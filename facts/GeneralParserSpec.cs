@@ -132,14 +132,65 @@ namespace atlantis.facts {
         }
 
         [Theory]
-        [InlineData("  Wages: $16.9 (Max: $5331).\n", "Wages: $16.9 (Max: $5331).")]
+        [InlineData("The weather was clear last month; it will be clear next month.", null)]
+        [InlineData("Wages: $16.9 (Max: $5331).", "Wages")]
+        [InlineData("Wanted: none.", "Wanted")]
+        [InlineData("For Sale: 65 orcs [ORC] at $42, 13 leaders [LEAD] at $744.", "For Sale")]
+        [InlineData("Entertainment available: $54.", "Entertainment available")]
+        [InlineData("Products: 15 grain [GRAI].", "Products")]
         // [InlineData("  The weather was clear last month; it will be clear next month.\n", "The weather was clear last month; it will be clear next month")]
         // [InlineData("  Wanted: 167 grain [GRAI] at $20, 115 livestock [LIVE] at $20, 123\n    fish [FISH] at $27, 7 leather armor [LARM] at $69.\n", "Wanted: 167 grain [GRAI] at $20, 115 livestock [LIVE] at $20, 123 fish [FISH] at $27, 7 leather armor [LARM] at $69")]
         public void RegionParam(string input, string capture) {
-            var result = RegionParser.RegionAttributeLine.Parse(input);
+            var result = RegionParser.RegionAttribute.Parse(input);
+
+            if (capture == null) {
+                result.Success.Should().BeFalse();
+                return;
+            }
+
+            output.AssertParsed(result);
+            result.Value.Should().Be(capture);
+        }
+
+        [Fact]
+        public void RegionParams() {
+            var input = @"------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $13.3 (Max: $466).
+  Wanted: none.
+  For Sale: 65 orcs [ORC] at $42, 13 leaders [LEAD] at $744.
+  Entertainment available: $54.
+  Products: 15 grain [GRAI].
+
+";
+            var result = RegionParser.RegionAttributes.Parse(input);
+
             output.AssertParsed(result);
 
-            result.Value.Should().Be(capture);
+            output.WriteLine(result.Value.ToString());
+
+            result.Value.StrValueOf("unknown").Should().Be("The weather was clear last month; it will be clear next month.");
+            result.Value.StrValueOf("wages").Should().Be("$13.3 (Max: $466).");
+            result.Value.StrValueOf("wanted").Should().Be("none.");
+            result.Value.StrValueOf("for-sale").Should().Be("65 orcs [ORC] at $42, 13 leaders [LEAD] at $744.");
+            result.Value.StrValueOf("entertainment-available").Should().Be("$54.");
+            result.Value.StrValueOf("products").Should().Be("15 grain [GRAI].");
+        }
+
+        [Theory]
+        [InlineData("orc [ORC] at $42", 1, "orc", "ORC", 42)]
+        [InlineData("65 orcs [ORC] at $42", 65, "orcs", "ORC", 42)]
+        [InlineData("65 orcs [ORC]", 65, "orcs", "ORC", null)]
+        [InlineData("orc [ORC]", 1, "orc", "ORC", null)]
+        public void Item(string input, int amount, string name, string code, int? price) {
+            var result = RegionParser.Item.Parse(input);
+            output.AssertParsed(result);
+
+            var value = result.Value;
+            value.IntValueOf("amount").Should().Be(amount);
+            value.StrValueOf("name").Should().Be(name);
+            value.StrValueOf("code").Should().Be(code);
+            value.IntValueOf("price").Should().Be(price);
         }
 
         [Theory]

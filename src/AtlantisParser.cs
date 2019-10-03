@@ -13,6 +13,7 @@ namespace atlantis
     using ParserNone = Pidgin.Parser<char, Pidgin.Unit>;
     using System.Text;
     using System.IO;
+    using System.Globalization;
 
     enum ReportSection {
         General,
@@ -57,6 +58,15 @@ namespace atlantis
             }
 
             return (nodes[0] as ValueReportNode<int>).Value;
+        }
+
+        public static IReportNode FirstByType(this IReportNode node, string type) {
+            var nodes = node.ByType(type);
+            if (nodes.Length == 0) {
+                return null;
+            }
+
+            return nodes[0];
         }
     }
 
@@ -165,6 +175,15 @@ namespace atlantis
             return new ValueReportNode<int>(type, int.Parse(value));
         }
 
+        public static IReportNode Float(string type, double value) {
+            return new ValueReportNode<double>(type, value);
+        }
+
+        public static IReportNode Float(string type, string value) {
+            return new ValueReportNode<double>(type, double.Parse(value, CultureInfo.InstalledUICulture));
+        }
+
+
         public static ParserNode Node(this Parser<char, IEnumerable<IReportNode>> parser, string type) {
             return parser.Select(x => Node(type, x));
         }
@@ -183,6 +202,14 @@ namespace atlantis
 
         public static ParserNode Num(this Parser<char, int> parser, string type) {
             return parser.Select(x => Num(type, x));
+        }
+
+        public static ParserNode Float(this Parser<char, string> parser, string type) {
+            return parser.Select(x => Float(type, x));
+        }
+
+        public static ParserNode Float(this Parser<char, double> parser, string type) {
+            return parser.Select(x => Float(type, x));
         }
     }
 
@@ -417,16 +444,75 @@ Ally : none.
             return recLine.Select(s => string.Join(" ", s));
         }
 
-        public static Parser<char, string> RegionAttribute(string label) {
-            return String(label)
-                .Before(
-                    TColon.Between(SkipWhitespaces)
-                );
-        }
+        public static readonly ParserNone RegionAttributeDivider =
+            TColon.Between(SkipWhitespaces).IgnoreResult();
 
-        public static readonly Parser<char, string> RegionAttributeContent =
-            MultiLineText(ident: Char(' ').Repeat(4).IgnoreResult())
-                .Select(s => s.TrimEnd('.'));
+        public static readonly ParserNone RegionAttributeTerminator =
+            TDot.Then(EndOfLine).IgnoreResult();
+
+        public static readonly Parser<char, string> RegionAttribute =
+            TText(
+                AtlantisCharset(simpleWhitepsace: true).Exclude(Charset.List(':', '.')),
+                stopBefore: Lookahead(Try(RegionAttributeDivider.Or(RegionAttributeTerminator)))
+            )
+                .Before(RegionAttributeDivider);
+
+        public static readonly Parser<char, string> UnknownRegionAttribute =
+            MultiLineText(ident: Char(' ').Repeat(4).IgnoreResult());
+
+        public static Parser<char, int> SilverAmount =
+            Char('$').Then(DecimalNum);
+
+        // Wages: $13.3 (Max: $466).
+        public static readonly ParserNode RegionWages =
+            Sequence(
+                Char('$').Then(
+                    TNumber.Then(
+                        TDot.Then(TNumber).Optional(),
+                        (whole, fraction) => {
+                            if (fraction.HasValue) {
+                                whole += "." + fraction.Value;
+                            }
+
+                            return Float("salary", whole);
+                        })
+                ),
+                String("(Max:")
+                    .Between(SkipWhitespaces)
+                    .Then(SilverAmount)
+                    .Num("max-wages")
+            )
+            .Before(Any.Until(RegionAttributeTerminator))
+            .Node("wages");
+
+
+        public static readonly ParserNode ItemCode =
+            Token(AtlantisCharset().NoWhitespace().Exclude(Charset.List('[', ']')))
+                .AtLeastOnceString()
+                .BetweenBrackets()
+                .Str("code");
+
+        // orc [ORC] at $42
+        // 65 orcs [ORC] at $42
+        public static readonly ParserNode Item =
+            Sequence(
+                TNumber
+                    .Before(SkipWhitespaces)
+                    .RecoverWith(_ => Return("1"))
+                    .Num("amount")
+                    .LikeOptional(),
+                TText(AtlantisCharset(), stopBefore: Lookahead(Try(ItemCode.IgnoreResult())))
+                    .Str("name")
+                    .LikeOptional(),
+                ItemCode
+                    .LikeOptional(),
+                String("at")
+                    .Between(SkipWhitespaces)
+                    .Then(SilverAmount)
+                    .Num("price")
+                    .Optional()
+            )
+            .Node("item");
 
         public static readonly ParserNode RegionAttributes =
             String("------------------------------------------------------------")
@@ -434,12 +520,20 @@ Ally : none.
                 .Then(
                     Char(' ').Repeat(2).Then(
                         OneOf(
-                            Try(RegionAttribute("Wages").Then(RegionAttributeContent)).Str("wages"),
-                            Try(RegionAttribute("Wanted").Then(RegionAttributeContent)).Str("wanted"),
-                            Try(RegionAttribute("For Sale").Then(RegionAttributeContent)).Str("for-sale"),
-                            Try(RegionAttribute("Entertainment").Then(RegionAttributeContent)).Str("entertainment"),
-                            Try(RegionAttribute("Products").Then(RegionAttributeContent)).Str("products"),
-                            RegionAttributeContent.Str("unknown")
+                            Try(RegionAttribute.Bind(label => {
+                                switch (label) {
+                                    case "Wages": return RegionWages;
+                                    case "Wanted": return ListOf(Item).Before(RegionAttributeTerminator).Node("wanted");
+                                    case "For Sale": return ListOf(Item).Before(RegionAttributeTerminator).Node("for-sale");
+                                    case "Entertainment available": return SilverAmount.Before(RegionAttributeTerminator).Num("entertainment-available");
+                                    case "Products": return ListOf(Item).Before(RegionAttributeTerminator).Node("products");
+
+                                    default:
+                                        string key = label.ToLowerInvariant().Replace(' ', '-');
+                                        return UnknownRegionAttribute.Str(key);
+                                }
+                            })),
+                            UnknownRegionAttribute.Str("unknown")
                         )
                     )
                     .Many()
