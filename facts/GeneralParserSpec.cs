@@ -21,7 +21,7 @@ namespace atlantis.facts {
         [InlineData("Magic 1", "Magic", 1)]
         [InlineData("Ocean Fleets 5", "Ocean Fleets", 5)]
         public void FactionAttribute(string input, string key, int value) {
-            var result = RegionParser.FactionAttribute.Parse(input);
+            var result = AtlantisParser.FactionAttribute.Parse(input);
             output.AssertParsed(result);
 
             (result.Value.Children[0] as ValueReportNode<string>).Value.Should().Be(key);
@@ -31,7 +31,7 @@ namespace atlantis.facts {
         [Theory]
         [InlineData("(War 1, Trade 2, Magic 2)", 3)]
         public void FactionAttributes(string input, int count) {
-            var result = RegionParser.FactionAttributes.Parse(input);
+            var result = AtlantisParser.FactionAttributes.Parse(input);
             output.AssertParsed(result);
 
             result.Value.Children.Count.Should().Be(count);
@@ -39,7 +39,7 @@ namespace atlantis.facts {
 
         [Fact]
         public void FactionNumber() {
-            var result = RegionParser.FactionNumber.Parse("(15)");
+            var result = AtlantisParser.FactionNumber.Parse("(15)");
             output.AssertParsed(result);
 
             (result.Value as ValueReportNode<int>).Value.Should().Be(15);
@@ -47,7 +47,7 @@ namespace atlantis.facts {
 
         [Fact]
         public void FactionInfo() {
-            var result = RegionParser.ReportFaction.Parse("Avalon Empire (15) (War 1, Trade 2, Magic 2)");
+            var result = AtlantisParser.ReportFaction.Parse("Avalon Empire (15) (War 1, Trade 2, Magic 2)");
             output.AssertParsed(result);
         }
 
@@ -55,7 +55,7 @@ namespace atlantis.facts {
         [InlineData("May, Year 3", "May", 3)]
         [InlineData("February, Year 1", "February", 1)]
         public void Date(string input, string month, int year) {
-            var result = RegionParser.ReportDate.Parse(input);
+            var result = AtlantisParser.ReportDate.Parse(input);
             output.AssertParsed(result);
 
             var node = result.Value;
@@ -85,7 +85,7 @@ namespace atlantis.facts {
         [InlineData("(0,0,2 <underworld>)", 0, 0, 2, "underworld")]
         [InlineData("(1,1)", 1, 1, null, null)]
         public void Coords(string input, int x, int y, int? z, string label) {
-            var result = RegionParser.Coords.Parse(input);
+            var result = AtlantisParser.Coords.Parse(input);
             output.AssertParsed(result);
 
             var v = result.Value;
@@ -98,7 +98,7 @@ namespace atlantis.facts {
         [Theory]
         [InlineData("contains Sinsto [town]", "Sinsto", "town")]
         public void Settlement(string input, string name, string size) {
-            var result = RegionParser.Settlement.Parse(input);
+            var result = AtlantisParser.Settlement.Parse(input);
             output.AssertParsed(result);
 
             var v = result.Value;
@@ -110,7 +110,7 @@ namespace atlantis.facts {
         [InlineData("1195 peasants (gnomes)", 1195, "gnomes")]
         [InlineData("10237 peasants (drow elves)", 10237, "drow elves")]
         public void Population(string input, int amount, string race) {
-            var result = RegionParser.Population.Parse(input);
+            var result = AtlantisParser.Population.Parse(input);
             output.AssertParsed(result);
 
             var v = result.Value;
@@ -125,7 +125,7 @@ namespace atlantis.facts {
   elves), $1385.
 ")]
         public void Summary(string input) {
-            var result = RegionParser.Summary.Parse(input);
+            var result = AtlantisParser.Summary.Parse(input);
             output.AssertParsed(result);
 
             var v = result.Value;
@@ -141,7 +141,7 @@ namespace atlantis.facts {
         // [InlineData("  The weather was clear last month; it will be clear next month.\n", "The weather was clear last month; it will be clear next month")]
         // [InlineData("  Wanted: 167 grain [GRAI] at $20, 115 livestock [LIVE] at $20, 123\n    fish [FISH] at $27, 7 leather armor [LARM] at $69.\n", "Wanted: 167 grain [GRAI] at $20, 115 livestock [LIVE] at $20, 123 fish [FISH] at $27, 7 leather armor [LARM] at $69")]
         public void RegionParam(string input, string capture) {
-            var result = RegionParser.RegionAttribute.Parse(input);
+            var result = AtlantisParser.RegionAttribute.Parse(input);
 
             if (capture == null) {
                 result.Success.Should().BeFalse();
@@ -163,7 +163,7 @@ namespace atlantis.facts {
   Products: 15 grain [GRAI].
 
 ";
-            var result = RegionParser.RegionAttributes.Parse(input);
+            var result = AtlantisParser.RegionAttributes.Parse(input);
 
             output.AssertParsed(result);
 
@@ -183,7 +183,7 @@ namespace atlantis.facts {
         [InlineData("65 orcs [ORC]", 65, "orcs", "ORC", null)]
         [InlineData("orc [ORC]", 1, "orc", "ORC", null)]
         public void Item(string input, int amount, string name, string code, int? price) {
-            var result = RegionParser.Item.Parse(input);
+            var result = AtlantisParser.Item.Parse(input);
             output.AssertParsed(result);
 
             var value = result.Value;
@@ -275,7 +275,7 @@ Exits:
 
 ")]
         public void Region(string input) {
-            var result = RegionParser.Region.Parse(input);
+            var result = AtlantisParser.Region.Parse(input);
             output.AssertParsed(result);
 
             var v = result.Value;
@@ -283,7 +283,7 @@ Exits:
 
         [Fact]
         public void Regions() {
-            var result = RegionParser.Regions.Parse(@"underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],
+            var result = AtlantisParser.Regions.Parse(@"underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],
   10237 peasants (drow elves), $5937.
 ------------------------------------------------------------
   The weather was clear last month; it will be clear next month.
@@ -408,7 +408,7 @@ Exits:
         [InlineData("Unclaimed silver: 10000.\n")]
         [InlineData("\n")]
         public void ReportLine(string input) {
-            var result = RegionParser.ReportLine.Parse(input);
+            var result = AtlantisParser.ReportLine.Parse(input);
             output.AssertParsed(result);
         }
 
@@ -583,7 +583,7 @@ Exits:
 
 ";
 
-            var result = RegionParser.Regions.Parse(input);
+            var result = AtlantisParser.Regions.Parse(input);
             output.AssertParsed(result);
 
 
@@ -597,7 +597,7 @@ Exits:
   10/10; MaxSpeed: 4.
 ")]
         public void structure(string input) {
-            var result = RegionParser.Structure.Parse(input);
+            var result = AtlantisParser.Structure.Parse(input);
             output.AssertParsed(result);
 
             output.WriteLine(result.Value.ToString());
@@ -623,7 +623,7 @@ Exits:
 
 ")]
         public void structureWithUnits(string input) {
-            var result = RegionParser.StructureWithUnits.Parse(input);
+            var result = AtlantisParser.StructureWithUnits.Parse(input);
             output.AssertParsed(result);
 
             output.WriteLine(result.Value.ToString());

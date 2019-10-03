@@ -15,19 +15,6 @@ namespace atlantis
     using System.IO;
     using System.Globalization;
 
-    enum ReportSection {
-        General,
-        Errors,
-        Battles,
-        Events,
-        SkillLore,
-        ItemLore,
-        ObjectLore,
-        Region,
-        OrderTemplate,
-        Other
-    }
-
     public interface IReportNode
     {
         string Type { get; }
@@ -213,7 +200,7 @@ namespace atlantis
         }
     }
 
-    public static class RegionParser {
+    public static class AtlantisParser {
         public static readonly ParserNone ReportHeader =
             String("Atlantis Report For:").IgnoreResult();
 
