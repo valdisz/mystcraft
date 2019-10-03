@@ -152,7 +152,7 @@ namespace atlantis.facts {
             result.Value.Should().Be(capture);
         }
 
-        [Fact]
+        // [Fact]
         public void RegionParams() {
             var input = @"------------------------------------------------------------
   The weather was clear last month; it will be clear next month.
@@ -410,6 +410,223 @@ Exits:
         public void ReportLine(string input) {
             var result = RegionParser.ReportLine.Parse(input);
             output.AssertParsed(result);
+        }
+
+        [Fact]
+        public void MustParseTwoRegions() {
+            string input = @"plain (4,4) in Prefield, contains Estenher [village], 6736 peasants
+  (high elves), $5658.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $14.2 (Max: $1131).
+  Wanted: 104 grain [GRAI] at $24, 109 livestock [LIVE] at $26, 131
+    fish [FISH] at $20.
+  For Sale: 269 high elves [HELF] at $45, 53 leaders [LEAD] at $795.
+  Entertainment available: $350.
+  Products: 46 livestock [LIVE], 20 horses [HORS].
+
+Exits:
+  North : ocean (4,2) in Atlantis Ocean.
+  Northeast : plain (5,3) in Prefield.
+  Southeast : plain (5,5) in Prefield.
+  South : plain (4,6) in Prefield.
+  Southwest : ocean (3,5) in Atlantis Ocean.
+  Northwest : ocean (3,3) in Atlantis Ocean.
+
+- taxmen (2333), Anuii (44), revealing faction, holding, sharing, 44
+  high elves [HELF], 58 humans [MAN], 11 gnomes [GNOM], 4 swords
+  [SWOR], 6268 silver [SILV]. Weight: 1079. Capacity: 0/0/1629/0.
+  Skills: combat [COMB] 1 (40).
+- scout (2900), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 6 high elves [HELF], horse [HORS], 275
+  silver [SILV]. Weight: 110. Capacity: 0/70/160/0. Skills: riding
+  [RIDI] 2 (90).
+- vestnieks (927), Semigallians (18), avoiding, behind, centaur
+  [CTAU].
+- Ambassador Este (3397), Disasters Inc (43), avoiding, behind,
+  revealing faction, human [MAN], 70 silver [SILV]. Weight: 10.
+  Capacity: 0/0/15/0. Skills: none.
+- p ship (3930), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 10 high elves [HELF]. Weight: 100.
+  Capacity: 0/0/150/0. Skills: shipbuilding [SHIP] 5 (450).
+- scout (5921), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, gnome [GNOM], 62 silver [SILV]. Weight: 5.
+  Capacity: 0/0/9/0. Skills: observation [OBSE] 2 (90), riding [RIDI]
+  1 (35).
+- entertainers (6382), Anuii (44), avoiding, behind, revealing
+  faction, weightless battle spoils, 8 gnomes [GNOM], 1680 silver
+  [SILV]. Weight: 40. Capacity: 0/0/72/0. Skills: entertainment [ENTE]
+  2 (125).
+- workers (6782), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 5 high elves [HELF], 204 silver [SILV].
+  Weight: 50. Capacity: 0/0/75/0. Skills: none.
+- Emissary Prefield (2552), Ordo Hereticus (30), avoiding, behind,
+  revealing faction, holding, receiving no aid, sharing, won't cross
+  water, gnoll [GNOL], camel [CAME], 24 silver [SILV]. Weight: 60.
+  Capacity: 0/70/85/0. Skills: none.
+- scout (8038), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, human [MAN]. Weight: 10. Capacity:
+  0/0/15/0. Skills: riding [RIDI] 2 (125).
+- vestnieks (7480), Skalperians (22), avoiding, behind, gnome [GNOM].
+- scout (3962), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, centaur [CTAU], 6 horses [HORS]. Weight:
+  350. Capacity: 0/490/490/0. Skills: none.
+- scout (3440), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, high elf [HELF], horse [HORS]. Weight: 60.
+  Capacity: 0/70/85/0. Skills: riding [RIDI] 2 (90).
+- scout (3439), Anuii (44), avoiding, behind, revealing faction,
+  sharing, weightless battle spoils, high elf [HELF], horse [HORS].
+  Weight: 60. Capacity: 0/70/85/0. Skills: riding [RIDI] 2 (90).
+- City Guard (9478), on guard, The Guardsmen (1), 4 leaders [LEAD], 4
+  swords [SWOR].
+
+plain (6,4) in Prefield, 4787 peasants (centaurs), $4978.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $15.2 (Max: $995).
+  Wanted: none.
+  For Sale: 191 centaurs [CTAU] at $85, 38 leaders [LEAD] at $851.
+  Entertainment available: $296.
+  Products: 66 grain [GRAI], 38 horses [HORS], 6 winged horses [WING].
+
+Exits:
+  North : ocean (6,2) in Atlantis Ocean.
+  Northeast : plain (7,3) in Prefield.
+  Southeast : ocean (7,5) in Atlantis Ocean.
+  South : plain (6,6) in Prefield.
+  Southwest : plain (5,5) in Prefield.
+  Northwest : plain (5,3) in Prefield.
+
+- taxmen (839), Anuii (44), revealing faction, holding, sharing,
+  weightless battle spoils, 4 centaurs [CTAU], horse [HORS]. Weight:
+  250. Capacity: 0/350/350/0. Skills: combat [COMB] 1 (30).
+- horses (1853), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, centaur [CTAU], 6 winged horses [WING],
+  lasso [LASS]. Weight: 351. Capacity: 420/490/490/0. Skills: horse
+  training [HORS] 5 (450).
+- p horses (2331), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 15 humans [MAN], gnome [GNOM], 38 horses
+  [HORS], 6 lassoes [LASS]. Weight: 2061. Capacity: 0/2660/2894/0.
+  Skills: horse training [HORS] 2 (90).
+- taxmen (2087), on guard, Anuii (44), revealing faction, holding,
+  sharing, 44 gnomes [GNOM], 13 humans [MAN], 42 centaurs [CTAU], 5215
+  silver [SILV]. Weight: 2450. Capacity: 0/2940/3531/0. Skills: combat
+  [COMB] 1 (31).
+- b grain (2673), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 5 gnomes [GNOM], 279 silver [SILV].
+  Weight: 25. Capacity: 0/0/45/0. Skills: farming [FARM] 2 (97).
+- centaur scout (3933), Anuii (44), avoiding, behind, revealing
+  faction, weightless battle spoils, centaur [CTAU], 80 silver [SILV].
+  Weight: 50. Capacity: 0/70/70/0. Skills: riding [RIDI] 3 (180).
+- p horses (2088), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 14 gnomes [GNOM], 302 silver [SILV].
+  Weight: 70. Capacity: 0/0/126/0. Skills: horse training [HORS] 2
+  (90).
+- p grain (2340), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 29 gnomes [GNOM], 4 bags [BAG], 66 grain
+  [GRAI]. Weight: 479. Capacity: 0/0/261/0. Skills: farming [FARM] 2
+  (124).
+- entertainers (6383), Anuii (44), avoiding, behind, revealing
+  faction, weightless battle spoils, 6 gnomes [GNOM], 760 silver
+  [SILV]. Weight: 30. Capacity: 0/0/54/0. Skills: entertainment [ENTE]
+  2 (125).
+- worker (4615), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 2 humans [MAN]. Weight: 20. Capacity:
+  0/0/30/0. Skills: riding [RIDI] 2 (150).
+- b farmers (848), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 14 humans [MAN], 3 horses [HORS]. Weight:
+  290. Capacity: 0/210/420/0. Skills: farming [FARM] 2 (137).
+- b fur (3444), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, gnoll [GNOL], 11 horses [HORS], 5 silver
+  [SILV]. Weight: 560. Capacity: 0/770/785/0. Skills: hunting [HUNT] 5
+  (450).
+- scout (8383), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, centaur [CTAU], 16 lassoes [LASS], 5
+  silver [SILV]. Weight: 66. Capacity: 0/70/70/0. Skills: none.
+- p fur (9300), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 3 gnolls [GNOL], 15 silver [SILV]. Weight:
+  30. Capacity: 0/0/45/0. Skills: hunting [HUNT] 5 (450).
+- p fur (9301), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 3 gnolls [GNOL], 15 silver [SILV]. Weight:
+  30. Capacity: 0/0/45/0. Skills: hunting [HUNT] 5 (450).
+- scout (8840), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, centaur [CTAU], 22 horses [HORS], 9 stone
+  [STON]. Weight: 1600. Capacity: 0/1610/1610/0. Skills: none.
+- centaur scout (3934), Anuii (44), avoiding, behind, revealing
+  faction, weightless battle spoils, centaur [CTAU], 5 horses [HORS].
+  Weight: 300. Capacity: 0/420/420/0. Skills: riding [RIDI] 3 (210).
+- scout (3115), Anuii (44), avoiding, behind, revealing faction,
+  sharing, weightless battle spoils, human [MAN], 10 horses [HORS].
+  Weight: 510. Capacity: 0/700/715/0. Skills: none.
+- p livestock (9303), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 7 ice dwarves [IDWA], 4 horses [HORS].
+  Weight: 270. Capacity: 0/280/385/0. Skills: ranching [RANC] 3 (181).
+- p livestock (9304), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 8 ice dwarves [IDWA], 4 horses [HORS].
+  Weight: 280. Capacity: 0/280/400/0. Skills: ranching [RANC] 3 (181).
+
++ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
+  - captain longship 128 (3941), Anuii (44), avoiding, behind,
+    revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
+    crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
+    Skills: sailing [SAIL] 2 (90).
+
++ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
+  10/10; MaxSpeed: 4.
+  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
+    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
+    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
+    (90).
+  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
+    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
+    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
+
+";
+
+            var result = RegionParser.Regions.Parse(input);
+            output.AssertParsed(result);
+
+
+            output.WriteLine(result.Value.ToString());
+            result.Value.Children.Count.Should().Be(2);
+        }
+
+        [Theory]
+        [InlineData("+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
+  10/10; MaxSpeed: 4.
+")]
+        public void structure(string input) {
+            var result = RegionParser.Structure.Parse(input);
+            output.AssertParsed(result);
+
+            output.WriteLine(result.Value.ToString());
+        }
+
+        [Theory]
+        [InlineData(@"+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
+  - captain longship 128 (3941), Anuii (44), avoiding, behind,
+    revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
+    crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
+    Skills: sailing [SAIL] 2 (90).
+
+")]
+        [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
+  10/10; MaxSpeed: 4.
+  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
+    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
+    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
+    (90).
+  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
+    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
+    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
+
+")]
+        public void structureWithUnits(string input) {
+            var result = RegionParser.StructureWithUnits.Parse(input);
+            output.AssertParsed(result);
+
+            output.WriteLine(result.Value.ToString());
         }
     }
 }

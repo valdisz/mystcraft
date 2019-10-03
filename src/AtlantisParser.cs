@@ -425,40 +425,48 @@ Ally : none.
                 .Then(TText(AtlantisCharset()))
                 .IgnoreResult();
 
-        public static Parser<char, string> MultiLineText(Parser<char, Pidgin.Unit> prefix = null, Parser<char, Pidgin.Unit> ident = null) {
+        public static Parser<char, string> MultiLineText(
+            Parser<char, Pidgin.Unit> prefix = null,
+            Parser<char, Pidgin.Unit> nextLineIdent = null,
+            Parser<char, Pidgin.Unit> firstLineMarker = null) {
+
             var line = Any.Until(EndOfLine).Select(string.Concat);
-            ident = ident ?? Char(' ').Repeat(2).IgnoreResult();
+            nextLineIdent = nextLineIdent ?? Char(' ').Repeat(2).IgnoreResult();
 
             if (prefix != null) {
                 line = prefix.Then(line);
-                ident = prefix.Then(ident);
+                nextLineIdent = prefix.Then(nextLineIdent);
             }
 
             Parser<char, IEnumerable<string>> recLine = null;
             recLine = line
                 .Then(
-                    Rec(() => Try(ident.Then(recLine))).Optional(),
+                    Rec(() => Try(nextLineIdent.Then(recLine)).Optional()),
                     MakeSequence
                 );
 
-            return recLine.Select(s => string.Join(" ", s));
+            var parser = recLine.Select(s => string.Join(" ", s));
+
+            return firstLineMarker != null
+                ? firstLineMarker.Then(parser)
+                : parser;
         }
 
         public static readonly ParserNone RegionAttributeDivider =
             TColon.Between(SkipWhitespaces).IgnoreResult();
 
-        public static readonly ParserNone RegionAttributeTerminator =
+        public static readonly ParserNone DotTerminator =
             TDot.Then(EndOfLine).IgnoreResult();
 
         public static readonly Parser<char, string> RegionAttribute =
             TText(
                 AtlantisCharset(simpleWhitepsace: true).Exclude(Charset.List(':', '.')),
-                stopBefore: Lookahead(Try(RegionAttributeDivider.Or(RegionAttributeTerminator)))
+                stopBefore: Lookahead(Try(RegionAttributeDivider.Or(DotTerminator)))
             )
                 .Before(RegionAttributeDivider);
 
         public static readonly Parser<char, string> UnknownRegionAttribute =
-            MultiLineText(ident: Char(' ').Repeat(4).IgnoreResult());
+            MultiLineText(nextLineIdent: Char(' ').Repeat(4).IgnoreResult());
 
         public static Parser<char, int> SilverAmount =
             Char('$').Then(DecimalNum);
@@ -482,7 +490,7 @@ Ally : none.
                     .Then(SilverAmount)
                     .Num("max-wages")
             )
-            .Before(Any.Until(RegionAttributeTerminator))
+            .Before(Any.Until(DotTerminator))
             .Node("wages");
 
 
@@ -523,10 +531,10 @@ Ally : none.
                             Try(RegionAttribute.Bind(label => {
                                 switch (label) {
                                     case "Wages": return RegionWages;
-                                    case "Wanted": return ListOf(Item).Before(RegionAttributeTerminator).Node("wanted");
-                                    case "For Sale": return ListOf(Item).Before(RegionAttributeTerminator).Node("for-sale");
-                                    case "Entertainment available": return SilverAmount.Before(RegionAttributeTerminator).Num("entertainment-available");
-                                    case "Products": return ListOf(Item).Before(RegionAttributeTerminator).Node("products");
+                                    case "Wanted": return ListOf(Item).Before(DotTerminator).Node("wanted");
+                                    case "For Sale": return ListOf(Item).Before(DotTerminator).Node("for-sale");
+                                    case "Entertainment available": return SilverAmount.Before(DotTerminator).Num("entertainment-available");
+                                    case "Products": return ListOf(Item).Before(DotTerminator).Node("products");
 
                                     default:
                                         string key = label.ToLowerInvariant().Replace(' ', '-');
@@ -593,25 +601,26 @@ Exits:
                 .Node("exits");
 
         public static ParserNode Unit(string prefix) =>
-            Sequence(
-                String(prefix + "-")
-                    .Or(String(prefix + "*"))
-                    .Then(Whitespace)
-                    .Then(
-                        TText(AtlantisCharsetWithParenthesis, stopBefore: Try(EndOfLine).IgnoreResult())
-                    ),
-                Try(
-                    String(prefix + "  ")
-                        .Then(
-                            TText(AtlantisCharsetWithParenthesis, stopBefore: Try(EndOfLine).IgnoreResult())
-                        )
-                        .Select(s => " " + s)
+            Map(
+                (owner, line) => {
+                    return Str(owner == "*" ? "own-unit" : "unit", line);
+                },
+                String(prefix + "-").Or(String(prefix + "*"))
+                    .Before(Whitespace),
+                Sequence(
+                    TText(AtlantisCharsetWithParenthesis, stopBefore: Try(EndOfLine).IgnoreResult()),
+                    Try(
+                        String(prefix + "  ")
+                            .Then(
+                                TText(AtlantisCharsetWithParenthesis, stopBefore: Try(EndOfLine).IgnoreResult())
+                            )
+                            .Select(s => " " + s)
+                    )
+                    .Many()
+                    .Select(string.Concat)
                 )
-                .Many()
                 .Select(string.Concat)
-            )
-            .Select(string.Concat)
-            .Str("unit");
+            );
 
         public static ParserNode Units(string prefix) =>
             Unit(prefix)
@@ -619,22 +628,129 @@ Exits:
                 .Before(EndOfLine)
                 .Node("units");
 
-        public static readonly ParserNode Structure =
+        // [121]
+        public static readonly ParserNode StructureNumber =
+            TNumber.BetweenBrackets()
+                .Num("number");
+
+        // Fleet
+        public static readonly ParserNode StructureType =
+            TText(AtlantisCharset().Exclude(Charset.List(',', ';')))
+                .Str("type");
+
+        // [121] : Fleet
+        public static readonly Parser<char, IEnumerable<IReportNode>> StructureNumberAndType =
+            StructureNumber
+                .Before(TColon.Between(SkipWhitespaces))
+                .Then(
+                    StructureType,
+                    (num, type) => new[] { num, type } as IEnumerable<IReportNode>
+                );
+
+        public static readonly ParserNode StructurePart =
             Sequence(
-                String("+ ")
-                    .Then(
-                        TText(AtlantisCharset(), stopBefore: EndOfLine.IgnoreResult())
-                    )
-                    .Str("structure-info")
-                    .LikeOptional(),
-                Units("  ")
-                    .Optional()
+                DecimalNum.Num("amount"),
+                StructureType.Between(SkipWhitespaces)
             )
-            .Node("structure");
+            .Node("part");
+
+        // 1 Longship, 1 Cog
+        public static readonly ParserNode StructureParts =
+            ListOf(StructurePart, TCommaWp.IgnoreResult())
+                .Node("parts");
+
+        // Load: 580/600
+        public static readonly ParserNode StructureAttribute =
+            TText(AtlantisCharset().Exclude(Charset.List(':')))
+                .Before(TColon.Between(SkipWhitespaces))
+                .Then(
+                    TText(AtlantisCharset().Exclude(Charset.List(',', ';', '.'))),
+                    (key, value) => Node("attribute",
+                        Str("key", key),
+                        Str("value", value)
+                    )
+                );
+
+        // Load: 580/600; Sailors: 10/10; MaxSpeed: 4
+        public static readonly ParserNode StructureAttributes =
+            ListOf(StructureAttribute, TSemicolonWp.IgnoreResult())
+                .Node("attributes");
+
+        // needs 10
+        public static readonly ParserNode StructureNeeds =
+            String("needs")
+                .Then(SkipWhitespaces)
+                .Then(Int(10))
+                .Num("needs");
+
+        // contains an inner location
+        public static readonly ParserNode StrucutreFlag =
+            TText(AtlantisCharset().Exclude(Charset.List(',', ';', '.')))
+                .Str("flag");
+
+        // Fleet
+        public static readonly ParserNode StructureName =
+            TText(AtlantisCharset(), stopBefore: Lookahead(Try(StructureNumberAndType)).IgnoreResult())
+                .Str("name");
+
+        // + Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors: 10/10; MaxSpeed: 4.
+        // + 1 [1] : Fort, needs 10.
+        // + Shaft [1] : Shaft, contains an inner location.
+        // + Building [3] : Fort.
+        public static readonly ParserNode Structure =
+            String("+ ")
+                .Then(
+                    Map(
+                        (name, numAndType, parts, attributes) => {
+                            var n = Node("structure");
+                            n.Add(name);
+                            n.AddRange(numAndType);
+
+                            if (parts.HasValue) {
+                                n.AddRange(parts.Value);
+                            }
+
+                            if (attributes.HasValue) {
+                                n.Add(attributes.Value);
+                            }
+
+                            return n;
+                        },
+                        StructureName,
+                        StructureNumberAndType,
+                        TCommaWp
+                            .Then(
+                                OneOf(
+                                    Try(StructureNeeds),
+                                    Try(StructureParts),
+                                    Try(StrucutreFlag)
+                                )
+                            )
+                            .AtLeastOnce()
+                            .Optional(),
+                        TSemicolonWp
+                            .Then(StructureAttributes)
+                            .Optional()
+                    )
+                )
+                .Before(DotTerminator);
+
+        public static readonly ParserNode StructureWithUnits =
+            Structure
+                .Then(
+                    Try(Units("  ").Optional()),
+                    (structure, units) => {
+                        if (units.HasValue) {
+                            structure.Add(units.Value);
+                        }
+
+                        return structure;
+                    }
+                );
 
         public static readonly ParserNode Structures =
-            Structure
-                .Many()
+            StructureWithUnits
+                .AtLeastOnce()
                 .Node("structures");
 
 
