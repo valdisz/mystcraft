@@ -204,11 +204,11 @@ namespace atlantis
         // Avalon Empire
         public static readonly ParserNode FactionName =
             TText(AtlantisCharset())
-                .Str("faction-name");
+                .Str("name");
 
         // (15)
         public static readonly ParserNode FactionNumber =
-            Int(10).BetweenParenthesis().Num("faction-number");
+            Int(10).BetweenParenthesis().Num("number");
 
         public static readonly ParserNode Faction =
             Sequence(
@@ -252,7 +252,7 @@ Neutral : none.
 Friendly : Semigallians (18), Disasters Inc (43).
 Ally : none.
 */
-        public static ParserNode Attitude =
+        public static ParserNode Stance =
             OneOf(
                 Try(String("Hostile")),
                 Try(String("Unfriendly")),
@@ -260,12 +260,12 @@ Ally : none.
                 Try(String("Friendly")),
                 String("Ally")
             )
-            .Str("attitude");
+            .Str("stance");
 
         // Declared Attitudes (default Neutral):
         public static ParserNode DefaultAttitude =
             String("Declared Attitudes (default ")
-                .Then(Attitude)
+                .Then(Stance)
                 .Before(String("):"))
                 .Select(attitude => Node("default", attitude));
 
@@ -296,7 +296,7 @@ Ally : none.
                 .Before(EndOfLine)
                 .Then(
                     Sequence(
-                        Attitude
+                        Stance
                             .Before(TColon.Between(SkipWhitespaces)),
                         ListOfFactions
                     )
@@ -398,29 +398,51 @@ Ally : none.
                 .Then(TText(AtlantisCharset()))
                 .IgnoreResult();
 
-        public static readonly Parser<char, string> RegionAttributeLine =
-            String("  ")
-                .Then(
-                    Any
-                        .Until(EndOfLine)
-                        .Select(string.Concat)
-                );
+        public static Parser<char, string> MultiLineText(Parser<char, Pidgin.Unit> prefix = null, Parser<char, Pidgin.Unit> ident = null) {
+            var line = Any.Until(EndOfLine).Select(string.Concat);
+            ident = ident ?? Char(' ').Repeat(2).IgnoreResult();
 
-        public static readonly Parser<char, IEnumerable<string>> RegionAttribute =
-            RegionAttributeLine
+            if (prefix != null) {
+                line = prefix.Then(line);
+                ident = prefix.Then(ident);
+            }
+
+            Parser<char, IEnumerable<string>> recLine = null;
+            recLine = line
                 .Then(
-                    Rec(() => Try(String("  ").Then(RegionAttribute))).Optional(),
+                    Rec(() => Try(ident.Then(recLine))).Optional(),
                     MakeSequence
                 );
+
+            return recLine.Select(s => string.Join(" ", s));
+        }
+
+        public static Parser<char, string> RegionAttribute(string label) {
+            return String(label)
+                .Before(
+                    TColon.Between(SkipWhitespaces)
+                );
+        }
+
+        public static readonly Parser<char, string> RegionAttributeContent =
+            MultiLineText(ident: Char(' ').Repeat(4).IgnoreResult())
+                .Select(s => s.TrimEnd('.'));
 
         public static readonly ParserNode RegionAttributes =
             String("------------------------------------------------------------")
                 .Before(EndOfLine)
                 .Then(
-                    RegionAttribute
-                        .Select(s => string.Join(" ", s))
-                        .Str("attr")
-                        .Many()
+                    Char(' ').Repeat(2).Then(
+                        OneOf(
+                            Try(RegionAttribute("Wages").Then(RegionAttributeContent)).Str("wages"),
+                            Try(RegionAttribute("Wanted").Then(RegionAttributeContent)).Str("wanted"),
+                            Try(RegionAttribute("For Sale").Then(RegionAttributeContent)).Str("for-sale"),
+                            Try(RegionAttribute("Entertainment").Then(RegionAttributeContent)).Str("entertainment"),
+                            Try(RegionAttribute("Products").Then(RegionAttributeContent)).Str("products"),
+                            RegionAttributeContent.Str("unknown")
+                        )
+                    )
+                    .Many()
                 )
                 .Before(EndOfLine)
                 .Node("attributes");
@@ -591,20 +613,10 @@ Exits:
             RegionSequence
                 .Node("regions");
 
-        public static readonly Parser<char, IEnumerable<string>> ReportLineSequence =
-            TText(c => !char.IsWhiteSpace(c), stopBefore: EndOfLine.IgnoreResult())
-                .Then(
-                    Rec(() => Char(' ')
-                        .AtLeastOnce()
-                        .Then(ReportLineSequence, (_, line) => MakeSequence(" ", line))
-                    ).Optional(),
-                    MakeSequence
-                );
-
         public static readonly ParserNode ReportLine =
             OneOf(
                 Try(EndOfLine.ThenReturn("")),
-                ReportLineSequence.Select(string.Concat)
+                MultiLineText(null)
             )
             .Str("unknown");
 
@@ -632,21 +644,5 @@ Exits:
                 )
             )
             .Node("report");
-            // SkipEmptyLines
-            //     .Then(GeneralParsers.ReportHeader)
-            //     .Then(
-            //         SkipEmptyLines
-            //             .Then(
-            //                 OneOf(
-            //                     Try(GeneralParsers.FactionInfo),
-            //                     Try(GeneralParsers.Date),
-            //                     Try(Regions),
-            //                     Try(OrdersTemplate),
-            //                     Try(ReportLine)
-            //                 )
-            //             )
-            //             .Many()
-            //     )
-                // .Node("report");
     }
 }
