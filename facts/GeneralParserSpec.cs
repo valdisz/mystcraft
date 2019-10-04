@@ -642,6 +642,19 @@ Exits:
         }
 
         [Fact]
+        public void canParseUnitWithDescription() {
+            var result = AtlantisParser.Unit<Pidgin.Unit>().Parse(
+@"- Herdsmen of the Ungre Guild (1767), 3 humans [MAN], 3 spices [SPIC],
+  2 gems [GEM], net [NET], 2 mink [MINK], 3 livestock [LIVE]; Content
+  looking shepherds and herdsmen.
+");
+            output.AssertParsed(result);
+
+            output.WriteLine(result.Value.ToString());
+
+        }
+
+        [Fact]
         public void canParserUnits() {
             var result = AtlantisParser.Units<Pidgin.Unit>().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
   faction, holding, receiving no aid, won't cross water, wood elf

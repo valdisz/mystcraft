@@ -161,7 +161,7 @@ namespace atlantis
         }
 
         public static IReportNode Str(string type, string value) {
-            return new ValueReportNode<string>(type, value.Trim());
+            return new ValueReportNode<string>(type, value.Trim() );
         }
 
         public static IReportNode Num(string type, int value) {
@@ -225,14 +225,26 @@ namespace atlantis
                     Num("value", s.Last()))
                 );
 
-        // Avalon Empire
-        public static readonly ParserNode FactionName =
-            TText(AtlantisCharset())
-                .Str("name");
+        public static Parser<char, Pidgin.Unit> UnitTerminator =
+            TDot
+                .Then(EndOfLine)
+                .Then(
+                    Lookahead(
+                        Try(
+                            Not(Char(' ').Repeat(2))
+                        )
+                    )
+                )
+                .IgnoreResult();
 
         // (15)
         public static readonly ParserNode FactionNumber =
             Int(10).BetweenParenthesis().Num("number");
+
+        // Avalon Empire
+        public static readonly ParserNode FactionName =
+            TText(AtlantisCharset(), stopBefore: Lookahead(Try(FactionNumber)))
+                .Str("name");
 
         public static readonly ParserNode Faction =
             Sequence(
@@ -647,7 +659,7 @@ Exits:
             ListOf(
                 Item,
                 TCommaWp.IgnoreResult(),
-                TDot.IgnoreResult()
+                TDot.Then(SkipWhitespaces).Or(TSemicolonWp.IgnoreResult())
             )
             .Node("items");
 
@@ -709,11 +721,11 @@ Exits:
             .Node("capacity");
 
         public static Parser<char, string> UnitAttributeName =
-            TText(AtlantisCharset().Exclude(Charset.List(':')))
+            TText(AtlantisCharset().Exclude(Charset.List(':', ';')))
                 .Before(TColon.Between(SkipWhitespaces));
 
         public static ParserNode GenericUnitAttribute =
-            TText(AtlantisCharset().Exclude(Charset.List(',', '.')))
+            TText(AtlantisCharset().Exclude(Charset.List(',', '.', ';')))
                 .Str("attribute");
 
         public static ParserNode UnitAttribute =
@@ -734,18 +746,26 @@ Exits:
                 .IgnoreResult();
 
 
-        public static Parser<char, Pidgin.Unit> UnitTerminator =
-            TDot
-                .Then(EndOfLine)
-                .Then(Lookahead(Try(Not(Char(' ').Repeat(2)))))
-                .IgnoreResult();
-
         public static Parser<char, IEnumerable<IReportNode>> UnitAttributes =
             ListOf(
                 UnitAttribute,
                 UnitAttributeSeparator,
-                UnitTerminator
+                UnitTerminator.Or(TSemicolonWp.IgnoreResult())
             );
+
+        public static ParserNode UnitDescription =
+            TSemicolonWp
+                .Then(
+                    TText(AtlantisCharset(), stopBefore: Lookahead(Try(UnitTerminator)))
+                )
+                .Str("description");
+
+        public static ParserNode UnitFaction =
+            TText(AtlantisCharset(), stopBefore: Lookahead(Try(FactionNumber.IgnoreResult().Or(UnitTerminator))))
+                .Then(
+                    FactionNumber,
+                    (name, number) => Node("faction", Str("name", name), number)
+                );
 
 /*
 * Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
@@ -761,10 +781,14 @@ Exits:
   faction, receiving no aid, high elf [HELF], horse [HORS], 40 silver
   [SILV]. Weight: 60. Capacity: 0/70/85/0. Skills: riding [RIDI] 1
   (60).
+
+- Herdsmen of the Ungre Guild (1767), 3 humans [MAN], 3 spices [SPIC],
+  2 gems [GEM], net [NET], 2 mink [MINK], 3 livestock [LIVE]; Content
+  looking shepherds and herdsmen.
  */
         public static ParserNode Unit<T>(Parser<char, T> prefix = null) {
             var parser = Map(
-                (marker, name, number, faction, flags, items, attributes) => {
+                (marker, name, number, faction, flags, items, attributes, description) => {
                     var node = Node(
                         marker == '*'
                             ? "own-unit"
@@ -775,6 +799,10 @@ Exits:
 
                     if (faction.HasValue) {
                         node.Add(faction.Value);
+                    }
+
+                    if (description.HasValue) {
+                        node.Add(description.Value);
                     }
 
                     if (flags.HasValue) {
@@ -793,7 +821,7 @@ Exits:
                     .Before(Whitespace),
                 UnitName,
                 UnitNumber,
-                Try(TCommaWp.Then(Faction))
+                Try(TCommaWp.Then(UnitFaction))
                     .Optional(),
                 Try(TCommaWp.Then(UnitFlags))
                     .Optional(),
@@ -801,6 +829,8 @@ Exits:
                     .Then(UnitItems),
                 Try(UnitAttributeSeparator
                     .Then(UnitAttributes))
+                    .Optional(),
+                Try(UnitDescription)
                     .Optional()
             )
             .Before(UnitTerminator);
@@ -948,7 +978,6 @@ Exits:
         public static readonly ParserNode Structures =
             StructuresSequence
                 .Node("structures");
-
 
 /*
 underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],
