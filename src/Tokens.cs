@@ -101,7 +101,10 @@ namespace atlantis
 
         public static readonly Func<char, bool> AtlantisCharsetWithParenthesis = AtlantisCharset().CombineWith(Charset.List('(', ')'));
 
-        public static Parser<char, string> TText(Func<char, bool> charset, Func<char, bool> separator = null, Parser<char, Pidgin.Unit> stopBefore = null) {
+        public static Parser<char, string> TText(Func<char, bool> charset, Func<char, bool> separator = null) =>
+            TText<Pidgin.Unit>(charset, separator, null);
+
+        public static Parser<char, string> TText<T>(Func<char, bool> charset, Func<char, bool> separator = null, Parser<char, T> stopBefore = null) {
             separator = separator ?? (c => char.IsWhiteSpace(c));
 
             var firstChar = Token(charset.Exclude(separator));

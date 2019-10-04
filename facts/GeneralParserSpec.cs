@@ -628,5 +628,56 @@ Exits:
 
             output.WriteLine(result.Value.ToString());
         }
+
+        [Fact]
+        public void canParserUnit() {
+            var result = AtlantisParser.Unit<Pidgin.Unit>().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
+  faction, holding, receiving no aid, won't cross water, wood elf
+  [WELF], horse [HORS]. Weight: 60. Capacity: 0/70/85/0. Skills:
+  combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).
+");
+            output.AssertParsed(result);
+
+            output.WriteLine(result.Value.ToString());
+        }
+
+        [Fact]
+        public void canParserUnits() {
+            var result = AtlantisParser.Units<Pidgin.Unit>().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
+  faction, holding, receiving no aid, won't cross water, wood elf
+  [WELF], horse [HORS]. Weight: 60. Capacity: 0/70/85/0. Skills:
+  combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).
+- Aquatic Scout (3427), Disasters Inc (43), avoiding, behind,
+  revealing faction, lizardman [LIZA]. Weight: 10. Capacity:
+  0/0/15/15. Skills: none.
+- Scout (2070), Disasters Inc (43), avoiding, behind, revealing
+  faction, receiving no aid, high elf [HELF], horse [HORS], 40 silver
+  [SILV]. Weight: 60. Capacity: 0/70/85/0. Skills: riding [RIDI] 1
+  (60).
+");
+            output.AssertParsed(result);
+
+            output.WriteLine(result.Value.ToString());
+        }
+
+        [Theory]
+        [InlineData("foo, bar, wood elf [WELF]", 2)]
+        [InlineData("foo, bar, 10 orcs [ORC]", 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, 3 swords [SWOR]", 6)]
+        public void unitFlags(string input, int count) {
+            var result = AtlantisParser.UnitFlags.Parse(input);
+            output.AssertParsed(result);
+
+            result.Value.Children.Count.Should().Be(count);
+        }
+
+        [Theory]
+        [InlineData("Weight: 60.\n*", 1)]
+        public void unitAttributes(string input, int count) {
+            var result = AtlantisParser.UnitAttributes.Parse(input);
+            output.AssertParsed(result);
+
+            // result.Value.Children.Count.Should().Be(count);
+        }
     }
 }

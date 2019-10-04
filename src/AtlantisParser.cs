@@ -150,6 +150,16 @@ namespace atlantis
             return new ReportNode(type, (children ?? Enumerable.Empty<IReportNode>()).ToArray());
         }
 
+        public static IReportNode Node(string type, IEnumerable<Maybe<IReportNode>> children) {
+            return new ReportNode(
+                type,
+                (children ?? Enumerable.Empty<Maybe<IReportNode>>())
+                    .Where(x => x.HasValue)
+                    .Select(x => x.Value)
+                    .ToArray()
+            );
+        }
+
         public static IReportNode Str(string type, string value) {
             return new ValueReportNode<string>(type, value.Trim());
         }
@@ -284,15 +294,30 @@ Ally : none.
                 .Select(attitude => Node("default", attitude));
 
 
-        public static Parser<char, IEnumerable<IReportNode>> ListOf(ParserNode itemParser, Parser<char, Pidgin.Unit> separator = null) {
+        public static Parser<char, IEnumerable<IReportNode>> ListOf(
+            ParserNode itemParser,
+            Parser<char, Pidgin.Unit> separator = null,
+            Parser<char, Pidgin.Unit> terminator = null) {
+
             separator = separator ?? TCommaWp.IgnoreResult();
 
+            if (terminator != null) {
+                terminator = Lookahead(Try(terminator));
+            }
+
             Parser<char, IEnumerable<IReportNode>> recItemParser = null;
-            recItemParser = itemParser
-                .Then(
-                    Rec(() => separator.Then(recItemParser)).Optional(),
-                    MakeSequence
-                );
+            recItemParser = terminator != null
+                ? itemParser
+                    .Then(
+                        terminator.WithResult(Enumerable.Empty<IReportNode>())
+                            .Or(Rec(() => separator.Then(recItemParser))),
+                        MakeSequence
+                    )
+                : itemParser
+                    .Then(
+                        Rec(() => separator.Then(recItemParser)).Optional(),
+                        MakeSequence
+                    );
 
             return OneOf(
                 Try(String("none").WithResult(Enumerable.Empty<IReportNode>())),
@@ -481,11 +506,13 @@ Ally : none.
             .Node("wages");
 
 
-        public static readonly ParserNode ItemCode =
+        public static readonly ParserNode AtlantisCode =
             Token(AtlantisCharset().NoWhitespace().Exclude(Charset.List('[', ']')))
                 .AtLeastOnceString()
                 .BetweenBrackets()
                 .Str("code");
+
+        public static readonly ParserNode UnitCode = AtlantisCode;
 
         // orc [ORC] at $42
         // 65 orcs [ORC] at $42
@@ -494,20 +521,27 @@ Ally : none.
                 TNumber
                     .Before(SkipWhitespaces)
                     .RecoverWith(_ => Return("1"))
-                    .Num("amount")
-                    .LikeOptional(),
-                TText(AtlantisCharset(), stopBefore: Lookahead(Try(ItemCode.IgnoreResult())))
-                    .Str("name")
-                    .LikeOptional(),
-                ItemCode
-                    .LikeOptional(),
+                    .Num("amount"),
+                TText(AtlantisCharset().Exclude(Charset.List(',')), stopBefore: Lookahead(Try(AtlantisCode.IgnoreResult())))
+                    .Str("name"),
+                UnitCode
+            )
+            .Then(
                 String("at")
                     .Between(SkipWhitespaces)
                     .Then(SilverAmount)
                     .Num("price")
-                    .Optional()
-            )
-            .Node("item");
+                    .Optional(),
+                (itemParams, price) => {
+                    var node = Node("item", itemParams);
+
+                    if (price.HasValue) {
+                        node.Add(price.Value);
+                    }
+
+                    return node;
+                }
+            );
 
         public static readonly ParserNode RegionAttributes =
             String("------------------------------------------------------------")
@@ -587,33 +621,202 @@ Exits:
                 .Before(EndOfLine)
                 .Node("exits");
 
-        public static ParserNode Unit(string prefix) =>
-            Map(
-                (owner, line) => {
-                    return Str(owner == "*" ? "own-unit" : "unit", line);
-                },
-                String(prefix + "-").Or(String(prefix + "*"))
-                    .Before(Whitespace),
-                Sequence(
-                    TText(AtlantisCharsetWithParenthesis, stopBefore: Try(EndOfLine).IgnoreResult()),
-                    Try(
-                        String(prefix + "  ")
-                            .Then(
-                                TText(AtlantisCharsetWithParenthesis, stopBefore: Try(EndOfLine).IgnoreResult())
-                            )
-                            .Select(s => " " + s)
-                    )
-                    .Many()
-                    .Select(string.Concat)
-                )
-                .Select(string.Concat)
+        public static ParserNode UnitName =
+            TText(AtlantisCharset())
+                .Str("name");
+
+        public static ParserNode UnitNumber =
+            DecimalNum
+                .BetweenParenthesis()
+                .Num("number");
+
+        public static ParserNode UnitFlag =
+            TText(AtlantisCharset().Exclude(Charset.List(',', '.')))
+                .Str("flag");
+
+        public static ParserNode UnitFlags =
+            ListOf(
+                UnitFlag,
+                TCommaWp.IgnoreResult()
+                ,
+                TCommaWp.Then(Item).IgnoreResult()
+            )
+            .Node("flags");
+
+        public static ParserNode UnitItems =
+            ListOf(
+                Item,
+                TCommaWp.IgnoreResult(),
+                TDot.IgnoreResult()
+            )
+            .Node("items");
+
+        public static ParserNode SkillCode = AtlantisCode;
+
+        public static ParserNode SkillLevel =
+            DecimalNum
+                .Num("level");
+
+        public static ParserNode SkillDays =
+            DecimalNum
+                .BetweenParenthesis()
+                .Num("days");
+
+        public static Parser<char, IEnumerable<IReportNode>> SkillParameters =
+            Sequence(
+                SkillCode,
+                SkipWhitespaces
+                    .Then(SkillLevel),
+                SkipWhitespaces
+                    .Then(SkillDays)
             );
 
-        public static ParserNode Units(string prefix) =>
+        public static ParserNode SkillName =
+            TText(AtlantisCharset().Exclude(Charset.List(',', '.')), stopBefore: Lookahead(Try(SkillParameters)))
+                .Str("name");
+
+        //stealth [STEA] 1 (30)
+        public static ParserNode Skill =
+            SkillName
+                .Then(
+                    SkillParameters,
+                    (name, parameters) => {
+                        var node = Node("skill");
+                        node.Add(name);
+                        node.AddRange(parameters);
+
+                        return node;
+                    }
+                );
+
+        public static ParserNode UnitWight =
+            DecimalNum
+                .Num("weight");
+
+        public static ParserNode UnitCapacity =
+            Sequence(
+                DecimalNum.Num("flying"),
+                Char('/')
+                    .Then(DecimalNum)
+                    .Num("riding"),
+                Char('/')
+                    .Then(DecimalNum)
+                    .Num("walking"),
+                Char('/')
+                    .Then(DecimalNum)
+                    .Num("swiming")
+            )
+            .Node("capacity");
+
+        public static Parser<char, string> UnitAttributeName =
+            TText(AtlantisCharset().Exclude(Charset.List(':')))
+                .Before(TColon.Between(SkipWhitespaces));
+
+        public static ParserNode GenericUnitAttribute =
+            TText(AtlantisCharset().Exclude(Charset.List(',', '.')))
+                .Str("attribute");
+
+        public static ParserNode UnitAttribute =
+            UnitAttributeName
+                .Bind(name => {
+                    switch (name) {
+                        case "Weight": return UnitWight;
+                        case "Capacity": return UnitCapacity;
+                        case "Skills": return ListOf(Skill, terminator: TDot.IgnoreResult()).Node("skills");
+                        default:
+                            return GenericUnitAttribute;
+                    }
+                });
+
+        public static ParserNone UnitAttributeSeparator =
+            Char('.')
+                .Then(SkipWhitespaces)
+                .IgnoreResult();
+
+
+        public static Parser<char, Pidgin.Unit> UnitTerminator =
+            TDot
+                .Then(EndOfLine)
+                .Then(Lookahead(Try(Not(Char(' ').Repeat(2)))))
+                .IgnoreResult();
+
+        public static Parser<char, IEnumerable<IReportNode>> UnitAttributes =
+            ListOf(
+                UnitAttribute,
+                UnitAttributeSeparator,
+                UnitTerminator
+            );
+
+/*
+* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
+  faction, holding, receiving no aid, won't cross water, wood elf
+  [WELF], horse [HORS]. Weight: 60. Capacity: 0/70/85/0. Skills:
+  combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).
+
+- Aquatic Scout (3427), Disasters Inc (43), avoiding, behind,
+  revealing faction, lizardman [LIZA]. Weight: 10. Capacity:
+  0/0/15/15. Skills: none.
+
+- Scout (2070), Disasters Inc (43), avoiding, behind, revealing
+  faction, receiving no aid, high elf [HELF], horse [HORS], 40 silver
+  [SILV]. Weight: 60. Capacity: 0/70/85/0. Skills: riding [RIDI] 1
+  (60).
+ */
+        public static ParserNode Unit<T>(Parser<char, T> prefix = null) {
+            var parser = Map(
+                (marker, name, number, faction, flags, items, attributes) => {
+                    var node = Node(
+                        marker == '*'
+                            ? "own-unit"
+                            : "unit",
+                        name,
+                        number
+                    );
+
+                    if (faction.HasValue) {
+                        node.Add(faction.Value);
+                    }
+
+                    if (flags.HasValue) {
+                        node.Add(flags.Value);
+                    }
+
+                    if (attributes.HasValue) {
+                        node.AddRange(attributes.Value);
+                    }
+
+                    node.AddRange(items);
+
+                    return node;
+                },
+                Char('-').Or(Char('*'))
+                    .Before(Whitespace),
+                UnitName,
+                UnitNumber,
+                Try(TCommaWp.Then(Faction))
+                    .Optional(),
+                Try(TCommaWp.Then(UnitFlags))
+                    .Optional(),
+                TCommaWp
+                    .Then(UnitItems),
+                Try(UnitAttributeSeparator
+                    .Then(UnitAttributes))
+                    .Optional()
+            )
+            .Before(UnitTerminator);
+
+            return prefix != null
+                ? prefix.Then(parser)
+                : parser;
+        }
+
+        public static ParserNode Units<T>(Parser<char, T> prefix = null) =>
             Unit(prefix)
                 .Many()
                 .Before(EndOfLine)
                 .Node("units");
+
+        public static ParserNode Units() => Units<Pidgin.Unit>();
 
         // [121]
         public static readonly ParserNode StructureNumber =
@@ -725,7 +928,7 @@ Exits:
         public static readonly ParserNode StructureWithUnits =
             Structure
                 .Then(
-                    Try(Units("  ").Optional()),
+                    Try(Units(Char(' ').Repeat(2)).Optional()),
                     (structure, units) => {
                         if (units.HasValue) {
                             structure.Add(units.Value);
@@ -772,7 +975,7 @@ Exits:
                     .LikeOptional()
                     ,
                 SkipEmptyLines
-                    .Then(Units(""))
+                    .Then(Units())
                     .Optional()
                     ,
                 SkipEmptyLines
