@@ -938,9 +938,15 @@ Exits:
                     }
                 );
 
-        public static readonly ParserNode Structures =
+        public static readonly Parser<char, IEnumerable<IReportNode>> StructuresSequence =
             StructureWithUnits
-                .AtLeastOnce()
+                .Then(
+                    Rec(() => Try(SkipEmptyLines.Then(StructuresSequence))).Optional(),
+                    MakeSequence
+                );
+
+        public static readonly ParserNode Structures =
+            StructuresSequence
                 .Node("structures");
 
 
@@ -964,25 +970,34 @@ Exits:
 */
         public static readonly ParserNode Region =
             Sequence(
-                Summary
-                    .LikeOptional()
-                    ,
-                RegionAttributes
-                    .LikeOptional()
-                    ,
+                Summary,
+                RegionAttributes,
                 SkipEmptyLines
                     .Then(Exits)
-                    .LikeOptional()
-                    ,
-                SkipEmptyLines
-                    .Then(Units())
-                    .Optional()
-                    ,
-                SkipEmptyLines
-                    .Then(Structures)
-                    .Optional()
             )
-            .Node("region");
+            .Then(
+                Sequence(
+                    Try(
+                        SkipEmptyLines
+                            .Then(Units())
+                    ).Optional(),
+                    Try(
+                        SkipEmptyLines
+                            .Then(Structures)
+                    ).Optional()
+                ),
+                (required, optional) => {
+                    var node = Node("region");
+
+                    node.AddRange(required);
+                    node.AddRange(optional
+                        .Where(x => x.HasValue)
+                        .Select(x => x.Value)
+                    );
+
+                    return node;
+                }
+            );
 
         public static IEnumerable<T> MakeSequence<T>(T first, Maybe<IEnumerable<T>> next) {
             yield return first;
