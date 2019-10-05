@@ -306,6 +306,61 @@ Exits:
   [ILLU], artifact lore [ARTI].
 
 ")]
+        [InlineData(@"mountain (10,2) in Metfle, 2021 peasants (orcs), $889.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $12.2 (Max: $370).
+  Wanted: none.
+  For Sale: 80 orcs [ORC] at $39, 16 leaders [LEAD] at $683.
+  Entertainment available: $53.
+  Products: 28 livestock [LIVE], 38 iron [IRON], 11 stone [STON], 6
+    mithril [MITH].
+
+Exits:
+  North : ocean (10,0) in Atlantis Ocean.
+  Northeast : ocean (11,1) in Atlantis Ocean.
+  Southeast : mountain (11,3) in Metfle.
+  South : mountain (10,4) in Metfle.
+  Southwest : ocean (9,3) in Atlantis Ocean.
+  Northwest : ocean (9,1) in Atlantis Ocean.
+
+- p iron (5220), Anuii (44), avoiding, behind, revealing faction,
+  sharing, weightless battle spoils, 6 humans [MAN], 6 picks [PICK],
+  52 iron [IRON]. Weight: 326. Capacity: 0/0/90/0. Skills: mining
+  [MINI] 3 (260), riding [RIDI] 1 (30).
+- p mith (5561), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 2 humans [MAN], 12 mithril [MITH]. Weight:
+  140. Capacity: 0/0/30/0. Skills: mining [MINI] 3 (260), riding
+  [RIDI] 1 (30).
+- p weap-quar (7637), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 12 orcs [ORC], 16 hammers [HAMM], 11 stone
+  [STON], 1028 silver [SILV]. Weight: 686. Capacity: 0/0/180/0.
+  Skills: weaponsmith [WEAP] 2 (90), quarrying [QUAR] 1 (40).
+- miner (2898), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 2 humans [MAN], 2 picks [PICK], 20 iron
+  [IRON]. Weight: 122. Capacity: 0/0/30/0. Skills: mining [MINI] 4
+  (300), riding [RIDI] 1 (30).
+- Jester (5626), The Lizards (20), avoiding, behind, orc [ORC].
+- Lizardmen (6656), The Lizards (20), avoiding, behind, lizardman
+  [LIZA].
+- taxmen (5923), Anuii (44), revealing faction, holding, 8 wood elves
+  [WELF], 378 silver [SILV]. Weight: 80. Capacity: 0/0/120/0. Skills:
+  combat [COMB] 1 (30).
+- scout (2907), on guard, Anuii (44), behind, revealing faction,
+  holding, weightless battle spoils, centaur [CTAU], 48 silver [SILV].
+  Weight: 50. Capacity: 0/70/70/0. Skills: riding [RIDI] 1 (55).
+- scout (4611), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, orc [ORC], 2 silver [SILV]. Weight: 10.
+  Capacity: 0/0/15/0. Skills: none.
+
++ Shaft [1] : Shaft, contains an inner location.
+
++ Fleet [177] : Cog; Load: 20/500; Sailors: 6/6; MaxSpeed: 4.
+  - captain cog 177 (6792), Anuii (44), avoiding, behind, revealing
+    faction, weightless battle spoils, 2 lizardmen [LIZA], 980 silver
+    [SILV]. Weight: 20. Capacity: 0/0/30/30. Skills: sailing [SAIL] 3
+    (205).
+")]
         public void Region(string input) {
             var result = AtlantisParser.Region.Parse(input);
             output.AssertParsed(result);
@@ -313,9 +368,99 @@ Exits:
             var v = result.Value;
         }
 
-        [Fact]
-        public void Regions() {
-            var result = AtlantisParser.Regions.Parse(@"underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],
+        [Theory]
+        [InlineData(@"mountain (10,2) in Metfle, 2021 peasants (orcs), $889.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $12.2 (Max: $370).
+  Wanted: none.
+  For Sale: 80 orcs [ORC] at $39, 16 leaders [LEAD] at $683.
+  Entertainment available: $53.
+  Products: 28 livestock [LIVE], 38 iron [IRON], 11 stone [STON], 6
+    mithril [MITH].
+
+Exits:
+  North : ocean (10,0) in Atlantis Ocean.
+  Northeast : ocean (11,1) in Atlantis Ocean.
+  Southeast : mountain (11,3) in Metfle.
+  South : mountain (10,4) in Metfle.
+  Southwest : ocean (9,3) in Atlantis Ocean.
+  Northwest : ocean (9,1) in Atlantis Ocean.
+
+- p iron (5220), Anuii (44), avoiding, behind, revealing faction,
+  sharing, weightless battle spoils, 6 humans [MAN], 6 picks [PICK],
+  52 iron [IRON]. Weight: 326. Capacity: 0/0/90/0. Skills: mining
+  [MINI] 3 (260), riding [RIDI] 1 (30).
+- p mith (5561), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 2 humans [MAN], 12 mithril [MITH]. Weight:
+  140. Capacity: 0/0/30/0. Skills: mining [MINI] 3 (260), riding
+  [RIDI] 1 (30).
+- p weap-quar (7637), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 12 orcs [ORC], 16 hammers [HAMM], 11 stone
+  [STON], 1028 silver [SILV]. Weight: 686. Capacity: 0/0/180/0.
+  Skills: weaponsmith [WEAP] 2 (90), quarrying [QUAR] 1 (40).
+- miner (2898), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, 2 humans [MAN], 2 picks [PICK], 20 iron
+  [IRON]. Weight: 122. Capacity: 0/0/30/0. Skills: mining [MINI] 4
+  (300), riding [RIDI] 1 (30).
+- Jester (5626), The Lizards (20), avoiding, behind, orc [ORC].
+- Lizardmen (6656), The Lizards (20), avoiding, behind, lizardman
+  [LIZA].
+- taxmen (5923), Anuii (44), revealing faction, holding, 8 wood elves
+  [WELF], 378 silver [SILV]. Weight: 80. Capacity: 0/0/120/0. Skills:
+  combat [COMB] 1 (30).
+- scout (2907), on guard, Anuii (44), behind, revealing faction,
+  holding, weightless battle spoils, centaur [CTAU], 48 silver [SILV].
+  Weight: 50. Capacity: 0/70/70/0. Skills: riding [RIDI] 1 (55).
+- scout (4611), Anuii (44), avoiding, behind, revealing faction,
+  weightless battle spoils, orc [ORC], 2 silver [SILV]. Weight: 10.
+  Capacity: 0/0/15/0. Skills: none.
+
++ Shaft [1] : Shaft, contains an inner location.
+
++ Fleet [177] : Cog; Load: 20/500; Sailors: 6/6; MaxSpeed: 4.
+  - captain cog 177 (6792), Anuii (44), avoiding, behind, revealing
+    faction, weightless battle spoils, 2 lizardmen [LIZA], 980 silver
+    [SILV]. Weight: 20. Capacity: 0/0/30/30. Skills: sailing [SAIL] 3
+    (205).
+
+
+swamp (40,2) in Lihes, contains Panedyl [village], 5835 peasants
+  (lizardmen), $1750.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $11.5 (Max: $350).
+  Wanted: 122 grain [GRAI] at $18, 114 livestock [LIVE] at $23, 129
+    fish [FISH] at $21.
+  For Sale: 233 lizardmen [LIZA] at $36, 46 leaders [LEAD] at $644.
+  Entertainment available: $145.
+  Products: 17 livestock [LIVE], 16 wood [WOOD], 19 herbs [HERB].
+
+Exits:
+  North : swamp (40,0) in Lihes.
+  Northeast : swamp (41,1) in Lihes.
+  Southeast : swamp (41,3) in Lihes.
+  South : swamp (40,4) in Lihes.
+  Southwest : swamp (39,3) in Lihes.
+  Northwest : swamp (39,1) in Lihes.
+
+- Marines (1416), Noizy Tribe (49), 17 lizardmen [LIZA], 3 spears
+  [SPEA], 17 livestock [LIVE].
+- City Guard (2966), on guard, The Guardsmen (1), 40 leaders [LEAD],
+  40 swords [SWOR].
+- Weaponsmiths (2370), Noizy Tribe (49), avoiding, behind, 3 goblins
+  [GBLN], 2 lizardmen [LIZA], 2 axes [AXE], 62 crossbows [XBOW].
+- Scout (2258), Silver Hand (27), avoiding, behind, goblin [GBLN].
+- choppers (6852), Noizy Tribe (49), avoiding, behind, 7 lizardmen
+  [LIZA].
+- Ambassador Whereitallbegan (4290), Disasters Inc (43), avoiding,
+  behind, revealing faction, lizardman [LIZA], 6 silver [SILV].
+  Weight: 10. Capacity: 0/0/15/15. Skills: none.
+- ranger (8928), Noizy Tribe (49), leader [LEAD].
+- scout (9371), Noizy Tribe (49), behind, 2 gnomes [GNOM], winged
+  horse [WING].
+", 2)]
+        [InlineData(@"underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],
   10237 peasants (drow elves), $5937.
 ------------------------------------------------------------
   The weather was clear last month; it will be clear next month.
@@ -411,8 +556,10 @@ Exits:
   [UDWA], 32 silver [SILV]. Weight: 10. Capacity: 0/0/15/0. Skills:
   none.
 
-");
-            output.AssertParsed(result);
+", 3)]
+        public void canParseRegions(string input, int regionCount) {
+            var result = AtlantisParser.Regions.Parse(input);
+            (output.AssertParsed(result).Value?.Children?.Count ?? 0).Should().Be(regionCount);
         }
 
         [Theory]
@@ -456,32 +603,34 @@ Exits:
         [InlineData("+ Fleet [128]\n  : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
         [InlineData("+ Fleet\n  [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
         [InlineData("+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:\n  10/10; MaxSpeed: 4.\n")]
-        public void structure(string input) {
+        [InlineData("+ Shaft [1] : Shaft, contains an inner location.\n")]
+        [InlineData("+ AE Sembury [165] : Cog; Load: 500/500; Sailors: 6/6; MaxSpeed: 4; Imperial Trade Fleet.")]
+        public void canParseStructure(string input) {
             var result = AtlantisParser.Structure.Parse(input);
             output.AssertParsed(result);
         }
 
         [Theory]
-//         [InlineData(@"+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
-//   - captain longship 128 (3941), Anuii (44), avoiding, behind,
-//     revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
-//     crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
-//     Skills: sailing [SAIL] 2 (90).
-// ", 1)]
-//         [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
-//   10/10; MaxSpeed: 4.
-//   - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
-//     faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
-//     [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
-//     (90).
-//   - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
-//     weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
-//     Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
-// ", 2)]
+        [InlineData(@"+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
+  - captain longship 128 (3941), Anuii (44), avoiding, behind,
+    revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
+    crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
+    Skills: sailing [SAIL] 2 (90).
+", 1)]
+        [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
+  10/10; MaxSpeed: 4.
+  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
+    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
+    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
+    (90).
+  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
+    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
+    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
+", 2)]
         [InlineData(@"+ Building [1] : Fort.
   - Unit (469), Demon's Duchy (28), behind, leader [LEAD].
 ", 1)]
-        public void structureWithUnits(string input, int units) {
+        public void canPraseStructureWithUnits(string input, int units) {
             var result = AtlantisParser.StructureWithUnits.Parse(input);
             output.AssertParsed(result);
 
@@ -489,6 +638,30 @@ Exits:
             output.WriteLine(structure.ToString());
 
             (structure.FirstByType("units")?.Children?.Count ?? 0).Should().Be(units);
+        }
+
+        [Theory]
+        [InlineData(@"  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
+    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
+    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
+")]
+        public void canParseUnitWithlargerIdent(string input) {
+            var result = AtlantisParser.Unit(Parser.Char(' ').Repeat(2).IgnoreResult()).Parse(input);
+            output.AssertParsed(result);
+        }
+
+        [Theory]
+        [InlineData(@"  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
+    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
+    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
+    (90).
+  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
+    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
+    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
+", 2)]
+        public void canParseMultipleUnitsWithlargerIdent(string input, int unitCount) {
+            var result = AtlantisParser.Units(Parser.Char(' ').Repeat(2).IgnoreResult()).Parse(input);
+            output.AssertParsed(result).Value?.Children?.Count.Should().Be(unitCount);
         }
 
         [Theory]
@@ -529,7 +702,7 @@ Exits:
         [InlineData(". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", 3)]
         [InlineData(". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", 3)]
         public void unitAttributes(string input, int count) {
-            var result = AtlantisParser.UnitAttributes.Parse(input);
+            var result = AtlantisParser.UnitAttributes().Parse(input);
             output.AssertParsed(result);
 
             (result.Value?.Children?.Count ?? 0).Should().Be(count);
@@ -537,7 +710,7 @@ Exits:
 
         [Fact]
         public void canParserUnit() {
-            var result = AtlantisParser.Unit<Pidgin.Unit>().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
+            var result = AtlantisParser.Unit().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
   faction, holding, receiving no aid, won't cross water, wood elf
   [WELF], horse [HORS]. Weight: 60. Capacity: 0/70/85/0. Skills:
   combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).
@@ -547,18 +720,19 @@ Exits:
             output.WriteLine(result.Value.ToString());
         }
 
-        [Fact]
-        public void canParseUnitWithDescription() {
-            var result = AtlantisParser.Unit<Pidgin.Unit>().Parse(
-@"- Herdsmen of the Ungre Guild (1767), 3 humans [MAN], 3 spices [SPIC],
+        [Theory]
+        [InlineData(@"- Dwarven masons (3860), 3 hill dwarves [HDWA], 3 picks [PICK], 41
+  stone [STON]; They are dusty and brawny..
+", "They are dusty and brawny.")]
+        [InlineData(@"- Herdsmen of the Ungre Guild (1767), 3 humans [MAN], 3 spices [SPIC],
   2 gems [GEM], net [NET], 2 mink [MINK], 3 livestock [LIVE]; Content
   looking shepherds and herdsmen.
-");
-            output.AssertParsed(result);
+", "Content looking shepherds and herdsmen")]
+        public void canParseUnitWithDescription(string input, string description) {
+            var result = AtlantisParser.Unit().Parse(input);
+            var unit = output.AssertParsed(result).Value;
 
-            var unit = result.Value;
-
-            unit.StrValueOf("description").Should().Be("Content looking shepherds and herdsmen");
+            unit.StrValueOf("description").Should().Be(description);
         }
 
         [Theory]
@@ -566,13 +740,13 @@ Exits:
         [InlineData(".\n  foo", false)]
         [InlineData(".\nfoo", true)]
         public void unitTerminator(string input, bool success) {
-            var result = AtlantisParser.UnitTerminator.Parse(input);
+            var result = AtlantisParser.UnitTerminator().Parse(input);
             result.Success.Should().Be(success);
         }
 
         [Fact]
         public void canParserUnits() {
-            var result = AtlantisParser.Units<Pidgin.Unit>().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
+            var result = AtlantisParser.Units().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
   faction, holding, receiving no aid, won't cross water, wood elf
   [WELF], horse [HORS]. Weight: 60. Capacity: 0/70/85/0. Skills:
   combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).

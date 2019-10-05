@@ -240,13 +240,18 @@ namespace atlantis
                     Num("value", s.Last()))
                 );
 
-        public static Parser<char, Pidgin.Unit> UnitTerminator =
-            Sequence(
+        public static ParserNone UnitTerminator(ParserNone prefix = null) {
+            var parser = Sequence(
                 TDot,
                 Char('\n').Or(Char('\r').Then(Char('\n')))
-            ).IgnoreResult()
-            .Then(Lookahead(Not(Char(' '))).Optional())
-            .IgnoreResult();
+            );
+
+            var finalPparser = prefix == null
+                ? parser.Then(Lookahead(Not(Char(' '))).Optional())
+                : parser.Then(Lookahead(Not(prefix.Then(Char(' ')))).Optional());
+
+            return finalPparser.IgnoreResult();
+        }
 
         // (15)
         public static readonly ParserNode FactionNumber =
@@ -770,24 +775,24 @@ Exits:
                     }
                 });
 
-        public static readonly Parser<char, IEnumerable<IReportNode>> UnitAttributeSeq =
+        public static Parser<char, IEnumerable<IReportNode>> UnitAttributeSeq(ParserNone prefix) =>
             UnitAttribute
                 .Then(
                     Rec(() => Try(
                         OneOf(
                             Lookahead(Try(TSemicolon)).Then(Return(EmptySequence)),
-                            Lookahead(Try(UnitTerminator)).Then(Return(EmptySequence)),
-                            UnitAttributeSeq
+                            Lookahead(Try(UnitTerminator(prefix))).Then(Return(EmptySequence)),
+                            UnitAttributeSeq(prefix)
                         )
                     )).Optional(),
                     MakeSequence
                 );
 
-        public static ParserNode UnitAttributes =
-            UnitAttributeSeq
+        public static ParserNode UnitAttributes(ParserNone prefix = null) =>
+            UnitAttributeSeq(prefix)
                 .Node("attributes");
 
-        public static Parser<char, string> UnitDescriptionText() {
+        public static Parser<char, string> UnitDescriptionText(ParserNone prefix) {
             var token = Token(AtlantisCharset.ExcludeList('.')).AtLeastOnce();
             var spaces = Char(' ').AtLeastOnce();
             var lineIdent = Char(' ').Repeat(2).IgnoreResult();
@@ -803,20 +808,19 @@ Exits:
                         tokens,
                         (value, next) => SingleSpace.Concat(next)
                     );
+                var terminator = Lookahead(UnitTerminator(prefix)) // .<new line><not 2*space>
+                    .ThenReturn(Enumerable.Empty<char>());
 
                 var possible = OneOf(
                     // next word on the same line
                     Try(nextWord),
 
                     // end of description
-                    Try(
-                        Lookahead(UnitTerminator) // .<new line><not 2*space>
-                            .ThenReturn(Enumerable.Empty<char>())
-                    ),
+                    Try(terminator),
 
                     // just . char
                     Try(Char('.').Then(
-                        OneOf(Try(nextWord), newLine),
+                        OneOf(Try(nextWord), Try(terminator), newLine),
                         MakeSequence
                     )),
 
@@ -832,8 +836,8 @@ Exits:
             return tokens.Select(string.Concat);
         }
 
-        public static ParserNode UnitDescription =
-            UnitDescriptionText().Str("description");
+        public static ParserNode UnitDescription(ParserNone prefix) =>
+            UnitDescriptionText(prefix).Str("description");
 
         public static readonly Parser<char, (IReportNode flags, IReportNode items)> UnitFlagsAndItems =
             Try(UnitFlags.Before(TCommaWp))
@@ -888,7 +892,7 @@ Exits:
             });
         }
 
-        public static ParserNode Unit<T>(Parser<char, T> prefix = null) {
+        public static ParserNode Unit(ParserNone prefix = null) {
             var parser = Map(
                 (marker, name, number, faction, flagsAndItems, attributes, description) => {
                     var node = Node(
@@ -929,23 +933,28 @@ Exits:
                 UnitFaction,
                 TCommaWp
                     .Then(UnitFlagsAndItems),
-                Try(UnitAttributes)
+                Try(UnitAttributes(prefix))
                     .Optional(),
-                Try(TSemicolonWp.Then(UnitDescription))
+                Try(TSemicolonWp.Then(UnitDescription(prefix)))
                     .Optional()
-            ).Before(UnitTerminator);
+            ).Before(UnitTerminator(prefix));
 
             return prefix != null
                 ? prefix.Then(parser)
                 : parser;
         }
 
-        public static ParserNode Units<T>(Parser<char, T> prefix = null) =>
-            Unit(prefix)
-                .AtLeastOnce()
-                .Node("units");
+        public static Parser<char, IEnumerable<IReportNode>> UnitSequence(ParserNone prefix = null) =>
+            SkipEmptyLines
+                .Then(Unit(prefix))
+                .Then(
+                    Rec(() => Try(UnitSequence(prefix))).Optional(),
+                    MakeSequence
+                );
 
-        public static ParserNode Units() => Units<Pidgin.Unit>();
+        public static ParserNode Units(ParserNone prefix = null) =>
+            UnitSequence(prefix)
+                .Node("units");
 
         // [121]
         public static readonly ParserNode StructureNumber =
@@ -1019,6 +1028,53 @@ Exits:
             TText(AtlantisCharset, terminator: StructureNumberAndType)
                 .Str("name");
 
+        public static Parser<char, string> StructureDescriptionText() {
+            var token = Token(AtlantisCharset.ExcludeList('.')).AtLeastOnce();
+            var spaces = Char(' ').AtLeastOnce();
+            var lineIdent = Char(' ').Repeat(2).IgnoreResult();
+
+            Parser<char, IEnumerable<char>> tokens = null;
+            var recTokens = Rec(() => {
+                var nextWord = spaces.Then(tokens, (value, next) => value.Concat(next));
+                var newLine = EndOfLine
+                    .Then(lineIdent)
+                    .Then(spaces.Optional())
+                    .IgnoreResult()
+                    .Then(
+                        tokens,
+                        (value, next) => SingleSpace.Concat(next)
+                    );
+                var terminator = Lookahead(DotTerminator) // .<new line><not 2*space>
+                    .ThenReturn(Enumerable.Empty<char>());
+
+                var possible = OneOf(
+                    // next word on the same line
+                    Try(nextWord),
+
+                    // end of description
+                    Try(terminator),
+
+                    // just . char
+                    Try(Char('.').Then(
+                        OneOf(Try(nextWord), Try(terminator), newLine),
+                        MakeSequence
+                    )),
+
+                    // next word on new line
+                    newLine
+                );
+
+                return Try(possible);
+            }).Optional();
+
+            tokens = token.Then(recTokens, CombineOutputs);
+
+            return tokens.Select(string.Concat);
+        }
+
+        public static readonly ParserNode StructureDescription =
+            StructureDescriptionText().Str("description");
+
         // + Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors: 10/10; MaxSpeed: 4.
         // + 1 [1] : Fort, needs 10.
         // + Shaft [1] : Shaft, contains an inner location.
@@ -1027,10 +1083,14 @@ Exits:
             String("+ ")
                 .Then(
                     Map(
-                        (name, numAndType, parts, attributes) => {
+                        (name, numAndType, parts, attributes, description) => {
                             var n = Node("structure");
                             n.Add(name);
                             n.AddRange(numAndType);
+
+                            if (description.HasValue) {
+                                n.Add(description.Value);
+                            }
 
                             if (parts.HasValue) {
                                 n.AddRange(parts.Value);
@@ -1055,6 +1115,9 @@ Exits:
                             .AtLeastOnce()
                             .Optional(),
                         StructureAttributes
+                            .Optional(),
+                        TSemicolonWp
+                            .Then(StructureDescription)
                             .Optional()
                     )
                 )
@@ -1063,10 +1126,11 @@ Exits:
         public static readonly ParserNode StructureWithUnits =
             Structure
                 .Then(
-                    // Try(
-                        Units(Char(' ').Repeat(2))
-                    // ).Optional()
-                    .LikeOptional()
+                    Try(
+                        Units(Char(' ').Repeat(2).IgnoreResult())
+
+                    ).Optional()
+                    // .LikeOptional()
                     ,
                     (structure, units) => {
                         if (units.HasValue) {
@@ -1078,9 +1142,10 @@ Exits:
                 );
 
         public static readonly Parser<char, IEnumerable<IReportNode>> StructuresSequence =
-            StructureWithUnits
+            SkipEmptyLines
+                .Then(StructureWithUnits)
                 .Then(
-                    Rec(() => Try(SkipEmptyLines.Then(StructuresSequence))).Optional(),
+                    Rec(() => Try(StructuresSequence)).Optional(),
                     MakeSequence
                 );
 
@@ -1115,12 +1180,8 @@ Exits:
             )
             .Then(
                 Sequence(
-                    Try(
-                        SkipEmptyLines.Then(Units())
-                    ).Optional(),
-                    Try(
-                        SkipEmptyLines.Then(Structures)
-                    ).Optional()
+                    Try(Units()).Optional(),
+                    Try(Structures).Optional()
                 ),
                 (required, optional) => {
                     var node = Node("region");

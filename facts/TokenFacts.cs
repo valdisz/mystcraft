@@ -42,7 +42,7 @@ bar", @"foo")]
         [InlineData("Content\n  looking shepherds and herdsmen.\n", "Content looking shepherds and herdsmen")]
         public void TText_matchesMultiLineWithTerminator(string input, string expected) {
             var res = output
-                .AssertParsed(Tokens.TText(Tokens.AtlantisCharset, terminator: AtlantisParser.UnitTerminator)
+                .AssertParsed(Tokens.TText(Tokens.AtlantisCharset, terminator: AtlantisParser.UnitTerminator())
                 .Parse(input));
             Assert.Equal(expected, res.Value);
         }
