@@ -2,6 +2,7 @@ namespace atlantis
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Pidgin;
     using static Pidgin.Parser;
     using static Pidgin.Parser<char>;
@@ -38,6 +39,9 @@ namespace atlantis
         public static Func<char, bool> CombineWith(this Func<char, bool> charset, Func<char, bool> other) {
             return c => charset(c) || other(c);
         }
+
+        public static Func<char, bool> ExcludeList(this Func<char, bool> charset, params char[] chars) =>
+            charset.Exclude(Charset.List(chars));
     }
 
     public static class Tokens {
@@ -65,6 +69,13 @@ namespace atlantis
         public static Parser<char, T> BetweenBrackets<T>(this Parser<char, T> parser) =>
             parser.Between(TLBracket, TRBracket);
 
+        public static Parser<char, T> BetweenWhitespaces<T>(this Parser<char, T> parser) =>
+            parser.Between(SkipWhitespaces);
+
+        public static Parser<char, T> BeforeWhitespaces<T>(this Parser<char, T> parser) =>
+            parser.Before(SkipWhitespaces);
+
+
         public static Parser<char, Maybe<T>> LikeOptional<T>(this Parser<char, T> parser) =>
             parser.Select(x => new Maybe<T>(x));
 
@@ -82,8 +93,7 @@ namespace atlantis
 
         // public static readonly Parser<char, string> TSentence = SentenceOf(TWord, Whitespace);
 
-        public static Func<char, bool> AtlantisCharset(bool simpleWhitepsace = false) => Charset.Combine(
-            c => simpleWhitepsace ? c == ' ' : char.IsWhiteSpace(c),
+        public static readonly Func<char, bool> AtlantisCharset = Charset.Combine(
             Charset.Range('a', 'z'),
             Charset.Range('A', 'Z'),
             Charset.Range('0', '9'),
@@ -95,30 +105,89 @@ namespace atlantis
             )
         );
 
-        public static Func<char, bool> NoWhitespace(this Func<char, bool> charser) {
-            return charser.Exclude(c => char.IsWhiteSpace(c));
+        public static readonly Func<char, bool> NoSpecials = Charset.Combine(
+            Charset.Range('a', 'z'),
+            Charset.Range('A', 'Z'),
+            Charset.Range('0', '9'),
+            Charset.List(
+                '\'', '"'
+            )
+        );
+
+        public static Parser<char, string> TText(Func<char, bool> charset,
+            Parser<char, char> space = null,
+            Parser<char, Pidgin.Unit> firstLineIdent = null,
+            Parser<char, Pidgin.Unit> lineIdent = null) =>
+            TText<Pidgin.Unit>(charset, space, firstLineIdent, lineIdent, null);
+
+        public static readonly char[] SingleSpace = { ' ' };
+
+        public static IEnumerable<char> CombineOutputs(char first, Maybe<IEnumerable<char>> next) {
+            yield return first;
+
+            if (next.HasValue) {
+                foreach (var c in next.Value) yield return c;
+            }
         }
 
-        public static readonly Func<char, bool> AtlantisCharsetWithParenthesis = AtlantisCharset().CombineWith(Charset.List('(', ')'));
+        public static IEnumerable<char> CombineOutputs(IEnumerable<char> first, Maybe<IEnumerable<char>> next) {
+            return next.HasValue
+                ? first.Concat(next.Value)
+                : first;
+        }
 
-        public static Parser<char, string> TText(Func<char, bool> charset, Func<char, bool> separator = null) =>
-            TText<Pidgin.Unit>(charset, separator, null);
+        public static Parser<char, string> TText<T>(
+            Func<char, bool> charset,
+            Parser<char, char> space = null,
+            Parser<char, Pidgin.Unit> firstLineIdent = null,
+            Parser<char, Pidgin.Unit> lineIdent = null,
+            Parser<char, T> terminator = null) {
 
-        public static Parser<char, string> TText<T>(Func<char, bool> charset, Func<char, bool> separator = null, Parser<char, T> stopBefore = null) {
-            separator = separator ?? (c => char.IsWhiteSpace(c));
-
-            var firstChar = Token(charset.Exclude(separator));
-            var charsetToken = Token(charset.CombineWith(separator));
-
-            Parser<char, string> remaining;
-            if (stopBefore == null) {
-                remaining = charsetToken.ManyString();
-            }
-            else {
-                remaining = charsetToken.Until(stopBefore).Select(string.Concat);
+            if (terminator != null) {
+                terminator = Lookahead(Try(terminator));
             }
 
-            return firstChar.Then(remaining, (c, s) => c + s);
+            var token = terminator == null
+                ? Token(charset).AtLeastOnce()
+                : Token(charset).AtLeastOnceUntil(terminator);
+            // var token = Token(charset);// .AtLeastOnce();
+
+            space = space ?? Char(' ');
+            var spaces = space.AtLeastOnce();
+
+            lineIdent = lineIdent ?? Char(' ').Repeat(2).IgnoreResult();
+
+            Parser<char, IEnumerable<char>> tokens = null;
+            var recTokens = Rec(() => {
+                var possible = OneOf(
+                    // next word on the same line
+                    Try(spaces.Then(tokens, (value, next) => value.Concat(next))),
+
+                    // next word on new line
+                    EndOfLine
+                        .Then(lineIdent)
+                        .Then(spaces.Optional())
+                        .IgnoreResult()
+                        .Then(
+                            tokens,
+                            (value, next) => SingleSpace.Concat(next)
+                        )
+                );
+
+                if (terminator != null) {
+                    possible = Try(terminator.Then(Return(Enumerable.Empty<char>()))).Or(possible);
+                }
+
+
+                return Try(possible);
+            }).Optional();
+
+            tokens = token.Then(recTokens, CombineOutputs);
+
+            return (firstLineIdent != null
+                ? firstLineIdent.Then(tokens)
+                : tokens
+            ).Select(string.Concat);
         }
     }
 }

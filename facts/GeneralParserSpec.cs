@@ -30,6 +30,8 @@ namespace atlantis.facts {
 
         [Theory]
         [InlineData("(War 1, Trade 2, Magic 2)", 3)]
+        [InlineData("(War 1,\n  Trade 2, Magic 2)", 3)]
+        [InlineData("(War 1, Trade 2,\n  Magic 2)", 3)]
         public void FactionAttributes(string input, int count) {
             var result = AtlantisParser.FactionAttributes.Parse(input);
             output.AssertParsed(result);
@@ -45,15 +47,47 @@ namespace atlantis.facts {
             (result.Value as ValueReportNode<int>).Value.Should().Be(15);
         }
 
-        [Fact]
-        public void FactionInfo() {
-            var result = AtlantisParser.ReportFaction.Parse("Avalon Empire (15) (War 1, Trade 2, Magic 2)");
+        [Theory]
+        [InlineData("Avalon Empire (15)", "Avalon Empire", 15)]
+        [InlineData("Avalon Empire  (15)", "Avalon Empire", 15)]
+        [InlineData("Avalon Empire   (15)", "Avalon Empire", 15)]
+        [InlineData("Avalon\n  Empire (15)", "Avalon Empire", 15)]
+        [InlineData("Avalon Empire\n  (15)", "Avalon Empire", 15)]
+        public void FactionNameAndNumber(string input, string name, int number) {
+            var result = AtlantisParser.Faction.Parse(input);
             output.AssertParsed(result);
+
+            var faction = result.Value;
+            faction.StrValueOf("name").Should().Be(name);
+            faction.IntValueOf("number").Should().Be(number);
+        }
+
+        [Theory]
+        [InlineData("Avalon Empire (15) (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire (15) (War 1, Trade 2, Magic\n  2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire (15) (War 1, Trade 2,\n  Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire (15) (War 1, Trade\n  2, Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire (15) (War 1,\n  Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire (15) (War\n  1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire (15)\n  (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon Empire\n  (15) (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
+        [InlineData("Avalon\n  Empire (15) (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
+        public void ReportFaction(string input, string name, int number, int count) {
+            var result = AtlantisParser.ReportFaction.Parse(input);
+            output.AssertParsed(result);
+
+            var faction = result.Value;
+
+            faction.FirstByType("faction")?.StrValueOf("name").Should().Be(name);
+            faction.FirstByType("faction")?.IntValueOf("number").Should().Be(number);
+            faction.FirstByType("attributes")?.Children.Count.Should().Be(count);
         }
 
         [Theory]
         [InlineData("May, Year 3", "May", 3)]
         [InlineData("February, Year 1", "February", 1)]
+        [InlineData("February, Year\n  1", "February", 1)]
+        [InlineData("February,\n  Year 1", "February", 1)]
         public void Date(string input, string month, int year) {
             var result = AtlantisParser.ReportDate.Parse(input);
             output.AssertParsed(result);
@@ -64,25 +98,8 @@ namespace atlantis.facts {
         }
 
         [Theory]
-        [InlineData("atlantis", true)]
-        [InlineData("atlantis text", true)]
-        [InlineData(" cannot start with space", false)]
-        [InlineData("a", true)]
-        public void AText(string input, bool success) {
-            var result = Tokens.TText(Tokens.AtlantisCharset()).Parse(input);
-            result.Success.Should().Be(success);
-        }
-    }
-
-    public class RegionParserSpec {
-        public RegionParserSpec(ITestOutputHelper output) {
-            this.output = output;
-        }
-
-        private readonly ITestOutputHelper output;
-
-        [Theory]
         [InlineData("(0,0,2 <underworld>)", 0, 0, 2, "underworld")]
+        [InlineData("(0,0,2\n  <underworld>)", 0, 0, 2, "underworld")]
         [InlineData("(1,1)", 1, 1, null, null)]
         public void Coords(string input, int x, int y, int? z, string label) {
             var result = AtlantisParser.Coords.Parse(input);
@@ -109,6 +126,9 @@ namespace atlantis.facts {
         [Theory]
         [InlineData("1195 peasants (gnomes)", 1195, "gnomes")]
         [InlineData("10237 peasants (drow elves)", 10237, "drow elves")]
+        [InlineData("10237 peasants (drow\n  elves)", 10237, "drow elves")]
+        [InlineData("10237 peasants\n  (drow elves)", 10237, "drow elves")]
+        [InlineData("10237\n  peasants (drow elves)", 10237, "drow elves")]
         public void Population(string input, int amount, string race) {
             var result = AtlantisParser.Population.Parse(input);
             output.AssertParsed(result);
@@ -120,12 +140,21 @@ namespace atlantis.facts {
 
         [Theory]
         [InlineData("underforest (50,0,2 <underworld>) in Ryway, 100 peasants (humans).\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway, 100 peasants\n  (humans).\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway, 100\n  peasants (humans).\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway,\n  100 peasants (humans).\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in\n  Ryway, 100 peasants (humans).\n")]
+        [InlineData("underforest (50,0,2 <underworld>)\n  in Ryway, 100 peasants (humans).\n")]
+        [InlineData("underforest (50,0,2\n  <underworld>) in Ryway, 100 peasants (humans).\n")]
+        [InlineData("underforest\n  (50,0,2 <underworld>) in Ryway, 100 peasants (humans).\n")]
         [InlineData("underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town], 10237 peasants (drow elves), $5937.\n")]
-        [InlineData(@"underforest (52,0,2 <underworld>) in Ryway, 1872 peasants (drow
-  elves), $1385.
-")]
-        public void Summary(string input) {
-            var result = AtlantisParser.Summary.Parse(input);
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],\n  10237 peasants (drow elves), $5937.\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway, contains Sinsto\n  [town], 10237 peasants (drow elves), $5937.\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway, contains\n  Sinsto [town], 10237 peasants (drow elves), $5937.\n")]
+        [InlineData("underforest (50,0,2 <underworld>) in Ryway,\n  contains Sinsto [town], 10237 peasants (drow elves), $5937.\n")]
+        [InlineData("underforest (52,0,2 <underworld>) in Ryway, 1872 peasants (drow elves), $1385.\n")]
+        public void RegionSummary(string input) {
+            var result = AtlantisParser.RegionHeader.Parse(input);
             output.AssertParsed(result);
 
             var v = result.Value;
@@ -138,8 +167,6 @@ namespace atlantis.facts {
         [InlineData("For Sale: 65 orcs [ORC] at $42, 13 leaders [LEAD] at $744.", "For Sale")]
         [InlineData("Entertainment available: $54.", "Entertainment available")]
         [InlineData("Products: 15 grain [GRAI].", "Products")]
-        // [InlineData("  The weather was clear last month; it will be clear next month.\n", "The weather was clear last month; it will be clear next month")]
-        // [InlineData("  Wanted: 167 grain [GRAI] at $20, 115 livestock [LIVE] at $20, 123\n    fish [FISH] at $27, 7 leather armor [LARM] at $69.\n", "Wanted: 167 grain [GRAI] at $20, 115 livestock [LIVE] at $20, 123 fish [FISH] at $27, 7 leather armor [LARM] at $69")]
         public void RegionParam(string input, string capture) {
             var result = AtlantisParser.RegionAttribute.Parse(input);
 
@@ -152,7 +179,7 @@ namespace atlantis.facts {
             result.Value.Should().Be(capture);
         }
 
-        // [Fact]
+        [Fact]
         public void RegionParams() {
             var input = @"------------------------------------------------------------
   The weather was clear last month; it will be clear next month.
@@ -170,16 +197,21 @@ namespace atlantis.facts {
             output.WriteLine(result.Value.ToString());
 
             result.Value.StrValueOf("unknown").Should().Be("The weather was clear last month; it will be clear next month.");
-            result.Value.StrValueOf("wages").Should().Be("$13.3 (Max: $466).");
-            result.Value.StrValueOf("wanted").Should().Be("none.");
-            result.Value.StrValueOf("for-sale").Should().Be("65 orcs [ORC] at $42, 13 leaders [LEAD] at $744.");
-            result.Value.StrValueOf("entertainment-available").Should().Be("$54.");
-            result.Value.StrValueOf("products").Should().Be("15 grain [GRAI].");
+            result.Value.FirstByType("wages")?.RealValueOf("salary").Should().Be(13.3);
+            result.Value.FirstByType("wages")?.IntValueOf("max-wages").Should().Be(466);
+            result.Value.FirstByType("wanted")?.Children.Count.Should().Be(0);
+            result.Value.FirstByType("for-sale")?.Children?.Count.Should().Be(2);
+            result.Value.IntValueOf("entertainment-available").Should().Be(54);
+            result.Value.FirstByType("products")?.Children?.Count.Should().Be(1);
         }
 
         [Theory]
         [InlineData("orc [ORC] at $42", 1, "orc", "ORC", 42)]
+        [InlineData("orc [ORC] at\n  $42", 1, "orc", "ORC", 42)]
+        [InlineData("orc [ORC]\n  at $42", 1, "orc", "ORC", 42)]
+        [InlineData("orc\n  [ORC] at $42", 1, "orc", "ORC", 42)]
         [InlineData("65 orcs [ORC] at $42", 65, "orcs", "ORC", 42)]
+        [InlineData("65\n  orcs [ORC] at $42", 65, "orcs", "ORC", 42)]
         [InlineData("65 orcs [ORC]", 65, "orcs", "ORC", null)]
         [InlineData("orc [ORC]", 1, "orc", "ORC", null)]
         public void Item(string input, int amount, string name, string code, int? price) {
@@ -412,221 +444,95 @@ Exits:
             output.AssertParsed(result);
         }
 
-        [Fact]
-        public void MustParseTwoRegions() {
-            string input = @"plain (4,4) in Prefield, contains Estenher [village], 6736 peasants
-  (high elves), $5658.
-------------------------------------------------------------
-  The weather was clear last month; it will be clear next month.
-  Wages: $14.2 (Max: $1131).
-  Wanted: 104 grain [GRAI] at $24, 109 livestock [LIVE] at $26, 131
-    fish [FISH] at $20.
-  For Sale: 269 high elves [HELF] at $45, 53 leaders [LEAD] at $795.
-  Entertainment available: $350.
-  Products: 46 livestock [LIVE], 20 horses [HORS].
-
-Exits:
-  North : ocean (4,2) in Atlantis Ocean.
-  Northeast : plain (5,3) in Prefield.
-  Southeast : plain (5,5) in Prefield.
-  South : plain (4,6) in Prefield.
-  Southwest : ocean (3,5) in Atlantis Ocean.
-  Northwest : ocean (3,3) in Atlantis Ocean.
-
-- taxmen (2333), Anuii (44), revealing faction, holding, sharing, 44
-  high elves [HELF], 58 humans [MAN], 11 gnomes [GNOM], 4 swords
-  [SWOR], 6268 silver [SILV]. Weight: 1079. Capacity: 0/0/1629/0.
-  Skills: combat [COMB] 1 (40).
-- scout (2900), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 6 high elves [HELF], horse [HORS], 275
-  silver [SILV]. Weight: 110. Capacity: 0/70/160/0. Skills: riding
-  [RIDI] 2 (90).
-- vestnieks (927), Semigallians (18), avoiding, behind, centaur
-  [CTAU].
-- Ambassador Este (3397), Disasters Inc (43), avoiding, behind,
-  revealing faction, human [MAN], 70 silver [SILV]. Weight: 10.
-  Capacity: 0/0/15/0. Skills: none.
-- p ship (3930), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 10 high elves [HELF]. Weight: 100.
-  Capacity: 0/0/150/0. Skills: shipbuilding [SHIP] 5 (450).
-- scout (5921), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, gnome [GNOM], 62 silver [SILV]. Weight: 5.
-  Capacity: 0/0/9/0. Skills: observation [OBSE] 2 (90), riding [RIDI]
-  1 (35).
-- entertainers (6382), Anuii (44), avoiding, behind, revealing
-  faction, weightless battle spoils, 8 gnomes [GNOM], 1680 silver
-  [SILV]. Weight: 40. Capacity: 0/0/72/0. Skills: entertainment [ENTE]
-  2 (125).
-- workers (6782), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 5 high elves [HELF], 204 silver [SILV].
-  Weight: 50. Capacity: 0/0/75/0. Skills: none.
-- Emissary Prefield (2552), Ordo Hereticus (30), avoiding, behind,
-  revealing faction, holding, receiving no aid, sharing, won't cross
-  water, gnoll [GNOL], camel [CAME], 24 silver [SILV]. Weight: 60.
-  Capacity: 0/70/85/0. Skills: none.
-- scout (8038), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, human [MAN]. Weight: 10. Capacity:
-  0/0/15/0. Skills: riding [RIDI] 2 (125).
-- vestnieks (7480), Skalperians (22), avoiding, behind, gnome [GNOM].
-- scout (3962), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, centaur [CTAU], 6 horses [HORS]. Weight:
-  350. Capacity: 0/490/490/0. Skills: none.
-- scout (3440), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, high elf [HELF], horse [HORS]. Weight: 60.
-  Capacity: 0/70/85/0. Skills: riding [RIDI] 2 (90).
-- scout (3439), Anuii (44), avoiding, behind, revealing faction,
-  sharing, weightless battle spoils, high elf [HELF], horse [HORS].
-  Weight: 60. Capacity: 0/70/85/0. Skills: riding [RIDI] 2 (90).
-- City Guard (9478), on guard, The Guardsmen (1), 4 leaders [LEAD], 4
-  swords [SWOR].
-
-plain (6,4) in Prefield, 4787 peasants (centaurs), $4978.
-------------------------------------------------------------
-  The weather was clear last month; it will be clear next month.
-  Wages: $15.2 (Max: $995).
-  Wanted: none.
-  For Sale: 191 centaurs [CTAU] at $85, 38 leaders [LEAD] at $851.
-  Entertainment available: $296.
-  Products: 66 grain [GRAI], 38 horses [HORS], 6 winged horses [WING].
-
-Exits:
-  North : ocean (6,2) in Atlantis Ocean.
-  Northeast : plain (7,3) in Prefield.
-  Southeast : ocean (7,5) in Atlantis Ocean.
-  South : plain (6,6) in Prefield.
-  Southwest : plain (5,5) in Prefield.
-  Northwest : plain (5,3) in Prefield.
-
-- taxmen (839), Anuii (44), revealing faction, holding, sharing,
-  weightless battle spoils, 4 centaurs [CTAU], horse [HORS]. Weight:
-  250. Capacity: 0/350/350/0. Skills: combat [COMB] 1 (30).
-- horses (1853), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, centaur [CTAU], 6 winged horses [WING],
-  lasso [LASS]. Weight: 351. Capacity: 420/490/490/0. Skills: horse
-  training [HORS] 5 (450).
-- p horses (2331), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 15 humans [MAN], gnome [GNOM], 38 horses
-  [HORS], 6 lassoes [LASS]. Weight: 2061. Capacity: 0/2660/2894/0.
-  Skills: horse training [HORS] 2 (90).
-- taxmen (2087), on guard, Anuii (44), revealing faction, holding,
-  sharing, 44 gnomes [GNOM], 13 humans [MAN], 42 centaurs [CTAU], 5215
-  silver [SILV]. Weight: 2450. Capacity: 0/2940/3531/0. Skills: combat
-  [COMB] 1 (31).
-- b grain (2673), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 5 gnomes [GNOM], 279 silver [SILV].
-  Weight: 25. Capacity: 0/0/45/0. Skills: farming [FARM] 2 (97).
-- centaur scout (3933), Anuii (44), avoiding, behind, revealing
-  faction, weightless battle spoils, centaur [CTAU], 80 silver [SILV].
-  Weight: 50. Capacity: 0/70/70/0. Skills: riding [RIDI] 3 (180).
-- p horses (2088), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 14 gnomes [GNOM], 302 silver [SILV].
-  Weight: 70. Capacity: 0/0/126/0. Skills: horse training [HORS] 2
-  (90).
-- p grain (2340), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 29 gnomes [GNOM], 4 bags [BAG], 66 grain
-  [GRAI]. Weight: 479. Capacity: 0/0/261/0. Skills: farming [FARM] 2
-  (124).
-- entertainers (6383), Anuii (44), avoiding, behind, revealing
-  faction, weightless battle spoils, 6 gnomes [GNOM], 760 silver
-  [SILV]. Weight: 30. Capacity: 0/0/54/0. Skills: entertainment [ENTE]
-  2 (125).
-- worker (4615), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 2 humans [MAN]. Weight: 20. Capacity:
-  0/0/30/0. Skills: riding [RIDI] 2 (150).
-- b farmers (848), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 14 humans [MAN], 3 horses [HORS]. Weight:
-  290. Capacity: 0/210/420/0. Skills: farming [FARM] 2 (137).
-- b fur (3444), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, gnoll [GNOL], 11 horses [HORS], 5 silver
-  [SILV]. Weight: 560. Capacity: 0/770/785/0. Skills: hunting [HUNT] 5
-  (450).
-- scout (8383), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, centaur [CTAU], 16 lassoes [LASS], 5
-  silver [SILV]. Weight: 66. Capacity: 0/70/70/0. Skills: none.
-- p fur (9300), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 3 gnolls [GNOL], 15 silver [SILV]. Weight:
-  30. Capacity: 0/0/45/0. Skills: hunting [HUNT] 5 (450).
-- p fur (9301), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 3 gnolls [GNOL], 15 silver [SILV]. Weight:
-  30. Capacity: 0/0/45/0. Skills: hunting [HUNT] 5 (450).
-- scout (8840), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, centaur [CTAU], 22 horses [HORS], 9 stone
-  [STON]. Weight: 1600. Capacity: 0/1610/1610/0. Skills: none.
-- centaur scout (3934), Anuii (44), avoiding, behind, revealing
-  faction, weightless battle spoils, centaur [CTAU], 5 horses [HORS].
-  Weight: 300. Capacity: 0/420/420/0. Skills: riding [RIDI] 3 (210).
-- scout (3115), Anuii (44), avoiding, behind, revealing faction,
-  sharing, weightless battle spoils, human [MAN], 10 horses [HORS].
-  Weight: 510. Capacity: 0/700/715/0. Skills: none.
-- p livestock (9303), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 7 ice dwarves [IDWA], 4 horses [HORS].
-  Weight: 270. Capacity: 0/280/385/0. Skills: ranching [RANC] 3 (181).
-- p livestock (9304), Anuii (44), avoiding, behind, revealing faction,
-  weightless battle spoils, 8 ice dwarves [IDWA], 4 horses [HORS].
-  Weight: 280. Capacity: 0/280/400/0. Skills: ranching [RANC] 3 (181).
-
-+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
-  - captain longship 128 (3941), Anuii (44), avoiding, behind,
-    revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
-    crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
-    Skills: sailing [SAIL] 2 (90).
-
-+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
-  10/10; MaxSpeed: 4.
-  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
-    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
-    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
-    (90).
-  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
-    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
-    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
-
-";
-
-            var result = AtlantisParser.Regions.Parse(input);
-            output.AssertParsed(result);
-
-
-            output.WriteLine(result.Value.ToString());
-            result.Value.Children.Count.Should().Be(2);
-        }
-
         [Theory]
         [InlineData("+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
-        [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
-  10/10; MaxSpeed: 4.
-")]
+        [InlineData("+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed:\n  4.\n")]
+        [InlineData("+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4;\n  MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [128] : Longship; Load: 93/100; Sailors:\n  4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [128] : Longship; Load: 93/100;\n  Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [128] : Longship; Load:\n  93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [128] : Longship;\n  Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [128] :\n  Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [128]\n  : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet\n  [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
+        [InlineData("+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:\n  10/10; MaxSpeed: 4.\n")]
         public void structure(string input) {
             var result = AtlantisParser.Structure.Parse(input);
             output.AssertParsed(result);
-
-            output.WriteLine(result.Value.ToString());
         }
 
         [Theory]
-        [InlineData(@"+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
-  - captain longship 128 (3941), Anuii (44), avoiding, behind,
-    revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
-    crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
-    Skills: sailing [SAIL] 2 (90).
-
-")]
-        [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
-  10/10; MaxSpeed: 4.
-  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
-    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
-    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
-    (90).
-  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
-    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
-    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
-
-")]
-        public void structureWithUnits(string input) {
+//         [InlineData(@"+ Fleet [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.
+//   - captain longship 128 (3941), Anuii (44), avoiding, behind,
+//     revealing faction, weightless battle spoils, 2 gnomes [GNOM], 83
+//     crossbows [XBOW], 36 herbs [HERB]. Weight: 93. Capacity: 0/0/18/0.
+//     Skills: sailing [SAIL] 2 (90).
+// ", 1)]
+//         [InlineData(@"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
+//   10/10; MaxSpeed: 4.
+//   - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
+//     faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
+//     [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
+//     (90).
+//   - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
+//     weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
+//     Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
+// ", 2)]
+        [InlineData(@"+ Building [1] : Fort.
+  - Unit (469), Demon's Duchy (28), behind, leader [LEAD].
+", 1)]
+        public void structureWithUnits(string input, int units) {
             var result = AtlantisParser.StructureWithUnits.Parse(input);
             output.AssertParsed(result);
 
-            output.WriteLine(result.Value.ToString());
+            var structure = result.Value;
+            output.WriteLine(structure.ToString());
+
+            (structure.FirstByType("units")?.Children?.Count ?? 0).Should().Be(units);
+        }
+
+        [Theory]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, wood elf [WELF], horse\n  [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, wood elf [WELF],\n  horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, wood elf\n  [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, wood\n  elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water,\n  wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross\n  water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't\n  cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no aid,\n  won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving no\n  aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding, receiving\n  no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction, holding,\n  receiving no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing faction,\n  holding, receiving no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind, revealing\n  faction, holding, receiving no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding, behind,\n  revealing faction, holding, receiving no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        [InlineData("avoiding,\n  behind, revealing faction, holding, receiving no aid, won't cross water, wood elf [WELF], horse [HORS].", 6, 2)]
+        public void canParseUnitFlagsAndSkills(string input, int falgsCount, int itemCount) {
+            var result = AtlantisParser.UnitFlagsAndItems.Parse(input);
+            output.AssertParsed(result);
+
+            var (flags, items) = result.Value;
+            (flags?.Children?.Count ?? 0).Should().Be(falgsCount);
+            (items?.Children?.Count ?? 0).Should().Be(itemCount);
+        }
+
+        [Theory]
+        [InlineData(". Weight: 60.\n", 1)]  // attribute is final in unit
+        [InlineData(". Weight: 60;", 1)]    // after attrbute will be description
+        [InlineData(". Capacity: 0/70/85/0.\n", 1)]
+        [InlineData(". Capacity: 0/70/85/0;", 1)]
+        [InlineData(". Weight: 60. Capacity: 0/70/85/0.\n", 2)]
+        [InlineData(". Weight: 60. Capacity: 0/70/85/0;", 2)]
+        [InlineData(". Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", 1)]
+        [InlineData(". Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", 1)]
+        [InlineData(". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", 3)]
+        [InlineData(". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", 3)]
+        public void unitAttributes(string input, int count) {
+            var result = AtlantisParser.UnitAttributes.Parse(input);
+            output.AssertParsed(result);
+
+            (result.Value?.Children?.Count ?? 0).Should().Be(count);
         }
 
         [Fact]
@@ -650,8 +556,18 @@ Exits:
 ");
             output.AssertParsed(result);
 
-            output.WriteLine(result.Value.ToString());
+            var unit = result.Value;
 
+            unit.StrValueOf("description").Should().Be("Content looking shepherds and herdsmen");
+        }
+
+        [Theory]
+        [InlineData(".\n", true)]
+        [InlineData(".\n  foo", false)]
+        [InlineData(".\nfoo", true)]
+        public void unitTerminator(string input, bool success) {
+            var result = AtlantisParser.UnitTerminator.Parse(input);
+            result.Success.Should().Be(success);
         }
 
         [Fact]
@@ -682,15 +598,6 @@ Exits:
             output.AssertParsed(result);
 
             result.Value.Children.Count.Should().Be(count);
-        }
-
-        [Theory]
-        [InlineData("Weight: 60.\n*", 1)]
-        public void unitAttributes(string input, int count) {
-            var result = AtlantisParser.UnitAttributes.Parse(input);
-            output.AssertParsed(result);
-
-            // result.Value.Children.Count.Should().Be(count);
         }
     }
 }
