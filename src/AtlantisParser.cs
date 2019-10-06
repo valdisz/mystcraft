@@ -1002,7 +1002,7 @@ Exits:
                 .Then(TText(NoSpecials))
                 .Before(TColon.BetweenWhitespaces())
                 .Then(
-                    TText(NoSpecials.CombineWith(Charset.List('/'))),
+                    TText(NoSpecials.CombineWith(Charset.List('/', ','))),
                     (key, value) => Node("attribute",
                         Str("key", key),
                         Str("value", value)
