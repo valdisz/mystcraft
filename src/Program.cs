@@ -3,35 +3,11 @@
     using System;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using Newtonsoft.Json;
     using Pidgin;
-    using static Tokens;
 
     class Program
     {
-        public static void Parse() {
-string input = @"+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:
-  10/10; MaxSpeed: 4.
-  - captain fleet 121 (3940), Anuii (44), avoiding, behind, revealing
-    faction, weightless battle spoils, 2 gnomes [GNOM], 11 stone
-    [STON]. Weight: 560. Capacity: 0/0/18/0. Skills: sailing [SAIL] 2
-    (90).
-  - Unit (6795), Anuii (44), avoiding, behind, revealing faction,
-    weightless battle spoils, 2 lizardmen [LIZA]. Weight: 20.
-    Capacity: 0/0/30/30. Skills: sailing [SAIL] 3 (195).
-";
-
-            var result = AtlantisParser.StructureWithUnits.Parse(input);
-            AssertParsed(result);
-
-            if (result.Success) {
-                Console.WriteLine(result.Value.ToString());
-                Console.WriteLine();
-                Console.WriteLine("OK");
-            }
-        }
-
         static void Main(string[] args)
         {
             if (args == null || args.Length == 0) {
