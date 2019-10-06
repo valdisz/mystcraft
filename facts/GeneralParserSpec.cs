@@ -1,8 +1,10 @@
 namespace atlantis.facts {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Text.RegularExpressions;
     using FluentAssertions;
     using Pidgin;
     using Xunit;
@@ -20,7 +22,7 @@ namespace atlantis.facts {
         [InlineData("Trade 1", "Trade", 1)]
         [InlineData("Magic 1", "Magic", 1)]
         [InlineData("Ocean Fleets 5", "Ocean Fleets", 5)]
-        public void FactionAttribute(string input, string key, int value) {
+        public void canParseFactionAttribute(string input, string key, int value) {
             var result = AtlantisParser.FactionAttribute.Parse(input);
             output.AssertParsed(result);
 
@@ -32,7 +34,7 @@ namespace atlantis.facts {
         [InlineData("(War 1, Trade 2, Magic 2)", 3)]
         [InlineData("(War 1,\n  Trade 2, Magic 2)", 3)]
         [InlineData("(War 1, Trade 2,\n  Magic 2)", 3)]
-        public void FactionAttributes(string input, int count) {
+        public void canParseFactionAttributes(string input, int count) {
             var result = AtlantisParser.FactionAttributes.Parse(input);
             output.AssertParsed(result);
 
@@ -40,7 +42,7 @@ namespace atlantis.facts {
         }
 
         [Fact]
-        public void FactionNumber() {
+        public void canParseFactionNumber() {
             var result = AtlantisParser.FactionNumber.Parse("(15)");
             output.AssertParsed(result);
 
@@ -53,7 +55,7 @@ namespace atlantis.facts {
         [InlineData("Avalon Empire   (15)", "Avalon Empire", 15)]
         [InlineData("Avalon\n  Empire (15)", "Avalon Empire", 15)]
         [InlineData("Avalon Empire\n  (15)", "Avalon Empire", 15)]
-        public void FactionNameAndNumber(string input, string name, int number) {
+        public void canParseFactionNameAndNumber(string input, string name, int number) {
             var result = AtlantisParser.Faction.Parse(input);
             output.AssertParsed(result);
 
@@ -72,7 +74,7 @@ namespace atlantis.facts {
         [InlineData("Avalon Empire (15)\n  (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
         [InlineData("Avalon Empire\n  (15) (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
         [InlineData("Avalon\n  Empire (15) (War 1, Trade 2, Magic 2)", "Avalon Empire", 15, 3)]
-        public void ReportFaction(string input, string name, int number, int count) {
+        public void canParseReportFaction(string input, string name, int number, int count) {
             var result = AtlantisParser.ReportFaction.Parse(input);
             output.AssertParsed(result);
 
@@ -88,7 +90,7 @@ namespace atlantis.facts {
         [InlineData("February, Year 1", "February", 1)]
         [InlineData("February, Year\n  1", "February", 1)]
         [InlineData("February,\n  Year 1", "February", 1)]
-        public void Date(string input, string month, int year) {
+        public void canParseReportDate(string input, string month, int year) {
             var result = AtlantisParser.ReportDate.Parse(input);
             output.AssertParsed(result);
 
@@ -101,7 +103,7 @@ namespace atlantis.facts {
         [InlineData("(0,0,2 <underworld>)", 0, 0, 2, "underworld")]
         [InlineData("(0,0,2\n  <underworld>)", 0, 0, 2, "underworld")]
         [InlineData("(1,1)", 1, 1, null, null)]
-        public void Coords(string input, int x, int y, int? z, string label) {
+        public void canParseCoords(string input, int x, int y, int? z, string label) {
             var result = AtlantisParser.Coords.Parse(input);
             output.AssertParsed(result);
 
@@ -114,7 +116,7 @@ namespace atlantis.facts {
 
         [Theory]
         [InlineData("contains Sinsto [town]", "Sinsto", "town")]
-        public void Settlement(string input, string name, string size) {
+        public void canParseSettlement(string input, string name, string size) {
             var result = AtlantisParser.Settlement.Parse(input);
             output.AssertParsed(result);
 
@@ -129,7 +131,7 @@ namespace atlantis.facts {
         [InlineData("10237 peasants (drow\n  elves)", 10237, "drow elves")]
         [InlineData("10237 peasants\n  (drow elves)", 10237, "drow elves")]
         [InlineData("10237\n  peasants (drow elves)", 10237, "drow elves")]
-        public void Population(string input, int amount, string race) {
+        public void canParsePopulation(string input, int amount, string race) {
             var result = AtlantisParser.Population.Parse(input);
             output.AssertParsed(result);
 
@@ -153,7 +155,7 @@ namespace atlantis.facts {
         [InlineData("underforest (50,0,2 <underworld>) in Ryway, contains\n  Sinsto [town], 10237 peasants (drow elves), $5937.\n")]
         [InlineData("underforest (50,0,2 <underworld>) in Ryway,\n  contains Sinsto [town], 10237 peasants (drow elves), $5937.\n")]
         [InlineData("underforest (52,0,2 <underworld>) in Ryway, 1872 peasants (drow elves), $1385.\n")]
-        public void RegionSummary(string input) {
+        public void canParseRegionHeader(string input) {
             var result = AtlantisParser.RegionHeader.Parse(input);
             output.AssertParsed(result);
 
@@ -167,7 +169,7 @@ namespace atlantis.facts {
         [InlineData("For Sale: 65 orcs [ORC] at $42, 13 leaders [LEAD] at $744.", "For Sale")]
         [InlineData("Entertainment available: $54.", "Entertainment available")]
         [InlineData("Products: 15 grain [GRAI].", "Products")]
-        public void RegionParam(string input, string capture) {
+        public void canParseRegionParam(string input, string capture) {
             var result = AtlantisParser.RegionAttribute.Parse(input);
 
             if (capture == null) {
@@ -180,7 +182,7 @@ namespace atlantis.facts {
         }
 
         [Fact]
-        public void RegionParams() {
+        public void canParseRegionParams() {
             var input = @"------------------------------------------------------------
   The weather was clear last month; it will be clear next month.
   Wages: $13.3 (Max: $466).
@@ -214,7 +216,7 @@ namespace atlantis.facts {
         [InlineData("65\n  orcs [ORC] at $42", 65, "orcs", "ORC", 42)]
         [InlineData("65 orcs [ORC]", 65, "orcs", "ORC", null)]
         [InlineData("orc [ORC]", 1, "orc", "ORC", null)]
-        public void Item(string input, int amount, string name, string code, int? price) {
+        public void canParseItem(string input, int amount, string name, string code, int? price) {
             var result = AtlantisParser.Item.Parse(input);
             output.AssertParsed(result);
 
@@ -272,8 +274,7 @@ Exits:
     receiving no aid, sharing, weightless battle spoils, under dwarf
     [UDWA], horse [HORS], 52 silver [SILV]. Weight: 60. Capacity:
     0/70/85/0. Skills: none.
-
-")]
+", 7)]
         [InlineData(@"forest (50,22) in Mapa, contains Sembury [village], 5866 peasants
   (high elves), $2698.
 ------------------------------------------------------------
@@ -304,8 +305,7 @@ Exits:
   [MHEA], farsight [FARS], mind reading [MIND], weather lore [WEAT],
   earth lore [EART], necromancy [NECR], demon lore [DEMO], illusion
   [ILLU], artifact lore [ARTI].
-
-")]
+", 2)]
         [InlineData(@"mountain (10,2) in Metfle, 2021 peasants (orcs), $889.
 ------------------------------------------------------------
   The weather was clear last month; it will be clear next month.
@@ -360,12 +360,80 @@ Exits:
     faction, weightless battle spoils, 2 lizardmen [LIZA], 980 silver
     [SILV]. Weight: 20. Capacity: 0/0/30/30. Skills: sailing [SAIL] 3
     (205).
-")]
-        public void Region(string input) {
-            var result = AtlantisParser.Region.Parse(input);
-            output.AssertParsed(result);
+", 9)]
+        [InlineData(@"forest (52,10) in Hiewmouckdoi, 2334 peasants (wood elves), $700.
+------------------------------------------------------------
+  The weather was clear last month; it will be clear next month.
+  Wages: $11.5 (Max: $284).
+  Wanted: none.
+  For Sale: 93 wood elves [WELF] at $36, 18 leaders [LEAD] at $644.
+  Entertainment available: $51.
+  Products: 28 livestock [LIVE], 26 wood [WOOD], 17 furs [FUR], 16
+    herbs [HERB].
 
-            var v = result.Value;
+Exits:
+  North : ocean (52,8) in Atlantis Ocean.
+  Northeast : forest (53,9) in Hiewmouckdoi.
+  Southeast : ocean (53,11) in Atlantis Ocean.
+  South : ocean (52,12) in Atlantis Ocean.
+  Southwest : ocean (51,11) in Atlantis Ocean.
+  Northwest : ocean (51,9) in Atlantis Ocean.
+
+- forest guard (649), on guard, Disasters Inc (43), revealing faction,
+  sharing, 11 wood elves [WELF], horse [HORS]. Weight: 160. Capacity:
+  0/70/235/0. Skills: combat [COMB] 1 (35).
+- p lumberjacks (1487), Disasters Inc (43), avoiding, behind,
+  revealing faction, sharing, 13 wood elves [WELF], 26 wood [WOOD].
+  Weight: 260. Capacity: 0/0/195/0. Skills: lumberjack [LUMB] 2 (158).
+- p hunt-armo (2823), Disasters Inc (43), avoiding, behind, revealing
+  faction, sharing, 5 wood elves [WELF], 35 leather armor [LARM].
+  Weight: 85. Capacity: 0/0/75/0. Skills: hunting [HUNT] 1 (60),
+  armorer [ARMO] 1 (75).
+- skauts (3329), Semigallians (18), avoiding, behind, wood elf [WELF].
+- p weapon (6348), Disasters Inc (43), avoiding, behind, revealing
+  faction, sharing, 10 wood elves [WELF], 10 axes [AXE], 60 crossbows
+  [XBOW]. Weight: 170. Capacity: 0/0/150/0. Skills: weaponsmith [WEAP]
+  1 (65).
+- p ranchers (6349), Disasters Inc (43), avoiding, behind, revealing
+  faction, 13 wood elves [WELF], 78 livestock [LIVE]. Weight: 4030.
+  Capacity: 0/0/4095/0. Skills: ranching [RANC] 1 (62).
+- p hunters (6350), Disasters Inc (43), avoiding, behind, revealing
+  faction, sharing, 17 wood elves [WELF], 49 furs [FUR]. Weight: 219.
+  Capacity: 0/0/255/0. Skills: hunting [HUNT] 1 (63).
+- p herbers (6756), Disasters Inc (43), avoiding, behind, revealing
+  faction, 10 wood elves [WELF], 54 herbs [HERB]. Weight: 100.
+  Capacity: 0/0/150/0. Skills: herb lore [HERB] 2 (110).
+- p armorers (7137), Disasters Inc (43), avoiding, behind, revealing
+  faction, sharing, 10 wood elves [WELF], 30 leather armor [LARM].
+  Weight: 130. Capacity: 0/0/150/0. Skills: armorer [ARMO] 1 (55).
+- p quick-xbow (7138), Disasters Inc (43), avoiding, behind, revealing
+  faction, sharing, 10 wood elves [WELF], 30 crossbows [XBOW]. Weight:
+  130. Capacity: 0/0/150/0. Skills: weaponsmith [WEAP] 1 (55).
+- p shipbuilders (2626), Disasters Inc (43), avoiding, behind,
+  revealing faction, consuming faction's food, 9 high elves [HELF], 4
+  horses [HORS]. Weight: 290. Capacity: 0/280/415/0. Skills:
+  shipbuilding [SHIP] 4 (368).
+- p shipbuilders (1702), Disasters Inc (43), avoiding, behind,
+  revealing faction, consuming faction's food, 9 high elves [HELF],
+  unfinished Galleon [GALL] (needs 54). Weight: 90. Capacity:
+  0/0/135/0. Skills: shipbuilding [SHIP] 4 (357).
+- skauts (1231), Semigallians (18), avoiding, behind, wood elf [WELF],
+  20 horses [HORS].
+- watcher (8025), Disasters Inc (43), avoiding, behind, sharing,
+  centaur [CTAU]. Weight: 50. Capacity: 0/70/70/0. Skills: riding
+  [RIDI] 3 (190), observation [OBSE] 2 (90), stealth [STEA] 1 (30),
+  entertainment [ENTE] 1 (30).
+- kurjers (7601), Semigallians (18), avoiding, behind, human [MAN],
+  horse [HORS].
+- trans Chawi-SWforest (5894), Disasters Inc (43), avoiding, behind,
+  revealing faction, sharing, human [MAN], 5 horses [HORS], 1050
+  silver [SILV]. Weight: 260. Capacity: 0/350/365/0. Skills: none.
+", 16)]
+        public void canParseRegion(string input, int unitCount) {
+            var result = AtlantisParser.Region.Before(Parser<char>.End).Parse(input);
+            var region = output.AssertParsed(result).Value;
+
+            (region.FirstByType("units")?.Children?.Count ?? 0).Should().Be(unitCount);
         }
 
         [Theory]
@@ -586,7 +654,7 @@ Exits:
         [InlineData("Ally : none.\n")]
         [InlineData("Unclaimed silver: 10000.\n")]
         [InlineData("\n")]
-        public void ReportLine(string input) {
+        public void canParseUnknownReportLine(string input) {
             var result = AtlantisParser.ReportLine.Parse(input);
             output.AssertParsed(result);
         }
@@ -604,7 +672,7 @@ Exits:
         [InlineData("+ Fleet\n  [128] : Longship; Load: 93/100; Sailors: 4/4; MaxSpeed: 4.\n")]
         [InlineData("+ Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors:\n  10/10; MaxSpeed: 4.\n")]
         [InlineData("+ Shaft [1] : Shaft, contains an inner location.\n")]
-        [InlineData("+ AE Sembury [165] : Cog; Load: 500/500; Sailors: 6/6; MaxSpeed: 4; Imperial Trade Fleet.")]
+        [InlineData("+ AE Sembury [165] : Cog; Load: 500/500; Sailors: 6/6; MaxSpeed: 4; Imperial Trade Fleet.\n")]
         public void canParseStructure(string input) {
             var result = AtlantisParser.Structure.Parse(input);
             output.AssertParsed(result);
@@ -690,34 +758,231 @@ Exits:
             (items?.Children?.Count ?? 0).Should().Be(itemCount);
         }
 
-        [Theory]
-        [InlineData(". Weight: 60.\n", 1)]  // attribute is final in unit
-        [InlineData(". Weight: 60;", 1)]    // after attrbute will be description
-        [InlineData(". Capacity: 0/70/85/0.\n", 1)]
-        [InlineData(". Capacity: 0/70/85/0;", 1)]
-        [InlineData(". Weight: 60. Capacity: 0/70/85/0.\n", 2)]
-        [InlineData(". Weight: 60. Capacity: 0/70/85/0;", 2)]
-        [InlineData(". Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", 1)]
-        [InlineData(". Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", 1)]
-        [InlineData(". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", 3)]
-        [InlineData(". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", 3)]
-        public void unitAttributes(string input, int count) {
-            var result = AtlantisParser.UnitAttributes().Parse(input);
-            output.AssertParsed(result);
+        public static IEnumerable<string> AddLineBreaks(string input, string lineBreak = "\n  ") {
+            var words = input.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
-            (result.Value?.Children?.Count ?? 0).Should().Be(count);
+            yield return input;
+
+            for (var i = 1; i < words.Length; i++) {
+;                yield return string.Join(" ", words.Take(i)) + lineBreak + string.Join(" ", words.Skip(i));
+            }
+        }
+
+        public static IEnumerable<object[]> CanParaseUnitAttributesCases {
+            get {
+                var cases = new[] {
+                    (". Weight: 60.\n", new[] { "weight" }),
+                    (". Capacity: 0/70/85/0.\n", new[] { "capacity" }),
+                    (". Capacity: 0/70/85/0;", new[] { "capacity" }),
+                    (". Weight: 60. Capacity: 0/70/85/0.\n", new[] { "weight", "capacity" }),
+                    (". Weight: 60. Capacity: 0/70/85/0;", new[] { "weight", "capacity" }),
+                    (". Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", new[] { "skills" }),
+                    (". Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", new[] { "skills" }),
+                    (". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).\n", new[] { "weight", "capacity", "skills" }),
+                    (". Weight: 60. Capacity: 0/70/85/0. Skills: combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65);", new[] { "weight", "capacity", "skills" }),
+                    (". Can Study: fire [FIRE], earthquake [EQUA], force shield [FSHI], energy shield [ESHI], spirit shield [SSHI], magical healing [MHEA], farsight [FARS], mind reading [MIND], weather lore [WEAT], earth lore [EART], necromancy [NECR], demon lore [DEMO], illusion [ILLU], artifact lore [ARTI].\n", new[] { "can-study" }),
+                    (". Can Study: fire [FIRE], earthquake [EQUA], force shield [FSHI], energy shield [ESHI], spirit shield [SSHI], magical healing [MHEA], farsight [FARS], mind reading [MIND], weather lore [WEAT], earth lore [EART], necromancy [NECR], demon lore [DEMO], illusion [ILLU], artifact lore [ARTI];", new[] { "can-study" })
+                };
+
+                foreach (var (s, p1) in cases) {
+                    foreach (var input in AddLineBreaks(s)) {
+                        yield return new object[] { input, p1 };
+                    }
+                }
+            }
         }
 
         [Fact]
-        public void canParserUnit() {
-            var result = AtlantisParser.Unit().Parse(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
+        public void canParseCanStudyUnitAttribute() {
+            string input = ". Can Study: fire [FIRE], earthquake [EQUA], force shield [FSHI], energy shield [ESHI], spirit shield [SSHI], magical healing [MHEA], farsight [FARS], mind reading [MIND], weather lore [WEAT], earth lore [EART], necromancy [NECR], demon lore [DEMO], illusion [ILLU], artifact lore [ARTI].\n";
+            var attribute = output.AssertParsed(AtlantisParser.UnitAttribute.Parse(input)).Value;
+
+            attribute.StrValueOf("key").Should().Be("can-study");
+            (attribute.FirstByType("value")?.Children?.Count ?? 0).Should().Be(14);
+        }
+
+        [Theory]
+        [MemberData(nameof(CanParaseUnitAttributesCases))]
+        public void canParseUnitAttributes(string input, string[] attributeNames) {
+            var result = AtlantisParser.UnitAttributes().Parse(input);
+            var attribute = output.AssertParsed(result).Value;
+
+            var attributes = attribute.ByType("attribute");
+            attributes.Length.Should().Be(attributeNames.Length);
+
+            attributes.Select(x => x.StrValueOf("key")).Should().BeEquivalentTo(attributeNames);
+        }
+
+        [Theory]
+        [InlineData(@"* Emperor (456), Avalon Empire (15), avoiding, behind, holding, won't
+  cross water, leader [LEAD]. Weight: 10. Capacity: 0/0/15/0. Skills:
+  force [FORC] 1 (30), pattern [PATT] 1 (30), spirit [SPIR] 1 (30),
+  gate lore [GATE] 1 (30), combat [COMB] 3 (180), endurance [ENDU] 3
+  (180). Can Study: fire [FIRE], earthquake [EQUA], force shield
+  [FSHI], energy shield [ESHI], spirit shield [SSHI], magical healing
+  [MHEA], farsight [FARS], mind reading [MIND], weather lore [WEAT],
+  earth lore [EART], necromancy [NECR], demon lore [DEMO], illusion
+  [ILLU], artifact lore [ARTI].
+")]
+        [InlineData(@"* Unit m2 (2530), Avalon Empire (15), avoiding, behind, revealing
   faction, holding, receiving no aid, won't cross water, wood elf
   [WELF], horse [HORS]. Weight: 60. Capacity: 0/70/85/0. Skills:
   combat [COMB] 1 (30), stealth [STEA] 1 (30), riding [RIDI] 1 (65).
-");
+")]
+        [InlineData(@"- p shipbuilders (2626), Disasters Inc (43), avoiding, behind,
+  revealing faction, consuming faction's food, 9 high elves [HELF], 4
+  horses [HORS]. Weight: 290. Capacity: 0/280/415/0. Skills:
+  shipbuilding [SHIP] 4 (368).
+")]
+        public void canParserUnit(string input) {
+            var result = AtlantisParser.Unit().Before(Parser<char>.End).Parse(input);
             output.AssertParsed(result);
+        }
 
-            output.WriteLine(result.Value.ToString());
+        [Fact]
+        public void canParseSpecificUnit1() {
+            string input = @"- p shipbuilders (2626), Disasters Inc (43), avoiding, behind,
+  revealing faction, consuming faction's food, 9 high elves [HELF], 4
+  horses [HORS]. Weight: 290. Capacity: 0/280/415/0. Skills:
+  shipbuilding [SHIP] 4 (368).
+";
+            var unit = output.AssertParsed(AtlantisParser.Unit().Before(Parser<char>.End).Parse(input)).Value;
+
+            output.WriteLine(unit.ToString());
+
+            unit.StrValueOf("name").Should().Be("p shipbuilders");
+            (unit.IntValueOf("number") ?? 0).Should().Be(2626);
+            unit.FirstByType("faction").StrValueOf("name").Should().Be("Disasters Inc");
+            (unit.FirstByType("faction").IntValueOf("number") ?? 0).Should().Be(43);
+
+            var flags = unit.FirstByType("flags").Children;
+            flags.Count.Should().Be(4);
+            flags.Select(x => (x as ValueReportNode<string>).Value).Should().BeEquivalentTo(
+                "avoiding", "behind", "revealing faction", "consuming faction's food"
+            );
+
+            var items = unit.FirstByType("items").Children;
+            items.Count.Should().Be(2);
+
+            (items[0].IntValueOf("amount") ?? 0).Should().Be(9);
+            items[0].StrValueOf("name").Should().Be("high elves");
+            items[0].StrValueOf("code").Should().Be("HELF");
+
+            (items[1].IntValueOf("amount") ?? 0).Should().Be(4);
+            items[1].StrValueOf("name").Should().Be("horses");
+            items[1].StrValueOf("code").Should().Be("HORS");
+
+            unit.FirstByType("attributes").Children.Count.Should().Be(3);
+        }
+
+        [Fact]
+        public void canParseSpecificUnit2() {
+            string input = @"- p shipbuilders (1702), Disasters Inc (43), avoiding, behind,
+  revealing faction, consuming faction's food, 9 high elves [HELF],
+  unfinished Galleon [GALL] (needs 54). Weight: 90. Capacity:
+  0/0/135/0. Skills: shipbuilding [SHIP] 4 (357).
+";
+            var unit = output.AssertParsed(AtlantisParser.Unit().Before(Parser<char>.End).Parse(input)).Value;
+
+            output.WriteLine(unit.ToString());
+
+            unit.StrValueOf("name").Should().Be("p shipbuilders");
+            (unit.IntValueOf("number") ?? 0).Should().Be(1702);
+            unit.FirstByType("faction").StrValueOf("name").Should().Be("Disasters Inc");
+            (unit.FirstByType("faction").IntValueOf("number") ?? 0).Should().Be(43);
+
+            var flags = unit.FirstByType("flags").Children;
+            flags.Count.Should().Be(4);
+            flags.Select(x => (x as ValueReportNode<string>).Value).Should().BeEquivalentTo(
+                "avoiding", "behind", "revealing faction", "consuming faction's food"
+            );
+
+            var items = unit.FirstByType("items").Children;
+            items.Count.Should().Be(2);
+
+            (items[0].IntValueOf("amount") ?? 0).Should().Be(9);
+            items[0].StrValueOf("name").Should().Be("high elves");
+            items[0].StrValueOf("code").Should().Be("HELF");
+
+            (items[1].IntValueOf("amount") ?? 0).Should().Be(1);
+            items[1].StrValueOf("name").Should().Be("unfinished Galleon");
+            items[1].StrValueOf("code").Should().Be("GALL");
+            items[1].IntValueOf("needs").Should().Be(54);
+
+            unit.FirstByType("attributes").Children.Count.Should().Be(3);
+        }
+
+        [Fact]
+        public void canParseSpecificUnit3() {
+            string input = @"- trans Chawi-SWforest (5894), Disasters Inc (43), avoiding, behind,
+  revealing faction, sharing, human [MAN], 5 horses [HORS], 1050
+  silver [SILV]. Weight: 260. Capacity: 0/350/365/0. Skills: none.
+";
+            var unit = output.AssertParsed(AtlantisParser.Unit().Before(Parser<char>.End).Parse(input)).Value;
+
+            output.WriteLine(unit.ToString());
+
+            unit.StrValueOf("name").Should().Be("trans Chawi-SWforest");
+            (unit.IntValueOf("number") ?? 0).Should().Be(5894);
+            unit.FirstByType("faction").StrValueOf("name").Should().Be("Disasters Inc");
+            (unit.FirstByType("faction").IntValueOf("number") ?? 0).Should().Be(43);
+
+            var flags = unit.FirstByType("flags").Children;
+            flags.Count.Should().Be(4);
+            flags.Select(x => (x as ValueReportNode<string>).Value).Should().BeEquivalentTo(
+                "avoiding", "behind", "revealing faction", "sharing"
+            );
+
+            var items = unit.FirstByType("items").Children;
+            items.Count.Should().Be(3);
+
+            (items[0].IntValueOf("amount") ?? 0).Should().Be(1);
+            items[0].StrValueOf("name").Should().Be("human");
+            items[0].StrValueOf("code").Should().Be("MAN");
+
+            (items[1].IntValueOf("amount") ?? 0).Should().Be(5);
+            items[1].StrValueOf("name").Should().Be("horses");
+            items[1].StrValueOf("code").Should().Be("HORS");
+
+            (items[2].IntValueOf("amount") ?? 0).Should().Be(1050);
+            items[2].StrValueOf("name").Should().Be("silver");
+            items[2].StrValueOf("code").Should().Be("SILV");
+
+            unit.FirstByType("attributes").Children.Count.Should().Be(3);
+        }
+
+        [Fact]
+        public void canParseSpecificUnit4() {
+            string input = @"- kurjers (7601), Semigallians (18), avoiding, behind, human [MAN],
+  horse [HORS].
+";
+            var unit = output.AssertParsed(AtlantisParser.Unit().Before(Parser<char>.End).Parse(input)).Value;
+
+            output.WriteLine(unit.ToString());
+
+            unit.StrValueOf("name").Should().Be("kurjers");
+            (unit.IntValueOf("number") ?? 0).Should().Be(7601);
+            unit.FirstByType("faction").StrValueOf("name").Should().Be("Semigallians");
+            (unit.FirstByType("faction").IntValueOf("number") ?? 0).Should().Be(18);
+
+            var flags = unit.FirstByType("flags").Children;
+            flags.Count.Should().Be(2);
+            flags.Select(x => (x as ValueReportNode<string>).Value).Should().BeEquivalentTo(
+                "avoiding", "behind"
+            );
+
+            var items = unit.FirstByType("items").Children;
+            items.Count.Should().Be(2);
+
+            (items[0].IntValueOf("amount") ?? 0).Should().Be(1);
+            items[0].StrValueOf("name").Should().Be("human");
+            items[0].StrValueOf("code").Should().Be("MAN");
+
+            (items[1].IntValueOf("amount") ?? 0).Should().Be(1);
+            items[1].StrValueOf("name").Should().Be("horse");
+            items[1].StrValueOf("code").Should().Be("HORS");
+
+            unit.FirstByType("attributes").Should().Be(null);
         }
 
         [Theory]
@@ -728,6 +993,9 @@ Exits:
   2 gems [GEM], net [NET], 2 mink [MINK], 3 livestock [LIVE]; Content
   looking shepherds and herdsmen.
 ", "Content looking shepherds and herdsmen")]
+        [InlineData(@"- Burvis al Pirmais ibn Beigtais (551), leader [LEAD], skeleton
+  [SKEL]; Rise my minions....
+", "Rise my minions...")]
         public void canParseUnitWithDescription(string input, string description) {
             var result = AtlantisParser.Unit().Parse(input);
             var unit = output.AssertParsed(result).Value;
@@ -739,7 +1007,7 @@ Exits:
         [InlineData(".\n", true)]
         [InlineData(".\n  foo", false)]
         [InlineData(".\nfoo", true)]
-        public void unitTerminator(string input, bool success) {
+        public void canParseUnitTerminator(string input, bool success) {
             var result = AtlantisParser.UnitTerminator().Parse(input);
             result.Success.Should().Be(success);
         }
@@ -767,7 +1035,7 @@ Exits:
         [InlineData("foo, bar, wood elf [WELF]", 2)]
         [InlineData("foo, bar, 10 orcs [ORC]", 2)]
         [InlineData("avoiding, behind, revealing faction, holding, receiving no aid, won't cross water, 3 swords [SWOR]", 6)]
-        public void unitFlags(string input, int count) {
+        public void canParseUnitFlags(string input, int count) {
             var result = AtlantisParser.UnitFlags.Parse(input);
             output.AssertParsed(result);
 

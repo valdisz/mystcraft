@@ -556,17 +556,24 @@ Ally : none.
                     .Then(UnitCode)
             )
             .Then(
-                String("at")
-                    .BetweenWhitespaces()
-                    .Then(SilverAmount)
-                    .Num("price")
-                    .Optional(),
-                (itemParams, price) => {
+                OneOf(
+                    Try(String("at")
+                        .BetweenWhitespaces()
+                        .Then(SilverAmount)
+                        .Num("price")
+                    ),
+                    Try(
+                        SkipWhitespaces
+                            .Then(String("needs")
+                                .BeforeWhitespaces()
+                                .Then(DecimalNum)
+                                .BetweenParenthesis()
+                            ).Num("needs")
+                    )
+                ).Many(),
+                (itemParams, args) => {
                     var node = Node("item", itemParams);
-
-                    if (price.HasValue) {
-                        node.Add(price.Value);
-                    }
+                    node.AddRange(args);
 
                     return node;
                 }
@@ -691,13 +698,16 @@ Exits:
                 .Num("days");
 
         public static Parser<char, IEnumerable<IReportNode>> SkillParameters =
-            Sequence(
-                SkillCode,
-                SkipWhitespaces
-                    .Then(SkillLevel),
-                SkipWhitespaces
-                    .Then(SkillDays)
-            );
+            SkillCode
+                .Then(
+                    Try(Sequence(
+                        SkipWhitespaces
+                            .Then(SkillLevel),
+                        SkipWhitespaces
+                            .Then(SkillDays)
+                    )).Optional(),
+                    MakeSequence
+                );
 
         public static ParserNode SkillName =
             TText(NoSpecials)
@@ -767,6 +777,11 @@ Exits:
                             return attr;
                         });
 
+                        case "Can Study": return ListOf(Skill, terminator: TDot.Or(TSemicolon).IgnoreResult()).Select(skills => {
+                            attr.Add(Node("value", skills));
+                            return attr;
+                        });
+
                         default:
                             return GenericUnitAttribute.Select(value => {
                                 attr.Add(Str("value", value));
@@ -811,6 +826,12 @@ Exits:
                 var terminator = Lookahead(UnitTerminator(prefix)) // .<new line><not 2*space>
                     .ThenReturn(Enumerable.Empty<char>());
 
+                Parser<char, IEnumerable<char>> nextChar = null;
+                nextChar = Rec(() => Char('.').Then(
+                    OneOf(Try(nextWord), Try(terminator), Try(nextChar), newLine),
+                    MakeSequence
+                ));
+
                 var possible = OneOf(
                     // next word on the same line
                     Try(nextWord),
@@ -819,10 +840,7 @@ Exits:
                     Try(terminator),
 
                     // just . char
-                    Try(Char('.').Then(
-                        OneOf(Try(nextWord), Try(terminator), newLine),
-                        MakeSequence
-                    )),
+                    Try(nextChar),
 
                     // next word on new line
                     newLine
@@ -879,19 +897,6 @@ Exits:
   2 gems [GEM], net [NET], 2 mink [MINK], 3 livestock [LIVE]; Content
   looking shepherds and herdsmen.
  */
-        public static Parser<U, Maybe<T>> Tr<U, T>(this Parser<U, Maybe<T>> parser, string msg = "") {
-            return parser.Select(x => {
-                if (x.HasValue) {
-                    Console.WriteLine(msg + x.ToString());
-                }
-                else  {
-                    Console.WriteLine(msg + "<<< NO VALUE >>>");
-                }
-
-                return x;
-            });
-        }
-
         public static ParserNode Unit(ParserNone prefix = null) {
             var parser = Map(
                 (marker, name, number, faction, flagsAndItems, attributes, description) => {
@@ -991,9 +996,10 @@ Exits:
             ListOf(StructurePart, TCommaWp.IgnoreResult())
                 .Node("parts");
 
-        // Load: 580/600
+        // ; Load: 580/600
         public static readonly ParserNode StructureAttribute =
-            TText(NoSpecials)
+            TSemicolonWp
+                .Then(TText(NoSpecials))
                 .Before(TColon.BetweenWhitespaces())
                 .Then(
                     TText(NoSpecials.CombineWith(Charset.List('/'))),
@@ -1003,12 +1009,16 @@ Exits:
                     )
                 );
 
-        // Load: 580/600; Sailors: 10/10; MaxSpeed: 4
-        public static readonly ParserNode StructureAttributes =
-            TSemicolonWp
+        public static readonly Parser<char, IEnumerable<IReportNode>> StructureAttributeSeq =
+            StructureAttribute
                 .Then(
-                    ListOf(StructureAttribute, TSemicolonWp.IgnoreResult())
-                )
+                    Rec(() => Try(StructureAttributeSeq)).Optional(),
+                    MakeSequence
+                );
+
+        // ; Load: 580/600; Sailors: 10/10; MaxSpeed: 4
+        public static readonly ParserNode StructureAttributes =
+            StructureAttributeSeq
                 .Node("attributes");
 
         // needs 10
@@ -1024,8 +1034,53 @@ Exits:
                 .Str("flag");
 
         // Fleet
+        // AE Explorer
+        public static Parser<char, string> StructureNameText() {
+            var token = Token(AtlantisCharset).AtLeastOnce();
+            var spaces = Char(' ').AtLeastOnce();
+            var lineIdent = Char(' ').Repeat(2).IgnoreResult();
+
+            Parser<char, IEnumerable<char>> tokens = null;
+            var recTokens = Rec(() => {
+                var nextWord = spaces.Then(tokens, (value, next) => value.Concat(next));
+                var newLine = EndOfLine
+                    .Then(lineIdent)
+                    .Then(spaces.Optional())
+                    .IgnoreResult()
+                    .Then(
+                        tokens,
+                        (value, next) => SingleSpace.Concat(next)
+                    );
+                var terminator = Lookahead(SkipWhitespaces.Then(StructureNumberAndType)) // [123] : Fleet
+                    .ThenReturn(Enumerable.Empty<char>());
+
+                var possible = OneOf(
+                    // end of description
+                    Try(terminator),
+
+                    // next word on the same line
+                    Try(nextWord),
+
+                    // just . char
+                    Try(Char('.').Then(
+                        OneOf(Try(nextWord), Try(terminator), newLine),
+                        MakeSequence
+                    )),
+
+                    // next word on new line
+                    newLine
+                );
+
+                return Try(possible);
+            }).Optional();
+
+            tokens = token.Then(recTokens, CombineOutputs);
+
+            return tokens.Select(string.Concat);
+        }
+
         public static readonly ParserNode StructureName =
-            TText(AtlantisCharset, terminator: StructureNumberAndType)
+            StructureNameText()
                 .Str("name");
 
         public static Parser<char, string> StructureDescriptionText() {
@@ -1073,12 +1128,15 @@ Exits:
         }
 
         public static readonly ParserNode StructureDescription =
-            StructureDescriptionText().Str("description");
+            TSemicolonWp
+                .Then(StructureDescriptionText())
+                .Str("description");
 
         // + Fleet [121] : Fleet, 1 Longship, 1 Cog; Load: 580/600; Sailors: 10/10; MaxSpeed: 4.
         // + 1 [1] : Fort, needs 10.
         // + Shaft [1] : Shaft, contains an inner location.
         // + Building [3] : Fort.
+        // + AE Sembury [165] : Cog; Load: 500/500; Sailors: 6/6; MaxSpeed: 4; Imperial Trade Fleet.
         public static readonly ParserNode Structure =
             String("+ ")
                 .Then(
@@ -1114,10 +1172,9 @@ Exits:
                             )
                             .AtLeastOnce()
                             .Optional(),
-                        StructureAttributes
+                        Try(StructureAttributes)
                             .Optional(),
-                        TSemicolonWp
-                            .Then(StructureDescription)
+                        Try(StructureDescription)
                             .Optional()
                     )
                 )

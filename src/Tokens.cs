@@ -110,7 +110,7 @@ namespace atlantis
             Charset.Range('A', 'Z'),
             Charset.Range('0', '9'),
             Charset.List(
-                '\'', '"'
+                '\'', '"', '$'
             )
         );
 
@@ -150,7 +150,6 @@ namespace atlantis
             var token = terminator == null
                 ? Token(charset).AtLeastOnce()
                 : Token(charset).AtLeastOnceUntil(terminator);
-            // var token = Token(charset);// .AtLeastOnce();
 
             space = space ?? Char(' ');
             var spaces = space.AtLeastOnce();
@@ -158,31 +157,31 @@ namespace atlantis
             lineIdent = lineIdent ?? Char(' ').Repeat(2).IgnoreResult();
 
             Parser<char, IEnumerable<char>> tokens = null;
-            var recTokens = Rec(() => {
-                var possible = OneOf(
-                    // next word on the same line
-                    Try(spaces.Then(tokens, (value, next) => value.Concat(next))),
+            tokens = token.Then(
+                Rec(() => {
+                    var possible = OneOf(
+                        // next word on the same line
+                        Try(spaces.Then(tokens, (value, next) => value.Concat(next))),
 
-                    // next word on new line
-                    EndOfLine
-                        .Then(lineIdent)
-                        .Then(spaces.Optional())
-                        .IgnoreResult()
-                        .Then(
-                            tokens,
-                            (value, next) => SingleSpace.Concat(next)
-                        )
-                );
+                        // next word on new line
+                        EndOfLine
+                            .Then(lineIdent)
+                            .Then(spaces.Optional())
+                            .IgnoreResult()
+                            .Then(
+                                tokens,
+                                (value, next) => SingleSpace.Concat(next)
+                            )
+                    );
 
-                if (terminator != null) {
-                    possible = Try(terminator.Then(Return(Enumerable.Empty<char>()))).Or(possible);
-                }
+                    return Try(possible);
+                }).Optional(),
+                CombineOutputs
+            );
 
-
-                return Try(possible);
-            }).Optional();
-
-            tokens = token.Then(recTokens, CombineOutputs);
+            if (terminator != null) {
+                tokens = terminator.ThenReturn(Enumerable.Empty<char>()).Or(tokens);
+            }
 
             return (firstLineIdent != null
                 ? firstLineIdent.Then(tokens)
