@@ -15,210 +15,6 @@ namespace atlantis
     using System.IO;
     using System.Globalization;
 
-    public interface IReportNode
-    {
-        string Type { get; }
-        bool HasChildren { get; }
-        IList<IReportNode> Children { get; }
-
-        void Add(IReportNode child);
-        void AddRange(IEnumerable<IReportNode> children);
-        void AddRange(params IReportNode[] children);
-
-        IReportNode[] ByType(string type);
-    }
-
-    public static class ReportNodeExtensions {
-        public static string StrValueOf(this IReportNode node, string type) {
-            var nodes = node.ByType(type);
-            if (nodes.Length == 0) {
-                return null;
-            }
-
-            return (nodes[0] as ValueReportNode<string>)?.Value;
-        }
-
-        public static int? IntValueOf(this IReportNode node, string type) {
-            var nodes = node.ByType(type);
-            if (nodes.Length == 0) {
-                return null;
-            }
-
-            return (nodes[0] as ValueReportNode<int>)?.Value;
-        }
-
-        public static double? RealValueOf(this IReportNode node, string type) {
-            var nodes = node.ByType(type);
-            if (nodes.Length == 0) {
-                return null;
-            }
-
-            return (nodes[0] as ValueReportNode<double>)?.Value;
-        }
-
-        public static IReportNode FirstByType(this IReportNode node, string type) {
-            var nodes = node.ByType(type);
-            if (nodes.Length == 0) {
-                return null;
-            }
-
-            return nodes[0];
-        }
-    }
-
-    public abstract class BaseReportNode : IReportNode
-    {
-        public abstract string Type { get; }
-        public abstract bool HasChildren { get; }
-        public abstract IList<IReportNode> Children { get; }
-
-        public virtual void Add(IReportNode child)
-        {
-            if (HasChildren) Children.Add(child);
-        }
-
-        protected virtual void AddMany(IEnumerable<IReportNode> children) {
-            if (HasChildren) {
-                foreach (var child in children) {
-                    Children.Add(child);
-                }
-            }
-        }
-
-        public void AddRange(IEnumerable<IReportNode> children) => AddMany(children);
-        public void AddRange(params IReportNode[] children)  => AddMany(children);
-
-        public override string ToString() {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(Type);
-            if (HasChildren) {
-                foreach (var child in Children) {
-                    using var childReader = new StringReader(child.ToString());
-                    string line;
-                    while ((line = childReader.ReadLine()) != null) {
-                        sb.Append("  ");
-                        sb.AppendLine(line);
-                    }
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        public IReportNode[] ByType(string type)
-        {
-            if (!HasChildren) {
-                throw new InvalidOperationException();
-            }
-
-            return Children.Where(x => x.Type == type).ToArray();
-        }
-    }
-
-    public class ReportNode : BaseReportNode
-    {
-        public ReportNode(string type, params IReportNode[] nodes) {
-            this.type = type;
-            if (nodes != null && nodes.Length > 0) {
-                children.AddRange(nodes);
-            }
-        }
-
-        private readonly string type;
-        private readonly List<IReportNode> children = new List<IReportNode>();
-
-        public override string Type => type;
-        public override bool HasChildren => true;
-        public override IList<IReportNode> Children => children;
-    }
-
-    public class ValueReportNode<T> : BaseReportNode
-    {
-        public ValueReportNode(string type, T value) {
-            this.type = type;
-            Value = value;
-        }
-
-        private readonly string type;
-
-        public override string Type => type;
-        public override bool HasChildren => false;
-        public override IList<IReportNode> Children => throw new NotImplementedException();
-
-        public T Value { get; }
-
-        public override string ToString() => $"{Type} ({Value})";
-    }
-
-    public static class Nodes {
-        public static IReportNode Node(string type, params IReportNode[] children) {
-            return new ReportNode(type, children);
-        }
-
-        public static IReportNode Node(string type, IEnumerable<IReportNode> children) {
-            return new ReportNode(type, (children ?? Enumerable.Empty<IReportNode>()).ToArray());
-        }
-
-        public static IReportNode Node(string type, IEnumerable<Maybe<IReportNode>> children) {
-            return new ReportNode(
-                type,
-                (children ?? Enumerable.Empty<Maybe<IReportNode>>())
-                    .Where(x => x.HasValue)
-                    .Select(x => x.Value)
-                    .ToArray()
-            );
-        }
-
-        public static IReportNode Str(string type, string value) {
-            return new ValueReportNode<string>(type, value.Trim() );
-        }
-
-        public static IReportNode Num(string type, int value) {
-            return new ValueReportNode<int>(type, value);
-        }
-
-        public static IReportNode Num(string type, string value) {
-            return new ValueReportNode<int>(type, int.Parse(value));
-        }
-
-        public static IReportNode Float(string type, double value) {
-            return new ValueReportNode<double>(type, value);
-        }
-
-        public static IReportNode Real(string type, string value) {
-            return new ValueReportNode<double>(type, double.Parse(value, CultureInfo.InstalledUICulture));
-        }
-
-
-        public static ParserNode Node(this Parser<char, IEnumerable<IReportNode>> parser, string type) {
-            return parser.Select(x => Node(type, x));
-        }
-
-        public static ParserNode Node(this Parser<char, IEnumerable<Maybe<IReportNode>>> parser, string type) {
-            return parser.Select(x => Node(type, x.Where(node => node.HasValue).Select(node => node.Value)));
-        }
-
-        public static ParserNode Str(this Parser<char, string> parser, string type) {
-            return parser.Select(x => Str(type, x));
-        }
-
-        public static ParserNode Num(this Parser<char, string> parser, string type) {
-            return parser.Select(x => Num(type, x));
-        }
-
-        public static ParserNode Num(this Parser<char, int> parser, string type) {
-            return parser.Select(x => Num(type, x));
-        }
-
-        public static ParserNode Float(this Parser<char, string> parser, string type) {
-            return parser.Select(x => Real(type, x));
-        }
-
-        public static ParserNode Float(this Parser<char, double> parser, string type) {
-            return parser.Select(x => Float(type, x));
-        }
-    }
-
     public static class AtlantisParser {
         public static readonly ParserNone DotTerminator =
             TDot.Then(EndOfLine).IgnoreResult();
@@ -235,7 +31,7 @@ namespace atlantis
                 .AtLeastOnceString()
                 .Separated(SkipWhitespaces)
                 .Where(s => s.Count() > 1)
-                .Select(s => Node("attribute",
+                .Select(s => Node("attribute", asArray: false, writeProperty: false,
                     Str("key", string.Join(" ", s.SkipLast(1))),
                     Num("value", s.Last()))
                 );
@@ -268,14 +64,14 @@ namespace atlantis
                 SkipWhitespaces
                     .Then(FactionNumber)
             )
-            .Node("faction");
+            .Node("faction", asArray: false, writeProperty: true);
 
         // (War 1, Trade 2, Magic 2)
         public static readonly ParserNode FactionAttributes =
             FactionAttribute
                 .Separated(TCommaWp)
                 .BetweenParenthesis()
-                .Node("attributes");
+                .Node("attributes", asArray: true, writeProperty: true);
 
         // Avalon Empire (15) (War 1, Trade 2, Magic 2)
         public static readonly ParserNode ReportFaction =
@@ -284,7 +80,7 @@ namespace atlantis
                 SkipWhitespaces
                     .Then(FactionAttributes)
             )
-            .Node("faction-info");
+            .Node("faction-info", asArray: false, writeProperty: true);
 
         // May, Year 3
         public static readonly ParserNode ReportDate =
@@ -297,7 +93,7 @@ namespace atlantis
                     .Then(Int(10))
                     .Num("year")
             )
-            .Node("date");
+            .Node("date", asArray: false, writeProperty: true);
 
 /*
 Declared Attitudes (default Unfriendly):
@@ -309,11 +105,11 @@ Ally : none.
 */
         public static ParserNode Stance =
             OneOf(
-                Try(String("Hostile")),
-                Try(String("Unfriendly")),
-                Try(String("Neutral")),
-                Try(String("Friendly")),
-                String("Ally")
+                Try(String("Hostile").Select(x => x.ToLowerInvariant())),
+                Try(String("Unfriendly").Select(x => x.ToLowerInvariant())),
+                Try(String("Neutral").Select(x => x.ToLowerInvariant())),
+                Try(String("Friendly").Select(x => x.ToLowerInvariant())),
+                String("Ally").Select(x => x.ToLowerInvariant())
             )
             .Str("stance");
 
@@ -321,8 +117,7 @@ Ally : none.
         public static ParserNode DefaultAttitude =
             String("Declared Attitudes (default ")
                 .Then(Stance)
-                .Before(String("):"))
-                .Select(attitude => Node("default", attitude));
+                .Before(String("):"));
 
 
         public static Parser<char, IEnumerable<IReportNode>> ListOf(
@@ -359,7 +154,7 @@ Ally : none.
         public static ParserNode ListOfFactions =
             ListOf(Faction)
                 .Before(TDot.Then(EndOfLine))
-                .Node("factions");
+                .Node("factions", asArray: true, writeProperty: true);
 
         public static ParserNode Attitudes =
             DefaultAttitude
@@ -370,11 +165,21 @@ Ally : none.
                             .Before(TColon.Between(SkipWhitespaces)),
                         ListOfFactions
                     )
-                    .Node("attitude")
+                    .Node("attitude", asArray: false, writeProperty: false)
                     .Repeat(5),
-                    (def, list) => MakeSequence(def, list)
-                )
-                .Node("attitudes");
+                    (def, list) => {
+                        var node = Node("attitudes", asArray: false, writeProperty: true);
+
+                        node.Add(Str("default", (def as ValueReportNode<string>).Value));
+                        node.AddRange(list.Select(x => Node(
+                            x.StrValueOf("stance"), asArray: true, true,
+                            x.FirstByType("factions").Children
+                                .Select(f => Node("faction", asArray: false, writeProperty: false, f.Children.ToArray()))
+                        )));
+
+                        return node;
+                    }
+                );
 
         // (0,0,2 <underworld>)
         public static readonly ParserNode Coords =
@@ -396,7 +201,7 @@ Ally : none.
                     .Optional()
             )
             .BetweenParenthesis()
-            .Node("coords");
+            .Node("coords", asArray: false, writeProperty: true);
 
         // underforest (0,0,2 <underworld>) in Ryway
         public static readonly ParserNode Location =
@@ -410,7 +215,7 @@ Ally : none.
                     .Then(TText(AtlantisCharset.ExcludeList(',', '.')))
                     .Str("prvonice")
             )
-            .Node("location");
+            .Node("location", asArray: false, writeProperty: true);
 
         // [town]
         public static readonly ParserNode SettlementSize =
@@ -428,7 +233,7 @@ Ally : none.
                         SkipWhitespaces.Then(SettlementSize)
                     )
                 )
-                .Node("settlement");
+                .Node("settlement", asArray: false, writeProperty: true);
 
         // 1195 peasants (gnomes)
         public static readonly ParserNode Population =
@@ -439,7 +244,7 @@ Ally : none.
                     .Then(TText(NoSpecials).BetweenParenthesis())
                     .Str("race")
             )
-            .Node("population");
+            .Node("population", asArray: false, writeProperty: true);
 
         public static readonly ParserNode Tax =
             Char('$').Then(Int(10)).Num("tax");
@@ -460,7 +265,7 @@ Ally : none.
                         .Many()
                         .Optional(),
                     (loc, other) => {
-                        var node = Node("region-header", loc);
+                        var node = Node("region-header", asArray: false, writeProperty: true, loc);
                         node.AddRange(other.GetValueOrDefault(EmptySequence));
                         return node;
                     }
@@ -511,6 +316,7 @@ Ally : none.
         public static Parser<char, int> SilverAmount =
             Char('$').Then(DecimalNum);
 
+        // Wages: $13.3.
         // Wages: $13.3 (Max: $466).
         public static readonly ParserNode RegionWages =
             Sequence(
@@ -522,16 +328,17 @@ Ally : none.
                                 whole += "." + fraction.Value;
                             }
 
-                            return Real("salary", whole);
+                            return Float("salary", whole);
                         })
-                ),
-                String("(Max:")
+                ).LikeOptional(),
+                Try(String("(Max:")
                     .Between(SkipWhitespaces)
                     .Then(SilverAmount)
                     .Num("max-wages")
+                ).Optional()
             )
             .Before(Any.Until(DotTerminator))
-            .Node("wages");
+            .Node("wages", asArray: false, writeProperty: true);
 
 
         public static readonly ParserNode AtlantisCode =
@@ -572,14 +379,14 @@ Ally : none.
                     )
                 ).Many(),
                 (itemParams, args) => {
-                    var node = Node("item", itemParams);
+                    var node = Node("item", asArray: false, writeProperty: false, itemParams);
                     node.AddRange(args);
 
                     return node;
                 }
             );
 
-        public static readonly ParserNode RegionAttributes =
+        public static readonly Parser<char, IEnumerable<IReportNode>> RegionAttributes =
             String("------------------------------------------------------------")
                 .Before(EndOfLine)
                 .Then(
@@ -588,23 +395,30 @@ Ally : none.
                             Try(RegionAttribute.Bind(label => {
                                 switch (label) {
                                     case "Wages": return RegionWages;
-                                    case "Wanted": return ListOf(Item).Before(DotTerminator).Node("wanted");
-                                    case "For Sale": return ListOf(Item).Before(DotTerminator).Node("for-sale");
+                                    case "Wanted": return ListOf(Item).Before(DotTerminator).Node("wanted", asArray: true, writeProperty: true);
+                                    case "For Sale": return ListOf(Item).Before(DotTerminator).Node("for-sale", asArray: true, writeProperty: true);
                                     case "Entertainment available": return SilverAmount.Before(DotTerminator).Num("entertainment-available");
-                                    case "Products": return ListOf(Item).Before(DotTerminator).Node("products");
+                                    case "Products": return ListOf(Item).Before(DotTerminator).Node("products", asArray: true, writeProperty: true);
 
                                     default:
                                         string key = label.ToLowerInvariant().Replace(' ', '-');
-                                        return UnknownRegionAttribute.Str(key);
+                                        return UnknownRegionAttribute
+                                            .Select(s => Node("unknown", asArray: false, writeProperty: false,
+                                                Str("key", key),
+                                                Str("value", s)
+                                            ));
                                 }
                             })),
-                            UnknownRegionAttribute.Str("unknown")
+                            UnknownRegionAttribute
+                                .Select(s => Node("unknown", asArray: false, writeProperty: false,
+                                    Str("key", "unknown"),
+                                    Str("value", s)
+                                ))
                         )
                     )
-                    .Many()
+                    .AtLeastOnce()
                 )
-                .Before(EndOfLine)
-                .Node("attributes");
+                .Before(EndOfLine);
 
         // n
         // ne
@@ -638,7 +452,7 @@ Ally : none.
                     )
                     .Before(TDot.Then(EndOfLine))
                 )
-                .Node("exit");
+                .Node("exit", asArray: false, writeProperty: false);
 /*
 Exits:
   Southeast : underforest (51,1,2 <underworld>) in Ryway.
@@ -655,7 +469,7 @@ Exits:
                     )
                 )
                 .Before(EndOfLine)
-                .Node("exits");
+                .Node("exits", asArray: true, writeProperty: true);
 
         public static ParserNode UnitName =
             TText(AtlantisCharset)
@@ -668,7 +482,7 @@ Exits:
 
         public static ParserNode UnitFlag =
             TText(NoSpecials)
-                .Str("flag");
+                .Str("flag", writeProperty: false);
 
         public static ParserNode UnitFlags =
             ListOf(
@@ -676,7 +490,7 @@ Exits:
                 TCommaWp.IgnoreResult(),
                 TCommaWp.Then(Item).IgnoreResult()
             )
-            .Node("flags");
+            .Node("flags", asArray: true, writeProperty: true);
 
         public static ParserNode UnitItems =
             ListOf(
@@ -684,7 +498,7 @@ Exits:
                 TCommaWp.IgnoreResult(),
                 TDot.IgnoreResult().Or(TSemicolonWp.IgnoreResult())
             )
-            .Node("items");
+            .Node("items", asArray: true, writeProperty: true);
 
         public static ParserNode SkillCode = AtlantisCode;
 
@@ -720,7 +534,7 @@ Exits:
                 .Then(
                     SkillParameters,
                     (name, parameters) => {
-                        var node = Node("skill");
+                        var node = Node("skill", asArray: false, writeProperty: false);
                         node.Add(name);
                         node.AddRange(parameters);
 
@@ -758,54 +572,39 @@ Exits:
         public static ParserNode UnitAttribute =
             UnitAttributeName
                 .Bind(name => {
-                    var key = name.ToLowerInvariant().Replace(' ', '-');
-                    var attr = Node("attribute", Str("key", key));
 
                     switch (name) {
-                        case "Weight": return UnitWight.Select(weigth => {
-                            attr.Add(Num("value", weigth));
-                            return attr;
-                        });
-
-                        case "Capacity": return UnitCapacity.Select(cap => {
-                            attr.Add(Node("value", cap));
-                            return attr;
-                        });
-
-                        case "Skills": return ListOf(Skill, terminator: TDot.Or(TSemicolon).IgnoreResult()).Select(skills => {
-                            attr.Add(Node("value", skills));
-                            return attr;
-                        });
-
-                        case "Can Study": return ListOf(Skill, terminator: TDot.Or(TSemicolon).IgnoreResult()).Select(skills => {
-                            attr.Add(Node("value", skills));
-                            return attr;
-                        });
+                        case "Weight": return UnitWight.Num("wieght");
+                        case "Capacity": return UnitCapacity.Node("capacity", asArray: false, writeProperty: true);
+                        case "Skills": return ListOf(Skill, terminator: TDot.Or(TSemicolon).IgnoreResult())
+                            .Node("skills", asArray: true, writeProperty: true);
+                        case "Can Study": return ListOf(Skill, terminator: TDot.Or(TSemicolon).IgnoreResult())
+                            .Node("can-study", asArray: true, writeProperty: true);
 
                         default:
                             return GenericUnitAttribute.Select(value => {
-                                attr.Add(Str("value", value));
+                                var key = name.ToLowerInvariant().Replace(' ', '-');
+                                var attr = Node("unknown", asArray: false, writeProperty: false,
+                                    Str("key", key),
+                                    Str("value", value)
+                                );
                                 return attr;
                             });
                     }
                 });
 
-        public static Parser<char, IEnumerable<IReportNode>> UnitAttributeSeq(ParserNone prefix) =>
+        public static Parser<char, IEnumerable<IReportNode>> UnitAttributes(ParserNone prefix = null) =>
             UnitAttribute
                 .Then(
                     Rec(() => Try(
                         OneOf(
                             Lookahead(Try(TSemicolon)).Then(Return(EmptySequence)),
                             Lookahead(Try(UnitTerminator(prefix))).Then(Return(EmptySequence)),
-                            UnitAttributeSeq(prefix)
+                            UnitAttributes(prefix)
                         )
                     )).Optional(),
                     MakeSequence
                 );
-
-        public static ParserNode UnitAttributes(ParserNone prefix = null) =>
-            UnitAttributeSeq(prefix)
-                .Node("attributes");
 
         public static Parser<char, string> UnitDescriptionText(ParserNone prefix) {
             var token = Token(AtlantisCharset.ExcludeList('.')).AtLeastOnce();
@@ -901,12 +700,13 @@ Exits:
             var parser = Map(
                 (marker, name, number, faction, flagsAndItems, attributes, description) => {
                     var node = Node(
-                        marker == '*'
-                            ? "own-unit"
-                            : "unit",
+                        "unit",
+                        asArray: false, writeProperty: false,
                         name,
                         number
                     );
+
+                    node.Add(new ValueReportNode<bool>("own", marker == '*'));
 
                     if (faction.HasValue) {
                         node.Add(faction.Value);
@@ -923,7 +723,19 @@ Exits:
                     }
 
                     if (attributes.HasValue) {
-                        node.Add(attributes.Value);
+                        var unknown = Node("attributes", asArray: true, writeProperty: true);
+                        foreach (var a in attributes.Value) {
+                            if (a.Type == "unknown") {
+                                unknown.Add(a);
+                            }
+                            else {
+                                node.Add(a);
+                            }
+                        }
+
+                        if (unknown.Children.Count > 0) {
+                            node.Add(unknown);
+                        }
                     }
 
                     node.AddRange(items);
@@ -959,7 +771,7 @@ Exits:
 
         public static ParserNode Units(ParserNone prefix = null) =>
             UnitSequence(prefix)
-                .Node("units");
+                .Node("units", asArray: true, writeProperty: true);
 
         // [121]
         public static readonly ParserNode StructureNumber =
@@ -989,12 +801,12 @@ Exits:
                 StructureType
                     .BetweenWhitespaces()
             )
-            .Node("part");
+            .Node("part", asArray: false, writeProperty: false);
 
         // 1 Longship, 1 Cog
         public static readonly ParserNode StructureParts =
             ListOf(StructurePart, TCommaWp.IgnoreResult())
-                .Node("parts");
+                .Node("parts", asArray: true, writeProperty: true);
 
         // ; Load: 580/600
         public static readonly ParserNode StructureAttribute =
@@ -1004,6 +816,7 @@ Exits:
                 .Then(
                     TText(NoSpecials.CombineWith(Charset.List('/', ','))),
                     (key, value) => Node("attribute",
+                        asArray: false, writeProperty: false,
                         Str("key", key),
                         Str("value", value)
                     )
@@ -1019,7 +832,7 @@ Exits:
         // ; Load: 580/600; Sailors: 10/10; MaxSpeed: 4
         public static readonly ParserNode StructureAttributes =
             StructureAttributeSeq
-                .Node("attributes");
+                .Node("attributes", asArray: true, writeProperty: true);
 
         // needs 10
         public static readonly ParserNode StructureNeeds =
@@ -1145,7 +958,7 @@ Exits:
                 .Then(
                     Map(
                         (name, numAndType, parts, attributes, description) => {
-                            var n = Node("structure");
+                            var n = Node("structure", asArray: false, writeProperty: false);
                             n.Add(name);
                             n.AddRange(numAndType);
 
@@ -1211,7 +1024,7 @@ Exits:
 
         public static readonly ParserNode Structures =
             StructuresSequence
-                .Node("structures");
+                .Node("structures", asArray: true, writeProperty: true);
 
 /*
 underforest (50,0,2 <underworld>) in Ryway, contains Sinsto [town],
@@ -1232,28 +1045,40 @@ Exits:
   Southwest : underforest (49,1,2 <underworld>) in Hawheci.
 */
         public static readonly ParserNode Region =
-            Sequence(
-                RegionHeader,
-                RegionAttributes,
-                SkipEmptyLines
-                    .Then(Exits)
-            )
-            .Then(
-                Sequence(
-                    Try(Units()).Optional(),
-                    Try(Structures).Optional()
-                ),
-                (required, optional) => {
-                    var node = Node("region");
+            Map(
+                (header, attributes, exits, optional) => {
+                    var node = Node("region", asArray: false, writeProperty: false);
+                    node.Add(header);
 
-                    node.AddRange(required);
+                    var unknown = Node("attributes", asArray: true, writeProperty: true);
+                    foreach (var a in attributes) {
+                        if (a.Type == "unknown") {
+                            unknown.Add(a);
+                        }
+                        else {
+                            node.Add(a);
+                        }
+                    }
+
+                    if (unknown.Children.Count > 0) {
+                        node.Add(unknown);
+                    }
+
                     node.AddRange(optional
                         .Where(x => x.HasValue)
                         .Select(x => x.Value)
                     );
 
                     return node;
-                }
+                },
+                RegionHeader,
+                RegionAttributes,
+                SkipEmptyLines
+                    .Then(Exits),
+                Sequence(
+                    Try(Units()).Optional(),
+                    Try(Structures).Optional()
+                )
             );
 
         public static IEnumerable<T> MakeSequence<T>(T first, Maybe<IEnumerable<T>> next) {
@@ -1283,9 +1108,7 @@ Exits:
 
         public static readonly ParserNode Regions =
             RegionSequence
-                .Node("regions");
-
-
+                .Node("regions", asArray: true, writeProperty: true);
 
         public static readonly ParserNode ReportLine =
             OneOf(
@@ -1309,6 +1132,8 @@ Exits:
                     Map(
                         (faction, date, attitudes, regions, orders) => {
                             var node = Node("report",
+                                asArray: false,
+                                writeProperty: false,
                                 faction,
                                 date,
                                 attitudes,
