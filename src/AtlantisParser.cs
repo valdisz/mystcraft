@@ -1102,6 +1102,12 @@ Exits:
                 var terminator = Lookahead(DotTerminator) // .<new line><not 2*space>
                     .ThenReturn(Enumerable.Empty<char>());
 
+                Parser<char, IEnumerable<char>> nextChar = null;
+                nextChar = Rec(() => Char('.').Then(
+                    OneOf(Try(nextWord), Try(terminator), Try(nextChar), newLine),
+                    MakeSequence
+                ));
+
                 var possible = OneOf(
                     // next word on the same line
                     Try(nextWord),
@@ -1110,10 +1116,7 @@ Exits:
                     Try(terminator),
 
                     // just . char
-                    Try(Char('.').Then(
-                        OneOf(Try(nextWord), Try(terminator), newLine),
-                        MakeSequence
-                    )),
+                    Try(nextChar),
 
                     // next word on new line
                     newLine
