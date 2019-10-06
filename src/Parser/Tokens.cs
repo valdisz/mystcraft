@@ -82,17 +82,6 @@ namespace atlantis
         public static Parser<char, Pidgin.Unit> SkipEmptyLines =
             EndOfLine.SkipMany();
 
-        // public static Parser<char, string> SentenceOf(Parser<char, string> word, Parser<char, char> whitespace) {
-        //     return Sequence(
-        //         word,
-        //         Try(
-        //             Sequence(whitespace.AtLeastOnceString(), word).Select(string.Concat)
-        //         ).ManyString()
-        //     ).Select(string.Concat);
-        // }
-
-        // public static readonly Parser<char, string> TSentence = SentenceOf(TWord, Whitespace);
-
         public static readonly Func<char, bool> AtlantisCharset = Charset.Combine(
             Charset.Range('a', 'z'),
             Charset.Range('A', 'Z'),

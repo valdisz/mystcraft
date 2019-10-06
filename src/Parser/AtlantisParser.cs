@@ -1,6 +1,5 @@
 namespace atlantis
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Pidgin;
@@ -11,9 +10,6 @@ namespace atlantis
 
     using ParserNode = Pidgin.Parser<char, IReportNode>;
     using ParserNone = Pidgin.Parser<char, Pidgin.Unit>;
-    using System.Text;
-    using System.IO;
-    using System.Globalization;
 
     public static class AtlantisParser {
         public static readonly ParserNone DotTerminator =

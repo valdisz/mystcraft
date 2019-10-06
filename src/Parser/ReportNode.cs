@@ -220,7 +220,6 @@ namespace atlantis
             return new ValueReportNode<double>(type, double.Parse(value, CultureInfo.InstalledUICulture), writeProperty);
         }
 
-
         public static ParserNode Node(this Parser<char, IEnumerable<IReportNode>> parser, string type, bool asArray, bool writeProperty) {
             return parser.Select(x => Node(type, asArray, writeProperty, x));
         }
