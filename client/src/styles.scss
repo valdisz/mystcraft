@@ -1,0 +1,19 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #d0d0d0;
+}
+
+#host {
+    width: 100%;
+    height: 100%;
+
+    &>canvas {
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+}

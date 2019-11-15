@@ -82,6 +82,18 @@ namespace atlantis
         public static Parser<char, Pidgin.Unit> SkipEmptyLines =
             EndOfLine.SkipMany();
 
+        public static readonly Func<char, bool> AtlantisCharsetWp = Charset.Combine(
+            Charset.Range('a', 'z'),
+            Charset.Range('A', 'Z'),
+            Charset.Range('0', '9'),
+            Charset.List(
+                ' ', '!', '[', ']', ',', '.', '{', '}', '@', '#', '$',
+                '%', '^', '&', '*', '-', '_', '+', '=', ';', ':',
+                '<', '>', '?', '/', '~',  '`',
+                '\'', '\\'
+            )
+        );
+
         public static readonly Func<char, bool> AtlantisCharset = Charset.Combine(
             Charset.Range('a', 'z'),
             Charset.Range('A', 'Z'),
@@ -114,13 +126,13 @@ namespace atlantis
         public static IEnumerable<char> CombineOutputs(char first, Maybe<IEnumerable<char>> next) {
             yield return first;
 
-            if (next.HasValue) {
+            if (next.Success) {
                 foreach (var c in next.Value) yield return c;
             }
         }
 
         public static IEnumerable<char> CombineOutputs(IEnumerable<char> first, Maybe<IEnumerable<char>> next) {
-            return next.HasValue
+            return next.Success
                 ? first.Concat(next.Value)
                 : first;
         }
@@ -146,27 +158,27 @@ namespace atlantis
             lineIdent = lineIdent ?? Char(' ').Repeat(2).IgnoreResult();
 
             Parser<char, IEnumerable<char>> tokens = null;
-            tokens = token.Then(
-                Rec(() => {
-                    var possible = OneOf(
-                        // next word on the same line
-                        Try(spaces.Then(tokens, (value, next) => value.Concat(next))),
+            // tokens = token.Then(
+            //     Rec(() => {
+            //         var possible = OneOf(
+            //             // next word on the same line
+            //             Try(spaces.Then(tokens, (value, next) => value.Concat(next))),
 
-                        // next word on new line
-                        EndOfLine
-                            .Then(lineIdent)
-                            .Then(spaces.Optional())
-                            .IgnoreResult()
-                            .Then(
-                                tokens,
-                                (value, next) => SingleSpace.Concat(next)
-                            )
-                    );
+            //             // next word on new line
+            //             EndOfLine
+            //                 .Then(lineIdent)
+            //                 .Then(spaces.Optional())
+            //                 .IgnoreResult()
+            //                 .Then(
+            //                     tokens,
+            //                     (value, next) => SingleSpace.Concat(next)
+            //                 )
+            //         );
 
-                    return Try(possible);
-                }).Optional(),
-                CombineOutputs
-            );
+            //         return Try(possible);
+            //     }).Optional(),
+            //     CombineOutputs
+            // );
 
             if (terminator != null) {
                 tokens = terminator.ThenReturn(Enumerable.Empty<char>()).Or(tokens);

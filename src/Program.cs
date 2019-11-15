@@ -1,35 +1,51 @@
 ﻿namespace atlantis
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using Pidgin;
 
     class Program
     {
-        static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            if (args == null || args.Length == 0) {
-                Console.WriteLine("Give path to the report file as an argument");
-                return;
-            }
+            // var ip = new ItemParser();
+            // var result = ip.Parse(new TextParser("2 high elves [HELF] at $48"));
 
-            var input = File.ReadAllText(string.Concat(args));
 
-            Result<char, IReportNode> result = null;
-            result = AtlantisParser.Report.Parse(input);
-            var report = AssertParsed(result);
+            // if (args == null || args.Length == 0) {
+            //     Console.WriteLine("Give path to the report file as an argument");
+            //     return;
+            // }
 
-            using JsonWriter writer = new JsonTextWriter(Console.Out);
-            writer.Formatting = Formatting.Indented;
+            // string filePath = @"C:\local\var\git-private\atlantis\reports\New-Origins-v5\010_oct_1.rep";
+            // string filePath = string.Concat(args);
+            string filePath = @"C:\local\var\git-private\atlantis\reports\15_merged_0309.rep";
+            using var input = File.OpenText(filePath);
+            var repReader = new AtlantisReportReader();
 
-            report.WriteJson(writer);
+            DateTime started = DateTime.Now;
+            await repReader.ReadAsync(input);
+            Console.WriteLine($"Duration {(DateTime.Now - started).TotalMilliseconds}ms");
 
-            writer.Flush();
+            // var input = File.ReadAllText(string.Concat(args));
+
+            // Result<char, IReportNode> result = null;
+            // result = AtlantisParser.Report.Parse(input);
+            // var report = AssertParsed(result);
+
+            // using JsonWriter writer = new JsonTextWriter(Console.Out);
+            // writer.Formatting = Formatting.Indented;
+
+            // report.WriteJson(writer);
+
+            // writer.Flush();
         }
 
-        public static IReportNode AssertParsed(Result<char, IReportNode> res) {
+        public static IReportNodeOld AssertParsed(Result<char, IReportNodeOld> res) {
             if (!res.Success) {
                 if (!string.IsNullOrWhiteSpace(res.Error.Message)) {
                     Console.WriteLine(res.Error.Message);

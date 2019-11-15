@@ -8,25 +8,25 @@ namespace atlantis
     using System.Text;
     using Newtonsoft.Json;
     using Pidgin;
-    using ParserNode = Pidgin.Parser<char, IReportNode>;
+    using ParserNode = Pidgin.Parser<char, IReportNodeOld>;
 
-    public interface IReportNode
+    public interface IReportNodeOld
     {
         string Type { get; }
         bool HasChildren { get; }
-        IList<IReportNode> Children { get; }
+        IList<IReportNodeOld> Children { get; }
 
-        void Add(IReportNode child);
-        void AddRange(IEnumerable<IReportNode> children);
-        void AddRange(params IReportNode[] children);
+        void Add(IReportNodeOld child);
+        void AddRange(IEnumerable<IReportNodeOld> children);
+        void AddRange(params IReportNodeOld[] children);
 
-        IReportNode[] ByType(string type);
+        IReportNodeOld[] ByType(string type);
 
         void WriteJson(JsonWriter writer);
     }
 
     public static class ReportNodeExtensions {
-        public static string StrValueOf(this IReportNode node, string type) {
+        public static string StrValueOf(this IReportNodeOld node, string type) {
             var nodes = node.ByType(type);
             if (nodes.Length == 0) {
                 return null;
@@ -35,7 +35,7 @@ namespace atlantis
             return (nodes[0] as ValueReportNode<string>)?.Value;
         }
 
-        public static int? IntValueOf(this IReportNode node, string type) {
+        public static int? IntValueOf(this IReportNodeOld node, string type) {
             var nodes = node.ByType(type);
             if (nodes.Length == 0) {
                 return null;
@@ -44,7 +44,7 @@ namespace atlantis
             return (nodes[0] as ValueReportNode<int>)?.Value;
         }
 
-        public static double? RealValueOf(this IReportNode node, string type) {
+        public static double? RealValueOf(this IReportNodeOld node, string type) {
             var nodes = node.ByType(type);
             if (nodes.Length == 0) {
                 return null;
@@ -53,7 +53,20 @@ namespace atlantis
             return (nodes[0] as ValueReportNode<double>)?.Value;
         }
 
-        public static IReportNode FirstByType(this IReportNode node, string type) {
+
+        public static string StrValue(this IReportNodeOld node) {
+            return (node as ValueReportNode<string>)?.Value;
+        }
+
+        public static int? IntValue(this IReportNodeOld node) {
+            return (node as ValueReportNode<int>)?.Value;
+        }
+
+        public static double? RealValue(this IReportNodeOld node) {
+            return (node as ValueReportNode<double>)?.Value;
+        }
+
+        public static IReportNodeOld FirstByType(this IReportNodeOld node, string type) {
             var nodes = node.ByType(type);
             if (nodes.Length == 0) {
                 return null;
@@ -63,18 +76,18 @@ namespace atlantis
         }
     }
 
-    public abstract class BaseReportNode : IReportNode
+    public abstract class BaseReportNodeOld : IReportNodeOld
     {
         public abstract string Type { get; }
         public abstract bool HasChildren { get; }
-        public abstract IList<IReportNode> Children { get; }
+        public abstract IList<IReportNodeOld> Children { get; }
 
-        public virtual void Add(IReportNode child)
+        public virtual void Add(IReportNodeOld child)
         {
             if (HasChildren) Children.Add(child);
         }
 
-        protected virtual void AddMany(IEnumerable<IReportNode> children) {
+        protected virtual void AddMany(IEnumerable<IReportNodeOld> children) {
             if (HasChildren) {
                 foreach (var child in children) {
                     Children.Add(child);
@@ -82,8 +95,8 @@ namespace atlantis
             }
         }
 
-        public void AddRange(IEnumerable<IReportNode> children) => AddMany(children);
-        public void AddRange(params IReportNode[] children)  => AddMany(children);
+        public void AddRange(IEnumerable<IReportNodeOld> children) => AddMany(children);
+        public void AddRange(params IReportNodeOld[] children)  => AddMany(children);
 
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
@@ -102,7 +115,7 @@ namespace atlantis
             return sb.ToString();
         }
 
-        public IReportNode[] ByType(string type)
+        public IReportNodeOld[] ByType(string type)
         {
             if (!HasChildren) {
                 throw new InvalidOperationException();
@@ -114,7 +127,7 @@ namespace atlantis
         public abstract void WriteJson(JsonWriter writer);
     }
 
-    public class ValueReportNode<T> : BaseReportNode
+    public class ValueReportNode<T> : BaseReportNodeOld
     {
         public ValueReportNode(string type, T value, bool writeProperty =  true) {
             this.type = type;
@@ -127,7 +140,7 @@ namespace atlantis
 
         public override string Type => type;
         public override bool HasChildren => false;
-        public override IList<IReportNode> Children => throw new NotImplementedException();
+        public override IList<IReportNodeOld> Children => throw new NotImplementedException();
 
         public T Value { get; }
 
@@ -140,9 +153,9 @@ namespace atlantis
         }
     }
 
-    public class ReportNode : BaseReportNode
+    public class ReportNodeOld : BaseReportNodeOld
     {
-        public ReportNode(string type, bool asArray, bool writeProperty, params IReportNode[] nodes) {
+        public ReportNodeOld(string type, bool asArray, bool writeProperty, params IReportNodeOld[] nodes) {
             this.type = type;
             this.asArray = asArray;
             this.writeProperty = writeProperty;
@@ -154,11 +167,11 @@ namespace atlantis
         private readonly string type;
         private readonly bool asArray;
         private readonly bool writeProperty;
-        private readonly List<IReportNode> children = new List<IReportNode>();
+        private readonly List<IReportNodeOld> children = new List<IReportNodeOld>();
 
         public override string Type => type;
         public override bool HasChildren => true;
-        public override IList<IReportNode> Children => children;
+        public override IList<IReportNodeOld> Children => children;
 
         public override void WriteJson(JsonWriter writer)
         {
@@ -180,52 +193,52 @@ namespace atlantis
     }
 
     public static class Nodes {
-        public static IReportNode Node(string type, bool asArray, bool writeProperty, params IReportNode[] children) {
-            return new ReportNode(type, asArray, writeProperty, children);
+        public static IReportNodeOld Node(string type, bool asArray, bool writeProperty, params IReportNodeOld[] children) {
+            return new ReportNodeOld(type, asArray, writeProperty, children);
         }
 
-        public static IReportNode Node(string type, bool asArray, bool writeProperty, IEnumerable<IReportNode> children) {
-            return new ReportNode(type, asArray, writeProperty, (children ?? Enumerable.Empty<IReportNode>()).ToArray());
+        public static IReportNodeOld Node(string type, bool asArray, bool writeProperty, IEnumerable<IReportNodeOld> children) {
+            return new ReportNodeOld(type, asArray, writeProperty, (children ?? Enumerable.Empty<IReportNodeOld>()).ToArray());
         }
 
-        public static IReportNode Node(string type, bool asArray, bool writeProperty, IEnumerable<Maybe<IReportNode>> children) {
-            return new ReportNode(
+        public static IReportNodeOld Node(string type, bool asArray, bool writeProperty, IEnumerable<Maybe<IReportNodeOld>> children) {
+            return new ReportNodeOld(
                 type,
                 asArray,
                 writeProperty,
-                (children ?? Enumerable.Empty<Maybe<IReportNode>>())
-                    .Where(x => x.HasValue)
+                (children ?? Enumerable.Empty<Maybe<IReportNodeOld>>())
+                    .Where(x => x.Success)
                     .Select(x => x.Value)
                     .ToArray()
             );
         }
 
-        public static IReportNode Str(string type, string value, bool writeProperty = true) {
+        public static IReportNodeOld Str(string type, string value, bool writeProperty = true) {
             return new ValueReportNode<string>(type, value.Trim(), writeProperty);
         }
 
-        public static IReportNode Num(string type, int value, bool writeProperty = true) {
+        public static IReportNodeOld Num(string type, int value, bool writeProperty = true) {
             return new ValueReportNode<int>(type, value, writeProperty);
         }
 
-        public static IReportNode Num(string type, string value, bool writeProperty = true) {
+        public static IReportNodeOld Num(string type, string value, bool writeProperty = true) {
             return new ValueReportNode<int>(type, int.Parse(value), writeProperty);
         }
 
-        public static IReportNode Float(string type, double value, bool writeProperty = true) {
+        public static IReportNodeOld Float(string type, double value, bool writeProperty = true) {
             return new ValueReportNode<double>(type, value, writeProperty);
         }
 
-        public static IReportNode Float(string type, string value, bool writeProperty = true) {
+        public static IReportNodeOld Float(string type, string value, bool writeProperty = true) {
             return new ValueReportNode<double>(type, double.Parse(value, CultureInfo.InstalledUICulture), writeProperty);
         }
 
-        public static ParserNode Node(this Parser<char, IEnumerable<IReportNode>> parser, string type, bool asArray, bool writeProperty) {
+        public static ParserNode Node(this Parser<char, IEnumerable<IReportNodeOld>> parser, string type, bool asArray, bool writeProperty) {
             return parser.Select(x => Node(type, asArray, writeProperty, x));
         }
 
-        public static ParserNode Node(this Parser<char, IEnumerable<Maybe<IReportNode>>> parser, string type, bool asArray, bool writeProperty) {
-            return parser.Select(x => Node(type, asArray, writeProperty, x.Where(node => node.HasValue).Select(node => node.Value)));
+        public static ParserNode Node(this Parser<char, IEnumerable<Maybe<IReportNodeOld>>> parser, string type, bool asArray, bool writeProperty) {
+            return parser.Select(x => Node(type, asArray, writeProperty, x.Where(node => node.Success).Select(node => node.Value)));
         }
 
         public static ParserNode Str(this Parser<char, string> parser, string type, bool writeProperty = true) {

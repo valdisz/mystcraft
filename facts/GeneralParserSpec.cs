@@ -194,17 +194,16 @@ namespace atlantis.facts {
 ";
             var result = AtlantisParser.RegionAttributes.Parse(input);
 
-            output.AssertParsed(result);
+            var items = output.AssertParsed(result).Value.ToArray();
 
-            output.WriteLine(result.Value.ToString());
 
-            result.Value.StrValueOf("unknown").Should().Be("The weather was clear last month; it will be clear next month.");
-            result.Value.FirstByType("wages")?.RealValueOf("salary").Should().Be(13.3);
-            result.Value.FirstByType("wages")?.IntValueOf("max-wages").Should().Be(466);
-            result.Value.FirstByType("wanted")?.Children.Count.Should().Be(0);
-            result.Value.FirstByType("for-sale")?.Children?.Count.Should().Be(2);
-            result.Value.IntValueOf("entertainment-available").Should().Be(54);
-            result.Value.FirstByType("products")?.Children?.Count.Should().Be(1);
+            items.FirstOrDefault(x => x.Type == "unknown")?.StrValueOf("value").Should().Be("The weather was clear last month; it will be clear next month.");
+            items.FirstOrDefault(x => x.Type == "wages")?.RealValue().Should().Be(13.3);
+            items.FirstOrDefault(x => x.Type == "wages")?.IntValue().Should().Be(466);
+            items.FirstOrDefault(x => x.Type == "wanted")?.Children.Count.Should().Be(0);
+            items.FirstOrDefault(x => x.Type == "for-sale")?.Children?.Count.Should().Be(2);
+            items.FirstOrDefault(x => x.Type == "entertainment-available").Should().Be(54);
+            items.FirstOrDefault(x => x.Type == "products")?.Children?.Count.Should().Be(1);
         }
 
         [Theory]
@@ -805,9 +804,8 @@ Exits:
         [MemberData(nameof(CanParaseUnitAttributesCases))]
         public void canParseUnitAttributes(string input, string[] attributeNames) {
             var result = AtlantisParser.UnitAttributes().Parse(input);
-            var attribute = output.AssertParsed(result).Value;
+            var attributes = output.AssertParsed(result).Value.ToArray();
 
-            var attributes = attribute.ByType("attribute");
             attributes.Length.Should().Be(attributeNames.Length);
 
             attributes.Select(x => x.StrValueOf("key")).Should().BeEquivalentTo(attributeNames);
@@ -872,7 +870,9 @@ Exits:
             items[1].StrValueOf("name").Should().Be("horses");
             items[1].StrValueOf("code").Should().Be("HORS");
 
-            unit.FirstByType("attributes").Children.Count.Should().Be(3);
+            unit.FirstByType("weight").Should().NotBeNull();
+            unit.FirstByType("capacity").Should().NotBeNull();
+            unit.FirstByType("skills").Should().NotBeNull();
         }
 
         [Fact]
@@ -909,7 +909,9 @@ Exits:
             items[1].StrValueOf("code").Should().Be("GALL");
             items[1].IntValueOf("needs").Should().Be(54);
 
-            unit.FirstByType("attributes").Children.Count.Should().Be(3);
+            unit.FirstByType("weight").Should().NotBeNull();
+            unit.FirstByType("capacity").Should().NotBeNull();
+            unit.FirstByType("skills").Should().NotBeNull();
         }
 
         [Fact]
@@ -948,7 +950,9 @@ Exits:
             items[2].StrValueOf("name").Should().Be("silver");
             items[2].StrValueOf("code").Should().Be("SILV");
 
-            unit.FirstByType("attributes").Children.Count.Should().Be(3);
+            unit.FirstByType("weight").Should().NotBeNull();
+            unit.FirstByType("capacity").Should().NotBeNull();
+            unit.FirstByType("skills").Should().NotBeNull();
         }
 
         [Fact]
@@ -981,8 +985,6 @@ Exits:
             (items[1].IntValueOf("amount") ?? 0).Should().Be(1);
             items[1].StrValueOf("name").Should().Be("horse");
             items[1].StrValueOf("code").Should().Be("HORS");
-
-            unit.FirstByType("attributes").Should().Be(null);
         }
 
         [Theory]
