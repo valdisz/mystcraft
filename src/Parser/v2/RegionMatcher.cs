@@ -5,7 +5,7 @@ namespace atlantis
 
     public class RegionMatcher {
         public RegionMatcher(Cursor<MultiLineBlock> cursor) {
-            items.Add(new ReportBlock(ReportBlockType.RegionHeader, new[] { cursor.Value }));
+            items.Add(new ReportBlock(ReportState.RegionHeader, new[] { cursor.Value }));
             this.cursor = cursor;
         }
 
@@ -16,32 +16,32 @@ namespace atlantis
             while (await cursor.NextAsync()) {
 
                 if (cursor.MatchOwnUnit()) {
-                    items.Add(new ReportBlock(ReportBlockType.OwnUnit, new[] { cursor.Value }));
+                    items.Add(new ReportBlock(ReportState.OwnUnit, new[] { cursor.Value }));
                     continue;
                 }
 
                 if (cursor.MatchStructure()) {
-                    items.Add(new ReportBlock(ReportBlockType.Structure, new[] { cursor.Value }));
+                    items.Add(new ReportBlock(ReportState.Structure, new[] { cursor.Value }));
                     continue;
                 }
 
                 if (cursor.MatchRegionInfo()) {
-                    items.Add(new ReportBlock(ReportBlockType.RegionInfo, new[] { cursor.Value }));
+                    items.Add(new ReportBlock(ReportState.RegionInfo, new[] { cursor.Value }));
                     continue;
                 }
 
                 if (cursor.MatchUnit()) {
-                    items.Add(new ReportBlock(ReportBlockType.Unit, new[] { cursor.Value }));
+                    items.Add(new ReportBlock(ReportState.Unit, new[] { cursor.Value }));
                     continue;
                 }
 
                 if (cursor.MatchRegionExits()) {
-                    items.Add(new ReportBlock(ReportBlockType.RegionExits, new[] { cursor.Value }));
+                    items.Add(new ReportBlock(ReportState.RegionExits, new[] { cursor.Value }));
                     continue;
                 }
 
                 if (cursor.MatchRegionGate()) {
-                    items.Add(new ReportBlock(ReportBlockType.Gate, new[] { cursor.Value }));
+                    items.Add(new ReportBlock(ReportState.Gate, new[] { cursor.Value }));
                     continue;
                 }
 
@@ -49,7 +49,7 @@ namespace atlantis
                 break;
             }
 
-            return new ReportBlock(ReportBlockType.Region, items.ToArray());
+            return new ReportBlock(ReportState.Region, items.ToArray());
         }
     }
 }

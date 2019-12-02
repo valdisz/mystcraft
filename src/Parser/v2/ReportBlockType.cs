@@ -1,6 +1,6 @@
 namespace atlantis
 {
-    public enum ReportBlockType {
+    public enum ReportState {
         None,
         Header,
         FactionStatus,

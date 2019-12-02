@@ -32,6 +32,8 @@ namespace atlantis
         public int Ln { get; }
         public int Col { get; }
 
+        public override string ToString() => Success ? Value.ToString() : $"[ERROR] ({Ln}:{Col}) {Error}";
+
         public static implicit operator T(Maybe<T> v) => v.Value;
 
         public static implicit operator bool(Maybe<T> v) => v.Success;
@@ -82,7 +84,7 @@ namespace atlantis
             var span = GetSpan();
             if (span.Length < s.Length) return -1;
 
-            for (var i = span.Length - s.Length - 1; i <= 0; i--) {
+            for (var i = span.Length - s.Length; i >= 0; i--) {
                 var value = span.Slice(i);
                 if (value.StartsWith(s, StringComparison.OrdinalIgnoreCase)) {
                     return i;
@@ -187,6 +189,20 @@ namespace atlantis
             return Seek(i);
         }
 
+        public Maybe<TextParser> SkipWhitespacesBackwards() {
+            if (EOF) return new Maybe<TextParser>("EOF", 1, Pos + 1);
+
+            var span = GetSpan();
+            int i;
+            for (i = span.Length - 1; i >= 0; i--) {
+                if (!char.IsWhiteSpace(span[i])) {
+                    break;
+                }
+            }
+
+            return Slice(i + 1);
+        }
+
         public Maybe<int> Integer() {
             if (EOF) return new Maybe<int>("EOF", 1, Pos + 1);
 
@@ -245,7 +261,8 @@ namespace atlantis
             var span = GetSpan();
             int i;
             for (i = 0; i < span.Length; i++) {
-                if (char.IsWhiteSpace(span[i])) {
+                var c = span[i];
+                if (char.IsWhiteSpace(c) || char.IsPunctuation(c) || char.IsSeparator(c)) {
                     break;
                 }
             }
@@ -253,6 +270,18 @@ namespace atlantis
             RemoveBookmark();
 
             return new Maybe<TextParser>(Slice(i));
+        }
+
+        public Maybe<TextParser[]> Words() {
+            List<TextParser> words = new List<TextParser>();
+            while (!EOF) {
+                var w = Word();
+                if (!w) return w.Convert<TextParser[]>();
+
+                words.Add(w.Value);
+            }
+
+            return new Maybe<TextParser[]>(words.ToArray());
         }
 
         public Maybe<TextParser> Match(ReadOnlySpan<char> s) {
@@ -288,7 +317,7 @@ namespace atlantis
 
         public Maybe<TextParser> Between(ReadOnlySpan<char> s) => Between(s, s);
 
-        public override string ToString() => GetSpan().Trim().ToString();
+        public override string ToString() => GetSpan().ToString();
 
         public string AsString() => ToString();
 
@@ -325,6 +354,11 @@ namespace atlantis
         public static Maybe<TextParser> SkipWhitespaces(this Maybe<TextParser> p) {
             if (!p) return p;
             return p.Value.SkipWhitespaces();
+        }
+
+        public static Maybe<TextParser> SkipWhitespacesBackwards(this Maybe<TextParser> p) {
+            if (!p) return p;
+            return p.Value.SkipWhitespacesBackwards();
         }
 
         public static Maybe<TextParser> Word(this Maybe<TextParser> p) => p ? p.Value.Word() : p;
@@ -380,5 +414,36 @@ namespace atlantis
 
             return new Maybe<IReportNode>("all options does not fit", 1, p.Pos + 1);
         }
+
+        public static Maybe<T[]> List<T>(this TextParser p, ReadOnlySpan<char> separator, Func<TextParser, Maybe<T>> itemParser) {
+            List<T> items = new List<T>();
+
+            if (p.Match("none")) {
+                return new Maybe<T[]>(new T[0]);
+            }
+
+            while (!p.EOF) {
+                var span = p.Before(separator);
+                if (span) p.Seek(separator.Length);
+
+                var item = itemParser(span ? span : p);
+
+                if (!item)  return item.Convert<T[]>();
+
+                items.Add(item.Value);
+            }
+
+            return new Maybe<T[]>(items.ToArray());
+        }
+
+        public static Maybe<T[]> List<T>(this Maybe<TextParser> p, ReadOnlySpan<char> separator, Func<TextParser, Maybe<T>> itemParser)
+            => p ? List(p.Value, separator, itemParser) : p.Convert<T[]>();
+
+        public static Maybe<IReportNode[]> List(this TextParser p, ReadOnlySpan<char> separator, IReportParser itemParser)
+            => List(p, separator, x => itemParser.Parse(x));
+
+        public static Maybe<IReportNode[]> List(this Maybe<TextParser> p, ReadOnlySpan<char> separator, IReportParser itemParser)
+            => p ? List(p.Value, separator, itemParser) : p.Convert<IReportNode[]>();
+
     }
 }

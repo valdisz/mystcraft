@@ -1,4 +1,4 @@
-namespace atlantis
+﻿namespace atlantis
 {
     using System;
     using System.Collections.Generic;
@@ -8,10 +8,10 @@ namespace atlantis
     using System.Threading.Tasks.Dataflow;
     using Pidgin;
 
-    public class AtlantisReportReader {
+    public class AtlantisReportTextReader {
         public async Task ReadAsync(TextReader report) {
             var blockReader = new AtlantisTextReader(report);
-            var classification = new ReportMatcher(blockReader.ReadAllAsync());
+            var classification = new AtlantisReportConverter(blockReader.ReadAllAsync());
 
             ActionBlock<TextParser> parseUnit = new ActionBlock<TextParser>(p => {
                 UnitParser unitParser = new UnitParser();
@@ -40,12 +40,12 @@ namespace atlantis
             await parseUnit.Completion;
         }
 
-        private async IAsyncEnumerable<string> UnitBlocks(ReportMatcher rm) {
+        private async IAsyncEnumerable<string> UnitBlocks(AtlantisReportConverter rm) {
 
             await foreach (var block in rm.CategorizeAsync()) {
                 Console.WriteLine($"{block.Type} with {block.Lines.Count()} blocks");
-                if (block.Type == ReportBlockType.Region) {
-                    foreach (var unitBlock in block.Items.Where(b => b.Type == ReportBlockType.Unit || b.Type == ReportBlockType.OwnUnit)) {
+                if (block.Type == ReportState.Region) {
+                    foreach (var unitBlock in block.Items.Where(b => b.Type == ReportState.Unit || b.Type == ReportState.OwnUnit)) {
                         foreach (var line in unitBlock.Lines) {
                             yield return line.Text;
                         }

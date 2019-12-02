@@ -1,21 +1,21 @@
-namespace atlantis
-{
+namespace atlantis {
     using System.Linq;
 
     public struct MultiLineBlock {
         public MultiLineBlock(int ln, string[] text) {
-            Ln = ln;
+            LnStart = ln;
             Lines = text;
             Text = string.Join(' ', text.Select(s => s.Trim()));
         }
 
-        public int Ln;
+        public int LnStart;
+        public int LnEnd => LnStart + Lines.Length - 1;
         public string[] Lines;
         public string Text;
 
-        public void Deconstruct(out int ln, out string text, out string[] lines) {
-            ln = Ln;
+        public void Deconstruct(string text, out (int, int) ln, out string[] lines) {
             text = Text;
+            ln = (LnStart, LnEnd);
             lines = Lines;
         }
 

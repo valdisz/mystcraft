@@ -1,18 +1,18 @@
-namespace atlantis
-{
+namespace atlantis {
+    using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
 
-    public class AtlantisTextReader {
-        public AtlantisTextReader(TextReader report) {
-            this.report = report;
+    public class AtlantisTextReader : IDisposable {
+        public AtlantisTextReader(TextReader reader) {
+            this.reader = reader;
         }
 
-        private readonly TextReader report;
+        private readonly TextReader reader;
         private readonly List<string> lines = new List<string>(32);
         private string line;
+        private bool empty;
         private int ln = 0;
         private int ln0 = 0;
 
@@ -28,7 +28,7 @@ namespace atlantis
         }
 
         private async Task<string> NextLineAsync() {
-            line = await report.ReadLineAsync();
+            line = await reader.ReadLineAsync();
             if (line != null) {
                 ln++;
             }
@@ -76,7 +76,13 @@ namespace atlantis
             while (await NextLineAsync() != null) {
                 if (line == "") {
                     if (lines.Count > 0) yield return WriteBlock();
+                    empty = true;
                     continue;
+                }
+
+                if (empty) {
+                    yield return WriteBlock();
+                    empty = false;
                 }
 
                 char firstChar = line[0];
@@ -90,7 +96,6 @@ namespace atlantis
                         break;
 
                     // if line starts with whitespace, it is added to current block
-                    // if it is started
                     case var c when (char.IsWhiteSpace(c) && lines.Count > 0):
                         AddLine();
                         break;
@@ -106,5 +111,23 @@ namespace atlantis
             // last block must be outputed
             if (lines.Count > 0) yield return WriteBlock();
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing) {
+            if (!disposedValue) {
+                if (disposing) {
+                    reader.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose() {
+            Dispose(true);
+        }
+        #endregion
     }
 }

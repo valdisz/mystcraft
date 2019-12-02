@@ -1,8 +1,6 @@
-﻿namespace atlantis
-{
+﻿namespace atlantis {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
 
     public class Cursor<T> : IAsyncDisposable {
@@ -61,10 +59,8 @@
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual async ValueTask DisposeAsync(bool disposing)
-        {
-            if (!disposedValue)
-            {
+        protected virtual async ValueTask DisposeAsync(bool disposing) {
+            if (!disposedValue) {
                 await source.DisposeAsync();
 
                 disposedValue = true;

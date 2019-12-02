@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace atlantis {
     // (12,34)
@@ -235,7 +237,7 @@ namespace atlantis {
 
     public class FactionNameParser : ReportParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            var name = p.Before("(").AsString();
+            var name = p.Before("(").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
 
             var num = p.Between("(", ")").Integer();
@@ -381,6 +383,86 @@ Ready item: book of exorcism [BKEX].
             result.AddRange(props);
 
             return new Maybe<IReportNode>(result);
+        }
+    }
+
+    // War 1
+    // Trade 1
+    // Magic 1
+    public class FactionArgumentParser : ReportParser {
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var key = p.BeforeBackwards(" ").SkipWhitespaces().AsString();
+            if (!key) return Error(key);
+
+            var value = p.SkipWhitespaces().Integer();
+            if (!value) return Error(value);
+
+            return Ok(ReportNode.Object(
+                ReportNode.Str("key", key),
+                ReportNode.Int("value", value)
+            ));
+        }
+    }
+
+    public class ReportFactionParser : ReportParser {
+        public ReportFactionParser(FactionNameParser factionName, FactionArgumentParser argumentParser) {
+            this.factionName = factionName;
+            this.argumentParser = argumentParser;
+        }
+
+        private readonly FactionNameParser factionName;
+        private readonly FactionArgumentParser argumentParser;
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var faction = factionName.Parse(p);
+            if (!faction) return Error(faction);
+
+            var args = p.After("(").BeforeBackwards(")").List(",", argumentParser);
+            if (!args) return Error(args);
+
+            return Ok(ReportNode.Bag(
+                ReportNode.Key("faction", ReportNode.Object(
+                        faction.Value,
+                        ReportNode.Key("type", ReportNode.Array(args.Value))
+                    )
+                )
+            ));
+        }
+    }
+
+    public class ReportDateParser : ReportParser {
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var month = p.Before(",").AsString();
+            if (!month) return Error(month);
+
+            var year = p.After("Year").SkipWhitespaces().Integer();
+            if (!year) return Error(year);
+
+            return Ok(ReportNode.Bag(
+                ReportArray.Key("date", ReportNode.Object(
+                    ReportNode.Str("month", month),
+                    ReportNode.Int("year", year)
+                ))
+            ));
+        }
+    }
+
+    public class FactionStatusItemParser : ReportParser {
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var key = p.Before(":").AsString();
+            if (!key) return Error(key);
+
+            var amount = p.After(":").SkipWhitespaces().Integer();
+            if (!amount) return Error(amount);
+
+            var max = p.After("(").Integer();
+            if (!max) return Error(max);
+
+            return Ok(ReportNode.Object(
+                ReportNode.Str("key", key),
+                ReportNode.Int("amount", amount),
+                ReportNode.Int("max", max)
+            ));
         }
     }
 }
