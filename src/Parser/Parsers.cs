@@ -19,8 +19,8 @@ namespace atlantis {
             Maybe<int> y = content.SkipWhitespaces().After(",").SkipWhitespaces().Integer();
             if (!y) return Error(y);
 
-            Maybe<int> z = null;
-            Maybe<string> label = null;
+            Maybe<int> z = Maybe<int>.NA;
+            Maybe<string> label = Maybe<string>.NA;
             if (content.SkipWhitespaces().After(",")) {
                 z = content.SkipWhitespaces().Integer();
                 content.SkipWhitespaces();
@@ -56,17 +56,27 @@ namespace atlantis {
     // unlimited high elves [HELF] at $75
     public class ItemParser : ReportParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
+            p.PushBookmark();
             var word = p.Word();
             if (!word) return Error(word);
 
-            Maybe<int> amount = word.Match("unlimited")
-                ? new Maybe<int>(-1)
-                : word.Integer();
-            if (!amount) {
-                amount = new Maybe<int>(1);
+            int amount = 1;
+            if (word.Match("unlimited")) {
+                amount = -1;
+                p.RemoveBookmark();
+            }
+            else {
+                var intAmount = word.Integer();
+                if (intAmount) {
+                    amount = intAmount.Value;
+                    p.RemoveBookmark();
+                }
+                else {
+                    p.PopBookmark();
+                }
             }
 
-            Maybe<string> name = p.SkipWhitespaces().Before("[").AsString();
+            Maybe<string> name = p.SkipWhitespaces().Before("[").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
 
             Maybe<string> code = p.Between("[", "]").AsString();
@@ -89,28 +99,28 @@ namespace atlantis {
     // combat [COMB] 1 (31)
     public class SkillParser : ReportParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            var name = p.Before("[").AsString();
+            var name = p.Before("[").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
 
             var code = p.Between("[", "]").AsString();
             if (!code) return Error(code);
 
-            var levelAndDays = p.Try(parser => {
-                var level = parser.SkipWhitespaces().Integer();
-                var days = level
-                    ? parser.SkipWhitespaces().Between("(", ")").Integer()
-                    : Maybe<int>.NA;
-
-                return level && days
-                    ? new Maybe<(int level, int days)>((level.Value, days.Value))
-                    : Maybe<(int level, int days)>.NA;
-            });
+            p.PushBookmark();
+            var level = p.SkipWhitespaces().Integer();
+            var days = Maybe<int>.NA;
+            if (level) {
+                p.RemoveBookmark();
+                days = p.Try(parser => parser.SkipWhitespaces().Between("(", ")").Integer());
+            }
+            else {
+                p.PopBookmark();
+            }
 
             return Ok(ReportNode.Object(
                 ReportNode.Str("name", name),
                 ReportNode.Str("code", code),
-                levelAndDays ? ReportNode.Int("level", levelAndDays.Value.level) : null,
-                levelAndDays ? ReportNode.Int("days", levelAndDays.Value.days) : null
+                level ? ReportNode.Int("level", level) : null,
+                days ? ReportNode.Int("days", days) : null
             ));
         }
     }
@@ -146,7 +156,7 @@ namespace atlantis {
             if (!swimming) return Error(swimming);
 
             return Ok(ReportNode.Bag(
-                ReportNode.Key("weight", ReportNode.Object(
+                ReportNode.Key("capacity", ReportNode.Object(
                     ReportNode.Int("flying", flying),
                     ReportNode.Int("riding", riding),
                     ReportNode.Int("walking", walking),
@@ -203,15 +213,17 @@ namespace atlantis {
 
             List<IReportNode> skills = new List<IReportNode>();
 
-            while (!p.EOF) {
-                if (skills.Count > 0) {
-                    if (!Mem(p.After(",").SkipWhitespaces())) return Error(LastResult);
+            if (!p.Match("none")) {
+                while (!p.EOF) {
+                    if (skills.Count > 0) {
+                        if (!Mem(p.After(",").SkipWhitespaces())) return Error(LastResult);
+                    }
+
+                    var skill = skillParser.Parse(p);
+                    if (!skill) return Error(skill);
+
+                    skills.Add(skill.Value);
                 }
-
-                var skill = skillParser.Parse(p);
-                if (!skill) return Error(skill);
-
-                skills.Add(skill.Value);
             }
 
             return Ok(ReportNode.Bag(
@@ -222,7 +234,7 @@ namespace atlantis {
 
     public class UnitNameParser : ReportParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            var name = p.Before("(").AsString();
+            var name = p.Before("(").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
 
             var num = p.Between("(", ")").Integer();
@@ -263,9 +275,7 @@ Skills: tactics [TACT] 5 (450), observation [OBSE] 2 (160), stealth [STEA] 2 (90
 Ready item: book of exorcism [BKEX].
     */
     public class UnitParser : ReportParser {
-        public UnitParser() {
-            var skillParser = new SkillParser();
-
+        public UnitParser(SkillParser skillParser) {
             nameParser = new UnitNameParser();
             factionParser = new FactionNameParser();
             itemParser = new ItemParser();
@@ -284,6 +294,9 @@ Ready item: book of exorcism [BKEX].
         readonly IReportParser canStudyParser;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
+            // don't need dot at the end of line
+            p = p.BeforeBackwards(".");
+
             bool own = false;
             if (p.Match("*")) {
                 own = true;
@@ -292,7 +305,7 @@ Ready item: book of exorcism [BKEX].
                 return Error(LastResult);
             }
 
-            p.SkipWhitespaces();
+            p = p.SkipWhitespaces();
 
             // unit name
             // Legatus Legionis Marcus (640)
@@ -315,27 +328,26 @@ Ready item: book of exorcism [BKEX].
             p.PushBookmark();
             if (p.After(";")) {
                 var descPos = p.Pos - 2;
-                description = p.BeforeBackwards(".").AsString();
-                if (!description) return Error(description);
+                description = new Maybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
 
+                // w/o description
                 p.PopBookmark();
                 p = p.Slice(descPos - p.Pos + 1);
             }
             else {
-                p.PopBookmark();
+                p.RemoveBookmark();
             }
 
             List<string> flags = new List<string>();
             List<IReportNode> items = new List<IReportNode>();
 
             // all element after faction name till first item are flags
-            do {
+            while (items.Count == 0 && !p.EOF) {
                 // , flag
                 if (!Mem(p.After(",").SkipWhitespaces())) return Error(LastResult);
 
                 // there could be no flags
-                var flagOrItem = p.Before(",", ".");
-                if (!flagOrItem) return Error(flagOrItem);
+                var flagOrItem = p.Before(",", ".").RecoverWith(p);
 
                 var item = itemParser.Parse(flagOrItem);
                 if (item) {
@@ -344,32 +356,32 @@ Ready item: book of exorcism [BKEX].
                 else {
                     flags.Add(flagOrItem.Reset().AsString());
                 }
-            } while (items.Count == 0);
-
-            // all elements till `.` are items
-            while (!p.Match(".")) {
-                if (!Mem(p.After(",").SkipWhitespaces())) return Error(LastResult);
-                var item = itemParser.Parse(p.Before(",", "."));
-                if (!item) return Error(item);
-                items.Add(item.Value);
             }
 
-            p.SkipWhitespaces();
+            var remainingItems = p.Before(".").RecoverWith(p).Value;
+            while (!remainingItems.EOF) {
+                var nextItem = remainingItems.After(",").SkipWhitespaces();
+                if (!nextItem) break;
+
+                var item = itemParser.ParseMaybe(nextItem.Before(",").RecoverWith(nextItem));
+                if (item) items.Add(item.Value);
+            }
 
             List<IReportNode> props = new List<IReportNode>();
             while (!p.EOF) {
-                Mem(p.Before("."));
-                var elm = LastResult ? LastResult : p;
+                var nextProp = p.After(".").SkipWhitespaces();
+                if (!nextProp) break;
 
-                var prop = elm.OneOf(
+                var notSuccess = !nextProp.Success;
+
+                nextProp = nextProp.Before(".").RecoverWith(nextProp);
+                var prop = nextProp.OneOf(
                     weightParser,
                     capacityParser,
                     canStudyParser,
                     skillsParser
                 );
                 if (prop) props.Add(prop.Value);
-
-                p.Try(parser => parser.After(".")).SkipWhitespaces();
             }
 
             var result = ReportNode.Object();
@@ -462,6 +474,67 @@ Ready item: book of exorcism [BKEX].
                 ReportNode.Str("key", key),
                 ReportNode.Int("amount", amount),
                 ReportNode.Int("max", max)
+            ));
+        }
+    }
+
+    // forest (50,22) in Mapa, contains Sembury [village], 5866 peasants (high elves), $2698.
+    // ocean (2,6) in Atlantis Ocean.
+    public class RegionHeaderParser : ReportParser {
+        public RegionHeaderParser(CoordsParser coordsParser) {
+            this.coordsParser = coordsParser;
+        }
+
+        private readonly CoordsParser coordsParser;
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var terrain = p.Before("(").SkipWhitespacesBackwards().AsString();
+            if (!terrain) return Error(terrain);
+
+            var coords = coordsParser.Parse(p);
+            if (!coords) return Error(coords);
+
+            var province = p.After("in").SkipWhitespaces().OneOf(
+                x => x.Before(","),
+                x => x.Before(".")
+            ).AsString();
+            if (!province) return Error(province);
+
+            var settlement = p.Try(x => {
+                var name = p.After(",").After("contains").SkipWhitespaces().Before("[").SkipWhitespacesBackwards().AsString();
+                if (!name) return name.Convert<(string, string)>();
+
+                var size = p.Between("[", "]").AsString();
+                if (!size) return size.Convert<(string, string)>();
+
+                return new Maybe<(string, string)>((name.Value, size.Value));
+            });
+
+            var population = p.Try(x => {
+                var amount = p.After(",").SkipWhitespaces().Integer();
+                if (!amount) return amount.Convert<(int, string)>();
+
+                var race = p.Between("(", ")").AsString();
+                if (!race) return race.Convert<(int, string)>();
+
+                return new Maybe<(int, string)>((amount.Value, race.Value));
+            });
+
+            var tax = p.Try(x => x.After("$").Integer());
+
+            return Ok(ReportNode.Bag(
+                ReportNode.Str("terrain", terrain),
+                ReportNode.Key("coords", coords.Value),
+                ReportNode.Str("province", province),
+                settlement ? ReportNode.Key("settlement", ReportNode.Object(
+                    ReportNode.Str("name", settlement.Value.Item1),
+                    ReportNode.Str("size", settlement.Value.Item2)
+                )) : null,
+                population ? ReportNode.Key("population", ReportNode.Object(
+                    ReportNode.Int("amount", population.Value.Item1),
+                    ReportNode.Str("race", population.Value.Item2)
+                )) : null,
+                tax ? ReportNode.Int("tax", tax) : null
             ));
         }
     }

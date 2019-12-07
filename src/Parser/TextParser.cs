@@ -2,56 +2,19 @@ namespace atlantis
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
 
-    public class Maybe<T> {
-        public Maybe(T value) {
-            Success = true;
-            this.value = value;
-        }
-
-        public Maybe(string error, int ln, int col) {
-            Success = false;
-            Error = error;
-            Ln = ln;
-            Col = col;
-        }
-
-        public static readonly Maybe<T> NA = new Maybe<T>("N/A", 0, 0);
-
-        private T value;
-        public T Value {
-            get {
-                if (!Success) throw new InvalidOperationException();
-                return value;
-            }
-        }
-
-        public bool Success { get; }
-        public string Error { get; }
-        public int Ln { get; }
-        public int Col { get; }
-
-        public override string ToString() => Success ? Value.ToString() : $"[ERROR] ({Ln}:{Col}) {Error}";
-
-        public static implicit operator T(Maybe<T> v) => v.Value;
-
-        public static implicit operator bool(Maybe<T> v) => v.Success;
-
-        public Maybe<TOut> Convert<TOut>() {
-            if (!Success) return new Maybe<TOut>(Error, Ln, Col);
-
-            throw new InvalidCastException();
-        }
-    }
-
     public class TextParser {
-        public TextParser(string text) {
-            this.Text = text.AsMemory();
+        public TextParser(int ln, string text) {
+            Ln = ln;
+            Text = text.AsMemory();
+
         }
 
-        public TextParser(ReadOnlyMemory<char> text) {
-            this.Text = text;
+        public TextParser(int ln, ReadOnlyMemory<char> text) {
+            Ln = ln;
+            Text = text;
         }
 
         private readonly Stack<int> bookmarks = new Stack<int>();
@@ -59,11 +22,12 @@ namespace atlantis
 
         public ReadOnlyMemory<char> Text { get; }
         public bool EOF => Text.Length == Pos;
+        public int Ln { get; }
 
         private ReadOnlySpan<char> GetSpan() => Text.Span.Slice(Pos);
 
         private int LFind(ReadOnlySpan<char> s) {
-            if (EOF) throw new InvalidOperationException();
+            if (EOF) return -1;
 
             var span = GetSpan();
             if (span.Length < s.Length) return -1;
@@ -79,7 +43,7 @@ namespace atlantis
         }
 
         private int RFind(ReadOnlySpan<char> s) {
-            if (EOF) throw new InvalidOperationException();
+            if (EOF) return -1;
 
             var span = GetSpan();
             if (span.Length < s.Length) return -1;
@@ -95,6 +59,7 @@ namespace atlantis
         }
 
         public TextParser Reset() {
+            ClearBookmarks();
             Pos = 0;
             return this;
         }
@@ -102,7 +67,7 @@ namespace atlantis
         public Maybe<TextParser> Seek(int n) {
             var newPos = Pos + n;
             if (newPos < 0 || newPos > Text.Length) {
-                return new Maybe<TextParser>("EOF", 1, Pos + 1);
+                return new Maybe<TextParser>("EOF", Ln, Pos + 1);
             }
 
             Pos = newPos;
@@ -130,53 +95,61 @@ namespace atlantis
         }
 
         public Maybe<TextParser> Slice(int length) {
-            if (EOF) return new Maybe<TextParser>("EOF", 1, Pos + 1);
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
-            var s = new TextParser(Text.Slice(Pos, length));
+            var s = new TextParser(Ln, Text.Slice(Pos, length));
             Seek(length);
             return new Maybe<TextParser>(s);
         }
 
         public Maybe<TextParser> Before(ReadOnlySpan<char> s) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
             var i = LFind(s);
             if (i >= 0) {
                 return new Maybe<TextParser>(Slice(i));
             }
 
-            return new Maybe<TextParser>($"Cant find {s.ToString()}", 1, Pos + 1);
+            return new Maybe<TextParser>($"Cant find {s.ToString()}", Ln, Pos + 1);
         }
 
         public Maybe<TextParser> After(ReadOnlySpan<char> s) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
             var i = LFind(s);
             if (i >= 0) {
                 Seek(i + s.Length);
                 return new Maybe<TextParser>(this);
             }
 
-            return new Maybe<TextParser>($"Cant find {s.ToString()}", 1, Pos + 1);
+            return new Maybe<TextParser>($"Cant find {s.ToString()}", Ln, Pos + 1);
         }
 
         public Maybe<TextParser> BeforeBackwards(ReadOnlySpan<char> s) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
             var i = RFind(s);
             if (i >= 0) {
                 return new Maybe<TextParser>(Slice(i));
             }
 
-            return new Maybe<TextParser>($"Cant find {s.ToString()}", 1, Pos + 1);
+            return new Maybe<TextParser>($"Cant find {s.ToString()}", Ln, Pos + 1);
         }
 
         public Maybe<TextParser> AfterBackwards(ReadOnlySpan<char> s) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
             var i = RFind(s);
             if (i >= 0) {
                 Seek(i + s.Length);
                 return new Maybe<TextParser>(this);
             }
 
-            return new Maybe<TextParser>($"Cant find {s.ToString()}", 1, Pos + 1);
+            return new Maybe<TextParser>($"Cant find {s.ToString()}", Ln, Pos + 1);
         }
 
         public Maybe<TextParser> SkipWhitespaces() {
-            if (EOF) return new Maybe<TextParser>("EOF", 1, Pos + 1);
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             var span = GetSpan();
             int i;
@@ -190,7 +163,7 @@ namespace atlantis
         }
 
         public Maybe<TextParser> SkipWhitespacesBackwards() {
-            if (EOF) return new Maybe<TextParser>("EOF", 1, Pos + 1);
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             var span = GetSpan();
             int i;
@@ -204,7 +177,7 @@ namespace atlantis
         }
 
         public Maybe<int> Integer() {
-            if (EOF) return new Maybe<int>("EOF", 1, Pos + 1);
+            if (EOF) return new Maybe<int>("EOF", Ln, Pos + 1);
 
             PushBookmark();
             var span = GetSpan();
@@ -225,7 +198,7 @@ namespace atlantis
 
             if (!char.IsDigit(span[i])) {
                 PopBookmark();
-                return new Maybe<int>("Not a number", 1, Pos + 1);
+                return new Maybe<int>("Not a number", Ln, Pos + 1);
             }
 
             for (; i < span.Length; i++) {
@@ -236,7 +209,7 @@ namespace atlantis
 
             if (i < 0) {
                 PopBookmark();
-                return new Maybe<int>("Expected +, - or number", 1, Pos + 1);
+                return new Maybe<int>("Expected +, - or number", Ln, Pos + 1);
             }
 
             RemoveBookmark();
@@ -248,14 +221,14 @@ namespace atlantis
         }
 
         public Maybe<TextParser> Word() {
-            if (EOF) return new Maybe<TextParser>("EOF", 1, Pos + 1);
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             PushBookmark();
             SkipWhitespaces();
 
             if (EOF) {
                 PopBookmark();
-                return new Maybe<TextParser>("Reached EOF", 1, Pos + 1);
+                return new Maybe<TextParser>("Reached EOF", Ln, Pos + 1);
             }
 
             var span = GetSpan();
@@ -285,11 +258,11 @@ namespace atlantis
         }
 
         public Maybe<TextParser> Match(ReadOnlySpan<char> s) {
-            if (EOF) return new Maybe<TextParser>("EOF", 1, Pos + 1);
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             var span = GetSpan();
             if (span.Length < s.Length || !span.StartsWith(s, StringComparison.OrdinalIgnoreCase))
-                return new Maybe<TextParser>("does not match", 1, Pos + 1);
+                return new Maybe<TextParser>("does not match", Ln, Pos + 1);
 
             return Slice(s.Length);
         }
@@ -339,8 +312,10 @@ namespace atlantis
                 if (match) return match;
             }
 
-            return new Maybe<TextParser>("all options does not fit", 1, p.Pos + 1);
+            return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
         }
+
+        public static Maybe<TextParser> Before(this Maybe<TextParser> p, params string[] list) => p ? p.Value.Before(list) : p;
 
         public static Maybe<TextParser> After(this TextParser p, params string[] list) {
             foreach (var s in list) {
@@ -348,7 +323,7 @@ namespace atlantis
                 if (match) return match;
             }
 
-            return new Maybe<TextParser>("all options does not fit", 1, p.Pos + 1);
+            return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<TextParser> SkipWhitespaces(this Maybe<TextParser> p) {
@@ -400,7 +375,7 @@ namespace atlantis
                 if (result) return result;
             }
 
-            return new Maybe<T>("all options does not fit", 1, p.Pos + 1);
+            return new Maybe<T>("all options does not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<IReportNode> OneOf(this Maybe<TextParser> p, params IReportParser[] parsers)
@@ -412,7 +387,7 @@ namespace atlantis
                 if (result) return result;
             }
 
-            return new Maybe<IReportNode>("all options does not fit", 1, p.Pos + 1);
+            return new Maybe<IReportNode>("all options does not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<T[]> List<T>(this TextParser p, ReadOnlySpan<char> separator, Func<TextParser, Maybe<T>> itemParser) {
@@ -445,5 +420,6 @@ namespace atlantis
         public static Maybe<IReportNode[]> List(this Maybe<TextParser> p, ReadOnlySpan<char> separator, IReportParser itemParser)
             => p ? List(p.Value, separator, itemParser) : p.Convert<IReportNode[]>();
 
+        public static Maybe<T> RecoverWith<T>(this Maybe<T> p, T onFailure) => p ? p : new Maybe<T>(onFailure);
     }
 }

@@ -12,7 +12,8 @@
     {
         public static async Task Main(string[] args)
         {
-            if (args == null || args.Length == 0) args = new[] { @"C:\local\var\git-private\atlantis\reports\New-Origins-v5\010_oct_1.rep" };
+            // if (args == null || args.Length == 0) args = new[] { @"C:\local\var\git-private\atlantis\reports\New-Origins-v5\010_oct_1.rep" };
+            if (args == null || args.Length == 0) args = new[] { @"C:\local\bin\games\Atlantis\Advisor\New-Origins\reports\050_feb_5.rep" };
 
             using var reader = File.OpenText(string.Concat(args));
             using var converter = new AtlantisReportJsonConverter(reader);

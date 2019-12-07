@@ -19,4 +19,9 @@ namespace atlantis {
             return result;
         }
     }
+
+    public static class ReportParserExtensions {
+        public static Maybe<IReportNode> ParseMaybe(this IReportParser parser, Maybe<TextParser> p)
+            => p ? parser.Parse(p.Value) : p.Convert<IReportNode>();
+    }
 }

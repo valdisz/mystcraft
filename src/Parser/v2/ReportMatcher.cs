@@ -17,7 +17,7 @@
 
         private async IAsyncEnumerable<TextParser> AsTextParser() {
             await foreach (var block in source) {
-                yield return new TextParser(block.Text);
+                yield return new TextParser(1, block.Text);
             }
         }
 

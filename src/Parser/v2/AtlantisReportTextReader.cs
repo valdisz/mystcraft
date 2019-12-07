@@ -14,14 +14,14 @@
             var classification = new AtlantisReportConverter(blockReader.ReadAllAsync());
 
             ActionBlock<TextParser> parseUnit = new ActionBlock<TextParser>(p => {
-                UnitParser unitParser = new UnitParser();
+                UnitParser unitParser = new UnitParser(new SkillParser());
                 unitParser.Parse(p);
             }, new ExecutionDataflowBlockOptions {
                 MaxDegreeOfParallelism = 4
             });
 
             TransformBlock<string, TextParser> toTextParser = new TransformBlock<string, TextParser>(s =>
-                Task.FromResult(new TextParser(s)),
+                Task.FromResult(new TextParser(1, s)),
                 new ExecutionDataflowBlockOptions {
                     MaxDegreeOfParallelism = 4,
                     SingleProducerConstrained = true
