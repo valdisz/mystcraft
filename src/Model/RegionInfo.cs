@@ -1,9 +1,4 @@
-﻿namespace atlantis
-{
-    using Pidgin;
-    using static Pidgin.Parser;
-    using static Tokens;
-
+﻿namespace atlantis {
     public class RegionInfo {
         public RegionInfo(Coords coords, string terrain, string province, Settlement settlement) {
             Coords = coords;

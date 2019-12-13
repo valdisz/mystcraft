@@ -1,9 +1,4 @@
-namespace atlantis
-{
-    using Pidgin;
-    using static Pidgin.Parser;
-    using static Tokens;
-
+namespace atlantis {
     public class Population {
         public Population(string race, int count) {
             Race = race;
