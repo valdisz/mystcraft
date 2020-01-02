@@ -1,10 +1,12 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
 namespace atlantis {
+    using atlantis.Persistence;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
     public class Startup {
         public Startup(IConfiguration configuration, IWebHostEnvironment env) {
             Configuration = configuration;
@@ -17,8 +19,13 @@ namespace atlantis {
         public void ConfigureServices(IServiceCollection services) {
             services
                 .AddOptions()
+                .AddDbContext<Database>(opt => {
+                    opt.UseSqlite(Configuration.GetConnectionString("database"));
+                    opt.EnableDetailedErrors();
+                    opt.EnableSensitiveDataLogging();
+                })
                 .AddMvcCore()
-                .SetCompatibilityVersion(CompatibilityVersion.Latest);
+                    .SetCompatibilityVersion(CompatibilityVersion.Latest);
         }
 
         public void Configure(IApplicationBuilder app) {
