@@ -49,7 +49,7 @@ namespace atlantis
                         await writer.WriteValueAsync(unitNumber.Value);
 
                         await writer.WritePropertyNameAsync("orders");
-                        await writer.WriteValueAsync(orders.ToString().Trim());
+                        await writer.WriteValueAsync(orders.ToString().Trim().Replace("\r\n", "\n"));
                     await writer.WriteEndObjectAsync();
                 }
 
