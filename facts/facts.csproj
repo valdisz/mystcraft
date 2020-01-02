@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\atlantis.csproj" />
+    <ProjectReference Include="..\server\atlantis.csproj" />
   </ItemGroup>
 
 </Project>
