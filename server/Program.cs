@@ -19,7 +19,9 @@
         public static Task RunServerAsync(string[] args) {
             var builder = new WebHostBuilder()
                 .ConfigureAppConfiguration(conf => {
-                    conf.AddCommandLine(args);
+                    conf
+                        .AddJsonFile("appsettings.json")
+                        .AddCommandLine(args);
                 })
                 .UseStartup<Startup>()
                 .UseKestrel();

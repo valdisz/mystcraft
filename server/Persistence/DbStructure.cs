@@ -10,6 +10,8 @@ namespace atlantis.Persistence {
         public long TurnId { get; set; }
         public long RegionId { get; set; }
 
+        public string EmpheralId => $"{Type} {Number}";
+
         public int Sequence { get; set; }
         public int Number { get; set; }
 
@@ -22,7 +24,6 @@ namespace atlantis.Persistence {
         [Required]
         public string Json { get; set; }
 
-        [Required]
         public string Memory { get; set; }
 
         public DbGame Game { get; set; }

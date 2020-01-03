@@ -1,4 +1,5 @@
 namespace atlantis {
+    using System;
     using atlantis.Persistence;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -18,6 +19,7 @@ namespace atlantis {
 
         public void ConfigureServices(IServiceCollection services) {
             services
+                .AddLogging()
                 .AddOptions()
                 .AddDbContext<Database>(opt => {
                     opt.UseSqlite(Configuration.GetConnectionString("database"));
@@ -28,7 +30,11 @@ namespace atlantis {
                     .SetCompatibilityVersion(CompatibilityVersion.Latest);
         }
 
-        public void Configure(IApplicationBuilder app) {
+        public void Configure(IApplicationBuilder app, IServiceProvider services) {
+            using var scope = services.CreateScope();
+            var db = scope.ServiceProvider.GetService<Database>();
+            db.Database.Migrate();
+
             app
                 .UseDeveloperExceptionPage()
                 .UseRouting()

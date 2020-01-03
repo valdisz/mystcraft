@@ -22,7 +22,6 @@ namespace atlantis.Persistence {
         [Required]
         public string Json { get; set; }
 
-        [Required]
         public string Memory { get; set; }
 
         public string Orders { get; set; }

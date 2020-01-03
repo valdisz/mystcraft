@@ -23,96 +23,82 @@ namespace atlantis.Persistence
                 t.HasOne(x => x.Game)
                     .WithMany(x => x.Turns)
                     .HasForeignKey(x => x.GameId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
             });
 
             model.Entity<DbFaction>(t => {
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Turn)
                     .WithMany(x => x.Factions)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
             });
 
             model.Entity<DbEvent>(t => {
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Turn)
-                    .WithMany()
+                    .WithMany(x => x.Events)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Faction)
                     .WithMany(x => x.Events)
                     .HasForeignKey(x => x.FactionId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
             });
 
             model.Entity<DbRegion>(t => {
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Turn)
                     .WithMany(x => x.Regions)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
             });
 
             model.Entity<DbStructure>(t => {
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Turn)
                     .WithMany(x => x.Structures)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Region)
                     .WithMany(x => x.Structures)
                     .HasForeignKey(x => x.RegionId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
             });
 
             model.Entity<DbUnit>(t => {
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Turn)
                     .WithMany(x => x.Units)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Region)
                     .WithMany(x => x.Units)
                     .HasForeignKey(x => x.RegionId)
-                    .IsRequired()
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired();
 
                 t.HasOne(x => x.Structure)
                     .WithMany(x => x.Units)

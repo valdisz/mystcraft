@@ -63,15 +63,14 @@ namespace atlantis.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Memory")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Own")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("TurnId")
@@ -95,12 +94,21 @@ namespace atlantis.Migrations
                     b.Property<string>("EngineVersion")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Memory")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Password")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("PlayerFactionNumber")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("RulesetName")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RulesetVersion")
                         .HasColumnType("TEXT");
@@ -123,23 +131,31 @@ namespace atlantis.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Memory")
+                    b.Property<string>("Label")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("Number")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Memory")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Terrain")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("X")
+                    b.Property<int>("X")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("Y")
+                    b.Property<int>("Y")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("Z")
+                    b.Property<int>("Z")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -165,7 +181,6 @@ namespace atlantis.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Memory")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -208,6 +223,9 @@ namespace atlantis.Migrations
                     b.Property<long>("GameId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Memory")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Month")
                         .HasColumnType("INTEGER");
 
@@ -241,7 +259,6 @@ namespace atlantis.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Memory")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -297,7 +314,7 @@ namespace atlantis.Migrations
                         .IsRequired();
 
                     b.HasOne("atlantis.Persistence.DbTurn", "Turn")
-                        .WithMany()
+                        .WithMany("Events")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

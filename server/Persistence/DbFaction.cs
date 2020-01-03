@@ -9,6 +9,7 @@ namespace atlantis.Persistence {
         public long GameId { get; set; }
         public long TurnId { get; set; }
 
+        public bool Own { get; set; }
         public int Number { get; set; }
 
 
@@ -17,9 +18,6 @@ namespace atlantis.Persistence {
 
         [Required]
         public string Json { get; set; }
-
-        [Required]
-        public string Memory { get; set; }
 
         public DbGame Game { get; set; }
         public DbTurn Turn { get; set; }
