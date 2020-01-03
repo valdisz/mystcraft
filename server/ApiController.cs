@@ -69,6 +69,24 @@ namespace atlantis {
             var regions = report["regions"] as JArray;
             var ordersTemplate = report["ordersTemplate"] as JObject;
 
+            var turn = new DbTurn {
+                GameId = gameId,
+                Year = date.Value<int>("year"),
+                Month = MonthToNumber(date.Value<string>("month")),
+                Factions = new List<DbFaction>(),
+                Regions = new List<DbRegion>(),
+                Structures = new List<DbStructure>(),
+                Events = new List<DbEvent>(),
+                Units = new List<DbUnit>()
+            };
+            turn.Number = (turn.Year - 1) * 12 + turn.Month;
+
+            var existingTurn = await db.Turns.FirstOrDefaultAsync(x => x.GameId == gameId && x.Number == turn.Number);
+            if (existingTurn != null) {
+                db.Remove(existingTurn);
+                await db.SaveChangesAsync();
+            }
+
             db.ChangeTracker.AutoDetectChangesEnabled = false;
             var lastTurn = await db.Turns
                 .OrderByDescending(x => x.Id)
@@ -93,16 +111,7 @@ namespace atlantis {
             db.ChangeTracker.AutoDetectChangesEnabled = true;
             var game = await db.Games.FindAsync(gameId);
 
-            var turn = new DbTurn {
-                GameId = gameId,
-                Memory = lastTurn?.Memory,
-                Year = date.Value<int>("year"),
-                Month = MonthToNumber(date.Value<string>("month")),
-                Factions = new List<DbFaction>(),
-                Regions = new List<DbRegion>(),
-                Events = new List<DbEvent>()
-            };
-            turn.Number = (turn.Year - 1) * 12 + turn.Month;
+            turn.Memory = lastTurn?.Memory;
 
             await db.Turns.AddAsync(turn);
             await db.SaveChangesAsync();
@@ -148,10 +157,12 @@ namespace atlantis {
             var orders = (ordersTemplate["units"] as JArray)
                 .ToDictionary(k => k.Value<int>("unit"), v => v.Value<string>("orders"));
 
-            foreach (JObject region in regions) {
+            foreach (JObject region in regions)
+            {
                 var coords = region["coords"] as JObject;
 
-                var r = new DbRegion {
+                var r = new DbRegion
+                {
                     GameId = gameId,
                     TurnId = turn.Id,
                     X = coords.Value<int>("x"),
@@ -169,15 +180,11 @@ namespace atlantis {
                 };
                 r.Memory = regionMemory.TryGetValue(r.EmpheralId, out var regMem) ? regMem : null;
 
-                int unitOrder = 0;
-                foreach (JObject unit in region["units"] as JArray) {
-                    unitOrder++;
-                }
+                var units = region["units"] as JArray;
+                if (units != null) AddUnits(game, turn, units, r, null, unitMemory);
 
-                int structureOrder = 0;
-                foreach (JObject structure in (region["structures"] as JArray ?? Enumerable.Empty<JToken>())) {
-                    structureOrder++;
-                }
+                var structures = region["structures"] as JArray;
+                if (structures != null) AddStructures(game, turn, structures, r, structuresMemory, unitMemory);
 
                 region.Remove("units");
                 region.Remove("structures");
@@ -191,6 +198,70 @@ namespace atlantis {
             }
 
             await db.SaveChangesAsync();
+        }
+
+        private void AddStructures(DbGame game, DbTurn turn, JArray structures, DbRegion region, Dictionary<string, string> structuresMemory, Dictionary<int, string> unitMemory)
+        {
+            int structureOrder = 0;
+            foreach (JObject structure in structures)
+            {
+                var s = new DbStructure {
+                    GameId = game.Id,
+                    TurnId = turn.Id,
+                    Sequence = structureOrder,
+                    Number = 1,
+                    Type = "Shaft",
+                    Name = "Building",
+                    Units = new List<DbUnit>()
+                };
+                s.Memory = structuresMemory.TryGetValue(s.EmpheralId, out var structMem)
+                    ? structMem
+                    : null;
+
+                var units = structure["units"] as JArray;
+                if (units != null) AddUnits(game, turn, units, region, s, unitMemory);
+
+                structure.Remove("units");
+                s.Json = structure.ToString();
+
+                region.Structures.Add(s);
+                turn.Structures.Add(s);
+
+                structureOrder++;
+            }
+        }
+
+        private static void AddUnits(DbGame game, DbTurn turn, JArray units, DbRegion region, DbStructure structure, Dictionary<int, string> unitMemory)
+        {
+            int unitOrder = 0;
+            foreach (JObject unit in units)
+            {
+                var unitFaction = unit["faction"] as JObject;
+                var u = new DbUnit
+                {
+                    GameId = game.Id,
+                    TurnId = turn.Id,
+                    Number = unit.Value<int>("number"),
+                    Name = unit.Value<string>("name"),
+                    FactionNumber = unitFaction != null
+                        ? unitFaction.Value<int>("number")
+                        : (int?)null,
+                    Sequence = unitOrder
+                };
+
+                u.Own = game.PlayerFactionNumber == u.FactionNumber;
+                u.Memory = u.Own && unitMemory.TryGetValue(u.Number, out var unitMem)
+                    ? unitMem
+                    : null;
+                unit["own"] = u.Own;    // because could be loaded several reports from different factions
+                u.Json = unit.ToString();
+
+                region.Units.Add(u);
+                turn.Units.Add(u);
+                if (structure != null) structure.Units.Add(u);
+
+                unitOrder++;
+            }
         }
 
         private int MonthToNumber(string monthName) {
