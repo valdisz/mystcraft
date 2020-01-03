@@ -181,10 +181,10 @@ namespace atlantis {
                 r.Memory = regionMemory.TryGetValue(r.EmpheralId, out var regMem) ? regMem : null;
 
                 var units = region["units"] as JArray;
-                if (units != null) AddUnits(game, turn, units, r, null, unitMemory);
+                if (units != null) AddUnits(game, turn, units, r, null, unitMemory, orders);
 
                 var structures = region["structures"] as JArray;
-                if (structures != null) AddStructures(game, turn, structures, r, structuresMemory, unitMemory);
+                if (structures != null) AddStructures(game, turn, structures, r, structuresMemory, unitMemory, orders);
 
                 region.Remove("units");
                 region.Remove("structures");
@@ -200,7 +200,7 @@ namespace atlantis {
             await db.SaveChangesAsync();
         }
 
-        private void AddStructures(DbGame game, DbTurn turn, JArray structures, DbRegion region, Dictionary<string, string> structuresMemory, Dictionary<int, string> unitMemory)
+        private void AddStructures(DbGame game, DbTurn turn, JArray structures, DbRegion region, Dictionary<string, string> structuresMemory, Dictionary<int, string> unitMemory, Dictionary<int, string> orders)
         {
             int structureOrder = 0;
             foreach (JObject structure in structures)
@@ -219,7 +219,7 @@ namespace atlantis {
                     : null;
 
                 var units = structure["units"] as JArray;
-                if (units != null) AddUnits(game, turn, units, region, s, unitMemory);
+                if (units != null) AddUnits(game, turn, units, region, s, unitMemory, orders);
 
                 structure.Remove("units");
                 s.Json = structure.ToString();
@@ -231,7 +231,7 @@ namespace atlantis {
             }
         }
 
-        private static void AddUnits(DbGame game, DbTurn turn, JArray units, DbRegion region, DbStructure structure, Dictionary<int, string> unitMemory)
+        private static void AddUnits(DbGame game, DbTurn turn, JArray units, DbRegion region, DbStructure structure, Dictionary<int, string> unitMemory, Dictionary<int, string> orders)
         {
             int unitOrder = 0;
             foreach (JObject unit in units)
@@ -253,6 +253,10 @@ namespace atlantis {
                 u.Memory = u.Own && unitMemory.TryGetValue(u.Number, out var unitMem)
                     ? unitMem
                     : null;
+                u.Orders = orders.TryGetValue(u.Number, out var unitOrders)
+                    ? unitOrders
+                    : null;
+
                 unit["own"] = u.Own;    // because could be loaded several reports from different factions
                 u.Json = unit.ToString();
 
