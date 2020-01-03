@@ -538,4 +538,48 @@ Ready item: book of exorcism [BKEX].
             ));
         }
     }
+
+    // + Building [5] : Stables; Imperial Stables.
+    // + AE Mayfield [286] : Fleet, 2 Cogs; Load: 485/1000; Sailors: 12/12; MaxSpeed: 4.
+    // + AE Mayfield [286] : Fleet, 2 Cogs, 1 Longship; Load: 485/1000; Sailors: 12/12; MaxSpeed: 4.
+    // + AE Empire [246] : Fleet, 10 Corsairs; Load: 5593/10000; Sailors: 135/150; MaxSpeed: 0; Sail directions: S, SW.
+    // + AE Triangulum [329] : Fleet, 3 Corsairs; Sail directions: S, SW; Shiny new corsairs ready to engage any enemy. Built bay Imperial Shipyards..
+    // + Shaft [1] : Shaft, contains an inner location.
+    // + Lair [1] : Lair, closed to player units.
+    // + Tower [1] : Tower, needs 10.
+    // + Tower [1] : Tower, engraved with Runes of Warding.
+    // + Ruin [1] : Ruin, closed to player units.
+    // + The Kings Highway [1] : Road N.
+    // + Trade Academy [NIMB] [Nort Triders] [2] : Tower; comment.
+
+    // + {Name} [{Number}] : {Type}, {Int} {Type}, {Flag}; {Key}: {Value}; {Description}.
+    public class StructureParser : ReportParser {
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            p = p.BeforeBackwards(".");
+
+            var nameAndNumber = p.After("+").SkipWhitespaces().Before("] : ");  // lets hope noone will use this combination in their building names
+
+            var number = nameAndNumber.AfterBackwards("[").Integer();
+            var name = nameAndNumber.BeforeBackwards("[").AsString();
+            var description = Maybe<string>.NA;
+
+            p.After("] : ");
+            // p.PushBookmark();
+            // if (p.AfterBackwards(";")) {
+            //     var descPos = p.Pos - 2;
+            //     description = new Maybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
+
+            //     // w/o description
+            //     p.PopBookmark();
+            //     p = p.Slice(descPos - p.Pos + 1);
+            // }
+            // else {
+            //     p.RemoveBookmark();
+            // }
+
+            // p.SkipWhitespaces()
+
+            throw new NotImplementedException();
+        }
+    }
 }
