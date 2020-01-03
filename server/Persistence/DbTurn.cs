@@ -1,8 +1,11 @@
 namespace atlantis.Persistence {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
 
     public class DbTurn {
+        [Key]
         public long Id { get; set; }
+
         public long GameId { get; set; }
 
         public int Number { get; set; }

@@ -17,12 +17,9 @@ namespace atlantis.Persistence
 
         protected override void OnModelCreating(ModelBuilder model) {
             model.Entity<DbGame>(t => {
-                t.HasKey(x => x.Id);
             });
 
             model.Entity<DbTurn>(t => {
-                t.HasKey(x => x.Id);
-
                 t.HasOne(x => x.Game)
                     .WithMany(x => x.Turns)
                     .HasForeignKey(x => x.GameId)
@@ -31,8 +28,6 @@ namespace atlantis.Persistence
             });
 
             model.Entity<DbFaction>(t => {
-                t.HasKey(x => x.Id);
-
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
@@ -47,8 +42,6 @@ namespace atlantis.Persistence
             });
 
             model.Entity<DbEvent>(t => {
-                t.HasKey(x => x.Id);
-
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
@@ -69,8 +62,6 @@ namespace atlantis.Persistence
             });
 
             model.Entity<DbRegion>(t => {
-                t.HasKey(x => x.Id);
-
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
@@ -85,8 +76,6 @@ namespace atlantis.Persistence
             });
 
             model.Entity<DbStructure>(t => {
-                t.HasKey(x => x.Id);
-
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)
@@ -107,8 +96,6 @@ namespace atlantis.Persistence
             });
 
             model.Entity<DbUnit>(t => {
-                t.HasKey(x => x.Id);
-
                 t.HasOne(x => x.Game)
                     .WithMany()
                     .HasForeignKey(x => x.GameId)

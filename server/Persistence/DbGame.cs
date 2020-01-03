@@ -1,8 +1,12 @@
 namespace atlantis.Persistence {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
 
     public class DbGame {
+        [Key]
         public long Id { get; set; }
+
+        [Required]
         public string Name { get; set; }
 
         public int? PlayerFactionNumber { get; set; }
