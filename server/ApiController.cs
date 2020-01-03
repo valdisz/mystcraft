@@ -155,7 +155,7 @@ namespace atlantis {
                     GameId = gameId,
                     TurnId = turn.Id,
                     X = coords.Value<int>("x"),
-                    Y = coords.Value<int>("x"),
+                    Y = coords.Value<int>("y"),
                     Z = coords.TryGetValue("z", StringComparison.OrdinalIgnoreCase, out var zCoord)
                         ? zCoord.Value<int>()
                         : 1,
