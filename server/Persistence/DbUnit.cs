@@ -7,7 +7,14 @@ namespace atlantis.Persistence {
         public long RegionId { get; set; }
         public long? StrcutureId { get; set; }
 
-        public long Number { get; set; }
+        public bool Own { get; set; }
+        public int Sequence { get; set; }
+        public int Number { get; set; }
+        public string Name { get; set; }
+        public int? FactionNumber { get; set; }
+        public string Json { get; set; }
+        public string Memory { get; set; }
+        public string Orders { get; set; }
 
         public DbGame Game { get; set; }
         public DbTurn Turn { get; set; }
