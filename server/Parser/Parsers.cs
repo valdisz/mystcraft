@@ -556,6 +556,7 @@ Ready item: book of exorcism [BKEX].
     public class StructureParser : ReportParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var nameAndNumber = p.After("+").SkipWhitespaces().Before("] : ");  // lets hope noone will use this combination in their building names
+            if (!nameAndNumber) return Error(nameAndNumber);
 
             var name = nameAndNumber.BeforeBackwards("[").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
@@ -563,12 +564,9 @@ Ready item: book of exorcism [BKEX].
             var number = nameAndNumber.After("[").Integer();
             if (!number) return Error(number);
 
-            var type = p.After("] :").SkipWhitespaces().Before(",", ";", ".").AsString();
-            if (!type) return Error(type);
+            p.After("] :").SkipWhitespaces();
 
-            p.Seek(1);
-
-            List<TextParser> props = new List<TextParser>();
+            Queue<TextParser> props = new Queue<TextParser>();
             if (!p.EOF) {
                 var props1 = p
                     .Before(";")
@@ -580,9 +578,16 @@ Ready item: book of exorcism [BKEX].
                     .BeforeBackwards(".")
                     .List(";", item => item.SkipWhitespaces());
 
-                if (props1) props.AddRange(props1.Value);
-                if (props2) props.AddRange(props2.Value);
+                if (props1)
+                    foreach (var prop in props1.Value)
+                        props.Enqueue(prop);
+
+                if (props2)
+                    foreach (var prop in props2.Value)
+                        props.Enqueue(prop);
             }
+
+            var type = props.Dequeue().AsString();
 
             var structure = ReportNode.Object(
                 ReportNode.Str("name", name),
@@ -590,12 +595,12 @@ Ready item: book of exorcism [BKEX].
                 ReportNode.Str("type", type)
             );
 
-            if (type.Value.Equals("fleet", StringComparison.OrdinalIgnoreCase)) {
+            if (type.Equals("fleet", StringComparison.OrdinalIgnoreCase)) {
                 var contents = ReportNode.Array();
                 structure.Add(ReportNode.Key("contents", contents));
 
                 while (props.Count > 0) {
-                    var item = props[0];
+                    var item = props.Peek();
                     item.PushBookmark();
 
                     var objCount = item.Integer();
@@ -610,7 +615,7 @@ Ready item: book of exorcism [BKEX].
                             ReportNode.Int("count", objCount),
                             ReportNode.Str("type", objType)
                         ));
-                        props.RemoveAt(0);
+                        props.Dequeue();
                     }
                 }
             }
