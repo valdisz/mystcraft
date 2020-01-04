@@ -40,7 +40,8 @@ namespace atlantis {
         }
 
         [HttpPost("games/{gameId}/report")]
-        public async Task UploadReport([FromRoute] long gameId) {
+        public async Task UploadReport([FromRoute] long gameId)
+        {
             using var bodyReader = new StreamReader(Request.Body);
             using var converter = new AtlantisReportJsonConverter(bodyReader);
 
@@ -69,7 +70,8 @@ namespace atlantis {
             var regions = report["regions"] as JArray;
             var ordersTemplate = report["ordersTemplate"] as JObject;
 
-            var turn = new DbTurn {
+            var turn = new DbTurn
+            {
                 GameId = gameId,
                 Year = date.Value<int>("year"),
                 Month = MonthToNumber(date.Value<string>("month")),
@@ -81,44 +83,33 @@ namespace atlantis {
             };
             turn.Number = (turn.Year - 1) * 12 + turn.Month;
 
-            var existingTurn = await db.Turns.FirstOrDefaultAsync(x => x.GameId == gameId && x.Number == turn.Number);
-            if (existingTurn != null) {
-                var tablesToDelete = new[] {
-                    db.Model.FindEntityType(typeof(DbEvent)).GetTableName(),
-                    db.Model.FindEntityType(typeof(DbUnit)).GetTableName(),
-                    db.Model.FindEntityType(typeof(DbFaction)).GetTableName(),
-                    db.Model.FindEntityType(typeof(DbStructure)).GetTableName(),
-                    db.Model.FindEntityType(typeof(DbRegion)).GetTableName(),
-                };
-
-                foreach (var table in tablesToDelete) {
-                    await db.Database.ExecuteSqlRawAsync($"delete from {table} where TurnId = {existingTurn.Id}");
-                }
-
-                db.Remove(existingTurn);
-                await db.SaveChangesAsync();
-
-            }
+            // ensure that there are no turn with the same number
+            await RemoveTurn(gameId, turn.Number);
 
             db.ChangeTracker.AutoDetectChangesEnabled = false;
             var lastTurn = await db.Turns
                 .OrderByDescending(x => x.Id)
                 .Include(x => x.Factions)
-                .Include(x => x.Regions)
                 .Include(x => x.Units)
                 .Include(x => x.Structures)
+                .Include(x => x.Regions)
+                .ThenInclude(x => x.Structures)
                 .FirstOrDefaultAsync(x => x.GameId == gameId);
 
             Dictionary<string, string> regionMemory = lastTurn != null
-                ? lastTurn.Regions.ToDictionary(k => k.EmpheralId, v => v.Memory)
+                ? lastTurn.Regions
+                    .ToDictionary(k => k.EmpheralId, v => v.Memory)
                 : new Dictionary<string, string>();
 
             Dictionary<int, string> unitMemory = lastTurn != null
-                ? lastTurn.Units.Where(x => x.Own).ToDictionary(k => k.Number, v => v.Memory)
+                ? lastTurn.Units
+                    .Where(x => x.Own)
+                    .ToDictionary(k => k.Number, v => v.Memory)
                 : new Dictionary<int, string>();
 
             Dictionary<string, string> structuresMemory = lastTurn != null
-                ? lastTurn.Structures.ToDictionary(k => k.EmpheralId, v => v.Memory)
+                ? lastTurn.Structures
+                    .ToDictionary(k => DbStructure.GetEmpheralId(k.Region.X, k.Region.Y, k.Region.Z, k.Number, k.Type), v => v.Memory)
                 : new Dictionary<string, string>();
 
             db.ChangeTracker.AutoDetectChangesEnabled = true;
@@ -129,7 +120,8 @@ namespace atlantis {
             await db.Turns.AddAsync(turn);
             await db.SaveChangesAsync();
 
-            var f = new DbFaction {
+            var f = new DbFaction
+            {
                 GameId = gameId,
                 TurnId = turn.Id,
                 Name = faction.Value<string>("name"),
@@ -145,7 +137,8 @@ namespace atlantis {
                 ).ToString(),
             };
 
-            if (!game.PlayerFactionNumber.HasValue) {
+            if (!game.PlayerFactionNumber.HasValue)
+            {
                 game.PlayerFactionNumber = f.Number;
                 game.EngineVersion = engine.Value<string>("version");
 
@@ -178,6 +171,7 @@ namespace atlantis {
                 {
                     GameId = gameId,
                     TurnId = turn.Id,
+                    UpdatedAtTurn = turn.Number,
                     X = coords.Value<int>("x"),
                     Y = coords.Value<int>("y"),
                     Z = coords.TryGetValue("z", StringComparison.OrdinalIgnoreCase, out var zCoord)
@@ -210,7 +204,83 @@ namespace atlantis {
                 game.Password = ordersTemplate.Value<string>("password");
             }
 
+            // copy missing regions from previous turn
+            if (lastTurn != null) {
+                CopyInvisibleRegions(gameId, turn, lastTurn, game);
+            }
+
             await db.SaveChangesAsync();
+        }
+
+        private static void CopyInvisibleRegions(long gameId, DbTurn turn, DbTurn lastTurn, DbGame game)
+        {
+            var visibleRegions = turn.Regions.ToDictionary(k => k.EmpheralId);
+            var allRegions = lastTurn.Regions.ToDictionary(k => k.EmpheralId);
+
+            foreach (var key in allRegions.Keys.Except(visibleRegions.Keys))
+            {
+                var invisibleRegion = allRegions[key];
+                var regCopy = new DbRegion
+                {
+                    GameId = gameId,
+                    TurnId = turn.Id,
+                    UpdatedAtTurn = invisibleRegion.UpdatedAtTurn,
+                    X = invisibleRegion.X,
+                    Y = invisibleRegion.Y,
+                    Z = invisibleRegion.Z,
+                    Label = invisibleRegion.Label,
+                    Province = invisibleRegion.Province,
+                    Terrain = invisibleRegion.Terrain,
+                    Structures = new List<DbStructure>(),
+                    Units = new List<DbUnit>(),
+                    Json = invisibleRegion.Json,
+                    Memory = invisibleRegion.Memory
+                };
+
+                if (invisibleRegion.Structures != null) {
+                    foreach (var str in invisibleRegion.Structures)
+                    {
+                        var strCopy = new DbStructure
+                        {
+                            GameId = game.Id,
+                            TurnId = turn.Id,
+                            Sequence = str.Sequence,
+                            Number = str.Number,
+                            Type = str.Type,
+                            Name = str.Name,
+                            Units = new List<DbUnit>(),
+                            Json = str.Json
+                        };
+
+                        regCopy.Structures.Add(strCopy);
+                        turn.Structures.Add(strCopy);
+                    }
+                }
+
+                turn.Regions.Add(regCopy);
+            }
+        }
+
+        private async Task RemoveTurn(long gameId, int turnNumber) {
+            var existingTurn = await db.Turns.FirstOrDefaultAsync(x => x.GameId == gameId && x.Number == turnNumber);
+            if (existingTurn != null)
+            {
+                var tablesToDelete = new[] {
+                    db.Model.FindEntityType(typeof(DbEvent)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbUnit)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbFaction)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbStructure)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbRegion)).GetTableName()
+                };
+
+                foreach (var table in tablesToDelete)
+                {
+                    await db.Database.ExecuteSqlRawAsync($"delete from {table} where TurnId = {existingTurn.Id}");
+                }
+
+                db.Remove(existingTurn);
+                await db.SaveChangesAsync();
+            }
         }
 
         private void AddStructures(DbGame game, DbTurn turn, JArray structures, DbRegion region, Dictionary<string, string> structuresMemory, Dictionary<int, string> unitMemory, Dictionary<int, string> orders)
@@ -229,7 +299,9 @@ namespace atlantis {
                     Units = new List<DbUnit>(),
                     Json = str.ToString()
                 };
-                s.Memory = structuresMemory.TryGetValue(s.EmpheralId, out var structMem)
+
+                var emphId = DbStructure.GetEmpheralId(region.X, region.Y, region.Z, s.Number, s.Type);
+                s.Memory = structuresMemory.TryGetValue(emphId, out var structMem)
                     ? structMem
                     : null;
 

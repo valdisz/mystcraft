@@ -15,6 +15,8 @@ namespace atlantis.Persistence {
         public int Y { get; set; }
         public int Z { get; set; }
 
+        public int UpdatedAtTurn { get; set; }
+
         [Required]
         public string Label { get; set; }
 

@@ -10,8 +10,6 @@ namespace atlantis.Persistence {
         public long TurnId { get; set; }
         public long RegionId { get; set; }
 
-        public string EmpheralId => $"{Type} {Number}";
-
         public int Sequence { get; set; }
         public int Number { get; set; }
 
@@ -31,5 +29,7 @@ namespace atlantis.Persistence {
         public DbRegion Region { get; set; }
 
         public List<DbUnit> Units { get; set; }
+
+        public static string GetEmpheralId(int x, int y, int z, int number, string type) => $"{x} {y} {z} {number} {type}";
     }
 }
