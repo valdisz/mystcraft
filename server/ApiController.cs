@@ -209,9 +209,9 @@ namespace atlantis {
                     GameId = game.Id,
                     TurnId = turn.Id,
                     Sequence = structureOrder,
-                    Number = 1,
-                    Type = "Shaft",
-                    Name = "Building",
+                    Number = structure.Value<int>("number"),
+                    Type = structure.Value<string>("type"),
+                    Name = structure.Value<string>("name"),
                     Units = new List<DbUnit>()
                 };
                 s.Memory = structuresMemory.TryGetValue(s.EmpheralId, out var structMem)

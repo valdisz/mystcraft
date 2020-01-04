@@ -11,5 +11,6 @@ namespace atlantis
         public static readonly CoordsParser Coords = new CoordsParser();
         public static readonly RegionHeaderParser RegionHeader = new RegionHeaderParser(Coords);
         public static readonly UnitParser Unit = new UnitParser(Skill);
+        public static readonly StructureParser Structure = new StructureParser();
     }
 }

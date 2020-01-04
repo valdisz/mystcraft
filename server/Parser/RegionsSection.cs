@@ -81,7 +81,9 @@ namespace atlantis
 
                         await writer.WriteStartObjectAsync();
                         await writer.WritePropertyNameAsync("structure");
-                        await writer.WriteValueAsync(cursor.Value.AsString());
+
+                        var structure = AllParsers.Structure.Parse(cursor.Value);
+                        if (structure) await structure.Value.WriteJson(writer);
 
                         await writer.WritePropertyNameAsync("units");
                         await writer.WriteStartArrayAsync();

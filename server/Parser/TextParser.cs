@@ -23,6 +23,7 @@ namespace atlantis
         public ReadOnlyMemory<char> Text { get; }
         public bool EOF => Text.Length == Pos;
         public int Ln { get; }
+        public int Length => Text.Length - Pos;
 
         private ReadOnlySpan<char> GetSpan() => Text.Span.Slice(Pos);
 
@@ -398,14 +399,16 @@ namespace atlantis
             }
 
             while (!p.EOF) {
-                var span = p.Before(separator);
+                Maybe<TextParser> span = p.Before(separator);
                 if (span) p.Seek(separator.Length);
 
                 var item = itemParser(span ? span : p);
-
-                if (!item)  return item.Convert<T[]>();
+                if (!item) return item.Convert<T[]>();
 
                 items.Add(item.Value);
+                if (!span) {
+                    break;
+                }
             }
 
             return new Maybe<T[]>(items.ToArray());
@@ -420,6 +423,8 @@ namespace atlantis
         public static Maybe<IReportNode[]> List(this Maybe<TextParser> p, ReadOnlySpan<char> separator, IReportParser itemParser)
             => p ? List(p.Value, separator, itemParser) : p.Convert<IReportNode[]>();
 
-        public static Maybe<T> RecoverWith<T>(this Maybe<T> p, T onFailure) => p ? p : new Maybe<T>(onFailure);
+        public static Maybe<T> RecoverWith<T>(this Maybe<T> p, Func<T> onFailure) => p ? p : new Maybe<T>(onFailure());
+
+        public static Maybe<P> Map<T, P>(this Maybe<T> p, Func<T, P> mapping) => p ? new Maybe<P>(mapping(p.Value)) : p.Convert<P>();
     }
 }

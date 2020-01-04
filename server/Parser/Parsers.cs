@@ -347,7 +347,7 @@ Ready item: book of exorcism [BKEX].
                 if (!Mem(p.After(",").SkipWhitespaces())) return Error(LastResult);
 
                 // there could be no flags
-                var flagOrItem = p.Before(",", ".").RecoverWith(p);
+                var flagOrItem = p.Before(",", ".").RecoverWith(() => p);
 
                 var item = itemParser.Parse(flagOrItem);
                 if (item) {
@@ -358,12 +358,12 @@ Ready item: book of exorcism [BKEX].
                 }
             }
 
-            var remainingItems = p.Before(".").RecoverWith(p).Value;
+            var remainingItems = p.Before(".").RecoverWith(() => p).Value;
             while (!remainingItems.EOF) {
                 var nextItem = remainingItems.After(",").SkipWhitespaces();
                 if (!nextItem) break;
 
-                var item = itemParser.ParseMaybe(nextItem.Before(",").RecoverWith(nextItem));
+                var item = itemParser.ParseMaybe(nextItem.Before(",").RecoverWith(() => nextItem));
                 if (item) items.Add(item.Value);
             }
 
@@ -374,7 +374,7 @@ Ready item: book of exorcism [BKEX].
 
                 var notSuccess = !nextProp.Success;
 
-                nextProp = nextProp.Before(".").RecoverWith(nextProp);
+                nextProp = nextProp.Before(".").RecoverWith(() => nextProp);
                 var prop = nextProp.OneOf(
                     weightParser,
                     capacityParser,
@@ -555,31 +555,140 @@ Ready item: book of exorcism [BKEX].
     // + {Name} [{Number}] : {Type}, {Int} {Type}, {Flag}; {Key}: {Value}; {Description}.
     public class StructureParser : ReportParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            p = p.BeforeBackwards(".");
-
             var nameAndNumber = p.After("+").SkipWhitespaces().Before("] : ");  // lets hope noone will use this combination in their building names
 
-            var number = nameAndNumber.AfterBackwards("[").Integer();
-            var name = nameAndNumber.BeforeBackwards("[").AsString();
-            var description = Maybe<string>.NA;
+            var name = nameAndNumber.BeforeBackwards("[").SkipWhitespacesBackwards().AsString();
+            if (!name) return Error(name);
 
-            p.After("] : ");
-            // p.PushBookmark();
-            // if (p.AfterBackwards(";")) {
-            //     var descPos = p.Pos - 2;
-            //     description = new Maybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
+            var number = nameAndNumber.After("[").Integer();
+            if (!number) return Error(number);
 
-            //     // w/o description
-            //     p.PopBookmark();
-            //     p = p.Slice(descPos - p.Pos + 1);
-            // }
-            // else {
-            //     p.RemoveBookmark();
-            // }
+            var type = p.After("] :").SkipWhitespaces().Before(",", ";", ".").AsString();
+            if (!type) return Error(type);
 
-            // p.SkipWhitespaces()
+            p.Seek(1);
 
-            throw new NotImplementedException();
+            List<TextParser> props = new List<TextParser>();
+            if (!p.EOF) {
+                var props1 = p
+                    .Before(";")
+                    .RecoverWith(() => p.BeforeBackwards("."))
+                    .List(",", item => item.SkipWhitespaces());
+
+                var props2 = p
+                    .After(";")
+                    .BeforeBackwards(".")
+                    .List(";", item => item.SkipWhitespaces());
+
+                if (props1) props.AddRange(props1.Value);
+                if (props2) props.AddRange(props2.Value);
+            }
+
+            var structure = ReportNode.Object(
+                ReportNode.Str("name", name),
+                ReportNode.Int("number", number),
+                ReportNode.Str("type", type)
+            );
+
+            if (type.Value.Equals("fleet", StringComparison.OrdinalIgnoreCase)) {
+                var contents = ReportNode.Array();
+                structure.Add(ReportNode.Key("contents", contents));
+
+                while (props.Count > 0) {
+                    var item = props[0];
+                    item.PushBookmark();
+
+                    var objCount = item.Integer();
+                    var objType = item.SkipWhitespaces().AsString();
+
+                    if (!objCount || !objType) {
+                        item.PopBookmark();
+                        break;
+                    }
+                    else {
+                        contents.Add(ReportNode.Object(
+                            ReportNode.Int("count", objCount),
+                            ReportNode.Str("type", objType)
+                        ));
+                        props.RemoveAt(0);
+                    }
+                }
+            }
+
+            var flags = ReportNode.Array();
+            structure.Add(ReportNode.Key("flags", flags));
+
+            List<TextParser> unknownProps = new List<TextParser>();
+            foreach (var prop in props) {
+                var knownProp = prop.OneOf(
+                    x => x.After("needs")
+                        .SkipWhitespaces()
+                        .Integer()
+                        .Map(v => ReportNode.Int("needs", v)),
+                    x => {
+                        var targetProp = x.After("Load:").SkipWhitespaces();
+                        if (!targetProp) return targetProp.Convert<IReportNode>();
+
+                        var value = targetProp.Before("/").Integer();
+                        if (!value) return value.Convert<IReportNode>();
+
+                        var max = targetProp.After("/").Integer();
+                        if (!max) return max.Convert<IReportNode>();
+
+                        return new Maybe<IReportNode>(ReportNode.Key("load", ReportNode.Object(
+                            ReportNode.Int("used", value),
+                            ReportNode.Int("max", max)
+                        )));
+                    },
+                    x => {
+                        var targetProp = x.After("Sailors:").SkipWhitespaces();
+                        if (!targetProp) return targetProp.Convert<IReportNode>();
+
+                        var value = targetProp.Before("/").Integer();
+                        if (!value) return value.Convert<IReportNode>();
+
+                        var max = targetProp.After("/").Integer();
+                        if (!max) return max.Convert<IReportNode>();
+
+                        return new Maybe<IReportNode>(ReportNode.Key("sailors", ReportNode.Object(
+                            ReportNode.Int("current", value),
+                            ReportNode.Int("required", max)
+                        )));
+                    },
+                    x => x.After("MaxSpeed:")
+                        .SkipWhitespaces()
+                        .Integer()
+                        .Map(v => ReportNode.Int("speed", v)),
+                    x => x.After("Sail directions:")
+                        .SkipWhitespaces()
+                        .List(",", item => item.SkipWhitespaces())
+                        .Map(v => ReportNode.Key("sailDirections",ReportNode.Array(
+                            v.Select(sd => ReportNode.Str(sd.AsString()))
+                        )))
+                );
+                if (knownProp) {
+                    structure.Add(knownProp.Value);
+                    continue;
+                }
+
+                var knownFlag = prop.OneOf(
+                    x => x.Match("closed to player units"),
+                    x => x.Match("contains an inner location"),
+                    x => x.Match("engraved with runes of warding")
+                ).AsString();
+                if (knownFlag) {
+                    flags.Add(ReportNode.Str(knownFlag.Value));
+                    continue;
+                }
+
+                unknownProps.Add(prop);
+            }
+
+            if (unknownProps.Count > 0) {
+                structure.Add(ReportNode.Str("description", string.Join("; ", unknownProps.Select(x => x.AsString()))));
+            }
+
+            return Ok(structure);
         }
     }
 }
