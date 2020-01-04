@@ -83,8 +83,21 @@ namespace atlantis {
 
             var existingTurn = await db.Turns.FirstOrDefaultAsync(x => x.GameId == gameId && x.Number == turn.Number);
             if (existingTurn != null) {
+                var tablesToDelete = new[] {
+                    db.Model.FindEntityType(typeof(DbEvent)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbUnit)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbFaction)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbStructure)).GetTableName(),
+                    db.Model.FindEntityType(typeof(DbRegion)).GetTableName(),
+                };
+
+                foreach (var table in tablesToDelete) {
+                    await db.Database.ExecuteSqlRawAsync($"delete from {table} where TurnId = {existingTurn.Id}");
+                }
+
                 db.Remove(existingTurn);
                 await db.SaveChangesAsync();
+
             }
 
             db.ChangeTracker.AutoDetectChangesEnabled = false;
@@ -205,14 +218,16 @@ namespace atlantis {
             int structureOrder = 0;
             foreach (JObject structure in structures)
             {
+                var str = structure["structure"] as JObject;
                 var s = new DbStructure {
                     GameId = game.Id,
                     TurnId = turn.Id,
                     Sequence = structureOrder,
-                    Number = structure.Value<int>("number"),
-                    Type = structure.Value<string>("type"),
-                    Name = structure.Value<string>("name"),
-                    Units = new List<DbUnit>()
+                    Number = str.Value<int>("number"),
+                    Type = str.Value<string>("type"),
+                    Name = str.Value<string>("name"),
+                    Units = new List<DbUnit>(),
+                    Json = str.ToString()
                 };
                 s.Memory = structuresMemory.TryGetValue(s.EmpheralId, out var structMem)
                     ? structMem
@@ -220,9 +235,6 @@ namespace atlantis {
 
                 var units = structure["units"] as JArray;
                 if (units != null) AddUnits(game, turn, units, region, s, unitMemory, orders);
-
-                structure.Remove("units");
-                s.Json = structure.ToString();
 
                 region.Structures.Add(s);
                 turn.Structures.Add(s);
