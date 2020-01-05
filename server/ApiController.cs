@@ -1,6 +1,7 @@
 namespace atlantis {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -30,7 +31,7 @@ namespace atlantis {
         }
 
         [HttpPost("games")]
-        public async Task<long> CreateGameAsync([FromForm] string name) {
+        public async Task<long> CreateGameAsync([Required, FromForm] string name) {
             var newGame = await db.Games.AddAsync(new DbGame {
                 Name = name
             });
@@ -39,8 +40,46 @@ namespace atlantis {
             return newGame.Entity.Id;
         }
 
+        [HttpGet("games/{gameId}/regions/{turnNumber?}")]
+        public async Task<IActionResult> GetRegionsAsync([Required, FromRoute] long gameId, [FromRoute] int? turnNumber) {
+            IQueryable<DbTurn> q = db.Turns
+                .Include(x => x.Regions)
+                .Where(x => x.GameId == gameId);
+
+            if (turnNumber.HasValue) {
+                q = q.Where(x => x.Number == turnNumber.Value);
+            }
+            else {
+                q = q.OrderByDescending(x => x.Id);
+            }
+
+            var turn = await q.FirstOrDefaultAsync();
+            if (turn == null) return NotFound();
+
+            using var ms = new MemoryStream();
+            using var bodyWriter = new StreamWriter(ms);
+            using var writer = new JsonTextWriter(bodyWriter);
+
+            writer.WriteStartArray();
+            foreach (var r in turn.Regions) {
+                var json = JObject.Parse(r.Json);
+                json["_id"] = r.Id;
+                json["_updatedAtTurn"] = r.UpdatedAtTurn;
+                json.WriteTo(writer);
+            }
+            writer.WriteEndArray();
+
+            Response.ContentType = "application/json; charset=utf-8";
+            Response.ContentLength = ms.Length;
+
+            ms.Seek(0, SeekOrigin.Begin);
+            await ms.CopyToAsync(Response.Body, 0x10000);
+
+            return Ok();
+        }
+
         [HttpPost("games/{gameId}/report")]
-        public async Task UploadReport([FromRoute] long gameId)
+        public async Task UploadReport([Required, FromRoute] long gameId)
         {
             using var bodyReader = new StreamReader(Request.Body);
             using var converter = new AtlantisReportJsonConverter(bodyReader);
@@ -56,17 +95,17 @@ namespace atlantis {
             using JsonReader reader = new JsonTextReader(bufferReader);
 
             JObject report = await JObject.LoadAsync(reader);
-            var faction = report["faction"] as JObject; // *
-            var date = report["date"] as JObject; // *
-            var engine = report["engine"] as JObject; // *
-            var factionStatus = report["factionStatus"] as JArray; // *
-            var errors = report["errors"] as JArray; // *
-            var events = report["events"] as JArray; // *
-            var skillReports = report["skillReports"] as JArray; // *
-            var objectReports = report["objectReports"] as JArray; // *
-            var itemReports = report["itemReports"] as JArray; // *
-            var attitudes = report["attitudes"] as JObject; // *
-            var unclaimedSilver = report["unclaimedSilver"]; // *
+            var faction = report["faction"] as JObject;
+            var date = report["date"] as JObject;
+            var engine = report["engine"] as JObject;
+            var factionStatus = report["factionStatus"] as JArray;
+            var errors = report["errors"] as JArray;
+            var events = report["events"] as JArray;
+            var skillReports = report["skillReports"] as JArray;
+            var objectReports = report["objectReports"] as JArray;
+            var itemReports = report["itemReports"] as JArray;
+            var attitudes = report["attitudes"] as JObject;
+            var unclaimedSilver = report["unclaimedSilver"];
             var regions = report["regions"] as JArray;
             var ordersTemplate = report["ordersTemplate"] as JObject;
 

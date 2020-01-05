@@ -24,6 +24,9 @@
                         .AddCommandLine(args);
                 })
                 .UseStartup<Startup>()
+                .ConfigureKestrel(conf => {
+                    conf.AllowSynchronousIO = true;
+                })
                 .UseKestrel();
 
             var host = builder.Build();
