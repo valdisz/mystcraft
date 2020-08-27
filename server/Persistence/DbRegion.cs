@@ -1,15 +1,18 @@
 namespace atlantis.Persistence {
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using HotChocolate;
 
+    [GraphQLName("Region")]
     public class DbRegion {
         [Key]
         public long Id { get; set; }
 
-        public long GameId { get; set; }
+
+        [GraphQLIgnore]
         public long TurnId { get; set; }
 
-        public string EmpheralId => $"{X} {Y} {Z}";
+        [GraphQLIgnore]
+        public string UID => GetUID(X, Y, Z);
 
         public int X { get; set; }
         public int Y { get; set; }
@@ -26,15 +29,12 @@ namespace atlantis.Persistence {
         [Required]
         public string Terrain { get; set; }
 
-        [Required]
-        public string Json { get; set; }
-
-        public string Memory { get; set; }
-
-        public DbGame Game { get; set; }
+        [GraphQLIgnore]
         public DbTurn Turn { get; set; }
 
-        public List<DbUnit> Units { get; set; }
-        public List<DbStructure> Structures { get; set; }
+        // public List<DbUnit> Units { get; set; }
+        // public List<DbStructure> Structures { get; set; }
+
+        public static string GetUID(int x, int y, int z) => $"{x} {y} {z}";
     }
 }

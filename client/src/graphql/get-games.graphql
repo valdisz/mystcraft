@@ -1,0 +1,27 @@
+query GetGames {
+  games {
+    nodes {
+      ...GameListItem
+    }
+  }
+}
+
+fragment GameListItem on Game {
+      id
+      name
+      rulesetName
+      rulesetVersion
+      playerFactionNumber
+      playerFactionName
+      lastTurnNumber
+      turns(last: 1) {
+        edges {
+          node {
+            id
+            number
+            month
+            year
+          }
+        }
+      }
+}

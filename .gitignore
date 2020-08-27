@@ -4,3 +4,4 @@ reports/
 node_modules/
 .cache/
 dist/
+.idea/

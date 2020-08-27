@@ -1,0 +1,14 @@
+overwrite: true
+schema: http://localhost:5000/graphql
+documents:
+  - ./src/graphql/**/*.graphql
+generates:
+  ./src/schema.ts:
+    config:
+      skipTypename: true
+      exportFragmentSpreadSubTypes: true
+      flattenGeneratedTypes: true
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-document-nodes

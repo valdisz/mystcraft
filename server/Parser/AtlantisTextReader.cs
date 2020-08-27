@@ -130,4 +130,17 @@ namespace atlantis {
         }
         #endregion
     }
+
+    public static class AtlantisTextReaderExtensions {
+
+
+        private static async IAsyncEnumerable<TextParser> ToTextParser(IAsyncEnumerable<MultiLineBlock> source) {
+            await foreach (var block in source) {
+                yield return new TextParser(block.LnStart, block.Text);
+            }
+        }
+
+        public static Cursor<TextParser> AsCursor(this AtlantisTextReader reader, int historySize = 3)
+            => new Cursor<TextParser>(historySize, ToTextParser(reader.ReadAllAsync()));
+    }
 }

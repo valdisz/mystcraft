@@ -6,19 +6,39 @@
   "scripts": {
     "build": "parcel build src/index.html --no-source-maps",
     "build:debug": "parcel build src/index.html",
-    "start": "parcel src/index.html"
-  },
-  "devDependencies": {
-    "parcel-bundler": "^1.12.4",
-    "sass": "^1.24.0",
-    "typescript": "^3.7.4"
+    "start": "parcel src/index.html",
+    "codegen": "graphql-codegen --config codegen.yaml"
   },
   "dependencies": {
-    "mobx": "^5.15.1",
-    "mobx-react-lite": "^1.5.2",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-router": "^5.1.2",
-    "react-router-dom": "^5.1.2"
+    "@material-ui/core": "^4.11.0",
+    "apollo-cache-inmemory": "^1.6.6",
+    "apollo-client": "^2.6.10",
+    "apollo-link-http": "^1.5.17",
+    "mobx": "^5.15.6",
+    "mobx-react-lite": "^2.1.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0",
+    "styled-components": "^5.1.1"
+  },
+  "devDependencies": {
+    "@graphql-cli/codegen": "^1.17.8",
+    "@graphql-cli/generate": "^4.0.0",
+    "@graphql-codegen/cli": "^1.17.8",
+    "@graphql-codegen/schema-ast": "^1.17.8",
+    "@graphql-codegen/typescript": "^1.17.9",
+    "@graphql-codegen/typescript-document-nodes": "^1.17.8",
+    "@graphql-codegen/typescript-operations": "^1.17.8",
+    "@types/react-router": "^5.1.8",
+    "@types/react-router-dom": "^5.1.5",
+    "@types/styled-components": "^5.1.2",
+    "graphql": "^15.3.0",
+    "graphql-cli": "^4.0.0",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^4.0.2"
+  },
+  "resolutions": {
+    "graphql": "15.3.0"
   }
 }

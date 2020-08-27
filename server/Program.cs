@@ -41,7 +41,7 @@
             using JsonWriter writer = new JsonTextWriter(Console.Out);
             writer.Formatting = Formatting.Indented;
 
-            await converter.ConvertAsync(writer);
+            await converter.ReadAsJsonAsync(writer);
         }
     }
 }

@@ -1,0 +1,7 @@
+overwrite: true
+schemaPath: ./src/schema.graphql
+documents:
+  - .src/graphql/**/*.graphql
+extensions:
+  endpoints:
+    default: 'http://localhost:5000/graphql'

@@ -16,75 +16,6 @@ namespace atlantis.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.0");
 
-            modelBuilder.Entity("atlantis.Persistence.DbEvent", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("FactionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("GameId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Json")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("TurnId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FactionId");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("TurnId");
-
-                    b.ToTable("Events");
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("GameId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Json")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Own")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("TurnId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("TurnId");
-
-                    b.ToTable("Factions");
-                });
-
             modelBuilder.Entity("atlantis.Persistence.DbGame", b =>
                 {
                     b.Property<long>("Id")
@@ -94,14 +25,17 @@ namespace atlantis.Migrations
                     b.Property<string>("EngineVersion")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Memory")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("LastTurnNumber")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PlayerFactionName")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("PlayerFactionNumber")
@@ -124,18 +58,8 @@ namespace atlantis.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("GameId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Json")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Label")
                         .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Memory")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Province")
@@ -163,17 +87,23 @@ namespace atlantis.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GameId");
-
                     b.HasIndex("TurnId");
 
                     b.ToTable("Regions");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+            modelBuilder.Entity("atlantis.Persistence.DbReport", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FactionName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasMaxLength(100);
+
+                    b.Property<int>("FactionNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("GameId")
@@ -183,38 +113,20 @@ namespace atlantis.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Memory")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("Source")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("RegionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Sequence")
-                        .HasColumnType("INTEGER");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");
 
-                    b.HasIndex("RegionId");
-
                     b.HasIndex("TurnId");
 
-                    b.ToTable("Structures");
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
@@ -225,9 +137,6 @@ namespace atlantis.Migrations
 
                     b.Property<long>("GameId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Memory")
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("Month")
                         .HasColumnType("INTEGER");
@@ -245,107 +154,8 @@ namespace atlantis.Migrations
                     b.ToTable("Turns");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("FactionNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("GameId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Json")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Memory")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Orders")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Own")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("RegionId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Sequence")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("StrcutureId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("TurnId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("RegionId");
-
-                    b.HasIndex("StrcutureId");
-
-                    b.HasIndex("TurnId");
-
-                    b.ToTable("Units");
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbEvent", b =>
-                {
-                    b.HasOne("atlantis.Persistence.DbFaction", "Faction")
-                        .WithMany("Events")
-                        .HasForeignKey("FactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("atlantis.Persistence.DbGame", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
-                        .WithMany("Events")
-                        .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
-                {
-                    b.HasOne("atlantis.Persistence.DbGame", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
-                        .WithMany("Factions")
-                        .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("atlantis.Persistence.DbRegion", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbGame", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("atlantis.Persistence.DbTurn", "Turn")
                         .WithMany("Regions")
                         .HasForeignKey("TurnId")
@@ -353,22 +163,16 @@ namespace atlantis.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+            modelBuilder.Entity("atlantis.Persistence.DbReport", b =>
                 {
                     b.HasOne("atlantis.Persistence.DbGame", "Game")
-                        .WithMany()
+                        .WithMany("Reports")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbRegion", "Region")
-                        .WithMany("Structures")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("atlantis.Persistence.DbTurn", "Turn")
-                        .WithMany("Structures")
+                        .WithMany("Reports")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -379,31 +183,6 @@ namespace atlantis.Migrations
                     b.HasOne("atlantis.Persistence.DbGame", "Game")
                         .WithMany("Turns")
                         .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
-                {
-                    b.HasOne("atlantis.Persistence.DbGame", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("atlantis.Persistence.DbRegion", "Region")
-                        .WithMany("Units")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("atlantis.Persistence.DbStructure", "Structure")
-                        .WithMany("Units")
-                        .HasForeignKey("StrcutureId");
-
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
-                        .WithMany("Units")
-                        .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
