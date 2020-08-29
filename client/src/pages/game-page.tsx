@@ -1,20 +1,22 @@
 import * as React from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
-import { List, ListSubheader, ListItem, ListItemText, Divider } from '@material-ui/core'
-import { IObservableArray, runInAction, observable } from 'mobx'
-import { useObserver, useLocalStore } from 'mobx-react-lite'
 import { CLIENT } from '../client'
-import { GameListItem, GetGamesQuery, GetGames, GetMapQuery, GetMap, GetMapQueryVariables } from '../schema'
-import { Link, useParams } from 'react-router-dom'
-import { Container, Renderer, Graphics, Polygon, Point } from 'pixi.js'
+import { GetMapQuery, GetMap, GetMapQueryVariables, Region as RegionData } from '../schema'
+import PIXI, { Container, Renderer, Graphics, Polygon, autoDetectRenderer } from 'pixi.js'
 import gql from 'graphql-tag'
+import throttle from 'lodash.throttle'
+import { useParams } from 'react-router-dom'
 
 class Region extends Container {
-    constructor(terrain: string, scale: number = 4) {
+    constructor(public readonly pX: number, public readonly pY: number, public readonly terrain: string, scale: number = 4) {
         super()
 
-        const w = 16 * scale
-        const h = 14 * scale
+        const w = 14 * scale
+        const h = 12 * scale
+
+        this.sizeW = w
+        this.sizeH = h
+
         const hex = new Polygon([
             w,          h / 2,
             w / 4 * 3,  h,
@@ -53,30 +55,110 @@ class Region extends Container {
         const g = new Graphics()
         g.beginFill(color)
         g.drawPolygon(hex)
+        g.endFill()
 
         this.addChild(g)
+
+        const dX = 0
+        const dY = 0
+
+        this.x = (pX - 1) * (this.width / 4 * 3) - dX * pX
+        this.y = (pY - 1) * (this.height / 2) - dY * pY
+        this.zIndex = pY
     }
+
+    readonly sizeW
+    readonly sizeH
 }
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 declare const ResizeObserver: any
 
-class Viewport {
+interface IViewport {
+    readonly width: number
+    readonly height: number
+    readonly offsetX: number
+    readonly offsetY: number
+    readonly zoom: number
+}
+
+class Viewport implements IViewport {
     constructor(private element: HTMLElement) {
-        this.observer = new ResizeObserver(() => {
-            if (this.onResize) {
-                this.onResize({ width: this.width, height: this.height })
-            }
-        })
+        this.observer = new ResizeObserver(this.raiseOnUpdate)
         this.observer.observe(element)
+
+        element.addEventListener('pointerdown', this.onPanStart)
+
+        element.addEventListener('pointermove', this.onPan)
+
+        element.addEventListener('pointerup', this.onPanEnd)
+        element.addEventListener('pointercancel', this.onPanEnd)
+        element.addEventListener('pointerleave', this.onPanEnd)
+        element.addEventListener('pointerout', this.onPanEnd)
+
+        element.addEventListener('wheel', this.onZoom)
     }
 
+    private _offsetX = 0
+    private _offsetY = 0
+
+    private _zoom = 100
+
     private observer
+
+    private paning = false
+    private panOffsetX = 0
+    private panOffsetY = 0
+    private panX = 0
+    private panY = 0
+
+    private onPanStart = (e: MouseEvent) => {
+        this.panOffsetX = this._offsetX
+        this.panOffsetY = this._offsetY
+
+        this.panX = e.x
+        this.panY = e.y
+
+        this.paning = true
+    }
+
+    private onPan = throttle((e: MouseEvent) => {
+        if (!this.paning) return
+
+        const deltaX = e.x - this.panX
+        const deltaY = e.y - this.panY
+
+        this._offsetX = Math.floor(this.panOffsetX + deltaX)
+        this._offsetY = Math.floor(this.panOffsetY + deltaY)
+
+        window.requestAnimationFrame(() => this.raiseOnUpdate())
+    }, 30)
+
+    private onPanEnd = (e: MouseEvent) => {
+        if (!this.paning) return
+
+        this.paning = false
+        this.raiseOnUpdate()
+    }
+
+    private onZoom = (e: WheelEvent) => {
+        const z = Math.floor(e.deltaY * 0.1) + this._zoom
+        this._zoom = Math.min(Math.max(z, 10), 400)
+
+        this.raiseOnUpdate()
+    }
+
+    private raiseOnUpdate = () => this.onUpdate && this.onUpdate(this)
 
     get width() { return this.element.clientWidth }
     get height() { return this.element.clientHeight }
 
-    onResize?: (event: { width: number, height: number }) => void
+    get offsetX() { return this._offsetX }
+    get offsetY() { return this._offsetY }
+
+    get zoom() { return this._zoom / 100 }
+
+    onUpdate?: (event: IViewport) => void
 }
 
 class Scene extends Container {
@@ -85,20 +167,25 @@ class Scene extends Container {
 
         this.viewport = new Viewport(canvas)
 
-        this.renderer = new Renderer({
+        this.renderer = autoDetectRenderer({
             width: this.viewport.width,
             height: this.viewport.height,
-            view: canvas
+            view: canvas,
+            antialias: true,
+            resolution: window.devicePixelRatio || 1
         })
 
-        this.viewport.onResize = ({ width, height}) => {
+        this.viewport.onUpdate = ({ width, height, offsetX, offsetY, zoom }) => {
             this.renderer.resize(width, height)
+            this.x = offsetX
+            this.y = offsetY
+            this.scale.set(zoom)
             this.update()
         }
     }
 
-    private renderer: Renderer
-    private viewport: Viewport
+    readonly renderer: Renderer
+    readonly viewport: Viewport
 
     update() {
         this.renderer.render(this)
@@ -108,20 +195,16 @@ class Scene extends Container {
 class GameMap {
     constructor(canvas: HTMLCanvasElement) {
         this.scene = new Scene(canvas)
-
-        this.scene.update()
     }
 
     private scene: Scene
 
     addRegion(x: number, y: number, terrain: string) {
-        const region = new Region(terrain, 2)
-        region.x = (x - 1) * (region.width / 4 * 3)
-        region.y = (y - 1) * (region.height / 2)
-        this.scene.addChild(region)
+        this.scene.addChild(new Region(x, y, terrain, 4))
     }
 
     finish() {
+        this.scene.sortChildren()
         this.scene.update()
     }
 }
@@ -138,7 +221,7 @@ const GlobalStyles = createGlobalStyle`
 const MapContainer = styled.div`
     width: 100%;
     height: 100%;
-    background-color: red;
+    background-color: #000;
 `
 
 const MapCanvas = styled.canvas`
@@ -193,3 +276,4 @@ export function GamePage() {
         </MapContainer>
     </>
 }
+
