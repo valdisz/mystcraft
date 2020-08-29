@@ -233,6 +233,13 @@ export type GetGamesQuery = { games?: Maybe<{ nodes?: Maybe<Array<Maybe<(
       & { turns?: Maybe<{ edges?: Maybe<Array<{ node?: Maybe<Pick<Turn, 'id' | 'number' | 'month' | 'year'>> }>> }> }
     )>>> }> };
 
+export type GetMapQueryVariables = Exact<{
+  turnId: Scalars['ID'];
+}>;
+
+
+export type GetMapQuery = { node?: Maybe<{ regions?: Maybe<{ nodes?: Maybe<Array<Maybe<Pick<Region, 'id' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province'>>>> }> }> };
+
 export const GameListItem = gql`
     fragment GameListItem on Game {
   id
@@ -263,3 +270,22 @@ export const GetGames = gql`
   }
 }
     ${GameListItem}`;
+export const GetMap = gql`
+    query GetMap($turnId: ID!) {
+  node(id: $turnId) {
+    ... on Turn {
+      regions {
+        nodes {
+          id
+          x
+          y
+          z
+          label
+          terrain
+          province
+        }
+      }
+    }
+  }
+}
+    `;

@@ -1,0 +1,17 @@
+query GetMap($turnId: ID!) {
+  node(id: $turnId) {
+    ...on Turn {
+      regions {
+        nodes {
+          id
+          x
+          y
+          z
+          label
+          terrain
+          province
+        }
+      }
+    }
+  }
+}
