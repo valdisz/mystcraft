@@ -177,6 +177,20 @@ namespace atlantis
             return Slice(i + 1);
         }
 
+        public Maybe<TextParser> SkipChar(char c) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
+            var span = GetSpan();
+            int i;
+            for (i = 0; i < span.Length; i++) {
+                if (span[i] != c) {
+                    break;
+                }
+            }
+
+            return Seek(i);
+        }
+
         public Maybe<int> Integer() {
             if (EOF) return new Maybe<int>("EOF", Ln, Pos + 1);
 
@@ -219,6 +233,50 @@ namespace atlantis
             if (!s) return s.Convert<int>();
 
             return new Maybe<int>(int.Parse(s.Value.Text.Span));
+        }
+
+        public Maybe<double> Real() {
+            if (EOF) return new Maybe<double>("EOF", Ln, Pos + 1);
+
+            PushBookmark();
+            var span = GetSpan();
+
+            var i = 0;
+            switch (span[0]) {
+                case '+':
+                    var r = Seek(1);
+                    if (!r) return r.Convert<double>();
+
+                    span = GetSpan();
+                    break;
+
+                case '-':
+                    i++;
+                    break;
+            }
+
+            if (!char.IsDigit(span[i]) && span[i] != '.') {
+                PopBookmark();
+                return new Maybe<double>("Not a number", Ln, Pos + 1);
+            }
+
+            for (; i < span.Length; i++) {
+                if (!char.IsDigit(span[i]) && span[i] != '.') {
+                    break;
+                }
+            }
+
+            if (i < 0) {
+                PopBookmark();
+                return new Maybe<double>("Expected +, -, . or number", Ln, Pos + 1);
+            }
+
+            RemoveBookmark();
+
+            var s = Slice(i);
+            if (!s) return s.Convert<double>();
+
+            return new Maybe<double>(double.Parse(s.Value.Text.Span));
         }
 
         public Maybe<TextParser> Word() {
@@ -340,6 +398,7 @@ namespace atlantis
         public static Maybe<TextParser> Word(this Maybe<TextParser> p) => p ? p.Value.Word() : p;
         public static Maybe<TextParser> Match(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Match(s) : p;
         public static Maybe<int> Integer(this Maybe<TextParser> p) => p ? p.Value.Integer() : p.Convert<int>();
+        public static Maybe<double> Real(this Maybe<TextParser> p) => p ? p.Value.Real() : p.Convert<double>();
         public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> left, ReadOnlySpan<char> right) => p ? p.Value.Between(left, right) : p;
         public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Between(s) : p;
         public static Maybe<string> AsString(this Maybe<TextParser> p) => p ? new Maybe<string>(p.Value) : p.Convert<string>();
@@ -381,6 +440,18 @@ namespace atlantis
 
         public static Maybe<IReportNode> OneOf(this Maybe<TextParser> p, params IReportParser[] parsers)
             => p ? OneOf(p.Value, parsers) : p.Convert<IReportNode>();
+
+        public static Maybe<TextParser> OneOf(this TextParser p, params string[] str) {
+            for (var i = 0; i < str.Length; i++) {
+                var result = p.Try(parser => parser.Match(str[i]));
+                if (result) return result;
+            }
+
+            return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
+        }
+
+        public static Maybe<TextParser> OneOf(this Maybe<TextParser> p, params string[] str)
+            => p ? OneOf(p.Value, str) : p.Convert<TextParser>();
 
         public static Maybe<IReportNode> OneOf(this TextParser p, params IReportParser[] parsers) {
             for (var i = 0; i < parsers.Length; i++) {

@@ -1,6 +1,9 @@
-namespace atlantis.Persistence {
+namespace atlantis.Persistence
+{
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
+    using Microsoft.EntityFrameworkCore;
 
     [GraphQLName("Region")]
     public class DbRegion {
@@ -29,6 +32,33 @@ namespace atlantis.Persistence {
         [Required]
         public string Terrain { get; set; }
 
+        [Required]
+        public int Population { get; set; }
+
+        public string Race { get; set; }
+
+        [Required]
+        public int Entertainment { get; set; }
+
+        [Required]
+        public int Tax { get; set; }
+
+        [Required]
+        public double Wages { get; set; }
+
+        [Required]
+        public int TotalWages { get; set; }
+
+        public List<DbTradableItem> ForSale { get; set; } = new List<DbTradableItem>();
+
+        public List<DbTradableItem> Wanted { get; set; } = new List<DbTradableItem>();
+
+
+        public List<DbItem> Products { get; set; } = new List<DbItem>();
+
+        [GraphQLIgnore]
+        public List<DbRegionExit> Exits { get; set; } = new List<DbRegionExit>();
+
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
 
@@ -36,5 +66,10 @@ namespace atlantis.Persistence {
         // public List<DbStructure> Structures { get; set; }
 
         public static string GetUID(int x, int y, int z) => $"{x} {y} {z}";
+    }
+
+    [Owned]
+    public class DbRegionExit {
+        public string RegionUID { get; set; }
     }
 }

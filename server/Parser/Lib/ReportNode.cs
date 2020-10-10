@@ -66,6 +66,7 @@ namespace atlantis {
         public static IReportNode Bag(params IReportNode[] children) => new ReportBag(children);
         public static IReportNode Key(string key, IReportNode value) => new ReportKey(key, value);
         public static IReportNode Int(string key, int value) => new ReportKey(key, new ReportInt(value));
+        public static IReportNode Real(string key, double value) => new ReportKey(key, new ReportReal(value));
         public static IReportNode Str(string key, string value) => new ReportKey(key, new ReportStr(value));
         public static IReportNode Bool(string key, bool value) => new ReportKey(key, new ReportBool(value));
         public static IReportNode Null(string key) => new ReportKey(key, new ReportNull());
@@ -133,6 +134,18 @@ namespace atlantis {
         }
 
         public int Value { get; }
+
+        public override Task WriteJson(JsonWriter writer) => writer.WriteValueAsync(Value);
+    }
+
+    public class ReportReal : ReportNode
+    {
+        public ReportReal(double value) : base("real", false)
+        {
+            Value = value;
+        }
+
+        public double Value { get; }
 
         public override Task WriteJson(JsonWriter writer) => writer.WriteValueAsync(Value);
     }

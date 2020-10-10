@@ -8,7 +8,8 @@ namespace atlantis
         public static readonly SkillParser Skill = new SkillParser();
         public static readonly ItemParser Item = new ItemParser();
         public static readonly RegionHeaderParser RegionHeader = new RegionHeaderParser(new CoordsParser());
-        public static readonly UnitParser Unit = new UnitParser(Skill);
+        public static readonly UnitParser Unit = new UnitParser(Skill, Item);
         public static readonly StructureParser Structure = new StructureParser();
+        public static readonly RegionPropsParser RegionProps = new RegionPropsParser(Item);
     }
 }

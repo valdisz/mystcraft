@@ -37,6 +37,32 @@ namespace atlantis.Persistence
                     .HasForeignKey(x => x.TurnId);
             });
 
+            model.Entity<DbRegion>(t => {
+                t.OwnsMany(p => p.ForSale, a => {
+                    a.WithOwner().HasForeignKey("RegionId");
+                    a.ToTable("Regions_ForSale");
+                    a.HasKey("RegionId", nameof(DbTradableItem.Code));
+                });
+
+                t.OwnsMany(p => p.Wanted, a => {
+                    a.WithOwner().HasForeignKey("RegionId");
+                    a.ToTable("Regions_Wanted");
+                    a.HasKey("RegionId", nameof(DbTradableItem.Code));
+                });
+
+                t.OwnsMany(p => p.Products, a => {
+                    a.WithOwner().HasForeignKey("RegionId");
+                    a.ToTable("Regions_Products");
+                    a.HasKey("RegionId", nameof(DbItem.Code));
+                });
+
+                t.OwnsMany(p => p.Exits, a => {
+                    a.WithOwner().HasForeignKey("RegionId");
+                    a.ToTable("Regions_Exits");
+                    a.HasKey("RegionId", nameof(DbRegionExit.RegionUID));
+                });
+            });
+
             // model.Entity<DbTurn>(t => {
             //     t.HasOne(x => x.Game)
             //         .WithMany(x => x.Turns)

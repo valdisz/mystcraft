@@ -233,10 +233,10 @@ Skills: tactics [TACT] 5 (450), observation [OBSE] 2 (160), stealth [STEA] 2 (90
 Ready item: book of exorcism [BKEX].
     */
     public class UnitParser : BaseParser {
-        public UnitParser(SkillParser skillParser) {
+        public UnitParser(SkillParser skillParser, ItemParser itemParser) {
             nameParser = new UnitNameParser();
             factionParser = new FactionNameParser();
-            itemParser = new ItemParser();
+            this.itemParser = itemParser;
             skillsParser = new UnitSkillsParser(skillParser);
             weightParser = new UnitWeightParser();
             capacityParser = new UnitCapacityParser();
@@ -513,6 +513,106 @@ Ready item: book of exorcism [BKEX].
                 )) : null,
                 tax ? ReportNode.Int("tax", tax) : null
             ));
+        }
+    }
+
+    public class RegionPropsParser : BaseParser {
+        public RegionPropsParser(ItemParser itemParser) {
+            this.itemParser = itemParser;
+        }
+
+        private readonly ItemParser itemParser;
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            Maybe<IReportNode> ParaseItems(TextParser src, IReportParser parser, List<IReportNode> items) {
+                while (!src.EOF) {
+                    if (items.Count > 0) {
+                        Maybe<TextParser> result = src.After(",").SkipWhitespaces();
+                        if (!result) return Error(result);
+                    }
+
+                    var item = itemParser.Parse(src);
+                    if (!item) return Error(item);
+
+                    items.Add(item.Value);
+                }
+
+                return null;
+            }
+
+            p.SkipChar('-');
+
+            Maybe<double> wages = null;
+            Maybe<int> totalWages = null;
+            List<IReportNode> wanted = new List<IReportNode>();
+            List<IReportNode> forSale = new List<IReportNode>();
+            Maybe<int> entertainment = null;
+            List<IReportNode> products = new List<IReportNode>();
+
+            while (!p.EOF) {
+                var prop = p.SkipWhitespaces().Before(":").AsString();
+                if (!prop) return Error(prop);
+
+                var value = p.SkipWhitespaces().BeforeBackwards(".").SkipWhitespaces();
+                if (!value) return Error(value);
+                if (value.Match("none")) continue;
+
+                switch (prop.Value) {
+                    case "Wages": {
+                        wages = value.Seek(1).Real();
+                        if (!wages) return Error(wages);
+
+                        if (value.SkipWhitespaces().After("(")) {
+                            totalWages = value.Before(")").Seek(1).Integer();
+                        }
+
+                        break;
+                    }
+
+                    case "Wanted": {
+                        var err = ParaseItems(value.Value, itemParser, wanted);
+                        if (err != null) return err;
+                        break;
+                    }
+
+                    case "For Sale": {
+                        var err = ParaseItems(value.Value, itemParser, forSale);
+                        if (err != null) return err;
+                        break;
+                    }
+
+                    case "Products": {
+                        var err = ParaseItems(value.Value, itemParser, products);
+                        if (err != null) return err;
+                        break;
+                    }
+
+                    case "Entertainment available": {
+                        entertainment = value.Seek(1).Integer();
+                        if (!entertainment) return Error(entertainment);
+                        break;
+                    }
+
+                    default: {
+                        continue;
+                    }
+                }
+            }
+
+            return Ok(ReportNode.Bag(
+                ReportNode.Real("wages", wages?.Value ?? 0),
+                ReportNode.Int("totalWages", totalWages?.Value ?? 0),
+                ReportNode.Key("wanted", ReportNode.Array(wanted)),
+                ReportNode.Key("forSale", ReportNode.Array(forSale)),
+                ReportNode.Int("entertainment", entertainment?.Value ?? 0),
+                ReportNode.Key("products", ReportNode.Array(products))
+            ));
+        }
+    }
+
+    public class RegionExistsParser : BaseParser {
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            throw new NotImplementedException();
         }
     }
 

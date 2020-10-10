@@ -19,17 +19,14 @@ namespace atlantis
         }
 
         private bool IsUnit(TextParser p) {
-            var isRegionContent = p.OneOf(
-                x => x.Match("-"),
-                x => x.Match("*")
-            );
+            bool isRegionContent = p.OneOf("- ", "* ");
             p.Reset();
 
             return isRegionContent;
         }
 
         private bool IsStructure(TextParser p) {
-            var isRegionContent = p.Match("+");
+            var isRegionContent = p.Match("+ ");
             p.Reset();
 
             return isRegionContent;
@@ -45,8 +42,8 @@ namespace atlantis
                 await AllParsers.RegionHeader.Parse(cursor.Value).Value.WriteJson(writer);
 
                 await cursor.SkipEmptyLines();
-                await writer.WritePropertyNameAsync("props");
-                await writer.WriteValueAsync(cursor.Value.AsString());
+
+                await AllParsers.RegionProps.Parse(cursor.Value).Value.WriteJson(writer);
 
                 await cursor.SkipEmptyLines();
                 await writer.WritePropertyNameAsync("exits");
