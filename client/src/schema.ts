@@ -91,11 +91,20 @@ export type TurnReportsArgs = {
 };
 
 export type Region = Node & {
+  entertainment: Scalars['Int'];
+  forSale?: Maybe<Array<Maybe<TradableItem>>>;
   id: Scalars['ID'];
   label: Scalars['String'];
+  population: Scalars['Int'];
+  products?: Maybe<Array<Maybe<Item>>>;
   province: Scalars['String'];
+  race?: Maybe<Scalars['String']>;
+  tax: Scalars['Int'];
   terrain: Scalars['String'];
+  totalWages: Scalars['Int'];
   updatedAtTurn: Scalars['Int'];
+  wages: Scalars['Float'];
+  wanted?: Maybe<Array<Maybe<TradableItem>>>;
   x: Scalars['Int'];
   y: Scalars['Int'];
   z: Scalars['Int'];
@@ -186,6 +195,19 @@ export type MutationNewGameArgs = {
   name?: Maybe<Scalars['String']>;
 };
 
+export type TradableItem = {
+  code?: Maybe<Scalars['String']>;
+  count: Scalars['Int'];
+  name: Scalars['String'];
+  price: Scalars['Int'];
+};
+
+export type Item = {
+  code?: Maybe<Scalars['String']>;
+  count: Scalars['Int'];
+  name: Scalars['String'];
+};
+
 /** A connection to a list of items. */
 export type ReportConnection = {
   /** A list of edges. */
@@ -228,10 +250,26 @@ export type ReportEdge = {
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetGamesQuery = { games?: Maybe<{ nodes?: Maybe<Array<Maybe<(
-      Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'playerFactionNumber' | 'playerFactionName' | 'lastTurnNumber'>
-      & { turns?: Maybe<{ edges?: Maybe<Array<{ node?: Maybe<Pick<Turn, 'id' | 'number' | 'month' | 'year'>> }>> }> }
-    )>>> }> };
+export type GetGamesQuery = { games?: Maybe<{ nodes?: Maybe<Array<Maybe<GameListItemFragment>>> }> };
+
+export type NewGameMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type NewGameMutation = { newGame?: Maybe<GameListItemFragment> };
+
+export type GameListItemFragment = (
+  Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'playerFactionNumber' | 'playerFactionName' | 'lastTurnNumber'>
+  & { turns?: Maybe<{ edges?: Maybe<Array<{ node?: Maybe<Pick<Turn, 'id' | 'number' | 'month' | 'year'>> }>> }> }
+);
+
+export type GetLastTurnMapQueryVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type GetLastTurnMapQuery = { node?: Maybe<{ turns?: Maybe<{ nodes?: Maybe<Array<Maybe<Pick<Turn, 'id'>>>> }> }> };
 
 export type GetMapQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -270,6 +308,26 @@ export const GetGames = gql`
   }
 }
     ${GameListItem}`;
+export const NewGame = gql`
+    mutation NewGame($name: String!) {
+  newGame(name: $name) {
+    ...GameListItem
+  }
+}
+    ${GameListItem}`;
+export const GetLastTurnMap = gql`
+    query GetLastTurnMap($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      turns(last: 1) {
+        nodes {
+          id
+        }
+      }
+    }
+  }
+}
+    `;
 export const GetMap = gql`
     query GetMap($turnId: ID!) {
   node(id: $turnId) {

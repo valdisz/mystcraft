@@ -1,11 +1,13 @@
 import * as React from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import { CLIENT } from '../client'
-import { GetMapQuery, GetMap, GetMapQueryVariables, Region as RegionData } from '../schema'
+import { GetMapQuery, GetMap, GetMapQueryVariables, Region as RegionData, GetLastTurnMapQuery, GetLastTurnMap, GetLastTurnMapQueryVariables } from '../schema'
 import PIXI, { Container, Renderer, Graphics, Polygon, autoDetectRenderer } from 'pixi.js'
 import gql from 'graphql-tag'
 import throttle from 'lodash.throttle'
 import { useParams } from 'react-router-dom'
+import { useCallbackRef } from '../lib'
+import { Card, CardContent } from '@material-ui/core'
 
 class Region extends Container {
     constructor(public readonly pX: number, public readonly pY: number, public readonly terrain: string, scale: number = 4) {
@@ -229,51 +231,102 @@ const MapCanvas = styled.canvas`
     height: 100%;
 `
 
+interface GamePageRouteParams {
+    gameId: string
+}
+
+async function* loadMap(gameId: string) {
+    const { data: { node: turnsNode } } = await CLIENT.query<GetLastTurnMapQuery, GetLastTurnMapQueryVariables>({
+        query: GetLastTurnMap,
+        variables: { gameId }
+    })
+
+    if (!turnsNode?.turns?.nodes?.length) return
+
+    const { data: { node: regionsNode } } = await CLIENT.query<GetMapQuery, GetMapQueryVariables>({
+        query: GetMap,
+        variables: {
+            turnId: turnsNode.turns.nodes[0].id
+        }
+    })
+
+    if (!regionsNode?.regions?.nodes?.length) return
+
+    for (const { x, y, z, terrain } of regionsNode.regions.nodes) {
+        if (z !== 1) continue
+
+        yield { x, y, terrain }
+    }
+}
+
+const GameContainer = styled.div`
+    width: 100%;
+    height: 100%;
+    position: relative;
+`
+
+const Widget = styled.div`
+    position: absolute;
+`
+
+const TopLeft = styled(Widget)`
+    top: 1rem;
+    left: 1rem;
+`
+
+const TopRight = styled(Widget)`
+    top: 1rem;
+    right: 1rem;
+`
+
+const BottomLeft = styled(Widget)`
+    bottom: 1rem;
+    left: 1rem;
+`
+
+const BottomRight = styled(Widget)`
+    bottom: 1rem;
+    right: 1rem;
+`
+
+const GameActions = styled.div`
+    width: 200px;
+`
+
+
 export function GamePage() {
-    const { gameId } = useParams()
-    const canvasRef = React.useRef()
+    const { gameId } = useParams<GamePageRouteParams>()
+    const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
     const map = React.useRef<GameMap>(null)
 
     React.useEffect(() => {
-        CLIENT.query({
-            query: gql`
-            query GetLastTurn($gameId: ID!) {
-                node(id: $gameId) {
-                  ... on Game {
-                    turns(last: 1) {
-                      nodes {
-                        id
-                      }
-                    }
-                  }
-                }
-              }
-            `,
-            variables: { gameId }
-        })
-        .then(res => res.data.node.turns.nodes[0].id)
-        .then(turnId => CLIENT.query<GetMapQuery, GetMapQueryVariables>({
-            query: GetMap,
-            variables: { turnId }
-        }))
-        .then(res => {
-            map.current = new GameMap(canvasRef.current)
+        if (!canvasRef) return
 
-            for (const { x, y, z, terrain } of res.data.node.regions.nodes) {
-                if (z !== 1) continue
-
+        const loadMapAsync = async () => {
+            map.current = new GameMap(canvasRef)
+            for await (const {x, y, terrain} of loadMap(gameId)) {
                 map.current.addRegion(x, y, terrain)
             }
-
             map.current.finish()
-        })
-    }, [ canvasRef.current ])
+        }
 
-    return <>
+        loadMapAsync()
+    }, [ canvasRef ])
+
+    return <GameContainer>
         <GlobalStyles />
         <MapContainer>
-            <MapCanvas ref={canvasRef} />
+            <MapCanvas ref={setCanvasRef} />
         </MapContainer>
-    </>
+        <TopLeft>
+            <GameActions>
+                <Card>
+                    <CardContent>
+                        Test
+                    </CardContent>
+                </Card>
+            </GameActions>
+        </TopLeft>
+    </GameContainer>
 }
 

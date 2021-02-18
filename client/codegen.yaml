@@ -7,7 +7,7 @@ generates:
     config:
       skipTypename: true
       exportFragmentSpreadSubTypes: true
-      flattenGeneratedTypes: true
+      flattenGeneratedTypes: false
     plugins:
       - typescript
       - typescript-operations

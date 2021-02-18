@@ -1,7 +1,9 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { BrowserRouter} from 'react-router-dom';
-import { App } from './app';
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import { BrowserRouter} from 'react-router-dom'
+import 'regenerator-runtime/runtime.js'
+
+import { App } from './app'
 
 const RoutedApp = () => <BrowserRouter>
     <App />

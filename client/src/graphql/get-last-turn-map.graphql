@@ -1,0 +1,11 @@
+query GetLastTurnMap($gameId: ID!) {
+    node(id: $gameId) {
+        ... on Game {
+            turns(last: 1) {
+                nodes {
+                    id
+                }
+            }
+        }
+    }
+}

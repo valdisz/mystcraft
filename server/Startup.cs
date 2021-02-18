@@ -3,7 +3,6 @@ namespace atlantis {
     using atlantis.Persistence;
     using HotChocolate;
     using HotChocolate.AspNetCore;
-    using HotChocolate.Configuration;
     using HotChocolate.Execution.Configuration;
     using HotChocolate.Types.Relay;
     using Microsoft.AspNetCore.Builder;

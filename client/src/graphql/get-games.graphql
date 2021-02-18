@@ -6,6 +6,12 @@ query GetGames {
   }
 }
 
+mutation NewGame($name: String!) {
+  newGame(name: $name) {
+    ...GameListItem
+  }
+}
+
 fragment GameListItem on Game {
       id
       name
