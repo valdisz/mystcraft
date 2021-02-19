@@ -8,6 +8,8 @@ import { GamePage } from './pages/game-page'
 const GlobalStyles = createGlobalStyle`
 html, body, #app-host {
     height: 100%;
+    margin: 0;
+    padding: 0;
 }
 `
 
