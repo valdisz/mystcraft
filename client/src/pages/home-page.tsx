@@ -1,12 +1,15 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, ButtonGroup
 } from '@material-ui/core'
 import { observer, useObserver } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
 import GrainIcon from '@material-ui/icons/Grain';
 import { useStore } from '../store'
+import { SplitButton } from '../components'
+
+
 
 function NoGames() {
     return <ListItem>
@@ -20,6 +23,13 @@ interface GameItemProps {
     gameName: string
 }
 
+function GameActions() {
+    return <ButtonGroup>
+        <Button color='secondary' size='small'>Delete</Button>
+        <Button color='secondary' size='small'>Delete</Button>
+    </ButtonGroup>
+}
+
 function GameItem({ gameId, factionName, gameName }: GameItemProps) {
     return <ListItem button component={Link} to={`/game/${gameId}`} >
         <ListItemIcon>
@@ -29,10 +39,13 @@ function GameItem({ gameId, factionName, gameName }: GameItemProps) {
             { gameName ? <strong>{gameName}</strong> : <em>No name</em> }
         </ListItemText>
         <ListItemSecondaryAction>
-            <Button color='secondary' size='small'>Delete</Button>
+            <SplitButton color='default' size='small' variant='outlined' actions={[
+                { content: 'Delete', onAction: () => { } }
+            ]}>Load turn</SplitButton>
         </ListItemSecondaryAction>
     </ListItem>
 }
+
 
 const NewGameDialog = observer(() => {
     const { home } = useStore()
