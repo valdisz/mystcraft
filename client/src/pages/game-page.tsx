@@ -1,12 +1,8 @@
 import * as React from 'react'
-import styled, { createGlobalStyle } from 'styled-components'
-import { CLIENT } from '../client'
-import { GetMapQuery, GetMap, GetMapQueryVariables, Region as RegionData, GetLastTurnMapQuery, GetLastTurnMap, GetLastTurnMapQueryVariables } from '../schema'
-import PIXI from 'pixi.js'
-import gql from 'graphql-tag'
+import styled from 'styled-components'
 import { useParams } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import { Card, CardContent, AppBar, Button, Typography, Toolbar, IconButton } from '@material-ui/core'
+import { AppBar, Button, Typography, Toolbar, IconButton } from '@material-ui/core'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
@@ -60,31 +56,6 @@ const GameContainer = styled.div`
 const Widget = styled.div`
     position: absolute;
 `
-
-const TopLeft = styled(Widget)`
-    top: 1rem;
-    left: 1rem;
-`
-
-const TopRight = styled(Widget)`
-    top: 1rem;
-    right: 1rem;
-`
-
-const BottomLeft = styled(Widget)`
-    bottom: 1rem;
-    left: 1rem;
-`
-
-const BottomRight = styled(Widget)`
-    bottom: 1rem;
-    right: 1rem;
-`
-
-const GameActions = styled.div`
-    width: 200px;
-`
-
 
 export function GamePage() {
     const { gameId } = useParams<GamePageRouteParams>()

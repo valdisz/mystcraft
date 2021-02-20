@@ -1,6 +1,6 @@
 import throttle from 'lodash.throttle';
 import { IViewport } from './IViewport';
-import { ResizeObserver } from './game-page';
+import { ResizeObserver } from '../pages/game-page';
 
 export class Viewport implements IViewport {
     constructor(private element: HTMLElement) {

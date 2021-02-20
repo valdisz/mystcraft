@@ -1,9 +1,8 @@
 import * as React from 'react'
-import styled, { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle } from 'styled-components'
 import { createMuiTheme, ThemeProvider, CssBaseline } from '@material-ui/core'
-import { Switch, Route } from 'react-router-dom'
-import { HomePage } from './pages/home-page'
-import { GamePage } from './pages/game-page'
+import { StoreProvider } from './store'
+import { Routes } from './routes'
 
 const GlobalStyles = createGlobalStyle`
 html, body, #app-host {
@@ -16,16 +15,11 @@ html, body, #app-host {
 const theme = createMuiTheme({})
 
 export function App() {
-    return <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <GlobalStyles />
-        <Switch>
-            <Route path='/game/:gameId'>
-                <GamePage />
-            </Route>
-            <Route path='/'>
-                <HomePage />
-            </Route>
-        </Switch>
-    </ThemeProvider>
+    return <StoreProvider>
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <GlobalStyles />
+            <Routes />
+        </ThemeProvider>
+    </StoreProvider>
 }
