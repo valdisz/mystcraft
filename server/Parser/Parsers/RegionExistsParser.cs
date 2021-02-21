@@ -41,6 +41,7 @@ namespace atlantis
                 var settlement = exit.Try(settlementParser);
 
                 exits.Add(ReportNode.Object(
+                    ReportNode.Str("direction", direction),
                     location.Value,
                     settlement ? ReportNode.Key("settlement", settlement.Value) : null
                 ));
