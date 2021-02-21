@@ -1,9 +1,13 @@
-import { action, observable, runInAction, transaction } from 'mobx';
+import { action, makeObservable, observable, runInAction, transaction } from 'mobx';
 import { CLIENT } from '../client';
 import { GameListItemFragment, GetGamesQuery, GetGames, NewGame, NewGameMutation, NewGameMutationVariables } from '../schema';
 import { NewGameStore } from "./new-game-store";
 
 export class HomeStore {
+    constructor() {
+        makeObservable(this)
+    }
+
     readonly games = observable<GameListItemFragment>([]);
 
     load = () => {

@@ -1,7 +1,11 @@
 import * as React from 'react';
-import { action, observable } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 
 export class NewGameStore {
+    constructor() {
+        makeObservable(this)
+    }
+
     @observable isOpen = false;
     @observable name = '';
 

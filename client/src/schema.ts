@@ -1,6 +1,8 @@
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -14,6 +16,7 @@ export type Scalars = {
   /** The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1. */
   Long: any;
 };
+
 
 /** The node interface is implemented by entities that have a global unique identifier. */
 export type Node = {
@@ -247,22 +250,12 @@ export type ReportEdge = {
 };
 
 
+export type GameListItemFragment = Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'playerFactionNumber' | 'playerFactionName' | 'lastTurnNumber'>;
+
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetGamesQuery = { games?: Maybe<{ nodes?: Maybe<Array<Maybe<GameListItemFragment>>> }> };
-
-export type NewGameMutationVariables = Exact<{
-  name: Scalars['String'];
-}>;
-
-
-export type NewGameMutation = { newGame?: Maybe<GameListItemFragment> };
-
-export type GameListItemFragment = (
-  Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'playerFactionNumber' | 'playerFactionName' | 'lastTurnNumber'>
-  & { turns?: Maybe<{ edges?: Maybe<Array<{ node?: Maybe<Pick<Turn, 'id' | 'number' | 'month' | 'year'>> }>> }> }
-);
 
 export type GetLastTurnMapQueryVariables = Exact<{
   gameId: Scalars['ID'];
@@ -278,6 +271,27 @@ export type GetMapQueryVariables = Exact<{
 
 export type GetMapQuery = { node?: Maybe<{ regions?: Maybe<{ nodes?: Maybe<Array<Maybe<Pick<Region, 'id' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province'>>>> }> }> };
 
+export type GetTurnsQueryVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type GetTurnsQuery = { node?: Maybe<{ turns?: Maybe<{ nodes?: Maybe<Array<Maybe<TurnItemFragment>>> }> }> };
+
+export type TurnItemFragment = (
+  Pick<Turn, 'id' | 'number' | 'month' | 'year'>
+  & { reports?: Maybe<{ nodes?: Maybe<Array<Maybe<TurnItemReportFragment>>> }> }
+);
+
+export type TurnItemReportFragment = Pick<Report, 'id' | 'factionNumber'>;
+
+export type NewGameMutationVariables = Exact<{
+  name: Scalars['String'];
+}>;
+
+
+export type NewGameMutation = { newGame?: Maybe<GameListItemFragment> };
+
 export const GameListItem = gql`
     fragment GameListItem on Game {
   id
@@ -287,31 +301,34 @@ export const GameListItem = gql`
   playerFactionNumber
   playerFactionName
   lastTurnNumber
-  turns(last: 1) {
-    edges {
-      node {
-        id
-        number
-        month
-        year
-      }
+}
+    `;
+export const TurnItemReport = gql`
+    fragment TurnItemReport on Report {
+  id
+  factionNumber
+  factionNumber
+}
+    `;
+export const TurnItem = gql`
+    fragment TurnItem on Turn {
+  id
+  number
+  month
+  year
+  reports {
+    nodes {
+      ...TurnItemReport
     }
   }
 }
-    `;
+    ${TurnItemReport}`;
 export const GetGames = gql`
     query GetGames {
   games {
     nodes {
       ...GameListItem
     }
-  }
-}
-    ${GameListItem}`;
-export const NewGame = gql`
-    mutation NewGame($name: String!) {
-  newGame(name: $name) {
-    ...GameListItem
   }
 }
     ${GameListItem}`;
@@ -347,3 +364,23 @@ export const GetMap = gql`
   }
 }
     `;
+export const GetTurns = gql`
+    query GetTurns($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      turns {
+        nodes {
+          ...TurnItem
+        }
+      }
+    }
+  }
+}
+    ${TurnItem}`;
+export const NewGame = gql`
+    mutation NewGame($name: String!) {
+  newGame(name: $name) {
+    ...GameListItem
+  }
+}
+    ${GameListItem}`;
