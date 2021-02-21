@@ -1,4 +1,5 @@
-namespace atlantis {
+namespace atlantis
+{
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -11,28 +12,9 @@ namespace atlantis {
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Model;
 
     using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
-
-    public class JsonRegion {
-        public string Terrain;
-        public JsonCoords Coords;
-        public string Province;
-        public JsonPopulation Population;
-        public int? Tax;
-    }
-
-    public class JsonPopulation {
-        public int Amount;
-        public string Race;
-    }
-
-    public class JsonCoords {
-        public int X;
-        public int Y;
-        public int? Z;
-        public string Label;
-    }
 
     [Route("report")]
     public class ApiController : ControllerBase {
@@ -52,6 +34,7 @@ namespace atlantis {
             DbGame game = await FindGameAsync(db, relayId, gameId);
             if (game == null) return NotFound();
 
+            // 1. upload reports
             int earliestTurn = int.MaxValue;
             foreach (var file in Request.Form.Files) {
                 await using var stream = file.OpenReadStream();
@@ -61,6 +44,7 @@ namespace atlantis {
             }
             await db.SaveChangesAsync();
 
+            // 2. parse & merge reports and update history
             await UpdateTurnsAsync(db, game.Id, earliestTurn);
 
             return Ok();
@@ -176,21 +160,22 @@ namespace atlantis {
             RegionDic regions = regionsIn
                 .ToDictionary(k => k.Key, v => CopyRegion(v.Value));
 
-            await foreach (var report in db.Reports.Where(x => x.TurnId == turnId).AsNoTracking().AsAsyncEnumerable()) {
+            var reports = db.Reports
+                .Where(x => x.TurnId == turnId)
+                .AsNoTracking()
+                .AsAsyncEnumerable();
+
+            await foreach (var report in reports) {
                 var json = JObject.Parse(report.Json);
                 var jsonRegions = json["regions"] as JArray;
 
                 foreach (JObject region in jsonRegions) {
-                    CreateOrUpdateRegion(turnNumber, regions, region.ToObject<JsonRegion>());
+                    CreateOrUpdateRegion(turnNumber, regions, region.ToObject<JRegion>());
                 }
             }
 
             return regions;
         }
-
-        // private static JObject MergeRegionReport(JObject a, JObject b) {
-
-        // }
 
         private static DbRegion CopyRegion(DbRegion region) {
             return new DbRegion {
@@ -206,13 +191,13 @@ namespace atlantis {
                 TotalWages = region.TotalWages,
                 Entertainment = region.Entertainment,
                 Exits = region.Exits.Select(x => new DbRegionExit { RegionUID = x.RegionUID }).ToList(),
-                Products = region.Products.Select(x => new DbItem { Code = x.Code, Name = x.Name, Count = x.Count }).ToList(),
-                ForSale = region.ForSale.Select(x => new DbTradableItem { Code = x.Code, Name = x.Name, Count = x.Count, Price = x.Price }).ToList(),
-                Wanted = region.Wanted.Select(x => new DbTradableItem { Code = x.Code, Name = x.Name, Count = x.Count, Price = x.Price }).ToList()
+                Products = region.Products.Select(x => new DbItem { Code = x.Code, Amount = x.Amount }).ToList(),
+                ForSale = region.ForSale.Select(x => new DbTradableItem { Code = x.Code, Amount = x.Amount, Price = x.Price }).ToList(),
+                Wanted = region.Wanted.Select(x => new DbTradableItem { Code = x.Code, Amount = x.Amount, Price = x.Price }).ToList()
             };
         }
 
-        private static void CreateOrUpdateRegion(int turnNumber, RegionDic regions, JsonRegion source) {
+        private static void CreateOrUpdateRegion(int turnNumber, RegionDic regions, JRegion source) {
             var x = source.Coords.X;
             var y = source.Coords.Y;
             var z = source.Coords.Z ?? 1;
@@ -235,20 +220,69 @@ namespace atlantis {
             region.Population = source.Population?.Amount ?? 0;
             region.Race = source.Population?.Race;
             region.Tax = source.Tax ?? 0;
+            region.Entertainment = source.Entertainment ?? 0;
+            region.Wages = source.Wages;
+            region.TotalWages = source.TotalWages ?? 0;
+
+            SetRegionItems(region.Products, source.Products);
+            SetRegionItems(region.Wanted, source.Wanted);
+            SetRegionItems(region.ForSale, source.ForSale);
         }
 
-        private static Task RemoveRegions(Database db, long turnId) {
-            return db.Database
+        private static async Task RemoveRegions(Database db, long turnId) {
+            await db.Database
                 .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbRegion)).GetTableName()} where TurnId = {turnId}");
         }
 
         private static async Task InsertRegions(Database db, long turnId, IEnumerable<DbRegion> regions) {
             foreach (var region in regions) {
                 region.TurnId = turnId;
+
+                foreach (var wanted in region.Wanted) {
+                    wanted.TurnId = turnId;
+                }
+
+                foreach (var forSale in region.ForSale) {
+                    forSale.TurnId = turnId;
+                }
+
+                foreach (var product in region.Products) {
+                    product.TurnId = turnId;
+                }
+
                 await db.AddAsync(region);
             }
 
             await db.SaveChangesAsync();
+        }
+
+        public static void SetRegionItems(ICollection<DbItem> dbItems, IEnumerable<JItem> items) {
+            var dest = dbItems.ToDictionary(x => x.Code);
+
+            foreach (var item in items) {
+                if (!dest.TryGetValue(item.Code, out var i)) {
+                    i = new DbItem();
+                    dbItems.Add(i);
+                }
+
+                i.Code = item.Code;
+                i.Amount = item.Amount;
+            }
+        }
+
+        public static void SetRegionItems(ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
+            var dest = dbItems.ToDictionary(x => x.Code);
+
+            foreach (var item in items) {
+                if (!dest.TryGetValue(item.Code, out var i)) {
+                    i = new DbTradableItem();
+                    dbItems.Add(i);
+                }
+
+                i.Code = item.Code;
+                i.Amount = item.Amount;
+                i.Price = item.Price;
+            }
         }
     }
 }

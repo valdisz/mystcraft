@@ -188,12 +188,11 @@ namespace atlantis.Migrations
                             b1.Property<string>("Code")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Count")
+                            b1.Property<int>("Amount")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("TEXT");
+                            b1.Property<long>("TurnId")
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("RegionId", "Code");
 
@@ -227,14 +226,13 @@ namespace atlantis.Migrations
                             b1.Property<string>("Code")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Count")
+                            b1.Property<int>("Amount")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("TEXT");
-
                             b1.Property<int>("Price")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("TurnId")
                                 .HasColumnType("INTEGER");
 
                             b1.HasKey("RegionId", "Code");
@@ -253,14 +251,13 @@ namespace atlantis.Migrations
                             b1.Property<string>("Code")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Count")
+                            b1.Property<int>("Amount")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("TEXT");
-
                             b1.Property<int>("Price")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("TurnId")
                                 .HasColumnType("INTEGER");
 
                             b1.HasKey("RegionId", "Code");

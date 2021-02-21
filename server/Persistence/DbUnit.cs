@@ -9,8 +9,6 @@ namespace atlantis.Persistence {
         public long TurnId { get; set; }
         public long RegionId { get; set; }
         public long? StrcutureId { get; set; }
-
-        public bool Own { get; set; }
         public int Sequence { get; set; }
         public int Number { get; set; }
 

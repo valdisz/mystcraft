@@ -7,18 +7,30 @@ namespace atlantis.Persistence
     [Owned]
     [GraphQLName("Item")]
     public class DbItem {
+        [GraphQLIgnore]
+        [Required]
+        public long TurnId { get; set; }
+
+        [Required]
         public string Code { get; set; }
 
         [Required]
-        public string Name { get; set; }
-
-        [Required]
-        public int Count { get; set; }
+        public int Amount { get; set; }
     }
 
     [Owned]
     [GraphQLName("TradableItem")]
-    public class DbTradableItem : DbItem {
+    public class DbTradableItem  {
+        [GraphQLIgnore]
+        [Required]
+        public long TurnId { get; set; }
+
+        [Required]
+        public string Code { get; set; }
+
+        [Required]
+        public int Amount { get; set; }
+
         [Required]
         public int Price { get; set; }
     }
