@@ -7,9 +7,13 @@ namespace atlantis
         public static readonly FactionStatusItemParser FactionStatusItem = new FactionStatusItemParser();
         public static readonly SkillParser Skill = new SkillParser();
         public static readonly ItemParser Item = new ItemParser();
-        public static readonly RegionHeaderParser RegionHeader = new RegionHeaderParser(new CoordsParser());
+        public static readonly CoordsParser Coords = new CoordsParser();
+        public static readonly LocationParser Location = new LocationParser(Coords);
+        public static readonly SettlementParser Settlement = new SettlementParser();
+        public static readonly RegionHeaderParser RegionHeader = new RegionHeaderParser(Location, Settlement);
         public static readonly UnitParser Unit = new UnitParser(Skill, Item);
         public static readonly StructureParser Structure = new StructureParser();
         public static readonly RegionPropsParser RegionProps = new RegionPropsParser(Item);
+        public static readonly RegionExistsParser RegionExits = new RegionExistsParser(Location, Settlement);
     }
 }

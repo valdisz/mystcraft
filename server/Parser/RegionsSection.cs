@@ -63,7 +63,12 @@ namespace atlantis
 
                 await cursor.SkipEmptyLines();
                 await writer.WritePropertyNameAsync("exits");
-                await writer.WriteValueAsync(cursor.Value.AsString());
+
+                var exits = AllParsers.RegionExits.Parse(cursor.Value);
+                if (!exits) {
+                    throw new ReportParserException(exits.Error);
+                }
+                await exits.Value.WriteJson(writer);
 
                 bool hasStructures = false;
 

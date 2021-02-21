@@ -50,6 +50,9 @@ namespace atlantis
             return Ok();
         }
 
+        public const string DEFAULT_LEVEL_LABEL = "surface";
+        public const int DEFAULT_LEVEL_Z = 1;
+
         private static Task<DbGame> FindGameAsync(Database db, IIdSerializer relayId, string gameId) {
             var id = (long) relayId.Deserialize(gameId).Value;
 
@@ -174,6 +177,8 @@ namespace atlantis
                 }
             }
 
+            AddRevealedRegionsFromExits(turnNumber, regions);
+
             return regions;
         }
 
@@ -186,11 +191,31 @@ namespace atlantis
                 UpdatedAtTurn = region.UpdatedAtTurn,
                 Province = region.Province,
                 Terrain = region.Terrain,
+                Settlement = region.Settlement != null
+                    ? new DbSettlement {
+                        Name = region.Settlement.Name,
+                        Size = region.Settlement.Size
+                    }
+                    : null,
                 Tax = region.Tax,
                 Wages = region.Wages,
                 TotalWages = region.TotalWages,
                 Entertainment = region.Entertainment,
-                Exits = region.Exits.Select(x => new DbRegionExit { RegionUID = x.RegionUID }).ToList(),
+                Exits = region.Exits.Select(x => new DbExit {
+                    Direction = x.Direction,
+                    Label = x.Label,
+                    Province = x.Province,
+                    Settlement = x.Settlement != null
+                        ? new DbSettlement {
+                            Name = x.Settlement.Name,
+                            Size = x.Settlement.Size
+                        }
+                        : null,
+                    Terrain = x.Terrain,
+                    X = x.X,
+                    Y = x.Y,
+                    Z = x.Z
+                }).ToList(),
                 Products = region.Products.Select(x => new DbItem { Code = x.Code, Amount = x.Amount }).ToList(),
                 ForSale = region.ForSale.Select(x => new DbTradableItem { Code = x.Code, Amount = x.Amount, Price = x.Price }).ToList(),
                 Wanted = region.Wanted.Select(x => new DbTradableItem { Code = x.Code, Amount = x.Amount, Price = x.Price }).ToList()
@@ -200,7 +225,7 @@ namespace atlantis
         private static void CreateOrUpdateRegion(int turnNumber, RegionDic regions, JRegion source) {
             var x = source.Coords.X;
             var y = source.Coords.Y;
-            var z = source.Coords.Z ?? 1;
+            var z = source.Coords.Z ?? DEFAULT_LEVEL_Z;
 
             var uid = DbRegion.GetUID(x, y, z);
 
@@ -214,9 +239,22 @@ namespace atlantis
             region.X = x;
             region.Y = y;
             region.Z = z;
-            region.Label = source.Coords.Label ?? "surface";
+            region.Label = source.Coords.Label ?? DEFAULT_LEVEL_LABEL;
             region.Province = source.Province;
             region.Terrain = source.Terrain;
+
+            if (source.Settlement != null) {
+                if (region.Settlement == null) {
+                    region.Settlement = new DbSettlement();
+                }
+
+                region.Settlement.Name = source.Settlement.Name;
+                region.Settlement.Size = source.Settlement.Size;
+            }
+            else {
+                region.Settlement = null;
+            }
+
             region.Population = source.Population?.Amount ?? 0;
             region.Race = source.Population?.Race;
             region.Tax = source.Tax ?? 0;
@@ -227,6 +265,7 @@ namespace atlantis
             SetRegionItems(region.Products, source.Products);
             SetRegionItems(region.Wanted, source.Wanted);
             SetRegionItems(region.ForSale, source.ForSale);
+            SetRegionExits(region.Exits, source.Exits);
         }
 
         private static async Task RemoveRegions(Database db, long turnId) {
@@ -260,13 +299,13 @@ namespace atlantis
             var dest = dbItems.ToDictionary(x => x.Code);
 
             foreach (var item in items) {
-                if (!dest.TryGetValue(item.Code, out var i)) {
-                    i = new DbItem();
-                    dbItems.Add(i);
+                if (!dest.TryGetValue(item.Code, out var d)) {
+                    d = new DbItem();
+                    dbItems.Add(d);
                 }
 
-                i.Code = item.Code;
-                i.Amount = item.Amount;
+                d.Code = item.Code;
+                d.Amount = item.Amount;
             }
         }
 
@@ -274,14 +313,67 @@ namespace atlantis
             var dest = dbItems.ToDictionary(x => x.Code);
 
             foreach (var item in items) {
-                if (!dest.TryGetValue(item.Code, out var i)) {
-                    i = new DbTradableItem();
-                    dbItems.Add(i);
+                if (!dest.TryGetValue(item.Code, out var d)) {
+                    d = new DbTradableItem();
+                    dbItems.Add(d);
                 }
 
-                i.Code = item.Code;
-                i.Amount = item.Amount;
-                i.Price = item.Price;
+                d.Code = item.Code;
+                d.Amount = item.Amount;
+                d.Price = item.Price;
+            }
+        }
+
+        public static void SetRegionExits(ICollection<DbExit> dbItems, IEnumerable<JExit> items) {
+            var dest = dbItems.ToDictionary(x => x.RegionUID);
+            foreach (var item in items) {
+                var uid = DbRegion.GetUID(item.Coords.X, item.Coords.Y, item.Coords.Z ?? 1);
+                if (!dest.TryGetValue(uid, out var d)) {
+                    d = new DbExit();
+                    dbItems.Add(d);
+                }
+
+                d.Direction = item.Direction;
+                d.X = item.Coords.X;
+                d.Y = item.Coords.Y;
+                d.Z = item.Coords.Z ?? DEFAULT_LEVEL_Z;
+                d.Label = item.Coords.Label ?? DEFAULT_LEVEL_LABEL;
+                d.Province = item.Province;
+                d.Terrain = item.Terrain;
+
+                if (item.Settlement != null) {
+                    if (d.Settlement == null) {
+                        d.Settlement = new DbSettlement();
+                    }
+
+                    d.Settlement.Name = item.Settlement.Name;
+                    d.Settlement.Size = item.Settlement.Size;
+                }
+                else {
+                    d.Settlement = null;
+                }
+            }
+        }
+
+        public static void AddRevealedRegionsFromExits(int turnNumber, RegionDic regions) {
+            var exits = regions.Values
+                .SelectMany(x => x.Exits)
+                .GroupBy(x => x.RegionUID)
+                .ToDictionary(x => x.Key, x => x.First());
+
+            foreach (var uid in exits.Keys.Except(regions.Keys)) {
+                var exit = exits[uid];
+
+                DbRegion region = new DbRegion();
+                regions.Add(uid, region);
+
+                region.UpdatedAtTurn = turnNumber;
+                region.X = exit.X;
+                region.Y = exit.Y;
+                region.Z = exit.Z;
+                region.Label = exit.Label;
+                region.Province = exit.Province;
+                region.Terrain = exit.Terrain;
             }
         }
     }

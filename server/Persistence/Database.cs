@@ -38,6 +38,10 @@ namespace atlantis.Persistence
             });
 
             model.Entity<DbRegion>(t => {
+                t.OwnsOne(p => p.Settlement, a => {
+                    a.Property(x => x.Size).HasConversion<string>();
+                });
+
                 t.OwnsMany(p => p.ForSale, a => {
                     a.WithOwner().HasForeignKey("RegionId");
                     a.ToTable("Regions_ForSale");
@@ -59,7 +63,12 @@ namespace atlantis.Persistence
                 t.OwnsMany(p => p.Exits, a => {
                     a.WithOwner().HasForeignKey("RegionId");
                     a.ToTable("Regions_Exits");
-                    a.HasKey("RegionId", nameof(DbRegionExit.RegionUID));
+                    a.HasKey("RegionId", nameof(DbExit.Direction));
+                    a.Property(x => x.Direction).HasConversion<string>();
+
+                    a.OwnsOne(x => x.Settlement, b => {
+                        b.Property(x => x.Size).HasConversion<string>();
+                    });
                 });
             });
 

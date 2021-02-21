@@ -62,6 +62,8 @@ namespace atlantis.Migrations
                     Label = table.Column<string>(nullable: false),
                     Province = table.Column<string>(nullable: false),
                     Terrain = table.Column<string>(nullable: false),
+                    Settlement_Name = table.Column<string>(nullable: true),
+                    Settlement_Size = table.Column<string>(nullable: true),
                     Population = table.Column<int>(nullable: false),
                     Race = table.Column<string>(nullable: true),
                     Entertainment = table.Column<int>(nullable: false),
@@ -114,12 +116,20 @@ namespace atlantis.Migrations
                 name: "Regions_Exits",
                 columns: table => new
                 {
-                    RegionUID = table.Column<string>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false)
+                    Direction = table.Column<string>(nullable: false),
+                    RegionId = table.Column<long>(nullable: false),
+                    X = table.Column<int>(nullable: false),
+                    Y = table.Column<int>(nullable: false),
+                    Z = table.Column<int>(nullable: false),
+                    Label = table.Column<string>(nullable: false),
+                    Province = table.Column<string>(nullable: false),
+                    Terrain = table.Column<string>(nullable: false),
+                    Settlement_Name = table.Column<string>(nullable: true),
+                    Settlement_Size = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Regions_Exits", x => new { x.RegionId, x.RegionUID });
+                    table.PrimaryKey("PK_Regions_Exits", x => new { x.RegionId, x.Direction });
                     table.ForeignKey(
                         name: "FK_Regions_Exits_Regions_RegionId",
                         column: x => x.RegionId,

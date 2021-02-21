@@ -2,6 +2,7 @@ namespace atlantis.Persistence
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using atlantis.Model;
     using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,8 @@ namespace atlantis.Persistence
         [Required]
         public string Terrain { get; set; }
 
+        public DbSettlement Settlement { get; set; }
+
         [Required]
         public int Population { get; set; }
 
@@ -57,7 +60,7 @@ namespace atlantis.Persistence
         public List<DbItem> Products { get; set; } = new List<DbItem>();
 
         [GraphQLIgnore]
-        public List<DbRegionExit> Exits { get; set; } = new List<DbRegionExit>();
+        public List<DbExit> Exits { get; set; } = new List<DbExit>();
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
@@ -69,7 +72,37 @@ namespace atlantis.Persistence
     }
 
     [Owned]
-    public class DbRegionExit {
-        public string RegionUID { get; set; }
+    public class DbSettlement {
+        public string Name { get; set; }
+        public SettlementSize Size { get; set; }
+    }
+
+    [Owned]
+    public class DbExit {
+        [GraphQLIgnore]
+        public string RegionUID => DbRegion.GetUID(X, Y, Z);
+
+        [Required]
+        public Direction Direction { get; set; }
+
+        [Required]
+        public int X { get; set; }
+
+        [Required]
+        public int Y { get; set; }
+
+        [Required]
+        public int Z { get; set; }
+
+        [Required]
+        public string Label { get; set; }
+
+        [Required]
+        public string Province { get; set; }
+
+        [Required]
+        public string Terrain { get; set; }
+
+        public DbSettlement Settlement { get; set; }
     }
 }

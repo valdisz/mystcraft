@@ -9,7 +9,7 @@ using atlantis.Persistence;
 namespace atlantis.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20210221173914_initial")]
+    [Migration("20210221215815_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -182,6 +182,86 @@ namespace atlantis.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("atlantis.Persistence.DbSettlement", "Settlement", b1 =>
+                        {
+                            b1.Property<long>("DbRegionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Name")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Size")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("DbRegionId");
+
+                            b1.ToTable("Regions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbRegionId");
+                        });
+
+                    b.OwnsMany("atlantis.Persistence.DbExit", "Exits", b1 =>
+                        {
+                            b1.Property<long>("RegionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Direction")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Label")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Province")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Terrain")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("X")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Y")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Z")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("RegionId", "Direction");
+
+                            b1.ToTable("Regions_Exits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RegionId");
+
+                            b1.OwnsOne("atlantis.Persistence.DbSettlement", "Settlement", b2 =>
+                                {
+                                    b2.Property<long>("DbExitRegionId")
+                                        .HasColumnType("INTEGER");
+
+                                    b2.Property<string>("DbExitDirection")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Name")
+                                        .HasColumnType("TEXT");
+
+                                    b2.Property<string>("Size")
+                                        .IsRequired()
+                                        .HasColumnType("TEXT");
+
+                                    b2.HasKey("DbExitRegionId", "DbExitDirection");
+
+                                    b2.ToTable("Regions_Exits");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("DbExitRegionId", "DbExitDirection");
+                                });
+                        });
+
                     b.OwnsMany("atlantis.Persistence.DbItem", "Products", b1 =>
                         {
                             b1.Property<long>("RegionId")
@@ -199,22 +279,6 @@ namespace atlantis.Migrations
                             b1.HasKey("RegionId", "Code");
 
                             b1.ToTable("Regions_Products");
-
-                            b1.WithOwner()
-                                .HasForeignKey("RegionId");
-                        });
-
-                    b.OwnsMany("atlantis.Persistence.DbRegionExit", "Exits", b1 =>
-                        {
-                            b1.Property<long>("RegionId")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<string>("RegionUID")
-                                .HasColumnType("TEXT");
-
-                            b1.HasKey("RegionId", "RegionUID");
-
-                            b1.ToTable("Regions_Exits");
 
                             b1.WithOwner()
                                 .HasForeignKey("RegionId");
