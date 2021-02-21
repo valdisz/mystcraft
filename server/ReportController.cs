@@ -168,7 +168,9 @@ namespace atlantis
                 .AsNoTracking()
                 .AsAsyncEnumerable();
 
+            int i = 0;
             await foreach (var report in reports) {
+                await System.IO.File.WriteAllTextAsync($"report-{i++}.json", report.Json);
                 var json = JObject.Parse(report.Json);
                 var jsonRegions = json["regions"] as JArray;
 

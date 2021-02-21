@@ -1,8 +1,47 @@
-using System.Collections.Generic;
-using System.Linq;
+namespace atlantis {
+    using System.Collections.Generic;
+    using System.Linq;
 
-namespace atlantis
-{
+    public class UnitReadyItemParser : BaseParser {
+        public UnitReadyItemParser(ItemParser itemParser) {
+            this.itemParser = itemParser;
+        }
+
+        private readonly ItemParser itemParser;
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var prefix = p.After("Ready item:").SkipWhitespaces();
+            if (!prefix) return Error(prefix);
+
+            var item = itemParser.Parse(p);
+            if (!item) return Error(item);
+
+            return Ok(ReportNode.Bag(
+                ReportNode.Key("readyItem", item.Value)
+            ));
+        }
+    }
+
+    public class UnitCombatSpellParser : BaseParser {
+        public UnitCombatSpellParser(IReportParser skillParser) {
+            this.skillParser = skillParser;
+        }
+
+        private readonly IReportParser skillParser;
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var prefix = p.After("Combat spell:").SkipWhitespaces();
+            if (!prefix) return Error(prefix);
+
+            var skill = skillParser.Parse(p);
+            if (!skill) return Error(skill);
+
+            return Ok(ReportNode.Bag(
+                ReportNode.Key("combatSpell", skill.Value)
+            ));
+        }
+    }
+
     /*
 * Legatus Legionis Marcus (640),
 on guard,
@@ -24,6 +63,8 @@ Ready item: book of exorcism [BKEX].
             weightParser = new UnitWeightParser();
             capacityParser = new UnitCapacityParser();
             canStudyParser = new UnitCanStudyParser(skillParser);
+            readyItemParser = new UnitReadyItemParser(itemParser);
+            combatSpellParser = new UnitCombatSpellParser(skillParser);
         }
 
         readonly IReportParser nameParser;
@@ -33,6 +74,8 @@ Ready item: book of exorcism [BKEX].
         readonly IReportParser weightParser;
         readonly IReportParser capacityParser;
         readonly IReportParser canStudyParser;
+        readonly IReportParser readyItemParser;
+        readonly IReportParser combatSpellParser;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             // don't need dot at the end of line
@@ -120,6 +163,8 @@ Ready item: book of exorcism [BKEX].
                     weightParser,
                     capacityParser,
                     canStudyParser,
+                    readyItemParser,
+                    combatSpellParser,
                     skillsParser
                 );
                 if (prop) props.Add(prop.Value);

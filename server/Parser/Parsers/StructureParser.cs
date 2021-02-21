@@ -2,7 +2,7 @@ namespace atlantis {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    
+
     // + Building [5] : Stables; Imperial Stables.
     // + AE Mayfield [286] : Fleet, 2 Cogs; Load: 485/1000; Sailors: 12/12; MaxSpeed: 4.
     // + AE Mayfield [286] : Fleet, 2 Cogs, 1 Longship; Load: 485/1000; Sailors: 12/12; MaxSpeed: 4.
@@ -130,8 +130,8 @@ namespace atlantis {
                     x => x.After("Sail directions:")
                         .SkipWhitespaces()
                         .List(",", item => item.SkipWhitespaces())
-                        .Map(v => ReportNode.Key("sailDirections",ReportNode.Array(
-                            v.Select(sd => ReportNode.Str(sd.AsString()))
+                        .Map(v => ReportNode.Key("sailDirections", ReportNode.Array(
+                            v.Select(sd => ReportNode.Str(NormalizeDirection(sd.AsString())))
                         )))
                 );
                 if (knownProp) {
@@ -157,6 +157,19 @@ namespace atlantis {
             }
 
             return Ok(structure);
+        }
+
+        public static string NormalizeDirection(string s) {
+            switch (s.ToUpperInvariant()) {
+                case "N": return "North";
+                case "NE": return "Northeast";
+                case "SE": return "Southeast";
+                case "S": return "South";
+                case "SW": return "Southwest";
+                case "NW": return "Northwest";
+            }
+
+            throw new FormatException("Unknown direction");
         }
     }
 }
