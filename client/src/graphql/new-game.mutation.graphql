@@ -1,0 +1,5 @@
+mutation NewGame($name: String!) {
+  newGame(name: $name) {
+    ...GameListItem
+  }
+}

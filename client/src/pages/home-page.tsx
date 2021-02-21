@@ -1,15 +1,14 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, ButtonGroup
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
 } from '@material-ui/core'
 import { observer, useObserver } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
 import GrainIcon from '@material-ui/icons/Grain';
 import { useStore } from '../store'
 import { SplitButton } from '../components'
-
-
+import { GameListItemFragment } from '../schema'
 
 function NoGames() {
     return <ListItem>
@@ -18,34 +17,77 @@ function NoGames() {
 }
 
 interface GameItemProps {
-    gameId: string
-    factionName: string
-    gameName: string
+    game: GameListItemFragment
 }
 
 function GameActions() {
-    return <ButtonGroup>
-        <Button color='secondary' size='small'>Delete</Button>
-        <Button color='secondary' size='small'>Delete</Button>
-    </ButtonGroup>
+    const { home } = useStore()
+    return <SplitButton color='default' size='small' variant='outlined'
+        onClick={home.triggerUploadReport}
+        actions={[
+            { content: 'Delete', onAction: () => { } }
+        ]}>
+            Load turn
+        </SplitButton>
 }
 
-function GameItem({ gameId, factionName, gameName }: GameItemProps) {
-    return <ListItem button component={Link} to={`/game/${gameId}`} >
+function Game({ name }) {
+    return name ? <strong>{name}</strong> : <em>No name</em>
+}
+
+const FactionNumber = styled.code`
+    font-weight: bold;
+    &::before {
+        content: '[';
+    }
+    &::after {
+        content: ']';
+    }
+`
+
+const UnstyledList = styled.ul`
+    list-style: none;
+    margin: 0;
+    padding: 0;
+`
+
+function Faction({ name, number}) {
+    return name && number
+        ?<>
+            {name} <FactionNumber>{number}</FactionNumber>
+        </>
+        : <em>Faction not yet determined</em>
+}
+
+function Ruleset({ name, version}) {
+    return <div>
+        {name} {version}
+    </div>
+}
+
+function GameItem({ game }: GameItemProps) {
+    return <ListItem button component={Link} to={`/game/${game.id}`} >
         <ListItemIcon>
             <GrainIcon />
         </ListItemIcon>
-        <ListItemText secondary={factionName}>
-            { gameName ? <strong>{gameName}</strong> : <em>No name</em> }
+        <ListItemText
+            primary={<Game name={game.name} />}
+            secondary={<Ruleset name={game.rulesetName} version={game.rulesetVersion} />} />
+        <ListItemText>
+            <UnstyledList>
+                <li>
+                    <strong>Faction</strong> <Faction name={game.playerFactionName} number={game.playerFactionNumber} />
+                </li>
+                <li>
+                    <strong>Turn</strong> {game.lastTurnNumber}
+                </li>
+            </UnstyledList>
         </ListItemText>
         <ListItemSecondaryAction>
-            <SplitButton color='default' size='small' variant='outlined' actions={[
-                { content: 'Delete', onAction: () => { } }
-            ]}>Load turn</SplitButton>
+            <GameActions />
         </ListItemSecondaryAction>
     </ListItem>
 }
-
 
 const NewGameDialog = observer(() => {
     const { home } = useStore()
@@ -87,6 +129,7 @@ const CenterLayout = styled.div`
 
 export function HomePage() {
     const { home } = useStore()
+
     React.useEffect(() => {
         home.load()
     }, [])
@@ -95,10 +138,11 @@ export function HomePage() {
         <Container>
             <Card>
                 <CardHeader title='Games' action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>} />
+                <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadReport} />
                 <List component='nav' dense>
                     {useObserver(() => <>
                         { home.games.length
-                            ? home.games.map(x => <GameItem key={x.id} gameId={x.id} factionName={x.playerFactionName} gameName={x.name} />)
+                            ? home.games.map(x => <GameItem key={x.id} game={x} />)
                             : <NoGames />
                         }
                     </>)}

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -525,14 +525,22 @@ Ready item: book of exorcism [BKEX].
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             Maybe<IReportNode> ParaseItems(TextParser src, IReportParser parser, List<IReportNode> items) {
+                if (src.Match("none")) {
+                    return null;
+                }
+
                 while (!src.EOF) {
                     if (items.Count > 0) {
                         Maybe<TextParser> result = src.After(",").SkipWhitespaces();
-                        if (!result) return Error(result);
+                        if (!result) {
+                            return Error(result);
+                        }
                     }
 
                     var item = itemParser.Parse(src);
-                    if (!item) return Error(item);
+                    if (!item) {
+                        return Error(item);
+                    }
 
                     items.Add(item.Value);
                 }
@@ -553,17 +561,44 @@ Ready item: book of exorcism [BKEX].
                 var prop = p.SkipWhitespaces().Before(":").AsString();
                 if (!prop) return Error(prop);
 
-                var value = p.SkipWhitespaces().BeforeBackwards(".").SkipWhitespaces();
-                if (!value) return Error(value);
-                if (value.Match("none")) continue;
+                p.After(":").SkipWhitespaces();
+
+                Maybe<TextParser> value;
+                switch (prop.Value) {
+                    case "Wages": {
+                        value = p.OneOf(
+                            x => x.Before(")."),
+                            x => x.Match("$0.")
+                        )
+                        .SkipWhitespaces();
+                        break;
+                    }
+
+                    default: {
+                        value = p.Before(".").SkipWhitespaces();
+                        break;
+                    }
+                }
+                if (!value) {
+                    return Error(value);
+                }
+
+                p.After(".");
 
                 switch (prop.Value) {
                     case "Wages": {
-                        wages = value.Seek(1).Real();
-                        if (!wages) return Error(wages);
+                        wages = value.Value.EOF
+                            ? new Maybe<double>(0)
+                            : value.Seek(1).Real();
+                        if (!wages) {
+                            return Error(wages);
+                        }
 
-                        if (value.SkipWhitespaces().After("(")) {
-                            totalWages = value.Before(")").Seek(1).Integer();
+                        if (value.After("(Max:").SkipWhitespaces()) {
+                            totalWages = value.Seek(1).Integer();
+                            if (!totalWages) {
+                                return Error(wages);
+                            }
                         }
 
                         break;
@@ -571,25 +606,33 @@ Ready item: book of exorcism [BKEX].
 
                     case "Wanted": {
                         var err = ParaseItems(value.Value, itemParser, wanted);
-                        if (err != null) return err;
+                        if (err != null) {
+                            return err;
+                        }
                         break;
                     }
 
                     case "For Sale": {
                         var err = ParaseItems(value.Value, itemParser, forSale);
-                        if (err != null) return err;
+                        if (err != null) {
+                            return err;
+                        }
                         break;
                     }
 
                     case "Products": {
                         var err = ParaseItems(value.Value, itemParser, products);
-                        if (err != null) return err;
+                        if (err != null) {
+                            return err;
+                        }
                         break;
                     }
 
                     case "Entertainment available": {
                         entertainment = value.Seek(1).Integer();
-                        if (!entertainment) return Error(entertainment);
+                        if (!entertainment) {
+                            return Error(entertainment);
+                        }
                         break;
                     }
 

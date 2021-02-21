@@ -1,0 +1,29 @@
+query GetTurns($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      turns {
+        nodes {
+          ...TurnItem
+        }
+      }
+    }
+  }
+}
+
+fragment TurnItem on Turn {
+  id
+  number
+  month
+  year
+  reports {
+    nodes {
+      ...TurnItemReport
+    }
+  }
+}
+
+fragment TurnItemReport on Report {
+  id
+  factionNumber
+  factionNumber
+}

@@ -30,7 +30,9 @@ namespace atlantis
         public int Ln { get; }
         public int Col { get; }
 
-        public override string ToString() => Success ? Value.ToString() : $"[ERROR] ({Ln}:{Col}) {Error}";
+        public override string ToString() => Success
+            ? Value.ToString()
+            : $"[ERROR] ({Ln}:{Col}) {Error}";
 
         public static implicit operator T(Maybe<T> v) => v.Value;
 

@@ -3,6 +3,17 @@ namespace atlantis
     using System.Threading.Tasks;
     using Newtonsoft.Json;
 
+    [System.Serializable]
+    public class ReportParserException : System.Exception
+    {
+        public ReportParserException() { }
+        public ReportParserException(string message) : base(message) { }
+        public ReportParserException(string message, System.Exception inner) : base(message, inner) { }
+        protected ReportParserException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+
     public class RegionsSection : IReportSectionParser {
         public Task<bool> CanParseAsync(Cursor<TextParser> cursor) => IsRegion(cursor);
 
@@ -43,7 +54,12 @@ namespace atlantis
 
                 await cursor.SkipEmptyLines();
 
-                await AllParsers.RegionProps.Parse(cursor.Value).Value.WriteJson(writer);
+                var regions = AllParsers.RegionProps.Parse(cursor.Value);
+                if (!regions) {
+                    throw new ReportParserException(regions.Error);
+                }
+
+                await regions.Value.WriteJson(writer);
 
                 await cursor.SkipEmptyLines();
                 await writer.WritePropertyNameAsync("exits");

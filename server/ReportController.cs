@@ -49,10 +49,10 @@ namespace atlantis {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (Request.Form.Files.Count == 0) return UnprocessableEntity();
 
-            int earliestTurn = int.MaxValue;
-            DbGame game;
-            if ((game = await FindGameAsync(db, relayId, gameId)) == null) return NotFound();
+            DbGame game = await FindGameAsync(db, relayId, gameId);
+            if (game == null) return NotFound();
 
+            int earliestTurn = int.MaxValue;
             foreach (var file in Request.Form.Files) {
                 await using var stream = file.OpenReadStream();
                 var turnNumber = await LoadReportFileAsync(db, stream, game);
@@ -69,7 +69,7 @@ namespace atlantis {
         private static Task<DbGame> FindGameAsync(Database db, IIdSerializer relayId, string gameId) {
             var id = (long) relayId.Deserialize(gameId).Value;
 
-            return db.Games.SingleAsync(x => x.Id == id);
+            return db.Games.SingleOrDefaultAsync(x => x.Id == id);
         }
 
         private static async Task<int> LoadReportFileAsync(Database db, Stream reportStream, DbGame game) {

@@ -191,6 +191,20 @@ namespace atlantis
             return Seek(i);
         }
 
+        public Maybe<TextParser> Skip(Func<char, bool> predicate) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
+            var span = GetSpan();
+            int i;
+            for (i = 0; i < span.Length; i++) {
+                if (!predicate(span[i])) {
+                    break;
+                }
+            }
+
+            return Seek(i);
+        }
+
         public Maybe<int> Integer() {
             if (EOF) return new Maybe<int>("EOF", Ln, Pos + 1);
 
