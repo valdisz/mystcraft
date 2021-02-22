@@ -11,8 +11,8 @@ namespace atlantis.Persistence
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
-        // public DbSet<DbFaction> Factions { get; set; }
-        // public DbSet<DbEvent> Events { get; set; }
+        public DbSet<DbFaction> Factions { get; set; }
+        public DbSet<DbEvent> Events { get; set; }
         // public DbSet<DbStructure> Structures { get; set; }
         // public DbSet<DbUnit> Units { get; set; }
 
@@ -20,21 +20,35 @@ namespace atlantis.Persistence
             model.Entity<DbGame>(t => {
                 t.HasMany<DbReport>(x => x.Reports)
                     .WithOne(x => x.Game)
-                    .HasForeignKey(x => x.GameId);
+                    .HasForeignKey(x => x.GameId)
+                    .IsRequired();
 
                 t.HasMany<DbTurn>(x => x.Turns)
                     .WithOne(x => x.Game)
-                    .HasForeignKey(x => x.GameId);
+                    .HasForeignKey(x => x.GameId)
+                    .IsRequired();
             });
 
             model.Entity<DbTurn>(t => {
                 t.HasMany<DbReport>(x => x.Reports)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId);
+                    .HasForeignKey(x => x.TurnId)
+                    .IsRequired();
 
                 t.HasMany<DbRegion>(x => x.Regions)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId);
+                    .HasForeignKey(x => x.TurnId)
+                    .IsRequired();
+
+                t.HasMany(x => x.Factions)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => x.TurnId)
+                    .IsRequired();
+
+                t.HasMany(x => x.Events)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => x.TurnId)
+                    .IsRequired();
             });
 
             model.Entity<DbRegion>(t => {
@@ -72,53 +86,15 @@ namespace atlantis.Persistence
                 });
             });
 
-            // model.Entity<DbTurn>(t => {
-            //     t.HasOne(x => x.Game)
-            //         .WithMany(x => x.Turns)
-            //         .HasForeignKey(x => x.GameId)
-            //         .IsRequired();
-            // });
+            model.Entity<DbFaction>(t => {
+                t.HasMany(x => x.Events)
+                    .WithOne(x => x.Faction)
+                    .HasForeignKey(x => x.FactionId)
+                    .IsRequired();
+            });
 
-            // model.Entity<DbFaction>(t => {
-            //     t.HasOne(x => x.Game)
-            //         .WithMany()
-            //         .HasForeignKey(x => x.GameId)
-            //         .IsRequired();
-
-            //     t.HasOne(x => x.Turn)
-            //         .WithMany(x => x.Factions)
-            //         .HasForeignKey(x => x.TurnId)
-            //         .IsRequired();
-            // });
-
-            // model.Entity<DbEvent>(t => {
-            //     t.HasOne(x => x.Game)
-            //         .WithMany()
-            //         .HasForeignKey(x => x.GameId)
-            //         .IsRequired();
-
-            //     t.HasOne(x => x.Turn)
-            //         .WithMany(x => x.Events)
-            //         .HasForeignKey(x => x.TurnId)
-            //         .IsRequired();
-
-            //     t.HasOne(x => x.Faction)
-            //         .WithMany(x => x.Events)
-            //         .HasForeignKey(x => x.FactionId)
-            //         .IsRequired();
-            // });
-
-            // model.Entity<DbRegion>(t => {
-            //     t.HasOne(x => x.Game)
-            //         .WithMany()
-            //         .HasForeignKey(x => x.GameId)
-            //         .IsRequired();
-
-            //     t.HasOne(x => x.Turn)
-            //         .WithMany(x => x.Regions)
-            //         .HasForeignKey(x => x.TurnId)
-            //         .IsRequired();
-            // });
+            model.Entity<DbEvent>(t => {
+            });
 
             // model.Entity<DbStructure>(t => {
             //     t.HasOne(x => x.Game)

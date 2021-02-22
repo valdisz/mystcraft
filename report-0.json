@@ -3874,9 +3874,9 @@
             "type": "Cog",
             "flags": [],
             "sailDirections": [
-              "N",
-              "SW",
-              "NW"
+              "North",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": [
@@ -3927,9 +3927,9 @@
             ],
             "flags": [],
             "sailDirections": [
-              "N",
-              "SW",
-              "NW"
+              "North",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": [
@@ -3975,9 +3975,9 @@
             ],
             "flags": [],
             "sailDirections": [
-              "N",
-              "SW",
-              "NW"
+              "North",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": [
@@ -4023,9 +4023,9 @@
             ],
             "flags": [],
             "sailDirections": [
-              "N",
-              "SW",
-              "NW"
+              "North",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": [
@@ -4060,9 +4060,9 @@
             "type": "Cog",
             "flags": [],
             "sailDirections": [
-              "N",
-              "SW",
-              "NW"
+              "North",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": [
@@ -14260,6 +14260,10 @@
                   "days": 135
                 }
               ],
+              "combatSpell": {
+                "name": "summon black wind",
+                "code": "SBLA"
+              },
               "canStudy": [
                 {
                   "name": "fire",
@@ -14427,6 +14431,11 @@
                   "days": 100
                 }
               ],
+              "readyItem": {
+                "amount": 1,
+                "name": "holy symbol",
+                "code": "HLYS"
+              },
               "canStudy": [
                 {
                   "name": "fire",
@@ -16486,7 +16495,7 @@
             "type": "Cog",
             "flags": [],
             "sailDirections": [
-              "N"
+              "North"
             ],
             "description": "Imperial Trade Fleet"
           },
@@ -21089,8 +21098,8 @@
             ],
             "flags": [],
             "sailDirections": [
-              "SW",
-              "NW"
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": [
@@ -36963,8 +36972,8 @@
             "type": "Longship",
             "flags": [],
             "sailDirections": [
-              "N",
-              "NW"
+              "North",
+              "Northwest"
             ]
           },
           "units": []
@@ -36976,8 +36985,8 @@
             "type": "Longship",
             "flags": [],
             "sailDirections": [
-              "N",
-              "NW"
+              "North",
+              "Northwest"
             ]
           },
           "units": [
@@ -41444,7 +41453,7 @@
             "type": "Longship",
             "flags": [],
             "sailDirections": [
-              "SW"
+              "Southwest"
             ]
           },
           "units": [
@@ -42946,8 +42955,8 @@
             ],
             "flags": [],
             "sailDirections": [
-              "SE",
-              "S"
+              "Southeast",
+              "South"
             ]
           },
           "units": [
@@ -42991,8 +43000,8 @@
             "type": "Corsair",
             "flags": [],
             "sailDirections": [
-              "SE",
-              "S"
+              "Southeast",
+              "South"
             ]
           },
           "units": []
@@ -43004,8 +43013,8 @@
             "type": "Corsair",
             "flags": [],
             "sailDirections": [
-              "SE",
-              "S"
+              "Southeast",
+              "South"
             ]
           },
           "units": [
@@ -43647,7 +43656,7 @@
             "type": "Cog",
             "flags": [],
             "sailDirections": [
-              "NW"
+              "Northwest"
             ]
           },
           "units": []
@@ -43941,11 +43950,11 @@
             "type": "Longship",
             "flags": [],
             "sailDirections": [
-              "N",
-              "SE",
-              "S",
-              "SW",
-              "NW"
+              "North",
+              "Southeast",
+              "South",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": []
@@ -43957,11 +43966,11 @@
             "type": "Cog",
             "flags": [],
             "sailDirections": [
-              "N",
-              "SE",
-              "S",
-              "SW",
-              "NW"
+              "North",
+              "Southeast",
+              "South",
+              "Southwest",
+              "Northwest"
             ]
           },
           "units": []
@@ -50420,7 +50429,7 @@
             "type": "Corsair",
             "flags": [],
             "sailDirections": [
-              "SE"
+              "Southeast"
             ]
           },
           "units": [
@@ -50704,7 +50713,7 @@
             ],
             "flags": [],
             "sailDirections": [
-              "SE"
+              "Southeast"
             ]
           },
           "units": [

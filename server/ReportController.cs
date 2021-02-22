@@ -15,6 +15,7 @@ namespace atlantis
     using Model;
 
     using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
+    using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
 
     [Route("report")]
     public class ApiController : ControllerBase {
@@ -63,13 +64,17 @@ namespace atlantis
             using var textReader = new StreamReader(reportStream);
 
             using var atlantisReader = new AtlantisReportJsonConverter(textReader);
-            var jObj = await atlantisReader.ReadAsJsonAsync();
-            dynamic json = jObj;
+            var json = await atlantisReader.ReadAsJsonAsync();
 
-            string factionName = json.faction.name;
-            int factionNumber = json.faction.number;
-            int year = json.date.year;
-            int month = json.date.month;
+            var faction = json["faction"].ToObject<JFaction>();
+            var date = json["date"].ToObject<JDate>();
+            var engine = json["engine"]?.ToObject<JGameEngine>();
+            var ordersTemplate = json["ordersTemplate"]?.ToObject<JOrdersTemplate>();
+
+            string factionName = faction.Name;
+            int factionNumber = faction.Number;
+            int year = date.Year;
+            int month = date.Month;
             int turnNumber = month + (year - 1) * 12;
 
             reportStream.Seek(0, SeekOrigin.Begin);
@@ -107,7 +112,7 @@ namespace atlantis
             report.FactionNumber = factionNumber;
             report.FactionName = factionName;
             report.Source = source;
-            report.Json = jObj.ToString(Formatting.Indented);
+            report.Json = json.ToString(Formatting.Indented);
 
             game.PlayerFactionNumber ??= report.FactionNumber;
             if (report.FactionNumber == game.PlayerFactionNumber && turnNumber > game.LastTurnNumber) {
@@ -115,10 +120,10 @@ namespace atlantis
                 game.LastTurnNumber = turnNumber;
             }
 
-            game.EngineVersion ??= json.engine?.version;
-            game.RulesetName ??= json.engine?.ruleset?.name;
-            game.RulesetVersion ??= json.engine?.ruleset?.version;
-            game.Password ??= json.ordersTemplate?.password;
+            game.EngineVersion ??= engine?.Version;
+            game.RulesetName ??= engine?.Ruleset?.Name;
+            game.RulesetVersion ??= engine?.Ruleset?.Version;
+            game.Password ??= ordersTemplate?.Password;
 
             return turnNumber;
         }
@@ -142,46 +147,81 @@ namespace atlantis
                 .ToListAsync();
 
             RegionDic regions = new RegionDic();
+            FactionsDic factions = new FactionsDic();
+
             if (earliestTurn > 1) {
                 regions = (await db.Regions
                         .Where(x => x.TurnId == turns[0].Id)
                         .AsNoTracking()
                         .ToArrayAsync())
                     .ToDictionary(k => k.UID);
+
+                factions = (await db.Factions
+                        .Where(x => x.TurnId == turns[0].Id)
+                        .AsNoTracking()
+                        .ToArrayAsync())
+                    .ToDictionary(k => k.Number);
             }
 
             foreach (var turn in turns) {
-                regions = await UpdateTurnAsync(db, turn.Id, turn.Number, regions);
+                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions);
 
-                await RemoveRegions(db, turn.Id);
-                await InsertRegions(db, turn.Id, regions.Values);
+                await RemoveRegionsAsync(db, turn.Id);
+                await RemoveEventsAsync(db, turn.Id);
+                await RemoveFactionsAsync(db, turn.Id);
+
+                await InsertRegionsAsync(db, turn.Id, regions.Values);
+                await InsertFactionsAsync(db, turn.Id, factions.Values);
             }
         }
 
         // This method will be memory intensive as it must merge all reports into one
-        private static async Task<RegionDic> UpdateTurnAsync(Database db, long turnId, int turnNumber, RegionDic regionsIn) {
-            RegionDic regions = regionsIn
-                .ToDictionary(k => k.Key, v => CopyRegion(v.Value));
-
-            var reports = db.Reports
+        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber, RegionDic regions, FactionsDic factions) {
+            var savedReports = db.Reports
                 .Where(x => x.TurnId == turnId)
                 .AsNoTracking()
                 .AsAsyncEnumerable();
 
             int i = 0;
-            await foreach (var report in reports) {
-                await System.IO.File.WriteAllTextAsync($"report-{i++}.json", report.Json);
-                var json = JObject.Parse(report.Json);
-                var jsonRegions = json["regions"] as JArray;
+            await foreach (var r in savedReports) {
+                await System.IO.File.WriteAllTextAsync($"report-{i++}.json", r.Json);
+                var report = JsonConvert.DeserializeObject<JReport>(r.Json);
 
-                foreach (JObject region in jsonRegions) {
-                    CreateOrUpdateRegion(turnNumber, regions, region.ToObject<JRegion>());
+                foreach (var region in report.Regions) {
+                    CreateOrUpdateRegion(turnNumber, regions, region);
                 }
+
+                CreateOrUpdateFaction(factions, report);
             }
 
             AddRevealedRegionsFromExits(turnNumber, regions);
+        }
 
-            return regions;
+        public static void CreateOrUpdateFaction(FactionsDic factions, JReport report) {
+            var f = report.Faction;
+
+            if (!factions.TryGetValue(f.Number, out var faction)) {
+                faction = new DbFaction {
+                    Number = f.Number
+                };
+                factions.Add(faction.Number, faction);
+            }
+
+            faction.Name = f.Name;
+
+            foreach (var error in report.Errors) {
+                faction.Events.Add(new DbEvent {
+                    Type = EventType.Error,
+                    Message = error
+                });
+            }
+
+            foreach (var ev in report.Events) {
+                faction.Events.Add(new DbEvent {
+                    Type = EventType.Info,
+                    Message = ev
+                });
+            }
         }
 
         private static DbRegion CopyRegion(DbRegion region) {
@@ -203,24 +243,10 @@ namespace atlantis
                 Wages = region.Wages,
                 TotalWages = region.TotalWages,
                 Entertainment = region.Entertainment,
-                Exits = region.Exits.Select(x => new DbExit {
-                    Direction = x.Direction,
-                    Label = x.Label,
-                    Province = x.Province,
-                    Settlement = x.Settlement != null
-                        ? new DbSettlement {
-                            Name = x.Settlement.Name,
-                            Size = x.Settlement.Size
-                        }
-                        : null,
-                    Terrain = x.Terrain,
-                    X = x.X,
-                    Y = x.Y,
-                    Z = x.Z
-                }).ToList(),
-                Products = region.Products.Select(x => new DbItem { Code = x.Code, Amount = x.Amount }).ToList(),
-                ForSale = region.ForSale.Select(x => new DbTradableItem { Code = x.Code, Amount = x.Amount, Price = x.Price }).ToList(),
-                Wanted = region.Wanted.Select(x => new DbTradableItem { Code = x.Code, Amount = x.Amount, Price = x.Price }).ToList()
+                Exits = region.Exits.Select(x => new DbExit(x)).ToList(),
+                Products = region.Products.Select(x => new DbItem(x)).ToList(),
+                ForSale = region.ForSale.Select(x => new DbTradableItem(x)).ToList(),
+                Wanted = region.Wanted.Select(x => new DbTradableItem(x)).ToList()
             };
         }
 
@@ -270,12 +296,22 @@ namespace atlantis
             SetRegionExits(region.Exits, source.Exits);
         }
 
-        private static async Task RemoveRegions(Database db, long turnId) {
-            await db.Database
+        private static Task RemoveRegionsAsync(Database db, long turnId) {
+            return db.Database
                 .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbRegion)).GetTableName()} where TurnId = {turnId}");
         }
 
-        private static async Task InsertRegions(Database db, long turnId, IEnumerable<DbRegion> regions) {
+        private static Task RemoveFactionsAsync(Database db, long turnId) {
+            return db.Database
+                .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbFaction)).GetTableName()} where TurnId = {turnId}");
+        }
+
+        private static Task RemoveEventsAsync(Database db, long turnId) {
+            return db.Database
+                .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbEvent)).GetTableName()} where TurnId = {turnId}");
+        }
+
+        private static async Task InsertRegionsAsync(Database db, long turnId, IEnumerable<DbRegion> regions) {
             foreach (var region in regions) {
                 region.TurnId = turnId;
 
@@ -292,6 +328,20 @@ namespace atlantis
                 }
 
                 await db.AddAsync(region);
+            }
+
+            await db.SaveChangesAsync();
+        }
+
+        private static async Task InsertFactionsAsync(Database db, long turnId, IEnumerable<DbFaction> factions) {
+            foreach (var faction in factions) {
+                faction.TurnId = turnId;
+
+                foreach (var ev in faction.Events) {
+                    ev.TurnId = turnId;
+                }
+
+                await db.AddAsync(faction);
             }
 
             await db.SaveChangesAsync();

@@ -49,6 +49,27 @@ namespace atlantis.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Factions",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TurnId = table.Column<long>(nullable: false),
+                    Number = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Factions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Factions_Turns_TurnId",
+                        column: x => x.TurnId,
+                        principalTable: "Turns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Regions",
                 columns: table => new
                 {
@@ -106,6 +127,34 @@ namespace atlantis.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Reports_Turns_TurnId",
+                        column: x => x.TurnId,
+                        principalTable: "Turns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Events",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TurnId = table.Column<long>(nullable: false),
+                    FactionId = table.Column<long>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    Message = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Events_Factions_FactionId",
+                        column: x => x.FactionId,
+                        principalTable: "Factions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Events_Turns_TurnId",
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
@@ -201,6 +250,21 @@ namespace atlantis.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Events_FactionId",
+                table: "Events",
+                column: "FactionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_TurnId",
+                table: "Events",
+                column: "TurnId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Factions_TurnId",
+                table: "Factions",
+                column: "TurnId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Regions_TurnId",
                 table: "Regions",
                 column: "TurnId");
@@ -224,6 +288,9 @@ namespace atlantis.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Events");
+
+            migrationBuilder.DropTable(
                 name: "Regions_Exits");
 
             migrationBuilder.DropTable(
@@ -237,6 +304,9 @@ namespace atlantis.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reports");
+
+            migrationBuilder.DropTable(
+                name: "Factions");
 
             migrationBuilder.DropTable(
                 name: "Regions");
