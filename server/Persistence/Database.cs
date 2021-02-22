@@ -1,6 +1,9 @@
 namespace atlantis.Persistence
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
     public class Database : DbContext {
         public Database(DbContextOptions<Database> options)
@@ -14,7 +17,7 @@ namespace atlantis.Persistence
         public DbSet<DbFaction> Factions { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         // public DbSet<DbStructure> Structures { get; set; }
-        // public DbSet<DbUnit> Units { get; set; }
+        public DbSet<DbUnit> Units { get; set; }
 
         protected override void OnModelCreating(ModelBuilder model) {
             model.Entity<DbGame>(t => {
@@ -49,9 +52,19 @@ namespace atlantis.Persistence
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
                     .IsRequired();
+
+                t.HasMany(x => x.Units)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => x.TurnId)
+                    .IsRequired();
             });
 
             model.Entity<DbRegion>(t => {
+                t.HasMany(x => x.Units)
+                    .WithOne(x => x.Region)
+                    .HasForeignKey(x => x.RegionId)
+                    .IsRequired();
+
                 t.OwnsOne(p => p.Settlement, a => {
                     a.Property(x => x.Size).HasConversion<string>();
                 });
@@ -91,9 +104,14 @@ namespace atlantis.Persistence
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => x.FactionId)
                     .IsRequired();
+
+                t.HasMany(x => x.Units)
+                    .WithOne(x => x.Faction)
+                    .HasForeignKey(x => x.FactionId);
             });
 
             model.Entity<DbEvent>(t => {
+                t.Property(x => x.Type).HasConversion<string>();
             });
 
             // model.Entity<DbStructure>(t => {
@@ -113,26 +131,42 @@ namespace atlantis.Persistence
             //         .IsRequired();
             // });
 
-            // model.Entity<DbUnit>(t => {
-            //     t.HasOne(x => x.Game)
-            //         .WithMany()
-            //         .HasForeignKey(x => x.GameId)
-            //         .IsRequired();
+            model.Entity<DbUnit>(t => {
+                var splitStringConverter = new ValueConverter<List<string>, string>(
+                    v => string.Join(";", v),
+                    v => v.Split(new[] { ';' }).ToList()
+                );
+                t.Property(p => p.Flags)
+                    .HasConversion(splitStringConverter);
 
-            //     t.HasOne(x => x.Turn)
-            //         .WithMany(x => x.Units)
-            //         .HasForeignKey(x => x.TurnId)
-            //         .IsRequired();
+                t.OwnsMany(p => p.Items, a => {
+                    a.WithOwner().HasForeignKey("UnitId");
+                    a.ToTable("Unit_Items");
+                    a.HasKey("UnitId", nameof(DbItem.Code));
+                });
 
-            //     t.HasOne(x => x.Region)
-            //         .WithMany(x => x.Units)
-            //         .HasForeignKey(x => x.RegionId)
-            //         .IsRequired();
+                t.OwnsOne(p => p.Capacity);
 
-            //     t.HasOne(x => x.Structure)
-            //         .WithMany(x => x.Units)
-            //         .HasForeignKey(x => x.StrcutureId);
-            // });
+                t.OwnsMany(p => p.Skills, a => {
+                    a.WithOwner().HasForeignKey("UnitId");
+                    a.ToTable("Unit_Skills");
+                    a.HasKey("UnitId", nameof(DbSkill.Code));
+                });
+
+                t.OwnsMany(p => p.CanStudy, a => {
+                    a.WithOwner().HasForeignKey("UnitId");
+                    a.ToTable("Unit_CanStudy");
+                    a.HasKey("UnitId", nameof(DbSkill.Code));
+                });
+
+                t.OwnsOne(p => p.ReadyItem);
+
+                t.OwnsOne(p => p.CombatSpell);
+
+                // t.HasOne(x => x.Structure)
+                //     .WithMany(x => x.Units)
+                //     .HasForeignKey(x => x.StrcutureId);
+            });
         }
     }
 }

@@ -1,12 +1,17 @@
 namespace atlantis.Persistence {
     using System.ComponentModel.DataAnnotations;
     using atlantis.Model;
+    using HotChocolate;
 
+    [GraphQLName("Event")]
     public class DbEvent {
         [Key]
         public long Id { get; set; }
 
+        [GraphQLIgnore]
         public long TurnId { get; set; }
+
+        [GraphQLIgnore]
         public long FactionId { get; set; }
 
         [Required]
@@ -15,7 +20,10 @@ namespace atlantis.Persistence {
         [Required]
         public string Message { get; set; }
 
+        [GraphQLIgnore]
         public DbTurn Turn { get; set; }
+
+        [GraphQLIgnore]
         public DbFaction Faction { get; set; }
     }
 }

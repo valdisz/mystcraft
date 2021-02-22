@@ -9,7 +9,7 @@ using atlantis.Persistence;
 namespace atlantis.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20210222093546_initial")]
+    [Migration("20210222114858_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,8 +34,9 @@ namespace atlantis.Migrations
                     b.Property<long>("TurnId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -225,6 +226,57 @@ namespace atlantis.Migrations
                     b.ToTable("Turns");
                 });
 
+            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long?>("FactionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Flags")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("OnGuard")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Orders")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("RegionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TurnId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Weight")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FactionId");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("TurnId");
+
+                    b.ToTable("Units");
+                });
+
             modelBuilder.Entity("atlantis.Persistence.DbEvent", b =>
                 {
                     b.HasOne("atlantis.Persistence.DbFaction", "Faction")
@@ -345,10 +397,7 @@ namespace atlantis.Migrations
                             b1.Property<string>("Code")
                                 .HasColumnType("TEXT");
 
-                            b1.Property<int>("Amount")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<long>("TurnId")
+                            b1.Property<int?>("Amount")
                                 .HasColumnType("INTEGER");
 
                             b1.HasKey("RegionId", "Code");
@@ -373,9 +422,6 @@ namespace atlantis.Migrations
                             b1.Property<int>("Price")
                                 .HasColumnType("INTEGER");
 
-                            b1.Property<long>("TurnId")
-                                .HasColumnType("INTEGER");
-
                             b1.HasKey("RegionId", "Code");
 
                             b1.ToTable("Regions_ForSale");
@@ -396,9 +442,6 @@ namespace atlantis.Migrations
                                 .HasColumnType("INTEGER");
 
                             b1.Property<int>("Price")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<long>("TurnId")
                                 .HasColumnType("INTEGER");
 
                             b1.HasKey("RegionId", "Code");
@@ -432,6 +475,155 @@ namespace atlantis.Migrations
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
+                {
+                    b.HasOne("atlantis.Persistence.DbFaction", "Faction")
+                        .WithMany("Units")
+                        .HasForeignKey("FactionId");
+
+                    b.HasOne("atlantis.Persistence.DbRegion", "Region")
+                        .WithMany("Units")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                        .WithMany("Units")
+                        .HasForeignKey("TurnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("atlantis.Persistence.DbCapacity", "Capacity", b1 =>
+                        {
+                            b1.Property<long>("DbUnitId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Flying")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Riding")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Swimming")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Walking")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbUnitId");
+
+                            b1.ToTable("Units");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbUnitId");
+                        });
+
+                    b.OwnsOne("atlantis.Persistence.DbItem", "ReadyItem", b1 =>
+                        {
+                            b1.Property<long>("DbUnitId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int?>("Amount")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Code")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("DbUnitId");
+
+                            b1.ToTable("Units");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbUnitId");
+                        });
+
+                    b.OwnsOne("atlantis.Persistence.DbSkill", "CombatSpell", b1 =>
+                        {
+                            b1.Property<long>("DbUnitId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Code")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int?>("Days")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int?>("Level")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbUnitId");
+
+                            b1.ToTable("Units");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbUnitId");
+                        });
+
+                    b.OwnsMany("atlantis.Persistence.DbItem", "Items", b1 =>
+                        {
+                            b1.Property<long>("UnitId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Code")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int?>("Amount")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("UnitId", "Code");
+
+                            b1.ToTable("Unit_Items");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UnitId");
+                        });
+
+                    b.OwnsMany("atlantis.Persistence.DbSkill", "CanStudy", b1 =>
+                        {
+                            b1.Property<long>("UnitId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Code")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int?>("Days")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int?>("Level")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("UnitId", "Code");
+
+                            b1.ToTable("Unit_CanStudy");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UnitId");
+                        });
+
+                    b.OwnsMany("atlantis.Persistence.DbSkill", "Skills", b1 =>
+                        {
+                            b1.Property<long>("UnitId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Code")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int?>("Days")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int?>("Level")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("UnitId", "Code");
+
+                            b1.ToTable("Unit_Skills");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UnitId");
+                        });
                 });
 #pragma warning restore 612, 618
         }

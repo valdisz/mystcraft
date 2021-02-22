@@ -5,8 +5,10 @@
 //  </copyright>
 // -----------------------------------------------------------------------
 
-namespace atlantis {
+namespace atlantis
+{
     using System.Linq;
+    using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
@@ -40,6 +42,19 @@ namespace atlantis {
         [UsePaging]
         public IQueryable<DbRegion> GetRegions([Parent] DbTurn turn) {
             return db.Regions.Where(x => x.TurnId == turn.Id);
+        }
+
+        [UsePaging]
+        public IQueryable<DbUnit> GetUnits([Parent] DbTurn turn) {
+            return db.Units
+                .Include(x => x.Faction)
+                .Where(x => x.TurnId == turn.Id);
+        }
+
+        public Task<DbUnit> FindUnit([Parent] DbTurn turn, int number) {
+            return db.Units
+                .Include(x => x.Faction)
+                .SingleOrDefaultAsync(x => x.TurnId == turn.Id && x.Number == number);
         }
     }
 }

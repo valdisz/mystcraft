@@ -19,13 +19,20 @@ namespace atlantis.Persistence {
         [GraphQLIgnore]
         public DbGame Game { get; set; }
 
+        [GraphQLIgnore]
         public List<DbReport> Reports { get; set; } = new List<DbReport>();
 
+        [GraphQLIgnore]
         public List<DbRegion> Regions { get; set; } = new List<DbRegion>();
 
+        [GraphQLIgnore]
         public List<DbFaction> Factions { get; set; } = new List<DbFaction>();
+
+        [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new List<DbEvent>();
-        // public List<DbUnit> Units { get; set; }
+
+        [GraphQLIgnore]
+        public List<DbUnit> Units { get; set; } = new List<DbUnit>();
         // public List<DbStructure> Structures { get; set; }
     }
 }

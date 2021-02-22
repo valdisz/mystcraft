@@ -16,15 +16,10 @@ namespace atlantis.Persistence
             this.Amount = other.Amount;
         }
 
-        [GraphQLIgnore]
-        [Required]
-        public long TurnId { get; set; }
-
         [Required]
         public string Code { get; set; }
 
-        [Required]
-        public int Amount { get; set; }
+        public int? Amount { get; set; }
     }
 
     [Owned]
@@ -39,10 +34,6 @@ namespace atlantis.Persistence
             this.Amount = other.Amount;
             this.Price = other.Price;
         }
-
-        [GraphQLIgnore]
-        [Required]
-        public long TurnId { get; set; }
 
         [Required]
         public string Code { get; set; }

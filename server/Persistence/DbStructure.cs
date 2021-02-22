@@ -1,7 +1,9 @@
 namespace atlantis.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using HotChocolate;
 
+    [GraphQLName("Structure")]
     public class DbStructure {
         [Key]
         public long Id { get; set; }

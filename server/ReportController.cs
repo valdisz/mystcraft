@@ -11,11 +11,11 @@ namespace atlantis
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using Model;
 
     using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
+    using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
 
     [Route("report")]
     public class ApiController : ControllerBase {
@@ -130,6 +130,7 @@ namespace atlantis
 
         private static async Task UpdateTurnsAsync(Database db, long gameId, int earliestTurn) {
             var lastTurn = await db.Turns
+                .AsNoTracking()
                 .OrderByDescending(x => x.Number)
                 .Where(x => x.GameId == gameId)
                 .Select(x => x.Number)
@@ -140,43 +141,47 @@ namespace atlantis
             }
 
             var turns = await db.Turns
+                .AsNoTracking()
                 .Where(x => x.GameId == gameId && x.Number >= lastTurn)
                 .OrderBy(x => x.Number)
                 .Select(x => new { x.Id, x.Number })
-                .AsNoTracking()
                 .ToListAsync();
 
             RegionDic regions = new RegionDic();
             FactionsDic factions = new FactionsDic();
+            UnitsDic units = new UnitsDic();
 
             if (earliestTurn > 1) {
                 regions = (await db.Regions
-                        .Where(x => x.TurnId == turns[0].Id)
                         .AsNoTracking()
+                        .Where(x => x.TurnId == turns[0].Id)
                         .ToArrayAsync())
                     .ToDictionary(k => k.UID);
 
                 factions = (await db.Factions
-                        .Where(x => x.TurnId == turns[0].Id)
                         .AsNoTracking()
+                        .Where(x => x.TurnId == turns[0].Id)
                         .ToArrayAsync())
                     .ToDictionary(k => k.Number);
             }
 
             foreach (var turn in turns) {
-                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions);
+                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions, units);
 
-                await RemoveRegionsAsync(db, turn.Id);
                 await RemoveEventsAsync(db, turn.Id);
+                await RemoveUnitsAsync(db, turn.Id);
                 await RemoveFactionsAsync(db, turn.Id);
+                await RemoveRegionsAsync(db, turn.Id);
 
-                await InsertRegionsAsync(db, turn.Id, regions.Values);
                 await InsertFactionsAsync(db, turn.Id, factions.Values);
+                await InsertRegionsAsync(db, turn.Id, regions.Values);
+
+                await db.SaveChangesAsync();
             }
         }
 
         // This method will be memory intensive as it must merge all reports into one
-        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber, RegionDic regions, FactionsDic factions) {
+        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber, RegionDic regions, FactionsDic factions, UnitsDic units) {
             var savedReports = db.Reports
                 .Where(x => x.TurnId == turnId)
                 .AsNoTracking()
@@ -184,11 +189,10 @@ namespace atlantis
 
             int i = 0;
             await foreach (var r in savedReports) {
-                await System.IO.File.WriteAllTextAsync($"report-{i++}.json", r.Json);
                 var report = JsonConvert.DeserializeObject<JReport>(r.Json);
 
                 foreach (var region in report.Regions) {
-                    CreateOrUpdateRegion(turnNumber, regions, region);
+                    CreateOrUpdateRegion(turnNumber, factions, regions, units, region);
                 }
 
                 CreateOrUpdateFaction(factions, report);
@@ -197,9 +201,7 @@ namespace atlantis
             AddRevealedRegionsFromExits(turnNumber, regions);
         }
 
-        public static void CreateOrUpdateFaction(FactionsDic factions, JReport report) {
-            var f = report.Faction;
-
+        public static DbFaction CreateOrUpdateFaction(FactionsDic factions, JFaction f) {
             if (!factions.TryGetValue(f.Number, out var faction)) {
                 faction = new DbFaction {
                     Number = f.Number
@@ -208,6 +210,14 @@ namespace atlantis
             }
 
             faction.Name = f.Name;
+
+            return faction;
+        }
+
+        public static DbFaction CreateOrUpdateFaction(FactionsDic factions, JReport report) {
+            var f = report.Faction;
+
+            var faction = CreateOrUpdateFaction(factions, f);
 
             foreach (var error in report.Errors) {
                 faction.Events.Add(new DbEvent {
@@ -222,35 +232,11 @@ namespace atlantis
                     Message = ev
                 });
             }
+
+            return faction;
         }
 
-        private static DbRegion CopyRegion(DbRegion region) {
-            return new DbRegion {
-                X = region.X,
-                Y = region.Y,
-                Z = region.Z,
-                Label = region.Label,
-                UpdatedAtTurn = region.UpdatedAtTurn,
-                Province = region.Province,
-                Terrain = region.Terrain,
-                Settlement = region.Settlement != null
-                    ? new DbSettlement {
-                        Name = region.Settlement.Name,
-                        Size = region.Settlement.Size
-                    }
-                    : null,
-                Tax = region.Tax,
-                Wages = region.Wages,
-                TotalWages = region.TotalWages,
-                Entertainment = region.Entertainment,
-                Exits = region.Exits.Select(x => new DbExit(x)).ToList(),
-                Products = region.Products.Select(x => new DbItem(x)).ToList(),
-                ForSale = region.ForSale.Select(x => new DbTradableItem(x)).ToList(),
-                Wanted = region.Wanted.Select(x => new DbTradableItem(x)).ToList()
-            };
-        }
-
-        private static void CreateOrUpdateRegion(int turnNumber, RegionDic regions, JRegion source) {
+        private static DbRegion CreateOrUpdateRegion(int turnNumber, FactionsDic factions, RegionDic regions, UnitsDic units, JRegion source) {
             var x = source.Coords.X;
             var y = source.Coords.Y;
             var z = source.Coords.Z ?? DEFAULT_LEVEL_Z;
@@ -290,10 +276,71 @@ namespace atlantis
             region.Wages = source.Wages;
             region.TotalWages = source.TotalWages ?? 0;
 
-            SetRegionItems(region.Products, source.Products);
-            SetRegionItems(region.Wanted, source.Wanted);
-            SetRegionItems(region.ForSale, source.ForSale);
-            SetRegionExits(region.Exits, source.Exits);
+            SetItems(region.Products, source.Products);
+            SetItems(region.Wanted, source.Wanted);
+            SetItems(region.ForSale, source.ForSale);
+            SetExits(region.Exits, source.Exits);
+
+            int seq = 0;
+            foreach (var unit in source.Units) {
+                CreateOrUpdateUnit(factions, units, region, unit, seq++);
+            }
+
+            return region;
+        }
+
+        private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, JUnit source, int seq) {
+            if (!units.TryGetValue(source.Number, out var unit)) {
+                unit = new DbUnit {
+                    Number = source.Number
+                };
+
+                units.Add(unit.Number, unit);
+                region.Units.Add(unit);
+            }
+
+            if (source.Faction != null && unit.Faction == null) {
+                var faction = CreateOrUpdateFaction(factions, source.Faction);
+                faction.Units.Add(unit);
+                unit.Faction = faction;
+            }
+
+            unit.Sequence = seq;
+            unit.Name = source.Name;
+            unit.Description = source.Description;
+            unit.OnGuard = source.OnGuard;
+            unit.Flags = unit.Flags.Union(source.Flags).ToList();
+            unit.Weight = source.Weight;
+
+            if (source.Capacity != null) {
+                unit.Capacity = new DbCapacity {
+                    Walking = source.Capacity.Walking,
+                    Swimming = source.Capacity.Swimming,
+                    Riding = source.Capacity.Riding,
+                    Flying = source.Capacity.Flying
+                };
+            }
+
+            if (source.ReadyItem != null) {
+                unit.ReadyItem = new DbItem {
+                    Code = source.ReadyItem.Code,
+                    Amount = source.ReadyItem.Amount
+                };
+            }
+
+            if (source.CombatSpell != null) {
+                unit.CombatSpell = new DbSkill {
+                    Code = source.CombatSpell.Code,
+                    Level = source.CombatSpell.Level,
+                    Days = source.CombatSpell.Days
+                };
+            }
+
+            SetItems(unit.Items, source.Items);
+            SetSkills(unit.Skills, source.Skills);
+            SetSkills(unit.CanStudy, source.CanStudy);
+
+            return unit;
         }
 
         private static Task RemoveRegionsAsync(Database db, long turnId) {
@@ -311,26 +358,21 @@ namespace atlantis
                 .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbEvent)).GetTableName()} where TurnId = {turnId}");
         }
 
+        private static Task RemoveUnitsAsync(Database db, long turnId) {
+            return db.Database
+                .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbUnit)).GetTableName()} where TurnId = {turnId}");
+        }
+
         private static async Task InsertRegionsAsync(Database db, long turnId, IEnumerable<DbRegion> regions) {
             foreach (var region in regions) {
                 region.TurnId = turnId;
 
-                foreach (var wanted in region.Wanted) {
-                    wanted.TurnId = turnId;
-                }
-
-                foreach (var forSale in region.ForSale) {
-                    forSale.TurnId = turnId;
-                }
-
-                foreach (var product in region.Products) {
-                    product.TurnId = turnId;
+                foreach (var unit in region.Units) {
+                    unit.TurnId = turnId;
                 }
 
                 await db.AddAsync(region);
             }
-
-            await db.SaveChangesAsync();
         }
 
         private static async Task InsertFactionsAsync(Database db, long turnId, IEnumerable<DbFaction> factions) {
@@ -343,11 +385,9 @@ namespace atlantis
 
                 await db.AddAsync(faction);
             }
-
-            await db.SaveChangesAsync();
         }
 
-        public static void SetRegionItems(ICollection<DbItem> dbItems, IEnumerable<JItem> items) {
+        public static void SetItems(ICollection<DbItem> dbItems, IEnumerable<JItem> items) {
             var dest = dbItems.ToDictionary(x => x.Code);
 
             foreach (var item in items) {
@@ -361,7 +401,22 @@ namespace atlantis
             }
         }
 
-        public static void SetRegionItems(ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
+        public static void SetSkills(ICollection<DbSkill> dbItems, IEnumerable<JSkill> items) {
+            var dest = dbItems.ToDictionary(x => x.Code);
+
+            foreach (var item in items) {
+                if (!dest.TryGetValue(item.Code, out var d)) {
+                    d = new DbSkill();
+                    dbItems.Add(d);
+                }
+
+                d.Code = item.Code;
+                d.Level = item.Level;
+                d.Days = item.Days;
+            }
+        }
+
+        public static void SetItems(ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
             var dest = dbItems.ToDictionary(x => x.Code);
 
             foreach (var item in items) {
@@ -371,12 +426,12 @@ namespace atlantis
                 }
 
                 d.Code = item.Code;
-                d.Amount = item.Amount;
+                d.Amount = item.Amount ?? 1;
                 d.Price = item.Price;
             }
         }
 
-        public static void SetRegionExits(ICollection<DbExit> dbItems, IEnumerable<JExit> items) {
+        public static void SetExits(ICollection<DbExit> dbItems, IEnumerable<JExit> items) {
             var dest = dbItems.ToDictionary(x => x.RegionUID);
             foreach (var item in items) {
                 var uid = DbRegion.GetUID(item.Coords.X, item.Coords.Y, item.Coords.Z ?? 1);

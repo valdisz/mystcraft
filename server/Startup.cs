@@ -48,6 +48,8 @@ namespace atlantis {
                     .AddType<TurnType>()
                     .AddType<TurnResolvers>()
                     .AddType<RegionType>()
+                    .AddType<RegionResolvers>()
+                    .AddType<UnitType>()
                     .AddQueryType<QueryType>()
                     .AddMutationType<Mutation>()
                     .Create(),
