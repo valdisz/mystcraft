@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/server/bin/Debug/netcoreapp3.1/atlantis.dll",
+            "program": "${workspaceFolder}/server/bin/Debug/net5.0/atlantis.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",

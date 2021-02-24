@@ -14,7 +14,7 @@ namespace atlantis.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.0");
+                .HasAnnotation("ProductVersion", "5.0.3");
 
             modelBuilder.Entity("atlantis.Persistence.DbEvent", b =>
                 {
@@ -170,8 +170,8 @@ namespace atlantis.Migrations
 
                     b.Property<string>("FactionName")
                         .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("FactionNumber")
                         .HasColumnType("INTEGER");
@@ -349,6 +349,10 @@ namespace atlantis.Migrations
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Faction");
+
+                    b.Navigation("Turn");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
@@ -358,6 +362,8 @@ namespace atlantis.Migrations
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Turn");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbRegion", b =>
@@ -446,6 +452,8 @@ namespace atlantis.Migrations
                                     b2.WithOwner()
                                         .HasForeignKey("DbExitRegionId", "DbExitDirection");
                                 });
+
+                            b1.Navigation("Settlement");
                         });
 
                     b.OwnsMany("atlantis.Persistence.DbItem", "Products", b1 =>
@@ -510,6 +518,18 @@ namespace atlantis.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("RegionId");
                         });
+
+                    b.Navigation("Exits");
+
+                    b.Navigation("ForSale");
+
+                    b.Navigation("Products");
+
+                    b.Navigation("Settlement");
+
+                    b.Navigation("Turn");
+
+                    b.Navigation("Wanted");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbReport", b =>
@@ -525,6 +545,10 @@ namespace atlantis.Migrations
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Turn");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
@@ -597,6 +621,16 @@ namespace atlantis.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("StructureId");
                         });
+
+                    b.Navigation("Contents");
+
+                    b.Navigation("Load");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Sailors");
+
+                    b.Navigation("Turn");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
@@ -606,6 +640,8 @@ namespace atlantis.Migrations
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
@@ -759,6 +795,67 @@ namespace atlantis.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("UnitId");
                         });
+
+                    b.Navigation("CanStudy");
+
+                    b.Navigation("Capacity");
+
+                    b.Navigation("CombatSpell");
+
+                    b.Navigation("Faction");
+
+                    b.Navigation("Items");
+
+                    b.Navigation("ReadyItem");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Skills");
+
+                    b.Navigation("Structure");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
+                {
+                    b.Navigation("Events");
+
+                    b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("atlantis.Persistence.DbGame", b =>
+                {
+                    b.Navigation("Reports");
+
+                    b.Navigation("Turns");
+                });
+
+            modelBuilder.Entity("atlantis.Persistence.DbRegion", b =>
+                {
+                    b.Navigation("Structures");
+
+                    b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+                {
+                    b.Navigation("Units");
+                });
+
+            modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
+                {
+                    b.Navigation("Events");
+
+                    b.Navigation("Factions");
+
+                    b.Navigation("Regions");
+
+                    b.Navigation("Reports");
+
+                    b.Navigation("Structures");
+
+                    b.Navigation("Units");
                 });
 #pragma warning restore 612, 618
         }

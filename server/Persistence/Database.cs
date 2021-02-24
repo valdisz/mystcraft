@@ -6,6 +6,7 @@ namespace atlantis.Persistence
     using atlantis.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+    using Newtonsoft.Json;
 
     public class Database : DbContext {
         public Database(DbContextOptions<Database> options)
@@ -22,15 +23,13 @@ namespace atlantis.Persistence
         public DbSet<DbUnit> Units { get; set; }
 
         private readonly ValueConverter<List<string>, string> splitStringConverter = new ValueConverter<List<string>, string>(
-            v => string.Join(";", v),
-            v => v.Split(new[] { ';' }).ToList()
+            v => JsonConvert.SerializeObject(v),
+            v => JsonConvert.DeserializeObject<List<string>>(v)
         );
 
         private readonly ValueConverter<List<Direction>, string> directionListConverter = new ValueConverter<List<Direction>, string>(
-            v => string.Join(";", v.ToString()),
-            v => v.Split(new[] { ';' })
-                .Select(x => Enum.Parse<Direction>(x, true))
-                .ToList()
+            v => JsonConvert.SerializeObject(v),
+            v => JsonConvert.DeserializeObject<List<Direction>>(v)
         );
 
         protected override void OnModelCreating(ModelBuilder model) {

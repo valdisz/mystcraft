@@ -10,16 +10,16 @@ namespace atlantis.Migrations
                 name: "Games",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: false),
-                    PlayerFactionNumber = table.Column<int>(nullable: true),
-                    PlayerFactionName = table.Column<string>(nullable: true),
-                    LastTurnNumber = table.Column<int>(nullable: false),
-                    EngineVersion = table.Column<string>(nullable: true),
-                    RulesetName = table.Column<string>(nullable: true),
-                    RulesetVersion = table.Column<string>(nullable: true),
-                    Password = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    PlayerFactionNumber = table.Column<int>(type: "INTEGER", nullable: true),
+                    PlayerFactionName = table.Column<string>(type: "TEXT", nullable: true),
+                    LastTurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    EngineVersion = table.Column<string>(type: "TEXT", nullable: true),
+                    RulesetName = table.Column<string>(type: "TEXT", nullable: true),
+                    RulesetVersion = table.Column<string>(type: "TEXT", nullable: true),
+                    Password = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -30,12 +30,12 @@ namespace atlantis.Migrations
                 name: "Turns",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    GameId = table.Column<long>(nullable: false),
-                    Number = table.Column<int>(nullable: false),
-                    Month = table.Column<int>(nullable: false),
-                    Year = table.Column<int>(nullable: false)
+                    GameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Month = table.Column<int>(type: "INTEGER", nullable: false),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -52,11 +52,11 @@ namespace atlantis.Migrations
                 name: "Factions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TurnId = table.Column<long>(nullable: false),
-                    Number = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: false)
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -73,24 +73,23 @@ namespace atlantis.Migrations
                 name: "Regions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    TurnId = table.Column<long>(nullable: false),
-                    X = table.Column<int>(nullable: false),
-                    Y = table.Column<int>(nullable: false),
-                    Z = table.Column<int>(nullable: false),
-                    UpdatedAtTurn = table.Column<int>(nullable: false),
-                    Label = table.Column<string>(nullable: false),
-                    Province = table.Column<string>(nullable: false),
-                    Terrain = table.Column<string>(nullable: false),
-                    Settlement_Name = table.Column<string>(nullable: true),
-                    Settlement_Size = table.Column<string>(nullable: true),
-                    Population = table.Column<int>(nullable: false),
-                    Race = table.Column<string>(nullable: true),
-                    Entertainment = table.Column<int>(nullable: false),
-                    Tax = table.Column<int>(nullable: false),
-                    Wages = table.Column<double>(nullable: false),
-                    TotalWages = table.Column<int>(nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    Z = table.Column<int>(type: "INTEGER", nullable: false),
+                    UpdatedAtTurn = table.Column<int>(type: "INTEGER", nullable: false),
+                    Label = table.Column<string>(type: "TEXT", nullable: false),
+                    Province = table.Column<string>(type: "TEXT", nullable: false),
+                    Terrain = table.Column<string>(type: "TEXT", nullable: false),
+                    Settlement_Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Settlement_Size = table.Column<string>(type: "TEXT", nullable: true),
+                    Population = table.Column<int>(type: "INTEGER", nullable: false),
+                    Race = table.Column<string>(type: "TEXT", nullable: true),
+                    Entertainment = table.Column<int>(type: "INTEGER", nullable: false),
+                    Tax = table.Column<int>(type: "INTEGER", nullable: false),
+                    Wages = table.Column<double>(type: "REAL", nullable: false),
+                    TotalWages = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -107,14 +106,14 @@ namespace atlantis.Migrations
                 name: "Reports",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    GameId = table.Column<long>(nullable: false),
-                    TurnId = table.Column<long>(nullable: false),
-                    FactionNumber = table.Column<int>(nullable: false),
-                    FactionName = table.Column<string>(maxLength: 100, nullable: false),
-                    Source = table.Column<string>(nullable: false),
-                    Json = table.Column<string>(nullable: false)
+                    GameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    FactionName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Source = table.Column<string>(type: "TEXT", nullable: false),
+                    Json = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -137,12 +136,12 @@ namespace atlantis.Migrations
                 name: "Events",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TurnId = table.Column<long>(nullable: false),
-                    FactionId = table.Column<long>(nullable: false),
-                    Type = table.Column<string>(nullable: false),
-                    Message = table.Column<string>(nullable: false)
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    FactionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -165,16 +164,16 @@ namespace atlantis.Migrations
                 name: "Regions_Exits",
                 columns: table => new
                 {
-                    Direction = table.Column<string>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false),
-                    X = table.Column<int>(nullable: false),
-                    Y = table.Column<int>(nullable: false),
-                    Z = table.Column<int>(nullable: false),
-                    Label = table.Column<string>(nullable: false),
-                    Province = table.Column<string>(nullable: false),
-                    Terrain = table.Column<string>(nullable: false),
-                    Settlement_Name = table.Column<string>(nullable: true),
-                    Settlement_Size = table.Column<string>(nullable: true)
+                    Direction = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    Z = table.Column<int>(type: "INTEGER", nullable: false),
+                    Label = table.Column<string>(type: "TEXT", nullable: false),
+                    Province = table.Column<string>(type: "TEXT", nullable: false),
+                    Terrain = table.Column<string>(type: "TEXT", nullable: false),
+                    Settlement_Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Settlement_Size = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -191,10 +190,10 @@ namespace atlantis.Migrations
                 name: "Regions_ForSale",
                 columns: table => new
                 {
-                    Code = table.Column<string>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false),
-                    Amount = table.Column<int>(nullable: false),
-                    Price = table.Column<int>(nullable: false)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -211,9 +210,9 @@ namespace atlantis.Migrations
                 name: "Regions_Products",
                 columns: table => new
                 {
-                    Code = table.Column<string>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false),
-                    Amount = table.Column<int>(nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -230,10 +229,10 @@ namespace atlantis.Migrations
                 name: "Regions_Wanted",
                 columns: table => new
                 {
-                    Code = table.Column<string>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false),
-                    Amount = table.Column<int>(nullable: false),
-                    Price = table.Column<int>(nullable: false)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -250,26 +249,25 @@ namespace atlantis.Migrations
                 name: "Structures",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    TurnId = table.Column<long>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false),
-                    X = table.Column<int>(nullable: false),
-                    Y = table.Column<int>(nullable: false),
-                    Z = table.Column<int>(nullable: false),
-                    Sequence = table.Column<int>(nullable: false),
-                    Number = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Type = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    Flags = table.Column<string>(nullable: true),
-                    SailDirections = table.Column<string>(nullable: true),
-                    Speed = table.Column<int>(nullable: true),
-                    Needs = table.Column<int>(nullable: true),
-                    Load_Used = table.Column<int>(nullable: true),
-                    Load_Max = table.Column<int>(nullable: true),
-                    Sailors_Current = table.Column<int>(nullable: true),
-                    Sailors_Required = table.Column<int>(nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    Z = table.Column<int>(type: "INTEGER", nullable: false),
+                    Sequence = table.Column<int>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Flags = table.Column<string>(type: "TEXT", nullable: true),
+                    SailDirections = table.Column<string>(type: "TEXT", nullable: true),
+                    Speed = table.Column<int>(type: "INTEGER", nullable: true),
+                    Needs = table.Column<int>(type: "INTEGER", nullable: true),
+                    Load_Used = table.Column<int>(type: "INTEGER", nullable: true),
+                    Load_Max = table.Column<int>(type: "INTEGER", nullable: true),
+                    Sailors_Current = table.Column<int>(type: "INTEGER", nullable: true),
+                    Sailors_Required = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -292,9 +290,9 @@ namespace atlantis.Migrations
                 name: "Structures_Contents",
                 columns: table => new
                 {
-                    Type = table.Column<string>(nullable: false),
-                    StructureId = table.Column<long>(nullable: false),
-                    Count = table.Column<int>(nullable: false)
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    StructureId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Count = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -311,28 +309,27 @@ namespace atlantis.Migrations
                 name: "Units",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    TurnId = table.Column<long>(nullable: false),
-                    RegionId = table.Column<long>(nullable: false),
-                    StrcutureId = table.Column<long>(nullable: true),
-                    FactionId = table.Column<long>(nullable: true),
-                    Sequence = table.Column<int>(nullable: false),
-                    Number = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    OnGuard = table.Column<bool>(nullable: false),
-                    Flags = table.Column<string>(nullable: true),
-                    Weight = table.Column<int>(nullable: true),
-                    Capacity_Flying = table.Column<int>(nullable: true),
-                    Capacity_Riding = table.Column<int>(nullable: true),
-                    Capacity_Walking = table.Column<int>(nullable: true),
-                    Capacity_Swimming = table.Column<int>(nullable: true),
-                    ReadyItem_Code = table.Column<string>(nullable: true),
-                    ReadyItem_Amount = table.Column<int>(nullable: true),
-                    CombatSpell_Code = table.Column<string>(nullable: true),
-                    CombatSpell_Level = table.Column<int>(nullable: true),
-                    CombatSpell_Days = table.Column<int>(nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    StrcutureId = table.Column<long>(type: "INTEGER", nullable: true),
+                    FactionId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Sequence = table.Column<int>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    OnGuard = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Flags = table.Column<string>(type: "TEXT", nullable: true),
+                    Weight = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Flying = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Riding = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Walking = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Swimming = table.Column<int>(type: "INTEGER", nullable: true),
+                    ReadyItem_Code = table.Column<string>(type: "TEXT", nullable: true),
+                    ReadyItem_Amount = table.Column<int>(type: "INTEGER", nullable: true),
+                    CombatSpell_Code = table.Column<string>(type: "TEXT", nullable: true),
+                    CombatSpell_Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    CombatSpell_Days = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -367,10 +364,10 @@ namespace atlantis.Migrations
                 name: "Unit_CanStudy",
                 columns: table => new
                 {
-                    Code = table.Column<string>(nullable: false),
-                    UnitId = table.Column<long>(nullable: false),
-                    Level = table.Column<int>(nullable: true),
-                    Days = table.Column<int>(nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    Days = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -387,9 +384,9 @@ namespace atlantis.Migrations
                 name: "Unit_Items",
                 columns: table => new
                 {
-                    Code = table.Column<string>(nullable: false),
-                    UnitId = table.Column<long>(nullable: false),
-                    Amount = table.Column<int>(nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -406,10 +403,10 @@ namespace atlantis.Migrations
                 name: "Unit_Skills",
                 columns: table => new
                 {
-                    Code = table.Column<string>(nullable: false),
-                    UnitId = table.Column<long>(nullable: false),
-                    Level = table.Column<int>(nullable: true),
-                    Days = table.Column<int>(nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    Days = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

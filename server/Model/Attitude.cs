@@ -1,10 +1,10 @@
 namespace atlantis.Model
 {
     public enum Attitude {
-        Hostile,
-        Unfriendly,
-        Neutral,
-        Friendly,
-        Ally
+        Hostile = 1,
+        Unfriendly = 2,
+        Neutral = 3,
+        Friendly = 4,
+        Ally = 5
     }
 }

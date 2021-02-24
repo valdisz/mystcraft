@@ -1,8 +1,8 @@
 namespace atlantis.Model
 {
     public enum SettlementSize {
-        City,
-        Town,
-        Village
+        Village = 1,
+        Town = 2,
+        City = 3
     }
 }

@@ -1,8 +1,8 @@
 namespace atlantis.Model
 {
     public enum EventType {
-        Info,
-        Battle,
-        Error
+        Info = 1,
+        Battle = 2,
+        Error = 3
     }
 }

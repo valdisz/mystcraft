@@ -17,6 +17,7 @@ namespace atlantis
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
+    using System.Diagnostics;
 
     [Route("report")]
     public class ApiController : ControllerBase {
@@ -38,16 +39,18 @@ namespace atlantis
 
             // 1. upload reports
             int earliestTurn = int.MaxValue;
+            List<(int, JReport)> reports = new List<(int, JReport)>();
             foreach (var file in Request.Form.Files) {
                 await using var stream = file.OpenReadStream();
-                var turnNumber = await LoadReportFileAsync(db, stream, game);
+                var (turnNumber, report) = await LoadReportFileAsync(db, stream, game);
 
                 earliestTurn = Math.Min(earliestTurn, turnNumber);
+                reports.Add((earliestTurn, report));
             }
             await db.SaveChangesAsync();
 
             // 2. parse & merge reports and update history
-            await UpdateTurnsAsync(db, game.Id, earliestTurn);
+            await UpdateTurnsAsync(db, game.Id, earliestTurn, reports);
 
             return Ok();
         }
@@ -61,16 +64,17 @@ namespace atlantis
             return db.Games.SingleOrDefaultAsync(x => x.Id == id);
         }
 
-        private static async Task<int> LoadReportFileAsync(Database db, Stream reportStream, DbGame game) {
+        private static async Task<(int turnNumber, JReport report)> LoadReportFileAsync(Database db, Stream reportStream, DbGame game) {
             using var textReader = new StreamReader(reportStream);
 
             using var atlantisReader = new AtlantisReportJsonConverter(textReader);
             var json = await atlantisReader.ReadAsJsonAsync();
+            var report  = json.ToObject<JReport>();
 
-            var faction = json["faction"].ToObject<JFaction>();
-            var date = json["date"].ToObject<JDate>();
-            var engine = json["engine"]?.ToObject<JGameEngine>();
-            var ordersTemplate = json["ordersTemplate"]?.ToObject<JOrdersTemplate>();
+            var faction = report.Faction;
+            var date = report.Date;
+            var engine = report.Engine;
+            var ordersTemplate = report.OrdersTemplate;
 
             string factionName = faction.Name;
             int factionNumber = faction.Number;
@@ -83,7 +87,7 @@ namespace atlantis
 
             var turn = await db.Turns
                 .FirstOrDefaultAsync(x => x.GameId == game.Id && x.Number == turnNumber);
-            DbReport report = null;
+            DbReport dbReport = null;
 
             if (turn == null) {
                 turn = new DbTurn {
@@ -96,28 +100,28 @@ namespace atlantis
                 game.Turns.Add(turn);
             }
             else {
-                report = await db.Reports
+                dbReport = await db.Reports
                     .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnId == turn.Id);
             }
 
-            if (report == null) {
-                report = new DbReport {
+            if (dbReport == null) {
+                dbReport = new DbReport {
                     GameId = game.Id,
                     TurnId = turn.Id
                 };
 
-                game.Reports.Add(report);
-                turn.Reports.Add(report);
+                game.Reports.Add(dbReport);
+                turn.Reports.Add(dbReport);
             }
 
-            report.FactionNumber = factionNumber;
-            report.FactionName = factionName;
-            report.Source = source;
-            report.Json = json.ToString(Formatting.Indented);
+            dbReport.FactionNumber = factionNumber;
+            dbReport.FactionName = factionName;
+            dbReport.Source = source;
+            dbReport.Json = json.ToString(Formatting.Indented);
 
-            game.PlayerFactionNumber ??= report.FactionNumber;
-            if (report.FactionNumber == game.PlayerFactionNumber && turnNumber > game.LastTurnNumber) {
-                game.PlayerFactionName = report.FactionName;
+            game.PlayerFactionNumber ??= dbReport.FactionNumber;
+            if (dbReport.FactionNumber == game.PlayerFactionNumber && turnNumber > game.LastTurnNumber) {
+                game.PlayerFactionName = dbReport.FactionName;
                 game.LastTurnNumber = turnNumber;
             }
 
@@ -126,10 +130,10 @@ namespace atlantis
             game.RulesetVersion ??= engine?.Ruleset?.Version;
             game.Password ??= ordersTemplate?.Password;
 
-            return turnNumber;
+            return (turnNumber, report);
         }
 
-        private static async Task UpdateTurnsAsync(Database db, long gameId, int earliestTurn) {
+        private static async Task UpdateTurnsAsync(Database db, long gameId, int earliestTurn, List<(int, JReport)> reports) {
             var lastTurn = await db.Turns
                 .AsNoTracking()
                 .OrderByDescending(x => x.Number)
@@ -195,7 +199,7 @@ namespace atlantis
             }
 
             foreach (var turn in turns) {
-                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions, structures, units);
+                await MergeReportsAsync(db, reports, turn.Id, turn.Number, regions, factions, structures, units);
 
                 await RemoveEventsAsync(db, turn.Id);
                 await RemoveUnitsAsync(db, turn.Id);
@@ -211,10 +215,11 @@ namespace atlantis
         }
 
         // This method will be memory intensive as it must merge all reports into one
-        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber,
+        private static async Task MergeReportsAsync(Database db, List<(int, JReport)> reports, long turnId, int turnNumber,
             RegionDic regions, FactionsDic factions, StructuresDic structures, UnitsDic units) {
 
             var savedReports = db.Reports
+                .Include(x => x.Turn)
                 .Where(x => x.TurnId == turnId)
                 .AsNoTracking()
                 .AsAsyncEnumerable();
@@ -222,11 +227,11 @@ namespace atlantis
             await foreach (var r in savedReports) {
                 var report = JsonConvert.DeserializeObject<JReport>(r.Json);
 
+                CreateOrUpdateFaction(factions, report);
+
                 foreach (var region in report.Regions) {
                     CreateOrUpdateRegion(turnNumber, factions, regions, structures, units, region);
                 }
-
-                CreateOrUpdateFaction(factions, report);
             }
 
             AddRevealedRegionsFromExits(turnNumber, regions);
@@ -290,10 +295,7 @@ namespace atlantis
             region.Terrain = source.Terrain;
 
             if (source.Settlement != null) {
-                if (region.Settlement == null) {
-                    region.Settlement = new DbSettlement();
-                }
-
+                region.Settlement ??= new DbSettlement();
                 region.Settlement.Name = source.Settlement.Name;
                 region.Settlement.Size = source.Settlement.Size;
             }
@@ -325,7 +327,7 @@ namespace atlantis
                 presentStructures.Add(dbStr.UID);
 
                 foreach (var unit in str.Units) {
-                    CreateOrUpdateUnit(factions, units, region, dbStr, unit, unitSeq++);
+                    var strUnit = CreateOrUpdateUnit(factions, units, region, dbStr, unit, unitSeq++);
                 }
             }
 
@@ -396,7 +398,6 @@ namespace atlantis
             return str;
         }
 
-
         private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, DbStructure structure, JUnit source, int seq) {
             if (!units.TryGetValue(source.Number, out var unit)) {
                 unit = new DbUnit {
@@ -405,6 +406,7 @@ namespace atlantis
 
                 units.Add(unit.Number, unit);
                 region.Units.Add(unit);
+                if (structure != null) structure.Units.Add(unit);
             }
 
             if (source.Faction != null && unit.Faction == null) {
@@ -479,6 +481,11 @@ namespace atlantis
         private static async Task InsertRegionsAsync(Database db, long turnId, IEnumerable<DbRegion> regions) {
             foreach (var region in regions) {
                 region.TurnId = turnId;
+
+                Debug.Assert(region.Exits.Count <= 6);
+                foreach (var exit in region.Exits) {
+                    Debug.Assert((int) exit.Direction >= 1 && (int) exit.Direction <= 6);
+                }
 
                 foreach (var unit in region.Units) {
                     unit.TurnId = turnId;
@@ -557,8 +564,12 @@ namespace atlantis
             var dest = dbItems.ToDictionary(x => x.Type);
 
             foreach (var item in items) {
-                if (!dest.TryGetValue(item.Type, out var d)) {
-                    d = new DbFleetContent();
+                var type = item.Type.TrimEnd('s');
+                if (!dest.TryGetValue(type, out var d)) {
+                    d = new DbFleetContent {
+                        Type = type
+                    };
+
                     dbItems.Add(d);
                 }
 
@@ -584,10 +595,7 @@ namespace atlantis
                 d.Terrain = item.Terrain;
 
                 if (item.Settlement != null) {
-                    if (d.Settlement == null) {
-                        d.Settlement = new DbSettlement();
-                    }
-
+                    d.Settlement ??= new DbSettlement();
                     d.Settlement.Name = item.Settlement.Name;
                     d.Settlement.Size = item.Settlement.Size;
                 }
