@@ -247,6 +247,67 @@ namespace atlantis.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Structures",
+                columns: table => new
+                {
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TurnId = table.Column<long>(nullable: false),
+                    RegionId = table.Column<long>(nullable: false),
+                    X = table.Column<int>(nullable: false),
+                    Y = table.Column<int>(nullable: false),
+                    Z = table.Column<int>(nullable: false),
+                    Sequence = table.Column<int>(nullable: false),
+                    Number = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Type = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    Flags = table.Column<string>(nullable: true),
+                    SailDirections = table.Column<string>(nullable: true),
+                    Speed = table.Column<int>(nullable: true),
+                    Needs = table.Column<int>(nullable: true),
+                    Load_Used = table.Column<int>(nullable: true),
+                    Load_Max = table.Column<int>(nullable: true),
+                    Sailors_Current = table.Column<int>(nullable: true),
+                    Sailors_Required = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Structures", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Structures_Regions_RegionId",
+                        column: x => x.RegionId,
+                        principalTable: "Regions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Structures_Turns_TurnId",
+                        column: x => x.TurnId,
+                        principalTable: "Turns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Structures_Contents",
+                columns: table => new
+                {
+                    Type = table.Column<string>(nullable: false),
+                    StructureId = table.Column<long>(nullable: false),
+                    Count = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Structures_Contents", x => new { x.StructureId, x.Type });
+                    table.ForeignKey(
+                        name: "FK_Structures_Contents_Structures_StructureId",
+                        column: x => x.StructureId,
+                        principalTable: "Structures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Units",
                 columns: table => new
                 {
@@ -254,6 +315,7 @@ namespace atlantis.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     TurnId = table.Column<long>(nullable: false),
                     RegionId = table.Column<long>(nullable: false),
+                    StrcutureId = table.Column<long>(nullable: true),
                     FactionId = table.Column<long>(nullable: true),
                     Sequence = table.Column<int>(nullable: false),
                     Number = table.Column<int>(nullable: false),
@@ -270,8 +332,7 @@ namespace atlantis.Migrations
                     ReadyItem_Amount = table.Column<int>(nullable: true),
                     CombatSpell_Code = table.Column<string>(nullable: true),
                     CombatSpell_Level = table.Column<int>(nullable: true),
-                    CombatSpell_Days = table.Column<int>(nullable: true),
-                    Orders = table.Column<string>(nullable: true)
+                    CombatSpell_Days = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -288,6 +349,12 @@ namespace atlantis.Migrations
                         principalTable: "Regions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Units_Structures_StrcutureId",
+                        column: x => x.StrcutureId,
+                        principalTable: "Structures",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Units_Turns_TurnId",
                         column: x => x.TurnId,
@@ -386,6 +453,16 @@ namespace atlantis.Migrations
                 column: "TurnId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Structures_RegionId",
+                table: "Structures",
+                column: "RegionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Structures_TurnId",
+                table: "Structures",
+                column: "TurnId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Turns_GameId",
                 table: "Turns",
                 column: "GameId");
@@ -399,6 +476,11 @@ namespace atlantis.Migrations
                 name: "IX_Units_RegionId",
                 table: "Units",
                 column: "RegionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Units_StrcutureId",
+                table: "Units",
+                column: "StrcutureId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Units_TurnId",
@@ -427,6 +509,9 @@ namespace atlantis.Migrations
                 name: "Reports");
 
             migrationBuilder.DropTable(
+                name: "Structures_Contents");
+
+            migrationBuilder.DropTable(
                 name: "Unit_CanStudy");
 
             migrationBuilder.DropTable(
@@ -440,6 +525,9 @@ namespace atlantis.Migrations
 
             migrationBuilder.DropTable(
                 name: "Factions");
+
+            migrationBuilder.DropTable(
+                name: "Structures");
 
             migrationBuilder.DropTable(
                 name: "Regions");

@@ -1,7 +1,9 @@
 namespace atlantis.Persistence
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using atlantis.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -11,13 +13,25 @@ namespace atlantis.Persistence
         }
 
         public DbSet<DbGame> Games { get; set; }
-        public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbTurn> Turns { get; set; }
-        public DbSet<DbRegion> Regions { get; set; }
+        public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
         public DbSet<DbEvent> Events { get; set; }
-        // public DbSet<DbStructure> Structures { get; set; }
+        public DbSet<DbRegion> Regions { get; set; }
+        public DbSet<DbStructure> Structures { get; set; }
         public DbSet<DbUnit> Units { get; set; }
+
+        private readonly ValueConverter<List<string>, string> splitStringConverter = new ValueConverter<List<string>, string>(
+            v => string.Join(";", v),
+            v => v.Split(new[] { ';' }).ToList()
+        );
+
+        private readonly ValueConverter<List<Direction>, string> directionListConverter = new ValueConverter<List<Direction>, string>(
+            v => string.Join(";", v.ToString()),
+            v => v.Split(new[] { ';' })
+                .Select(x => Enum.Parse<Direction>(x, true))
+                .ToList()
+        );
 
         protected override void OnModelCreating(ModelBuilder model) {
             model.Entity<DbGame>(t => {
@@ -53,6 +67,11 @@ namespace atlantis.Persistence
                     .HasForeignKey(x => x.TurnId)
                     .IsRequired();
 
+                t.HasMany(x => x.Structures)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => x.TurnId)
+                    .IsRequired();
+
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
@@ -61,6 +80,11 @@ namespace atlantis.Persistence
 
             model.Entity<DbRegion>(t => {
                 t.HasMany(x => x.Units)
+                    .WithOne(x => x.Region)
+                    .HasForeignKey(x => x.RegionId)
+                    .IsRequired();
+
+                t.HasMany(x => x.Structures)
                     .WithOne(x => x.Region)
                     .HasForeignKey(x => x.RegionId)
                     .IsRequired();
@@ -114,28 +138,28 @@ namespace atlantis.Persistence
                 t.Property(x => x.Type).HasConversion<string>();
             });
 
-            // model.Entity<DbStructure>(t => {
-            //     t.HasOne(x => x.Game)
-            //         .WithMany()
-            //         .HasForeignKey(x => x.GameId)
-            //         .IsRequired();
+            model.Entity<DbStructure>(t => {
+                t.Property(p => p.Flags)
+                    .HasConversion(splitStringConverter);
 
-            //     t.HasOne(x => x.Turn)
-            //         .WithMany(x => x.Structures)
-            //         .HasForeignKey(x => x.TurnId)
-            //         .IsRequired();
+                t.Property(p => p.SailDirections)
+                    .HasConversion(directionListConverter);
 
-            //     t.HasOne(x => x.Region)
-            //         .WithMany(x => x.Structures)
-            //         .HasForeignKey(x => x.RegionId)
-            //         .IsRequired();
-            // });
+                t.HasMany(x => x.Units)
+                    .WithOne(x => x.Structure)
+                    .HasForeignKey(x => x.StrcutureId);
+
+                t.OwnsOne(p => p.Load);
+                t.OwnsOne(p => p.Sailors);
+
+                t.OwnsMany(p => p.Contents, a => {
+                    a.WithOwner().HasForeignKey("StructureId");
+                    a.ToTable("Structures_Contents");
+                    a.HasKey("StructureId", nameof(DbFleetContent.Type));
+                });
+            });
 
             model.Entity<DbUnit>(t => {
-                var splitStringConverter = new ValueConverter<List<string>, string>(
-                    v => string.Join(";", v),
-                    v => v.Split(new[] { ';' }).ToList()
-                );
                 t.Property(p => p.Flags)
                     .HasConversion(splitStringConverter);
 
@@ -162,10 +186,6 @@ namespace atlantis.Persistence
                 t.OwnsOne(p => p.ReadyItem);
 
                 t.OwnsOne(p => p.CombatSpell);
-
-                // t.HasOne(x => x.Structure)
-                //     .WithMany(x => x.Units)
-                //     .HasForeignKey(x => x.StrcutureId);
             });
         }
     }

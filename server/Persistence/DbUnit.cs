@@ -13,7 +13,9 @@ namespace atlantis.Persistence {
 
         [GraphQLIgnore]
         public long RegionId { get; set; }
-        // public long? StrcutureId { get; set; }
+
+        [GraphQLIgnore]
+        public long? StrcutureId { get; set; }
 
         [GraphQLIgnore]
         public long? FactionId { get; set; }
@@ -43,8 +45,6 @@ namespace atlantis.Persistence {
         public DbItem ReadyItem { get; set; }
         public DbSkill CombatSpell { get; set; }
 
-        public string Orders { get; set; }
-
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
 
@@ -52,6 +52,9 @@ namespace atlantis.Persistence {
         public DbRegion Region { get; set; }
 
         public DbFaction Faction { get; set; }
-        // public DbStructure Structure { get; set; }
+
+
+        [GraphQLIgnore]
+        public DbStructure Structure { get; set; }
     }
 }

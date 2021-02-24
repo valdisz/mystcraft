@@ -66,7 +66,8 @@ namespace atlantis.Persistence
         [GraphQLIgnore]
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
 
-        // public List<DbStructure> Structures { get; set; }
+        [GraphQLIgnore]
+        public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
 
         public static string GetUID(int x, int y, int z) => $"{x} {y} {z}";
     }

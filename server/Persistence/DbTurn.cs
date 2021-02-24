@@ -14,7 +14,6 @@ namespace atlantis.Persistence {
         public int Number { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
-        // public string Memory { get; set; }
 
         [GraphQLIgnore]
         public DbGame Game { get; set; }
@@ -33,6 +32,8 @@ namespace atlantis.Persistence {
 
         [GraphQLIgnore]
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
-        // public List<DbStructure> Structures { get; set; }
+
+        [GraphQLIgnore]
+        public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
     }
 }

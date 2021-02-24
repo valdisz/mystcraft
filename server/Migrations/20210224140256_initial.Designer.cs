@@ -9,7 +9,7 @@ using atlantis.Persistence;
 namespace atlantis.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20210222114858_initial")]
+    [Migration("20210224140256_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,6 +201,65 @@ namespace atlantis.Migrations
                     b.ToTable("Reports");
                 });
 
+            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Flags")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Needs")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("RegionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SailDirections")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Speed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("TurnId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
+
+                    b.HasIndex("TurnId");
+
+                    b.ToTable("Structures");
+                });
+
             modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
                 {
                     b.Property<long>("Id")
@@ -251,13 +310,13 @@ namespace atlantis.Migrations
                     b.Property<bool>("OnGuard")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Orders")
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("RegionId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Sequence")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("StrcutureId")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("TurnId")
@@ -271,6 +330,8 @@ namespace atlantis.Migrations
                     b.HasIndex("FactionId");
 
                     b.HasIndex("RegionId");
+
+                    b.HasIndex("StrcutureId");
 
                     b.HasIndex("TurnId");
 
@@ -468,6 +529,78 @@ namespace atlantis.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+                {
+                    b.HasOne("atlantis.Persistence.DbRegion", "Region")
+                        .WithMany("Structures")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                        .WithMany("Structures")
+                        .HasForeignKey("TurnId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("atlantis.Persistence.DbSailors", "Sailors", b1 =>
+                        {
+                            b1.Property<long>("DbStructureId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Current")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Required")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbStructureId");
+
+                            b1.ToTable("Structures");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbStructureId");
+                        });
+
+                    b.OwnsOne("atlantis.Persistence.DbTransportationLoad", "Load", b1 =>
+                        {
+                            b1.Property<long>("DbStructureId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Max")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Used")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbStructureId");
+
+                            b1.ToTable("Structures");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbStructureId");
+                        });
+
+                    b.OwnsMany("atlantis.Persistence.DbFleetContent", "Contents", b1 =>
+                        {
+                            b1.Property<long>("StructureId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Type")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("Count")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("StructureId", "Type");
+
+                            b1.ToTable("Structures_Contents");
+
+                            b1.WithOwner()
+                                .HasForeignKey("StructureId");
+                        });
+                });
+
             modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
                 {
                     b.HasOne("atlantis.Persistence.DbGame", "Game")
@@ -488,6 +621,10 @@ namespace atlantis.Migrations
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("atlantis.Persistence.DbStructure", "Structure")
+                        .WithMany("Units")
+                        .HasForeignKey("StrcutureId");
 
                     b.HasOne("atlantis.Persistence.DbTurn", "Turn")
                         .WithMany("Units")

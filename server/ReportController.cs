@@ -16,6 +16,7 @@ namespace atlantis
     using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
+    using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
 
     [Route("report")]
     public class ApiController : ControllerBase {
@@ -150,26 +151,55 @@ namespace atlantis
             RegionDic regions = new RegionDic();
             FactionsDic factions = new FactionsDic();
             UnitsDic units = new UnitsDic();
+            StructuresDic structures = new StructuresDic();
 
             if (earliestTurn > 1) {
                 regions = (await db.Regions
                         .AsNoTracking()
+                        .Include(x => x.Structures.Where(s => s.Number <= GameConsts.MAX_BUILDING_NUMBER))
                         .Where(x => x.TurnId == turns[0].Id)
                         .ToArrayAsync())
                     .ToDictionary(k => k.UID);
+
+                foreach (var region in regions.Values) {
+                    region.Id = 0;
+                    region.TurnId = 0;
+                }
 
                 factions = (await db.Factions
                         .AsNoTracking()
                         .Where(x => x.TurnId == turns[0].Id)
                         .ToArrayAsync())
                     .ToDictionary(k => k.Number);
+
+                foreach (var faction in factions.Values) {
+                    faction.Id = 0;
+                    faction.TurnId = 0;
+                }
+
+                structures = regions.Values
+                    .SelectMany(x => x.Structures)
+                    .ToDictionary(x => x.UID);
+
+                foreach (var str in structures.Values) {
+                    str.Id = 0;
+                    str.TurnId = 0;
+                    str.RegionId = 0;
+                    str.Region = null;
+
+                    // reset values
+                    str.Load = null;
+                    str.Sailors = null;
+                    str.SailDirections.Clear();
+                }
             }
 
             foreach (var turn in turns) {
-                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions, units);
+                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions, structures, units);
 
                 await RemoveEventsAsync(db, turn.Id);
                 await RemoveUnitsAsync(db, turn.Id);
+                await RemoveStructuresAsync(db, turn.Id);
                 await RemoveFactionsAsync(db, turn.Id);
                 await RemoveRegionsAsync(db, turn.Id);
 
@@ -181,18 +211,19 @@ namespace atlantis
         }
 
         // This method will be memory intensive as it must merge all reports into one
-        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber, RegionDic regions, FactionsDic factions, UnitsDic units) {
+        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber,
+            RegionDic regions, FactionsDic factions, StructuresDic structures, UnitsDic units) {
+
             var savedReports = db.Reports
                 .Where(x => x.TurnId == turnId)
                 .AsNoTracking()
                 .AsAsyncEnumerable();
 
-            int i = 0;
             await foreach (var r in savedReports) {
                 var report = JsonConvert.DeserializeObject<JReport>(r.Json);
 
                 foreach (var region in report.Regions) {
-                    CreateOrUpdateRegion(turnNumber, factions, regions, units, region);
+                    CreateOrUpdateRegion(turnNumber, factions, regions, structures, units, region);
                 }
 
                 CreateOrUpdateFaction(factions, report);
@@ -236,7 +267,8 @@ namespace atlantis
             return faction;
         }
 
-        private static DbRegion CreateOrUpdateRegion(int turnNumber, FactionsDic factions, RegionDic regions, UnitsDic units, JRegion source) {
+        private static DbRegion CreateOrUpdateRegion(int turnNumber, FactionsDic factions, RegionDic regions, StructuresDic structures,
+            UnitsDic units, JRegion source) {
             var x = source.Coords.X;
             var y = source.Coords.Y;
             var z = source.Coords.Z ?? DEFAULT_LEVEL_Z;
@@ -277,19 +309,95 @@ namespace atlantis
             region.TotalWages = source.TotalWages ?? 0;
 
             SetItems(region.Products, source.Products);
-            SetItems(region.Wanted, source.Wanted);
-            SetItems(region.ForSale, source.ForSale);
+            SetMarketItems(region.Wanted, source.Wanted);
+            SetMarketItems(region.ForSale, source.ForSale);
             SetExits(region.Exits, source.Exits);
 
-            int seq = 0;
+            int unitSeq = 0;
             foreach (var unit in source.Units) {
-                CreateOrUpdateUnit(factions, units, region, unit, seq++);
+                CreateOrUpdateUnit(factions, units, region, null, unit, unitSeq++);
+            }
+
+            int structureSeq = 0;
+            HashSet<string> presentStructures = new HashSet<string>();
+            foreach (var str in source.Structures) {
+                var dbStr = CreateOrUpdateStructure(structures, region, str, structureSeq++);
+                presentStructures.Add(dbStr.UID);
+
+                foreach (var unit in str.Units) {
+                    CreateOrUpdateUnit(factions, units, region, dbStr, unit, unitSeq++);
+                }
+            }
+
+            // remove structures that are not present anymore
+            for (int i = region.Structures.Count - 1; i >= 0 ; i--) {
+                var str = region.Structures[i];
+                var strUid = str.UID;
+
+                if (!presentStructures.Contains(strUid)) {
+                    structures.Remove(strUid);
+
+                    if (str.X == region.X && str.Y == region.Y && str.Z == region.Z) {
+                        // location of the structure not changed then structure does not exist anymore
+                        region.Structures.RemoveAt(i);
+                    }
+                }
             }
 
             return region;
         }
 
-        private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, JUnit source, int seq) {
+        private static DbStructure CreateOrUpdateStructure(StructuresDic structures, DbRegion region, JStructure source, int seq) {
+            string uid = DbStructure.GetUID(source.Structure.Number, region.X, region.Y, region.Z);
+            if (!structures.TryGetValue(uid, out var str)) {
+                str = new DbStructure();
+                structures.Add(uid, str);
+                region.Structures.Add(str);
+            }
+
+            var info = source.Structure;
+
+            str.X = region.X;
+            str.Y = region.Y;
+            str.Z = region.Z;
+            str.Sequence = seq;
+            str.Number = info.Number;
+            str.Name = info.Name;
+            str.Type = info.Type;
+            str.Description = info.Description;
+
+            str.Speed = info.Speed ?? str.Speed;
+            str.Needs = info.Needs ?? str.Needs;
+
+            if (info.Load != null) {
+                str.Load ??= new DbTransportationLoad();
+                str.Load.Used = info.Load.Used;
+                str.Load.Max = info.Load.Max;
+            }
+
+            if (info.Sailors != null) {
+                str.Sailors ??= new DbSailors();
+                str.Sailors.Current = info.Sailors.Current;
+                str.Sailors.Required = info.Sailors.Required;
+            }
+
+            SetFleetContent(str.Contents, info.Contents);
+
+            if (info.Flags.Length > 0) {
+                str.Flags.Clear();
+                str.Flags.AddRange(info.Flags);
+            }
+
+            if (info.SailDirections.Length > 0) {
+                str.SailDirections.Clear();
+                str.SailDirections.AddRange(info.SailDirections);
+            }
+
+            return str;
+        }
+
+
+        private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, DbStructure structure, JUnit source, int seq) {
             if (!units.TryGetValue(source.Number, out var unit)) {
                 unit = new DbUnit {
                     Number = source.Number
@@ -363,12 +471,21 @@ namespace atlantis
                 .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbUnit)).GetTableName()} where TurnId = {turnId}");
         }
 
+        private static Task RemoveStructuresAsync(Database db, long turnId) {
+            return db.Database
+                .ExecuteSqlRawAsync($"delete from {db.Model.FindEntityType(typeof(DbStructure)).GetTableName()} where TurnId = {turnId}");
+        }
+
         private static async Task InsertRegionsAsync(Database db, long turnId, IEnumerable<DbRegion> regions) {
             foreach (var region in regions) {
                 region.TurnId = turnId;
 
                 foreach (var unit in region.Units) {
                     unit.TurnId = turnId;
+                }
+
+                foreach (var str in region.Structures) {
+                    str.TurnId = turnId;
                 }
 
                 await db.AddAsync(region);
@@ -401,6 +518,26 @@ namespace atlantis
             }
         }
 
+        public static void SetMarketItems(ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
+            var dest = dbItems.ToDictionary(x => x.Code);
+
+            foreach (var item in items) {
+                if (!dest.TryGetValue(item.Code, out var d)) {
+                    d = new DbTradableItem();
+                    dbItems.Add(d);
+                }
+
+                d.Code = item.Code;
+                d.Amount = item.Amount ?? 1;
+                d.Price = item.Price;
+            }
+
+            // missing items are removed
+            foreach (var key in dest.Keys.Except(items.Select(x => x.Code))) {
+                dbItems.Remove(dest[key]);
+            }
+        }
+
         public static void SetSkills(ICollection<DbSkill> dbItems, IEnumerable<JSkill> items) {
             var dest = dbItems.ToDictionary(x => x.Code);
 
@@ -416,18 +553,16 @@ namespace atlantis
             }
         }
 
-        public static void SetItems(ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
-            var dest = dbItems.ToDictionary(x => x.Code);
+        public static void SetFleetContent(ICollection<DbFleetContent> dbItems, IEnumerable<JFleetContent> items) {
+            var dest = dbItems.ToDictionary(x => x.Type);
 
             foreach (var item in items) {
-                if (!dest.TryGetValue(item.Code, out var d)) {
-                    d = new DbTradableItem();
+                if (!dest.TryGetValue(item.Type, out var d)) {
+                    d = new DbFleetContent();
                     dbItems.Add(d);
                 }
 
-                d.Code = item.Code;
-                d.Amount = item.Amount ?? 1;
-                d.Price = item.Price;
+                d.Count = item.Count;
             }
         }
 
