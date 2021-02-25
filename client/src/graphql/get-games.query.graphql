@@ -1,7 +1,5 @@
 query GetGames {
   games {
-    nodes {
-      ...GameListItem
-    }
+    ...GameListItem
   }
 }

@@ -1,7 +1,7 @@
-import { action, makeObservable, observable, runInAction, transaction } from 'mobx';
-import { CLIENT } from '../client';
-import { GameListItemFragment, GetGamesQuery, GetGames, NewGame, NewGameMutation, NewGameMutationVariables } from '../schema';
-import { NewGameStore } from "./new-game-store";
+import { action, makeObservable, observable, runInAction, transaction } from 'mobx'
+import { CLIENT } from '../client'
+import { GameListItemFragment, GetGamesQuery, GetGames, NewGame, NewGameMutation, NewGameMutationVariables } from '../schema'
+import { NewGameStore } from './new-game-store'
 
 export class HomeStore {
     constructor() {
@@ -15,12 +15,12 @@ export class HomeStore {
             query: GetGames
         }).then(response => {
             runInAction(() => {
-                this.games.replace(response.data.games.nodes);
+                this.games.replace(response.data.games);
             });
         });
     };
 
-    readonly newGame = new NewGameStore();
+    readonly newGame = new NewGameStore()
 
     confirmNewGame = async () => {
         const response = await CLIENT.mutate<NewGameMutation, NewGameMutationVariables>({

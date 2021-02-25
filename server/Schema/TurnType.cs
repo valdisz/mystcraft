@@ -1,12 +1,6 @@
-﻿// -----------------------------------------------------------------------
-//  <copyright file="TurnType.cs" company="Akka.NET Project">
-//      Copyright (C) 2009-2020 Lightbend Inc. <http://www.lightbend.com>
-//      Copyright (C) 2013-2020 .NET Foundation <https://github.com/akkadotnet/akka.net>
-//  </copyright>
-// -----------------------------------------------------------------------
-
-namespace atlantis
+﻿namespace atlantis
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using HotChocolate;
@@ -34,14 +28,23 @@ namespace atlantis
 
         private readonly Database db;
 
-        [UsePaging]
-        public IQueryable<DbReport> GetReports([Parent] DbTurn turn) {
-            return db.Reports.Where(x => x.TurnId == turn.Id);
+        public Task<List<DbReport>> GetReports([Parent] DbTurn turn) {
+            return db.Reports
+                .Where(x => x.TurnId == turn.Id)
+                .ToListAsync();
         }
 
         [UsePaging]
         public IQueryable<DbRegion> GetRegions([Parent] DbTurn turn) {
-            return db.Regions.Where(x => x.TurnId == turn.Id);
+            return db.Regions
+                .Where(x => x.TurnId == turn.Id);
+        }
+
+        [UsePaging]
+        public IQueryable<DbStructure> GetStructures([Parent] DbTurn turn) {
+            return db.Structures
+                .Include(x => x.Region)
+                .Where(x => x.TurnId == turn.Id);
         }
 
         [UsePaging]
@@ -50,11 +53,28 @@ namespace atlantis
                 .Include(x => x.Faction)
                 .Where(x => x.TurnId == turn.Id);
         }
+        public Task<List<DbFaction>> GetFactions([Parent] DbTurn turn) {
+            return db.Factions
+                .Where(x => x.TurnId == turn.Id)
+                .ToListAsync();
+        }
 
-        public Task<DbUnit> FindUnit([Parent] DbTurn turn, int number) {
+        public Task<List<DbEvent>> GetEvents([Parent] DbTurn turn) {
+            return db.Events
+                .Include(x => x.Faction)
+                .Where(x => x.TurnId == turn.Id)
+                .ToListAsync();
+        }
+
+        public Task<DbUnit> UnitByNumber([Parent] DbTurn turn, int number) {
             return db.Units
                 .Include(x => x.Faction)
                 .SingleOrDefaultAsync(x => x.TurnId == turn.Id && x.Number == number);
+        }
+
+        public Task<DbRegion> RegionByCoords([Parent] DbTurn turn, int x, int y, int z) {
+            return db.Regions
+                .SingleOrDefaultAsync(r => r.TurnId == turn.Id && r.X == x && r.Y == y && r.Z == z);
         }
     }
 }

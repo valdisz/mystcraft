@@ -1,8 +1,9 @@
 namespace atlantis {
-    using System.Linq;
+    using System.Collections.Generic;
+    using System.Threading.Tasks;
     using atlantis.Persistence;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
+    using Microsoft.EntityFrameworkCore;
 
     public class Query {
         public Query(Database db) {
@@ -11,8 +12,7 @@ namespace atlantis {
 
         private readonly Database db;
 
-        [UsePaging]
-        public IQueryable<DbGame> Games() => db.Games;
+        public Task<List<DbGame>> GetGames() => db.Games.ToListAsync();
     }
 
     public class QueryType : ObjectType<Query> {

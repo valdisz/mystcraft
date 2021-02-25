@@ -1,0 +1,40 @@
+
+
+query GetSingleGame($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      ...SingleGame
+    }
+  }
+}
+
+fragment SingleGame on Game {
+  id
+  name
+  engineVersion
+  rulesetName
+  rulesetVersion
+  playerFactionName
+  playerFactionNumber
+  password
+  lastTurnNumber
+  turns {
+    ...TurnSummary
+  }
+}
+
+fragment TurnSummary on Turn {
+  id
+  number
+  month
+  year
+  reports {
+    ...ReportSummary
+  }
+}
+
+fragment ReportSummary on Report {
+  id
+  factionName
+  factionNumber
+}

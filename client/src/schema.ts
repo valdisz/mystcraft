@@ -31,33 +31,21 @@ export type Game = Node & {
   password?: Maybe<Scalars['String']>;
   playerFactionName?: Maybe<Scalars['String']>;
   playerFactionNumber?: Maybe<Scalars['Int']>;
-  reports?: Maybe<ReportConnection>;
+  reports?: Maybe<Array<Maybe<Report>>>;
   rulesetName?: Maybe<Scalars['String']>;
   rulesetVersion?: Maybe<Scalars['String']>;
-  turn?: Maybe<Turn>;
-  turns?: Maybe<TurnConnection>;
+  turnByNumber?: Maybe<Turn>;
+  turns?: Maybe<Array<Maybe<Turn>>>;
 };
 
 
 export type GameReportsArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
   turn?: Maybe<Scalars['Long']>;
 };
 
 
-export type GameTurnArgs = {
+export type GameTurnByNumberArgs = {
   turn: Scalars['Long'];
-};
-
-
-export type GameTurnsArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
 };
 
 export type Report = Node & {
@@ -69,12 +57,25 @@ export type Report = Node & {
 };
 
 export type Turn = Node & {
+  events?: Maybe<Array<Maybe<Event>>>;
+  factions?: Maybe<Array<Maybe<Faction>>>;
   id: Scalars['ID'];
   month: Scalars['Int'];
   number: Scalars['Int'];
+  regionByCoords?: Maybe<Region>;
   regions?: Maybe<RegionConnection>;
-  reports?: Maybe<ReportConnection>;
+  reports?: Maybe<Array<Maybe<Report>>>;
+  structures?: Maybe<StructureConnection>;
+  unitByNumber?: Maybe<Unit>;
+  units?: Maybe<UnitConnection>;
   year: Scalars['Int'];
+};
+
+
+export type TurnRegionByCoordsArgs = {
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+  z: Scalars['Int'];
 };
 
 
@@ -86,7 +87,20 @@ export type TurnRegionsArgs = {
 };
 
 
-export type TurnReportsArgs = {
+export type TurnStructuresArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  last?: Maybe<Scalars['PaginationAmount']>;
+};
+
+
+export type TurnUnitByNumberArgs = {
+  number: Scalars['Int'];
+};
+
+
+export type TurnUnitsArgs = {
   after?: Maybe<Scalars['String']>;
   before?: Maybe<Scalars['String']>;
   first?: Maybe<Scalars['PaginationAmount']>;
@@ -95,6 +109,7 @@ export type TurnReportsArgs = {
 
 export type Region = Node & {
   entertainment: Scalars['Int'];
+  exits?: Maybe<Array<Maybe<Exit>>>;
   forSale?: Maybe<Array<Maybe<TradableItem>>>;
   id: Scalars['ID'];
   label: Scalars['String'];
@@ -102,9 +117,14 @@ export type Region = Node & {
   products?: Maybe<Array<Maybe<Item>>>;
   province: Scalars['String'];
   race?: Maybe<Scalars['String']>;
+  settlement?: Maybe<Settlement>;
+  structureByNumber?: Maybe<Structure>;
+  structures?: Maybe<Array<Maybe<Structure>>>;
   tax: Scalars['Int'];
   terrain: Scalars['String'];
   totalWages: Scalars['Int'];
+  unitByNumber?: Maybe<Unit>;
+  units?: Maybe<Array<Maybe<Unit>>>;
   updatedAtTurn: Scalars['Int'];
   wages: Scalars['Float'];
   wanted?: Maybe<Array<Maybe<TradableItem>>>;
@@ -113,17 +133,74 @@ export type Region = Node & {
   z: Scalars['Int'];
 };
 
-export type Query = {
-  games?: Maybe<GameConnection>;
-  node?: Maybe<Node>;
+
+export type RegionStructureByNumberArgs = {
+  number: Scalars['Int'];
 };
 
 
-export type QueryGamesArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
+export type RegionUnitByNumberArgs = {
+  number: Scalars['Int'];
+};
+
+export type Unit = Node & {
+  canStudy?: Maybe<Array<Maybe<Skill>>>;
+  capacity?: Maybe<Capacity>;
+  combatSpell?: Maybe<Skill>;
+  description?: Maybe<Scalars['String']>;
+  faction?: Maybe<Faction>;
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>;
+  id: Scalars['ID'];
+  items: Array<Maybe<Item>>;
+  name: Scalars['String'];
+  number: Scalars['Int'];
+  onGuard: Scalars['Boolean'];
+  readyItem?: Maybe<Item>;
+  skills?: Maybe<Array<Maybe<Skill>>>;
+  weight?: Maybe<Scalars['Int']>;
+};
+
+export type Structure = Node & {
+  contents?: Maybe<Array<Maybe<DbFleetContent>>>;
+  description?: Maybe<Scalars['String']>;
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>;
+  id: Scalars['ID'];
+  load?: Maybe<DbTransportationLoad>;
+  name: Scalars['String'];
+  needs?: Maybe<Scalars['Int']>;
+  number: Scalars['Int'];
+  sailDirections?: Maybe<Array<Direction>>;
+  sailors?: Maybe<DbSailors>;
+  speed?: Maybe<Scalars['Int']>;
+  type: Scalars['String'];
+  unitByNumber?: Maybe<Unit>;
+  units?: Maybe<Array<Maybe<Unit>>>;
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+  z: Scalars['Int'];
+};
+
+
+export type StructureUnitByNumberArgs = {
+  number: Scalars['Int'];
+};
+
+export type Faction = Node & {
+  events?: Maybe<Array<Maybe<Event>>>;
+  id: Scalars['ID'];
+  name: Scalars['String'];
+  number: Scalars['Int'];
+  unitByNumber?: Maybe<Unit>;
+};
+
+
+export type FactionUnitByNumberArgs = {
+  number: Scalars['Int'];
+};
+
+export type Query = {
+  games?: Maybe<Array<Maybe<Game>>>;
+  node?: Maybe<Node>;
 };
 
 
@@ -131,57 +208,6 @@ export type QueryNodeArgs = {
   id: Scalars['ID'];
 };
 
-
-/** A connection to a list of items. */
-export type GameConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<GameEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Game>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int'];
-};
-
-/** A connection to a list of items. */
-export type RegionConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<RegionEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Region>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int'];
-};
-
-
-/** Information about pagination in a connection. */
-export type PageInfo = {
-  /** When paginating forwards, the cursor to continue. */
-  endCursor?: Maybe<Scalars['String']>;
-  /** Indicates whether more edges exist following the set defined by the clients arguments. */
-  hasNextPage: Scalars['Boolean'];
-  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
-  hasPreviousPage: Scalars['Boolean'];
-  /** When paginating backwards, the cursor to continue. */
-  startCursor?: Maybe<Scalars['String']>;
-};
-
-/** An edge in a connection. */
-export type GameEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Game>;
-};
-
-/** An edge in a connection. */
-export type TurnEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Turn>;
-};
 
 export type Mutation = {
   deleteGame?: Maybe<Scalars['String']>;
@@ -198,39 +224,114 @@ export type MutationNewGameArgs = {
   name?: Maybe<Scalars['String']>;
 };
 
+export type Settlement = {
+  name?: Maybe<Scalars['String']>;
+  size: SettlementSize;
+};
+
 export type TradableItem = {
-  code?: Maybe<Scalars['String']>;
-  count: Scalars['Int'];
-  name: Scalars['String'];
+  amount: Scalars['Int'];
+  code: Scalars['String'];
   price: Scalars['Int'];
 };
 
 export type Item = {
+  amount?: Maybe<Scalars['Int']>;
+  code: Scalars['String'];
+};
+
+export type Exit = {
+  direction: Direction;
+  label: Scalars['String'];
+  province: Scalars['String'];
+  settlement?: Maybe<Settlement>;
+  terrain: Scalars['String'];
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+  z: Scalars['Int'];
+};
+
+export type Capacity = {
+  flying: Scalars['Int'];
+  riding: Scalars['Int'];
+  swimming: Scalars['Int'];
+  walking: Scalars['Int'];
+};
+
+export type Skill = {
   code?: Maybe<Scalars['String']>;
+  days?: Maybe<Scalars['Int']>;
+  level?: Maybe<Scalars['Int']>;
+};
+
+export type DbFleetContent = {
   count: Scalars['Int'];
-  name: Scalars['String'];
+  type?: Maybe<Scalars['String']>;
 };
 
+export enum Direction {
+  North = 'NORTH',
+  Northeast = 'NORTHEAST',
+  Southeast = 'SOUTHEAST',
+  South = 'SOUTH',
+  Southwest = 'SOUTHWEST',
+  Northwest = 'NORTHWEST'
+}
+
+export type DbTransportationLoad = {
+  max: Scalars['Int'];
+  used: Scalars['Int'];
+};
+
+export type DbSailors = {
+  current: Scalars['Int'];
+  required: Scalars['Int'];
+};
+
+
 /** A connection to a list of items. */
-export type ReportConnection = {
+export type RegionConnection = {
   /** A list of edges. */
-  edges?: Maybe<Array<ReportEdge>>;
+  edges?: Maybe<Array<RegionEdge>>;
   /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Report>>>;
+  nodes?: Maybe<Array<Maybe<Region>>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
 };
 
 /** A connection to a list of items. */
-export type TurnConnection = {
+export type UnitConnection = {
   /** A list of edges. */
-  edges?: Maybe<Array<TurnEdge>>;
+  edges?: Maybe<Array<UnitEdge>>;
   /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Turn>>>;
+  nodes?: Maybe<Array<Maybe<Unit>>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
+};
+
+/** A connection to a list of items. */
+export type StructureConnection = {
+  /** A list of edges. */
+  edges?: Maybe<Array<StructureEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<Structure>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** Information about pagination in a connection. */
+export type PageInfo = {
+  /** When paginating forwards, the cursor to continue. */
+  endCursor?: Maybe<Scalars['String']>;
+  /** Indicates whether more edges exist following the set defined by the clients arguments. */
+  hasNextPage: Scalars['Boolean'];
+  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
+  hasPreviousPage: Scalars['Boolean'];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor?: Maybe<Scalars['String']>;
 };
 
 /** An edge in a connection. */
@@ -242,48 +343,66 @@ export type RegionEdge = {
 };
 
 /** An edge in a connection. */
-export type ReportEdge = {
+export type StructureEdge = {
   /** A cursor for use in pagination. */
   cursor: Scalars['String'];
   /** The item at the end of the edge. */
-  node?: Maybe<Report>;
+  node?: Maybe<Structure>;
 };
 
+/** An edge in a connection. */
+export type UnitEdge = {
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Unit>;
+};
+
+export enum SettlementSize {
+  Village = 'VILLAGE',
+  Town = 'TOWN',
+  City = 'CITY'
+}
+
+export type Event = {
+  faction?: Maybe<Faction>;
+  id: Scalars['Long'];
+  message: Scalars['String'];
+  type: EventType;
+};
+
+
+export enum EventType {
+  Info = 'INFO',
+  Battle = 'BATTLE',
+  Error = 'ERROR'
+}
 
 export type GameListItemFragment = Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'playerFactionNumber' | 'playerFactionName' | 'lastTurnNumber'>;
 
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetGamesQuery = { games?: Maybe<{ nodes?: Maybe<Array<Maybe<GameListItemFragment>>> }> };
+export type GetGamesQuery = { games?: Maybe<Array<Maybe<GameListItemFragment>>> };
 
-export type GetLastTurnMapQueryVariables = Exact<{
+export type GetSingleGameQueryVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
 
 
-export type GetLastTurnMapQuery = { node?: Maybe<{ turns?: Maybe<{ nodes?: Maybe<Array<Maybe<Pick<Turn, 'id'>>>> }> }> };
+export type GetSingleGameQuery = { node?: Maybe<SingleGameFragment> };
 
-export type GetMapQueryVariables = Exact<{
-  turnId: Scalars['ID'];
-}>;
-
-
-export type GetMapQuery = { node?: Maybe<{ regions?: Maybe<{ nodes?: Maybe<Array<Maybe<Pick<Region, 'id' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province'>>>> }> }> };
-
-export type GetTurnsQueryVariables = Exact<{
-  gameId: Scalars['ID'];
-}>;
-
-
-export type GetTurnsQuery = { node?: Maybe<{ turns?: Maybe<{ nodes?: Maybe<Array<Maybe<TurnItemFragment>>> }> }> };
-
-export type TurnItemFragment = (
-  Pick<Turn, 'id' | 'number' | 'month' | 'year'>
-  & { reports?: Maybe<{ nodes?: Maybe<Array<Maybe<TurnItemReportFragment>>> }> }
+export type SingleGameFragment = (
+  Pick<Game, 'id' | 'name' | 'engineVersion' | 'rulesetName' | 'rulesetVersion' | 'playerFactionName' | 'playerFactionNumber' | 'password' | 'lastTurnNumber'>
+  & { turns?: Maybe<Array<Maybe<TurnSummaryFragment>>> }
 );
 
-export type TurnItemReportFragment = Pick<Report, 'id' | 'factionNumber'>;
+export type TurnSummaryFragment = (
+  Pick<Turn, 'id' | 'number' | 'month' | 'year'>
+  & { reports?: Maybe<Array<Maybe<ReportSummaryFragment>>> }
+);
+
+export type ReportSummaryFragment = Pick<Report, 'id' | 'factionName' | 'factionNumber'>;
 
 export type NewGameMutationVariables = Exact<{
   name: Scalars['String'];
@@ -303,80 +422,56 @@ export const GameListItem = gql`
   lastTurnNumber
 }
     `;
-export const TurnItemReport = gql`
-    fragment TurnItemReport on Report {
+export const ReportSummary = gql`
+    fragment ReportSummary on Report {
   id
-  factionNumber
+  factionName
   factionNumber
 }
     `;
-export const TurnItem = gql`
-    fragment TurnItem on Turn {
+export const TurnSummary = gql`
+    fragment TurnSummary on Turn {
   id
   number
   month
   year
   reports {
-    nodes {
-      ...TurnItemReport
-    }
+    ...ReportSummary
   }
 }
-    ${TurnItemReport}`;
+    ${ReportSummary}`;
+export const SingleGame = gql`
+    fragment SingleGame on Game {
+  id
+  name
+  engineVersion
+  rulesetName
+  rulesetVersion
+  playerFactionName
+  playerFactionNumber
+  password
+  lastTurnNumber
+  turns {
+    ...TurnSummary
+  }
+}
+    ${TurnSummary}`;
 export const GetGames = gql`
     query GetGames {
   games {
-    nodes {
-      ...GameListItem
-    }
+    ...GameListItem
   }
 }
     ${GameListItem}`;
-export const GetLastTurnMap = gql`
-    query GetLastTurnMap($gameId: ID!) {
+export const GetSingleGame = gql`
+    query GetSingleGame($gameId: ID!) {
   node(id: $gameId) {
     ... on Game {
-      turns(last: 1) {
-        nodes {
-          id
-        }
-      }
+      ...SingleGame
     }
   }
 }
-    `;
-export const GetMap = gql`
-    query GetMap($turnId: ID!) {
-  node(id: $turnId) {
-    ... on Turn {
-      regions {
-        nodes {
-          id
-          x
-          y
-          z
-          label
-          terrain
-          province
-        }
-      }
-    }
-  }
-}
-    `;
-export const GetTurns = gql`
-    query GetTurns($gameId: ID!) {
-  node(id: $gameId) {
-    ... on Game {
-      turns {
-        nodes {
-          ...TurnItem
-        }
-      }
-    }
-  }
-}
-    ${TurnItem}`;
+    ${SingleGame}`;
 export const NewGame = gql`
     mutation NewGame($name: String!) {
   newGame(name: $name) {

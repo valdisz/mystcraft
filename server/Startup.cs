@@ -40,6 +40,7 @@ namespace atlantis {
                     opt.EnableDetailedErrors();
                     opt.EnableSensitiveDataLogging();
                 })
+                .AddDataLoaderRegistry()
                 .AddGraphQL(SchemaBuilder.New()
                     .EnableRelaySupport()
                     .AddType<GameType>()
@@ -50,6 +51,10 @@ namespace atlantis {
                     .AddType<RegionType>()
                     .AddType<RegionResolvers>()
                     .AddType<UnitType>()
+                    .AddType<StructureType>()
+                    .AddType<StructureResolvers>()
+                    .AddType<FactionType>()
+                    .AddType<FactionResolvers>()
                     .AddQueryType<QueryType>()
                     .AddMutationType<Mutation>()
                     .Create(),

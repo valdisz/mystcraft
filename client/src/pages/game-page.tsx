@@ -1,9 +1,11 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import { AppBar, Button, Typography, Toolbar, IconButton } from '@material-ui/core'
+import { AppBar, Typography, Toolbar, IconButton, Divider, Box } from '@material-ui/core'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { useStore } from '../store'
+import { Observer, observer } from 'mobx-react-lite'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 export declare const ResizeObserver: any
@@ -57,9 +59,14 @@ const Widget = styled.div`
     position: absolute;
 `
 
-export function GamePage() {
-    const { gameId } = useParams<GamePageRouteParams>()
-    const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
+const GameInfo = styled.div`
+    margin-left: 1rem;
+`
+
+const GameComponent = observer(() => {
+    const { game } = useStore()
+
+    // const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
     // const map = React.useRef<GameMap>(null)
 
     // React.useEffect(() => {
@@ -79,16 +86,37 @@ export function GamePage() {
     return <GameContainer>
         <AppBar position='static' color='primary'>
             <Toolbar>
-                <IconButton edge='start' color='inherit' aria-label='menu'>
+                <IconButton component={Link} to='/' edge='start' color='inherit'>
                     <ArrowBackIcon />
                 </IconButton>
-                <Typography variant='h6'>News</Typography>
-                <Button color='inherit'>Login</Button>
+                <Typography variant='h6'>{ game.name }</Typography>
+                <GameInfo>
+                    <Typography variant='subtitle2'>{ game.playerFactionName } [{ game.playerFactionNumber }]</Typography>
+                </GameInfo>
+                <GameInfo>
+                    <Typography variant='subtitle2'>Turn: { game.lastTurnNumber }</Typography>
+                </GameInfo>
             </Toolbar>
         </AppBar>
         {/* <MapContainer>
             <MapCanvas ref={setCanvasRef} />
         </MapContainer> */}
     </GameContainer>
+})
+
+export function GamePage() {
+    const { gameId } = useParams<GamePageRouteParams>()
+    const { game } = useStore()
+
+    React.useEffect(() => {
+        game.load(gameId)
+    }, [ gameId ])
+
+    return <Observer>
+        {() => game.loading
+            ? <div>Loading...</div>
+            : <GameComponent />
+        }
+    </Observer>
 }
 

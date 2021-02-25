@@ -1,5 +1,8 @@
-﻿namespace atlantis {
+﻿namespace atlantis
+{
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
@@ -25,11 +28,28 @@
 
         private readonly Database db;
 
-        [UsePaging]
-        public IQueryable<DbUnit> GetUnits([Parent] DbRegion region) {
+        public Task<List<DbUnit>> GetUnits([Parent] DbRegion region) {
             return db.Units
                 .Include(x => x.Faction)
-                .Where(x => x.RegionId == region.Id);
+                .Where(x => x.RegionId == region.Id)
+                .ToListAsync();
+        }
+
+        public Task<List<DbStructure>> GetStructures([Parent] DbRegion region) {
+            return db.Structures
+                .Where(x => x.RegionId == region.Id)
+                .ToListAsync();
+        }
+
+        public Task<DbUnit> UnitByNumber([Parent] DbRegion region, int number) {
+            return db.Units
+                .Include(x => x.Faction)
+                .SingleOrDefaultAsync(x => x.RegionId == region.Id && x.Number == number);
+        }
+
+        public Task<DbStructure> StructureByNumber([Parent] DbRegion region, int number) {
+            return db.Structures
+                .SingleOrDefaultAsync(x => x.RegionId == region.Id && x.Number == number);
         }
     }
 }

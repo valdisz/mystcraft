@@ -23,7 +23,6 @@ namespace atlantis.Persistence {
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
 
-        [GraphQLIgnore]
         public DbFaction Faction { get; set; }
     }
 }
