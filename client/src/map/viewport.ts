@@ -53,17 +53,17 @@ export class Viewport {
     }
 
     private onPanStart = (e: MouseEvent) => {
-        this.pan = new PIXI.Point(e.x, e.y)
+        this.pan = new PIXI.Point(e.clientX, e.clientY)
         this.paning = true;
     };
 
     private onPan = throttle((e: MouseEvent) => {
         if (!this.paning) return;
 
-        const deltaX = e.x - this.pan.x
-        const deltaY = e.y - this.pan.y
+        const deltaX = e.clientX - this.pan.x
+        const deltaY = e.clientY - this.pan.y
 
-        this.pan = new PIXI.Point(e.x, e.y)
+        this.pan = new PIXI.Point(e.clientX, e.clientY)
 
         this.updateBounds(
             Math.floor(this.origin.x + deltaX),

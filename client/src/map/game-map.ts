@@ -13,42 +13,11 @@ export interface MapSize {
     height: number
 }
 
-export class Rect {
-    constructor(x0: number, y0: number, x1: number, y1: number) {
-        this.p0 = new Point(x0, y0)
-        this.p1 = new Point(x1, y1)
-    }
-
-    p0: Point
-    p1: Point
-
-    get width() {
-        return this.p1.x - this.p0.x + 1
-    }
-
-    get height() {
-        return this.p1.y - this.p0.y + 1
-    }
-}
-
 const TILE_W = 48;
 const TILE_H = 48;
 
-export class Tile extends Container {
-    constructor(public readonly col: number, public readonly row: number, terrain: PIXI.Texture) {
-        super()
-
-        // this.addChild(g)
-        this.addChild(new PIXI.Sprite(terrain))
-    }
-}
-
-export interface TileMap {
-    [id: string]: Tile
-}
-
 export class GameMap {
-    constructor(canvas: HTMLCanvasElement, public readonly size: MapSize, public readonly getRegion: GetRegionCallback) {
+    constructor(private canvas: HTMLCanvasElement, public readonly size: MapSize, public readonly getRegion: GetRegionCallback) {
         const origin = new Point(TILE_W / 2, TILE_H)
 
         this.layout = new Layout(
@@ -86,8 +55,12 @@ export class GameMap {
         this.root = new Container()
         this.tiles = new Container()
         this.outline = new Container()
+        this.selected = new Container()
         this.root.addChild(this.outline)
         this.root.addChild(this.tiles)
+        this.root.addChild(this.selected)
+
+        canvas.addEventListener('click', this.onClick)
     }
 
     readonly loader = new Loader()
@@ -95,13 +68,27 @@ export class GameMap {
     readonly root: Container
     readonly tiles: Container
     readonly outline: Container
+    readonly selected: Container
 
     readonly renderer: Renderer
     readonly viewport: Viewport
     readonly layout: Layout
-    rect = new Rect(0, 0, 0, 0)
 
-    // tiles: TileMap = { }
+    onClick = (e: MouseEvent) => {
+        this.selected.removeChildren()
+
+        const x = e.clientX - this.canvas.offsetLeft
+        const y = e.clientY - this.canvas.offsetTop
+
+        let hex = this.layout.pixelToHex(new PIXI.Point(x, y))
+
+        const g = new PIXI.Graphics()
+        g.lineStyle(4, 0xD46A6A, 0.75)
+        g.drawPolygon(this.layout.polygonCorners(hex))
+        this.selected.addChild(g)
+
+        this.renderer.render(this.root)
+    }
 
     load() {
         return new Promise((resolve, reject) => {
@@ -123,8 +110,6 @@ export class GameMap {
         const dc = new DoubledCoord(col, row)
         const hex = dc.toCube()
         const p = this.layout.hexToPixel(hex)
-        p.x -= this.layout.size.x
-        p.y -= this.layout.size.y
 
         col = col % this.size.width
         if (col < 0) col += this.size.width
@@ -132,13 +117,13 @@ export class GameMap {
         const region = this.getRegion(col, row)
         if (region) {
             const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain))
+            tile.anchor.set(0.5)
             tile.position = p
             this.tiles.addChild(tile)
 
             const g = new PIXI.Graphics()
             g.lineStyle(4, 0x999999)
             g.drawPolygon(this.layout.polygonCorners(hex))
-            g.position.set(0, -2.5)
             this.outline.addChild(g)
         }
     }
