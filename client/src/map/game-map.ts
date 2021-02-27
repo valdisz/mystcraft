@@ -119,16 +119,6 @@ export class GameMap {
         return sheet.textures[`${name}.png`]
     }
 
-    drawPoint(col: number, row: number) {
-        const p = this.layout.hexToPixel(new DoubledCoord(col, row))
-        const g = new PIXI.Graphics()
-        g.beginFill(0xff0000)
-        g.drawCircle(4, 4, 4)
-        g.endFill()
-        g.position = p.clone().set(p.x - 4, p.y - 4)
-        this.root.addChild(g)
-    }
-
     drawTile(col, row) {
         const dc = new DoubledCoord(col, row)
         const hex = dc.toCube()
@@ -141,12 +131,12 @@ export class GameMap {
 
         const region = this.getRegion(col, row)
         if (region) {
-            const tile = new Tile(col, row, this.getTerrainTexture(region.terrain))
+            const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain))
             tile.position = p
             this.tiles.addChild(tile)
 
             const g = new PIXI.Graphics()
-            g.lineStyle(4, 0xaaaaaa)
+            g.lineStyle(4, 0x999999)
             g.drawPolygon(this.layout.polygonCorners(hex))
             g.position.set(0, -2.5)
             this.outline.addChild(g)
@@ -156,26 +146,14 @@ export class GameMap {
     update() {
         if (this.loader.loading) return
 
-        // const start = DoubledCoord.qdoubledFromCube(this.layout.pixelToHex(this.viewport.origin))
-        // const end = DoubledCoord.qdoubledFromCube(this.layout.pixelToHex(this.viewport.extent))
-
-        // const rect = new PIXI.Rectangle(
-        //     start.col,
-        //     start.row,
-        //     end.col - start.col + 1,
-        //     end.row - start.row + 1
-        // )
-        // console.log(rect)
-
-        // rect.pad(1, 1)
-        // console.log(rect)
-
-        const topLeft = DoubledCoord.fromCube(this.layout.pixelToHex(new PIXI.Point(0, 0)))
-        const bottomRight = DoubledCoord.fromCube(this.layout.pixelToHex(new PIXI.Point(this.viewport.width, this.viewport.height)))
-        const col0 = topLeft.col
-        const row0 = Math.max(0, topLeft.row)
-        const col1 = bottomRight.col
-        const row1 = Math.min(bottomRight.row, this.size.height - 1)
+        const p0 = new PIXI.Point(0, 0)
+        const p1 = new PIXI.Point(this.viewport.width, this.viewport.height)
+        const topLeft = DoubledCoord.fromCube(this.layout.pixelToHex(p0))
+        const bottomRight = DoubledCoord.fromCube(this.layout.pixelToHex(p1))
+        const col0 = topLeft.col - 2
+        const row0 = Math.max(0, topLeft.row - 2)
+        const col1 = bottomRight.col + 2
+        const row1 = Math.min(bottomRight.row + 2, this.size.height - 1)
 
         console.log(col0, row0, col1, row1)
 
@@ -186,34 +164,8 @@ export class GameMap {
                 if ((col + row) % 2) continue
 
                 this.drawTile(col, row)
-                // this.drawPoint(col, row)
             }
         }
-
-
-        // for (let col = rect.left; col <= rect.right; col++) {
-        //     for (let row = rect.top; row <= rect.bottom; row++) {
-        //         if ((col + row) % 2 !== 0) continue
-
-        //         const p = this.layout.hexToPixel(new DoubledCoord(col, row).qdoubledToCube())
-
-        //         let regionCol = col % this.size.width
-        //         if (regionCol < 0) regionCol += this.size.width
-
-        //         const region = this.getRegion(regionCol, row)
-        //         if (region) {
-        //             const tile = this.addTile(regionCol, row, region.terrain)
-        //             tile.position = p
-        //         }
-
-                // const g = new PIXI.Graphics()
-                // g.beginFill(0xff0000)
-                // g.drawCircle(2, 2, 2)
-                // g.endFill()
-                // g.position = p.clone().set(p.x - 2, p.y - 2)
-                // this.root.addChild(g)
-        //     }
-        // }
 
         this.renderer.render(this.root);
     }

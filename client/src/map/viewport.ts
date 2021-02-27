@@ -6,13 +6,13 @@ declare const ResizeObserver: any
 export class Viewport {
     constructor(
         private element: HTMLElement,
-        origin: PIXI.Point,
+        public origin: PIXI.Point,
         private mapWidth: number,
         private mapHeight: number,
         private onUpdate: (event: Viewport) => void,
     ) {
         this.observer = new ResizeObserver(() =>
-            this.updateBounds(this.viewRect.x, this.viewRect.y)
+            this.updateBounds(this.origin.x, this.origin.y)
         )
         this.observer.observe(element)
 
@@ -23,8 +23,6 @@ export class Viewport {
         element.addEventListener('pointercancel', this.onPanEnd)
         element.addEventListener('pointerleave', this.onPanEnd)
         element.addEventListener('pointerout', this.onPanEnd)
-
-        this.viewRect = new PIXI.Rectangle(origin.x, origin.y, this.width, this.height)
     }
 
     private readonly observer;
@@ -34,30 +32,10 @@ export class Viewport {
         this.observer.unobserve()
     }
 
-    viewRect: PIXI.Rectangle
-
-    get origin() {
-        return new PIXI.Point(this.viewRect.x, this.viewRect.y)
-    }
-
-    get extent() {
-        return new PIXI.Point(this.viewRect.right, this.viewRect.bottom)
-    }
-
-    pan = new PIXI.Point(0, 0)
+    pan: PIXI.Point
     paning = false;
-    zoom = 1;
 
     private updateBounds(x0: number, y0: number) {
-        // const x = this.mapWidth > this.width
-        //     ? x0
-        //     : (this.width - this.mapWidth) / 2
-
-        // const maxY = this.mapHeight - this.height
-        // const y = maxY > 0
-        //     ? Math.max(0, Math.min(y0, maxY))
-        //     : (this.height - this.mapHeight) / 2
-
         let x = x0
         if (Math.abs(x) > this.mapWidth) {
             if (x > 0) x -= this.mapWidth
@@ -66,9 +44,9 @@ export class Viewport {
 
         const y = Math.max(-this.mapHeight + this.height, Math.min(y0, 100))
 
-        if (x !== this.viewRect.x || y !== this.viewRect.y) {
-            this.viewRect.x = x
-            this.viewRect.y = y
+        if (x !== this.origin.x || y !== this.origin.y) {
+            this.origin.x = x
+            this.origin.y = y
 
             window.requestAnimationFrame(() => this.raiseOnUpdate());
         }
@@ -87,10 +65,9 @@ export class Viewport {
 
         this.pan = new PIXI.Point(e.x, e.y)
 
-        const origin = this.origin
         this.updateBounds(
-            Math.floor(origin.x + deltaX),
-            Math.floor(origin.y + deltaY)
+            Math.floor(this.origin.x + deltaX),
+            Math.floor(this.origin.y + deltaY)
         )
     }, 20);
 
