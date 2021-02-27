@@ -385,6 +385,34 @@ export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetGamesQuery = { games?: Maybe<Array<Maybe<GameListItemFragment>>> };
 
+export type GetRegionsQueryVariables = Exact<{
+  turnId: Scalars['ID'];
+  cursor?: Maybe<Scalars['String']>;
+  pageSize?: Scalars['PaginationAmount'];
+}>;
+
+
+export type GetRegionsQuery = { node?: Maybe<{ regions?: Maybe<(
+      Pick<RegionConnection, 'totalCount'>
+      & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<RegionFragment> }>> }
+    )> }> };
+
+export type RegionFragment = (
+  Pick<Region, 'id' | 'updatedAtTurn' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
+  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, products?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>> }
+);
+
+export type ItemFragment = Pick<Item, 'code' | 'amount'>;
+
+export type TradableItemFragment = Pick<TradableItem, 'code' | 'price' | 'amount'>;
+
+export type SettlementFragment = Pick<Settlement, 'name' | 'size'>;
+
+export type ExitFragment = (
+  Pick<Exit, 'direction' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province'>
+  & { settlement?: Maybe<SettlementFragment> }
+);
+
 export type GetSingleGameQueryVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
@@ -422,6 +450,75 @@ export const GameListItem = gql`
   lastTurnNumber
 }
     `;
+export const Settlement = gql`
+    fragment Settlement on Settlement {
+  name
+  size
+}
+    `;
+export const TradableItem = gql`
+    fragment TradableItem on TradableItem {
+  code
+  price
+  amount
+}
+    `;
+export const Item = gql`
+    fragment Item on Item {
+  code
+  amount
+}
+    `;
+export const Exit = gql`
+    fragment Exit on Exit {
+  direction
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
+}
+    ${Settlement}`;
+export const Region = gql`
+    fragment Region on Region {
+  id
+  updatedAtTurn
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
+  race
+  population
+  tax
+  wages
+  totalWages
+  wanted {
+    ...TradableItem
+  }
+  entertainment
+  products {
+    ...Item
+  }
+  forSale {
+    ...TradableItem
+  }
+  exits {
+    ...Exit
+  }
+}
+    ${Settlement}
+${TradableItem}
+${Item}
+${Exit}`;
 export const ReportSummary = gql`
     fragment ReportSummary on Report {
   id
@@ -463,6 +560,26 @@ export const GetGames = gql`
   }
 }
     ${GameListItem}`;
+export const GetRegions = gql`
+    query GetRegions($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      regions(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Region
+          }
+        }
+      }
+    }
+  }
+}
+    ${Region}`;
 export const GetSingleGame = gql`
     query GetSingleGame($gameId: ID!) {
   node(id: $gameId) {

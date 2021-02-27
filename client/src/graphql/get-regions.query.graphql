@@ -1,0 +1,79 @@
+query GetRegions($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      regions(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Region
+          }
+        }
+      }
+    }
+  }
+}
+
+fragment Region on Region {
+  id
+  updatedAtTurn
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
+  race
+  population
+  tax
+  wages
+  totalWages
+  wanted {
+    ...TradableItem
+  }
+  entertainment
+  products {
+    ...Item
+  }
+  forSale {
+    ...TradableItem
+  }
+  exits {
+    ...Exit
+  }
+}
+
+fragment Item on Item {
+  code
+  amount
+}
+
+fragment TradableItem on TradableItem {
+  code
+  price
+  amount
+}
+
+fragment Settlement on Settlement {
+    name
+    size
+}
+
+fragment Exit on Exit {
+  direction
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
+}

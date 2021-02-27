@@ -30,7 +30,7 @@ namespace atlantis
         }
 
         private bool IsUnit(TextParser p) {
-            bool isRegionContent = p.OneOf("- ", "* ");
+            bool isRegionContent = p.OneOf("- ", "* ", "! ", "% ", ": ", "= ");
             p.Reset();
 
             return isRegionContent;

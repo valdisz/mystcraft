@@ -1,9 +1,9 @@
-namespace atlantis.Persistence {
+namespace atlantis.Persistence
+{
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using atlantis.Model;
     using HotChocolate;
-    using Microsoft.EntityFrameworkCore;
 
     [GraphQLName("Structure")]
     public class DbStructure {
@@ -56,23 +56,5 @@ namespace atlantis.Persistence {
         public static string GetUID(int number, int x, int y, int z) => number > GameConsts.MAX_BUILDING_NUMBER
             ? $"[{number}]"
             : $"{DbRegion.GetUID(x, y, z)} [{number}]";
-    }
-
-    [Owned]
-    public class DbFleetContent {
-        public string Type { get; set; }
-        public int Count { get; set; }
-    }
-
-    [Owned]
-    public class DbTransportationLoad {
-        public int Used { get; set; }
-        public int Max { get; set; }
-    }
-
-    [Owned]
-    public class DbSailors {
-        public int Current { get; set; }
-        public int Required { get; set; }
     }
 }

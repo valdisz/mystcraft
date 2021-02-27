@@ -8,26 +8,6 @@ namespace atlantis.Persistence
     [Owned]
     [GraphQLName("Exit")]
     public class DbExit {
-        public DbExit() {
-
-        }
-
-        public DbExit(DbExit other) {
-            this.Direction = other.Direction;
-            this.Label = other.Label;
-            this.Province = other.Province;
-            this.Settlement = other.Settlement != null
-                ? new DbSettlement {
-                    Name = other.Settlement.Name,
-                    Size = other.Settlement.Size
-                }
-                : null;
-            this.Terrain = other.Terrain;
-            this.X = other.X;
-            this.Y = other.Y;
-            this.Z = other.Z;
-        }
-
         [GraphQLIgnore]
         public string RegionUID => DbRegion.GetUID(X, Y, Z);
 

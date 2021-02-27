@@ -5,6 +5,8 @@ export class Hex {
             throw "q + r + s must be 0";
     }
 
+    readonly type = 'cube'
+
     public add(b: Hex): Hex {
         return new Hex(this.q + b.q, this.r + b.r, this.s + b.s);
     }

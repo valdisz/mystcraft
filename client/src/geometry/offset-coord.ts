@@ -2,8 +2,11 @@ import { Hex } from './hex';
 
 export class OffsetCoord {
     constructor(public col: number, public row: number) { }
+
     public static EVEN: number = 1;
     public static ODD: number = -1;
+
+    readonly type = 'offset'
 
     public static qoffsetFromCube(offset: number, h: Hex): OffsetCoord {
         var col: number = h.q;

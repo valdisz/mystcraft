@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
     ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
 } from '@material-ui/core'
-import { observer, useObserver } from 'mobx-react-lite'
+import { Observer, observer } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
 import GrainIcon from '@material-ui/icons/Grain';
 import { useStore } from '../store'
@@ -20,12 +20,17 @@ interface GameItemProps {
     game: GameListItemFragment
 }
 
-function GameActions() {
-    const { home } = useStore()
-    return <SplitButton color='default' size='small' variant='outlined'
-        onClick={home.triggerUploadReport}
+interface GameActionsProps {
+    disabled: boolean
+    onUpload: () => void
+    onDelete: () => void
+}
+
+function GameActions({ disabled, onUpload, onDelete }: GameActionsProps) {
+    return <SplitButton disabled={disabled} color='default' size='small' variant='outlined'
+        onClick={onUpload}
         actions={[
-            { content: 'Delete', onAction: () => { } }
+            { content: 'Delete', onAction: onDelete }
         ]}>
             Load turn
         </SplitButton>
@@ -60,12 +65,13 @@ function Faction({ name, number}) {
 }
 
 function Ruleset({ name, version}) {
-    return <div>
+    return <span>
         {name} {version}
-    </div>
+    </span>
 }
 
 function GameItem({ game }: GameItemProps) {
+    const { home } = useStore()
     return <ListItem button component={Link} to={`/game/${game.id}`} >
         <ListItemIcon>
             <GrainIcon />
@@ -84,7 +90,9 @@ function GameItem({ game }: GameItemProps) {
             </UnstyledList>
         </ListItemText>
         <ListItemSecondaryAction>
-            <GameActions />
+            <Observer>
+                {() => <GameActions disabled={home.uploading} onUpload={() => home.triggerUploadReport(game.id)} onDelete={() => {}} /> }
+            </Observer>
         </ListItemSecondaryAction>
     </ListItem>
 }
@@ -140,12 +148,13 @@ export function HomePage() {
                 <CardHeader title='Games' action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>} />
                 <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadReport} />
                 <List component='nav' dense>
-                    {useObserver(() => <>
-                        { home.games.length
+                    <Observer>
+                        {() => <>{ home.games.length
                             ? home.games.map(x => <GameItem key={x.id} game={x} />)
                             : <NoGames />
+                            }</>
                         }
-                    </>)}
+                    </Observer>
                 </List>
             </Card>
         </Container>

@@ -41,7 +41,7 @@ function SplitButtonMenu({ open, actions, anchor, onClose }: SplitButtonMenuProp
     </Menu>
 }
 
-export function SplitButton({ actions, moreButtonProps, buttonGroupProps, ...props }: SplitButtonProps) {
+export function SplitButton({ disabled, actions, moreButtonProps, buttonGroupProps, ...props }: SplitButtonProps) {
     const showMoreButton = !!actions?.length
     const [open, setOpen] = React.useState(false)
     const anchorRef = React.useRef(null)
@@ -64,6 +64,7 @@ export function SplitButton({ actions, moreButtonProps, buttonGroupProps, ...pro
                 color={props?.color}
                 aria-label='split button'
                 {...(buttonGroupProps || {})}
+                disabled={disabled}
                 >
                 <Button {...props} />
                 { showMoreButton && <Button

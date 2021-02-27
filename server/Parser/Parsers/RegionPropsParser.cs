@@ -9,39 +9,39 @@ namespace atlantis
 
         private readonly ItemParser itemParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
-            Maybe<IReportNode> ParaseItems(TextParser src, IReportParser parser, List<IReportNode> items) {
-                if (src.Match("none")) {
-                    return null;
-                }
-
-                while (!src.EOF) {
-                    if (items.Count > 0) {
-                        Maybe<TextParser> result = src.After(",").SkipWhitespaces();
-                        if (!result) {
-                            return Error(result);
-                        }
-                    }
-
-                    var item = itemParser.Parse(src);
-                    if (!item) {
-                        return Error(item);
-                    }
-
-                    items.Add(item.Value);
-                }
-
+        private Maybe<IReportNode> ParaseItems(TextParser src, IReportParser parser, List<IReportNode> items) {
+            if (src.Match("none")) {
                 return null;
             }
 
-            p.SkipChar('-');
+            while (!src.EOF) {
+                if (items.Count > 0) {
+                    Maybe<TextParser> result = src.After(",").SkipWhitespaces();
+                    if (!result) {
+                        return Error(result);
+                    }
+                }
 
+                var item = itemParser.Parse(src);
+                if (!item) {
+                    return Error(item);
+                }
+
+                items.Add(item.Value);
+            }
+
+            return null;
+        }
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
             Maybe<double> wages = null;
             Maybe<int> totalWages = null;
             List<IReportNode> wanted = new List<IReportNode>();
             List<IReportNode> forSale = new List<IReportNode>();
             Maybe<int> entertainment = null;
             List<IReportNode> products = new List<IReportNode>();
+
+            p.Before("Wages:");
 
             while (!p.EOF) {
                 var prop = p.SkipWhitespaces().Before(":").AsString();

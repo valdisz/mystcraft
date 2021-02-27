@@ -1,6 +1,9 @@
+import { ApolloQueryResult } from 'apollo-client'
 import { makeObservable, observable, IObservableArray, runInAction } from 'mobx'
 import { CLIENT } from '../client'
-import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables, TurnSummaryFragment } from '../schema'
+import { RegionFragment, TurnSummaryFragment } from '../schema'
+import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
+import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
 
 export class TurnsStore {
     constructor() {
@@ -24,6 +27,9 @@ export class GameStore {
     @observable rulesetName: string
     @observable rulesetVersion: string
 
+    @observable turn: TurnSummaryFragment
+    regions: RegionFragment[] = []
+
     async load(gameId: string) {
         runInAction(() => this.loading = true)
 
@@ -34,11 +40,45 @@ export class GameStore {
             }
         })
 
+        const { turns, ...game } = response.data.node
         runInAction(() => {
-            const { turns, ...game } = response.data.node
             Object.assign(this, game);
             this.turns.replace(turns)
+            this.turn = turns.find(x => x.number == game.lastTurnNumber)
         })
+
+        // find latest turn
+        let latestTurn: TurnSummaryFragment
+        for (const turn of turns) {
+            if (!latestTurn) {
+                latestTurn = turn
+                continue
+            }
+
+            if (turn.number > latestTurn.number) {
+                latestTurn = turn
+            }
+        }
+
+        let cursor: string = null
+        let regions: ApolloQueryResult<GetRegionsQuery> = null
+        this.regions.length = 0
+        do {
+            regions = await CLIENT.query<GetRegionsQuery, GetRegionsQueryVariables>({
+                query: GetRegions,
+                variables: {
+                    cursor,
+                    turnId: latestTurn.id
+                }
+            })
+
+            for (const { node } of regions.data.node.regions.edges) {
+                this.regions.push(node)
+            }
+
+            cursor = regions.data.node.regions.pageInfo.endCursor
+        }
+        while (regions.data.node.regions.pageInfo.hasNextPage)
 
         setTimeout(() => runInAction(() => this.loading = false))
     }

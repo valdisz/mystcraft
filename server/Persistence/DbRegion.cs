@@ -10,7 +10,6 @@ namespace atlantis.Persistence
         [Key]
         public long Id { get; set; }
 
-
         [GraphQLIgnore]
         public long TurnId { get; set; }
 
@@ -54,7 +53,6 @@ namespace atlantis.Persistence
         public List<DbTradableItem> ForSale { get; set; } = new List<DbTradableItem>();
 
         public List<DbTradableItem> Wanted { get; set; } = new List<DbTradableItem>();
-
 
         public List<DbItem> Products { get; set; } = new List<DbItem>();
 

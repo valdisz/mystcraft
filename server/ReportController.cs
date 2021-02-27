@@ -12,22 +12,25 @@ namespace atlantis
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using Model;
+    using AutoMapper;
+    using System.Diagnostics;
 
     using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
-    using System.Diagnostics;
 
     [Route("report")]
     public class ApiController : ControllerBase {
-        public ApiController(Database db, IIdSerializer relayId) {
+        public ApiController(Database db, IIdSerializer relayId, IMapper mapper) {
             this.db = db;
             this.relayId = relayId;
+            this.mapper = mapper;
         }
 
         private readonly Database db;
         private readonly IIdSerializer relayId;
+        private readonly IMapper mapper;
 
         [HttpPost("{gameId}")]
         public async Task<IActionResult> UploadReports([Required, FromRoute] string gameId) {
@@ -50,7 +53,7 @@ namespace atlantis
             await db.SaveChangesAsync();
 
             // 2. parse & merge reports and update history
-            await UpdateTurnsAsync(db, game.Id, earliestTurn, reports);
+            await UpdateTurnsAsync(mapper, db, game.Id, earliestTurn, reports);
 
             return Ok();
         }
@@ -133,7 +136,7 @@ namespace atlantis
             return (turnNumber, report);
         }
 
-        private static async Task UpdateTurnsAsync(Database db, long gameId, int earliestTurn, List<(int, JReport)> reports) {
+        private static async Task UpdateTurnsAsync(IMapper mapper, Database db, long gameId, int earliestTurn, List<(int, JReport)> reports) {
             var lastTurn = await db.Turns
                 .AsNoTracking()
                 .OrderByDescending(x => x.Number)
@@ -163,39 +166,17 @@ namespace atlantis
                         .Include(x => x.Structures.Where(s => s.Number <= GameConsts.MAX_BUILDING_NUMBER))
                         .Where(x => x.TurnId == turns[0].Id)
                         .ToArrayAsync())
-                    .ToDictionary(k => k.UID);
-
-                foreach (var region in regions.Values) {
-                    region.Id = 0;
-                    region.TurnId = 0;
-                }
-
-                factions = (await db.Factions
-                        .AsNoTracking()
-                        .Where(x => x.TurnId == turns[0].Id)
-                        .ToArrayAsync())
-                    .ToDictionary(k => k.Number);
-
-                foreach (var faction in factions.Values) {
-                    faction.Id = 0;
-                    faction.TurnId = 0;
-                }
+                    .ToDictionary(k => k.UID, v => mapper.Map<DbRegion>(v));
 
                 structures = regions.Values
                     .SelectMany(x => x.Structures)
                     .ToDictionary(x => x.UID);
 
-                foreach (var str in structures.Values) {
-                    str.Id = 0;
-                    str.TurnId = 0;
-                    str.RegionId = 0;
-                    str.Region = null;
-
-                    // reset values
-                    str.Load = null;
-                    str.Sailors = null;
-                    str.SailDirections.Clear();
-                }
+                factions = (await db.Factions
+                        .AsNoTracking()
+                        .Where(x => x.TurnId == turns[0].Id)
+                        .ToArrayAsync())
+                    .ToDictionary(k => k.Number, v => mapper.Map<DbFaction>(v));
             }
 
             foreach (var turn in turns) {
@@ -211,6 +192,20 @@ namespace atlantis
                 await InsertRegionsAsync(db, turn.Id, regions.Values);
 
                 await db.SaveChangesAsync();
+
+                foreach (var ( key, value ) in regions) {
+                    regions[key] = mapper.Map<DbRegion>(value);
+                }
+
+                foreach (var ( key, value ) in factions) {
+                    factions[key] = mapper.Map<DbFaction>(value);
+                }
+
+                units.Clear();
+
+                structures = regions.Values
+                    .SelectMany(x => x.Structures)
+                    .ToDictionary(x => x.UID);
             }
         }
 

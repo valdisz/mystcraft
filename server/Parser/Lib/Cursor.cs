@@ -83,6 +83,14 @@
             return false;
         }
 
+        public static async Task<bool> SkipUntil(this Cursor<TextParser> cursor, Func<Cursor<TextParser>, bool> predicate) {
+            while (await cursor.NextAsync()) {
+                if (predicate(cursor)) return true;
+            }
+
+            return false;
+        }
+
         public static async Task<bool> SkipEmptyLines(this Cursor<TextParser> cursor) {
             while (await cursor.NextAsync()) {
                 if (!cursor.Value.EOF) return true;

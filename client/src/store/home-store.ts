@@ -41,23 +41,29 @@ export class HomeStore {
         this.fileUpload = ref
     }
 
-    triggerUploadReport = (event) => {
-        this.fileUpload?.click();
+    @observable uploading = false
+
+    uploadGameId: string
+    triggerUploadReport = (gameId: string) => {
+        this.uploadGameId = gameId
+        this.fileUpload?.click()
     }
 
     @action uploadReport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.uploading = true
+
         const reports = new FormData()
         for (const f of Array.from(event.target.files)) {
             reports.append('report', f)
         }
 
-        const gameId = 'R2FtZQpsMQ=='
-
-        await fetch(`http://localhost:5000/report/${gameId}`, {
+        await fetch(`http://localhost:5000/report/${this.uploadGameId}`, {
             method: 'POSt',
             body: reports
         })
-
         event.target.value = null;
+
+        this.load()
+        runInAction(() => this.uploading = false)
     }
 }

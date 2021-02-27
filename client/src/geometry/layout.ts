@@ -1,7 +1,7 @@
+import { Point } from 'pixi.js';
+import { DoubledCoord } from './doubled-coord';
 import { Hex } from './hex';
 import { Orientation } from './orientation';
-import { Point } from './point';
-
 
 export class Layout {
     constructor(
@@ -9,49 +9,38 @@ export class Layout {
         public size: Point,
         public origin: Point
     ) { }
-    public static pointy: Orientation = new Orientation(
-        Math.sqrt(3.0),
-        Math.sqrt(3.0) / 2.0,
-        0.0,
-        3.0 / 2.0,
-        Math.sqrt(3.0) / 3.0,
-        -1.0 / 3.0,
-        0.0,
-        2.0 / 3.0,
-        0.5
-    );
-    public static flat: Orientation = new Orientation(
-        3.0 / 2.0,
-        0.0,
-        Math.sqrt(3.0) / 2.0,
-        Math.sqrt(3.0),
-        2.0 / 3.0,
-        0.0,
-        -1.0 / 3.0,
-        Math.sqrt(3.0) / 3.0,
-        0.0
-    );
 
-    public hexToPixel(h: Hex): Point {
-        var M: Orientation = this.orientation;
-        var size: Point = this.size;
-        var origin: Point = this.origin;
-        var x: number = (M.f0 * h.q + M.f1 * h.r) * size.x;
-        var y: number = (M.f2 * h.q + M.f3 * h.r) * size.y;
+    public hexToPixel(h: Hex | DoubledCoord): Point {
+        if (h.type === 'double') {
+            return this.hexToPixel(h.toCube())
+        }
+
+        const M: Orientation = this.orientation;
+        const size: Point = this.size;
+        const origin: Point = this.origin;
+
+        const x = (M.f0 * h.q + M.f1 * h.r) * size.x;
+        const y = (M.f2 * h.q + M.f3 * h.r) * size.y;
+
         return new Point(x + origin.x, y + origin.y);
     }
 
     public pixelToHex(p: Point): Hex {
-        var M: Orientation = this.orientation;
-        var size: Point = this.size;
-        var origin: Point = this.origin;
-        var pt: Point = new Point(
+        const M: Orientation = this.orientation;
+
+        const size: Point = this.size;
+        const origin: Point = this.origin;
+        const pt: Point = new Point(
             (p.x - origin.x) / size.x,
             (p.y - origin.y) / size.y
         );
-        var q: number = M.b0 * pt.x + M.b1 * pt.y;
-        var r: number = M.b2 * pt.x + M.b3 * pt.y;
-        return new Hex(q, r, -q - r);
+
+        let q: number = M.b0 * pt.x + M.b1 * pt.y;
+        const r: number = M.b2 * pt.x + M.b3 * pt.y;
+
+        let hex = new Hex(q, r, -q - r).round();
+
+        return hex;
     }
 
     public hexCornerOffset(corner: number): Point {

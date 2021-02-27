@@ -21,11 +21,11 @@ namespace atlantis
         private readonly SettlementParser settlementParser;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            p.SkipWhitespaces().Match("Exits:").SkipWhitespaces();
+            p.After("Exits:").SkipWhitespaces();
 
             List<IReportNode> exits = new List<IReportNode>();
 
-            while (!p.EOF) {
+            while (!p.StartsWith("none") && !p.EOF) {
                 var exit = p.Before(".").SkipWhitespaces();
 
                 p.After(".").SkipWhitespaces();

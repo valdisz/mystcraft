@@ -1,4 +1,5 @@
-namespace atlantis {
+namespace atlantis
+{
     using System;
     using atlantis.Persistence;
     using HotChocolate;
@@ -40,6 +41,7 @@ namespace atlantis {
                     opt.EnableDetailedErrors();
                     opt.EnableSensitiveDataLogging();
                 })
+                .AddAutoMapper(typeof(MappingProfile))
                 .AddDataLoaderRegistry()
                 .AddGraphQL(SchemaBuilder.New()
                     .EnableRelaySupport()

@@ -13,9 +13,10 @@
         protected override void Configure(IObjectTypeDescriptor<DbRegion> descriptor) {
             descriptor.AsNode()
                 .IdField(x => x.Id)
-                .NodeResolver((ctx, id) => {
+                .NodeResolver(async (ctx, id) => {
                     var db = ctx.Service<Database>();
-                    return db.Regions.FirstOrDefaultAsync(x => x.Id == id);
+                    var region = await db.Regions.FirstOrDefaultAsync(x => x.Id == id);
+                    return region;
                 });
         }
     }

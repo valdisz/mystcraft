@@ -330,6 +330,14 @@ namespace atlantis
             return new Maybe<TextParser[]>(words.ToArray());
         }
 
+        public bool StartsWith(ReadOnlySpan<char> s) {
+            if (EOF) return false;
+
+            var span = GetSpan();
+
+            return span.StartsWith(s);
+        }
+
         public Maybe<TextParser> Match(ReadOnlySpan<char> s) {
             if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
@@ -411,6 +419,7 @@ namespace atlantis
 
         public static Maybe<TextParser> Word(this Maybe<TextParser> p) => p ? p.Value.Word() : p;
         public static Maybe<TextParser> Match(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Match(s) : p;
+        public static bool StartsWith(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.StartsWith(s) : false;
         public static Maybe<int> Integer(this Maybe<TextParser> p) => p ? p.Value.Integer() : p.Convert<int>();
         public static Maybe<double> Real(this Maybe<TextParser> p) => p ? p.Value.Real() : p.Convert<double>();
         public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> left, ReadOnlySpan<char> right) => p ? p.Value.Between(left, right) : p;
