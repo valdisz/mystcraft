@@ -83,9 +83,15 @@ export class GameMap {
         let hex = this.layout.pixelToHex(new PIXI.Point(x, y))
 
         const g = new PIXI.Graphics()
-        g.lineStyle(4, 0xD46A6A, 0.75)
+        g.lineStyle(6, 0x1E4EFF, 0.75)
         g.drawPolygon(this.layout.polygonCorners(hex))
         this.selected.addChild(g)
+
+        const g2 = new PIXI.Graphics()
+        // g2.lineStyle(2, 0xD46A6A, 0.75)
+        g2.lineStyle(2, 0xAEBFFF, 0.5)
+        g2.drawPolygon(this.layout.polygonCorners(hex))
+        this.selected.addChild(g2)
 
         this.renderer.render(this.root)
     }
