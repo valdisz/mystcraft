@@ -18,11 +18,11 @@ export class Viewport {
 
         element.addEventListener('pointerdown', this.onPanStart)
         element.addEventListener('pointermove', this.onPan)
-
         element.addEventListener('pointerup', this.onPanEnd)
         element.addEventListener('pointercancel', this.onPanEnd)
         element.addEventListener('pointerleave', this.onPanEnd)
         element.addEventListener('pointerout', this.onPanEnd)
+        element.addEventListener('contextmenu', this.onContextMenu)
     }
 
     private readonly observer;
@@ -52,7 +52,14 @@ export class Viewport {
         }
     }
 
+    private onContextMenu = (e: MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+    }
+
     private onPanStart = (e: MouseEvent) => {
+        if (e.button !== 2) return
+
         this.pan = new PIXI.Point(e.clientX, e.clientY)
         this.paning = true;
     };
@@ -72,8 +79,6 @@ export class Viewport {
     }, 20);
 
     private onPanEnd = (e: MouseEvent) => {
-        if (!this.paning) return;
-
         this.paning = false;
     };
 
