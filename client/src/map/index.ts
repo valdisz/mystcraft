@@ -1,2 +1,2 @@
-export * from './game-map'
+export * from './hex-map'
 export * from './viewport'

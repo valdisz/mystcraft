@@ -16,7 +16,7 @@ export interface MapSize {
 const TILE_W = 48;
 const TILE_H = 48;
 
-export class GameMap {
+export class HexMap {
     constructor(private canvas: HTMLCanvasElement, public readonly size: MapSize, public readonly getRegion: GetRegionCallback) {
         const origin = new Point(TILE_W / 2, TILE_H)
 

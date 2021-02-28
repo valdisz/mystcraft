@@ -7,7 +7,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { RegionFragment } from '../schema'
-import { GameMap } from '../map'
+import { HexMap } from '../map'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any
@@ -80,13 +80,13 @@ interface GameMapProps {
 
 function GameMapComponent({ regions, onRegionSelected }: GameMapProps) {
     const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
-    const gameMapRef = React.useRef<GameMap>(null)
+    const gameMapRef = React.useRef<HexMap>(null)
 
     React.useEffect(() => {
         if (!canvasRef) return
 
         if (!gameMapRef.current) {
-            gameMapRef.current = new GameMap(canvasRef, {
+            gameMapRef.current = new HexMap(canvasRef, {
                 width: 56,
                 height: 56
              }, (x, y) => regions.find(r => r.x === x && r.y === y && r.z === 1))
@@ -174,6 +174,30 @@ const StructuresComponent = observer(() => {
     </StructuresContainer>
 })
 
+const RegionContainer = styled.div`
+    grid-area: details;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+`
+
+const RegionBody = styled.div`
+    min-height: 0;
+    margin: 1rem;
+`
+
+const RegionComponent = observer(() => {
+    const { game: { selctedRegion: reg } } = useStore()
+
+    return <RegionContainer>
+        <RegionBody>
+            <h4>{reg.province}</h4>
+        </RegionBody>
+    </RegionContainer>
+})
+
 const GameComponent = observer(() => {
     const { game } = useStore()
 
@@ -196,6 +220,7 @@ const GameComponent = observer(() => {
             <GameMapComponent regions={game.regions} onRegionSelected={game.selectRegion} />
             <UnitsComponent />
             <StructuresComponent />
+            { game.selctedRegion && <RegionComponent /> }
             <Orders />
         </GameGrid>
     </GameContainer>
