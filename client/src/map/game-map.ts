@@ -74,26 +74,50 @@ export class GameMap {
     readonly viewport: Viewport
     readonly layout: Layout
 
-    onClick = (e: MouseEvent) => {
-        this.selected.removeChildren()
+    onRegionSelected: (col: number, row: number) => void
 
+    onClick = (e: MouseEvent) => {
         const x = e.clientX - this.canvas.offsetLeft
         const y = e.clientY - this.canvas.offsetTop
 
-        let hex = this.layout.pixelToHex(new PIXI.Point(x, y))
+        this.selectedRegion = this.layout.pixelToHex(new PIXI.Point(x, y))
+
+        this.update()
+
+        const dc = DoubledCoord.fromCube(this.selectedRegion)
+
+        dc.col = dc.col % this.size.width
+        if (dc.col < 0) dc.col += this.size.width
+
+        if (this.onRegionSelected) this.onRegionSelected(dc.col, dc.row)
+    }
+
+    selectedRegion: Hex
+
+    // selectRegion(col: number, row: number) {
+    //     this.selectedRegion = new DoubledCoord(col, row).toCube()
+    //     this.update()
+
+    //     if (this.onRegionSelected) this.onRegionSelected()
+    // }
+
+    drawSelectedHex() {
+        this.selected.removeChildren()
+
+        if (!this.selectedRegion) return
+
+        const points = this.layout.polygonCorners(this.selectedRegion)
 
         const g = new PIXI.Graphics()
         g.lineStyle(6, 0x1E4EFF, 0.75)
-        g.drawPolygon(this.layout.polygonCorners(hex))
+        g.drawPolygon(points)
         this.selected.addChild(g)
 
         const g2 = new PIXI.Graphics()
         // g2.lineStyle(2, 0xD46A6A, 0.75)
         g2.lineStyle(2, 0xAEBFFF, 0.5)
-        g2.drawPolygon(this.layout.polygonCorners(hex))
+        g2.drawPolygon(points)
         this.selected.addChild(g2)
-
-        this.renderer.render(this.root)
     }
 
     load() {
@@ -146,8 +170,6 @@ export class GameMap {
         const col1 = bottomRight.col + 2
         const row1 = Math.min(bottomRight.row + 2, this.size.height - 1)
 
-        console.log(col0, row0, col1, row1)
-
         this.tiles.removeChildren()
         this.outline.removeChildren()
         for (let col = col0; col <= col1 ; col++) {
@@ -157,6 +179,8 @@ export class GameMap {
                 this.drawTile(col, row)
             }
         }
+
+        this.drawSelectedHex()
 
         this.renderer.render(this.root);
     }

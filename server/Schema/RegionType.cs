@@ -29,11 +29,16 @@
 
         private readonly Database db;
 
-        public Task<List<DbUnit>> GetUnits([Parent] DbRegion region) {
-            return db.Units
-                .Include(x => x.Faction)
-                .Where(x => x.RegionId == region.Id)
-                .ToListAsync();
+        public Task<List<DbUnit>> GetUnits([Parent] DbRegion region, bool insideStructures = false) {
+            IQueryable<DbUnit> q = insideStructures
+                ? db.Units
+                    .Include(x => x.Faction)
+                    .Where(x => x.RegionId == region.Id)
+                : db.Units
+                    .Include(x => x.Faction)
+                    .Where(x => x.RegionId == region.Id && x.StrcutureId == null);
+
+            return q.ToListAsync();
         }
 
         public Task<List<DbStructure>> GetStructures([Parent] DbRegion region) {

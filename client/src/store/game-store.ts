@@ -1,5 +1,5 @@
 import { ApolloQueryResult } from 'apollo-client'
-import { makeObservable, observable, IObservableArray, runInAction } from 'mobx'
+import { makeObservable, observable, IObservableArray, runInAction, action, computed } from 'mobx'
 import { CLIENT } from '../client'
 import { RegionFragment, TurnSummaryFragment } from '../schema'
 import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
@@ -81,5 +81,24 @@ export class GameStore {
         while (regions.data.node.regions.pageInfo.hasNextPage)
 
         setTimeout(() => runInAction(() => this.loading = false))
+    }
+
+    @observable selctedRegion: RegionFragment = null
+
+    @action selectRegion = (col: number, row: number) => {
+        console.log('selectRegion', col, row)
+        const reg = this.regions.find(x => x.x === col && x.y === row && x.z === 1)
+        this.selctedRegion = reg ? observable(reg) : null
+        console.log('selectRegion', reg, this.selctedRegion)
+    }
+
+    @computed get units() {
+        const units = this.selctedRegion?.units ?? []
+        return units
+    }
+
+    @computed get structures() {
+        const structures = this.selctedRegion?.structures ?? []
+        return structures
     }
 }

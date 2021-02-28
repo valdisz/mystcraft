@@ -143,6 +143,11 @@ export type RegionUnitByNumberArgs = {
   number: Scalars['Int'];
 };
 
+
+export type RegionUnitsArgs = {
+  insideStructures?: Scalars['Boolean'];
+};
+
 export type Unit = Node & {
   canStudy?: Maybe<Array<Maybe<Skill>>>;
   capacity?: Maybe<Capacity>;
@@ -399,8 +404,30 @@ export type GetRegionsQuery = { node?: Maybe<{ regions?: Maybe<(
 
 export type RegionFragment = (
   Pick<Region, 'id' | 'updatedAtTurn' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
-  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, products?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>> }
+  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, products?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>>, units?: Maybe<Array<Maybe<UnitFragment>>>, structures?: Maybe<Array<Maybe<StructureFragment>>> }
 );
+
+export type StructureFragment = (
+  Pick<Structure, 'description' | 'flags' | 'id' | 'name' | 'needs' | 'number' | 'sailDirections' | 'speed' | 'type'>
+  & { contents?: Maybe<Array<Maybe<FleetContentFragment>>>, load?: Maybe<LoadFragment>, sailors?: Maybe<SailorsFragment>, units?: Maybe<Array<Maybe<UnitFragment>>> }
+);
+
+export type FleetContentFragment = Pick<DbFleetContent, 'type' | 'count'>;
+
+export type LoadFragment = Pick<DbTransportationLoad, 'used' | 'max'>;
+
+export type SailorsFragment = Pick<DbSailors, 'current' | 'required'>;
+
+export type UnitFragment = (
+  Pick<Unit, 'description' | 'flags' | 'id' | 'name' | 'number' | 'onGuard' | 'weight'>
+  & { canStudy?: Maybe<Array<Maybe<SkillFragment>>>, capacity?: Maybe<CapacityFragment>, combatSpell?: Maybe<SkillFragment>, faction?: Maybe<FactionFragment>, items: Array<Maybe<ItemFragment>>, readyItem?: Maybe<ItemFragment>, skills?: Maybe<Array<Maybe<SkillFragment>>> }
+);
+
+export type FactionFragment = Pick<Faction, 'id' | 'name' | 'number'>;
+
+export type CapacityFragment = Pick<Capacity, 'walking' | 'riding' | 'flying' | 'swimming'>;
+
+export type SkillFragment = Pick<Skill, 'code' | 'level' | 'days'>;
 
 export type ItemFragment = Pick<Item, 'code' | 'amount'>;
 
@@ -483,6 +510,109 @@ export const Exit = gql`
   }
 }
     ${Settlement}`;
+export const Skill = gql`
+    fragment Skill on Skill {
+  code
+  level
+  days
+}
+    `;
+export const Capacity = gql`
+    fragment Capacity on Capacity {
+  walking
+  riding
+  flying
+  swimming
+}
+    `;
+export const Faction = gql`
+    fragment Faction on Faction {
+  id
+  name
+  number
+}
+    `;
+export const Unit = gql`
+    fragment Unit on Unit {
+  canStudy {
+    ...Skill
+  }
+  capacity {
+    ...Capacity
+  }
+  combatSpell {
+    ...Skill
+  }
+  description
+  faction {
+    ...Faction
+  }
+  flags
+  id
+  items {
+    ...Item
+  }
+  name
+  number
+  onGuard
+  readyItem {
+    ...Item
+  }
+  skills {
+    ...Skill
+  }
+  weight
+}
+    ${Skill}
+${Capacity}
+${Faction}
+${Item}`;
+export const FleetContent = gql`
+    fragment FleetContent on DbFleetContent {
+  type
+  count
+}
+    `;
+export const Load = gql`
+    fragment Load on DbTransportationLoad {
+  used
+  max
+}
+    `;
+export const Sailors = gql`
+    fragment Sailors on DbSailors {
+  current
+  required
+}
+    `;
+export const Structure = gql`
+    fragment Structure on Structure {
+  contents {
+    ...FleetContent
+  }
+  description
+  flags
+  id
+  load {
+    ...Load
+  }
+  name
+  needs
+  number
+  sailDirections
+  sailors {
+    ...Sailors
+  }
+  speed
+  type
+  units {
+    ...Unit
+  }
+}
+    ${FleetContent}
+${Load}
+${Sailors}
+${Unit}`;
 export const Region = gql`
     fragment Region on Region {
   id
@@ -514,11 +644,19 @@ export const Region = gql`
   exits {
     ...Exit
   }
+  units {
+    ...Unit
+  }
+  structures {
+    ...Structure
+  }
 }
     ${Settlement}
 ${TradableItem}
 ${Item}
-${Exit}`;
+${Exit}
+${Unit}
+${Structure}`;
 export const ReportSummary = gql`
     fragment ReportSummary on Report {
   id

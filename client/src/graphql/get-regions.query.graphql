@@ -47,6 +47,106 @@ fragment Region on Region {
   exits {
     ...Exit
   }
+  units {
+    ...Unit
+  }
+  structures {
+    ...Structure
+  }
+}
+
+fragment Structure on Structure {
+  contents {
+    ...FleetContent
+  }
+  description
+  flags
+  id
+  load {
+    ...Load
+  }
+  name
+  needs
+  number
+  sailDirections
+  sailors {
+    ...Sailors
+  }
+  speed
+  type
+  units {
+    ...Unit
+  }
+}
+
+fragment FleetContent on DbFleetContent {
+  type
+  count
+}
+
+fragment Load on DbTransportationLoad {
+  used
+  max
+}
+
+fragment Sailors on DbSailors {
+  current
+  required
+}
+
+fragment Unit on Unit {
+  canStudy {
+    ...Skill
+  }
+  capacity {
+    ...Capacity
+  }
+  combatSpell {
+    ...Skill
+  }
+  description
+  faction {
+    ...Faction
+  }
+  flags
+  id
+  items {
+    ...Item
+  }
+  name
+  number
+  onGuard
+  readyItem {
+    ...Item
+  }
+  skills {
+    ...Skill
+  }
+  weight
+}
+
+fragment Faction on Faction {
+  id
+  name
+  number
+}
+
+fragment Capacity on Capacity {
+  walking
+  riding
+  flying
+  swimming
+}
+
+fragment Skill on Skill {
+  code
+  level
+  days
+}
+
+fragment Item on Item {
+  code
+  amount
 }
 
 fragment Item on Item {

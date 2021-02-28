@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import { AppBar, Typography, Toolbar, IconButton, Divider, Box } from '@material-ui/core'
+import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
@@ -24,10 +24,44 @@ const GameContainer = styled.div`
     flex-direction: column;
 `
 
-const MapContainer = styled.div`
-    display: flex;
+const GameGrid = styled.div`
     flex: 1;
+
+    min-height: 0;
+    display: grid;
+
+    grid-template-columns: 1fr 4fr 1fr;
+    grid-template-rows: 2fr 1fr;
+    grid-template-areas:
+        "structures map details"
+        "units units orders";
+`
+
+const OrdersContainer = styled.div`
+    grid-area: orders;
+`
+
+const OrdersBody = styled.div`
+    margin: 1rem;
+
+    textarea {
+        width: 100%;
+        height: 100%;
+    }
+`
+
+const Orders = () => {
+    return <OrdersContainer>
+        <OrdersBody>
+            <TextField variant='outlined' rows={10} multiline fullWidth />
+        </OrdersBody>
+    </OrdersContainer>
+}
+
+const MapContainer = styled.div`
+    grid-area: map;
     background-color: #000;
+    min-height: 0;
 `
 
 const MapCanvas = styled.canvas`
@@ -41,9 +75,10 @@ const GameInfo = styled.div`
 
 interface GameMapProps {
     regions: RegionFragment[]
+    onRegionSelected: (col: number, row: number) => void
 }
 
-function GameMapComponent({ regions }: GameMapProps) {
+function GameMapComponent({ regions, onRegionSelected }: GameMapProps) {
     const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
     const gameMapRef = React.useRef<GameMap>(null)
 
@@ -55,6 +90,8 @@ function GameMapComponent({ regions }: GameMapProps) {
                 width: 56,
                 height: 56
              }, (x, y) => regions.find(r => r.x === x && r.y === y && r.z === 1))
+
+             gameMapRef.current.onRegionSelected = onRegionSelected
         }
 
         const gameMap = gameMapRef.current
@@ -67,6 +104,75 @@ function GameMapComponent({ regions }: GameMapProps) {
         <MapCanvas ref={setCanvasRef} />
     </MapContainer>
 }
+
+const UnitsContainer = styled.div`
+    grid-area: units;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+`
+
+const UnitsTable = styled(Table)`
+    min-height: 0;
+`
+
+const UnitsComponent = observer(() => {
+    const { game } = useStore()
+    return <UnitsContainer>
+        <UnitsTable size='small' stickyHeader>
+            <TableHead>
+                <TableRow>
+                    <TableCell>Number</TableCell>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Skills</TableCell>
+                    <TableCell>Items</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+            {game.units.map((row) => (
+                <TableRow key={row.id}>
+                    <TableCell>{row.number}</TableCell>
+                    <TableCell component="th">{row.name}</TableCell>
+                    <TableCell>{row.skills.map(x => `${x.code} ${x.level} (${x.days})`).join(', ')}</TableCell>
+                    <TableCell>{row.items.map(x => `${x.amount} ${x.code}`).join(', ')}</TableCell>
+                </TableRow>
+            ))}
+            </TableBody>
+        </UnitsTable>
+    </UnitsContainer>
+})
+
+const StructuresContainer = styled.div`
+    grid-area: structures;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: auto;
+`
+
+const StructuresBody = styled.div`
+    min-height: 0;
+`
+
+const StructureItem = styled.div`
+    margin: 0.5rem 1rem;
+`
+
+const StructuresComponent = observer(() => {
+    const { game } = useStore()
+    return <StructuresContainer>
+        <StructuresBody>
+            {game.structures.map((row) => (
+                <StructureItem key={row.id}>
+                    {row.name} [{row.number}]: {row.type}
+                </StructureItem>
+            ))}
+        </StructuresBody>
+    </StructuresContainer>
+})
 
 const GameComponent = observer(() => {
     const { game } = useStore()
@@ -86,7 +192,12 @@ const GameComponent = observer(() => {
                 </GameInfo>
             </Toolbar>
         </AppBar>
-        <GameMapComponent regions={game.regions} />
+        <GameGrid>
+            <GameMapComponent regions={game.regions} onRegionSelected={game.selectRegion} />
+            <UnitsComponent />
+            <StructuresComponent />
+            <Orders />
+        </GameGrid>
     </GameContainer>
 })
 
