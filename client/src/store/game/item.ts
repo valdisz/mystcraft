@@ -1,3 +1,5 @@
+const SILVER = 'SILV'
+
 export interface UniqueItem {
     readonly code: string
 }
@@ -21,7 +23,7 @@ export class Item implements UniqueItem {
     price: number
 
     get weight() {
-        return this.amount * this.info.weigth
+        return this.amount * this.info.weight
     }
 
     trait(trait: Traits) {
@@ -72,7 +74,7 @@ export class ItemInfo implements UniqueItem {
 
     private readonly traits: TraitsMap
 
-    weigth: number
+    weight: number
     name: [string, string]
     description: string
 
@@ -166,6 +168,10 @@ export class List<T extends UniqueItem> {
         this.items[item.code] = item
     }
 
+    contains(item: T | string) {
+        return !!this.items[typeof item === 'string' ? item : item.code]
+    }
+
     remove(item: T | string) {
         const code = typeof item === 'string'
             ? item
@@ -177,16 +183,82 @@ export class List<T extends UniqueItem> {
     }
 }
 
-export class Unit {
-    constructor(public readonly own: boolean, public readonly num: number, public name: string ) {
+export interface Transfer {
+    target: Unit
+    item: ItemInfo
+    amount: number
+}
+
+export interface Income {
+    tax: number
+    sell: number
+    entertain: number
+    work: number
+}
+
+export enum TransferOutcome {
+    Ok,
+    NotEnaugh,
+    NoItem
+}
+
+export class Inventory {
+    constructor(public readonly owner: Unit, items?: Item[]) {
 
     }
+
+    private readonly items = new List<Item>()
+
+    readonly credit: Transfer[] = []
+    readonly debit: Transfer[] = []
+
+    readonly balance = new List<Item>()
+
+    readonly income: Income = {
+        tax: 0,
+        sell: 0,
+        entertain: 0,
+        work: 0
+    }
+
+    transfer(target: Unit, itemOrCode: ItemInfo | string, amount?: number) {
+        const code = typeof itemOrCode === 'string' ? itemOrCode : itemOrCode.code
+        const item = this.balance.get(code)
+        const src = this.items.get(code)
+
+        if (!item) return TransferOutcome.NoItem
+        if (amount && item.amount < amount) return TransferOutcome.NotEnaugh
+
+        if (!amount) amount = item.amount
+        if (!src || src.amount < amount) {
+            // todo: rewrite incoming transfers
+        }
+
+        this.debit.push({ amount, target, item: item.info })
+        target.inventory.credit.push({ amount, target: this.owner, item: item.info })
+
+        // todo: update balance
+    }
+
+    receive(source: Unit, item: ItemInfo, amount: number) {
+
+    }
+}
+
+export class Unit {
+    constructor(public readonly region: Region, public readonly own: boolean, public readonly num: number, public name: string ) {
+
+    }
+
+    readonly inventory = new Inventory(this)
 
     faction?: Faction
     description?: string
     onGuard = false
     flag: Flag[] = []
     readonly items = new List<Item>()
+    readonly men = new List<Item>()
+    silver: number = 0
     readonly skills = new List<Skill>()
     readonly canStudy = new List<SkillInfo>()
     weight = 0
@@ -204,5 +276,14 @@ export class Region {
 }
 
 export class Structure {
+    constructor(public readonly region: Region) {
+
+    }
+
     readonly units: Unit[] = []
+}
+
+export class World {
+    readonly regions: Region[] = []
+    readonly factions: Faction[] = []
 }
