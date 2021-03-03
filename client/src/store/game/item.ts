@@ -92,8 +92,9 @@ export class ItemInfo implements UniqueItem {
 }
 
 export class Faction {
-    name: string
     num: number
+    name: string
+    player: boolean
 }
 
 export class Flag {
@@ -246,7 +247,12 @@ export class Inventory {
 }
 
 export class Unit {
-    constructor(public readonly region: Region, public readonly own: boolean, public readonly num: number, public name: string ) {
+    constructor(
+        public readonly region: Region,
+        public structure: Structure,
+        public readonly own: boolean,
+        public readonly num: number,
+        public name: string ) {
 
     }
 
@@ -255,7 +261,7 @@ export class Unit {
     faction?: Faction
     description?: string
     onGuard = false
-    flag: Flag[] = []
+    flags: Flag[] = []
     readonly items = new List<Item>()
     readonly men = new List<Item>()
     silver: number = 0
@@ -268,6 +274,12 @@ export class Unit {
     readonly events: Event[] = []
     readonly orders: Order[] = []
     memory: any
+}
+
+export class Company {
+    constructor(public readonly faction: Faction | null, public readonly units: Unit[]) {
+
+    }
 }
 
 export class Region {
@@ -284,6 +296,12 @@ export class Structure {
 }
 
 export class World {
+    readonly levels: string[] = [ ]
     readonly regions: Region[] = []
     readonly factions: Faction[] = []
+    readonly playerFaction: Faction
+
+    getRegion(x: number, y: number, z: number) {
+
+    }
 }
