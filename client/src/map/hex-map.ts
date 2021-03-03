@@ -13,8 +13,17 @@ export interface MapSize {
     height: number
 }
 
+// // fantasy
+// const TILE_W = 32;
+// const TILE_H = 32;
+// const OFFSET_X = 0;
+// const OFFSET_Y = -8;
+
+// advisor
 const TILE_W = 48;
 const TILE_H = 48;
+const OFFSET_X = 0;
+const OFFSET_Y = 0;
 
 export class HexMap {
     constructor(private canvas: HTMLCanvasElement, public readonly size: MapSize, public readonly getRegion: GetRegionCallback) {
@@ -122,7 +131,7 @@ export class HexMap {
 
     load() {
         return new Promise((resolve, reject) => {
-            this.loader.add('/terrain.json');
+            this.loader.add('/terrain-advisor.json');
 
             this.loader.onError.once(reject)
 
@@ -131,7 +140,7 @@ export class HexMap {
     }
 
     getTerrainTexture(name: string): PIXI.Texture {
-        const sprites = this.loader.resources['/terrain.json'];
+        const sprites = this.loader.resources['/terrain-advisor.json'];
         const sheet = sprites.spritesheet
         return sheet.textures[`${name}.png`]
     }
@@ -139,13 +148,16 @@ export class HexMap {
     drawTile(col, row) {
         const dc = new DoubledCoord(col, row)
         const hex = dc.toCube()
-        const p = this.layout.hexToPixel(hex)
 
         col = col % this.size.width
         if (col < 0) col += this.size.width
 
         const region = this.getRegion(col, row)
         if (region) {
+            const p = this.layout.hexToPixel(hex)
+            p.x += OFFSET_X
+            p.y += OFFSET_Y
+
             const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain))
             tile.anchor.set(0.5)
             tile.position = p
@@ -172,8 +184,8 @@ export class HexMap {
 
         this.tiles.removeChildren()
         this.outline.removeChildren()
+        for (let row = row0; row <= row1; row++) {
         for (let col = col0; col <= col1 ; col++) {
-            for (let row = row0; row <= row1; row++) {
                 if ((col + row) % 2) continue
 
                 this.drawTile(col, row)
