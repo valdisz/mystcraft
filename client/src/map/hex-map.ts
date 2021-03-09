@@ -161,6 +161,7 @@ export class HexMap {
             const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain))
             tile.anchor.set(0.5)
             tile.position = p
+            // tile.tint = 0xbbbbbb // darken region when no region report
             this.tiles.addChild(tile)
 
             const g = new PIXI.Graphics()
