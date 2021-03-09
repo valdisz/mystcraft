@@ -43,6 +43,13 @@ namespace atlantis
             return isRegionContent;
         }
 
+        private bool IsGate(TextParser p) {
+            var isRegionContent = p.Match("There is a Gate here");
+            p.Reset();
+
+            return isRegionContent;
+        }
+
         public async Task ParseAsync(Cursor<TextParser> cursor, JsonWriter writer) {
             await writer.WritePropertyNameAsync("regions");
             await writer.WriteStartArrayAsync();
@@ -70,8 +77,24 @@ namespace atlantis
                 }
                 await exits.Value.WriteJson(writer);
 
-                bool hasStructures = false;
+                while (await cursor.NextAsync()) {
+                    if (cursor.Value.EOF) continue;
 
+                    if (IsUnit(cursor.Value) || IsStructure(cursor.Value)) {
+                        cursor.Back();
+                        break;
+                    }
+
+                    if (IsGate(cursor.Value)) {
+                        await AllParsers.RegionGate.Parse(cursor.Value).Value.WriteJson(writer);
+                        break;
+                    }
+
+                    cursor.Back();
+                    break;
+                }
+
+                bool hasStructures = false;
                 await writer.WritePropertyNameAsync("units");
                 await writer.WriteStartArrayAsync();
                 while (await cursor.NextAsync()) {

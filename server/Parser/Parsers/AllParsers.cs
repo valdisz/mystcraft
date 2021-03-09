@@ -15,5 +15,6 @@ namespace atlantis
         public static readonly StructureParser Structure = new StructureParser();
         public static readonly RegionPropsParser RegionProps = new RegionPropsParser(Item);
         public static readonly RegionExistsParser RegionExits = new RegionExistsParser(Location, Settlement);
+        public static readonly RegionGateParser RegionGate = new RegionGateParser();
     }
 }

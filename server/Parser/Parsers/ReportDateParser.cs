@@ -1,7 +1,7 @@
-using System;
-
 namespace atlantis
 {
+    using System;
+
     public class ReportDateParser : BaseParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var month = p.Before(",").AsString();
