@@ -1,0 +1,14 @@
+SILV:
+  name: [ silver, silver ]
+  weight: 0
+  trait:
+    - trait: silver
+
+LEAD:
+  name: [ leader, leaders ]
+  weight: 10
+  traits:
+    - trait: man
+  description: |
+    leader [LEAD], weight 10, walking capacity 5, moves 2 hexes per month.
+    This race may study all skills to level 5.

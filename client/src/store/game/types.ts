@@ -180,7 +180,7 @@ export class Structure {
 
 export class Region {
     province: Province
-    
+
     readonly terrain: TerrainInfo
     readonly coords: Coords
     // readonly population: Population | null;
@@ -247,7 +247,5 @@ export class World {
 
         const reg = new Region()
         province.add(reg)
-
-        
     }
 }
