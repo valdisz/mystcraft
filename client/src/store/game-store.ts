@@ -1,9 +1,10 @@
 import { ApolloQueryResult } from 'apollo-client'
 import { makeObservable, observable, IObservableArray, runInAction, action, computed } from 'mobx'
 import { CLIENT } from '../client'
-import { RegionFragment, TurnSummaryFragment } from '../schema'
+import { TurnSummaryFragment } from '../schema'
 import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
+import { Region, Ruleset, World } from './game/types'
 
 export class TurnsStore {
     constructor() {
@@ -28,7 +29,8 @@ export class GameStore {
     @observable rulesetVersion: string
 
     @observable turn: TurnSummaryFragment
-    regions: RegionFragment[] = []
+
+    world: World
 
     async load(gameId: string) {
         runInAction(() => this.loading = true)
@@ -60,9 +62,10 @@ export class GameStore {
             }
         }
 
+        this.world = new World({ width: 56, height: 56 }, new Ruleset())
+
         let cursor: string = null
         let regions: ApolloQueryResult<GetRegionsQuery> = null
-        this.regions.length = 0
         do {
             regions = await CLIENT.query<GetRegionsQuery, GetRegionsQueryVariables>({
                 query: GetRegions,
@@ -73,7 +76,7 @@ export class GameStore {
             })
 
             for (const { node } of regions.data.node.regions.edges) {
-                this.regions.push(node)
+                this.world.addRegion(node)
             }
 
             cursor = regions.data.node.regions.pageInfo.endCursor
@@ -83,13 +86,11 @@ export class GameStore {
         setTimeout(() => runInAction(() => this.loading = false))
     }
 
-    @observable selctedRegion: RegionFragment = null
+    @observable selctedRegion: Region = null
 
     @action selectRegion = (col: number, row: number) => {
-        console.log('selectRegion', col, row)
-        const reg = this.regions.find(x => x.x === col && x.y === row && x.z === 1)
+        const reg = this.world.getRegion(col, row, 1)
         this.selctedRegion = reg ? observable(reg) : null
-        console.log('selectRegion', reg, this.selctedRegion)
     }
 
     @computed get units() {

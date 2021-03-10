@@ -1,11 +1,11 @@
 import * as PIXI from 'pixi.js'
 import { autoDetectRenderer, Container, Loader, Point, Renderer } from 'pixi.js'
 import { Hex, DoubledCoord, Layout, Orientation } from '../geometry'
-import { RegionFragment } from '../schema'
+import { Region } from '../store/game/types'
 import { Viewport } from './viewport'
 
 export interface GetRegionCallback {
-    (x: number, y: number): RegionFragment
+    (x: number, y: number): Region
 }
 
 export interface MapSize {
@@ -158,7 +158,7 @@ export class HexMap {
             p.x += OFFSET_X
             p.y += OFFSET_Y
 
-            const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain))
+            const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain.code))
             tile.anchor.set(0.5)
             tile.position = p
             // tile.tint = 0xbbbbbb // darken region when no region report

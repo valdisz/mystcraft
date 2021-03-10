@@ -6,8 +6,8 @@ import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, T
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
-import { RegionFragment } from '../schema'
 import { HexMap } from '../map'
+import { Region } from '../store/game/types'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any
@@ -74,11 +74,11 @@ const GameInfo = styled.div`
 `
 
 interface GameMapProps {
-    regions: RegionFragment[]
+    getRegion: (col: number, row: number) => Region
     onRegionSelected: (col: number, row: number) => void
 }
 
-function GameMapComponent({ regions, onRegionSelected }: GameMapProps) {
+function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
     const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
     const gameMapRef = React.useRef<HexMap>(null)
 
@@ -86,10 +86,7 @@ function GameMapComponent({ regions, onRegionSelected }: GameMapProps) {
         if (!canvasRef) return
 
         if (!gameMapRef.current) {
-            gameMapRef.current = new HexMap(canvasRef, {
-                width: 56,
-                height: 56
-             }, (x, y) => regions.find(r => r.x === x && r.y === y && r.z === 1))
+            gameMapRef.current = new HexMap(canvasRef, { width: 56, height: 56 }, getRegion)
 
              gameMapRef.current.onRegionSelected = onRegionSelected
         }
@@ -133,10 +130,10 @@ const UnitsComponent = observer(() => {
             <TableBody>
             {game.units.map((row) => (
                 <TableRow key={row.id}>
-                    <TableCell>{row.number}</TableCell>
+                    <TableCell>{row.num}</TableCell>
                     <TableCell component="th">{row.name}</TableCell>
-                    <TableCell>{row.skills.map(x => `${x.code} ${x.level} (${x.days})`).join(', ')}</TableCell>
-                    <TableCell>{row.items.map(x => `${x.amount} ${x.code}`).join(', ')}</TableCell>
+                    <TableCell>{row.skills.all.map(x => `${x.code} ${x.level} (${x.days})`).join(', ')}</TableCell>
+                    <TableCell>{row.inventory.balance.all.map(x => `${x.amount} ${x.code}`).join(', ')}</TableCell>
                 </TableRow>
             ))}
             </TableBody>
@@ -165,11 +162,11 @@ const StructuresComponent = observer(() => {
     const { game } = useStore()
     return <StructuresContainer>
         <StructuresBody>
-            {game.structures.map((row) => (
+            {/* {game.structures.map((row) => (
                 <StructureItem key={row.id}>
                     {row.name} [{row.number}]: {row.type}
                 </StructureItem>
-            ))}
+            ))} */}
         </StructuresBody>
     </StructuresContainer>
 })
@@ -193,7 +190,7 @@ const RegionComponent = observer(() => {
 
     return <RegionContainer>
         <RegionBody>
-            <h4>{reg.province}</h4>
+            <h4>{reg.province.name}</h4>
         </RegionBody>
     </RegionContainer>
 })
@@ -217,7 +214,7 @@ const GameComponent = observer(() => {
             </Toolbar>
         </AppBar>
         <GameGrid>
-            <GameMapComponent regions={game.regions} onRegionSelected={game.selectRegion} />
+            <GameMapComponent getRegion={(x, y) => game.world.getRegion(x, y, 1)} onRegionSelected={game.selectRegion} />
             <UnitsComponent />
             <StructuresComponent />
             { game.selctedRegion && <RegionComponent /> }
