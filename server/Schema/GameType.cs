@@ -9,8 +9,7 @@
     using Persistence;
 
     public class GameType : ObjectType<DbGame> {
-        protected override void Configure(IObjectTypeDescriptor<DbGame> descriptor)
-        {
+        protected override void Configure(IObjectTypeDescriptor<DbGame> descriptor) {
             descriptor.AsNode()
                 .IdField(x => x.Id)
                 .NodeResolver((ctx, id) =>
@@ -29,9 +28,9 @@
 
         private readonly Database db;
 
-        public Task<List<DbReport>> GetReports([Parent] DbGame game, long? turn = null) {
+        public Task<List<DbReport>> GetReports([Parent] DbUserGame game, long? turn = null) {
             var q = db.Reports
-                .Where(x => x.GameId == game.Id);
+                .Where(x => x.UserGameId == game.Id);
 
             if (turn != null) {
                 q = q
@@ -42,16 +41,62 @@
             return q.ToListAsync();
         }
 
-        public Task<List<DbTurn>> GetTurns([Parent] DbGame game) {
+        public Task<List<DbTurn>> GetTurns([Parent] DbUserGame game) {
             return db.Turns
-                .Where(x => x.GameId == game.Id)
+                .Where(x => x.UserGameId == game.Id)
                 .OrderBy(x => x.Number)
                 .ToListAsync();
         }
 
-        public Task<DbTurn> TurnByNumber([Parent] DbGame game, long turn) {
+        public Task<DbTurn> TurnByNumber([Parent] DbUserGame game, long turn) {
             return db.Turns
-                .FirstOrDefaultAsync(x => x.GameId == game.Id && x.Number == turn);
+                .FirstOrDefaultAsync(x => x.UserGameId == game.Id && x.Number == turn);
+        }
+    }
+
+    public class UserGameType : ObjectType<DbUserGame> {
+        protected override void Configure(IObjectTypeDescriptor<DbUserGame> descriptor) {
+            descriptor.AsNode()
+                .IdField(x => x.Id)
+                .NodeResolver((ctx, id) =>
+                {
+                    var db = ctx.Service<Database>();
+                    return db.UserGames.FirstOrDefaultAsync(x => x.Id == id);
+                });
+        }
+    }
+
+    [ExtendObjectType(Name = "UserGame")]
+    public class UserGameResolvers {
+        public UserGameResolvers(Database db) {
+            this.db = db;
+        }
+
+        private readonly Database db;
+
+        public Task<List<DbReport>> GetReports([Parent] DbUserGame game, long? turn = null) {
+            var q = db.Reports
+                .Where(x => x.UserGameId == game.Id);
+
+            if (turn != null) {
+                q = q
+                    .Include(x => x.Turn)
+                    .Where(x => x.Turn.Number == turn);
+            }
+
+            return q.ToListAsync();
+        }
+
+        public Task<List<DbTurn>> GetTurns([Parent] DbUserGame game) {
+            return db.Turns
+                .Where(x => x.UserGameId == game.Id)
+                .OrderBy(x => x.Number)
+                .ToListAsync();
+        }
+
+        public Task<DbTurn> TurnByNumber([Parent] DbUserGame game, long turn) {
+            return db.Turns
+                .FirstOrDefaultAsync(x => x.UserGameId == game.Id && x.Number == turn);
         }
     }
 }

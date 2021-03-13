@@ -9,14 +9,14 @@ namespace atlantis.Persistence {
         public long Id { get; set; }
 
         [GraphQLIgnore]
-        public long GameId { get; set; }
+        public long UserGameId { get; set; }
 
         public int Number { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
 
         [GraphQLIgnore]
-        public DbGame Game { get; set; }
+        public DbUserGame UserGame { get; set; }
 
         [GraphQLIgnore]
         public List<DbReport> Reports { get; set; } = new List<DbReport>();
@@ -35,5 +35,8 @@ namespace atlantis.Persistence {
 
         [GraphQLIgnore]
         public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
+
+        [GraphQLIgnore]
+        public List<DbStudyPlan> Plans { get; set; } = new ();
     }
 }

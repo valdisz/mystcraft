@@ -56,5 +56,8 @@ namespace atlantis.Persistence {
 
         [GraphQLIgnore]
         public DbStructure Structure { get; set; }
+
+        [GraphQLIgnore]
+        public List<DbStudyPlan> Plans { get; set; } = new ();
     }
 }

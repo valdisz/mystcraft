@@ -1,4 +1,5 @@
-namespace atlantis.Persistence {
+namespace atlantis.Persistence
+{
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
@@ -11,21 +12,18 @@ namespace atlantis.Persistence {
         [Required]
         public string Name { get; set; }
 
-        public int? PlayerFactionNumber { get; set; }
-        public string PlayerFactionName { get; set; }
+        public GameType Type { get; set; }
 
-        public int LastTurnNumber { get; set; }
+        public string RemoteGameOptions { get; set; }
 
         public string EngineVersion { get; set; }
         public string RulesetName { get; set; }
         public string RulesetVersion { get; set; }
-        // public string Memory { get; set; }
-        public string Password { get; set; }
 
         [GraphQLIgnore]
-        public List<DbTurn> Turns { get; set; } = new List<DbTurn>();
+        public List<DbUserGame> UserGames { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbReport> Reports { get; set; } = new List<DbReport>();
+        public List<DbUniversity> Universities { get; set; } = new ();
     }
 }

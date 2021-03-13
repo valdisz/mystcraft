@@ -2,18 +2,31 @@ namespace atlantis.Persistence
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using atlantis.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
     using Newtonsoft.Json;
+
+    public class JsonListConverter<T> : ValueConverter<List<T>, string>
+    {
+        public JsonListConverter()
+            : base(
+                v => JsonConvert.SerializeObject(v),
+                v => JsonConvert.DeserializeObject<List<T>>(v)
+            )
+        {
+        }
+    }
 
     public class Database : DbContext {
         public Database(DbContextOptions<Database> options)
             : base(options) {
         }
 
+        public DbSet<DbUser> Users { get; set; }
+
         public DbSet<DbGame> Games { get; set; }
+        public DbSet<DbUserGame> UserGames { get; set; }
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
@@ -22,26 +35,55 @@ namespace atlantis.Persistence
         public DbSet<DbStructure> Structures { get; set; }
         public DbSet<DbUnit> Units { get; set; }
 
-        private readonly ValueConverter<List<string>, string> splitStringConverter = new ValueConverter<List<string>, string>(
-            v => JsonConvert.SerializeObject(v),
-            v => JsonConvert.DeserializeObject<List<string>>(v)
-        );
-
-        private readonly ValueConverter<List<Direction>, string> directionListConverter = new ValueConverter<List<Direction>, string>(
-            v => JsonConvert.SerializeObject(v),
-            v => JsonConvert.DeserializeObject<List<Direction>>(v)
-        );
+        public DbSet<DbUniversity> Universities { get; set; }
+        public DbSet<DbStudyPlan> StudyPlans { get; set; }
 
         protected override void OnModelCreating(ModelBuilder model) {
+            model.Entity<DbUser>(t => {
+                t.Property(x => x.Algorithm).HasConversion<string>();
+
+                t.HasMany(p => p.UserGames)
+                    .WithOne(p => p.User)
+                    .HasForeignKey(x => x.UserId);
+
+                t.HasMany(x => x.Universities)
+                    .WithMany(x => x.Users)
+                    .UsingEntity<DbUniversityUser>(
+                        j => j.HasOne(x => x.University).WithMany(x => x.UniversityUsers).HasForeignKey(x => x.UniversityId),
+                        j => j.HasOne(x => x.User).WithMany(x => x.UniversityUsers).HasForeignKey(x => x.UserId),
+                        j => {
+                            j.ToTable("University_User");
+                            j.HasKey(x => new { x.UserId, x.UniversityId });
+                            j.Property(x => x.Role).HasConversion<string>();
+                        }
+                    );
+
+                t.HasIndex(x => new { x.Email })
+                    .IsUnique();
+            });
+
             model.Entity<DbGame>(t => {
-                t.HasMany<DbReport>(x => x.Reports)
+                t.Property(x => x.Type)
+                    .HasConversion<string>();
+
+                t.HasMany(p => p.UserGames)
+                    .WithOne(p => p.Game)
+                    .HasForeignKey(x => x.GameId);
+
+                t.HasMany(x => x.Universities)
                     .WithOne(x => x.Game)
-                    .HasForeignKey(x => x.GameId)
+                    .HasForeignKey(x => x.GameId);
+            });
+
+            model.Entity<DbUserGame>(t => {
+                t.HasMany<DbReport>(x => x.Reports)
+                    .WithOne(x => x.UserGame)
+                    .HasForeignKey(x => x.UserGameId)
                     .IsRequired();
 
                 t.HasMany<DbTurn>(x => x.Turns)
-                    .WithOne(x => x.Game)
-                    .HasForeignKey(x => x.GameId)
+                    .WithOne(x => x.UserGame)
+                    .HasForeignKey(x => x.UserGameId)
                     .IsRequired();
             });
 
@@ -75,6 +117,10 @@ namespace atlantis.Persistence
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
                     .IsRequired();
+
+                t.HasMany(x => x.Plans)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => x.TurnId);
             });
 
             model.Entity<DbRegion>(t => {
@@ -139,10 +185,10 @@ namespace atlantis.Persistence
 
             model.Entity<DbStructure>(t => {
                 t.Property(p => p.Flags)
-                    .HasConversion(splitStringConverter);
+                    .HasConversion(new JsonListConverter<string>());
 
                 t.Property(p => p.SailDirections)
-                    .HasConversion(directionListConverter);
+                    .HasConversion(new JsonListConverter<Direction>());
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Structure)
@@ -160,7 +206,11 @@ namespace atlantis.Persistence
 
             model.Entity<DbUnit>(t => {
                 t.Property(p => p.Flags)
-                    .HasConversion(splitStringConverter);
+                    .HasConversion(new JsonListConverter<string>());
+
+                t.HasMany(p => p.Plans)
+                    .WithOne(p => p.Unit)
+                    .HasForeignKey(p => p.UnitId);
 
                 t.OwnsMany(p => p.Items, a => {
                     a.WithOwner().HasForeignKey("UnitId");
@@ -185,6 +235,19 @@ namespace atlantis.Persistence
                 t.OwnsOne(p => p.ReadyItem);
 
                 t.OwnsOne(p => p.CombatSpell);
+            });
+
+            model.Entity<DbUniversity>(t => {
+                t.HasMany(p => p.Plans)
+                    .WithOne(p => p.University)
+                    .HasForeignKey(p => p.UniversityId);
+            });
+
+            model.Entity<DbStudyPlan>(t => {
+                t.Property(x => x.Teach)
+                    .HasConversion(new JsonListConverter<long>());
+
+                t.OwnsOne(p => p.Target);
             });
         }
     }

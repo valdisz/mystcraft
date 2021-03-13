@@ -9,7 +9,7 @@ namespace atlantis.Persistence {
 
 
         [Required, GraphQLIgnore]
-        public long GameId { get; set; }
+        public long UserGameId { get; set; }
 
         [Required, GraphQLIgnore]
         public long TurnId { get; set; }
@@ -29,7 +29,7 @@ namespace atlantis.Persistence {
 
 
         [GraphQLIgnore]
-        public DbGame Game { get; set; }
+        public DbUserGame UserGame { get; set; }
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
