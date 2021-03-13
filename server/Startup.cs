@@ -1,14 +1,12 @@
 namespace advisor {
     using System;
     using System.Threading.Tasks;
-    using advisor.Features;
     using advisor.Persistence;
     using HotChocolate;
     using HotChocolate.AspNetCore;
     using HotChocolate.Execution.Configuration;
     using HotChocolate.Types.Relay;
     using MediatR;
-    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
@@ -50,9 +48,9 @@ namespace advisor {
                     conf.DefaultPolicy = builder.Build();
                     conf.FallbackPolicy = conf.DefaultPolicy;
 
-                    conf.AddPolicyAny(Roles.Root, Roles.Root);
-                    conf.AddPolicyAny(Roles.GameMaster, Roles.Root, Roles.GameMaster);
-                    conf.AddPolicyAny(Roles.UserManager, Roles.Root, Roles.UserManager);
+                    conf.AddPolicyAny(Policies.Root, Policies.Root);
+                    conf.AddPolicyAny(Policies.GameMaster, Policies.Root, Policies.GameMaster);
+                    conf.AddPolicyAny(Policies.UserManager, Policies.Root, Policies.UserManager);
                 });
 
             services
@@ -81,8 +79,8 @@ namespace advisor {
                         .AddType<UserResolvers>()
                     .AddType<GameType>()
                         .AddType<GameResolvers>()
-                    .AddType<UserGameType>()
-                        .AddType<UserGameResolvers>()
+                    .AddType<PlayerType>()
+                        .AddType<PlayerResolvers>()
                     .AddType<ReportType>()
                     .AddType<TurnType>()
                         .AddType<TurnResolvers>()
@@ -93,6 +91,8 @@ namespace advisor {
                         .AddType<StructureResolvers>()
                     .AddType<FactionType>()
                         .AddType<FactionResolvers>()
+                    .AddType<UniversityType>()
+                        .AddType<UniversityResolvers>()
                     .AddQueryType<QueryType>()
                     .AddMutationType<Mutation>()
                     .Create(),
@@ -108,27 +108,24 @@ namespace advisor {
                     .AddDataAnnotations()
                     .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
-            services.AddQueryRequestInterceptor(async (context, builder, ct) => {
+            services.AddQueryRequestInterceptor((context, builder, ct) => {
                 if (!context.User.Identity.IsAuthenticated) {
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 var userId = context.User.FindFirst(WellKnownClaimTypes.UserId)?.Value;
                 if (userId == null) {
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 builder.AddProperty("currentUserId", long.Parse(userId));
                 builder.AddProperty("currentUserEmail", context.User.FindFirst(WellKnownClaimTypes.Email)?.Value);
+
+                return Task.CompletedTask;
             });
         }
 
         public void Configure(IApplicationBuilder app, IServiceProvider services) {
-            Task.Run(async () => {
-                using var scope = services.CreateScope();
-                await BeforeStartAsync(scope.ServiceProvider);
-            }).Wait();
-
             app
                 .UseDeveloperExceptionPage()
                 .UseRouting()
@@ -140,20 +137,6 @@ namespace advisor {
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
                 });
-        }
-
-        public async Task BeforeStartAsync(IServiceProvider services) {
-            var db = services.GetService<Database>();
-            await db.Database.MigrateAsync();
-
-            if (! await db.Users.AnyAsync()) {
-                var mediator = services.GetService<IMediator>();
-
-                var email = Configuration.GetValue<string>("Seed:Email");
-                var password = Configuration.GetValue<string>("Seed:Password");
-
-                await mediator.Send(new CreateUser(email, password, Roles.Root));
-            }
         }
     }
 }

@@ -32,13 +32,6 @@ namespace advisor.Persistence
 
 
         [GraphQLIgnore]
-        public List<DbUserGame> UserGames { get; set; } = new ();
-
-
-        [GraphQLIgnore]
-        public List<DbUniversity> Universities { get; set; } = new ();
-
-        [GraphQLIgnore]
-        public List<DbUniversityUser> UniversityUsers { get; set; } = new ();
+        public List<DbPlayer> Players { get; set; } = new ();
     }
 }

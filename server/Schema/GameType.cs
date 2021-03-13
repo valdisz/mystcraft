@@ -29,8 +29,15 @@
 
         private readonly Database db;
 
-        public Task<List<DbUserGame>> GetUserGames([Parent] DbGame game) {
-            return db.UserGames.Where(x => x.GameId == game.Id).ToListAsync();
+        public Task<List<DbPlayer>> UserGames([Parent] DbGame game) {
+            return db.Players.Where(x => x.GameId == game.Id).ToListAsync();
+        }
+
+        public Task<List<DbUniversity>> Universities([Parent] DbGame game) {
+            return db.Universities
+                .Include(x => x.Members)
+                .ThenInclude(x => x.Player)
+                .Where(x => x.GameId == game.Id).ToListAsync();
         }
     }
 }

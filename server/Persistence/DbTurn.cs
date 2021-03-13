@@ -16,7 +16,7 @@ namespace advisor.Persistence {
         public int Year { get; set; }
 
         [GraphQLIgnore]
-        public DbUserGame UserGame { get; set; }
+        public DbPlayer UserGame { get; set; }
 
         [GraphQLIgnore]
         public List<DbReport> Reports { get; set; } = new List<DbReport>();

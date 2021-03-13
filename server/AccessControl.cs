@@ -8,7 +8,7 @@ namespace advisor
         readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
 
         public string GetSalt() {
-            byte[] salt = new byte[16];
+            byte[] salt = new byte[18];
             rng.GetNonZeroBytes(salt);
 
             return Convert.ToBase64String(salt);

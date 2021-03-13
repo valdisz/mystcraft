@@ -26,7 +26,8 @@ namespace advisor.Persistence
         public DbSet<DbUser> Users { get; set; }
 
         public DbSet<DbGame> Games { get; set; }
-        public DbSet<DbUserGame> UserGames { get; set; }
+        public DbSet<DbPlayer> Players { get; set; }
+
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
@@ -36,27 +37,16 @@ namespace advisor.Persistence
         public DbSet<DbUnit> Units { get; set; }
 
         public DbSet<DbUniversity> Universities { get; set; }
+        public DbSet<DbUniversityMembership> UniversityMemberships { get; set; }
         public DbSet<DbStudyPlan> StudyPlans { get; set; }
 
         protected override void OnModelCreating(ModelBuilder model) {
             model.Entity<DbUser>(t => {
                 t.Property(x => x.Algorithm).HasConversion<string>();
 
-                t.HasMany(p => p.UserGames)
+                t.HasMany(p => p.Players)
                     .WithOne(p => p.User)
                     .HasForeignKey(x => x.UserId);
-
-                t.HasMany(x => x.Universities)
-                    .WithMany(x => x.Users)
-                    .UsingEntity<DbUniversityUser>(
-                        j => j.HasOne(x => x.University).WithMany(x => x.UniversityUsers).HasForeignKey(x => x.UniversityId),
-                        j => j.HasOne(x => x.User).WithMany(x => x.UniversityUsers).HasForeignKey(x => x.UserId),
-                        j => {
-                            j.ToTable("University_User");
-                            j.HasKey(x => new { x.UserId, x.UniversityId });
-                            j.Property(x => x.Role).HasConversion<string>();
-                        }
-                    );
 
                 t.OwnsMany(x => x.Roles, a => {
                     a.WithOwner().HasForeignKey("UserId");
@@ -79,9 +69,12 @@ namespace advisor.Persistence
                 t.HasMany(x => x.Universities)
                     .WithOne(x => x.Game)
                     .HasForeignKey(x => x.GameId);
+
+                t.HasIndex(x => new { x.Name })
+                    .IsUnique();
             });
 
-            model.Entity<DbUserGame>(t => {
+            model.Entity<DbPlayer>(t => {
                 t.HasMany<DbReport>(x => x.Reports)
                     .WithOne(x => x.UserGame)
                     .HasForeignKey(x => x.UserGameId)
@@ -91,6 +84,10 @@ namespace advisor.Persistence
                     .WithOne(x => x.UserGame)
                     .HasForeignKey(x => x.UserGameId)
                     .IsRequired();
+
+                t.HasOne(x => x.UniversityMembership)
+                    .WithOne(x => x.Player)
+                    .HasForeignKey<DbUniversityMembership>(x => x.PlayerId);
             });
 
             model.Entity<DbTurn>(t => {
@@ -247,6 +244,10 @@ namespace advisor.Persistence
                 t.HasMany(p => p.Plans)
                     .WithOne(p => p.University)
                     .HasForeignKey(p => p.UniversityId);
+
+                t.HasMany(x => x.Members)
+                    .WithOne(x => x.University)
+                    .HasForeignKey(x => x.UniversityId);
             });
 
             model.Entity<DbStudyPlan>(t => {
@@ -254,6 +255,10 @@ namespace advisor.Persistence
                     .HasConversion(new JsonListConverter<long>());
 
                 t.OwnsOne(p => p.Target);
+            });
+
+            model.Entity<DbUniversityMembership>(t => {
+                t.HasKey(x => new { x.PlayerId, x.UniversityId });
             });
         }
     }

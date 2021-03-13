@@ -4,17 +4,19 @@ namespace advisor.Persistence
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("UserGame")]
-    public class DbUserGame {
+    [GraphQLName("Player")]
+    public class DbPlayer {
         [Key]
         public long Id { get; set; }
 
+        [GraphQLIgnore]
         public long UserId { get; set; }
 
+        [GraphQLIgnore]
         public long GameId { get; set; }
 
-        public int? PlayerFactionNumber { get; set; }
-        public string PlayerFactionName { get; set; }
+        public int? FactionNumber { get; set; }
+        public string FactionName { get; set; }
 
         public int LastTurnNumber { get; set; }
 
@@ -31,5 +33,8 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         public List<DbReport> Reports { get; set; } = new List<DbReport>();
+
+        [GraphQLIgnore]
+        public DbUniversityMembership UniversityMembership { get; set; }
     }
 }

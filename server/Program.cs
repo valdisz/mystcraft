@@ -2,8 +2,13 @@
     using System;
     using System.IO;
     using System.Threading.Tasks;
+    using advisor.Features;
+    using advisor.Persistence;
+    using MediatR;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
 
     class Program {
@@ -16,7 +21,7 @@
             }
         }
 
-        public static Task RunServerAsync(string[] args) {
+        public static async Task RunServerAsync(string[] args) {
             var builder = new WebHostBuilder()
                 .ConfigureAppConfiguration(conf => {
                     conf
@@ -32,7 +37,14 @@
 
             var host = builder.Build();
 
-            return host.RunAsync();
+            using (var scope = host.Services.CreateScope()) {
+                var services = scope.ServiceProvider;
+                var config = services.GetRequiredService<IConfiguration>();
+
+                await BeforeStartAsync(services, config);
+            }
+
+            await host.RunAsync();
         }
 
         public static async Task RunConverterAsync(string[] args) {
@@ -43,6 +55,20 @@
             writer.Formatting = Formatting.Indented;
 
             await converter.ReadAsJsonAsync(writer);
+        }
+
+        public static async Task BeforeStartAsync(IServiceProvider services, IConfiguration conf) {
+            var db = services.GetService<Database>();
+            await db.Database.MigrateAsync();
+
+            if (! await db.Users.AnyAsync()) {
+                var mediator = services.GetService<IMediator>();
+
+                var email = conf.GetValue<string>("Seed:Email");
+                var password = conf.GetValue<string>("Seed:Password");
+
+                await mediator.Send(new CreateUser(email, password, Policies.Root));
+            }
         }
     }
 }

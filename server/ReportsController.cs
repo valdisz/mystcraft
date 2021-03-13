@@ -37,7 +37,7 @@ namespace advisor
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (Request.Form.Files.Count == 0) return UnprocessableEntity();
 
-            DbUserGame game = await FindGameAsync(db, relayId, gameId);
+            DbPlayer game = await FindGameAsync(db, relayId, gameId);
             if (game == null) return NotFound();
 
             // 1. upload reports
@@ -61,16 +61,16 @@ namespace advisor
         public const string DEFAULT_LEVEL_LABEL = "surface";
         public const int DEFAULT_LEVEL_Z = 1;
 
-        private static Task<DbUserGame> FindGameAsync(Database db, IIdSerializer relayId, string userGameId) {
+        private static Task<DbPlayer> FindGameAsync(Database db, IIdSerializer relayId, string userGameId) {
             var id = (long) relayId.Deserialize(userGameId).Value;
 
-            return db.UserGames
+            return db.Players
                 .Include(x => x.Game)
                 .Where(x => x.Id == id)
                 .FirstOrDefaultAsync();
         }
 
-        private static async Task<(int turnNumber, JReport report)> LoadReportFileAsync(Database db, Stream reportStream, DbUserGame userGame) {
+        private static async Task<(int turnNumber, JReport report)> LoadReportFileAsync(Database db, Stream reportStream, DbPlayer userGame) {
             using var textReader = new StreamReader(reportStream);
 
             using var atlantisReader = new AtlantisReportJsonConverter(textReader);
@@ -125,9 +125,9 @@ namespace advisor
             dbReport.Source = source;
             dbReport.Json = json.ToString(Formatting.Indented);
 
-            userGame.PlayerFactionNumber ??= dbReport.FactionNumber;
-            if (dbReport.FactionNumber == userGame.PlayerFactionNumber && turnNumber > userGame.LastTurnNumber) {
-                userGame.PlayerFactionName = dbReport.FactionName;
+            userGame.FactionNumber ??= dbReport.FactionNumber;
+            if (dbReport.FactionNumber == userGame.FactionNumber && turnNumber > userGame.LastTurnNumber) {
+                userGame.FactionName = dbReport.FactionName;
                 userGame.LastTurnNumber = turnNumber;
             }
 

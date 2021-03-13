@@ -2,7 +2,7 @@ namespace advisor
 {
     using Microsoft.AspNetCore.Authorization;
 
-    public static class Roles {
+    public static class Policies {
         public const string Root = "root";
         public const string GameMaster = "game-master";
         public const string UserManager = "user-manager";

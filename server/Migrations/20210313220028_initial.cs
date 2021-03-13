@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace advisor.Migrations
+namespace atlantis.Migrations
 {
     public partial class initial : Migration
     {
@@ -46,7 +46,8 @@ namespace advisor.Migrations
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    GameId = table.Column<long>(type: "INTEGER", nullable: false)
+                    GameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,29 +61,29 @@ namespace advisor.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserGames",
+                name: "Players",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
-                    PlayerFactionNumber = table.Column<int>(type: "INTEGER", nullable: true),
-                    PlayerFactionName = table.Column<string>(type: "TEXT", nullable: true),
+                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: true),
+                    FactionName = table.Column<string>(type: "TEXT", nullable: true),
                     LastTurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     Password = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserGames", x => x.Id);
+                    table.PrimaryKey("PK_Players", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserGames_Games_GameId",
+                        name: "FK_Players_Games_GameId",
                         column: x => x.GameId,
                         principalTable: "Games",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserGames_Users_UserId",
+                        name: "FK_Players_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -108,31 +109,6 @@ namespace advisor.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "University_User",
-                columns: table => new
-                {
-                    UniversityId = table.Column<long>(type: "INTEGER", nullable: false),
-                    UserId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Role = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_University_User", x => new { x.UserId, x.UniversityId });
-                    table.ForeignKey(
-                        name: "FK_University_User_Universities_UniversityId",
-                        column: x => x.UniversityId,
-                        principalTable: "Universities",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_University_User_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Turns",
                 columns: table => new
                 {
@@ -147,9 +123,34 @@ namespace advisor.Migrations
                 {
                     table.PrimaryKey("PK_Turns", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Turns_UserGames_UserGameId",
+                        name: "FK_Turns_Players_UserGameId",
                         column: x => x.UserGameId,
-                        principalTable: "UserGames",
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UniversityMemberships",
+                columns: table => new
+                {
+                    UniversityId = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Role = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UniversityMemberships", x => new { x.PlayerId, x.UniversityId });
+                    table.ForeignKey(
+                        name: "FK_UniversityMemberships_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UniversityMemberships_Universities_UniversityId",
+                        column: x => x.UniversityId,
+                        principalTable: "Universities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -225,15 +226,15 @@ namespace advisor.Migrations
                 {
                     table.PrimaryKey("PK_Reports", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Reports_Turns_TurnId",
-                        column: x => x.TurnId,
-                        principalTable: "Turns",
+                        name: "FK_Reports_Players_UserGameId",
+                        column: x => x.UserGameId,
+                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Reports_UserGames_UserGameId",
-                        column: x => x.UserGameId,
-                        principalTable: "UserGames",
+                        name: "FK_Reports_Turns_TurnId",
+                        column: x => x.TurnId,
+                        principalTable: "Turns",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -578,6 +579,22 @@ namespace advisor.Migrations
                 column: "TurnId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Games_Name",
+                table: "Games",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Players_GameId",
+                table: "Players",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Players_UserId",
+                table: "Players",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Regions_TurnId",
                 table: "Regions",
                 column: "TurnId");
@@ -648,19 +665,15 @@ namespace advisor.Migrations
                 column: "GameId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_University_User_UniversityId",
-                table: "University_User",
+                name: "IX_UniversityMemberships_PlayerId",
+                table: "UniversityMemberships",
+                column: "PlayerId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UniversityMemberships_UniversityId",
+                table: "UniversityMemberships",
                 column: "UniversityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserGames_GameId",
-                table: "UserGames",
-                column: "GameId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserGames_UserId",
-                table: "UserGames",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
@@ -705,7 +718,7 @@ namespace advisor.Migrations
                 name: "Unit_Skills");
 
             migrationBuilder.DropTable(
-                name: "University_User");
+                name: "UniversityMemberships");
 
             migrationBuilder.DropTable(
                 name: "Users_Role");
@@ -729,7 +742,7 @@ namespace advisor.Migrations
                 name: "Turns");
 
             migrationBuilder.DropTable(
-                name: "UserGames");
+                name: "Players");
 
             migrationBuilder.DropTable(
                 name: "Games");

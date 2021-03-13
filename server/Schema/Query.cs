@@ -19,12 +19,13 @@ namespace advisor {
 
         public Task<List<DbGame>> Games() => db.Games.ToListAsync();
 
+        [Authorize(Policy = Policies.UserManager)]
         [UsePaging]
-        [Authorize(Policy = Roles.UserManager)]
         public IQueryable<DbUser> Users() {
             return db.Users;
         }
 
+        [Authorize]
         public async Task<DbUser> Me([GlobalState] long currentUserId) {
             return await db.Users.FindAsync(currentUserId);
         }

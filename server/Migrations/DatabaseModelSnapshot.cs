@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using advisor.Persistence;
 
-namespace advisor.Migrations
+namespace atlantis.Migrations
 {
     [DbContext(typeof(Database))]
     partial class DatabaseModelSnapshot : ModelSnapshot
@@ -16,7 +16,7 @@ namespace advisor.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.4");
 
-            modelBuilder.Entity("atlantis.Persistence.DbEvent", b =>
+            modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace advisor.Migrations
                     b.ToTable("Events");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
+            modelBuilder.Entity("advisor.Persistence.DbFaction", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +68,7 @@ namespace advisor.Migrations
                     b.ToTable("Factions");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbGame", b =>
+            modelBuilder.Entity("advisor.Persistence.DbGame", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -96,10 +96,46 @@ namespace advisor.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbRegion", b =>
+            modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FactionName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("FactionNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LastTurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -157,7 +193,7 @@ namespace advisor.Migrations
                     b.ToTable("Regions");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbReport", b =>
+            modelBuilder.Entity("advisor.Persistence.DbReport", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -194,7 +230,7 @@ namespace advisor.Migrations
                     b.ToTable("Reports");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -253,7 +289,7 @@ namespace advisor.Migrations
                     b.ToTable("Structures");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStudyPlan", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStudyPlan", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -285,7 +321,7 @@ namespace advisor.Migrations
                     b.ToTable("StudyPlans");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
+            modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -310,7 +346,7 @@ namespace advisor.Migrations
                     b.ToTable("Turns");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -363,7 +399,7 @@ namespace advisor.Migrations
                     b.ToTable("Units");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUniversity", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUniversity", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -372,6 +408,10 @@ namespace advisor.Migrations
                     b.Property<long>("GameId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");
@@ -379,26 +419,28 @@ namespace advisor.Migrations
                     b.ToTable("Universities");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUniversityUser", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUniversityMembership", b =>
                 {
-                    b.Property<long>("UserId")
+                    b.Property<long>("PlayerId")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("UniversityId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
 
-                    b.HasKey("UserId", "UniversityId");
+                    b.HasKey("PlayerId", "UniversityId");
+
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
 
                     b.HasIndex("UniversityId");
 
-                    b.ToTable("University_User");
+                    b.ToTable("UniversityMemberships");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUser", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUser", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -428,48 +470,15 @@ namespace advisor.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUserGame", b =>
+            modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("GameId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("LastTurnNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Password")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PlayerFactionName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("PlayerFactionNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GameId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserGames");
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbEvent", b =>
-                {
-                    b.HasOne("atlantis.Persistence.DbFaction", "Faction")
+                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
                         .WithMany("Events")
                         .HasForeignKey("FactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Events")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -480,9 +489,9 @@ namespace advisor.Migrations
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
+            modelBuilder.Entity("advisor.Persistence.DbFaction", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Factions")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -491,15 +500,34 @@ namespace advisor.Migrations
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbRegion", b =>
+            modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany("UserGames")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbUser", "User")
+                        .WithMany("Players")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Regions")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("atlantis.Persistence.DbSettlement", "Settlement", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
                         {
                             b1.Property<long>("DbRegionId")
                                 .HasColumnType("INTEGER");
@@ -519,7 +547,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("DbRegionId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbExit", "Exits", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbExit", "Exits", b1 =>
                         {
                             b1.Property<long>("RegionId")
                                 .HasColumnType("INTEGER");
@@ -555,7 +583,7 @@ namespace advisor.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("RegionId");
 
-                            b1.OwnsOne("atlantis.Persistence.DbSettlement", "Settlement", b2 =>
+                            b1.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b2 =>
                                 {
                                     b2.Property<long>("DbExitRegionId")
                                         .HasColumnType("INTEGER");
@@ -581,7 +609,7 @@ namespace advisor.Migrations
                             b1.Navigation("Settlement");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbItem", "Products", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbItem", "Products", b1 =>
                         {
                             b1.Property<long>("RegionId")
                                 .HasColumnType("INTEGER");
@@ -600,7 +628,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("RegionId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbTradableItem", "ForSale", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbTradableItem", "ForSale", b1 =>
                         {
                             b1.Property<long>("RegionId")
                                 .HasColumnType("INTEGER");
@@ -622,7 +650,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("RegionId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbTradableItem", "Wanted", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbTradableItem", "Wanted", b1 =>
                         {
                             b1.Property<long>("RegionId")
                                 .HasColumnType("INTEGER");
@@ -657,15 +685,15 @@ namespace advisor.Migrations
                     b.Navigation("Wanted");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbReport", b =>
+            modelBuilder.Entity("advisor.Persistence.DbReport", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Reports")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbUserGame", "UserGame")
+                    b.HasOne("advisor.Persistence.DbPlayer", "UserGame")
                         .WithMany("Reports")
                         .HasForeignKey("UserGameId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -676,21 +704,21 @@ namespace advisor.Migrations
                     b.Navigation("UserGame");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbRegion", "Region")
+                    b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany("Structures")
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Structures")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("atlantis.Persistence.DbSailors", "Sailors", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbSailors", "Sailors", b1 =>
                         {
                             b1.Property<long>("DbStructureId")
                                 .HasColumnType("INTEGER");
@@ -709,7 +737,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("DbStructureId");
                         });
 
-                    b.OwnsOne("atlantis.Persistence.DbTransportationLoad", "Load", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbTransportationLoad", "Load", b1 =>
                         {
                             b1.Property<long>("DbStructureId")
                                 .HasColumnType("INTEGER");
@@ -728,7 +756,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("DbStructureId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbFleetContent", "Contents", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbFleetContent", "Contents", b1 =>
                         {
                             b1.Property<long>("StructureId")
                                 .HasColumnType("INTEGER");
@@ -758,27 +786,27 @@ namespace advisor.Migrations
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStudyPlan", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStudyPlan", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Plans")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbUnit", "Unit")
+                    b.HasOne("advisor.Persistence.DbUnit", "Unit")
                         .WithMany("Plans")
                         .HasForeignKey("UnitId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbUniversity", "University")
+                    b.HasOne("advisor.Persistence.DbUniversity", "University")
                         .WithMany("Plans")
                         .HasForeignKey("UniversityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("atlantis.Persistence.DbSkill", "Target", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbSkill", "Target", b1 =>
                         {
                             b1.Property<long>("DbStudyPlanId")
                                 .HasColumnType("INTEGER");
@@ -809,9 +837,9 @@ namespace advisor.Migrations
                     b.Navigation("University");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
+            modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbUserGame", "UserGame")
+                    b.HasOne("advisor.Persistence.DbPlayer", "UserGame")
                         .WithMany("Turns")
                         .HasForeignKey("UserGameId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -820,29 +848,29 @@ namespace advisor.Migrations
                     b.Navigation("UserGame");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbFaction", "Faction")
+                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
                         .WithMany("Units")
                         .HasForeignKey("FactionId");
 
-                    b.HasOne("atlantis.Persistence.DbRegion", "Region")
+                    b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany("Units")
                         .HasForeignKey("RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbStructure", "Structure")
+                    b.HasOne("advisor.Persistence.DbStructure", "Structure")
                         .WithMany("Units")
                         .HasForeignKey("StrcutureId");
 
-                    b.HasOne("atlantis.Persistence.DbTurn", "Turn")
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Units")
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("atlantis.Persistence.DbCapacity", "Capacity", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbCapacity", "Capacity", b1 =>
                         {
                             b1.Property<long>("DbUnitId")
                                 .HasColumnType("INTEGER");
@@ -867,7 +895,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("DbUnitId");
                         });
 
-                    b.OwnsOne("atlantis.Persistence.DbItem", "ReadyItem", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbItem", "ReadyItem", b1 =>
                         {
                             b1.Property<long>("DbUnitId")
                                 .HasColumnType("INTEGER");
@@ -887,7 +915,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("DbUnitId");
                         });
 
-                    b.OwnsOne("atlantis.Persistence.DbSkill", "CombatSpell", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbSkill", "CombatSpell", b1 =>
                         {
                             b1.Property<long>("DbUnitId")
                                 .HasColumnType("INTEGER");
@@ -909,7 +937,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("DbUnitId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbItem", "Items", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbItem", "Items", b1 =>
                         {
                             b1.Property<long>("UnitId")
                                 .HasColumnType("INTEGER");
@@ -928,7 +956,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("UnitId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbSkill", "CanStudy", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbSkill", "CanStudy", b1 =>
                         {
                             b1.Property<long>("UnitId")
                                 .HasColumnType("INTEGER");
@@ -950,7 +978,7 @@ namespace advisor.Migrations
                                 .HasForeignKey("UnitId");
                         });
 
-                    b.OwnsMany("atlantis.Persistence.DbSkill", "Skills", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbSkill", "Skills", b1 =>
                         {
                             b1.Property<long>("UnitId")
                                 .HasColumnType("INTEGER");
@@ -993,9 +1021,9 @@ namespace advisor.Migrations
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUniversity", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUniversity", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbGame", "Game")
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
                         .WithMany("Universities")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1004,28 +1032,28 @@ namespace advisor.Migrations
                     b.Navigation("Game");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUniversityUser", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUniversityMembership", b =>
                 {
-                    b.HasOne("atlantis.Persistence.DbUniversity", "University")
-                        .WithMany("UniversityUsers")
+                    b.HasOne("advisor.Persistence.DbPlayer", "Player")
+                        .WithOne("UniversityMembership")
+                        .HasForeignKey("advisor.Persistence.DbUniversityMembership", "PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbUniversity", "University")
+                        .WithMany("Members")
                         .HasForeignKey("UniversityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("atlantis.Persistence.DbUser", "User")
-                        .WithMany("UniversityUsers")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Player");
 
                     b.Navigation("University");
-
-                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUser", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUser", b =>
                 {
-                    b.OwnsMany("atlantis.Persistence.DbUserRole", "Roles", b1 =>
+                    b.OwnsMany("advisor.Persistence.DbUserRole", "Roles", b1 =>
                         {
                             b1.Property<long>("UserId")
                                 .HasColumnType("INTEGER");
@@ -1044,52 +1072,42 @@ namespace advisor.Migrations
                     b.Navigation("Roles");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUserGame", b =>
-                {
-                    b.HasOne("atlantis.Persistence.DbGame", "Game")
-                        .WithMany("UserGames")
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("atlantis.Persistence.DbUser", "User")
-                        .WithMany("UserGames")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Game");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbFaction", b =>
+            modelBuilder.Entity("advisor.Persistence.DbFaction", b =>
                 {
                     b.Navigation("Events");
 
                     b.Navigation("Units");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbGame", b =>
+            modelBuilder.Entity("advisor.Persistence.DbGame", b =>
                 {
                     b.Navigation("Universities");
 
                     b.Navigation("UserGames");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbRegion", b =>
+            modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
+                {
+                    b.Navigation("Reports");
+
+                    b.Navigation("Turns");
+
+                    b.Navigation("UniversityMembership");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
                 {
                     b.Navigation("Structures");
 
                     b.Navigation("Units");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbStructure", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
                     b.Navigation("Units");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbTurn", b =>
+            modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.Navigation("Events");
 
@@ -1106,30 +1124,21 @@ namespace advisor.Migrations
                     b.Navigation("Units");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUnit", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
                 {
                     b.Navigation("Plans");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUniversity", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUniversity", b =>
                 {
+                    b.Navigation("Members");
+
                     b.Navigation("Plans");
-
-                    b.Navigation("UniversityUsers");
                 });
 
-            modelBuilder.Entity("atlantis.Persistence.DbUser", b =>
+            modelBuilder.Entity("advisor.Persistence.DbUser", b =>
                 {
-                    b.Navigation("UniversityUsers");
-
-                    b.Navigation("UserGames");
-                });
-
-            modelBuilder.Entity("atlantis.Persistence.DbUserGame", b =>
-                {
-                    b.Navigation("Reports");
-
-                    b.Navigation("Turns");
+                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }

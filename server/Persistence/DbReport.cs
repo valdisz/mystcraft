@@ -29,7 +29,7 @@ namespace advisor.Persistence {
 
 
         [GraphQLIgnore]
-        public DbUserGame UserGame { get; set; }
+        public DbPlayer UserGame { get; set; }
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }

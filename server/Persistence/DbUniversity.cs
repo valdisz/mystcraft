@@ -9,16 +9,17 @@ namespace advisor.Persistence
         [Key]
         public long Id { get; set; }
 
+        [GraphQLIgnore]
         public long GameId { get; set; }
+
+        [Required]
+        public string Name { get; set; }
 
         [GraphQLIgnore]
         public List<DbStudyPlan> Plans { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbUser> Users { get; set; } = new ();
-
-        [GraphQLIgnore]
-        public List<DbUniversityUser> UniversityUsers { get; set; } = new ();
+        public List<DbUniversityMembership> Members { get; set; } = new ();
 
         [GraphQLIgnore]
         public DbGame Game { get; set; }

@@ -23,34 +23,46 @@ namespace advisor
         private readonly IMediator mediator;
         private readonly IIdSerializer idSerializer;
 
-        [Authorize(Policy = Roles.UserManager)]
+        [Authorize(Policy = Policies.UserManager)]
         public Task<DbUser> CreateUser(string email, string password) {
             return mediator.Send(new CreateUser(email, password));
         }
 
-        [Authorize(Policy = Roles.UserManager)]
+        [Authorize(Policy = Policies.UserManager)]
         public Task<DbUser> UpdateUserRoles([GraphQLType(typeof(RelayIdType))] string userId, string[] add, string[] remove) {
-            var id = ParseRelayId<long>("User", userId);
-
-            return mediator.Send(new UpdateUserRoles(id, add, remove));
+            return mediator.Send(new UpdateUserRoles(
+                ParseRelayId<long>("User", userId),
+                add,
+                remove
+            ));
         }
 
-        [Authorize(Policy = Roles.GameMaster)]
-        public async Task<DbGame> CreateGame(string name) {
-            var newGame = new DbGame  {
-                Name = name
-            };
-
-            await db.Games.AddAsync(newGame);
-            await db.SaveChangesAsync();
-
-            return newGame;
+        [Authorize(Policy = Policies.GameMaster)]
+        public Task<DbGame> CreateGame(string name) {
+            return mediator.Send(new CreateGame(name));
         }
 
-        public Task<DbUserGame> JoinGame([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string gameId) {
-            var id = ParseRelayId<long>("Game", gameId);
+        public Task<DbPlayer> JoinGame([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string gameId) {
+            return mediator.Send(new JoinGame(
+                currentUserId,
+                ParseRelayId<long>("Game", gameId)
+            ));
+        }
 
-            return mediator.Send(new JoinGame(id, currentUserId));
+        public Task<DbUniversity> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
+            return mediator.Send(new OpenUniversity(
+                currentUserId,
+                ParseRelayId<long>("Player", playerId),
+                name
+            ));
+        }
+
+        public Task<DbUniversity> JoinUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string universityId, [GraphQLType(typeof(RelayIdType))] string playerId) {
+            return mediator.Send(new JoinUniversity(
+                currentUserId,
+                ParseRelayId<long>("Player", playerId),
+                ParseRelayId<long>("University", universityId)
+            ));
         }
 
         private T ParseRelayId<T>(string typeName, string value) {
