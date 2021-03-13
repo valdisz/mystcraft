@@ -58,6 +58,12 @@ namespace atlantis.Persistence
                         }
                     );
 
+                t.OwnsMany(x => x.Roles, a => {
+                    a.WithOwner().HasForeignKey("UserId");
+                    a.ToTable("Users_Role");
+                    a.HasKey("UserId", nameof(DbUserRole.Role));
+                });
+
                 t.HasIndex(x => new { x.Email })
                     .IsUnique();
             });

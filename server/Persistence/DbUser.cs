@@ -28,6 +28,8 @@ namespace atlantis.Persistence
         [Required]
         public string Digest { get; set; }
 
+        public List<DbUserRole> Roles { get; set; } = new ();
+
 
         [GraphQLIgnore]
         public List<DbUserGame> UserGames { get; set; } = new ();

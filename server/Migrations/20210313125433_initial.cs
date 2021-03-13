@@ -90,6 +90,24 @@ namespace atlantis.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users_Role",
+                columns: table => new
+                {
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users_Role", x => new { x.UserId, x.Role });
+                    table.ForeignKey(
+                        name: "FK_Users_Role_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "University_User",
                 columns: table => new
                 {
@@ -688,6 +706,9 @@ namespace atlantis.Migrations
 
             migrationBuilder.DropTable(
                 name: "University_User");
+
+            migrationBuilder.DropTable(
+                name: "Users_Role");
 
             migrationBuilder.DropTable(
                 name: "Units");

@@ -8,6 +8,7 @@ namespace atlantis {
     using Microsoft.EntityFrameworkCore;
     using System.Security.Claims;
     using System;
+    using System.Linq;
 
     [AllowAnonymous]
     public class AccountController : ControllerBase {
@@ -38,10 +39,12 @@ namespace atlantis {
                 return Unauthorized();
             }
 
+            var roles = user.Roles.Select(x => new Claim(WellKnownClaimTypes.Role, x.Role));
+
             var identity = new ClaimsIdentity(new[] {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
                 new Claim(WellKnownClaimTypes.Email, user.Email),
-            }, "local");
+            }.Concat(roles), "local", null, WellKnownClaimTypes.Role);
 
             var principal = new ClaimsPrincipal(identity);
 

@@ -1,13 +1,14 @@
-namespace atlantis
-{
+namespace atlantis {
     using System;
-    using System.Security.Claims;
     using System.Threading.Tasks;
+    using atlantis.Features;
     using atlantis.Persistence;
     using HotChocolate;
     using HotChocolate.AspNetCore;
     using HotChocolate.Execution.Configuration;
     using HotChocolate.Types.Relay;
+    using MediatR;
+    using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -32,7 +33,11 @@ namespace atlantis
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options => Configuration.Bind("CookieSettings", options));
 
             services
-                .AddAuthorization();
+                .AddAuthorization(conf => {
+                    conf.AddPolicyAny(Roles.Root, Roles.Root);
+                    conf.AddPolicyAny(Roles.GameMaster, Roles.Root, Roles.GameMaster);
+                    conf.AddPolicyAny(Roles.UserManager, Roles.Root, Roles.UserManager);
+                });
 
             services
                 .AddLogging(builder => builder
@@ -81,27 +86,32 @@ namespace atlantis
                 )
                 .AddSingleton<IIdSerializer, IdSerializer>()
                 .AddSingleton<AccessControl>()
+                .AddMediatR(typeof(Startup))
                 .AddMvcCore()
                     .AddDataAnnotations()
                     .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
-            services.AddQueryRequestInterceptor((context, builder, ct) => {
-                if (context.User.Identity.IsAuthenticated) {
-                    var userId = long.Parse(context.User.FindFirst(WellKnownClaimTypes.UserId).Value);
-                    var userName = context.User.FindFirst(WellKnownClaimTypes.Email).Value;
-
-                    builder.AddProperty("currentUserId", userId);
-                    builder.AddProperty("currentUserName", userName);
+            services.AddQueryRequestInterceptor(async (context, builder, ct) => {
+                if (!context.User.Identity.IsAuthenticated) {
+                    return;
                 }
 
-                return Task.CompletedTask;
+                var userId = context.User.FindFirst(WellKnownClaimTypes.UserId)?.Value;
+                if (userId == null) {
+                    await context.SignOutAsync();
+                    return;
+                }
+
+                builder.AddProperty("currentUserId", long.Parse(userId));
+                builder.AddProperty("currentUserEmail", context.User.FindFirst(WellKnownClaimTypes.Email)?.Value);
             });
         }
 
         public void Configure(IApplicationBuilder app, IServiceProvider services) {
-            using var scope = services.CreateScope();
-            var db = scope.ServiceProvider.GetService<Database>();
-            db.Database.Migrate();
+            Task.Run(async () => {
+                using var scope = services.CreateScope();
+                await BeforeStartAsync(scope.ServiceProvider);
+            }).Wait();
 
             app
                 .UseDeveloperExceptionPage()
@@ -114,6 +124,20 @@ namespace atlantis
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
                 });
+        }
+
+        public async Task BeforeStartAsync(IServiceProvider services) {
+            var db = services.GetService<Database>();
+            await db.Database.MigrateAsync();
+
+            if (! await db.Users.AnyAsync()) {
+                var mediator = services.GetService<IMediator>();
+
+                var email = Configuration.GetValue<string>("Seed:Email");
+                var password = Configuration.GetValue<string>("Seed:Password");
+
+                await mediator.Send(new CreateUser(email, password, Roles.Root));
+            }
         }
     }
 }

@@ -1023,6 +1023,27 @@ namespace atlantis.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("atlantis.Persistence.DbUser", b =>
+                {
+                    b.OwnsMany("atlantis.Persistence.DbUserRole", "Roles", b1 =>
+                        {
+                            b1.Property<long>("UserId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Role")
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("UserId", "Role");
+
+                            b1.ToTable("Users_Role");
+
+                            b1.WithOwner()
+                                .HasForeignKey("UserId");
+                        });
+
+                    b.Navigation("Roles");
+                });
+
             modelBuilder.Entity("atlantis.Persistence.DbUserGame", b =>
                 {
                     b.HasOne("atlantis.Persistence.DbGame", "Game")

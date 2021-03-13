@@ -21,6 +21,7 @@
                 .ConfigureAppConfiguration(conf => {
                     conf
                         .AddJsonFile("appsettings.json")
+                        .AddEnvironmentVariables("ADVISOR_")
                         .AddCommandLine(args);
                 })
                 .UseStartup<Startup>()

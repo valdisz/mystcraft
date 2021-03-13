@@ -1,33 +1,39 @@
 namespace atlantis
 {
     using System.Threading.Tasks;
+    using atlantis.Features;
+    using HotChocolate.AspNetCore.Authorization;
+    using HotChocolate.Types.Relay;
+    using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
+    [Authorize]
     public class Mutation {
-        public Mutation(Database db, AccessControl accessControl) {
+        public Mutation(Database db, IMediator mediator, IIdSerializer idSerializer) {
             this.db = db;
-            this.accessControl = accessControl;
+            this.mediator = mediator;
+            this.idSerializer = idSerializer;
         }
 
         private readonly Database db;
-        private readonly AccessControl accessControl;
+        private readonly IMediator mediator;
+        private readonly IIdSerializer idSerializer;
 
-        public async Task<DbUser> CreateUser(string email, string password) {
-            var salt = accessControl.GetSalt();
-            var digest = accessControl.ComputeDigest(salt, password);
-
-            var user = await db.Users.AddAsync(new DbUser {
-                Email = email,
-                Algorithm = DigestAlgorithm.SHA256,
-                Salt = salt,
-                Digest = digest
-            });
-            await db.SaveChangesAsync();
-
-            return user.Entity;
+        [Authorize(Policy = Roles.UserManager)]
+        public Task<DbUser> CreateUser(string email, string password) {
+            return mediator.Send(new CreateUser(email, password));
         }
 
+        [Authorize(Policy = Roles.UserManager)]
+        public Task<DbUser> UpdateUserRoles(string userId, string[] add, string[] remove) {
+            var id = idSerializer.Deserialize(userId);
+            if (id.TypeName != "User") return null;
+
+            return mediator.Send(new UpdateUserRoles((long) id.Value, add, remove));
+        }
+
+        [Authorize(Policy = Roles.GameMaster)]
         public async Task<DbGame> CreateGame(string name) {
             var newGame = new DbGame  {
                 Name = name
@@ -39,6 +45,7 @@ namespace atlantis
             return newGame;
         }
 
+        [Authorize(Policy = Roles.GameMaster)]
         public async Task<string> DeleteGame(long id)  {
             var game = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
             if (game != null) {

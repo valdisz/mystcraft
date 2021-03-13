@@ -9,6 +9,7 @@ namespace atlantis {
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
 
+    [Authorize]
     public class Query {
         public Query(Database db) {
             this.db = db;
@@ -19,19 +20,18 @@ namespace atlantis {
         public Task<List<DbGame>> Games() => db.Games.ToListAsync();
 
         [UsePaging]
+        [Authorize(Policy = Roles.UserManager)]
         public IQueryable<DbUser> Users() {
             return db.Users;
         }
 
-        [Authorize]
         public async Task<DbUser> Me([GlobalState] long currentUserId) {
             return await db.Users.FindAsync(currentUserId);
         }
     }
 
     public class QueryType : ObjectType<Query> {
-        protected override void Configure(IObjectTypeDescriptor<Query> descriptor)
-        {
+        protected override void Configure(IObjectTypeDescriptor<Query> descriptor) {
         }
     }
 }

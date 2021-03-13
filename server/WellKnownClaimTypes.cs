@@ -1,9 +1,7 @@
-namespace atlantis
-{
-    using System.Security.Claims;
-
+namespace atlantis {
     public static class WellKnownClaimTypes {
-        public const string UserId = ClaimTypes.Sid;
-        public const string Email = ClaimTypes.Email;
+        public const string UserId = "advisor.id";
+        public const string Email = "advisor.email";
+        public const string Role = "advisor.role";
     }
 }

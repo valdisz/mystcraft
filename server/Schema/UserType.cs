@@ -1,5 +1,4 @@
-namespace atlantis
-{
+namespace atlantis {
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
@@ -15,5 +14,13 @@ namespace atlantis
                         .SingleOrDefaultAsync(x => x.Id == id);
                 });
         }
+    }
+
+    [ExtendObjectType(Name = "User")]
+    public class UserResolvers {
+        public UserResolvers(Database db) {
+        }
+
+        private readonly Database db;
     }
 }
