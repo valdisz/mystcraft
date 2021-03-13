@@ -6,7 +6,7 @@
   "scripts": {
     "build": "parcel build src/index.html --no-source-maps",
     "build:debug": "parcel build src/index.html",
-    "start": "parcel src/index.html",
+    "start": "node proxy.js",
     "codegen": "graphql-codegen --config codegen.yaml",
     "terrain:advisor": "spritesheet-js -n terrain-advisor -p assets -f pixi.js src/assets/terrain/advisor/*.png",
     "terrain:fantasy": "spritesheet-js -n terrain-fantasy -p assets -f pixi.js src/assets/terrain/fantasy/*.png",
@@ -43,6 +43,8 @@
     "@types/react-router": "^5.1.8",
     "@types/react-router-dom": "^5.1.5",
     "@types/styled-components": "^5.1.2",
+    "express": "^4.17.1",
+    "http-proxy-middleware": "^1.0.6",
     "graphql": "15.5.0",
     "graphql-cli": "^4.0.0",
     "parcel-bundler": "^1.12.4",

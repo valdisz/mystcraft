@@ -4,10 +4,15 @@ import { BrowserRouter} from 'react-router-dom'
 import 'regenerator-runtime/runtime.js'
 
 import { App } from './app'
+import { Authenticate } from './auth'
 
-const RoutedApp = () => <BrowserRouter>
-    <App />
-</BrowserRouter>;
+const RoutedApp = () => (
+    <Authenticate>
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
+    </Authenticate>
+)
 
 const host = document.getElementById('app-host');
 
