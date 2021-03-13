@@ -1,4 +1,4 @@
-namespace atlantis {
+namespace advisor {
     public static class WellKnownClaimTypes {
         public const string UserId = "advisor.id";
         public const string Email = "advisor.email";

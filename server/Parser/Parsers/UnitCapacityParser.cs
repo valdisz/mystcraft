@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     // Capacity: 0/0/45/0
     public class UnitCapacityParser : BaseParser {

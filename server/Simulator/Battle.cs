@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace atlantis.Simulator {
+namespace advisor.Simulator {
     public enum AttackType {
         Piercing,
         Slashing,

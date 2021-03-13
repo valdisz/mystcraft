@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace atlantis
+namespace advisor
 {
     // Skills: endurance [ENDU] 1 (30)
     // Skills: fire [FIRE] 1 (30), earthquake [EQUA] 1 (30)

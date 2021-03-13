@@ -1,4 +1,4 @@
-namespace atlantis.Model
+namespace advisor.Model
 {
     public class JSkillReport {
         public JSkill Skill { get; set; }

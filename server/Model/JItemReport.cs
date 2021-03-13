@@ -1,4 +1,4 @@
-namespace atlantis.Model
+namespace advisor.Model
 {
     public class JItemReport {
         public JItem Item { get; set; }

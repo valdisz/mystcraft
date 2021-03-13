@@ -1,4 +1,4 @@
-﻿// namespace atlantis.facts {
+﻿// namespace advisor.facts {
 //     using System;
 //     using Xunit;
 //     using atlantis;

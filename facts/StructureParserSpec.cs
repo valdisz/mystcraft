@@ -1,4 +1,4 @@
-namespace atlantis.facts {
+namespace advisor.facts {
     using Xunit;
 
     public class StructureParserSpec {

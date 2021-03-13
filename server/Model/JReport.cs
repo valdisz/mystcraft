@@ -1,4 +1,4 @@
-namespace atlantis.Model
+namespace advisor.Model
 {
     public class JReport {
         public JFaction Faction { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace atlantis
+﻿namespace advisor
 {
     // (0,0,nexus)
     // (12,34)

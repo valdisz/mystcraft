@@ -1,12 +1,15 @@
-namespace atlantis
+namespace advisor
 {
+    using System;
     using System.Threading.Tasks;
-    using atlantis.Features;
+    using advisor.Features;
+    using HotChocolate;
     using HotChocolate.AspNetCore.Authorization;
     using HotChocolate.Types.Relay;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
     using Persistence;
+
+    using RelayIdType = HotChocolate.Types.NonNullType<HotChocolate.Types.IdType>;
 
     [Authorize]
     public class Mutation {
@@ -26,11 +29,10 @@ namespace atlantis
         }
 
         [Authorize(Policy = Roles.UserManager)]
-        public Task<DbUser> UpdateUserRoles(string userId, string[] add, string[] remove) {
-            var id = idSerializer.Deserialize(userId);
-            if (id.TypeName != "User") return null;
+        public Task<DbUser> UpdateUserRoles([GraphQLType(typeof(RelayIdType))] string userId, string[] add, string[] remove) {
+            var id = ParseRelayId<long>("User", userId);
 
-            return mediator.Send(new UpdateUserRoles((long) id.Value, add, remove));
+            return mediator.Send(new UpdateUserRoles(id, add, remove));
         }
 
         [Authorize(Policy = Roles.GameMaster)]
@@ -45,17 +47,20 @@ namespace atlantis
             return newGame;
         }
 
-        [Authorize(Policy = Roles.GameMaster)]
-        public async Task<string> DeleteGame(long id)  {
-            var game = await db.Games.FirstOrDefaultAsync(x => x.Id == id);
-            if (game != null) {
-                db.Games.Remove(game);
-                await db.SaveChangesAsync();
+        public Task<DbUserGame> JoinGame([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string gameId) {
+            var id = ParseRelayId<long>("Game", gameId);
 
-                return "deleted";
+            return mediator.Send(new JoinGame(id, currentUserId));
+        }
+
+        private T ParseRelayId<T>(string typeName, string value) {
+            var id = idSerializer.Deserialize(value);
+
+            if (id.TypeName != typeName) {
+                throw new ArgumentException($"Expected ID of type {typeName}, but got {id.TypeName}");
             }
 
-            return "not found";
+            return (T) Convert.ChangeType(id.Value, typeof(T));
         }
     }
 }

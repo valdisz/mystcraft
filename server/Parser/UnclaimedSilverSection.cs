@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     using System.Threading.Tasks;
     using Newtonsoft.Json;

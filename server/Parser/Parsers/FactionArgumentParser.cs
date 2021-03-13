@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     // War 1
     // Trade 1

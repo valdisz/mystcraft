@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     // forest (50,22) in Mapa, contains Sembury [village], 5866 peasants (high elves), $2698.
     // ocean (2,6) in Atlantis Ocean.

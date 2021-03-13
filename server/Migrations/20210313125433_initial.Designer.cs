@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using atlantis.Persistence;
+using advisor.Persistence;
 
-namespace atlantis.Migrations
+namespace advisor.Migrations
 {
     [DbContext(typeof(Database))]
     [Migration("20210313125433_initial")]

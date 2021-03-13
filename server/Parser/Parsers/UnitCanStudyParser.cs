@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace atlantis
+namespace advisor
 {
     // Can Study: endurance [ENDU]
     // Can Study: fire [FIRE], earthquake [EQUA], force shield [FSHI], energy shield [ESHI], spirit shield [SSHI], magical healing [MHEA], gate lore [GATE], farsight [FARS], mind reading [MIND], weather lore [WEAT], wolf lore [WOLF], necromancy [NECR], demon lore [DEMO], phantasmal entertainment [PHEN], create phantasmal beasts [PHBE], create phantasmal undead [PHUN], create phantasmal demons [PHDE], invisibility [INVI], true seeing [TRUE], dispel illusions [DISP], enchant swords [ESWO], enchant armor [EARM], enchant shields [ESHD], create cornucopia [CRCO], transmutation [TRNS]

@@ -1,4 +1,4 @@
-namespace atlantis.Model
+namespace advisor.Model
 {
     public class JAttitudes {
         public Attitude Default { get; set; }

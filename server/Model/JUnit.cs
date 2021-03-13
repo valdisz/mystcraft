@@ -1,4 +1,4 @@
-namespace atlantis.Model
+namespace advisor.Model
 {
     public class JUnit {
         public bool Own { get; set; }

@@ -1,4 +1,4 @@
-namespace atlantis.Simulator
+namespace advisor.Simulator
 {
     public class Weapon {
         public Weapon(AttackType type, WeaponLength length, int attacks, int cooldown, bool riding, int attack, int defense) {

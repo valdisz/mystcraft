@@ -1,4 +1,4 @@
-namespace atlantis.Persistence {
+namespace advisor.Persistence {
     using HotChocolate;
 
     [GraphQLName("UniversityUser")]

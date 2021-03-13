@@ -1,7 +1,7 @@
-namespace atlantis.Persistence
+namespace advisor.Persistence
 {
     using System.ComponentModel.DataAnnotations;
-    using atlantis.Model;
+    using advisor.Model;
     using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 

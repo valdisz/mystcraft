@@ -1,8 +1,8 @@
-namespace atlantis {
+namespace advisor {
     using System;
     using System.Threading.Tasks;
-    using atlantis.Features;
-    using atlantis.Persistence;
+    using advisor.Features;
+    using advisor.Persistence;
     using HotChocolate;
     using HotChocolate.AspNetCore;
     using HotChocolate.Execution.Configuration;
@@ -10,6 +10,7 @@ namespace atlantis {
     using MediatR;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc;
@@ -29,11 +30,26 @@ namespace atlantis {
 
         public void ConfigureServices(IServiceCollection services) {
             services
-                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options => Configuration.Bind("CookieSettings", options));
+                .AddSingleton<IApiKeyStore, ConfigurationApiKeyStore>()
+                .ConfigureApiKeys(Configuration)
+                .ConfigureApplicationCookie(options => Configuration.Bind("CookieSettings", options));
+
+            services
+                .AddAuthentication()
+                .AddApiKeys()
+                .AddCookie();
 
             services
                 .AddAuthorization(conf => {
+                    var builder = new AuthorizationPolicyBuilder(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        ApiKeyDefaults.AuthenticationScheme
+                    );
+                    builder.RequireAuthenticatedUser();
+
+                    conf.DefaultPolicy = builder.Build();
+                    conf.FallbackPolicy = conf.DefaultPolicy;
+
                     conf.AddPolicyAny(Roles.Root, Roles.Root);
                     conf.AddPolicyAny(Roles.GameMaster, Roles.Root, Roles.GameMaster);
                     conf.AddPolicyAny(Roles.UserManager, Roles.Root, Roles.UserManager);
@@ -62,6 +78,7 @@ namespace atlantis {
                     .EnableRelaySupport()
                     .AddAuthorizeDirectiveType()
                     .AddType<UserType>()
+                        .AddType<UserResolvers>()
                     .AddType<GameType>()
                         .AddType<GameResolvers>()
                     .AddType<UserGameType>()
@@ -98,7 +115,6 @@ namespace atlantis {
 
                 var userId = context.User.FindFirst(WellKnownClaimTypes.UserId)?.Value;
                 if (userId == null) {
-                    await context.SignOutAsync();
                     return;
                 }
 
@@ -120,7 +136,7 @@ namespace atlantis {
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseGraphQL("/graphql")
-                .UsePlayground("/graphql")
+                // .UsePlayground("/graphql")
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
                 });

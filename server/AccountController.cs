@@ -1,14 +1,15 @@
-namespace atlantis {
+namespace advisor {
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Authentication;
-    using atlantis.Persistence;
+    using advisor.Persistence;
     using Microsoft.EntityFrameworkCore;
     using System.Security.Claims;
     using System;
     using System.Linq;
+    using Microsoft.AspNetCore.Authentication.Cookies;
 
     [AllowAnonymous]
     public class AccountController : ControllerBase {
@@ -44,11 +45,11 @@ namespace atlantis {
             var identity = new ClaimsIdentity(new[] {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
                 new Claim(WellKnownClaimTypes.Email, user.Email),
-            }.Concat(roles), "local", null, WellKnownClaimTypes.Role);
+            }.Concat(roles), CookieAuthenticationDefaults.AuthenticationScheme, null, WellKnownClaimTypes.Role);
 
             var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(principal);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             var returnTo = new Uri(returnUrl ?? Url.Content("~/"));
             return Redirect(returnTo.PathAndQuery);

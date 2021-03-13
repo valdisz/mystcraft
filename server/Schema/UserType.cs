@@ -1,4 +1,8 @@
-namespace atlantis {
+namespace advisor {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using HotChocolate;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
@@ -22,5 +26,11 @@ namespace atlantis {
         }
 
         private readonly Database db;
+
+        public Task<List<DbUserGame>> GetGames([Parent] DbUser user) {
+            return db.UserGames
+                .Where(x => x.UserId == user.Id)
+                .ToListAsync();
+        }
     }
 }

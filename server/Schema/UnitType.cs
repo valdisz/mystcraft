@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;

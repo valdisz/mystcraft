@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     public class ReportFactionParser : BaseParser {
         public ReportFactionParser(FactionNameParser factionName, FactionArgumentParser argumentParser) {

@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     using Microsoft.AspNetCore.Authorization;
 

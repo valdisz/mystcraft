@@ -1,6 +1,6 @@
-namespace atlantis
+namespace advisor
 {
-    using atlantis.Persistence;
+    using advisor.Persistence;
     using AutoMapper;
 
     public class MappingProfile : Profile {

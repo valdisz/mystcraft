@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     public class LocationParser : BaseParser {
         public LocationParser(CoordsParser coordsParser) {

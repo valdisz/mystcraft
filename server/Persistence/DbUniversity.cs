@@ -1,4 +1,4 @@
-namespace atlantis.Persistence
+namespace advisor.Persistence
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;

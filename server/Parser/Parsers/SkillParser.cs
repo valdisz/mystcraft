@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     // combat [COMB] 1 (31)
     public class SkillParser : BaseParser {

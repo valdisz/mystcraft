@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     // Weight: 30
     public class UnitWeightParser : BaseParser {

@@ -1,8 +1,8 @@
-namespace atlantis.Features {
+namespace advisor.Features {
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using atlantis.Persistence;
+    using advisor.Persistence;
     using MediatR;
 
     public record CreateUser(string Email, string Password, params string[] Roles) : IRequest<DbUser> {

@@ -1,4 +1,4 @@
-namespace atlantis {
+namespace advisor {
     public class RegionGateParser : BaseParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var gate = p

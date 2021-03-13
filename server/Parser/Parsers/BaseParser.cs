@@ -1,4 +1,4 @@
-namespace atlantis {
+namespace advisor {
     public interface IReportParser {
         Maybe<IReportNode> Parse(TextParser p);
     }

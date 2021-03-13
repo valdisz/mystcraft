@@ -1,6 +1,6 @@
-namespace atlantis.Persistence
+namespace advisor.Persistence
 {
-    using atlantis.Model;
+    using advisor.Model;
     using Microsoft.EntityFrameworkCore;
     using HotChocolate;
 

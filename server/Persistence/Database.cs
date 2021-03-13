@@ -1,8 +1,8 @@
-namespace atlantis.Persistence
+namespace advisor.Persistence
 {
     using System;
     using System.Collections.Generic;
-    using atlantis.Model;
+    using advisor.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
     using Newtonsoft.Json;

@@ -1,4 +1,4 @@
-namespace atlantis.Persistence {
+namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 

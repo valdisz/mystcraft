@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace atlantis.Simulator
+namespace advisor.Simulator
 {
     public class Armor {
         public Armor(params (AttackType, int)[] protection) {

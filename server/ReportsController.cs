@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@ namespace atlantis
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using atlantis.Persistence;
+    using advisor.Persistence;
     using HotChocolate.Types.Relay;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;

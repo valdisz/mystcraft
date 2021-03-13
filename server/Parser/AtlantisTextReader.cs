@@ -1,4 +1,4 @@
-namespace atlantis {
+namespace advisor {
     using System;
     using System.Collections.Generic;
     using System.IO;

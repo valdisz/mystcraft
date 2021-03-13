@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     // high elf [HELF]
     // 2 high elves [HELF]

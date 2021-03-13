@@ -1,4 +1,4 @@
-namespace atlantis.Persistence
+namespace advisor.Persistence
 {
     using System.IO;
     using Microsoft.EntityFrameworkCore;

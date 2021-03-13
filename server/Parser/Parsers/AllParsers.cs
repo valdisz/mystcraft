@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     public static class AllParsers {
         public static readonly FactionNameParser FactionName = new FactionNameParser();

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace atlantis
+namespace advisor
 {
     public class RegionPropsParser : BaseParser {
         public RegionPropsParser(ItemParser itemParser) {

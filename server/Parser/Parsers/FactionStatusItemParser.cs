@@ -1,4 +1,4 @@
-namespace atlantis
+namespace advisor
 {
     public class FactionStatusItemParser : BaseParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {

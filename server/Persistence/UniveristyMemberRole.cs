@@ -1,4 +1,4 @@
-namespace atlantis.Persistence {
+namespace advisor.Persistence {
     public enum UniveristyMemberRole {
         Owner,
         Teacher,
