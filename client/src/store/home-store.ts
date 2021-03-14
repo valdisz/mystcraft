@@ -1,6 +1,8 @@
 import { action, makeObservable, observable, runInAction, transaction } from 'mobx'
 import { CLIENT } from '../client'
-import { GameListItemFragment, GetGamesQuery, GetGames, NewGame, NewGameMutation, NewGameMutationVariables } from '../schema'
+import { GameListItemFragment, GetGamesQuery, GetGames } from '../schema'
+import { CreateGame, CreateGameMutation, CreateGameMutationVariables } from '../schema'
+import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
 import { NewGameStore } from './new-game-store'
 
 export class HomeStore {
@@ -23,15 +25,15 @@ export class HomeStore {
     readonly newGame = new NewGameStore()
 
     confirmNewGame = async () => {
-        const response = await CLIENT.mutate<NewGameMutation, NewGameMutationVariables>({
-            mutation: NewGame,
+        const response = await CLIENT.mutate<CreateGameMutation, CreateGameMutationVariables>({
+            mutation: CreateGame,
             variables: {
                 name: this.newGame.name
             }
         });
 
         transaction(() => {
-            this.games.push(response.data.newGame);
+            this.games.push(response.data.createGame);
             this.newGame.cancel();
         });
     };
@@ -57,13 +59,23 @@ export class HomeStore {
             reports.append('report', f)
         }
 
-        await fetch(`http://localhost:5000/report/${this.uploadGameId}`, {
+        await fetch(`/report/${this.uploadGameId}`, {
             method: 'POSt',
-            body: reports
+            body: reports,
+            credentials: 'include'
         })
         event.target.value = null;
 
         this.load()
         runInAction(() => this.uploading = false)
+    }
+
+    joinGame = async (gameId: string) => {
+        const response = await CLIENT.mutate<JoinGameMutation, JoinGameMutationVariables>({
+            mutation: JoinGame,
+            variables: { gameId }
+        });
+
+        this.load();
     }
 }

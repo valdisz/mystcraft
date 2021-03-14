@@ -1,9 +1,0 @@
-fragment GameListItem on Game {
-  id
-  name
-  rulesetName
-  rulesetVersion
-  playerFactionNumber
-  playerFactionName
-  lastTurnNumber
-}

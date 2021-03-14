@@ -197,4 +197,15 @@ export class HexMap {
 
         this.renderer.render(this.root);
     }
+
+    centerAt(col: number, row: number) {
+        const p = this.layout.hexToPixel(new DoubledCoord(col, row));
+        const w = this.viewport.width
+        const h = this.viewport.height
+
+        this.viewport.setOffset(new PIXI.Point(
+            w / 2 - p.x,
+            h / 2 - p.y
+        ))
+    }
 }

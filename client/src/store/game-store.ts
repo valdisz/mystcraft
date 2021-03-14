@@ -19,15 +19,15 @@ export class GameStore {
 
     @observable loading = true
 
-    @observable lastTurnNumber: number
     @observable name: string
-    @observable password: string
-    @observable playerFactionName: string
-    @observable playerFactionNumber: number
-    turns: IObservableArray<TurnSummaryFragment> = observable([])
     @observable rulesetName: string
     @observable rulesetVersion: string
 
+    @observable lastTurnNumber: number
+    @observable factionName: string
+    @observable factionNumber: number
+
+    turns: IObservableArray<TurnSummaryFragment> = observable([])
     @observable turn: TurnSummaryFragment
 
     world: World
@@ -42,11 +42,20 @@ export class GameStore {
             }
         })
 
-        const { turns, ...game } = response.data.node
+        const { myPlayer, ...game } = response.data.node
+        const { turns, lastTurnNumber } = myPlayer
+
         runInAction(() => {
-            Object.assign(this, game);
+            this.name = game.name
+            this.rulesetName = game.rulesetName
+            this.rulesetVersion = game.rulesetVersion
+
+            this.factionName = myPlayer.factionName
+            this.factionNumber = myPlayer.factionNumber
+            this.lastTurnNumber = lastTurnNumber
+
             this.turns.replace(turns)
-            this.turn = turns.find(x => x.number == game.lastTurnNumber)
+            this.turn = turns.find(x => x.number == lastTurnNumber)
         })
 
         // find latest turn

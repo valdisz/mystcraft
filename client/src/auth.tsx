@@ -2,6 +2,7 @@ import * as React from 'react'
 import gql from 'graphql-tag'
 import { CLIENT } from './client'
 import { SignIn } from './components'
+import { ApolloError } from 'apollo-client'
 
 export interface AuthenticateProps {
 }
@@ -17,8 +18,11 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
         })
             .then(result => {
                 setNeedsSignIn(false)
-            }, err => {
-                setNeedsSignIn(!!err.graphQLErrors.find(x => x.extensions['code'] === 'AUTH_NOT_AUTHORIZED'))
+            }, (err: ApolloError) => {
+                const is401 = (err.networkError as any).statusCode === 401
+                const isNotAuthorized = !!err.graphQLErrors.find(x => x.extensions['code'] === 'AUTH_NOT_AUTHORIZED')
+
+                setNeedsSignIn(is401 || isNotAuthorized)
             })
             .finally(() => {
                 setLoading(false)

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core'
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -79,6 +79,8 @@ interface GameMapProps {
 }
 
 function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
+    const { game } = useStore()
+
     const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
     const gameMapRef = React.useRef<HexMap>(null)
 
@@ -86,15 +88,19 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
         if (!canvasRef) return
 
         if (!gameMapRef.current) {
-            gameMapRef.current = new HexMap(canvasRef, { width: 56, height: 56 }, getRegion)
+            gameMapRef.current = new HexMap(canvasRef, { width: 72, height: 96 }, getRegion)
 
-             gameMapRef.current.onRegionSelected = onRegionSelected
+            gameMapRef.current.onRegionSelected = onRegionSelected
         }
 
         const gameMap = gameMapRef.current
         gameMap
             .load()
-            .then(() => gameMap.update())
+            .then(() => {
+                const { x, y } = game.world.levels[1].regions[0].coords
+                gameMap.centerAt(x, y)
+                gameMap.update()
+            })
     }, [ canvasRef ])
 
     return <MapContainer>
@@ -206,7 +212,7 @@ const GameComponent = observer(() => {
                 </IconButton>
                 <Typography variant='h6'>{ game.name }</Typography>
                 <GameInfo>
-                    <Typography variant='subtitle2'>{ game.playerFactionName } [{ game.playerFactionNumber }]</Typography>
+                    <Typography variant='subtitle2'>{ game.factionName } [{ game.factionNumber }]</Typography>
                 </GameInfo>
                 <GameInfo>
                     <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>

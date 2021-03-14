@@ -52,6 +52,7 @@ namespace advisor {
                     conf.AddPolicyAnyRole(Policies.Root, Roles.Root);
                     conf.AddPolicyAnyRole(Policies.GameMasters, Roles.Root, Roles.GameMaster);
                     conf.AddPolicyAnyRole(Policies.UserManagers, Roles.Root, Roles.UserManager);
+                    conf.AddOwnPlayerPolicy();
                 });
 
             services

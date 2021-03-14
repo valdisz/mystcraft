@@ -23,7 +23,7 @@ namespace advisor {
         private readonly IIdSerializer relayId;
         private readonly IMediator mediator;
 
-        [HttpPost("{gameId}")]
+        [HttpPost("{playerId}")]
         public async Task<IActionResult> UploadReports([Required, FromRoute] string playerId) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (Request.Form.Files.Count == 0) return UnprocessableEntity();

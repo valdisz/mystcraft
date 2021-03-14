@@ -149,11 +149,6 @@ fragment Item on Item {
   amount
 }
 
-fragment Item on Item {
-  code
-  amount
-}
-
 fragment TradableItem on TradableItem {
   code
   price

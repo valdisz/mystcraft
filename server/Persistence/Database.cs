@@ -211,10 +211,6 @@ namespace advisor.Persistence
                 t.Property(p => p.Flags)
                     .HasConversion(new JsonListConverter<string>());
 
-                t.HasOne(p => p.Plan)
-                    .WithOne(p => p.Unit)
-                    .HasForeignKey<DbStudyPlan>(p => p.UnitId);
-
                 t.OwnsMany(p => p.Items, a => {
                     a.WithOwner().HasForeignKey("UnitId");
                     a.ToTable("Unit_Items");
@@ -255,6 +251,10 @@ namespace advisor.Persistence
                     .HasConversion(new JsonListConverter<long>());
 
                 t.OwnsOne(p => p.Target);
+
+                t.HasOne(p => p.Unit)
+                    .WithOne(p => p.Plan)
+                    .HasForeignKey<DbStudyPlan>(p => p.UnitId);
             });
 
             model.Entity<DbUniversityMembership>(t => {

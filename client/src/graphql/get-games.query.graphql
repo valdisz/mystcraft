@@ -3,3 +3,28 @@ query GetGames {
     ...GameListItem
   }
 }
+
+fragment GameListItem on Game {
+  id
+  name
+  rulesetName
+  rulesetVersion
+  myPlayer {
+    ...PlayerItem
+  }
+  myUniversity {
+    ...UniverisyItem
+  }
+}
+
+fragment PlayerItem on Player {
+  id
+  factionNumber
+  factionName
+  lastTurnNumber
+}
+
+fragment UniverisyItem on University {
+  id
+  name
+}

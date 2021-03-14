@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import GrainIcon from '@material-ui/icons/Grain';
 import { useStore } from '../store'
 import { SplitButton } from '../components'
-import { GameListItemFragment } from '../schema'
+import { GameListItemFragment, PlayerItemFragment } from '../schema'
 
 function NoGames() {
     return <ListItem>
@@ -70,6 +70,19 @@ function Ruleset({ name, version}) {
     </span>
 }
 
+function GamePlayer({ factionName, factionNumber, lastTurnNumber }: PlayerItemFragment) {
+    return <ListItemText>
+        <UnstyledList>
+            <li>
+                <strong>Faction</strong> <Faction name={factionName} number={factionNumber} />
+            </li>
+            <li>
+                <strong>Turn</strong> {lastTurnNumber}
+            </li>
+        </UnstyledList>
+    </ListItemText>
+}
+
 function GameItem({ game }: GameItemProps) {
     const { home } = useStore()
     return <ListItem button component={Link} to={`/game/${game.id}`} >
@@ -79,19 +92,14 @@ function GameItem({ game }: GameItemProps) {
         <ListItemText
             primary={<Game name={game.name} />}
             secondary={<Ruleset name={game.rulesetName} version={game.rulesetVersion} />} />
-        <ListItemText>
-            <UnstyledList>
-                <li>
-                    <strong>Faction</strong> <Faction name={game.playerFactionName} number={game.playerFactionNumber} />
-                </li>
-                <li>
-                    <strong>Turn</strong> {game.lastTurnNumber}
-                </li>
-            </UnstyledList>
-        </ListItemText>
+
+        { game.myPlayer && <GamePlayer {...game.myPlayer} />}
+
         <ListItemSecondaryAction>
             <Observer>
-                {() => <GameActions disabled={home.uploading} onUpload={() => home.triggerUploadReport(game.id)} onDelete={() => {}} /> }
+                {() => game.myPlayer
+                    ? <GameActions disabled={home.uploading} onUpload={() => home.triggerUploadReport(game.myPlayer.id)} onDelete={() => {}} />
+                    : <Button color='primary' size='small' variant='outlined' onClick={() => home.joinGame(game.id)}>Join</Button> }
             </Observer>
         </ListItemSecondaryAction>
     </ListItem>

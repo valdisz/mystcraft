@@ -18,33 +18,53 @@ export type Scalars = {
 };
 
 
+
 /** The node interface is implemented by entities that have a global unique identifier. */
 export type Node = {
   id: Scalars['ID'];
 };
 
+export type User = Node & {
+  email: Scalars['String'];
+  id: Scalars['ID'];
+  players?: Maybe<Array<Maybe<Player>>>;
+  roles?: Maybe<Array<Maybe<UserRole>>>;
+};
+
 export type Game = Node & {
   engineVersion?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
-  lastTurnNumber: Scalars['Int'];
+  myPlayer?: Maybe<Player>;
+  myUniversity?: Maybe<University>;
   name: Scalars['String'];
-  password?: Maybe<Scalars['String']>;
-  playerFactionName?: Maybe<Scalars['String']>;
-  playerFactionNumber?: Maybe<Scalars['Int']>;
-  reports?: Maybe<Array<Maybe<Report>>>;
+  players?: Maybe<Array<Maybe<Player>>>;
+  remoteGameOptions?: Maybe<Scalars['String']>;
   rulesetName?: Maybe<Scalars['String']>;
   rulesetVersion?: Maybe<Scalars['String']>;
+  type: GameType;
+  universities?: Maybe<Array<Maybe<University>>>;
+};
+
+export type Player = Node & {
+  factionName?: Maybe<Scalars['String']>;
+  factionNumber?: Maybe<Scalars['Int']>;
+  game?: Maybe<Game>;
+  id: Scalars['ID'];
+  lastTurnNumber: Scalars['Int'];
+  password?: Maybe<Scalars['String']>;
+  reports?: Maybe<Array<Maybe<Report>>>;
   turnByNumber?: Maybe<Turn>;
   turns?: Maybe<Array<Maybe<Turn>>>;
+  university?: Maybe<PlayerUniversity>;
 };
 
 
-export type GameReportsArgs = {
+export type PlayerReportsArgs = {
   turn?: Maybe<Scalars['Long']>;
 };
 
 
-export type GameTurnByNumberArgs = {
+export type PlayerTurnByNumberArgs = {
   turn: Scalars['Long'];
 };
 
@@ -203,9 +223,17 @@ export type FactionUnitByNumberArgs = {
   number: Scalars['Int'];
 };
 
+export type University = Node & {
+  id: Scalars['ID'];
+  members?: Maybe<Array<Maybe<UniversityMember>>>;
+  name: Scalars['String'];
+};
+
 export type Query = {
   games?: Maybe<Array<Maybe<Game>>>;
+  me?: Maybe<User>;
   node?: Maybe<Node>;
+  users?: Maybe<UserConnection>;
 };
 
 
@@ -214,20 +242,117 @@ export type QueryNodeArgs = {
 };
 
 
+export type QueryUsersArgs = {
+  after?: Maybe<Scalars['String']>;
+  before?: Maybe<Scalars['String']>;
+  first?: Maybe<Scalars['PaginationAmount']>;
+  last?: Maybe<Scalars['PaginationAmount']>;
+};
+
+
+
+/** A connection to a list of items. */
+export type UserConnection = {
+  /** A list of edges. */
+  edges?: Maybe<Array<UserEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<User>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** A connection to a list of items. */
+export type UnitConnection = {
+  /** A list of edges. */
+  edges?: Maybe<Array<UnitEdge>>;
+  /** A flattened list of the nodes. */
+  nodes?: Maybe<Array<Maybe<Unit>>>;
+  /** Information to aid in pagination. */
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int'];
+};
+
+/** Information about pagination in a connection. */
+export type PageInfo = {
+  /** When paginating forwards, the cursor to continue. */
+  endCursor?: Maybe<Scalars['String']>;
+  /** Indicates whether more edges exist following the set defined by the clients arguments. */
+  hasNextPage: Scalars['Boolean'];
+  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
+  hasPreviousPage: Scalars['Boolean'];
+  /** When paginating backwards, the cursor to continue. */
+  startCursor?: Maybe<Scalars['String']>;
+};
+
+/** An edge in a connection. */
+export type UserEdge = {
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<User>;
+};
+
+/** An edge in a connection. */
+export type StructureEdge = {
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Structure>;
+};
+
 export type Mutation = {
-  deleteGame?: Maybe<Scalars['String']>;
-  newGame?: Maybe<Game>;
+  createGame?: Maybe<Game>;
+  createUser?: Maybe<User>;
+  joinGame?: Maybe<Player>;
+  joinUniversity?: Maybe<University>;
+  openUniversity?: Maybe<University>;
+  updateUserRoles?: Maybe<User>;
 };
 
 
-export type MutationDeleteGameArgs = {
-  id: Scalars['Long'];
-};
-
-
-export type MutationNewGameArgs = {
+export type MutationCreateGameArgs = {
   name?: Maybe<Scalars['String']>;
 };
+
+
+export type MutationCreateUserArgs = {
+  email?: Maybe<Scalars['String']>;
+  password?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationJoinGameArgs = {
+  gameId: Scalars['ID'];
+};
+
+
+export type MutationJoinUniversityArgs = {
+  playerId: Scalars['ID'];
+  universityId: Scalars['ID'];
+};
+
+
+export type MutationOpenUniversityArgs = {
+  name?: Maybe<Scalars['String']>;
+  playerId: Scalars['ID'];
+};
+
+
+export type MutationUpdateUserRolesArgs = {
+  add?: Maybe<Array<Maybe<Scalars['String']>>>;
+  remove?: Maybe<Array<Maybe<Scalars['String']>>>;
+  userId: Scalars['ID'];
+};
+
+export type UserRole = {
+  role?: Maybe<Scalars['String']>;
+};
+
+export enum GameType {
+  Local = 'LOCAL',
+  Remote = 'REMOTE'
+}
 
 export type Settlement = {
   name?: Maybe<Scalars['String']>;
@@ -293,24 +418,12 @@ export type DbSailors = {
   required: Scalars['Int'];
 };
 
-
 /** A connection to a list of items. */
 export type RegionConnection = {
   /** A list of edges. */
   edges?: Maybe<Array<RegionEdge>>;
   /** A flattened list of the nodes. */
   nodes?: Maybe<Array<Maybe<Region>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int'];
-};
-
-/** A connection to a list of items. */
-export type UnitConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<UnitEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Unit>>>;
   /** Information to aid in pagination. */
   pageInfo: PageInfo;
   totalCount: Scalars['Int'];
@@ -327,16 +440,12 @@ export type StructureConnection = {
   totalCount: Scalars['Int'];
 };
 
-/** Information about pagination in a connection. */
-export type PageInfo = {
-  /** When paginating forwards, the cursor to continue. */
-  endCursor?: Maybe<Scalars['String']>;
-  /** Indicates whether more edges exist following the set defined by the clients arguments. */
-  hasNextPage: Scalars['Boolean'];
-  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
-  hasPreviousPage: Scalars['Boolean'];
-  /** When paginating backwards, the cursor to continue. */
-  startCursor?: Maybe<Scalars['String']>;
+/** An edge in a connection. */
+export type UnitEdge = {
+  /** A cursor for use in pagination. */
+  cursor: Scalars['String'];
+  /** The item at the end of the edge. */
+  node?: Maybe<Unit>;
 };
 
 /** An edge in a connection. */
@@ -347,33 +456,28 @@ export type RegionEdge = {
   node?: Maybe<Region>;
 };
 
-/** An edge in a connection. */
-export type StructureEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Structure>;
-};
-
-/** An edge in a connection. */
-export type UnitEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Unit>;
-};
-
 export enum SettlementSize {
   Village = 'VILLAGE',
   Town = 'TOWN',
   City = 'CITY'
 }
 
+export type UniversityMember = {
+  player?: Maybe<Player>;
+  role: UniveristyMemberRole;
+};
+
 export type Event = {
   faction?: Maybe<Faction>;
   id: Scalars['Long'];
   message: Scalars['String'];
   type: EventType;
+};
+
+export type PlayerUniversity = {
+  role: UniveristyMemberRole;
+  university?: Maybe<University>;
+  _Clone__: PlayerUniversity;
 };
 
 
@@ -383,12 +487,25 @@ export enum EventType {
   Error = 'ERROR'
 }
 
-export type GameListItemFragment = Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'playerFactionNumber' | 'playerFactionName' | 'lastTurnNumber'>;
+export enum UniveristyMemberRole {
+  Owner = 'OWNER',
+  Teacher = 'TEACHER',
+  Member = 'MEMBER'
+}
 
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetGamesQuery = { games?: Maybe<Array<Maybe<GameListItemFragment>>> };
+
+export type GameListItemFragment = (
+  Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion'>
+  & { myPlayer?: Maybe<PlayerItemFragment>, myUniversity?: Maybe<UniverisyItemFragment> }
+);
+
+export type PlayerItemFragment = Pick<Player, 'id' | 'factionNumber' | 'factionName' | 'lastTurnNumber'>;
+
+export type UniverisyItemFragment = Pick<University, 'id' | 'name'>;
 
 export type GetRegionsQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -448,9 +565,22 @@ export type GetSingleGameQueryVariables = Exact<{
 export type GetSingleGameQuery = { node?: Maybe<SingleGameFragment> };
 
 export type SingleGameFragment = (
-  Pick<Game, 'id' | 'name' | 'engineVersion' | 'rulesetName' | 'rulesetVersion' | 'playerFactionName' | 'playerFactionNumber' | 'password' | 'lastTurnNumber'>
-  & { turns?: Maybe<Array<Maybe<TurnSummaryFragment>>> }
+  Pick<Game, 'id' | 'name' | 'engineVersion' | 'rulesetName' | 'rulesetVersion'>
+  & { myPlayer?: Maybe<(
+    Pick<Player, 'factionName' | 'factionNumber' | 'lastTurnNumber'>
+    & { turns?: Maybe<Array<Maybe<TurnSummaryFragment>>> }
+  )>, myUniversity?: Maybe<UniversitySummaryFragment> }
 );
+
+export type UniversitySummaryFragment = (
+  Pick<University, 'id' | 'name'>
+  & { members?: Maybe<Array<Maybe<(
+    Pick<UniversityMember, 'role'>
+    & { player?: Maybe<PlayerSummaryFragment> }
+  )>>> }
+);
+
+export type PlayerSummaryFragment = Pick<Player, 'id' | 'factionName' | 'factionNumber' | 'lastTurnNumber'>;
 
 export type TurnSummaryFragment = (
   Pick<Turn, 'id' | 'number' | 'month' | 'year'>
@@ -459,24 +589,49 @@ export type TurnSummaryFragment = (
 
 export type ReportSummaryFragment = Pick<Report, 'id' | 'factionName' | 'factionNumber'>;
 
-export type NewGameMutationVariables = Exact<{
+export type CreateGameMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
 
 
-export type NewGameMutation = { newGame?: Maybe<GameListItemFragment> };
+export type CreateGameMutation = { createGame?: Maybe<GameListItemFragment> };
 
+export type JoinGameMutationVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type JoinGameMutation = { joinGame?: Maybe<PlayerItemFragment> };
+
+export const PlayerItem = gql`
+    fragment PlayerItem on Player {
+  id
+  factionNumber
+  factionName
+  lastTurnNumber
+}
+    `;
+export const UniverisyItem = gql`
+    fragment UniverisyItem on University {
+  id
+  name
+}
+    `;
 export const GameListItem = gql`
     fragment GameListItem on Game {
   id
   name
   rulesetName
   rulesetVersion
-  playerFactionNumber
-  playerFactionName
-  lastTurnNumber
+  myPlayer {
+    ...PlayerItem
+  }
+  myUniversity {
+    ...UniverisyItem
+  }
 }
-    `;
+    ${PlayerItem}
+${UniverisyItem}`;
 export const Settlement = gql`
     fragment Settlement on Settlement {
   name
@@ -675,6 +830,26 @@ export const TurnSummary = gql`
   }
 }
     ${ReportSummary}`;
+export const PlayerSummary = gql`
+    fragment PlayerSummary on Player {
+  id
+  factionName
+  factionNumber
+  lastTurnNumber
+}
+    `;
+export const UniversitySummary = gql`
+    fragment UniversitySummary on University {
+  id
+  name
+  members {
+    role
+    player {
+      ...PlayerSummary
+    }
+  }
+}
+    ${PlayerSummary}`;
 export const SingleGame = gql`
     fragment SingleGame on Game {
   id
@@ -682,15 +857,20 @@ export const SingleGame = gql`
   engineVersion
   rulesetName
   rulesetVersion
-  playerFactionName
-  playerFactionNumber
-  password
-  lastTurnNumber
-  turns {
-    ...TurnSummary
+  myPlayer {
+    factionName
+    factionNumber
+    lastTurnNumber
+    turns {
+      ...TurnSummary
+    }
+  }
+  myUniversity {
+    ...UniversitySummary
   }
 }
-    ${TurnSummary}`;
+    ${TurnSummary}
+${UniversitySummary}`;
 export const GetGames = gql`
     query GetGames {
   games {
@@ -727,10 +907,17 @@ export const GetSingleGame = gql`
   }
 }
     ${SingleGame}`;
-export const NewGame = gql`
-    mutation NewGame($name: String!) {
-  newGame(name: $name) {
+export const CreateGame = gql`
+    mutation CreateGame($name: String!) {
+  createGame(name: $name) {
     ...GameListItem
   }
 }
     ${GameListItem}`;
+export const JoinGame = gql`
+    mutation JoinGame($gameId: ID!) {
+  joinGame(gameId: $gameId) {
+    ...PlayerItem
+  }
+}
+    ${PlayerItem}`;

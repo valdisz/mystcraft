@@ -3,6 +3,7 @@ namespace advisor.Persistence
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
+    using HotChocolate.AspNetCore.Authorization;
 
     [GraphQLName("Player")]
     public class DbPlayer {

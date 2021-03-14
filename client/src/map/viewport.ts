@@ -88,4 +88,9 @@ export class Viewport {
 
     get width() { return this.element.clientWidth; }
     get height() { return this.element.clientHeight; }
+
+    setOffset(p: PIXI.Point) {
+        this.origin.copyFrom(p)
+        this.raiseOnUpdate()
+    }
 }

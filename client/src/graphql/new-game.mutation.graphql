@@ -1,5 +1,11 @@
-mutation NewGame($name: String!) {
-  newGame(name: $name) {
+mutation CreateGame($name: String!) {
+  createGame(name: $name) {
     ...GameListItem
+  }
+}
+
+mutation JoinGame($gameId: ID!) {
+  joinGame(gameId: $gameId) {
+    ...PlayerItem
   }
 }

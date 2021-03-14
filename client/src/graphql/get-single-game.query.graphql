@@ -1,5 +1,3 @@
-
-
 query GetSingleGame($gameId: ID!) {
   node(id: $gameId) {
     ... on Game {
@@ -14,13 +12,35 @@ fragment SingleGame on Game {
   engineVersion
   rulesetName
   rulesetVersion
-  playerFactionName
-  playerFactionNumber
-  password
-  lastTurnNumber
-  turns {
-    ...TurnSummary
+  myPlayer {
+    factionName
+    factionNumber
+    lastTurnNumber
+    turns {
+      ...TurnSummary
+    }
   }
+  myUniversity {
+    ...UniversitySummary
+  }
+}
+
+fragment UniversitySummary on University {
+  id
+  name
+  members {
+    role
+    player {
+      ...PlayerSummary
+    }
+  }
+}
+
+fragment PlayerSummary on Player {
+  id
+  factionName
+  factionNumber
+  lastTurnNumber
 }
 
 fragment TurnSummary on Turn {

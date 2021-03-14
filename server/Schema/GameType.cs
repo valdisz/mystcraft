@@ -4,6 +4,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using HotChocolate;
+    using HotChocolate.AspNetCore.Authorization;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
@@ -29,10 +30,26 @@
 
         private readonly Database db;
 
-        public Task<List<DbPlayer>> UserGames([Parent] DbGame game) {
+        public Task<DbPlayer> MyPlayer([Parent] DbGame game, [GlobalState] long currentUserId) {
+            return db.Players
+                .SingleOrDefaultAsync(x => x.GameId == game.Id && x.UserId == currentUserId);
+        }
+
+        public Task<DbUniversity> MyUniversity([Parent] DbGame game, [GlobalState] long currentUserId) {
+            return db.Players
+                .Include(x => x.UniversityMembership)
+                .ThenInclude(x => x.University)
+                .Where(x => x.GameId == game.Id && x.UserId == currentUserId && x.UniversityMembership != null)
+                .Select(x => x.UniversityMembership.University)
+                .SingleOrDefaultAsync();
+        }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<List<DbPlayer>> Players([Parent] DbGame game) {
             return db.Players.Where(x => x.GameId == game.Id).ToListAsync();
         }
 
+        [Authorize(Policy = Policies.GameMasters)]
         public Task<List<DbUniversity>> Universities([Parent] DbGame game) {
             return db.Universities
                 .Include(x => x.Members)
