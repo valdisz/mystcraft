@@ -114,6 +114,26 @@ namespace advisor
             return new Maybe<TextParser>($"Cant find {s.ToString()}", Ln, Pos + 1);
         }
 
+        public Maybe<TextParser> Before(params string[] list) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
+            int i = -1;
+            foreach (var item in list) {
+                var j = LFind(item);
+                if (j < 0) continue;
+
+                if (i < 0 || j < i) {
+                    i = j;
+                }
+            }
+
+            if (i >= 0) {
+                return new Maybe<TextParser>(Slice(i));
+            }
+
+            return new Maybe<TextParser>($"Cant find any of {string.Join(",", list)}", Ln, Pos + 1);
+        }
+
         public Maybe<TextParser> After(ReadOnlySpan<char> s) {
             if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
@@ -386,15 +406,6 @@ namespace advisor
         public static Maybe<TextParser> After(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.After(s) : p;
         public static Maybe<TextParser> BeforeBackwards(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.BeforeBackwards(s) : p;
         public static Maybe<TextParser> AfterBackwards(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.AfterBackwards(s) : p;
-
-        public static Maybe<TextParser> Before(this TextParser p, params string[] list) {
-            foreach (var s in list) {
-                var match = p.Before(s);
-                if (match) return match;
-            }
-
-            return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
-        }
 
         public static Maybe<TextParser> Before(this Maybe<TextParser> p, params string[] list) => p ? p.Value.Before(list) : p;
 
