@@ -10,18 +10,18 @@ namespace advisor.Features {
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
 
-    public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<long> {
+    public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<int> {
 
     }
 
-    public class UploadReportsHandler : IRequestHandler<UploadReports, long> {
+    public class UploadReportsHandler : IRequestHandler<UploadReports, int> {
         public UploadReportsHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<long> Handle(UploadReports request, CancellationToken cancellationToken) {
+        public async Task<int> Handle(UploadReports request, CancellationToken cancellationToken) {
             DbPlayer player = await db.Players
                 .Include(x => x.Game)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);

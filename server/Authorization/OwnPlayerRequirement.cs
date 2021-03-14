@@ -1,4 +1,5 @@
-namespace advisor.Authorization {
+namespace advisor.Authorization
+{
     using System.Threading.Tasks;
     using advisor.Persistence;
     using Microsoft.AspNetCore.Authorization;
@@ -6,8 +7,6 @@ namespace advisor.Authorization {
     public class OwnPlayerRequirement : IAuthorizationRequirement {
 
     }
-
-    public record GameContext(long PlayerId);
 
     public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequirement, GameContext> {
         public OwnPlayerAuthorizationHandler(Database db) {

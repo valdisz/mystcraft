@@ -114,7 +114,7 @@ namespace atlantis.Migrations
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UserGameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     Number = table.Column<int>(type: "INTEGER", nullable: false),
                     Month = table.Column<int>(type: "INTEGER", nullable: false),
                     Year = table.Column<int>(type: "INTEGER", nullable: false)
@@ -123,8 +123,8 @@ namespace atlantis.Migrations
                 {
                     table.PrimaryKey("PK_Turns", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Turns_Players_UserGameId",
-                        column: x => x.UserGameId,
+                        name: "FK_Turns_Players_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -215,7 +215,7 @@ namespace atlantis.Migrations
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    UserGameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnId = table.Column<long>(type: "INTEGER", nullable: false),
                     FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     FactionName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
@@ -226,8 +226,8 @@ namespace atlantis.Migrations
                 {
                     table.PrimaryKey("PK_Reports", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Reports_Players_UserGameId",
-                        column: x => x.UserGameId,
+                        name: "FK_Reports_Players_PlayerId",
+                        column: x => x.PlayerId,
                         principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -600,14 +600,14 @@ namespace atlantis.Migrations
                 column: "TurnId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Reports_PlayerId",
+                table: "Reports",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reports_TurnId",
                 table: "Reports",
                 column: "TurnId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reports_UserGameId",
-                table: "Reports",
-                column: "UserGameId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Structures_RegionId",
@@ -627,7 +627,8 @@ namespace atlantis.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_StudyPlans_UnitId",
                 table: "StudyPlans",
-                column: "UnitId");
+                column: "UnitId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StudyPlans_UniversityId",
@@ -635,9 +636,9 @@ namespace atlantis.Migrations
                 column: "UniversityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Turns_UserGameId",
+                name: "IX_Turns_PlayerId",
                 table: "Turns",
-                column: "UserGameId");
+                column: "PlayerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Units_FactionId",

@@ -211,9 +211,9 @@ namespace advisor.Persistence
                 t.Property(p => p.Flags)
                     .HasConversion(new JsonListConverter<string>());
 
-                t.HasMany(p => p.Plans)
+                t.HasOne(p => p.Plan)
                     .WithOne(p => p.Unit)
-                    .HasForeignKey(p => p.UnitId);
+                    .HasForeignKey<DbStudyPlan>(p => p.UnitId);
 
                 t.OwnsMany(p => p.Items, a => {
                     a.WithOwner().HasForeignKey("UnitId");
