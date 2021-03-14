@@ -1,6 +1,7 @@
 namespace advisor {
     using System;
     using System.Threading.Tasks;
+    using advisor.Authorization;
     using advisor.Persistence;
     using HotChocolate;
     using HotChocolate.AspNetCore;
@@ -48,9 +49,9 @@ namespace advisor {
                     conf.DefaultPolicy = builder.Build();
                     conf.FallbackPolicy = conf.DefaultPolicy;
 
-                    conf.AddPolicyAny(Policies.Root, Policies.Root);
-                    conf.AddPolicyAny(Policies.GameMaster, Policies.Root, Policies.GameMaster);
-                    conf.AddPolicyAny(Policies.UserManager, Policies.Root, Policies.UserManager);
+                    conf.AddPolicyAnyRole(Policies.Root, Roles.Root);
+                    conf.AddPolicyAnyRole(Policies.GameMasters, Roles.Root, Roles.GameMaster);
+                    conf.AddPolicyAnyRole(Policies.UserManagers, Roles.Root, Roles.UserManager);
                 });
 
             services
@@ -103,6 +104,7 @@ namespace advisor {
                 )
                 .AddSingleton<IIdSerializer, IdSerializer>()
                 .AddSingleton<AccessControl>()
+                .AddScoped<IAuthorizationHandler, OwnPlayerAuthorizationHandler>()
                 .AddMediatR(typeof(Startup))
                 .AddMvcCore()
                     .AddDataAnnotations()

@@ -23,12 +23,12 @@ namespace advisor
         private readonly IMediator mediator;
         private readonly IIdSerializer idSerializer;
 
-        [Authorize(Policy = Policies.UserManager)]
+        [Authorize(Policy = Policies.UserManagers)]
         public Task<DbUser> CreateUser(string email, string password) {
             return mediator.Send(new CreateUser(email, password));
         }
 
-        [Authorize(Policy = Policies.UserManager)]
+        [Authorize(Policy = Policies.UserManagers)]
         public Task<DbUser> UpdateUserRoles([GraphQLType(typeof(RelayIdType))] string userId, string[] add, string[] remove) {
             return mediator.Send(new UpdateUserRoles(
                 ParseRelayId<long>("User", userId),
@@ -37,7 +37,7 @@ namespace advisor
             ));
         }
 
-        [Authorize(Policy = Policies.GameMaster)]
+        [Authorize(Policy = Policies.GameMasters)]
         public Task<DbGame> CreateGame(string name) {
             return mediator.Send(new CreateGame(name));
         }

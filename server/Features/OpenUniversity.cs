@@ -48,7 +48,7 @@ namespace advisor.Features
             await db.Universities.AddAsync(university);
             await db.SaveChangesAsync();
 
-            await mediator.Send(new AddStudyPlans(university.Id));
+            await mediator.Send(new SetupStudyPlans(university.Id));
 
             return university;
         }

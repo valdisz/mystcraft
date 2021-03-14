@@ -10,34 +10,33 @@ namespace advisor.Features {
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
 
-    public record UploadReport(long UserId, long PlayerId, IEnumerable<string> Reports) : IRequest {
+    public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<long> {
 
     }
 
-    public class UploadReportHandler : IRequestHandler<UploadReport> {
-        public UploadReportHandler(Database db) {
+    public class UploadReportsHandler : IRequestHandler<UploadReports, long> {
+        public UploadReportsHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<Unit> Handle(UploadReport request, CancellationToken cancellationToken) {
+        public async Task<long> Handle(UploadReports request, CancellationToken cancellationToken) {
             DbPlayer player = await db.Players
                 .Include(x => x.Game)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 
-            if (player == null) return Unit.Value;
-            if (player.UserId != request.UserId) return Unit.Value;
+            if (player == null) return -1;
 
             int earliestTurn = int.MaxValue;
             foreach (var report in request.Reports) {
                 var turnNumber = await LoadReportAsync(db, report, player);
                 earliestTurn = Math.Min(earliestTurn, turnNumber);
             }
-            
+
             await db.SaveChangesAsync();
 
-            return Unit.Value;
+            return earliestTurn;
         }
 
         private static async Task<int> LoadReportAsync(Database db, string source, DbPlayer player) {

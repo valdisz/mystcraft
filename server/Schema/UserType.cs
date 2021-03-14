@@ -21,7 +21,7 @@ namespace advisor
                     if (id != currentUserId) {
                         var authorization = ctx.Service<IAuthorizationService>();
                         var principal = ctx.ContextData["ClaimsPrincipal"] as ClaimsPrincipal;
-                        var result = await authorization.AuthorizeAsync(principal, ctx, Policies.UserManager);
+                        var result = await authorization.AuthorizeAsync(principal, ctx, Policies.UserManagers);
                         if (!result.Succeeded) {
                             ctx.ReportError(ErrorBuilder.New()
                                 .SetCode(ErrorCodes.Authentication.NotAuthorized)
