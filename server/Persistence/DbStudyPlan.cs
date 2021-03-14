@@ -19,7 +19,7 @@ namespace advisor.Persistence {
 
         public DbSkill Target { get; set; }
 
-        public string Learn { get; set; }
+        public string Study { get; set; }
 
         public List<long> Teach { get; set; } = new ();
 

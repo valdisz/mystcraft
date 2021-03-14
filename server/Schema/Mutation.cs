@@ -65,6 +65,41 @@ namespace advisor
             ));
         }
 
+        public Task<DbStudyPlan> SetStudyPlanTarget(
+            [GlobalState] long currentUserId,
+            [GraphQLType(typeof(RelayIdType))] string studyPlanId,
+            string skill,
+            int level) {
+                return mediator.Send(new SetStudyPlanTarget(
+                    currentUserId,
+                    ParseRelayId<long>("StudyPlan", studyPlanId),
+                    skill,
+                    level
+                ));
+            }
+
+        public Task<DbStudyPlan> SetStudPlanyStudy(
+            [GlobalState] long currentUserId,
+            [GraphQLType(typeof(RelayIdType))] string studyPlanId,
+            string skill) {
+                return mediator.Send(new SetStudPlanyStudy(
+                    currentUserId,
+                    ParseRelayId<long>("StudyPlan", studyPlanId),
+                    skill
+                ));
+            }
+
+        public Task<DbStudyPlan> SetStudyPlanTeach(
+            [GlobalState] long currentUserId,
+            [GraphQLType(typeof(RelayIdType))] string studyPlanId,
+            long[] units) {
+                return mediator.Send(new SetStudyPlanTeach(
+                    currentUserId,
+                    ParseRelayId<long>("StudyPlan", studyPlanId),
+                    units
+                ));
+            }
+
         private T ParseRelayId<T>(string typeName, string value) {
             var id = idSerializer.Deserialize(value);
 
