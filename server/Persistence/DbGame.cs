@@ -21,7 +21,7 @@ namespace advisor.Persistence
         public string RulesetVersion { get; set; }
 
         [GraphQLIgnore]
-        public List<DbPlayer> UserGames { get; set; } = new ();
+        public List<DbPlayer> Players { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbUniversity> Universities { get; set; } = new ();

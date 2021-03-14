@@ -49,7 +49,7 @@ namespace advisor
 
         public Task<List<DbReport>> Reports([Parent] DbPlayer player, long? turn = null) {
             var q = db.Reports
-                .Where(x => x.UserGameId == player.Id);
+                .Where(x => x.PlayerId == player.Id);
 
             if (turn != null) {
                 q = q
@@ -62,14 +62,14 @@ namespace advisor
 
         public Task<List<DbTurn>> Turns([Parent] DbPlayer player) {
             return db.Turns
-                .Where(x => x.UserGameId == player.Id)
+                .Where(x => x.PlayerId == player.Id)
                 .OrderBy(x => x.Number)
                 .ToListAsync();
         }
 
         public Task<DbTurn> TurnByNumber([Parent] DbPlayer player, long turn) {
             return db.Turns
-                .FirstOrDefaultAsync(x => x.UserGameId == player.Id && x.Number == turn);
+                .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turn);
         }
     }
 }

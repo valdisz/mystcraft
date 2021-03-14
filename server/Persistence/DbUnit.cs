@@ -58,6 +58,6 @@ namespace advisor.Persistence {
         public DbStructure Structure { get; set; }
 
         [GraphQLIgnore]
-        public List<DbStudyPlan> Plans { get; set; } = new ();
+        public DbStudyPlan Plan { get; set; } = new ();
     }
 }

@@ -12,11 +12,13 @@ namespace advisor.Features
     }
 
     public class OpenUniversityHandler : IRequestHandler<OpenUniversity, DbUniversity> {
-        public OpenUniversityHandler(Database db) {
+        public OpenUniversityHandler(Database db, IMediator mediator) {
             this.db = db;
+            this.mediator = mediator;
         }
 
         private readonly Database db;
+        private readonly IMediator mediator;
 
         public async Task<DbUniversity> Handle(OpenUniversity request, CancellationToken cancellationToken) {
             var player = await db.Players
@@ -45,6 +47,8 @@ namespace advisor.Features
 
             await db.Universities.AddAsync(university);
             await db.SaveChangesAsync();
+
+            await mediator.Send(new AddStudyPlans(university.Id));
 
             return university;
         }

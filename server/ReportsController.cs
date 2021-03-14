@@ -19,41 +19,42 @@ namespace advisor
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
+    using MediatR;
+    using advisor.Features;
 
     [Route("report")]
     public class ReportsController : ControllerBase {
-        public ReportsController(Database db, IIdSerializer relayId, IMapper mapper) {
+        public ReportsController(Database db, IIdSerializer relayId, IMapper mapper, IMediator mediator) {
             this.db = db;
             this.relayId = relayId;
             this.mapper = mapper;
+            this.mediator = mediator;
         }
 
         private readonly Database db;
         private readonly IIdSerializer relayId;
         private readonly IMapper mapper;
+        private readonly IMediator mediator;
 
         [HttpPost("{gameId}")]
-        public async Task<IActionResult> UploadReports([Required, FromRoute] string gameId) {
+        public async Task<IActionResult> UploadReports([Required, FromRoute] string playerId) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (Request.Form.Files.Count == 0) return UnprocessableEntity();
 
-            DbPlayer game = await FindGameAsync(db, relayId, gameId);
-            if (game == null) return NotFound();
+            var id = relayId.Deserialize(playerId);
+            if (id.TypeName != "Player") return BadRequest();
 
-            // 1. upload reports
-            int earliestTurn = int.MaxValue;
-            List<(int, JReport)> reports = new List<(int, JReport)>();
+            List<string> reports = new List<string>();
             foreach (var file in Request.Form.Files) {
                 await using var stream = file.OpenReadStream();
-                var (turnNumber, report) = await LoadReportFileAsync(db, stream, game);
-
-                earliestTurn = Math.Min(earliestTurn, turnNumber);
-                reports.Add((earliestTurn, report));
+                using var textReader = new StreamReader(stream);
+                reports.Add(await textReader.ReadToEndAsync());
             }
-            await db.SaveChangesAsync();
+
+            var response = await mediator.Send(new UploadReport(0, (long) id.Value, reports));
 
             // 2. parse & merge reports and update history
-            await UpdateTurnsAsync(mapper, db, game.GameId, earliestTurn, reports);
+            // await UpdateTurnsAsync(mapper, db, game.GameId, earliestTurn, reports);
 
             return Ok();
         }
@@ -61,90 +62,11 @@ namespace advisor
         public const string DEFAULT_LEVEL_LABEL = "surface";
         public const int DEFAULT_LEVEL_Z = 1;
 
-        private static Task<DbPlayer> FindGameAsync(Database db, IIdSerializer relayId, string userGameId) {
-            var id = (long) relayId.Deserialize(userGameId).Value;
-
-            return db.Players
-                .Include(x => x.Game)
-                .Where(x => x.Id == id)
-                .FirstOrDefaultAsync();
-        }
-
-        private static async Task<(int turnNumber, JReport report)> LoadReportFileAsync(Database db, Stream reportStream, DbPlayer userGame) {
-            using var textReader = new StreamReader(reportStream);
-
-            using var atlantisReader = new AtlantisReportJsonConverter(textReader);
-            var json = await atlantisReader.ReadAsJsonAsync();
-            var report  = json.ToObject<JReport>();
-
-            var faction = report.Faction;
-            var date = report.Date;
-            var engine = report.Engine;
-            var ordersTemplate = report.OrdersTemplate;
-
-            string factionName = faction.Name;
-            int factionNumber = faction.Number;
-            int year = date.Year;
-            int month = date.Month;
-            int turnNumber = month + (year - 1) * 12;
-
-            reportStream.Seek(0, SeekOrigin.Begin);
-            var source = await textReader.ReadToEndAsync();
-
-            var turn = await db.Turns
-                .FirstOrDefaultAsync(x => x.UserGameId == userGame.Id && x.Number == turnNumber);
-            DbReport dbReport = null;
-
-            if (turn == null) {
-                turn = new DbTurn {
-                    UserGameId = userGame.Id,
-                    Month = month,
-                    Year = year,
-                    Number = turnNumber
-                };
-
-                userGame.Turns.Add(turn);
-            }
-            else {
-                dbReport = await db.Reports
-                    .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnId == turn.Id);
-            }
-
-            if (dbReport == null) {
-                dbReport = new DbReport {
-                    UserGameId = userGame.Id,
-                    TurnId = turn.Id
-                };
-
-                userGame.Reports.Add(dbReport);
-                turn.Reports.Add(dbReport);
-            }
-
-            dbReport.FactionNumber = factionNumber;
-            dbReport.FactionName = factionName;
-            dbReport.Source = source;
-            dbReport.Json = json.ToString(Formatting.Indented);
-
-            userGame.FactionNumber ??= dbReport.FactionNumber;
-            if (dbReport.FactionNumber == userGame.FactionNumber && turnNumber > userGame.LastTurnNumber) {
-                userGame.FactionName = dbReport.FactionName;
-                userGame.LastTurnNumber = turnNumber;
-            }
-
-            userGame.Password ??= ordersTemplate?.Password;
-
-            userGame.Game.EngineVersion ??= engine?.Version;
-            userGame.Game.RulesetName ??= engine?.Ruleset?.Name;
-            userGame.Game.RulesetVersion ??= engine?.Ruleset?.Version;
-
-            return (turnNumber, report);
-        }
-
         private static async Task UpdateTurnsAsync(IMapper mapper, Database db, long userGameId, int earliestTurn, List<(int, JReport)> reports) {
             var lastTurn = await db.Turns
                 .AsNoTracking()
                 .OrderByDescending(x => x.Number)
-                .Where(x => x.UserGameId == userGameId)
+                .Where(x => x.PlayerId == userGameId)
                 .Select(x => x.Number)
                 .FirstOrDefaultAsync();
 
@@ -154,7 +76,7 @@ namespace advisor
 
             var turns = await db.Turns
                 .AsNoTracking()
-                .Where(x => x.UserGameId == userGameId && x.Number >= lastTurn)
+                .Where(x => x.PlayerId == userGameId && x.Number >= lastTurn)
                 .OrderBy(x => x.Number)
                 .Select(x => new { x.Id, x.Number })
                 .ToListAsync();

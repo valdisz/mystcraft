@@ -9,14 +9,14 @@ namespace advisor.Persistence {
         public long Id { get; set; }
 
         [GraphQLIgnore]
-        public long UserGameId { get; set; }
+        public long PlayerId { get; set; }
 
         public int Number { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
 
         [GraphQLIgnore]
-        public DbPlayer UserGame { get; set; }
+        public DbPlayer Player { get; set; }
 
         [GraphQLIgnore]
         public List<DbReport> Reports { get; set; } = new List<DbReport>();

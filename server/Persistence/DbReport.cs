@@ -9,7 +9,7 @@ namespace advisor.Persistence {
 
 
         [Required, GraphQLIgnore]
-        public long UserGameId { get; set; }
+        public long PlayerId { get; set; }
 
         [Required, GraphQLIgnore]
         public long TurnId { get; set; }
@@ -29,7 +29,7 @@ namespace advisor.Persistence {
 
 
         [GraphQLIgnore]
-        public DbPlayer UserGame { get; set; }
+        public DbPlayer Player { get; set; }
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }

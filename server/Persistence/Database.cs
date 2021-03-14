@@ -62,7 +62,7 @@ namespace advisor.Persistence
                 t.Property(x => x.Type)
                     .HasConversion<string>();
 
-                t.HasMany(p => p.UserGames)
+                t.HasMany(p => p.Players)
                     .WithOne(p => p.Game)
                     .HasForeignKey(x => x.GameId);
 
@@ -76,13 +76,13 @@ namespace advisor.Persistence
 
             model.Entity<DbPlayer>(t => {
                 t.HasMany<DbReport>(x => x.Reports)
-                    .WithOne(x => x.UserGame)
-                    .HasForeignKey(x => x.UserGameId)
+                    .WithOne(x => x.Player)
+                    .HasForeignKey(x => x.PlayerId)
                     .IsRequired();
 
                 t.HasMany<DbTurn>(x => x.Turns)
-                    .WithOne(x => x.UserGame)
-                    .HasForeignKey(x => x.UserGameId)
+                    .WithOne(x => x.Player)
+                    .HasForeignKey(x => x.PlayerId)
                     .IsRequired();
 
                 t.HasOne(x => x.UniversityMembership)

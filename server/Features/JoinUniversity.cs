@@ -12,11 +12,13 @@ namespace advisor.Features
     }
 
     public class JoinUniversityHandler : IRequestHandler<JoinUniversity, DbUniversity> {
-        public JoinUniversityHandler(Database db) {
+        public JoinUniversityHandler(Database db, IMediator mediator) {
             this.db = db;
+            this.mediator = mediator;
         }
 
         private readonly Database db;
+        private readonly IMediator mediator;
 
         public async Task<DbUniversity> Handle(JoinUniversity request, CancellationToken cancellationToken) {
             var player = await db.Players
@@ -52,6 +54,8 @@ namespace advisor.Features
             university.Members.Add(membership);
 
             await db.SaveChangesAsync();
+
+            await mediator.Send(new AddStudyPlans(university.Id));
 
             return university;
         }
