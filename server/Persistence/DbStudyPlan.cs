@@ -8,8 +8,13 @@ namespace advisor.Persistence {
         [Key]
         public long Id { get; set; }
 
+        [GraphQLIgnore]
         public long UniversityId { get; set; }
+
+        [GraphQLIgnore]
         public long TurnId { get; set; }
+
+        [GraphQLIgnore]
         public long UnitId { get; set; }
 
         public DbSkill Target { get; set; }
@@ -18,8 +23,12 @@ namespace advisor.Persistence {
 
         public List<long> Teach { get; set; } = new ();
 
+        [GraphQLIgnore]
         public DbUniversity University { get; set; }
+
+        [GraphQLIgnore]
         public DbTurn Turn { get; set; }
+
         public DbUnit Unit { get; set; }
     }
 }

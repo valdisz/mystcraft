@@ -32,7 +32,8 @@ namespace advisor.Features
             if (player.UniversityMembership != null) return null;
 
             var membership = new DbUniversityMembership {
-                Role = UniveristyMemberRole.Owner
+                Role = UniveristyMemberRole.Owner,
+                PlayerId = request.PlayerId
             };
 
             player.UniversityMembership = membership;
@@ -48,7 +49,7 @@ namespace advisor.Features
             await db.Universities.AddAsync(university);
             await db.SaveChangesAsync();
 
-            await mediator.Send(new SetupStudyPlans(university.Id));
+            await mediator.Send(new SetupStudyPlans(request.PlayerId));
 
             return university;
         }

@@ -1,4 +1,5 @@
 namespace advisor.Features {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -7,11 +8,11 @@ namespace advisor.Features {
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record SetupStudyPlans(long PlayerId) : IRequest<DbUniversity> {
+    public record SetupStudyPlans(long PlayerId) : IRequest {
 
     }
 
-    public class SetupStudyPlansHandler : IRequestHandler<SetupStudyPlans, DbUniversity> {
+    public class SetupStudyPlansHandler : IRequestHandler<SetupStudyPlans> {
         public SetupStudyPlansHandler(Database db, IMapper mapper) {
             this.db = db;
             this.mapper = mapper;
@@ -20,70 +21,65 @@ namespace advisor.Features {
         private readonly Database db;
         private readonly IMapper mapper;
 
-        public async Task<DbUniversity> Handle(SetupStudyPlans request, CancellationToken cancellationToken) {
-            var player = await db.Players
-                .Include(x => x.UniversityMembership)
-                .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
+        public async Task<Unit> Handle(SetupStudyPlans request, CancellationToken cancellationToken) {
+            var membership = await db.UniversityMemberships
+                .Include(x => x.Player)
+                .SingleOrDefaultAsync(x => x.PlayerId == request.PlayerId);
 
-            if (player.UniversityMembership == null) return null;
+            if (membership == null) return Unit.Value;
 
-            var university = await db.Universities
-                .Include(x => x.Members)
-                .ThenInclude(x => x.Player)
-                .Include(x => x.Plans)
-                .ThenInclude(x => x.Unit)
-                .SingleOrDefaultAsync(x => x.Id == player.UniversityMembership.UniversityId);
+            var universityId = membership.UniversityId;
+            var factionNumber = membership.Player.FactionNumber;
+            var turnNumber = membership.Player.LastTurnNumber;
 
-            var latestTurnNumber = await db.Games
-                .Include(x => x.Players)
-                .ThenInclude(x => x.Turns)
-                .Where(x => x.Id == university.GameId)
-                .SelectMany(x => x.Players)
-                .SelectMany(x => x.Turns)
-                .Select(x => x.Number)
-                .MaxAsync();
-
-            var plans = university.Plans
-                .GroupBy(x => x.Unit.Number)
-                .ToDictionary(x => x.Key, x => x.OrderBy(p => p.Id).Last());
-
-            foreach (var member in university.Members) {
-                var playerId = member.PlayerId;
-                var factionNumber = member.Player.FactionNumber;
-
-                var units = await db.Units
+            async Task<Dictionary<int, DbStudyPlan>> getTurnPlans(int tnum) {
+                return (await db.StudyPlans
                     .Include(x => x.Turn)
-                    .Include(x => x.Faction)
-                    .Include(x => x.Plan)
-                    .Where(x => x.Turn.Number == latestTurnNumber
-                            && x.Turn.PlayerId == playerId
-                            && x.Faction != null
-                            && x.Faction.Number == factionNumber
-                    )
-                    .ToListAsync();
+                    .Include(x => x.Unit)
+                    .ThenInclude(x => x.Faction)
+                    .Where(x => x.UniversityId == membership.UniversityId
+                        && x.Turn.Number == turnNumber
+                        && x.Turn.PlayerId == request.PlayerId
+                        && x.Unit.Faction != null
+                        && x.Unit.Faction.Number == factionNumber)
+                    .ToListAsync())
+                    .ToDictionary(x => x.Unit.Number);
+            }
 
-                var mages = units
-                    .Where(x => x.Plan == null)
-                    .Where(x => x.Skills.Any(s => s.Code == "FORC" || s.Code == "PATT" || s.Code == "SPIR"));
+            var plans = await getTurnPlans(turnNumber);
+            var prevPalns = await getTurnPlans(turnNumber - 1);
 
-                foreach (var mage in mages) {
-                    var plan = new DbStudyPlan {
-                        UniversityId = university.Id,
-                        TurnId = mage.TurnId,
-                        UnitId = mage.Id
-                    };
+            var mages = await db.Units
+                .Include(x => x.Turn)
+                .Include(x => x.Faction)
+                .Include(x => x.Plan)
+                .Where(x => x.Turn.Number == turnNumber
+                        && x.Turn.PlayerId == request.PlayerId
+                        && x.Faction != null
+                        && x.Faction.Number == factionNumber
+                        && x.Skills.Any(s => s.Code == "FORC" || s.Code == "PATT" || s.Code == "SPIR")
+                )
+                .ToListAsync();
 
-                    if (plans.ContainsKey(mage.Number)) {
-                        plan.Target = mapper.Map<DbSkill>(plans[mage.Number]);
-                    }
+            foreach (var mage in mages) {
+                if (plans.ContainsKey(mage.Number)) continue;
 
-                    await db.StudyPlans.AddAsync(plan);
+                var plan = new DbStudyPlan {
+                    UniversityId = universityId,
+                    TurnId = mage.TurnId,
+                    UnitId = mage.Id
+                };
+
+                if (prevPalns.ContainsKey(mage.Number)) {
+                    plan.Target = mapper.Map<DbSkill>(prevPalns[mage.Number]);
                 }
+
+                await db.StudyPlans.AddAsync(plan);
             }
 
             await db.SaveChangesAsync();
 
-            return university;
+            return Unit.Value;
         }
     }
 }

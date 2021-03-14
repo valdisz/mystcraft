@@ -1,4 +1,5 @@
-namespace advisor {
+namespace advisor
+{
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -33,6 +34,19 @@ namespace advisor {
                 .Include(x => x.Player)
                 .Where(x => x.UniversityId == university.Id)
                 .ToListAsync();
+        }
+
+        public async Task<List<UniversityClass>> Classes([Parent] DbUniversity university) {
+            var turns = await db.StudyPlans
+                .Include(x => x.Turn)
+                .Where(x => x.UniversityId == university.Id)
+                .Select(x => x.Turn.Number)
+                .Distinct()
+                .ToListAsync();
+
+            return turns
+                .Select(x => new UniversityClass(university.Id, x))
+                .ToList();
         }
     }
 }
