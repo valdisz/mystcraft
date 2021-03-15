@@ -9,6 +9,8 @@
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     class Program {
@@ -21,13 +23,20 @@
             }
         }
 
-        public static async Task RunServerAsync(string[] args) {
+        public static IWebHostBuilder CreateHostBuilder(string[] args) {
             var builder = new WebHostBuilder()
                 .ConfigureAppConfiguration(conf => {
                     conf
                         .AddJsonFile("appsettings.json")
                         .AddEnvironmentVariables("ADVISOR_")
                         .AddCommandLine(args);
+                })
+                .ConfigureServices((context, services) => {
+                    services.AddLogging();
+                })
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
                 })
                 .UseStartup<Startup>()
                 .ConfigureKestrel(conf => {
@@ -36,7 +45,11 @@
                 .UseKestrel()
                 .UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
 
-            var host = builder.Build();
+            return builder;
+        }
+
+        public static async Task RunServerAsync(string[] args) {
+            var host = CreateHostBuilder(args).Build();
 
             using (var scope = host.Services.CreateScope()) {
                 var services = scope.ServiceProvider;

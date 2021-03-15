@@ -3,8 +3,10 @@ namespace advisor.Persistence
     using System;
     using System.Collections.Generic;
     using advisor.Model;
+    using AutoMapper.Configuration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+    using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
     public class JsonListConverter<T> : ValueConverter<List<T>, string>
@@ -18,10 +20,45 @@ namespace advisor.Persistence
         }
     }
 
-    public class Database : DbContext {
-        public Database(DbContextOptions<Database> options)
+    public enum DatabaseProvider {
+        SQLite,
+        PgSQL,
+        MsSQL
+    }
+
+    public class DatabaseOptions {
+        public string ConnectionString { get; set; }
+        public DatabaseProvider Provider { get; set; }
+        public bool IsProduction { get; set; }
+    }
+
+    public class PgSqlDatabase : Database {
+        public PgSqlDatabase(IOptionsSnapshot<DatabaseOptions> options)
             : base(options) {
+                this.options.Provider = DatabaseProvider.PgSQL;
         }
+    }
+
+    public class MsSqlDatabase : Database {
+        public MsSqlDatabase(IOptionsSnapshot<DatabaseOptions> options)
+            : base(options) {
+                this.options.Provider = DatabaseProvider.MsSQL;
+        }
+    }
+
+    public class SQLiteDatabase : Database {
+        public SQLiteDatabase(IOptionsSnapshot<DatabaseOptions> options)
+            : base(options) {
+                this.options.Provider = DatabaseProvider.SQLite;
+        }
+    }
+
+    public abstract class Database : DbContext {
+        protected Database(IOptionsSnapshot<DatabaseOptions> options) {
+            this.options = options.Value;
+        }
+
+        protected DatabaseOptions options;
 
         public DbSet<DbUser> Users { get; set; }
 
@@ -39,6 +76,28 @@ namespace advisor.Persistence
         public DbSet<DbUniversity> Universities { get; set; }
         public DbSet<DbUniversityMembership> UniversityMemberships { get; set; }
         public DbSet<DbStudyPlan> StudyPlans { get; set; }
+
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+            switch (options.Provider) {
+                case DatabaseProvider.SQLite:
+                    optionsBuilder.UseSqlite(options.ConnectionString);
+                    break;
+
+                case DatabaseProvider.PgSQL:
+                    optionsBuilder.UseNpgsql(options.ConnectionString);
+                    break;
+
+                case DatabaseProvider.MsSQL:
+                    optionsBuilder.UseSqlServer(options.ConnectionString);
+                    break;
+            }
+
+            if (!options.IsProduction) {
+                optionsBuilder.EnableDetailedErrors();
+                optionsBuilder.EnableSensitiveDataLogging();
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder model) {
             model.Entity<DbUser>(t => {

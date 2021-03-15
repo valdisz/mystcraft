@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace atlantis.Migrations
+namespace advisor.Migrations.sqlite
 {
     public partial class initial : Migration
     {

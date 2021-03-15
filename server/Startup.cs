@@ -16,6 +16,7 @@ namespace advisor {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
     public class Startup {
@@ -66,12 +67,34 @@ namespace advisor {
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowAnyOrigin());
-                })
-                .AddDbContext<Database>(opt => {
-                    opt.UseSqlite(Configuration.GetConnectionString("database"));
-                    opt.EnableDetailedErrors();
-                    opt.EnableSensitiveDataLogging();
-                })
+                });
+
+            services
+                .Configure<DatabaseOptions>(opt => {
+                    var provider = Configuration.GetValue<DatabaseProvider>("Provider");
+                    var connString = Configuration.GetConnectionString("database");
+
+                    opt.Provider = provider;
+                    opt.ConnectionString = connString;
+                    opt.IsProduction = Env.IsProduction();
+                });
+
+            var provider = Configuration.GetValue<DatabaseProvider>("Provider");
+            switch (provider) {
+                case DatabaseProvider.SQLite:
+                    services.AddDbContext<Database, SQLiteDatabase>();
+                    break;
+
+                case DatabaseProvider.PgSQL:
+                    services.AddDbContext<Database, PgSqlDatabase>();
+                    break;
+
+                case DatabaseProvider.MsSQL:
+                    services.AddDbContext<Database, MsSqlDatabase>();
+                    break;
+            }
+
+            services
                 .AddAutoMapper(typeof(MappingProfile))
                 .AddDataLoaderRegistry()
                 .AddGraphQL(SchemaBuilder.New()
@@ -131,9 +154,12 @@ namespace advisor {
             });
         }
 
-        public void Configure(IApplicationBuilder app, IServiceProvider services) {
+        public void Configure(IApplicationBuilder app) {
+            if (!Env.IsProduction()) {
+                app.UseDeveloperExceptionPage();
+            }
+
             app
-                .UseDeveloperExceptionPage()
                 .UseDefaultFiles()
                 .UseStaticFiles()
                 .UseRouting()
@@ -141,7 +167,6 @@ namespace advisor {
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseGraphQL("/graphql")
-                // .UsePlayground("/graphql")
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
                 });

@@ -21,11 +21,25 @@ RUN dotnet publish -c Release -o out
 
 ####################
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 
+EXPOSE 80
+ENV ASPNETCORE_ENVIRONMENT="Production"
+ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
+
+RUN useradd --create-home app
+
+VOLUME /usr/var/advisor
 WORKDIR /app
 
 COPY --from=net-build /server/out .
 COPY --from=node-build /client/dist ./wwwroot
 
+RUN mkdir -p /usr/var/advisor \
+    && chown app /usr/var/advisor \
+    && chmod u+w /usr/var/advisor \
+    && chown app /app \
+    && chmod u+r /app
+
+USER app
 ENTRYPOINT ["dotnet", "advisor.dll"]
