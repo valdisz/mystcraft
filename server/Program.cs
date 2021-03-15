@@ -33,7 +33,8 @@
                 .ConfigureKestrel(conf => {
                     conf.AllowSynchronousIO = true;
                 })
-                .UseKestrel();
+                .UseKestrel()
+                .UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
 
             var host = builder.Build();
 

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "atlantis", "server\atlantis.csproj", "{F2D7D338-5356-433F-BA62-D97C0E0C8ED6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "advisor", "server\advisor.csproj", "{F2D7D338-5356-433F-BA62-D97C0E0C8ED6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "facts", "facts\facts.csproj", "{2EE23285-7D23-48BB-8123-A3CF6CB9ECE8}"
 EndProject

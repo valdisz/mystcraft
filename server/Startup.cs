@@ -134,6 +134,8 @@ namespace advisor {
         public void Configure(IApplicationBuilder app, IServiceProvider services) {
             app
                 .UseDeveloperExceptionPage()
+                .UseDefaultFiles()
+                .UseStaticFiles()
                 .UseRouting()
                 .UseCors()
                 .UseAuthentication()
