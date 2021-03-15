@@ -97,6 +97,7 @@ namespace advisor {
                     .AddType<UniversityType>()
                         .AddType<UniversityResolvers>()
                     .AddType<StudyPlanType>()
+                    .AddType<UniversityClassType>()
                     .AddQueryType<QueryType>()
                     .AddMutationType<Mutation>()
                     .Create(),

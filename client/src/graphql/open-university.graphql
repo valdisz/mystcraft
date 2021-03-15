@@ -1,0 +1,5 @@
+mutation OpenUniversity($name: String!, $playerId: ID!) {
+  openUniversity(name: $name playerId: $playerId) {
+    id
+  }
+}

@@ -295,7 +295,7 @@ namespace atlantis.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Learn")
+                    b.Property<string>("Study")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Teach")

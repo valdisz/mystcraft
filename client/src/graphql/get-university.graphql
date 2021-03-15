@@ -1,0 +1,87 @@
+query GetUniversity($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+       myPlayer {
+         ...PlayerUniversity
+       }
+    }
+  }
+}
+
+query GetUniversityClass($classId: ID!) {
+  node(id: $classId) {
+    ... on UniversityClass {
+      ...UniversityClass
+    }
+  }
+}
+
+fragment PlayerUniversity on Player {
+  id
+  university {
+    role
+    university {
+      id
+      name
+      classes {
+        ...ClassSummary
+      }
+    }
+  }
+}
+
+fragment ClassSummary on UniversityClass {
+  id
+  turnNumber
+}
+
+fragment UniversityClass on UniversityClass {
+  id
+  turnNumber
+  students {
+    ...StudyPlan
+  }
+}
+
+fragment StudyPlan on StudyPlan {
+  id
+  study
+  target {
+    ...Skill
+  }
+  teach
+  unit {
+    ...Student
+  }
+}
+
+fragment Skill on Skill {
+  code
+  level
+  days
+}
+
+fragment Student on Unit {
+  id
+  number
+  name
+  faction {
+    name
+    number
+  }
+  region {
+    terrain
+    x
+    y
+    z
+    label
+    province
+    settlement {
+      name
+      size
+    }
+  }
+  skills {
+    ...Skill
+  }
+}

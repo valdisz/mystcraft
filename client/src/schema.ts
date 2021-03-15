@@ -181,6 +181,7 @@ export type Unit = Node & {
   number: Scalars['Int'];
   onGuard: Scalars['Boolean'];
   readyItem?: Maybe<Item>;
+  region?: Maybe<Region>;
   skills?: Maybe<Array<Maybe<Skill>>>;
   weight?: Maybe<Scalars['Int']>;
 };
@@ -224,9 +225,24 @@ export type FactionUnitByNumberArgs = {
 };
 
 export type University = Node & {
+  classes?: Maybe<Array<Maybe<UniversityClass>>>;
   id: Scalars['ID'];
   members?: Maybe<Array<Maybe<UniversityMember>>>;
   name: Scalars['String'];
+};
+
+export type StudyPlan = Node & {
+  id: Scalars['ID'];
+  study?: Maybe<Scalars['String']>;
+  target?: Maybe<Skill>;
+  teach?: Maybe<Array<Scalars['Long']>>;
+  unit?: Maybe<Unit>;
+};
+
+export type UniversityClass = Node & {
+  id: Scalars['ID'];
+  students?: Maybe<Array<Maybe<StudyPlan>>>;
+  turnNumber: Scalars['Int'];
 };
 
 export type Query = {
@@ -307,6 +323,9 @@ export type Mutation = {
   joinGame?: Maybe<Player>;
   joinUniversity?: Maybe<University>;
   openUniversity?: Maybe<University>;
+  setStudPlanyStudy?: Maybe<StudyPlan>;
+  setStudyPlanTarget?: Maybe<StudyPlan>;
+  setStudyPlanTeach?: Maybe<StudyPlan>;
   updateUserRoles?: Maybe<User>;
 };
 
@@ -336,6 +355,25 @@ export type MutationJoinUniversityArgs = {
 export type MutationOpenUniversityArgs = {
   name?: Maybe<Scalars['String']>;
   playerId: Scalars['ID'];
+};
+
+
+export type MutationSetStudPlanyStudyArgs = {
+  skill?: Maybe<Scalars['String']>;
+  studyPlanId: Scalars['ID'];
+};
+
+
+export type MutationSetStudyPlanTargetArgs = {
+  level: Scalars['Int'];
+  skill?: Maybe<Scalars['String']>;
+  studyPlanId: Scalars['ID'];
+};
+
+
+export type MutationSetStudyPlanTeachArgs = {
+  studyPlanId: Scalars['ID'];
+  units?: Maybe<Array<Scalars['Long']>>;
 };
 
 
@@ -418,6 +456,7 @@ export type DbSailors = {
   required: Scalars['Int'];
 };
 
+
 /** A connection to a list of items. */
 export type RegionConnection = {
   /** A list of edges. */
@@ -477,9 +516,7 @@ export type Event = {
 export type PlayerUniversity = {
   role: UniveristyMemberRole;
   university?: Maybe<University>;
-  _Clone__: PlayerUniversity;
 };
-
 
 export enum EventType {
   Info = 'INFO',
@@ -589,6 +626,51 @@ export type TurnSummaryFragment = (
 
 export type ReportSummaryFragment = Pick<Report, 'id' | 'factionName' | 'factionNumber'>;
 
+export type GetUniversityQueryVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type GetUniversityQuery = { node?: Maybe<{ myPlayer?: Maybe<PlayerUniversityFragment> }> };
+
+export type GetUniversityClassQueryVariables = Exact<{
+  classId: Scalars['ID'];
+}>;
+
+
+export type GetUniversityClassQuery = { node?: Maybe<UniversityClassFragment> };
+
+export type PlayerUniversityFragment = (
+  Pick<Player, 'id'>
+  & { university?: Maybe<(
+    Pick<PlayerUniversity, 'role'>
+    & { university?: Maybe<(
+      Pick<University, 'id' | 'name'>
+      & { classes?: Maybe<Array<Maybe<ClassSummaryFragment>>> }
+    )> }
+  )> }
+);
+
+export type ClassSummaryFragment = Pick<UniversityClass, 'id' | 'turnNumber'>;
+
+export type UniversityClassFragment = (
+  Pick<UniversityClass, 'id' | 'turnNumber'>
+  & { students?: Maybe<Array<Maybe<StudyPlanFragment>>> }
+);
+
+export type StudyPlanFragment = (
+  Pick<StudyPlan, 'id' | 'study' | 'teach'>
+  & { target?: Maybe<SkillFragment>, unit?: Maybe<StudentFragment> }
+);
+
+export type StudentFragment = (
+  Pick<Unit, 'id' | 'number' | 'name'>
+  & { faction?: Maybe<Pick<Faction, 'name' | 'number'>>, region?: Maybe<(
+    Pick<Region, 'terrain' | 'x' | 'y' | 'z' | 'label' | 'province'>
+    & { settlement?: Maybe<Pick<Settlement, 'name' | 'size'>> }
+  )>, skills?: Maybe<Array<Maybe<SkillFragment>>> }
+);
+
 export type CreateGameMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
@@ -602,6 +684,14 @@ export type JoinGameMutationVariables = Exact<{
 
 
 export type JoinGameMutation = { joinGame?: Maybe<PlayerItemFragment> };
+
+export type OpenUniversityMutationVariables = Exact<{
+  name: Scalars['String'];
+  playerId: Scalars['ID'];
+}>;
+
+
+export type OpenUniversityMutation = { openUniversity?: Maybe<Pick<University, 'id'>> };
 
 export const PlayerItem = gql`
     fragment PlayerItem on Player {
@@ -871,6 +961,76 @@ export const SingleGame = gql`
 }
     ${TurnSummary}
 ${UniversitySummary}`;
+export const ClassSummary = gql`
+    fragment ClassSummary on UniversityClass {
+  id
+  turnNumber
+}
+    `;
+export const PlayerUniversity = gql`
+    fragment PlayerUniversity on Player {
+  id
+  university {
+    role
+    university {
+      id
+      name
+      classes {
+        ...ClassSummary
+      }
+    }
+  }
+}
+    ${ClassSummary}`;
+export const Student = gql`
+    fragment Student on Unit {
+  id
+  number
+  name
+  faction {
+    name
+    number
+  }
+  region {
+    terrain
+    x
+    y
+    z
+    label
+    province
+    settlement {
+      name
+      size
+    }
+  }
+  skills {
+    ...Skill
+  }
+}
+    ${Skill}`;
+export const StudyPlan = gql`
+    fragment StudyPlan on StudyPlan {
+  id
+  study
+  target {
+    ...Skill
+  }
+  teach
+  unit {
+    ...Student
+  }
+}
+    ${Skill}
+${Student}`;
+export const UniversityClass = gql`
+    fragment UniversityClass on UniversityClass {
+  id
+  turnNumber
+  students {
+    ...StudyPlan
+  }
+}
+    ${StudyPlan}`;
 export const GetGames = gql`
     query GetGames {
   games {
@@ -907,6 +1067,26 @@ export const GetSingleGame = gql`
   }
 }
     ${SingleGame}`;
+export const GetUniversity = gql`
+    query GetUniversity($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      myPlayer {
+        ...PlayerUniversity
+      }
+    }
+  }
+}
+    ${PlayerUniversity}`;
+export const GetUniversityClass = gql`
+    query GetUniversityClass($classId: ID!) {
+  node(id: $classId) {
+    ... on UniversityClass {
+      ...UniversityClass
+    }
+  }
+}
+    ${UniversityClass}`;
 export const CreateGame = gql`
     mutation CreateGame($name: String!) {
   createGame(name: $name) {
@@ -921,3 +1101,10 @@ export const JoinGame = gql`
   }
 }
     ${PlayerItem}`;
+export const OpenUniversity = gql`
+    mutation OpenUniversity($name: String!, $playerId: ID!) {
+  openUniversity(name: $name, playerId: $playerId) {
+    id
+  }
+}
+    `;

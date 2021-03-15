@@ -5,7 +5,8 @@ import * as Pages from './pages'
 export function Routes() {
     return <Switch>
         <Route path='/game/:gameId'>
-            <Pages.GamePage />
+            {/* <Pages.GamePage /> */}
+            <Pages.UniversityPage />
         </Route>
         <Route path='/'>
             <Pages.HomePage />

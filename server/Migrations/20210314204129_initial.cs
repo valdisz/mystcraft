@@ -478,7 +478,7 @@ namespace atlantis.Migrations
                     Target_Code = table.Column<string>(type: "TEXT", nullable: true),
                     Target_Level = table.Column<int>(type: "INTEGER", nullable: true),
                     Target_Days = table.Column<int>(type: "INTEGER", nullable: true),
-                    Learn = table.Column<string>(type: "TEXT", nullable: true),
+                    Study = table.Column<string>(type: "TEXT", nullable: true),
                     Teach = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

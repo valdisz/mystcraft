@@ -25,8 +25,14 @@ namespace advisor
         }
     }
 
-    public record PlayerUniversity(DbUniversity University, UniveristyMemberRole Role) {
+    public class PlayerUniversity {
+        public PlayerUniversity(DbUniversity University, UniveristyMemberRole Role) {
+            this.University = University;
+            this.Role = Role;
+        }
 
+        public DbUniversity University { get; }
+        public UniveristyMemberRole Role { get; }
     }
 
     [ExtendObjectType(Name = "Player")]
@@ -41,10 +47,14 @@ namespace advisor
             return db.Games.SingleOrDefaultAsync(x => x.Id == player.GameId);
         }
 
-        public PlayerUniversity University([Parent] DbPlayer player) {
-            return player.UniversityMembership == null
+        public async Task<PlayerUniversity> University([Parent] DbPlayer player) {
+            var membership = await db.UniversityMemberships
+                .Include(x => x.University)
+                .SingleOrDefaultAsync(x => x.PlayerId == player.Id);
+
+            return membership == null
                 ? null
-                : new PlayerUniversity(player.UniversityMembership.University, player.UniversityMembership.Role);
+                : new PlayerUniversity(membership.University, membership.Role);
         }
 
         public Task<List<DbReport>> Reports([Parent] DbPlayer player, long? turn = null) {

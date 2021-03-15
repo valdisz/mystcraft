@@ -8,13 +8,11 @@ import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
 import { Region } from '../store/game/types'
+import { GameRouteParams } from './game-route-params'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any
 
-interface GamePageRouteParams {
-    gameId: string
-}
 
 const GameContainer = styled.div`
     width: 100%;
@@ -230,7 +228,7 @@ const GameComponent = observer(() => {
 })
 
 export function GamePage() {
-    const { gameId } = useParams<GamePageRouteParams>()
+    const { gameId } = useParams<GameRouteParams>()
     const { game } = useStore()
 
     React.useEffect(() => {

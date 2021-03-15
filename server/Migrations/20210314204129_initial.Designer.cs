@@ -9,7 +9,7 @@ using advisor.Persistence;
 namespace atlantis.Migrations
 {
     [DbContext(typeof(Database))]
-    [Migration("20210314133614_initial")]
+    [Migration("20210314204129_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -297,7 +297,7 @@ namespace atlantis.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Learn")
+                    b.Property<string>("Study")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Teach")
