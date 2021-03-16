@@ -116,6 +116,10 @@ const StudySchedule = styled.table`
     .target {
         min-width: 50px;
     }
+
+    .location {
+        margin-top: 1rem;
+    }
 `
 
 const University = observer(() => {
@@ -133,7 +137,7 @@ const University = observer(() => {
 
                 <StudySchedule>
                     { university.locations.map(x => <tbody key={x.id}>
-                        <tr>
+                        <tr className='location'>
                             <th colSpan={20}>{x.terrain} ({x.x},{x.y},{x.z} {x.label}) in {x.province}{ x.settlement ? `, contains ${x.settlement} [${x.settlementSize.toLowerCase()}]` : '' }</th>
                         </tr>
                         <tr>
