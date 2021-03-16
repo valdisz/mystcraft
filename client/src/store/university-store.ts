@@ -127,6 +127,7 @@ function getSkillGroups() {
                 { code: 'FIRE' },
                 { code: 'FSHI' },
                 { code: 'SSHI' },
+                { code: 'ESHI' },
             ]
         },
         // 'illusions'
