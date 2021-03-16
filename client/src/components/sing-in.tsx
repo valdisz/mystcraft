@@ -17,7 +17,7 @@ function Copyright() {
     return (
         <Typography variant='body2' color='textSecondary' align='center'>
             {'Copyright © '}
-            <Link color='inherit' href='https://material-ui.com/'>Atlantis Economy Advisor</Link>
+            <Link color='inherit' href='https://material-ui.com/'>Valds Zobēla</Link>
             {' '}
             {new Date().getFullYear()}
             {'.'}
