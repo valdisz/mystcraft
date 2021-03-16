@@ -160,7 +160,8 @@ namespace advisor {
             }
 
             app
-                .UseDefaultFiles()
+                // .UseDefaultFiles()
+                .UseMiddleware<DefaultFilesMiddleware>()
                 .UseStaticFiles()
                 .UseRouting()
                 .UseCors()
