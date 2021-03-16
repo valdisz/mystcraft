@@ -118,7 +118,7 @@ const StudySchedule = styled.table`
     }
 
     .location {
-        margin-top: 2rem;
+        padding-top: 2rem;
     }
 `
 
