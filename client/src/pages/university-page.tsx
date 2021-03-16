@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
 import { GameRouteParams } from './game-route-params'
-import { Student, useStore } from '../store'
+import { Student, Skill, useStore } from '../store'
 import { observer, Observer } from 'mobx-react-lite'
 import { Button, Container, makeStyles, TextField, Typography } from '@material-ui/core'
 
@@ -117,10 +117,53 @@ const StudySchedule = styled.table`
         min-width: 50px;
     }
 
+    td.target {
+        cursor: pointer;
+    }
+
     .location {
         padding-top: 2rem;
     }
+
+    .skill--can-study {
+        background-color: lightgreen;
+    }
+
+    .skill--target {
+        border-width: 2px;
+        border-color: blue;
+    }
+
+    .skill--study {
+        border-width: 2px;
+        border-color: red;
+    }
+
+    .skill--tought {
+        border-width: 2px;
+        border-color: green;
+    }
 `
+
+function getSkillClasses(student: Student, skill: Skill) {
+    const classes = []
+
+    if (student.mode === 'target-selection') {
+        if (skill.canStudy) {
+            classes.push('skill--can-study')
+        }
+    }
+
+    if (student.target?.code === skill.code) {
+        classes.push('skill--target')
+    }
+
+    if (student.study === skill.code) {
+        classes.push('skill--study')
+    }
+
+    return classes.join(' ')
+}
 
 const University = observer(() => {
     const { university } = useStore()
@@ -154,22 +197,24 @@ const University = observer(() => {
                         { x.students.map(student => <tr key={student.id}>
                             <td className='faction'>{student.factionName} ({student.factionNumber})</td>
                             <td className='unit'>{student.name} ({student.number})</td>
-                            <td className='target'>
+                            <td className='target skill' onClick={student.beginTargetSelection}>
                                 { student.target && <>
-                                        <div className='level'>{student.target.level}</div>
                                         <div className='days'>{student.target.code}</div>
+                                        <div className='level' onClick={student.incTargetLevel}>{student.target.level}</div>
                                     </>}
                             </td>
                             <td className='orders'>{student.orders}</td>
-                            { student.skills.map((group, i) => <React.Fragment key={i}>
-                                <td className='empty'></td>
-                                { group.skills.map(({ code, level, days }) => <td key={code} className='skill'>
-                                    { days && <>
-                                        <div className='level'>{level}</div>
-                                        <div className='days'>{days}</div>
-                                    </> }
-                                </td> ) }
-                            </React.Fragment> ) }
+                            { student.skillsGroups.map((group, i) => (
+                                <React.Fragment key={i}>
+                                    <td className='empty'></td>
+                                    { group.skills.map(skill => (
+                                        <td key={skill.code} className={`skill ${getSkillClasses(student, skill)}`} onClick={() => student.skillClick(skill.code)}>
+                                            { skill.days && <>
+                                                <div className='days'>{skill.days}</div>
+                                                <div className='level'>{skill.level}</div>
+                                            </> }
+                                        </td>) ) }
+                                </React.Fragment>) ) }
                         </tr>)}
                     </tbody> ) }
                 </StudySchedule>

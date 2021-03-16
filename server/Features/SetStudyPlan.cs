@@ -28,6 +28,8 @@ namespace advisor.Features {
 
         private Task<DbStudyPlan> GetPlan(long studyPlanId) {
             return db.StudyPlans
+                .Include(x => x.Unit)
+                .ThenInclude(x => x.Faction)
                 .SingleOrDefaultAsync(x => x.Id == studyPlanId);
         }
 

@@ -72,7 +72,7 @@ export type Report = Node & {
   factionName: Scalars['String'];
   factionNumber: Scalars['Int'];
   id: Scalars['ID'];
-  json: Scalars['String'];
+  json?: Maybe<Scalars['String']>;
   source: Scalars['String'];
 };
 
@@ -640,6 +640,31 @@ export type GetUniversityClassQueryVariables = Exact<{
 
 export type GetUniversityClassQuery = { node?: Maybe<UniversityClassFragment> };
 
+export type SetStudPlanyStudyMutationVariables = Exact<{
+  studyPlanId: Scalars['ID'];
+  skill: Scalars['String'];
+}>;
+
+
+export type SetStudPlanyStudyMutation = { setStudPlanyStudy?: Maybe<StudyPlanFragment> };
+
+export type SetStudPlanyTargetMutationVariables = Exact<{
+  studyPlanId: Scalars['ID'];
+  skill: Scalars['String'];
+  level: Scalars['Int'];
+}>;
+
+
+export type SetStudPlanyTargetMutation = { setStudyPlanTarget?: Maybe<StudyPlanFragment> };
+
+export type SetStudPlanyTeachMutationVariables = Exact<{
+  studyPlanId: Scalars['ID'];
+  units: Array<Scalars['Long']> | Scalars['Long'];
+}>;
+
+
+export type SetStudPlanyTeachMutation = { setStudyPlanTeach?: Maybe<StudyPlanFragment> };
+
 export type PlayerUniversityFragment = (
   Pick<Player, 'id'>
   & { university?: Maybe<(
@@ -1087,6 +1112,27 @@ export const GetUniversityClass = gql`
   }
 }
     ${UniversityClass}`;
+export const SetStudPlanyStudy = gql`
+    mutation SetStudPlanyStudy($studyPlanId: ID!, $skill: String!) {
+  setStudPlanyStudy(studyPlanId: $studyPlanId, skill: $skill) {
+    ...StudyPlan
+  }
+}
+    ${StudyPlan}`;
+export const SetStudPlanyTarget = gql`
+    mutation SetStudPlanyTarget($studyPlanId: ID!, $skill: String!, $level: Int!) {
+  setStudyPlanTarget(studyPlanId: $studyPlanId, skill: $skill, level: $level) {
+    ...StudyPlan
+  }
+}
+    ${StudyPlan}`;
+export const SetStudPlanyTeach = gql`
+    mutation SetStudPlanyTeach($studyPlanId: ID!, $units: [Long!]!) {
+  setStudyPlanTeach(studyPlanId: $studyPlanId, units: $units) {
+    ...StudyPlan
+  }
+}
+    ${StudyPlan}`;
 export const CreateGame = gql`
     mutation CreateGame($name: String!) {
   createGame(name: $name) {

@@ -16,6 +16,24 @@ query GetUniversityClass($classId: ID!) {
   }
 }
 
+mutation SetStudPlanyStudy($studyPlanId: ID!, $skill: String!) {
+  setStudPlanyStudy(studyPlanId: $studyPlanId skill: $skill) {
+    ...StudyPlan
+  }
+}
+
+mutation SetStudPlanyTarget($studyPlanId: ID!, $skill: String!, $level: Int!) {
+  setStudyPlanTarget(studyPlanId: $studyPlanId, skill: $skill, level: $level) {
+    ...StudyPlan
+  }
+}
+
+mutation SetStudPlanyTeach($studyPlanId: ID!, $units: [Long!]!) {
+  setStudyPlanTeach(studyPlanId: $studyPlanId, units: $units) {
+    ...StudyPlan
+  }
+}
+
 fragment PlayerUniversity on Player {
   id
   university {
