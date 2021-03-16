@@ -26,6 +26,12 @@
             };
         }
 
+        public AtlantisReportJsonConverter(TextReader reader, params IReportSectionParser[] sections)
+        {
+            this.reader = new AtlantisTextReader(reader);
+            this.sections = sections;
+        }
+
         public AtlantisReportJsonConverter(TextReader reader, IEnumerable<IReportSectionParser> sections) {
             this.reader = new AtlantisTextReader(reader);
             this.sections = sections.ToArray();
@@ -41,7 +47,7 @@
             await using var cursor = reader.AsCursor();
 
             await writer.WriteStartObjectAsync();
-            while (await cursor.NextAsync()) {
+            while ( s.Count > 0 && await cursor.NextAsync()) {
                 foreach (var section in s) {
                     if (await section.CanParseAsync(cursor)) {
                         await section.ParseAsync(cursor, writer);
@@ -71,6 +77,25 @@
 
             JObject report = await JObject.LoadAsync(reader);
             return report;
+        }
+
+        public async Task<T> ReadAs<T>()
+        {
+            using var buffer = new MemoryStream();
+            using var bufferWriter = new StreamWriter(buffer);
+            using JsonWriter writer = new JsonTextWriter(bufferWriter);
+
+            await ReadAsJsonAsync(writer);
+
+            buffer.Seek(0, SeekOrigin.Begin);
+
+            using var bufferReader = new StreamReader(buffer);
+            using JsonReader reader = new JsonTextReader(bufferReader);
+
+            var serializer = JsonSerializer.Create();
+            var value = serializer.Deserialize<T>(reader);
+
+            return value;
         }
 
         private bool disposedValue = false;

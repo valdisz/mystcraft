@@ -1,14 +1,15 @@
 namespace advisor {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.IO;
     using System.Threading.Tasks;
-    using HotChocolate.Types.Relay;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Authorization;
     using Newtonsoft.Json;
     using MediatR;
+    using HotChocolate.Types.Relay;
     using advisor.Features;
-    using Microsoft.AspNetCore.Authorization;
 
     [Authorize]
     [Route("report")]
@@ -43,9 +44,7 @@ namespace advisor {
             }
 
             var earliestTurn = await mediator.Send(new UploadReports(playerIdValue, reports));
-
-            await mediator.Send(new LoadReports(playerIdValue, earliestTurn));
-
+            await mediator.Send(new ParseReports(playerIdValue, earliestTurn));
             await mediator.Send(new SetupStudyPlans(playerIdValue));
 
             return Ok();

@@ -14,13 +14,14 @@ namespace advisor.Features {
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
+    using System.IO;
 
-    public record LoadReports(long PlayerId, int EarliestTurn) : IRequest {
+    public record ParseReports(long PlayerId, int EarliestTurn) : IRequest {
 
     }
 
-    public class LoadReportsHandler : IRequestHandler<LoadReports> {
-        public LoadReportsHandler(Database db, IMapper mapper, IMediator mediator) {
+    public class ParseReportsHandler : IRequestHandler<ParseReports> {
+        public ParseReportsHandler(Database db, IMapper mapper, IMediator mediator) {
             this.db = db;
             this.mapper = mapper;
             this.mediator = mediator;
@@ -33,7 +34,7 @@ namespace advisor.Features {
         public const string DEFAULT_LEVEL_LABEL = "surface";
         public const int DEFAULT_LEVEL_Z = 1;
 
-        public async Task<Unit> Handle(LoadReports request, CancellationToken cancellationToken) {
+        public async Task<Unit> Handle(ParseReports request, CancellationToken cancellationToken) {
             var lastTurn = await db.Turns
                 .AsNoTracking()
                 .OrderByDescending(x => x.Number)
@@ -115,11 +116,10 @@ namespace advisor.Features {
             var savedReports = db.Reports
                 .Include(x => x.Turn)
                 .Where(x => x.TurnId == turnId)
-                .AsNoTracking()
                 .AsAsyncEnumerable();
 
             await foreach (var r in savedReports) {
-                var report = JsonConvert.DeserializeObject<JReport>(r.Json);
+                JReport report = await GetJsonReportAsync(r);
 
                 CreateOrUpdateFaction(factions, report);
 
@@ -129,6 +129,20 @@ namespace advisor.Features {
             }
 
             AddRevealedRegionsFromExits(turnNumber, regions);
+        }
+
+        public static async Task<JReport> GetJsonReportAsync(DbReport rec) {
+            if (rec.Json == null) {
+                using var textReader = new StringReader(rec.Source);
+                using var atlantisReader = new AtlantisReportJsonConverter(textReader);
+
+                var json = await atlantisReader.ReadAsJsonAsync();
+                rec.Json = json.ToString(Formatting.None);
+
+                return json.ToObject<JReport>();
+            }
+
+            return JsonConvert.DeserializeObject<JReport>(rec.Json);
         }
 
         public static DbFaction CreateOrUpdateFaction(FactionsDic factions, JFaction f) {

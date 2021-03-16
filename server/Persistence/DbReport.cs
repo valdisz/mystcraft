@@ -24,7 +24,6 @@ namespace advisor.Persistence {
         [Required]
         public string Source { get; set; }
 
-        [Required]
         public string Json { get; set; }
 
 

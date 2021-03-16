@@ -217,7 +217,6 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("integer");
 
                     b.Property<string>("Json")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<long>("PlayerId")

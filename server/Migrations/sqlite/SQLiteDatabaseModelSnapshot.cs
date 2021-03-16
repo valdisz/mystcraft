@@ -208,7 +208,6 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Json")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<long>("PlayerId")

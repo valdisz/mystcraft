@@ -42,7 +42,10 @@ namespace advisor.Features {
         private static async Task<int> LoadReportAsync(Database db, string source, DbPlayer player) {
             using var textReader = new StringReader(source);
 
-            using var atlantisReader = new AtlantisReportJsonConverter(textReader);
+            using var atlantisReader = new AtlantisReportJsonConverter(textReader,
+                new ReportFactionSection(),
+                new RulesetSection()
+            );
             var json = await atlantisReader.ReadAsJsonAsync();
             var report  = json.ToObject<JReport>();
 
@@ -89,7 +92,6 @@ namespace advisor.Features {
             dbReport.FactionNumber = factionNumber;
             dbReport.FactionName = factionName;
             dbReport.Source = source;
-            dbReport.Json = json.ToString(Formatting.Indented);
 
             player.FactionNumber ??= dbReport.FactionNumber;
             if (dbReport.FactionNumber == player.FactionNumber && turnNumber > player.LastTurnNumber) {
