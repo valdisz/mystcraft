@@ -10,7 +10,7 @@ using advisor.Persistence;
 namespace advisor.Migrations.mssql
 {
     [DbContext(typeof(MsSqlDatabase))]
-    [Migration("20210315203536_initial")]
+    [Migration("20210316085541_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -499,7 +499,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Events")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Faction");
@@ -512,7 +512,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Factions")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Turn");
@@ -542,7 +542,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Regions")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
@@ -716,7 +716,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Reports")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Player");
@@ -735,7 +735,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Structures")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsOne("advisor.Persistence.DbSailors", "Sailors", b1 =>
@@ -815,7 +815,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Plans")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbUnit", "Unit")
@@ -893,7 +893,7 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Units")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsOne("advisor.Persistence.DbCapacity", "Capacity", b1 =>
@@ -1069,13 +1069,13 @@ namespace advisor.Migrations.mssql
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
                         .WithOne("UniversityMembership")
                         .HasForeignKey("advisor.Persistence.DbUniversityMembership", "PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbUniversity", "University")
                         .WithMany("Members")
                         .HasForeignKey("UniversityId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Player");

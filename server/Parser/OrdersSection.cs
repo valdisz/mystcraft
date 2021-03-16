@@ -6,7 +6,7 @@ namespace advisor
 
     public class OrdersSection : IReportSectionParser {
         public Task<bool> CanParseAsync(Cursor<TextParser> cursor) {
-            var result = cursor.Value.Match("Orders Template (Long Format):");
+            var result = cursor.Value.Match("Orders Template");
             return Task.FromResult(result.Success);
         }
 

@@ -482,7 +482,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Events")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Faction");
@@ -495,7 +495,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Factions")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Turn");
@@ -525,7 +525,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Regions")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
@@ -697,7 +697,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Reports")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Player");
@@ -716,7 +716,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Structures")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsOne("advisor.Persistence.DbSailors", "Sailors", b1 =>
@@ -792,7 +792,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Plans")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbUnit", "Unit")
@@ -868,7 +868,7 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Units")
                         .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.OwnsOne("advisor.Persistence.DbCapacity", "Capacity", b1 =>
@@ -1038,13 +1038,13 @@ namespace advisor.Migrations.sqlite
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
                         .WithOne("UniversityMembership")
                         .HasForeignKey("advisor.Persistence.DbUniversityMembership", "PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbUniversity", "University")
                         .WithMany("Members")
                         .HasForeignKey("UniversityId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Player");

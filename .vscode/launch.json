@@ -9,11 +9,15 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/server/bin/Debug/net5.0/atlantis.dll",
+            "program": "${workspaceFolder}/server/bin/Debug/net5.0/advisor.dll",
             "args": [],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/server",
             "console": "internalConsole",
-            "stopAtEntry": false
+            "stopAtEntry": false,
+            "env": {
+                "ADVISOR_SEED__EMAIL": "valdis@zobela.eu",
+                "ADVISOR_SEED__PASSWORD": "valdis"
+            }
         },
         {
             "name": ".NET Core Attach",

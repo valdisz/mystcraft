@@ -51,14 +51,28 @@
         public static async Task RunServerAsync(string[] args) {
             var host = CreateHostBuilder(args).Build();
 
-            using (var scope = host.Services.CreateScope()) {
-                var services = scope.ServiceProvider;
-                var config = services.GetRequiredService<IConfiguration>();
-
-                await BeforeStartAsync(services, config);
-            }
+            await RunDatabaseMigrationsAsync(host);
 
             await host.RunAsync();
+        }
+
+        private static async Task RunDatabaseMigrationsAsync(IWebHost host) {
+            using (var scope = host.Services.CreateScope()) {
+                var services = scope.ServiceProvider;
+                var conf = services.GetRequiredService<IConfiguration>();
+
+                var db = services.GetService<Database>();
+                await db.Database.MigrateAsync();
+
+                if (! await db.Users.AnyAsync()) {
+                    var mediator = services.GetService<IMediator>();
+
+                    var email = conf.GetValue<string>("Seed:Email");
+                    var password = conf.GetValue<string>("Seed:Password");
+
+                    await mediator.Send(new CreateUser(email, password, Policies.Root));
+                }
+            }
         }
 
         public static async Task RunConverterAsync(string[] args) {
@@ -69,20 +83,6 @@
             writer.Formatting = Formatting.Indented;
 
             await converter.ReadAsJsonAsync(writer);
-        }
-
-        public static async Task BeforeStartAsync(IServiceProvider services, IConfiguration conf) {
-            var db = services.GetService<Database>();
-            await db.Database.MigrateAsync();
-
-            if (! await db.Users.AnyAsync()) {
-                var mediator = services.GetService<IMediator>();
-
-                var email = conf.GetValue<string>("Seed:Email");
-                var password = conf.GetValue<string>("Seed:Password");
-
-                await mediator.Send(new CreateUser(email, password, Policies.Root));
-            }
         }
     }
 }

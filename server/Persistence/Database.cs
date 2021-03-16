@@ -136,65 +136,58 @@ namespace advisor.Persistence
             model.Entity<DbPlayer>(t => {
                 t.HasMany<DbReport>(x => x.Reports)
                     .WithOne(x => x.Player)
-                    .HasForeignKey(x => x.PlayerId)
-                    .IsRequired();
+                    .HasForeignKey(x => x.PlayerId);
 
                 t.HasMany<DbTurn>(x => x.Turns)
                     .WithOne(x => x.Player)
-                    .HasForeignKey(x => x.PlayerId)
-                    .IsRequired();
-
-                t.HasOne(x => x.UniversityMembership)
-                    .WithOne(x => x.Player)
-                    .HasForeignKey<DbUniversityMembership>(x => x.PlayerId);
+                    .HasForeignKey(x => x.PlayerId);
             });
 
             model.Entity<DbTurn>(t => {
                 t.HasMany<DbReport>(x => x.Reports)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany<DbRegion>(x => x.Regions)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Factions)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Structures)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
-                    .IsRequired();
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Plans)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId);
+                    .HasForeignKey(x => x.TurnId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             model.Entity<DbRegion>(t => {
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Region)
-                    .HasForeignKey(x => x.RegionId)
-                    .IsRequired();
+                    .HasForeignKey(x => x.RegionId);
 
                 t.HasMany(x => x.Structures)
                     .WithOne(x => x.Region)
-                    .HasForeignKey(x => x.RegionId)
-                    .IsRequired();
+                    .HasForeignKey(x => x.RegionId);
 
                 t.OwnsOne(p => p.Settlement, a => {
                     a.Property(x => x.Size).HasConversion<string>();
@@ -233,8 +226,7 @@ namespace advisor.Persistence
             model.Entity<DbFaction>(t => {
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Faction)
-                    .HasForeignKey(x => x.FactionId)
-                    .IsRequired();
+                    .HasForeignKey(x => x.FactionId);
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Faction)
@@ -299,10 +291,6 @@ namespace advisor.Persistence
                 t.HasMany(p => p.Plans)
                     .WithOne(p => p.University)
                     .HasForeignKey(p => p.UniversityId);
-
-                t.HasMany(x => x.Members)
-                    .WithOne(x => x.University)
-                    .HasForeignKey(x => x.UniversityId);
             });
 
             model.Entity<DbStudyPlan>(t => {
@@ -318,6 +306,16 @@ namespace advisor.Persistence
 
             model.Entity<DbUniversityMembership>(t => {
                 t.HasKey(x => new { x.PlayerId, x.UniversityId });
+
+                t.HasOne(x => x.Player)
+                    .WithOne(x => x.UniversityMembership)
+                    .HasForeignKey<DbUniversityMembership>(x => x.PlayerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                t.HasOne(x => x.University)
+                    .WithMany(x => x.Members)
+                    .HasForeignKey(x => x.UniversityId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
         }
     }

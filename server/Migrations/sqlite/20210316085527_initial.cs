@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace advisor.Migrations.mssql
+namespace advisor.Migrations.sqlite
 {
     public partial class initial : Migration
     {
@@ -10,14 +10,14 @@ namespace advisor.Migrations.mssql
                 name: "Games",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RemoteGameOptions = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EngineVersion = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RulesetName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RulesetVersion = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    RemoteGameOptions = table.Column<string>(type: "TEXT", nullable: true),
+                    EngineVersion = table.Column<string>(type: "TEXT", nullable: true),
+                    RulesetName = table.Column<string>(type: "TEXT", nullable: true),
+                    RulesetVersion = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -28,12 +28,12 @@ namespace advisor.Migrations.mssql
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Salt = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Algorithm = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Digest = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Email = table.Column<string>(type: "TEXT", nullable: false),
+                    Salt = table.Column<string>(type: "TEXT", nullable: false),
+                    Algorithm = table.Column<string>(type: "TEXT", nullable: false),
+                    Digest = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -44,10 +44,10 @@ namespace advisor.Migrations.mssql
                 name: "Universities",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    GameId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    GameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -64,14 +64,14 @@ namespace advisor.Migrations.mssql
                 name: "Players",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    GameId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionNumber = table.Column<int>(type: "int", nullable: true),
-                    FactionName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastTurnNumber = table.Column<int>(type: "int", nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false),
+                    GameId = table.Column<long>(type: "INTEGER", nullable: false),
+                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: true),
+                    FactionName = table.Column<string>(type: "TEXT", nullable: true),
+                    LastTurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    Password = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -94,8 +94,8 @@ namespace advisor.Migrations.mssql
                 name: "Users_Role",
                 columns: table => new
                 {
-                    Role = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<long>(type: "bigint", nullable: false)
+                    Role = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,12 +112,12 @@ namespace advisor.Migrations.mssql
                 name: "Turns",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    Number = table.Column<int>(type: "int", nullable: false),
-                    Month = table.Column<int>(type: "int", nullable: false),
-                    Year = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Month = table.Column<int>(type: "INTEGER", nullable: false),
+                    Year = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,9 +134,9 @@ namespace advisor.Migrations.mssql
                 name: "UniversityMemberships",
                 columns: table => new
                 {
-                    UniversityId = table.Column<long>(type: "bigint", nullable: false),
-                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    UniversityId = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Role = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -146,24 +146,24 @@ namespace advisor.Migrations.mssql
                         column: x => x.PlayerId,
                         principalTable: "Players",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_UniversityMemberships_Universities_UniversityId",
                         column: x => x.UniversityId,
                         principalTable: "Universities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Factions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    Number = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -173,31 +173,30 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Regions",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    X = table.Column<int>(type: "int", nullable: false),
-                    Y = table.Column<int>(type: "int", nullable: false),
-                    Z = table.Column<int>(type: "int", nullable: false),
-                    UpdatedAtTurn = table.Column<int>(type: "int", nullable: false),
-                    Label = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Province = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Terrain = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Settlement_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Settlement_Size = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Population = table.Column<int>(type: "int", nullable: false),
-                    Race = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Entertainment = table.Column<int>(type: "int", nullable: false),
-                    Tax = table.Column<int>(type: "int", nullable: false),
-                    Wages = table.Column<double>(type: "float", nullable: false),
-                    TotalWages = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    Z = table.Column<int>(type: "INTEGER", nullable: false),
+                    UpdatedAtTurn = table.Column<int>(type: "INTEGER", nullable: false),
+                    Label = table.Column<string>(type: "TEXT", nullable: false),
+                    Province = table.Column<string>(type: "TEXT", nullable: false),
+                    Terrain = table.Column<string>(type: "TEXT", nullable: false),
+                    Settlement_Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Settlement_Size = table.Column<string>(type: "TEXT", nullable: true),
+                    Population = table.Column<int>(type: "INTEGER", nullable: false),
+                    Race = table.Column<string>(type: "TEXT", nullable: true),
+                    Entertainment = table.Column<int>(type: "INTEGER", nullable: false),
+                    Tax = table.Column<int>(type: "INTEGER", nullable: false),
+                    Wages = table.Column<double>(type: "REAL", nullable: false),
+                    TotalWages = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -207,21 +206,21 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Reports",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionNumber = table.Column<int>(type: "int", nullable: false),
-                    FactionName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Source = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Json = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    FactionName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Source = table.Column<string>(type: "TEXT", nullable: false),
+                    Json = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -237,19 +236,19 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionId = table.Column<long>(type: "bigint", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    FactionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -265,23 +264,23 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Regions_Exits",
                 columns: table => new
                 {
-                    Direction = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
-                    X = table.Column<int>(type: "int", nullable: false),
-                    Y = table.Column<int>(type: "int", nullable: false),
-                    Z = table.Column<int>(type: "int", nullable: false),
-                    Label = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Province = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Terrain = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Settlement_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Settlement_Size = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Direction = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    Z = table.Column<int>(type: "INTEGER", nullable: false),
+                    Label = table.Column<string>(type: "TEXT", nullable: false),
+                    Province = table.Column<string>(type: "TEXT", nullable: false),
+                    Terrain = table.Column<string>(type: "TEXT", nullable: false),
+                    Settlement_Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Settlement_Size = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -298,10 +297,10 @@ namespace advisor.Migrations.mssql
                 name: "Regions_ForSale",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -318,9 +317,9 @@ namespace advisor.Migrations.mssql
                 name: "Regions_Products",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -337,10 +336,10 @@ namespace advisor.Migrations.mssql
                 name: "Regions_Wanted",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -357,26 +356,25 @@ namespace advisor.Migrations.mssql
                 name: "Structures",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
-                    X = table.Column<int>(type: "int", nullable: false),
-                    Y = table.Column<int>(type: "int", nullable: false),
-                    Z = table.Column<int>(type: "int", nullable: false),
-                    Sequence = table.Column<int>(type: "int", nullable: false),
-                    Number = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Flags = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SailDirections = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Speed = table.Column<int>(type: "int", nullable: true),
-                    Needs = table.Column<int>(type: "int", nullable: true),
-                    Load_Used = table.Column<int>(type: "int", nullable: true),
-                    Load_Max = table.Column<int>(type: "int", nullable: true),
-                    Sailors_Current = table.Column<int>(type: "int", nullable: true),
-                    Sailors_Required = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    X = table.Column<int>(type: "INTEGER", nullable: false),
+                    Y = table.Column<int>(type: "INTEGER", nullable: false),
+                    Z = table.Column<int>(type: "INTEGER", nullable: false),
+                    Sequence = table.Column<int>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Flags = table.Column<string>(type: "TEXT", nullable: true),
+                    SailDirections = table.Column<string>(type: "TEXT", nullable: true),
+                    Speed = table.Column<int>(type: "INTEGER", nullable: true),
+                    Needs = table.Column<int>(type: "INTEGER", nullable: true),
+                    Load_Used = table.Column<int>(type: "INTEGER", nullable: true),
+                    Load_Max = table.Column<int>(type: "INTEGER", nullable: true),
+                    Sailors_Current = table.Column<int>(type: "INTEGER", nullable: true),
+                    Sailors_Required = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -392,16 +390,16 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Structures_Contents",
                 columns: table => new
                 {
-                    Type = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    StructureId = table.Column<long>(type: "bigint", nullable: false),
-                    Count = table.Column<int>(type: "int", nullable: false)
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
+                    StructureId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Count = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -418,28 +416,27 @@ namespace advisor.Migrations.mssql
                 name: "Units",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
-                    StrcutureId = table.Column<long>(type: "bigint", nullable: true),
-                    FactionId = table.Column<long>(type: "bigint", nullable: true),
-                    Sequence = table.Column<int>(type: "int", nullable: false),
-                    Number = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    OnGuard = table.Column<bool>(type: "bit", nullable: false),
-                    Flags = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Weight = table.Column<int>(type: "int", nullable: true),
-                    Capacity_Flying = table.Column<int>(type: "int", nullable: true),
-                    Capacity_Riding = table.Column<int>(type: "int", nullable: true),
-                    Capacity_Walking = table.Column<int>(type: "int", nullable: true),
-                    Capacity_Swimming = table.Column<int>(type: "int", nullable: true),
-                    ReadyItem_Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ReadyItem_Amount = table.Column<int>(type: "int", nullable: true),
-                    CombatSpell_Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CombatSpell_Level = table.Column<int>(type: "int", nullable: true),
-                    CombatSpell_Days = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    RegionId = table.Column<long>(type: "INTEGER", nullable: false),
+                    StrcutureId = table.Column<long>(type: "INTEGER", nullable: true),
+                    FactionId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Sequence = table.Column<int>(type: "INTEGER", nullable: false),
+                    Number = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    OnGuard = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Flags = table.Column<string>(type: "TEXT", nullable: true),
+                    Weight = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Flying = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Riding = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Walking = table.Column<int>(type: "INTEGER", nullable: true),
+                    Capacity_Swimming = table.Column<int>(type: "INTEGER", nullable: true),
+                    ReadyItem_Code = table.Column<string>(type: "TEXT", nullable: true),
+                    ReadyItem_Amount = table.Column<int>(type: "INTEGER", nullable: true),
+                    CombatSpell_Code = table.Column<string>(type: "TEXT", nullable: true),
+                    CombatSpell_Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    CombatSpell_Days = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -467,23 +464,22 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
                 name: "StudyPlans",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UniversityId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    UnitId = table.Column<long>(type: "bigint", nullable: false),
-                    Target_Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Target_Level = table.Column<int>(type: "int", nullable: true),
-                    Target_Days = table.Column<int>(type: "int", nullable: true),
-                    Study = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Teach = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<long>(type: "INTEGER", nullable: false),
+                    UniversityId = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnId = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Target_Code = table.Column<string>(type: "TEXT", nullable: true),
+                    Target_Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    Target_Days = table.Column<int>(type: "INTEGER", nullable: true),
+                    Study = table.Column<string>(type: "TEXT", nullable: true),
+                    Teach = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -493,7 +489,7 @@ namespace advisor.Migrations.mssql
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_StudyPlans_Units_UnitId",
                         column: x => x.UnitId,
@@ -512,10 +508,10 @@ namespace advisor.Migrations.mssql
                 name: "Unit_CanStudy",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UnitId = table.Column<long>(type: "bigint", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: true),
-                    Days = table.Column<int>(type: "int", nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    Days = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -532,9 +528,9 @@ namespace advisor.Migrations.mssql
                 name: "Unit_Items",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UnitId = table.Column<long>(type: "bigint", nullable: false),
-                    Amount = table.Column<int>(type: "int", nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -551,10 +547,10 @@ namespace advisor.Migrations.mssql
                 name: "Unit_Skills",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UnitId = table.Column<long>(type: "bigint", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: true),
-                    Days = table.Column<int>(type: "int", nullable: true)
+                    Code = table.Column<string>(type: "TEXT", nullable: false),
+                    UnitId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Level = table.Column<int>(type: "INTEGER", nullable: true),
+                    Days = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {

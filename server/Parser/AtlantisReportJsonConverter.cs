@@ -48,6 +48,8 @@
                         s.Remove(section);
                         break;
                     }
+
+                    cursor.Value.Reset();
                 }
             }
             await writer.WriteEndObjectAsync();
