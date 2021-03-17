@@ -91,12 +91,12 @@ export const SKILL_TREE: { [ code: string]: ISkill[] } = {
     BRTL: [{ code: "PATT", level: 4 }, { code: "FORC", level: 4 }, { code: "SPIR", level: 4 }]
 }
 
-export function getSkillRequirements(code: string): ISkill[] {
+export function getSkillRequirements(code: string, level: number): ISkill[] {
     const deps = { }
     const s = [ ]
     for (const dep of (SKILL_TREE[code] ?? [])) {
         s.push(dep.code)
-        deps[dep.code] = dep.level
+        deps[dep.code] = Math.max(level, dep.level)
     }
 
     while (s.length) {

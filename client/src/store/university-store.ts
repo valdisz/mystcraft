@@ -88,7 +88,7 @@ export class Student {
     @computed get depSkills() {
         if (!this.target) return { }
 
-        let missing = getSkillRequirements(this.target.code)
+        let missing = getSkillRequirements(this.target.code, this.target.level)
         missing.push(this.target)
         missing = missing.filter(x => this.skills[x.code].level < x.level)
 
