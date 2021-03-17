@@ -165,6 +165,8 @@ export class Student {
     }
 
     @computed get depSkills() {
+        if (!this.target) return []
+
         const deps = { }
 
         const s = SKILL_TREE[this.target.code] ?? [ ]
