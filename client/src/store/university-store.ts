@@ -229,13 +229,16 @@ export class Student {
         const skill = this.skills[code]
         if (!skill.canStudy) return false
 
+        const level = skill.level + 1
+
         const skillDeps = SKILL_TREE[code]
         if (!skillDeps) return true
 
         for (const dep of skillDeps) {
+            const depLevel = Math.max(level, dep.level)
             const depSkill = this.skills[dep.code]
 
-            if ((depSkill?.level || 0) < dep.level) return false;
+            if ((depSkill?.level || 0) < depLevel) return false;
         }
 
         return true
