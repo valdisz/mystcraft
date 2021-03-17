@@ -9,7 +9,7 @@ export interface SkillCellProps {
     active: boolean
     onClick: () => void
 
-    target: boolean
+    isTarget: boolean
     missing: number
 
     studying: boolean
@@ -31,7 +31,7 @@ const CellBody = styled.div<Partial<SkillCellProps>>`
     border-width: 2px;
     border-style: solid;
     border-color: ${props => {
-        if (props.target) return 'blue'
+        if (props.isTarget) return 'blue'
         if (props.missing) return 'orange'
 
         return 'white'
@@ -88,17 +88,18 @@ const Cell = styled.td<CellProps>`
 `
 
 export function SkillCell({ title, onClick, ...props }: SkillCellProps) {
-    const content = () => <>
-        <SkillDays>{props.days ? props.days : ' '}</SkillDays>
-        { (props.level || props.missing > 0) && <SkillInfo>
-            { props.level ? <SkillLevel>{props.level}</SkillLevel> : <span></span> }
-            { props.missing > 0 && <MissingSkillLevel>+{props.missing}</MissingSkillLevel> }
-        </SkillInfo> }
-    </>
-
     return <Cell active={props.active} studying={props.studying} withTeacher={props.withTeacher}
         title={title}
         onClick={() => props.active && onClick()}>
-        <CellBody {...props}>{content()}</CellBody>
+        <CellBody {...props}>
+            <SkillDays>{props.days ? props.days : ' '}</SkillDays>
+            { props.level || props.missing > 0
+                ? <SkillInfo>
+                    { props.level ? <SkillLevel>{props.level}</SkillLevel> : <span></span> }
+                    { props.missing > 0 ? <MissingSkillLevel>+{props.missing}</MissingSkillLevel> : null }
+                </SkillInfo>
+                : null
+            }
+        </CellBody>
     </Cell>
 }

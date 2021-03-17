@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
 import { GameRouteParams } from './game-route-params'
-import { Student, Skill, useStore } from '../store'
+import { useStore } from '../store'
 import { observer, Observer } from 'mobx-react-lite'
 import { Box, Button, ButtonGroup, ButtonProps, Container, List, ListItem, ListItemText, makeStyles, Paper, TextField, Typography } from '@material-ui/core'
 import { useCallbackRef } from '../lib'
@@ -245,7 +245,7 @@ const University = observer(() => {
                                             title=''
                                             days={skill.days}
                                             level={skill.level}
-                                            target={student.isTargetSkill(skill.code)}
+                                            isTarget={student.isTargetSkill(skill.code)}
                                             missing={student.getMissingLevel(skill.code)}
                                             studying={student.study == skill.code}
                                             withTeacher={false}

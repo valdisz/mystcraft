@@ -8,7 +8,7 @@ import { SetStudPlanyTarget, SetStudPlanyTargetMutation, SetStudPlanyTargetMutat
 import { SetStudPlanyStudy, SetStudPlanyStudyMutation, SetStudPlanyStudyMutationVariables } from '../schema'
 import { SetStudPlanyTeach, SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables } from '../schema'
 import { ClassSummaryFragment, UniveristyMemberRole } from '../schema'
-import { ISkill, SKILL_TREE } from './skill-tree'
+import { getSkillRequirements, ISkill, SKILL_TREE } from './skill-tree'
 
 class NewUniversity {
     constructor(private readonly parent: UniversityStore) {
@@ -88,35 +88,19 @@ export class Student {
     @computed get depSkills() {
         if (!this.target) return { }
 
-        const deps = { }
-
-        const s = SKILL_TREE[this.target.code] ?? [ ]
-        while (s.length) {
-            const skill = s.pop()
-            if (!deps[skill.code]) {
-                deps[skill.code] = 1
-            }
-
-            if (deps[skill.code] < skill.level) {
-                deps[skill.code] = skill.level
-            }
-
-            const skillDeps = SKILL_TREE[skill.code]
-            if (skillDeps?.length ?? 0) {
-                for (const dep of skillDeps) {
-                    s.push(dep)
-                }
-            }
-        }
+        let missing = getSkillRequirements(this.target.code)
+        missing.push(this.target)
+        missing = missing.filter(x => this.skills[x.code].level < x.level)
 
         const value = { }
         const level = this.target.level
-        for (const skill in deps) {
-            const depLevel = Math.max(level, deps[skill])
-            const studentLevel = this.skills[skill]?.level ?? 0
+        for (const skill of missing) {
+            const depLevel = Math.max(level, skill.level)
+            const studentLevel = this.skills[skill.code]?.level ?? 0
+            const delta = depLevel - studentLevel
 
-            if (studentLevel < depLevel) {
-                value[skill] = depLevel - studentLevel
+            if (delta > 0) {
+                value[skill.code] = delta
             }
         }
 

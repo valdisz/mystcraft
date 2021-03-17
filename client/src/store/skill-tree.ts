@@ -90,3 +90,23 @@ export const SKILL_TREE: { [ code: string]: ISkill[] } = {
 
     BRTL: [{ code: "PATT", level: 4 }, { code: "FORC", level: 4 }, { code: "SPIR", level: 4 }]
 }
+
+export function getSkillRequirements(code: string): ISkill[] {
+    const deps = { }
+    const s = [ ]
+    for (const dep of (SKILL_TREE[code] ?? [])) {
+        s.push(dep.code)
+        deps[dep.code] = dep.level
+    }
+
+    while (s.length) {
+        const next = s.pop()
+
+        for (const dep of (SKILL_TREE[next] ?? [])) {
+            s.push(dep.code)
+            deps[dep.code] = Math.max(dep.level, deps[dep.code] || 0, deps[next] || 0)
+        }
+    }
+
+    return Object.keys(deps).map(code => ({ code, level: deps[code] }))
+}
