@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { makeObservable, observable, IObservableArray, runInAction, action, computed, toJS } from 'mobx'
+import { makeObservable, observable, IObservableArray, runInAction, action, computed } from 'mobx'
 import { CLIENT } from '../client'
-import { GetUniversity, GetUniversityQuery, GetUniversityQueryVariables, SettlementSize, StudyPlanFragment,  } from '../schema'
+import { GetUniversity, GetUniversityQuery, GetUniversityQueryVariables, SettlementSize, StudyPlanFragment, UniversityMemberFragment,  } from '../schema'
 import { OpenUniversity, OpenUniversityMutation, OpenUniversityMutationVariables } from '../schema'
 import { GetUniversityClass, GetUniversityClassQuery, GetUniversityClassQueryVariables } from '../schema'
 import { SetStudPlanyTarget, SetStudPlanyTargetMutation, SetStudPlanyTargetMutationVariables } from '../schema'
@@ -93,7 +93,7 @@ export class Student {
     readonly teach: IObservableArray<number> = observable([])
     @observable study = ''
 
-    @observable mode: '' | 'target-selection' = ''
+    @observable mode: '' | 'target-selection' | 'study' = ''
 
     @action beginTargetSelection = () => {
         if (this.mode !== '') {
@@ -104,15 +104,35 @@ export class Student {
         this.mode = 'target-selection'
     }
 
+    @action beginStudy = () => {
+        if (this.mode !== '') {
+            this.mode = ''
+            return
+        }
+
+        this.mode = 'study'
+    }
+
     @action skillClick = (skill: string) => {
-        if (this.mode == 'target-selection') {
+        if (this.mode === 'target-selection') {
             this.setTarget(skill, (this.skills[skill].level || 0) + 1)
+        }
+        else if (this.mode === 'study') {
+            this.setStudy(skill)
         }
 
         this.mode = ''
     }
 
-    @computed get orders() {
+    @computed get ordersShort() {
+        return this.study
+            ? this.study
+            : this.teach.length
+                ? 'TEACH'
+                : ''
+    }
+
+    @computed get ordersFull() {
         return this.study
             ? `STUDY ${this.study}`
             : this.teach.length
@@ -190,6 +210,7 @@ export class Student {
         this.target = plan.target
             ? new Skill({ code: plan.target.code, level: plan.target.level })
             : null
+        this.study = plan.study
 
         const skills = getSkillGroups()
         const skillIndex: { [ code: string ]: Skill } = {}
@@ -256,6 +277,7 @@ export class UniversityStore {
     @observable name: string = null
 
     readonly classes: IObservableArray<ClassSummaryFragment> = observable([])
+    readonly members: IObservableArray<UniversityMemberFragment> = observable([])
 
     @observable selectedClassId: string = null
 
@@ -283,6 +305,9 @@ export class UniversityStore {
             classes.sort((a, b) => a.turnNumber - b.turnNumber)
         }
 
+        const members = university?.university.members ?? []
+        members.sort((a, b) => a.player.factionNumber - b.player.factionNumber)
+
         if (player) this.playerId = player.id
 
         runInAction(() => {
@@ -293,6 +318,7 @@ export class UniversityStore {
                 this.id = id
                 this.name = name
                 this.classes.replace(classes)
+                this.members.replace(members)
 
                 if (classes.length) {
                     this.selectClass(classes[classes.length - 1].id)

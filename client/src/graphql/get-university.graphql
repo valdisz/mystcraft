@@ -44,7 +44,19 @@ fragment PlayerUniversity on Player {
       classes {
         ...ClassSummary
       }
+      members {
+        ...UniversityMember
+      }
     }
+  }
+}
+
+fragment UniversityMember on UniversityMember {
+  role
+  player {
+    id
+    factionName
+    factionNumber
   }
 }
 

@@ -4,7 +4,9 @@ import { Link, useParams } from 'react-router-dom'
 import { GameRouteParams } from './game-route-params'
 import { Student, Skill, useStore } from '../store'
 import { observer, Observer } from 'mobx-react-lite'
-import { Button, Container, makeStyles, TextField, Typography } from '@material-ui/core'
+import { Box, Button, ButtonGroup, ButtonProps, Container, List, ListItem, ListItemText, makeStyles, Paper, TextField, Typography } from '@material-ui/core'
+import { useCallbackRef } from '../lib'
+import ClipboardJS from 'clipboard'
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -65,7 +67,7 @@ const NewUniversity = observer(() => {
 const StudySchedule = styled.table`
     border-collapse: collapse;
 
-    font-size: 75%;
+    font-size: 11px;
     font-family: Fira Code, Roboto Mono, monospace;
 
     td, th {
@@ -86,6 +88,10 @@ const StudySchedule = styled.table`
         border: none;
     }
 
+    .skill-level {
+        background-color: #e0e0e0;
+    }
+
     .skill {
         padding: 0;
 
@@ -93,7 +99,7 @@ const StudySchedule = styled.table`
             display: inline-block;
             padding: .25rem;
             margin: 2px;
-            background-color: silver;
+            background-color: #e0e0e0;
         }
 
         .days {
@@ -116,10 +122,6 @@ const StudySchedule = styled.table`
 
     .target {
         min-width: 50px;
-    }
-
-    td.target {
-        cursor: pointer;
     }
 
     .location {
@@ -146,10 +148,20 @@ const StudySchedule = styled.table`
     }
 `
 
+const XsButton = styled(Button).attrs({
+    size: 'small',
+    variant: 'outlined'
+})`
+    padding: 2px !important;
+    min-width: 20px !important;
+    font-size: 11px;
+    font-family: Fira Code, Roboto Mono, monospace;
+`
+
 function getSkillClasses(student: Student, skill: Skill) {
     const classes = []
 
-    if (student.mode === 'target-selection') {
+    if (student.mode !== '') {
         if (skill.canStudy) {
             classes.push('skill--can-study')
         }
@@ -164,6 +176,42 @@ function getSkillClasses(student: Student, skill: Skill) {
     }
 
     return classes.join(' ')
+}
+
+const MemberList = observer(() => {
+    const { university: { members } } = useStore()
+
+    return <>
+        { members.map(x => <ListItem key={x.player.id}>
+            <ListItemText primary={`${x.player.factionName} (${x.player.factionNumber})`} secondary={x.role} />
+        </ListItem>) }
+    </>
+})
+
+function Members() {
+    return <Paper>
+        <List>
+            <MemberList />
+        </List>
+    </Paper>
+}
+
+interface CopyButtonProps extends ButtonProps {
+    text: string
+}
+
+function CopyButton({ text, ...props }: CopyButtonProps) {
+    const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
+
+    React.useEffect(() => {
+        if (!ref) return
+
+        const clip = new ClipboardJS(ref)
+
+        return () => clip.destroy()
+    }, [ ref ])
+
+    return <XsButton {...props} ref={setRef} data-clipboard-text={text} />
 }
 
 const University = observer(() => {
@@ -197,14 +245,24 @@ const University = observer(() => {
                         </tr>
                         { x.students.map(student => <tr key={student.id}>
                             <td className='faction'>{student.factionName} ({student.factionNumber})</td>
-                            <td className='unit'>{student.name} ({student.number})</td>
-                            <td className='target skill' onClick={student.beginTargetSelection}>
-                                { student.target && <>
-                                        <div className='days'>{student.target.code}</div>
-                                        <div className='level' onClick={student.incTargetLevel}>{student.target.level}</div>
-                                    </>}
+                            <td className='unit'>
+                                {student.name} ({student.number})
+                                <Box ml={1} clone>
+                                    <ButtonGroup>
+                                        <XsButton onClick={student.beginStudy} title='Study'>S</XsButton>
+                                        <XsButton>T</XsButton>
+                                    </ButtonGroup>
+                                </Box>
                             </td>
-                            <td className='orders'>{student.orders}</td>
+                            <td className='target'>
+                                <ButtonGroup>
+                                    <XsButton onClick={student.beginTargetSelection} title='Study'>{student.target.code}</XsButton>
+                                    <XsButton className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
+                                </ButtonGroup>
+                            </td>
+                            <td className='orders'>
+                                <CopyButton fullWidth text={student.ordersFull}>{student.ordersShort}</CopyButton>
+                            </td>
                             { student.skillsGroups.map((group, i) => (
                                 <React.Fragment key={i}>
                                     <td className='empty'></td>
@@ -219,6 +277,7 @@ const University = observer(() => {
                         </tr>)}
                     </tbody> ) }
                 </StudySchedule>
+                <Members />
             </div>
         </Container>
     )

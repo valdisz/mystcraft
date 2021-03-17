@@ -671,9 +671,14 @@ export type PlayerUniversityFragment = (
     Pick<PlayerUniversity, 'role'>
     & { university?: Maybe<(
       Pick<University, 'id' | 'name'>
-      & { classes?: Maybe<Array<Maybe<ClassSummaryFragment>>> }
+      & { classes?: Maybe<Array<Maybe<ClassSummaryFragment>>>, members?: Maybe<Array<Maybe<UniversityMemberFragment>>> }
     )> }
   )> }
+);
+
+export type UniversityMemberFragment = (
+  Pick<UniversityMember, 'role'>
+  & { player?: Maybe<Pick<Player, 'id' | 'factionName' | 'factionNumber'>> }
 );
 
 export type ClassSummaryFragment = Pick<UniversityClass, 'id' | 'turnNumber'>;
@@ -992,6 +997,16 @@ export const ClassSummary = gql`
   turnNumber
 }
     `;
+export const UniversityMember = gql`
+    fragment UniversityMember on UniversityMember {
+  role
+  player {
+    id
+    factionName
+    factionNumber
+  }
+}
+    `;
 export const PlayerUniversity = gql`
     fragment PlayerUniversity on Player {
   id
@@ -1003,10 +1018,14 @@ export const PlayerUniversity = gql`
       classes {
         ...ClassSummary
       }
+      members {
+        ...UniversityMember
+      }
     }
   }
 }
-    ${ClassSummary}`;
+    ${ClassSummary}
+${UniversityMember}`;
 export const Student = gql`
     fragment Student on Unit {
   id
