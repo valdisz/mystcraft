@@ -75,6 +75,7 @@ const StudySchedule = styled.table`
 
     td {
         border: 1px solid silver;
+        text-align: right;
     }
 
     th {

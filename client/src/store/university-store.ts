@@ -389,11 +389,20 @@ function getSkillGroups() {
         {
             skills: [
                 new Skill({ code: 'ARTI' }),
+                new Skill({ code: 'CFSW' }),
+                new Skill({ code: 'CRRU' }),
                 new Skill({ code: 'CRCL' }),
                 new Skill({ code: 'CRRI' }),
                 new Skill({ code: 'CRSF' }),
                 new Skill({ code: 'CFSW' }),
                 new Skill({ code: 'CRWC' }),
+            ]
+        },
+        // enchant
+        {
+            skills: [
+                new Skill({ code: 'ESWO' }),
+                new Skill({ code: 'EARM' }),
             ]
         },
         // 'demons'
