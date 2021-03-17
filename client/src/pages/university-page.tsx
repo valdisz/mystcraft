@@ -162,7 +162,11 @@ function getSkillClasses(student: Student, skill: Skill) {
     const classes = []
 
     if (student.mode !== '') {
-        if (skill.canStudy) {
+        if (student.mode === 'target-selection' && skill.canStudy) {
+            classes.push('skill--can-study')
+        }
+
+        if (student.mode === 'study' && student.canStudy(skill.code)) {
             classes.push('skill--can-study')
         }
     }
