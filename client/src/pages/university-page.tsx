@@ -254,15 +254,18 @@ const University = observer(() => {
                                 <Box ml={1} clone>
                                     <ButtonGroup>
                                         <XsButton onClick={student.beginStudy} title='Study'>S</XsButton>
-                                        <XsButton>T</XsButton>
+                                        <XsButton title='Teach'>T</XsButton>
                                     </ButtonGroup>
                                 </Box>
                             </td>
                             <td className='target'>
-                                <ButtonGroup>
-                                    <XsButton onClick={student.beginTargetSelection} title='Study'>{student.target.code}</XsButton>
-                                    <XsButton className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
-                                </ButtonGroup>
+                                { student.target
+                                    ? <ButtonGroup>
+                                        <XsButton onClick={student.beginTargetSelection}>{student.target.code}</XsButton>
+                                        <XsButton className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
+                                    </ButtonGroup>
+                                    : <XsButton fullWidth onClick={student.beginTargetSelection}><i>none</i></XsButton>
+                                }
                             </td>
                             <td className='orders'>
                                 <CopyButton fullWidth text={student.ordersFull}>{student.ordersShort}</CopyButton>
