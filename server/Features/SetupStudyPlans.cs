@@ -1,4 +1,5 @@
 namespace advisor.Features {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -27,27 +28,14 @@ namespace advisor.Features {
                 .SingleOrDefaultAsync(x => x.PlayerId == request.PlayerId);
 
             if (membership == null) return Unit.Value;
+            if (membership.Player.FactionNumber == null) return Unit.Value;
 
             var universityId = membership.UniversityId;
-            var factionNumber = membership.Player.FactionNumber;
+            var factionNumber = membership.Player.FactionNumber.Value;
             var turnNumber = membership.Player.LastTurnNumber;
 
-            async Task<Dictionary<int, DbStudyPlan>> getTurnPlans(int tnum) {
-                return (await db.StudyPlans
-                    .Include(x => x.Turn)
-                    .Include(x => x.Unit)
-                    .ThenInclude(x => x.Faction)
-                    .Where(x => x.UniversityId == membership.UniversityId
-                        && x.Turn.Number == turnNumber
-                        && x.Turn.PlayerId == request.PlayerId
-                        && x.Unit.Faction != null
-                        && x.Unit.Faction.Number == factionNumber)
-                    .ToListAsync())
-                    .ToDictionary(x => x.Unit.Number);
-            }
-
-            var plans = await getTurnPlans(turnNumber);
-            var prevPalns = await getTurnPlans(turnNumber - 1);
+            var plans = await GetTurnPlans(turnNumber, universityId, request.PlayerId, factionNumber);
+            var prevPalns = await GetTurnPlans(turnNumber - 1, universityId, request.PlayerId, factionNumber);
 
             var mages = await db.Units
                 .Include(x => x.Turn)
@@ -71,7 +59,10 @@ namespace advisor.Features {
                 };
 
                 if (prevPalns.ContainsKey(mage.Number)) {
-                    plan.Target = mapper.Map<DbSkill>(prevPalns[mage.Number]);
+                    var prevTarget = prevPalns[mage.Number].Target;
+                    if (prevTarget != null) {
+                        plan.Target = mapper.Map<DbSkill>(prevTarget);
+                    }
                 }
 
                 await db.StudyPlans.AddAsync(plan);
@@ -80,6 +71,20 @@ namespace advisor.Features {
             await db.SaveChangesAsync();
 
             return Unit.Value;
+        }
+
+        private async Task<Dictionary<int, DbStudyPlan>> GetTurnPlans(int turnNum, long universityId, long playerId, int factionNumber) {
+            return (await db.StudyPlans
+                .Include(x => x.Turn)
+                .Include(x => x.Unit)
+                .ThenInclude(x => x.Faction)
+                .Where(x => x.UniversityId == universityId
+                    && x.Turn.Number == turnNum
+                    && x.Turn.PlayerId == playerId
+                    && x.Unit.Faction != null
+                    && x.Unit.Faction.Number == factionNumber)
+                .ToListAsync())
+                .ToDictionary(x => x.Unit.Number);
         }
     }
 }
