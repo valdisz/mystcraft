@@ -62,7 +62,7 @@ export interface SkillGroup {
 }
 
 export class Student {
-    constructor(public readonly id: string) {
+    constructor(public readonly id: string, private readonly location: StudyLocation) {
         makeObservable(this)
     }
 
@@ -216,7 +216,7 @@ export class Student {
         const techerSkil = this.skills[student.study]
         const studentSkill = student.skills[student.study]
 
-        return (techerSkil.level || 0) > (studentSkill.level || 0)
+        return (techerSkil?.level || 0) > (studentSkill?.level || 0)
     }
 
 
@@ -288,6 +288,15 @@ export class Student {
         this.skillsGroups.replace(skills)
         this.teach.replace(plan.teach || [])
     }
+
+    toggleTeaching = () => {
+        if (this.location.teacher === this) {
+            this.location.setTeacher(null)
+        }
+        else {
+            this.location.setTeacher(this)
+        }
+    }
 }
 
 export class StudyLocation {
@@ -313,6 +322,9 @@ export class StudyLocation {
     @action addStudent = (student: Student) => {
         this.students.push(student)
     }
+
+    @observable teacher: Student = null
+    @action setTeacher = (teacher: Student) => this.teacher = teacher
 }
 
 export class UniversityStore {
@@ -387,7 +399,7 @@ export class UniversityStore {
     }
 
     selectClass = async (classId: string) => {
-        runInAction(() => this.loading = true)
+        // runInAction(() => this.loading = true)
 
         const response = await CLIENT.query<GetUniversityClassQuery, GetUniversityClassQueryVariables>({
             query: GetUniversityClass,
@@ -399,9 +411,6 @@ export class UniversityStore {
         const locations: { [ id: string]: StudyLocation } = { }
 
         for (const item of response.data.node.students) {
-            const student = new Student(item.id)
-            student.setPlan(item)
-
             const { terrain, x, y, z, label, province, settlement } = item.unit.region
             const locationId = `${x} ${y} ${z}`
 
@@ -420,6 +429,8 @@ export class UniversityStore {
                 locations[locationId] = loc
             }
 
+            const student = new Student(item.id, loc)
+            student.setPlan(item)
             loc.addStudent(student)
         }
 

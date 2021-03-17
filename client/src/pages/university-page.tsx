@@ -192,14 +192,18 @@ const University = observer(() => {
             <div className={classes.paper2}>
                 <Typography component='h1' variant='h5'>{university.name}</Typography>
                 Turns:
-                <ul>
-                    { university.classes.map(x => <li key={x.id}>{x.turnNumber}</li> ) }
-                </ul>
+                <ButtonGroup>
+                    { university.classes.map(x => <Button
+                        size='small'
+                        variant={x.id === university.selectedClassId ? 'outlined' : 'contained' }
+                        key={x.id}
+                        onClick={() => university.selectClass(x.id)}>{x.turnNumber}</Button> ) }
+                </ButtonGroup>
 
                 <StudySchedule>
-                    { university.locations.map(x => <tbody key={x.id}>
+                    { university.locations.map(location => <tbody key={location.id}>
                         <tr>
-                            <th className='location' colSpan={20}>{x.terrain} ({x.x},{x.y},{x.z} {x.label}) in {x.province}{ x.settlement ? `, contains ${x.settlement} [${x.settlementSize.toLowerCase()}]` : '' }</th>
+                            <th className='location' colSpan={20}>{location.terrain} ({location.x},{location.y},{location.z} {location.label}) in {location.province}{ location.settlement ? `, contains ${location.settlement} [${location.settlementSize.toLowerCase()}]` : '' }</th>
                         </tr>
                         <tr>
                             <th className='faction'>Faction</th>
@@ -212,17 +216,22 @@ const University = observer(() => {
                                 { group.skills.map(({ code }) => <th key={code}>{code}</th> ) }
                             </React.Fragment> ) }
                         </tr>
-                        { x.students.map(student => <tr key={student.id}>
+                        { location.students.map(student => <tr key={student.id}>
                             <td className='faction'>{student.factionName} ({student.factionNumber})</td>
                             <td className='unit'>
                                 {student.name} ({student.number})
-                                <Box ml={1} clone>
-                                    <ButtonGroup>
-                                        <XsButton title='Study' onClick={student.beginStudy}>S</XsButton>
-                                        <XsButton title='Teach'>T</XsButton>
-                                        <XsButton title='Clear' onClick={student.clearOrders}>X</XsButton>
-                                    </ButtonGroup>
-                                </Box>
+                                { !location.teacher || location.teacher === student
+                                    ? <Box ml={1} clone>
+                                        <ButtonGroup>
+                                            <XsButton title='Study' onClick={student.beginStudy}>S</XsButton>
+                                            <XsButton title='Teach' onClick={student.toggleTeaching}>T</XsButton>
+                                            <XsButton title='Clear' onClick={student.clearOrders}>X</XsButton>
+                                        </ButtonGroup>
+                                    </Box>
+                                    : location.teacher.canTeach(student)
+                                        ? <XsButton>Teach</XsButton>
+                                        : null
+                                }
                             </td>
                             <td className='target'>
                                 { student.target
