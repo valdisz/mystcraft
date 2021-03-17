@@ -391,11 +391,10 @@ function getSkillGroups() {
                 new Skill({ code: 'ARTI' }),
                 new Skill({ code: 'CRCL' }),
                 new Skill({ code: 'CRRI' }),
-                new Skill({ code: 'CRRI' }),
                 new Skill({ code: 'CRTA' }),
-                // new Skill({ code: 'CRSF' }),
-                new Skill({ code: 'CFSW' }),
                 new Skill({ code: 'CRRU' }),
+                new Skill({ code: 'CFSW' }),
+                // new Skill({ code: 'CRSF' }),
                 // new Skill({ code: 'CRWC' }),
             ]
         },
