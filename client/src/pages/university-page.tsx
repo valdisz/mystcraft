@@ -7,6 +7,7 @@ import { observer, Observer } from 'mobx-react-lite'
 import { Box, Button, ButtonGroup, ButtonProps, Container, List, ListItem, ListItemText, makeStyles, Paper, TextField, Typography } from '@material-ui/core'
 import { useCallbackRef } from '../lib'
 import ClipboardJS from 'clipboard'
+import { SkillCell } from '../components/skill-cell'
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -66,12 +67,12 @@ const NewUniversity = observer(() => {
 
 const StudySchedule = styled.table`
     border-collapse: collapse;
+    height: 100%;
 
     font-size: 11px;
     font-family: Fira Code, Roboto Mono, monospace;
 
     td, th {
-        padding: 4px;
         white-space: nowrap;
     }
 
@@ -81,6 +82,7 @@ const StudySchedule = styled.table`
     }
 
     th {
+        padding: 4px;
         text-align: left;
     }
 
@@ -110,44 +112,27 @@ const StudySchedule = styled.table`
 
     .faction {
         min-width: 100px;
+        padding: 4px;
     }
 
     .unit {
         min-width: 100px;
+        padding: 4px;
     }
 
     .orders {
         min-width: 50px;
+        padding: 4px;
     }
 
     .target {
         min-width: 50px;
+        padding: 4px;
     }
 
     .location {
         padding-top: 2rem;
-    }
-
-    .skill--can-study {
-        background-color: lightgreen;
-    }
-
-    .skill--target {
-        border-width: 2px;
-        border-color: blue;
-    }
-
-    .skill--dep {
-        border-width: 2px;
-        border-color: orange;
-    }
-
-    .skill--study {
-        background-color: lightgreen;
-    }
-
-    .skill--tought {
-        background-color: green;
+        padding: 4px;
     }
 `
 
@@ -161,33 +146,6 @@ const XsButton = styled(Button).attrs({
     font-family: Fira Code, Roboto Mono, monospace;
 `
 
-function getSkillClasses(student: Student, skill: Skill) {
-    const classes = []
-
-    if (student.mode !== '') {
-        if (student.mode === 'target-selection' && skill.canStudy) {
-            classes.push('skill--can-study')
-        }
-
-        if (student.mode === 'study' && student.canStudy(skill.code)) {
-            classes.push('skill--can-study')
-        }
-    }
-
-    if (student.target?.code === skill.code) {
-        classes.push('skill--target')
-    }
-
-    if (student.depSkills.includes(skill.code)) {
-        classes.push('skill--dep')
-    }
-
-    if (student.study === skill.code) {
-        classes.push('skill--study')
-    }
-
-    return classes.join(' ')
-}
 
 const MemberList = observer(() => {
     const { university: { members } } = useStore()
@@ -222,7 +180,7 @@ function CopyButton({ text, ...props }: CopyButtonProps) {
         return () => clip.destroy()
     }, [ ref ])
 
-    return <XsButton {...props} ref={setRef} data-clipboard-text={text} />
+    return <XsButton {...props as any} ref={setRef as any} data-clipboard-text={text} />
 }
 
 const University = observer(() => {
@@ -282,12 +240,17 @@ const University = observer(() => {
                                 <React.Fragment key={i}>
                                     <td className='empty'></td>
                                     { group.skills.map(skill => (
-                                        <td key={skill.code} className={`skill ${getSkillClasses(student, skill)}`} onClick={() => student.skillClick(skill.code)}>
-                                            { skill.days && <>
-                                                <div className='days'>{skill.days}</div>
-                                                <div className='level'>{skill.level}</div>
-                                            </> }
-                                        </td>) ) }
+                                        <SkillCell key={skill.code}
+                                            active={student.isSkillActive(skill.code)}
+                                            title=''
+                                            days={skill.days}
+                                            level={skill.level}
+                                            target={student.isTargetSkill(skill.code)}
+                                            missing={student.getMissingLevel(skill.code)}
+                                            studying={student.study == skill.code}
+                                            withTeacher={false}
+                                            onClick={() => student.skillClick(skill.code)}
+                                        />) ) }
                                 </React.Fragment>) ) }
                         </tr>)}
                     </tbody> ) }

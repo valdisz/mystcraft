@@ -8,6 +8,7 @@ import { SetStudPlanyTarget, SetStudPlanyTargetMutation, SetStudPlanyTargetMutat
 import { SetStudPlanyStudy, SetStudPlanyStudyMutation, SetStudPlanyStudyMutationVariables } from '../schema'
 import { SetStudPlanyTeach, SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables } from '../schema'
 import { ClassSummaryFragment, UniveristyMemberRole } from '../schema'
+import { ISkill, SKILL_TREE } from './skill-tree'
 
 class NewUniversity {
     constructor(private readonly parent: UniversityStore) {
@@ -36,86 +37,6 @@ class NewUniversity {
 
         this.parent.load(this.parent.gameId)
     }
-}
-
-const SKILL_TREE: { [ code: string]: ISkill[] } = {
-    FORC: [],
-    PATT: [],
-    SPIR: [],
-    FIRE: [{ code: "FORC", level: 1 }],
-    EQUA: [{ code: "FORC", level: 1 }, { code: "PATT", level: 1 }],
-    FSHI: [{ code: "FORC", level: 1 }],
-    ESHI: [{ code: "FORC", level: 1 }],
-    SSHI: [{ code: "SPIR", level: 1 }, { code: "FORC", level: 1 }],
-    MHEA: [{ code: "PATT", level: 1 }],
-    GATE: [{ code: "PATT", level: 1 }, { code: "SPIR", level: 1 }],
-    FARS: [{ code: "PATT", level: 1 }, { code: "SPIR", level: 1 }],
-    TELE: [{ code: "GATE", level: 1 }, { code: "FARS", level: 2 }],
-    PORT: [{ code: "GATE", level: 2 }, { code: "FARS", level: 1 }],
-    MIND: [{ code: "PATT", level: 1 }],
-    WEAT: [{ code: "FORC", level: 1 }, { code: "PATT", level: 1 }],
-    SWIN: [{ code: "WEAT", level: 1 }],
-    SSTO: [{ code: "WEAT", level: 1 }],
-    STOR: [{ code: "WEAT", level: 3 }],
-    CALL: [{ code: "WEAT", level: 5 }],
-    CLEA: [{ code: "WEAT", level: 1 }],
-    EART: [{ code: "PATT", level: 1 }, { code: "FORC", level: 1 }],
-    WOLF: [{ code: "EART", level: 1 }],
-    BIRD: [{ code: "EART", level: 1 }],
-    DRAG: [{ code: "BIRD", level: 3 }, { code: "WOLF", level: 3 }],
-    NECR: [{ code: "FORC", level: 1 }, { code: "SPIR", level: 1 }],
-    SUSK: [{ code: "NECR", level: 1 }],
-    RAIS: [{ code: "SUSK", level: 3 }],
-    SULI: [{ code: "RAIS", level: 3 }],
-    FEAR: [{ code: "NECR", level: 1 }],
-    SBLA: [{ code: "NECR", level: 5 }],
-    BUND: [{ code: "NECR", level: 1 }],
-    DEMO: [{ code: "FORC", level: 1 }, { code: "SPIR", level: 1 }],
-    SUIM: [{ code: "DEMO", level: 1 }],
-    SUDE: [{ code: "SUIM", level: 3 }],
-    SUBA: [{ code: "SUDE", level: 3 }],
-    BDEM: [{ code: "DEMO", level: 1 }],
-    ILLU: [{ code: "FORC", level: 1 }, { code: "PATT", level: 1 }],
-    PHEN: [{ code: "ILLU", level: 1 }],
-    PHBE: [{ code: "ILLU", level: 1 }],
-    PHUN: [{ code: "ILLU", level: 1 }],
-    PHDE: [{ code: "ILLU", level: 1 }],
-    INVI: [{ code: "ILLU", level: 3 }],
-    TRUE: [{ code: "ILLU", level: 3 }],
-    DISP: [{ code: "ILLU", level: 1 }],
-    ARTI: [{ code: "FORC", level: 1 }, { code: "PATT", level: 1 }, { code: "SPIR", level: 1 }],
-    CRRI: [{ code: "ARTI", level: 2 }, { code: "INVI", level: 3 }],
-    CRCL: [{ code: "ARTI", level: 3 }, { code: "FSHI", level: 4 }],
-    CRSF: [{ code: "ARTI", level: 2 }, { code: "FIRE", level: 3 }],
-    CRTA: [{ code: "ARTI", level: 2 }, { code: "TRUE", level: 3 }],
-    CRPA: [{ code: "ARTI", level: 1 }, { code: "SSHI", level: 3 }],
-    CRRU: [{ code: "ARTI", level: 2 }, { code: "FEAR", level: 3 }],
-    CRSS: [{ code: "ARTI", level: 1 }, { code: "ESHI", level: 3 }],
-    CRMA: [{ code: "ARTI", level: 1 }, { code: "WEAT", level: 3 }],
-    ENGR: [{ code: "ARTI", level: 2 }, { code: "ESHI", level: 3 }, { code: "SSHI", level: 3 }],
-    CGAT: [{ code: "ARTI", level: 2 }, { code: "GATE", level: 3 }],
-    ESWO: [{ code: "ARTI", level: 2 }],
-    EARM: [{ code: "ARTI", level: 2 }],
-    ESHD: [{ code: "ARTI", level: 1 }],
-    CPOR: [{ code: "ARTI", level: 1 }, { code: "PORT", level: 2 }],
-    CFSW: [{ code: "ARTI", level: 2 }, { code: "FIRE", level: 3 }],
-    CRAG: [{ code: "ARTI", level: 2 }, { code: "TRUE", level: 5 }],
-    CRWC: [{ code: "ARTI", level: 1 }, { code: "SWIN", level: 2 }],
-    CRGC: [{ code: "ARTI", level: 2 }, { code: "GATE", level: 3 }],
-    CRSH: [{ code: "ARTI", level: 2 }, { code: "MHEA", level: 3 }],
-    CRSO: [{ code: "ARTI", level: 2 }, { code: "FARS", level: 3 }],
-    CRCO: [{ code: "ARTI", level: 1 }, { code: "EART", level: 2 }],
-    CRBX: [{ code: "ARTI", level: 2 }, { code: "BDEM", level: 3 }],
-    CRHS: [{ code: "ARTI", level: 2 }, { code: "BUND", level: 3 }],
-    CRCN: [{ code: "ARTI", level: 2 }, { code: "FSHI", level: 3 }],
-    TRNS: [{ code: "ARTI", level: 1 }],
-    BRTL: [{ code: "PATT", level: 4 }, { code: "FORC", level: 4 }, { code: "SPIR", level: 4 }]
-}
-
-export interface ISkill {
-    code: string
-    level?: number
-    days?: number
 }
 
 export class Skill implements ISkill {
@@ -165,7 +86,7 @@ export class Student {
     }
 
     @computed get depSkills() {
-        if (!this.target) return []
+        if (!this.target) return { }
 
         const deps = { }
 
@@ -188,17 +109,22 @@ export class Student {
             }
         }
 
+        const value = { }
         const level = this.target.level
-        return Object.keys(deps)
-            .map(skill => {
-                const depLevel = Math.max(level, deps[skill])
-                const studentSkill = this.skills[skill]
+        for (const skill in deps) {
+            const depLevel = Math.max(level, deps[skill])
+            const studentLevel = this.skills[skill]?.level ?? 0
 
-                return (studentSkill?.level ?? 0) >= depLevel
-                    ? null
-                    : skill
-            })
-            .filter(x => !!x)
+            if (studentLevel < depLevel) {
+                value[skill] = depLevel - studentLevel
+            }
+        }
+
+        return value
+    }
+
+    getMissingLevel(skill: string) {
+        return this.depSkills[skill] ?? 0
     }
 
     readonly teach: IObservableArray<number> = observable([])
@@ -329,6 +255,18 @@ export class Student {
         }
 
         return true
+    }
+
+    isSkillActive(skill: string) {
+        if (!this.mode) return false
+
+        if (this.mode === 'target-selection') {
+            return this.skills[skill].canStudy
+        }
+
+        if (this.mode === 'study') {
+            return this.canStudy(skill)
+        }
     }
 
     @action setPlan(plan: StudyPlanFragment) {
