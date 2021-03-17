@@ -137,14 +137,17 @@ const StudySchedule = styled.table`
         border-color: blue;
     }
 
-    .skill--study {
+    .skill--dep {
         border-width: 2px;
-        border-color: red;
+        border-color: orange;
+    }
+
+    .skill--study {
+        background-color: lightgreen;
     }
 
     .skill--tought {
-        border-width: 2px;
-        border-color: green;
+        background-color: green;
     }
 `
 
@@ -173,6 +176,10 @@ function getSkillClasses(student: Student, skill: Skill) {
 
     if (student.target?.code === skill.code) {
         classes.push('skill--target')
+    }
+
+    if (student.depSkills.includes(skill.code)) {
+        classes.push('skill--dep')
     }
 
     if (student.study === skill.code) {
@@ -253,8 +260,9 @@ const University = observer(() => {
                                 {student.name} ({student.number})
                                 <Box ml={1} clone>
                                     <ButtonGroup>
-                                        <XsButton onClick={student.beginStudy} title='Study'>S</XsButton>
+                                        <XsButton title='Study' onClick={student.beginStudy}>S</XsButton>
                                         <XsButton title='Teach'>T</XsButton>
+                                        <XsButton title='Clear' onClick={student.clearOrders}>X</XsButton>
                                     </ButtonGroup>
                                 </Box>
                             </td>
@@ -268,7 +276,7 @@ const University = observer(() => {
                                 }
                             </td>
                             <td className='orders'>
-                                <CopyButton fullWidth text={student.ordersFull}>{student.ordersShort}</CopyButton>
+                                { student.ordersShort && <CopyButton fullWidth text={student.ordersFull}>{student.ordersShort}</CopyButton> }
                             </td>
                             { student.skillsGroups.map((group, i) => (
                                 <React.Fragment key={i}>

@@ -164,6 +164,41 @@ export class Student {
         return index
     }
 
+    @computed get depSkills() {
+        const deps = { }
+
+        const s = SKILL_TREE[this.target.code] ?? [ ]
+        while (s.length) {
+            const skill = s.pop()
+            if (!deps[skill.code]) {
+                deps[skill.code] = 1
+            }
+
+            if (deps[skill.code] < skill.level) {
+                deps[skill.code] = skill.level
+            }
+
+            const skillDeps = SKILL_TREE[skill.code]
+            if (skillDeps?.length ?? 0) {
+                for (const dep of skillDeps) {
+                    s.push(dep)
+                }
+            }
+        }
+
+        const level = this.target.level
+        return Object.keys(deps)
+            .map(skill => {
+                const depLevel = Math.max(level, deps[skill])
+                const studentSkill = this.skills[skill]
+
+                return (studentSkill?.level ?? 0) >= depLevel
+                    ? null
+                    : skill
+            })
+            .filter(x => !!x)
+    }
+
     readonly teach: IObservableArray<number> = observable([])
     @observable study = ''
 
@@ -263,12 +298,16 @@ export class Student {
         this.setPlan(result.data.setStudyPlanTeach)
     }
 
+    clearOrders = () => this.setStudy('')
+
     canTeach = (student: Student) => {
         const techerSkil = this.skills[student.study]
         const studentSkill = student.skills[student.study]
 
         return (techerSkil.level || 0) > (studentSkill.level || 0)
     }
+
+
 
     isTargetSkill(skill: string) {
         return skill === this.target?.code
@@ -543,10 +582,10 @@ function getSkillGroups() {
         {
             skills: [
                 new Skill({ code: 'ILLU' }),
+                new Skill({ code: 'TRUE' }),
                 new Skill({ code: 'PHEN' }),
                 new Skill({ code: 'INVI' }),
-                new Skill({ code: 'PHDDE' }),
-                new Skill({ code: 'TRUE' }),
+                new Skill({ code: 'PHDE' }),
             ]
         },
         // 'necromancy'
