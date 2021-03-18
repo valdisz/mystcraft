@@ -49,7 +49,7 @@ namespace advisor.Features
 
                 var membershipTable = db.Model.FindEntityType(typeof(DbUniversityMembership)).GetTableName();
                 foreach (var playerId in players) {
-                    await db.Database.ExecuteSqlRawAsync($@"delete from {membershipTable} where PlayerId = {playerId}");
+                    await db.Database.ExecuteSqlRawAsync($@"delete from {membershipTable} where {nameof(DbUniversityMembership.PlayerId)} = {playerId}");
                 }
 
                 db.Remove(game);
