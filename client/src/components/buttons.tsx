@@ -5,8 +5,7 @@ import ClipboardJS from 'clipboard'
 import { useCallbackRef } from '../lib'
 
 export const XsButton = styled(Button).attrs({
-    size: 'small',
-    variant: 'outlined'
+    size: 'small'
 })`
     padding: 2px !important;
     min-width: 20px !important;

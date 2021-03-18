@@ -111,21 +111,25 @@ const StudySchedule = styled.table`
     .faction {
         min-width: 100px;
         padding: 4px;
+        background-color: white;
     }
 
     .unit {
         min-width: 100px;
         padding: 4px;
+        background-color: white;
     }
 
     .orders {
         min-width: 50px;
         padding: 4px;
+        background-color: white;
     }
 
     .target {
         min-width: 50px;
         padding: 4px;
+        background-color: white;
     }
 
     .location {

@@ -1,7 +1,13 @@
 import * as React from 'react'
+import styled from 'styled-components'
 import { observer } from 'mobx-react-lite'
 import { StudyLocation, useStore } from '../store'
 import { UniversityStudent } from './university-student'
+
+const LocationCell = styled.th`
+    padding-top: 2rem !important;
+    border: none;
+`
 
 export interface UniversityLocationProps {
     location: StudyLocation
@@ -12,7 +18,12 @@ export const UniversityLocation = observer(({ location }: UniversityLocationProp
 
     return <tbody>
         <tr>
-            <th colSpan={20}>{location.terrain} ({location.x},{location.y},{location.z} {location.label}) in {location.province}{ location.settlement ? `, contains ${location.settlement} [${location.settlementSize.toLowerCase()}]` : '' }</th>
+            <LocationCell colSpan={20}>
+                {location.terrain}
+                ({location.x},{location.y},{location.z} {location.label})
+                in {location.province}
+                { location.settlement ? `, contains ${location.settlement} [${location.settlementSize.toLowerCase()}]` : '' }
+            </LocationCell>
         </tr>
         <tr>
             <th className='faction'>Faction</th>

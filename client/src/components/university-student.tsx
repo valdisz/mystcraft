@@ -18,25 +18,25 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
             <Box ml={1} clone>
                 { student.mode === ''
                     ? <ButtonGroup>
-                        <XsButton title='Study' onClick={student.beginStudy}>S</XsButton>
-                        <XsButton title='Teach' onClick={student.beginTeaching}>T</XsButton>
-                        <XsButton title='Clear' onClick={student.clearOrders}>X</XsButton>
+                        <XsButton variant='outlined' title='Study' onClick={student.beginStudy}>S</XsButton>
+                        <XsButton variant='outlined' title='Teach' onClick={student.beginTeaching}>T</XsButton>
+                        <XsButton variant='outlined' title='Clear' onClick={student.clearOrders}>X</XsButton>
                     </ButtonGroup>
-                    : <XsButton onClick={student.resetMode}>Done</XsButton>
+                    : <XsButton variant='outlined' onClick={student.resetMode}>Done</XsButton>
                 }
             </Box>
         </td>
         <td className='target'>
             { student.target
                 ? <ButtonGroup>
-                    <XsButton onClick={student.beginTargetSelection}>{student.target.code}</XsButton>
-                    <XsButton className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
+                    <XsButton variant='outlined' onClick={student.beginTargetSelection}>{student.target.code}</XsButton>
+                    <XsButton variant='outlined' className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
                 </ButtonGroup>
-                : <XsButton fullWidth onClick={student.beginTargetSelection}><i>none</i></XsButton>
+                : <XsButton fullWidth variant='outlined' onClick={student.beginTargetSelection}><i>none</i></XsButton>
             }
         </td>
         <td className='orders'>
-            { student.ordersShort && <CopyButton fullWidth text={student.ordersFull} title={student.ordersFull}>{student.ordersShort}</CopyButton> }
+            { student.ordersShort && <CopyButton fullWidth color='primary' variant='contained' text={student.ordersFull} title={student.ordersFull}>{student.ordersShort}</CopyButton> }
         </td>
         { student.skillsGroups.map((group, i) => (
             <React.Fragment key={i}>
