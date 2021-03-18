@@ -1,4 +1,5 @@
 namespace advisor.Features {
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using advisor.Persistence;
@@ -66,7 +67,7 @@ namespace advisor.Features {
             var membership = await GetMembershipAsync(request.UserId, plan);
             if (membership.Role == UniveristyMemberRole.Member) return null;
 
-            plan.Teach.Clear();
+            plan.Teach = new ();
             plan.Study = request.Skill;
 
             await db.SaveChangesAsync();
@@ -80,8 +81,7 @@ namespace advisor.Features {
             if (membership.Role == UniveristyMemberRole.Member) return null;
 
             plan.Study = null;
-            plan.Teach.Clear();
-            plan.Teach.AddRange(request.Units);
+            plan.Teach = request.Units.ToList();
 
             await db.SaveChangesAsync();
 

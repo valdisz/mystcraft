@@ -61,6 +61,110 @@ export interface SkillGroup {
     skills: Skill[]
 }
 
+
+
+function* getSkillGroups() {
+    // 'bases'
+    yield {
+        skills: [
+            new Skill({ code: 'FORC' }),
+            new Skill({ code: 'PATT' }),
+            new Skill({ code: 'SPIR' }),
+        ]
+    }
+
+    // 'sruvival'
+    yield {
+        skills: [
+            new Skill({ code: 'OBSE' }),
+            new Skill({ code: 'STEA' }),
+        ]
+    }
+
+    // 'dragon'
+    yield {
+        skills: [
+            new Skill({ code: 'EART' }),
+            new Skill({ code: 'BIRD' }),
+            new Skill({ code: 'WOLF' }),
+            new Skill({ code: 'DRAG' }),
+        ]
+    }
+
+    // 'artifacts'
+    yield {
+        skills: [
+            new Skill({ code: 'ARTI' }),
+            new Skill({ code: 'CRCL' }),
+            new Skill({ code: 'CRRI' }),
+            new Skill({ code: 'CRTA' }),
+            new Skill({ code: 'CRRU' }),
+            new Skill({ code: 'CFSW' }),
+            // new Skill({ code: 'CRSF' }),
+            // new Skill({ code: 'CRWC' }),
+        ]
+    }
+
+    // enchant
+    yield {
+        skills: [
+            new Skill({ code: 'ESWO' }),
+            new Skill({ code: 'EARM' }),
+        ]
+    }
+
+    // 'demons'
+    yield {
+        skills: [
+            new Skill({ code: 'DEMO' }),
+            new Skill({ code: 'SUIM' }),
+            new Skill({ code: 'SUDE' }),
+            new Skill({ code: 'SUBA' }),
+        ]
+    }
+
+    // 'fire'
+    yield {
+        skills: [
+            new Skill({ code: 'FIRE' }),
+            new Skill({ code: 'FSHI' }),
+            new Skill({ code: 'SSHI' }),
+            new Skill({ code: 'ESHI' }),
+        ]
+    }
+
+    // 'illusions'
+    yield {
+        skills: [
+            new Skill({ code: 'ILLU' }),
+            new Skill({ code: 'TRUE' }),
+            new Skill({ code: 'PHEN' }),
+            new Skill({ code: 'INVI' }),
+            new Skill({ code: 'PHDE' }),
+        ]
+    }
+
+    // 'necromancy'
+    yield {
+        skills: [
+            new Skill({ code: 'NECR' }),
+            new Skill({ code: 'SBLA' }),
+        ]
+    }
+
+    // 'other'
+    yield {
+        skills: [
+            new Skill({ code: 'WEAT' }),
+            new Skill({ code: 'CLEA' }),
+            new Skill({ code: 'CALL' }),
+            new Skill({ code: 'SWIN' }),
+            new Skill({ code: 'MHEA' }),
+            new Skill({ code: 'FARS' }),
+        ]
+    }
+}
+
 export class Student {
     constructor(public readonly id: string, private readonly location: StudyLocation) {
         makeObservable(this)
@@ -90,7 +194,7 @@ export class Student {
 
         let missing = getSkillRequirements(this.target.code, this.target.level)
         missing.push(this.target)
-        missing = missing.filter(x => this.skills[x.code].level < x.level)
+        missing = missing.filter(x => (this.skills[x.code]?.level ?? 0) < x.level)
 
         const value = { }
         const level = this.target.level
@@ -111,38 +215,95 @@ export class Student {
         return this.depSkills[skill] ?? 0
     }
 
-    readonly teach: IObservableArray<number> = observable([])
+    readonly teach: IObservableArray<Student> = observable([])
+
+    @observable teacher: Student = null
+    @action setTeacher = (teacher: Student) => this.teacher = teacher
+
+    addStudent = async (student: Student) => {
+        const units = this.teach.map(x => x.number)
+        if (units.includes(student.number)) return
+
+        units.push(student.number)
+
+        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
+            mutation: SetStudPlanyTeach,
+            variables: {
+                studyPlanId: this.id,
+                units
+            }
+        })
+
+        this.setPlan(result.data.setStudyPlanTeach)
+        console.log(result.data.setStudyPlanTeach)
+
+        if (this.teach.length == 10) {
+            this.resetMode()
+        }
+    }
+
+    canTeach = (student: Student, skill: string) => {
+        const techerSkil = this.skills[skill]
+        const studentSkill = student.skills[skill]
+
+        return (techerSkil?.level || 0) > (studentSkill?.level || 0)
+    }
+
+
     @observable study = ''
 
-    @observable mode: '' | 'target-selection' | 'study' = ''
+    @observable mode: '' | 'target-selection' | 'study' | 'teaching' = ''
 
-    @action beginTargetSelection = () => {
-        if (this.mode !== '') {
-            this.mode = ''
-            return
+    @action beginTargetSelection = () => this.mode = 'target-selection'
+
+    @action beginStudy = () => this.mode = 'study'
+
+    @action beginTeaching = () => {
+        if (this.location.teacher === this) {
+            this.location.setTeacher(null)
+        }
+        else {
+            this.location.setTeacher(this)
         }
 
-        this.mode = 'target-selection'
+        this.mode = 'teaching'
     }
 
-    @action beginStudy = () => {
-        if (this.mode !== '') {
-            this.mode = ''
-            return
-        }
-
-        this.mode = 'study'
-    }
-
-    @action skillClick = (skill: string) => {
-        if (this.mode === 'target-selection') {
-            this.setTarget(skill, (this.skills[skill].level || 0) + 1)
-        }
-        else if (this.mode === 'study') {
-            this.setStudy(skill)
+    @action resetMode = () => {
+        if (this.mode === 'teaching') {
+            this.location.setTeacher(null)
         }
 
         this.mode = ''
+    }
+
+    @action skillClick = (skill: string) => {
+        switch (this.mode) {
+            case 'study':
+                this.setStudy(skill)
+                this.resetMode()
+                if (this.teacher) {
+                    this.teacher.teach.remove(this)
+                    this.setTeacher(null)
+                }
+                break
+
+            case 'target-selection':
+                this.setTarget(skill, (this.skills[skill].level || 0) + 1)
+                this.resetMode()
+                break
+
+            case 'teaching':
+                break
+
+            case '':
+                if (this.location.teacher) {
+                    this.location.teacher
+                        .addStudent(this)
+                        .then(() => this.setStudy(skill))
+                }
+                break;
+        }
     }
 
     @computed get ordersShort() {
@@ -157,7 +318,7 @@ export class Student {
         return this.study
             ? `STUDY ${this.study}`
             : this.teach.length
-                ? `TEACH ${this.teach.join(' ')}`
+                ? `TEACH ${this.teach.map(x => x.number).join(' ')}`
                 : ''
     }
 
@@ -198,27 +359,14 @@ export class Student {
         this.setPlan(result.data.setStudPlanyStudy)
     }
 
-    setTeach = async (units: number[]) => {
-        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
-            mutation: SetStudPlanyTeach,
-            variables: {
-                studyPlanId: this.id,
-                units
-            }
-        })
+    clearOrders = async () => {
+        for (const student of this.teach) {
+            student.setTeacher(null)
+        }
+        this.teach.clear()
 
-        this.setPlan(result.data.setStudyPlanTeach)
+        await this.setStudy('')
     }
-
-    clearOrders = () => this.setStudy('')
-
-    canTeach = (student: Student) => {
-        const techerSkil = this.skills[student.study]
-        const studentSkill = student.skills[student.study]
-
-        return (techerSkil?.level || 0) > (studentSkill?.level || 0)
-    }
-
 
 
     isTargetSkill(skill: string) {
@@ -245,14 +393,22 @@ export class Student {
     }
 
     isSkillActive(skill: string) {
-        if (!this.mode) return false
+        const teacher = this.location.teacher
+        const mode = this.mode
 
-        if (this.mode === 'target-selection') {
-            return this.skills[skill].canStudy
+        if (mode !== 'teaching' && teacher && teacher !== this) {
+            return teacher !== this.teacher && teacher.canTeach(this, skill)
         }
+        else {
+            if (!mode) return false
 
-        if (this.mode === 'study') {
-            return this.canStudy(skill)
+            if (mode === 'target-selection') {
+                return this.skills[skill].canStudy
+            }
+
+            if (mode === 'study') {
+                return this.canStudy(skill)
+            }
         }
     }
 
@@ -268,7 +424,7 @@ export class Student {
             : null
         this.study = plan.study
 
-        const skills = getSkillGroups()
+        const skills = Array.from(getSkillGroups())
         const skillIndex: { [ code: string ]: Skill } = {}
 
         for (const g of skills) {
@@ -286,15 +442,15 @@ export class Student {
         }
 
         this.skillsGroups.replace(skills)
-        this.teach.replace(plan.teach || [])
-    }
+        this.teach.replace((plan.teach || [])
+            .map(s => this.location.students.find(x => x.number === s))
+            .filter(s => !!s)
+        )
 
-    toggleTeaching = () => {
-        if (this.location.teacher === this) {
-            this.location.setTeacher(null)
-        }
-        else {
-            this.location.setTeacher(this)
+        for (const student of this.teach) {
+            if (student.teacher !== this) {
+                student.setTeacher(this)
+            }
         }
     }
 }
@@ -351,7 +507,7 @@ export class UniversityStore {
 
     @observable locations: IObservableArray<StudyLocation> = observable([])
 
-    readonly skills = getSkillGroups()
+    readonly skills = Array.from(getSkillGroups())
 
     async load(gameId: string) {
         this.gameId = gameId
@@ -408,34 +564,43 @@ export class UniversityStore {
             }
         })
 
-        const locations: { [ id: string]: StudyLocation } = { }
+        const locations: { [ id: string]: {
+            location: StudyLocation
+            data: { [id: string]: StudyPlanFragment }
+        } } = { }
 
         for (const item of response.data.node.students) {
             const { terrain, x, y, z, label, province, settlement } = item.unit.region
             const locationId = `${x} ${y} ${z}`
 
-            let loc: StudyLocation = locations[locationId]
+            let loc = locations[locationId]
             if (!loc) {
-                loc = new StudyLocation(locationId);
-                loc.terrain = terrain
-                loc.x = x
-                loc.y = y
-                loc.z = z
-                loc.label = label
-                loc.province = province
-                loc.settlement = settlement?.name
-                loc.settlementSize = settlement?.size
+                const location = new StudyLocation(locationId);
+                location.terrain = terrain
+                location.x = x
+                location.y = y
+                location.z = z
+                location.label = label
+                location.province = province
+                location.settlement = settlement?.name
+                location.settlementSize = settlement?.size
 
+                loc = { location, data: { } }
                 locations[locationId] = loc
             }
 
-            const student = new Student(item.id, loc)
-            student.setPlan(item)
-            loc.addStudent(student)
+            const student = new Student(item.id, loc.location)
+            loc.location.addStudent(student)
+            loc.data[item.id] = item
         }
 
-        for (const loc in locations) {
-            locations[loc].students.sort((a, b) => {
+        for (const key in locations) {
+            const { location, data } = locations[key]
+            for (const student of location.students) {
+                student.setPlan(data[student.id])
+            }
+
+            location.students.sort((a, b) => {
                 if (a.factionNumber === b.factionNumber) return a.number - b.number
 
                 return a.factionNumber - b.factionNumber
@@ -444,105 +609,8 @@ export class UniversityStore {
 
         runInAction(() => {
             this.selectedClassId = classId
-            this.locations.replace(Object.values(locations))
+            this.locations.replace(Object.values(locations).map(x => x.location))
             this.loading = false
         })
     }
-}
-
-
-
-function getSkillGroups() {
-    return [
-        // 'bases'
-        {
-            skills: [
-                new Skill({ code: 'FORC' }),
-                new Skill({ code: 'PATT' }),
-                new Skill({ code: 'SPIR' }),
-            ]
-        },
-        // 'sruvival'
-        {
-            skills: [
-                new Skill({ code: 'OBSE' }),
-                new Skill({ code: 'STEA' }),
-            ]
-        },
-        // 'dragon'
-        {
-            skills: [
-                new Skill({ code: 'EART' }),
-                new Skill({ code: 'BIRD' }),
-                new Skill({ code: 'WOLF' }),
-                new Skill({ code: 'DRAG' }),
-            ]
-        },
-        // 'artifacts'
-        {
-            skills: [
-                new Skill({ code: 'ARTI' }),
-                new Skill({ code: 'CRCL' }),
-                new Skill({ code: 'CRRI' }),
-                new Skill({ code: 'CRTA' }),
-                new Skill({ code: 'CRRU' }),
-                new Skill({ code: 'CFSW' }),
-                // new Skill({ code: 'CRSF' }),
-                // new Skill({ code: 'CRWC' }),
-            ]
-        },
-        // enchant
-        {
-            skills: [
-                new Skill({ code: 'ESWO' }),
-                new Skill({ code: 'EARM' }),
-            ]
-        },
-        // 'demons'
-        {
-            skills: [
-                new Skill({ code: 'DEMO' }),
-                new Skill({ code: 'SUIM' }),
-                new Skill({ code: 'SUDE' }),
-                new Skill({ code: 'SUBA' }),
-            ]
-        },
-        // 'fire'
-        {
-            skills: [
-                new Skill({ code: 'FIRE' }),
-                new Skill({ code: 'FSHI' }),
-                new Skill({ code: 'SSHI' }),
-                new Skill({ code: 'ESHI' }),
-            ]
-        },
-        // 'illusions'
-        {
-            skills: [
-                new Skill({ code: 'ILLU' }),
-                new Skill({ code: 'TRUE' }),
-                new Skill({ code: 'PHEN' }),
-                new Skill({ code: 'INVI' }),
-                new Skill({ code: 'PHDE' }),
-            ]
-        },
-        // 'necromancy'
-        {
-            skills: [
-                new Skill({ code: 'NECR' }),
-                new Skill({ code: 'SBLA' }),
-            ]
-        },
-        // 'other'
-        {
-            skills: [
-                new Skill({ code: 'WEAT' }),
-                new Skill({ code: 'CLEA' }),
-                new Skill({ code: 'CALL' }),
-                new Skill({ code: 'SWIN' }),
-                new Skill({ code: 'MHEA' }),
-                new Skill({ code: 'FARS' }),
-            ]
-        },
-    ]
 }

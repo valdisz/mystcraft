@@ -28,13 +28,15 @@ namespace advisor
 
         public int TurnNumber { get; }
 
-        public Task<List<DbStudyPlan>> Students([Service] Database db) {
-            return db.StudyPlans
+        public async Task<List<DbStudyPlan>> Students([Service] Database db) {
+            var students = await db.StudyPlans
                 .Include(x => x.Turn)
                 .Include(x => x.Unit)
                 .ThenInclude(x => x.Faction)
                 .Where(x => x.UniversityId == universityId && x.Turn.Number == TurnNumber)
                 .ToListAsync();
+
+            return students;
         }
     }
 

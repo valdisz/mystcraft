@@ -4,10 +4,8 @@ import { Link, useParams } from 'react-router-dom'
 import { GameRouteParams } from './game-route-params'
 import { useStore } from '../store'
 import { observer, Observer } from 'mobx-react-lite'
-import { Box, Button, ButtonGroup, ButtonProps, Container, List, ListItem, ListItemText, makeStyles, Paper, TextField, Typography } from '@material-ui/core'
-import { useCallbackRef } from '../lib'
-import ClipboardJS from 'clipboard'
-import { SkillCell } from '../components/skill-cell'
+import { Button, ButtonGroup, Container, List, ListItem, ListItemText, makeStyles, Paper, TextField, Typography } from '@material-ui/core'
+import { UniversityLocation } from '../components'
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -136,17 +134,6 @@ const StudySchedule = styled.table`
     }
 `
 
-const XsButton = styled(Button).attrs({
-    size: 'small',
-    variant: 'outlined'
-})`
-    padding: 2px !important;
-    min-width: 20px !important;
-    font-size: 11px;
-    font-family: Fira Code, Roboto Mono, monospace;
-`
-
-
 const MemberList = observer(() => {
     const { university: { members } } = useStore()
 
@@ -163,24 +150,6 @@ function Members() {
             <MemberList />
         </List>
     </Paper>
-}
-
-interface CopyButtonProps extends ButtonProps {
-    text: string
-}
-
-function CopyButton({ text, ...props }: CopyButtonProps) {
-    const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
-
-    React.useEffect(() => {
-        if (!ref) return
-
-        const clip = new ClipboardJS(ref)
-
-        return () => clip.destroy()
-    }, [ ref ])
-
-    return <XsButton {...props as any} ref={setRef as any} data-clipboard-text={text} />
 }
 
 const University = observer(() => {
@@ -201,69 +170,9 @@ const University = observer(() => {
                 </ButtonGroup>
 
                 <StudySchedule>
-                    { university.locations.map(location => <tbody key={location.id}>
-                        <tr>
-                            <th className='location' colSpan={20}>{location.terrain} ({location.x},{location.y},{location.z} {location.label}) in {location.province}{ location.settlement ? `, contains ${location.settlement} [${location.settlementSize.toLowerCase()}]` : '' }</th>
-                        </tr>
-                        <tr>
-                            <th className='faction'>Faction</th>
-                            <th className='unit'>Unit</th>
-                            <th className='target'>Target</th>
-                            <th className='orders'>Orders</th>
-
-                            { university.skills.map((group, i) => <React.Fragment key={i}>
-                                <th className='empty'></th>
-                                { group.skills.map(({ code }) => <th key={code}>{code}</th> ) }
-                            </React.Fragment> ) }
-                        </tr>
-                        { location.students.map(student => <tr key={student.id}>
-                            <td className='faction'>{student.factionName} ({student.factionNumber})</td>
-                            <td className='unit'>
-                                {student.name} ({student.number})
-                                { !location.teacher || location.teacher === student
-                                    ? <Box ml={1} clone>
-                                        <ButtonGroup>
-                                            <XsButton title='Study' onClick={student.beginStudy}>S</XsButton>
-                                            <XsButton title='Teach' onClick={student.toggleTeaching}>T</XsButton>
-                                            <XsButton title='Clear' onClick={student.clearOrders}>X</XsButton>
-                                        </ButtonGroup>
-                                    </Box>
-                                    : location.teacher.canTeach(student)
-                                        ? <XsButton>Teach</XsButton>
-                                        : null
-                                }
-                            </td>
-                            <td className='target'>
-                                { student.target
-                                    ? <ButtonGroup>
-                                        <XsButton onClick={student.beginTargetSelection}>{student.target.code}</XsButton>
-                                        <XsButton className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
-                                    </ButtonGroup>
-                                    : <XsButton fullWidth onClick={student.beginTargetSelection}><i>none</i></XsButton>
-                                }
-                            </td>
-                            <td className='orders'>
-                                { student.ordersShort && <CopyButton fullWidth text={student.ordersFull}>{student.ordersShort}</CopyButton> }
-                            </td>
-                            { student.skillsGroups.map((group, i) => (
-                                <React.Fragment key={i}>
-                                    <td className='empty'></td>
-                                    { group.skills.map(skill => (
-                                        <SkillCell key={skill.code}
-                                            active={student.isSkillActive(skill.code)}
-                                            title=''
-                                            days={skill.days}
-                                            level={skill.level}
-                                            isTarget={student.isTargetSkill(skill.code)}
-                                            missing={student.getMissingLevel(skill.code)}
-                                            studying={student.study == skill.code}
-                                            withTeacher={false}
-                                            onClick={() => student.skillClick(skill.code)}
-                                        />) ) }
-                                </React.Fragment>) ) }
-                        </tr>)}
-                    </tbody> ) }
+                    { university.locations.map(location => <UniversityLocation key={location.id} location={location} />) }
                 </StudySchedule>
+
                 <Members />
             </div>
         </Container>

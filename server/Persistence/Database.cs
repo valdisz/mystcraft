@@ -6,6 +6,7 @@ namespace advisor.Persistence
     using AutoMapper.Configuration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
 
@@ -33,32 +34,34 @@ namespace advisor.Persistence
     }
 
     public class PgSqlDatabase : Database {
-        public PgSqlDatabase(IOptionsSnapshot<DatabaseOptions> options)
-            : base(options) {
+        public PgSqlDatabase(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactor)
+            : base(options, loggerFactor) {
                 this.options.Provider = DatabaseProvider.PgSQL;
         }
     }
 
     public class MsSqlDatabase : Database {
-        public MsSqlDatabase(IOptionsSnapshot<DatabaseOptions> options)
-            : base(options) {
+        public MsSqlDatabase(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactor)
+            : base(options, loggerFactor) {
                 this.options.Provider = DatabaseProvider.MsSQL;
         }
     }
 
     public class SQLiteDatabase : Database {
-        public SQLiteDatabase(IOptionsSnapshot<DatabaseOptions> options)
-            : base(options) {
+        public SQLiteDatabase(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactor)
+            : base(options, loggerFactor) {
                 this.options.Provider = DatabaseProvider.SQLite;
         }
     }
 
     public abstract class Database : DbContext {
-        protected Database(IOptionsSnapshot<DatabaseOptions> options) {
+        protected Database(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory) {
             this.options = options.Value;
+            this.loggerFactory = loggerFactory;
         }
 
         protected DatabaseOptions options;
+        private readonly ILoggerFactory loggerFactory;
 
         public DbSet<DbUser> Users { get; set; }
 
@@ -97,6 +100,8 @@ namespace advisor.Persistence
                 optionsBuilder.EnableDetailedErrors();
                 optionsBuilder.EnableSensitiveDataLogging();
             }
+
+            optionsBuilder.UseLoggerFactory(loggerFactory);
         }
 
         protected override void OnModelCreating(ModelBuilder model) {
