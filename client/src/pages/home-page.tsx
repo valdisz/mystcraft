@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, ButtonGroup, Box
 } from '@material-ui/core'
 import { Observer, observer } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
@@ -99,7 +99,9 @@ function GameItem({ game }: GameItemProps) {
             <Observer>
                 {() => game.myPlayer
                     ? <>
-                        <Button component={Link} to={`/game/${game.id}/university`}>University</Button>
+                        <Box mr={1} clone>
+                            <Button color='primary' size='small' variant='contained' component={Link} to={`/game/${game.id}/university`}>University</Button>
+                        </Box>
                         <GameActions
                             disabled={home.uploading}
                             onUpload={() => home.triggerUploadReport(game.myPlayer.id)}

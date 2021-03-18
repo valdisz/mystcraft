@@ -161,10 +161,10 @@ const University = observer(() => {
             <div className={classes.paper2}>
                 <Typography component='h1' variant='h5'>{university.name}</Typography>
                 Turns:
-                <ButtonGroup>
+                <ButtonGroup disableElevation>
                     { university.classes.map(x => <Button
                         size='small'
-                        variant={x.id === university.selectedClassId ? 'outlined' : 'contained' }
+                        variant={x.id === university.selectedClassId ? 'contained' : 'outlined' }
                         key={x.id}
                         onClick={() => university.selectClass(x.id)}>{x.turnNumber}</Button> ) }
                 </ButtonGroup>
