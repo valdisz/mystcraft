@@ -41,6 +41,17 @@ namespace advisor.Features
                     await DeleteFromGameAsync<DbReport>(turnId);
                 }
 
+                var players = await db.Players
+                    .AsNoTracking()
+                    .Where(x => x.GameId == gameId)
+                    .Select(x => x.Id)
+                    .ToListAsync();
+
+                var membershipTable = db.Model.FindEntityType(typeof(DbUniversityMembership)).GetTableName();
+                foreach (var playerId in players) {
+                    await db.Database.ExecuteSqlRawAsync($@"delete from {membershipTable} where PlayerId = {playerId}");
+                }
+
                 db.Remove(game);
                 await db.SaveChangesAsync();
             }
