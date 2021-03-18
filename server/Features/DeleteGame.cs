@@ -32,13 +32,13 @@ namespace advisor.Features
                     .ToListAsync();
 
                 foreach (var turnId in turns) {
-                    await DeleteFromGameAsync<DbStudyPlan>(turnId);
-                    await DeleteFromGameAsync<DbEvent>(turnId);
-                    await DeleteFromGameAsync<DbUnit>(turnId);
-                    await DeleteFromGameAsync<DbStructure>(turnId);
-                    await DeleteFromGameAsync<DbRegion>(turnId);
-                    await DeleteFromGameAsync<DbFaction>(turnId);
-                    await DeleteFromGameAsync<DbReport>(turnId);
+                    await DeleteFromTurnAsync<DbStudyPlan>(turnId);
+                    await DeleteFromTurnAsync<DbEvent>(turnId);
+                    await DeleteFromTurnAsync<DbUnit>(turnId);
+                    await DeleteFromTurnAsync<DbStructure>(turnId);
+                    await DeleteFromTurnAsync<DbRegion>(turnId);
+                    await DeleteFromTurnAsync<DbFaction>(turnId);
+                    await DeleteFromTurnAsync<DbReport>(turnId);
                 }
 
                 var players = await db.Players
@@ -60,7 +60,7 @@ namespace advisor.Features
             return games;
         }
 
-        private Task DeleteFromGameAsync<T>(long turnId) {
+        private Task DeleteFromTurnAsync<T>(long turnId) {
             var targetTable = db.Model.FindEntityType(typeof(T)).GetTableName();
 
             return db.Database.ExecuteSqlRawAsync($@"delete from {targetTable} where TurnId = {turnId}");
