@@ -320,6 +320,7 @@ export type StructureEdge = {
 export type Mutation = {
   createGame?: Maybe<Game>;
   createUser?: Maybe<User>;
+  deleteGame?: Maybe<Array<Maybe<Game>>>;
   joinGame?: Maybe<Player>;
   joinUniversity?: Maybe<University>;
   openUniversity?: Maybe<University>;
@@ -338,6 +339,11 @@ export type MutationCreateGameArgs = {
 export type MutationCreateUserArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationDeleteGameArgs = {
+  gameId: Scalars['ID'];
 };
 
 
@@ -534,6 +540,13 @@ export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetGamesQuery = { games?: Maybe<Array<Maybe<GameListItemFragment>>> };
+
+export type DeleteGameMutationVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type DeleteGameMutation = { deleteGame?: Maybe<Array<Maybe<GameListItemFragment>>> };
 
 export type GameListItemFragment = (
   Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion'>
@@ -1078,6 +1091,13 @@ export const UniversityClass = gql`
 export const GetGames = gql`
     query GetGames {
   games {
+    ...GameListItem
+  }
+}
+    ${GameListItem}`;
+export const DeleteGame = gql`
+    mutation DeleteGame($gameId: ID!) {
+  deleteGame(gameId: $gameId) {
     ...GameListItem
   }
 }

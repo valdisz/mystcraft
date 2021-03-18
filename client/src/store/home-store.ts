@@ -3,6 +3,7 @@ import { CLIENT } from '../client'
 import { GameListItemFragment, GetGamesQuery, GetGames } from '../schema'
 import { CreateGame, CreateGameMutation, CreateGameMutationVariables } from '../schema'
 import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
+import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
 import { NewGameStore } from './new-game-store'
 
 export class HomeStore {
@@ -12,7 +13,14 @@ export class HomeStore {
 
     readonly games = observable<GameListItemFragment>([]);
 
-    load = () => {
+    load = (games?: GameListItemFragment[]) => {
+        if (games) {
+            runInAction(() => {
+                this.games.replace(games);
+            })
+            return
+        }
+
         CLIENT.query<GetGamesQuery>({
             query: GetGames
         }).then(response => {
@@ -77,5 +85,14 @@ export class HomeStore {
         });
 
         this.load();
+    }
+
+    deleteGame = async (gameId: string) => {
+        const response = await CLIENT.mutate<DeleteGameMutation, DeleteGameMutationVariables>({
+            mutation: DeleteGame,
+            variables: { gameId }
+        });
+
+        this.load(response.data.deleteGame);
     }
 }

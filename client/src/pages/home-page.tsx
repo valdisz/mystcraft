@@ -33,7 +33,7 @@ function GameActions({ disabled, onUpload, onDelete }: GameActionsProps) {
             { content: 'Delete', onAction: onDelete }
         ]}>
             Load turn
-        </SplitButton>
+    </SplitButton>
 }
 
 function Game({ name }) {
@@ -98,7 +98,13 @@ function GameItem({ game }: GameItemProps) {
         <ListItemSecondaryAction>
             <Observer>
                 {() => game.myPlayer
-                    ? <GameActions disabled={home.uploading} onUpload={() => home.triggerUploadReport(game.myPlayer.id)} onDelete={() => {}} />
+                    ? <>
+                        <Button component={Link} to={`/game/${game.id}/university`}>University</Button>
+                        <GameActions
+                            disabled={home.uploading}
+                            onUpload={() => home.triggerUploadReport(game.myPlayer.id)}
+                            onDelete={() => home.deleteGame(game.id)} />
+                    </>
                     : <Button color='primary' size='small' variant='outlined' onClick={() => home.joinGame(game.id)}>Join</Button> }
             </Observer>
         </ListItemSecondaryAction>

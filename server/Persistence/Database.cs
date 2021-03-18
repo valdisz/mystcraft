@@ -149,12 +149,12 @@ namespace advisor.Persistence
             });
 
             model.Entity<DbTurn>(t => {
-                t.HasMany<DbReport>(x => x.Reports)
+                t.HasMany(x => x.Reports)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                t.HasMany<DbRegion>(x => x.Regions)
+                t.HasMany(x => x.Regions)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
                     .OnDelete(DeleteBehavior.Restrict);

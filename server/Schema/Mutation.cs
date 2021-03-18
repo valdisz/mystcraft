@@ -1,6 +1,7 @@
 namespace advisor
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using advisor.Features;
     using HotChocolate;
@@ -45,6 +46,13 @@ namespace advisor
         public Task<DbPlayer> JoinGame([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string gameId) {
             return mediator.Send(new JoinGame(
                 currentUserId,
+                ParseRelayId<long>("Game", gameId)
+            ));
+        }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<List<DbGame>> DeleteGame([GraphQLType(typeof(RelayIdType))] string gameId) {
+            return mediator.Send(new DeleteGame(
                 ParseRelayId<long>("Game", gameId)
             ));
         }

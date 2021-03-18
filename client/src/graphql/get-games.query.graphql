@@ -4,6 +4,12 @@ query GetGames {
   }
 }
 
+mutation DeleteGame($gameId: ID!) {
+    deleteGame(gameId: $gameId) {
+        ...GameListItem
+    }
+}
+
 fragment GameListItem on Game {
   id
   name
