@@ -31,23 +31,29 @@ namespace advisor.Features {
             if (membership.Player.FactionNumber == null) return Unit.Value;
 
             var universityId = membership.UniversityId;
-            var factionNumber = membership.Player.FactionNumber.Value;
             var turnNumber = membership.Player.LastTurnNumber;
 
-            var plans = await GetTurnPlans(turnNumber, universityId, request.PlayerId, factionNumber);
-            var prevPalns = await GetTurnPlans(turnNumber - 1, universityId, request.PlayerId, factionNumber);
+            var members = await db.UniversityMemberships
+                .Include(x => x.Player)
+                .Where(x => x.UniversityId == universityId)
+                .Select(x => new { FactionNumber = x.Player.FactionNumber ?? 0 })
+                .ToListAsync();
 
-            var mages = await db.Units
+            var plans = await GetTurnPlans(turnNumber, universityId);
+            var prevPalns = await GetTurnPlans(turnNumber - 1, universityId);
+
+            var mages = (await db.Units
                 .Include(x => x.Turn)
                 .Include(x => x.Faction)
                 .Include(x => x.Plan)
                 .Where(x => x.Turn.Number == turnNumber
                         && x.Turn.PlayerId == request.PlayerId
                         && x.Faction != null
-                        && x.Faction.Number == factionNumber
                         && x.Skills.Any(s => s.Code == "FORC" || s.Code == "PATT" || s.Code == "SPIR")
                 )
-                .ToListAsync();
+                .ToListAsync())
+                .Where(unit => members.Any(member => member.FactionNumber == unit.Faction.Number))
+                .ToList();
 
             foreach (var mage in mages) {
                 if (plans.ContainsKey(mage.Number)) continue;
@@ -73,16 +79,12 @@ namespace advisor.Features {
             return Unit.Value;
         }
 
-        private async Task<Dictionary<int, DbStudyPlan>> GetTurnPlans(int turnNum, long universityId, long playerId, int factionNumber) {
+        private async Task<Dictionary<int, DbStudyPlan>> GetTurnPlans(int turnNum, long universityId) {
             return (await db.StudyPlans
                 .Include(x => x.Turn)
                 .Include(x => x.Unit)
                 .ThenInclude(x => x.Faction)
-                .Where(x => x.UniversityId == universityId
-                    && x.Turn.Number == turnNum
-                    && x.Turn.PlayerId == playerId
-                    && x.Unit.Faction != null
-                    && x.Unit.Faction.Number == factionNumber)
+                .Where(x => x.UniversityId == universityId && x.Turn.Number == turnNum)
                 .ToListAsync())
                 .ToDictionary(x => x.Unit.Number);
         }
