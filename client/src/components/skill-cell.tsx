@@ -48,6 +48,7 @@ const SkillLevel = styled.div`
     font-weight: bold;
     padding: 2px;
     background-color: #e0e0e0;
+    color: black;
 `
 
 const MissingSkillLevel = styled.div`
@@ -83,6 +84,8 @@ const Cell = styled.td<CellProps>`
 
         return 'white'
     }};
+
+    color: ${props => props.studying && props.withTeacher ? 'white' : 'black'};
 
     ${props => props.active && css`cursor: pointer;`}
 `
