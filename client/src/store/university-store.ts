@@ -235,7 +235,7 @@ export class Student {
         })
 
         this.setPlan(result.data.setStudyPlanTeach)
-        console.log(result.data.setStudyPlanTeach)
+        this.setStudents(result.data.setStudyPlanTeach)
 
         if (this.teach.length == 10) {
             this.resetMode()
@@ -243,10 +243,20 @@ export class Student {
     }
 
     canTeach = (student: Student, skill: string) => {
-        const techerSkil = this.skills[skill]
-        const studentSkill = student.skills[skill]
+        const techerLevel = this.skills[skill]?.level ?? 0
+        const targetLevel = (student.skills[skill]?.level ?? 0) + 1
 
-        return (techerSkil?.level || 0) > (studentSkill?.level || 0)
+        if (targetLevel > techerLevel) return false
+
+        const deps = SKILL_TREE[skill] ?? []
+        for (const dep of deps) {
+            const depLevel = Math.max(dep.level, targetLevel)
+            const studentDepLevel = student.skills[dep.code]?.level ?? 0
+
+            if (studentDepLevel < depLevel) return false
+        }
+
+        return true
     }
 
 
@@ -333,6 +343,7 @@ export class Student {
         })
 
         this.setPlan(result.data.setStudyPlanTarget)
+        this.setStudents(result.data.setStudyPlanTarget)
     }
 
     incTargetLevel = (e: React.MouseEvent) => {
@@ -357,6 +368,7 @@ export class Student {
         })
 
         this.setPlan(result.data.setStudPlanyStudy)
+        this.setStudents(result.data.setStudPlanyStudy)
     }
 
     clearOrders = async () => {
@@ -442,10 +454,12 @@ export class Student {
         }
 
         this.skillsGroups.replace(skills)
-        this.teach.replace((plan.teach || [])
-            .map(s => this.location.students.find(x => x.number === s))
-            .filter(s => !!s)
-        )
+    }
+
+    @action setStudents = (plan: StudyPlanFragment) => {
+        const students = (plan.teach || []).map(s => this.location.students.find(x => x.number === s))
+
+        this.teach.replace(students.filter(s => !!s))
 
         for (const student of this.teach) {
             if (student.teacher !== this) {
@@ -596,8 +610,13 @@ export class UniversityStore {
 
         for (const key in locations) {
             const { location, data } = locations[key]
+
             for (const student of location.students) {
                 student.setPlan(data[student.id])
+            }
+
+            for (const student of location.students) {
+                student.setStudents(data[student.id])
             }
 
             location.students.sort((a, b) => {

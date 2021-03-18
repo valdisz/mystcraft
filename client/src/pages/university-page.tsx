@@ -180,7 +180,6 @@ const University = observer(() => {
 })
 
 export function UniversityPage() {
-    console.log('route params', useParams<GameRouteParams>())
     const { gameId } = useParams<GameRouteParams>()
     const { university } = useStore()
 
