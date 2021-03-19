@@ -82,15 +82,15 @@ namespace advisor {
             var provider = Configuration.GetValue<DatabaseProvider>("Provider");
             switch (provider) {
                 case DatabaseProvider.SQLite:
-                    services.AddDbContext<Database, SQLiteDatabase>();
+                    services.AddDbContext<Database, SQLiteDatabase>(ServiceLifetime.Transient);
                     break;
 
                 case DatabaseProvider.PgSQL:
-                    services.AddDbContext<Database, PgSqlDatabase>();
+                    services.AddDbContext<Database, PgSqlDatabase>(ServiceLifetime.Transient);
                     break;
 
                 case DatabaseProvider.MsSQL:
-                    services.AddDbContext<Database, MsSqlDatabase>();
+                    services.AddDbContext<Database, MsSqlDatabase>(ServiceLifetime.Transient);
                     break;
             }
 
