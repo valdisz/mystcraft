@@ -1,25 +1,9 @@
-namespace advisor.Persistence
-{
-    using System;
-    using System.Collections.Generic;
+namespace advisor.Persistence {
     using advisor.Model;
-    using AutoMapper.Configuration;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
-
-    public class JsonListConverter<T> : ValueConverter<List<T>, string>
-    {
-        public JsonListConverter()
-            : base(
-                v => JsonConvert.SerializeObject(v),
-                v => JsonConvert.DeserializeObject<List<T>>(v)
-            )
-        {
-        }
-    }
 
     public enum DatabaseProvider {
         SQLite,
