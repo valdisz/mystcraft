@@ -28,7 +28,7 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
         </td>
         <td className='target'>
             { student.target
-                ? <ButtonGroup>
+                ? <ButtonGroup title={student.target.title}>
                     <XsButton variant='outlined' onClick={student.beginTargetSelection}>{student.target.code}</XsButton>
                     <XsButton variant='outlined' className='skill-level' onClick={student.incTargetLevel}>{student.target.level}</XsButton>
                 </ButtonGroup>
@@ -44,7 +44,7 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
                 { group.skills.map(skill => (
                     <SkillCell key={skill.code}
                         active={student.isSkillActive(skill.code)}
-                        title=''
+                        title={skill.title}
                         days={skill.days}
                         level={skill.level}
                         isTarget={student.isTargetSkill(skill.code)}

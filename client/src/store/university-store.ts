@@ -8,7 +8,7 @@ import { SetStudPlanyTarget, SetStudPlanyTargetMutation, SetStudPlanyTargetMutat
 import { SetStudPlanyStudy, SetStudPlanyStudyMutation, SetStudPlanyStudyMutationVariables } from '../schema'
 import { SetStudPlanyTeach, SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables } from '../schema'
 import { ClassSummaryFragment, UniveristyMemberRole } from '../schema'
-import { getSkillRequirements, ISkill, SKILL_TREE } from './skill-tree'
+import { getSkillDeps, getSkillRequirements, ISkill, SKILL_TREE } from './skill-tree'
 
 class NewUniversity {
     constructor(private readonly parent: UniversityStore) {
@@ -46,11 +46,16 @@ export class Skill implements ISkill {
         if (data) {
             Object.assign(this, data)
         }
+
+        if (data.code) {
+            this.title = SKILL_TREE[data.code]?.title ?? ''
+        }
     }
 
     @observable code  = ''
     @observable level?: number = null
     @observable days?: number = null
+    @observable title? = ''
 
     @computed get canStudy() {
         return !this.days || this.days < 450
@@ -248,7 +253,7 @@ export class Student {
 
         if (targetLevel > techerLevel) return false
 
-        const deps = SKILL_TREE[skill] ?? []
+        const deps = getSkillDeps(skill)
         for (const dep of deps) {
             const depLevel = Math.max(dep.level, targetLevel)
             const studentDepLevel = student.skills[dep.code]?.level ?? 0
@@ -391,7 +396,7 @@ export class Student {
 
         const level = skill.level + 1
 
-        const skillDeps = SKILL_TREE[code]
+        const skillDeps = getSkillDeps(code)
         if (!skillDeps) return true
 
         for (const dep of skillDeps) {

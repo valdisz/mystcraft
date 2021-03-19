@@ -33,7 +33,7 @@ export const UniversityLocation = observer(({ location }: UniversityLocationProp
 
             { university.skills.map((group, i) => <React.Fragment key={i}>
                 <th className='empty'></th>
-                { group.skills.map(({ code }) => <th key={code}>{code}</th> ) }
+                { group.skills.map(({ code, title }) => <th key={code} title={title}>{code}</th> ) }
             </React.Fragment> ) }
         </tr>
         { location.students.map(student => <UniversityStudent key={student.id} student={student} location={location} />)}
