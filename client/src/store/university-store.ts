@@ -409,19 +409,16 @@ export class Student {
         this.mode = ''
     }
 
-    @action skillClick = (skill: string) => {
+    @action skillClick = async (skill: string) => {
         switch (this.mode) {
             case 'study':
-                this.setStudy(skill)
+                await this.setStudy(skill)
                 this.resetMode()
-                if (this.teacher) {
-                    this.teacher.teach.remove(this)
-                    this.setTeacher(null)
-                }
+                if (this.teacher && !this.teacher.canTeach(this, skill)) await this.teacher.removeStudent(this)
                 break
 
             case 'target-selection':
-                this.setTarget(skill, (this.skills[skill].level || 0) + 1)
+                await this.setTarget(skill, (this.skills[skill].level || 0) + 1)
                 this.resetMode()
                 break
 
@@ -430,9 +427,8 @@ export class Student {
 
             case '':
                 if (this.location.teacher) {
-                    this.location.teacher
-                        .addStudent(this)
-                        .then(() => this.setStudy(skill))
+                    await this.setStudy(skill)
+                    await this.location.teacher.addStudent(this)
                 }
                 break;
         }

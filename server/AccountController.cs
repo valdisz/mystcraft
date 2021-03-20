@@ -52,7 +52,8 @@ namespace advisor {
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             var returnTo = new Uri(returnUrl ?? Url.Content("~/"));
-            return Redirect(returnTo.PathAndQuery);
+            // return Redirect(returnTo.PathAndQuery);
+            return Ok();
         }
     }
 

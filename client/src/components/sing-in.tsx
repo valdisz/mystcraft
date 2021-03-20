@@ -12,12 +12,13 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { Alert } from '@material-ui/lab';
 
 function Copyright() {
     return (
         <Typography variant='body2' color='textSecondary' align='center'>
             {'Copyright © '}
-            <Link color='inherit' href='https://material-ui.com/'>Valds Zobēla</Link>
+            <Link color='inherit' href='https://advisor.azurewebsites.net'>Valdis Zobēla</Link>
             {' '}
             {new Date().getFullYear()}
             {'.'}
@@ -45,8 +46,32 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export function SignIn() {
+export interface SignInProps {
+    onSuccess: () => void
+    onGoToSignUp: () => void
+}
+
+export function SignIn({ onSuccess, onGoToSignUp }: SignInProps) {
     const classes = useStyles();
+    const [wrongCreds, setWrongCreds] = React.useState(false)
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const response = await fetch('/login', {
+            method: 'POST',
+            credentials: 'same-origin',
+            body: new FormData(e.target as any)
+        })
+
+        if (response.ok) {
+            onSuccess()
+        }
+        else {
+            setWrongCreds(true)
+        }
+    }
 
     return (
         <Container component='main' maxWidth='xs'>
@@ -57,7 +82,7 @@ export function SignIn() {
                 <Typography component='h1' variant='h5'>
                     Sign in
                 </Typography>
-                <form className={classes.form} noValidate method='post' action='/login'>
+                <form className={classes.form} noValidate onSubmit={onSubmit}>
                     <TextField
                         variant='outlined'
                         margin='normal'
@@ -80,21 +105,26 @@ export function SignIn() {
                         id='password'
                         autoComplete='current-password'
                     />
+                    { wrongCreds && <Alert severity='error'>Username or password is incorrect!</Alert> }
                     {/* <FormControlLabel
                         control={<Checkbox value='remember' color='primary' />}
                         label='Remember me'
                     /> */}
-                    <Button type='submit' fullWidth variant='contained' color='primary' className={classes.submit}>Sign In</Button>
-                    {/* <Grid container>
-                        <Grid item xs>
+                    <Button fullWidth
+                        variant='contained'
+                        color='primary'
+                        type='submit'
+                        className={classes.submit}>Sign In</Button>
+                    <Grid container>
+                        {/* <Grid item xs>
                             <Link href='#' variant='body2'>Forgot password?</Link>
-                        </Grid>
+                        </Grid> */}
                         <Grid item>
-                            <Link href='#' variant='body2'>
-                                {'Don't have an account? Sign Up'}
-                            </Link>
+                            <Button size='small' variant='text' onClick={onGoToSignUp}>
+                                {`Don't have an account? Sign Up`}
+                            </Button>
                         </Grid>
-                    </Grid> */}
+                    </Grid>
                 </form>
             </div>
             <Box mt={8}>
@@ -103,3 +133,74 @@ export function SignIn() {
         </Container>
     );
 }
+
+
+export interface SignUpProps {
+    onSuccess: () => void
+    onGoToSignIn: () => void
+}
+
+export function SignUp({ onSuccess, onGoToSignIn }: SignUpProps) {
+    const classes = useStyles();
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        onSuccess()
+    }
+
+    return (
+        <Container component='main' maxWidth='xs'>
+            <div className={classes.paper}>
+                <Avatar className={classes.avatar}>
+                    <LockOutlinedIcon />
+                </Avatar>
+                <Typography component='h1' variant='h5'>
+                    Sign up
+                </Typography>
+                <form className={classes.form} noValidate onSubmit={onSubmit}>
+                    <TextField
+                        variant='outlined'
+                        margin='normal'
+                        required
+                        fullWidth
+                        id='email'
+                        label='Email Address'
+                        name='email'
+                        autoComplete='email'
+                        autoFocus
+                    />
+                    <TextField
+                        variant='outlined'
+                        margin='normal'
+                        required
+                        fullWidth
+                        name='password'
+                        label='Password'
+                        type='password'
+                        id='password'
+                        autoComplete='current-password'
+                    />
+
+                    <Button fullWidth
+                        variant='contained'
+                        color='primary'
+                        type='submit'
+                        className={classes.submit}>Sign Up</Button>
+
+                    <Grid container>
+                        <Grid item>
+                            <Button size='small' variant='text' onClick={onGoToSignIn}>
+                                Already have an account? Sign in
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </form>
+            </div>
+            <Box mt={8}>
+                <Copyright />
+            </Box>
+        </Container>
+    );
+  }
