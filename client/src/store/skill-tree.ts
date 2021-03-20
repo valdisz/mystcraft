@@ -11,6 +11,8 @@ export interface SkillDef {
 }
 
 export const SKILL_TREE: { [ code: string]: SkillDef } = {
+    OBSE: {"title": "observation","deps": []},
+    STEA: {"title": "stealth","deps": []},
     FORC: {"title": "force","deps": []},
     PATT: {"title": "pattern","deps": []},
     SPIR: {"title": "spirit","deps": []},
