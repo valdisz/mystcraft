@@ -26,11 +26,11 @@ const StudentCount = styled.em`
     font-size: 80%;
 `
 
-const Unit = observer(({ student, location }: UniversityStudentProps) => {
+const Unit = observer(({ student }: { student: Student }) => {
     return <UnitElement>
         <UnitName teaching={!!student.teach.length}>{student.name} ({student.number})</UnitName>
-        { student.teach.length > 0 && location.students.length > 2 &&
-            <StudentCount>{student.teach.length} of {Math.min(10, location.students.length - 1)} students</StudentCount>
+        { student.teach.length > 0 &&
+            <StudentCount>{student.teach.length} of {student.maxStudents} students</StudentCount>
         }
     </UnitElement>
 })
@@ -45,7 +45,7 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
                     { student.warningMessage && <WarningIcon fontSize='small' style={{ color: orange[500] }} /> }
                 </span>
             </Tooltip> }
-            <Unit student={student} location={location} />
+            <Unit student={student} />
             <Box ml={1} clone>
                 { student.mode === ''
                     ? <ButtonGroup>

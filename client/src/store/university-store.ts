@@ -327,9 +327,13 @@ export class Student {
         this.setPlan(result.data.setStudyPlanTeach)
         this.setStudents(result.data.setStudyPlanTeach)
 
-        if (this.teach.length == 10) {
+        if (this.teach.length >= this.maxStudents) {
             this.resetMode()
         }
+    }
+
+    @computed get maxStudents() {
+        return Math.min(10, Math.max(0,this.location.students.length - 1))
     }
 
     removeStudent = async (student: Student) => {
