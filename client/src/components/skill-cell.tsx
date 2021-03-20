@@ -85,9 +85,15 @@ const Cell = styled.td<CellProps>`
         return 'white'
     }};
 
-    color: ${props => props.studying && props.withTeacher ? 'white' : 'black'};
+    color: ${props => !props.active && props.studying && props.withTeacher ? 'white' : 'black'};
 
     ${props => props.active && css`cursor: pointer;`}
+    ${props => {
+        if (!props.active) return
+
+        if (props.studying && props.withTeacher) return css`outline: 3px solid green;`
+        if (props.studying) return css`outline: 3px solid lightgreen;`
+    }}
 `
 
 export function SkillCell({ title, onClick, ...props }: SkillCellProps) {

@@ -229,6 +229,10 @@ export class Student {
         const units = this.teach.map(x => x.number)
         if (units.includes(student.number)) return
 
+        if (student.teacher) {
+            await student.teacher.removeStudent(student)
+        }
+
         units.push(student.number)
 
         const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
@@ -245,6 +249,34 @@ export class Student {
         if (this.teach.length == 10) {
             this.resetMode()
         }
+    }
+
+    removeStudent = async (student: Student) => {
+        if (!this.teach.includes(student)) return
+
+        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
+            mutation: SetStudPlanyTeach,
+            variables: {
+                studyPlanId: this.id,
+                units: this.teach.filter(x => x !== student).map(x => x.number)
+            }
+        })
+
+        this.setPlan(result.data.setStudyPlanTeach)
+        this.setStudents(result.data.setStudyPlanTeach)
+    }
+
+    clearStudents = async () => {
+        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
+            mutation: SetStudPlanyTeach,
+            variables: {
+                studyPlanId: this.id,
+                units: []
+            }
+        })
+
+        this.setPlan(result.data.setStudyPlanTeach)
+        this.setStudents(result.data.setStudyPlanTeach)
     }
 
     canTeach = (student: Student, skill: string) => {
@@ -377,12 +409,17 @@ export class Student {
     }
 
     clearOrders = async () => {
-        for (const student of this.teach) {
-            student.setTeacher(null)
+        if (this.teach.length) {
+            await this.clearStudents()
         }
-        this.teach.clear()
 
-        await this.setStudy('')
+        if (this.study !== '') {
+            if (this.teacher) {
+                await this.teacher.removeStudent(this)
+            }
+
+            await this.setStudy('')
+        }
     }
 
 
@@ -413,7 +450,9 @@ export class Student {
         const teacher = this.location.teacher
         const mode = this.mode
 
-        if (mode !== 'teaching' && teacher && teacher !== this) {
+        if (mode === 'teaching') return false
+
+        if (teacher && teacher !== this) {
             return teacher !== this.teacher && teacher.canTeach(this, skill)
         }
         else {
@@ -464,12 +503,15 @@ export class Student {
     @action setStudents = (plan: StudyPlanFragment) => {
         const students = (plan.teach || []).map(s => this.location.students.find(x => x.number === s))
 
-        this.teach.replace(students.filter(s => !!s))
-
         for (const student of this.teach) {
-            if (student.teacher !== this) {
-                student.setTeacher(this)
-            }
+            if (students.includes(student)) continue
+
+            student.setTeacher(null)
+        }
+
+        this.teach.replace(students.filter(s => !!s))
+        for (const student of this.teach) {
+            student.setTeacher(this)
         }
     }
 }

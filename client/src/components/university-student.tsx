@@ -1,8 +1,9 @@
 import * as React from 'react'
+import styled from 'styled-components'
 import { observer } from 'mobx-react-lite'
 import { SkillCell } from './skill-cell'
 import { Student, StudyLocation } from '../store'
-import { Box, ButtonGroup } from '@material-ui/core'
+import { Badge, Box, ButtonGroup, Typography } from '@material-ui/core'
 import { CopyButton, XsButton } from './buttons'
 
 export interface UniversityStudentProps {
@@ -10,11 +11,33 @@ export interface UniversityStudentProps {
     location: StudyLocation
 }
 
+const UnitElement = styled.div`
+    display: inline-block;
+`
+
+const UnitName = styled.div<{ teaching: boolean }>`
+    font-weight: ${p => p.teaching ? 'bold' : 'normal '};
+`
+
+const StudentCount = styled.em`
+    font-size: 80%;
+`
+
+const Unit = observer(({ student }: { student: Student }) => {
+    return <UnitElement>
+        <UnitName teaching={!!student.teach.length}>{student.name} ({student.number})</UnitName>
+        { student.teach.length > 0 &&
+            <StudentCount>{student.teach.length} of 10 students</StudentCount>
+        }
+    </UnitElement>
+})
+
 export const UniversityStudent = observer(({ student, location }: UniversityStudentProps) => {
     return <tr>
         <td className='faction'>{student.factionName} ({student.factionNumber})</td>
         <td className='unit'>
-            {student.name} ({student.number})
+            { student.teacher && <></> }
+            <Unit student={student} />
             <Box ml={1} clone>
                 { student.mode === ''
                     ? <ButtonGroup>
