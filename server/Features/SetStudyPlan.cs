@@ -29,6 +29,7 @@ namespace advisor.Features {
 
         private Task<DbStudyPlan> GetPlan(long studyPlanId) {
             return db.StudyPlans
+                .Include(x => x.Turn)
                 .Include(x => x.Unit)
                 .ThenInclude(x => x.Faction)
                 .SingleOrDefaultAsync(x => x.Id == studyPlanId);
@@ -49,7 +50,9 @@ namespace advisor.Features {
         public async Task<DbStudyPlan> Handle(SetStudyPlanTarget request, CancellationToken cancellationToken) {
             var plan = await GetPlan(request.StudyPlanId);
             var membership = await GetMembershipAsync(request.UserId, plan);
-            if (membership.Role == UniveristyMemberRole.Member) return null;
+
+            var own = plan.Turn.PlayerId == membership.PlayerId;
+            if (!own && membership.Role == UniveristyMemberRole.Member) return null;
 
             plan.Target = new DbSkill {
                 Code = request.Skill,
@@ -65,7 +68,9 @@ namespace advisor.Features {
         public async Task<DbStudyPlan> Handle(SetStudPlanyStudy request, CancellationToken cancellationToken) {
             var plan = await GetPlan(request.StudyPlanId);
             var membership = await GetMembershipAsync(request.UserId, plan);
-            if (membership.Role == UniveristyMemberRole.Member) return null;
+
+            var own = plan.Turn.PlayerId == membership.PlayerId;
+            if (!own && membership.Role == UniveristyMemberRole.Member) return null;
 
             plan.Teach = new ();
             plan.Study = request.Skill;
@@ -78,6 +83,7 @@ namespace advisor.Features {
         public async Task<DbStudyPlan> Handle(SetStudyPlanTeach request, CancellationToken cancellationToken) {
             var plan = await GetPlan(request.StudyPlanId);
             var membership = await GetMembershipAsync(request.UserId, plan);
+
             if (membership.Role == UniveristyMemberRole.Member) return null;
 
             plan.Study = null;

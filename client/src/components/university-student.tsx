@@ -26,7 +26,11 @@ const StudentCount = styled.em`
     font-size: 80%;
 `
 
-const Unit = observer(({ student }: { student: Student }) => {
+interface StudentProps {
+    student: Student
+}
+
+const Unit = observer(({ student }: StudentProps) => {
     return <UnitElement>
         <UnitName teaching={!!student.teach.length}>{student.name} ({student.number})</UnitName>
         { student.teach.length > 0 &&
@@ -35,27 +39,35 @@ const Unit = observer(({ student }: { student: Student }) => {
     </UnitElement>
 })
 
+const UnitMessages = observer(({ student }: StudentProps) => {
+    return <Tooltip title={student.criticalMessage || student.warningMessage}>
+        <span>
+            { student.criticalMessage && <ErrorIcon fontSize='small' style={{ color: red[500] }} /> }
+            { student.warningMessage && <WarningIcon fontSize='small' style={{ color: orange[500] }} /> }
+        </span>
+    </Tooltip>
+})
+
+const UnitActions = observer(({ student }: StudentProps) => {
+    return <Box ml={1} clone>
+        { student.mode === ''
+            ? <ButtonGroup>
+                <XsButton variant='outlined' title='Study' onClick={student.beginStudy}>S</XsButton>
+                <XsButton variant='outlined' title='Teach' onClick={student.beginTeaching}>T</XsButton>
+                <XsButton variant='outlined' title='Clear' onClick={student.clearOrders}>X</XsButton>
+            </ButtonGroup>
+            : <XsButton variant='outlined' onClick={student.resetMode}>Done</XsButton>
+        }
+    </Box>
+})
+
 export const UniversityStudent = observer(({ student, location }: UniversityStudentProps) => {
     return <tr>
         <td className='faction'>{student.factionName} ({student.factionNumber})</td>
         <td className='unit'>
-            { (student.criticalMessage || student.warningMessage) && <Tooltip title={student.criticalMessage || student.warningMessage}>
-                <span>
-                    { student.criticalMessage && <ErrorIcon fontSize='small' style={{ color: red[500] }} /> }
-                    { student.warningMessage && <WarningIcon fontSize='small' style={{ color: orange[500] }} /> }
-                </span>
-            </Tooltip> }
+            { (student.criticalMessage || student.warningMessage) && <UnitMessages student={student} /> }
             <Unit student={student} />
-            <Box ml={1} clone>
-                { student.mode === ''
-                    ? <ButtonGroup>
-                        <XsButton variant='outlined' title='Study' onClick={student.beginStudy}>S</XsButton>
-                        <XsButton variant='outlined' title='Teach' onClick={student.beginTeaching}>T</XsButton>
-                        <XsButton variant='outlined' title='Clear' onClick={student.clearOrders}>X</XsButton>
-                    </ButtonGroup>
-                    : <XsButton variant='outlined' onClick={student.resetMode}>Done</XsButton>
-                }
-            </Box>
+            <UnitActions student={student} />
         </td>
         <td className='target'>
             { student.target
