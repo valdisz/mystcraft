@@ -46,6 +46,7 @@ namespace advisor {
             var earliestTurn = await mediator.Send(new UploadReports(playerIdValue, reports));
             await mediator.Send(new ParseReports(playerIdValue, earliestTurn));
             await mediator.Send(new SetupStudyPlans(playerIdValue));
+            await mediator.Send(new CalculateFactionStats(playerIdValue, earliestTurn));
 
             return Ok();
         }

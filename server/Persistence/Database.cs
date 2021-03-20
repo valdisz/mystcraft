@@ -55,6 +55,7 @@ namespace advisor.Persistence {
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
+        public DbSet<DbFactionStats> FactionStats { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
         public DbSet<DbStructure> Structures { get; set; }
@@ -167,6 +168,11 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => x.TurnId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                t.HasMany(x => x.Stats)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => x.TurnId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             model.Entity<DbRegion>(t => {
@@ -224,6 +230,23 @@ namespace advisor.Persistence {
 
             model.Entity<DbEvent>(t => {
                 t.Property(x => x.Type).HasConversion<string>();
+                t.Property(x => x.Category).HasConversion<string>();
+            });
+
+            model.Entity<DbFactionStats>(t => {
+                t.HasKey(x => new { x.TurnId, x.FactionId });
+
+                t.HasOne(x => x.Faction)
+                    .WithOne(x => x.Stats)
+                    .HasForeignKey<DbFactionStats>(x => x.FactionId);
+
+                t.OwnsOne(x => x.Income);
+
+                t.OwnsMany(p => p.Production, a => {
+                    a.WithOwner().HasForeignKey("TurnId", "FactionId");
+                    a.ToTable("FactionStats_Production");
+                    a.HasKey("TurnId", "FactionId", nameof(DbItem.Code));
+                });
             });
 
             model.Entity<DbStructure>(t => {
@@ -274,6 +297,9 @@ namespace advisor.Persistence {
                 t.OwnsOne(p => p.ReadyItem);
 
                 t.OwnsOne(p => p.CombatSpell);
+
+                t.HasMany(x => x.Events)
+                    .WithOne(x => x.Unit);
             });
 
             model.Entity<DbUniversity>(t => {

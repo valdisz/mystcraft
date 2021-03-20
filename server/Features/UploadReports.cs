@@ -97,9 +97,8 @@ namespace advisor.Features {
             if (dbReport.FactionNumber == player.FactionNumber && turnNumber > player.LastTurnNumber) {
                 player.FactionName = dbReport.FactionName;
                 player.LastTurnNumber = turnNumber;
+                player.Password ??= ordersTemplate?.Password;
             }
-
-            player.Password ??= ordersTemplate?.Password;
 
             player.Game.EngineVersion ??= engine?.Version;
             player.Game.RulesetName ??= engine?.Ruleset?.Name;

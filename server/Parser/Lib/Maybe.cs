@@ -36,7 +36,7 @@ namespace advisor
 
         public static implicit operator T(Maybe<T> v) => v.Value;
 
-        public static implicit operator bool(Maybe<T> v) => v.Success;
+        public static implicit operator bool(Maybe<T> v) => v != null && v.Success;
 
         public Maybe<TOut> Convert<TOut>() {
             if (!Success) return new Maybe<TOut>(Error, Ln, Col);

@@ -16,5 +16,6 @@ namespace advisor
         public static readonly RegionPropsParser RegionProps = new RegionPropsParser(Item);
         public static readonly RegionExistsParser RegionExits = new RegionExistsParser(Location, Settlement);
         public static readonly RegionGateParser RegionGate = new RegionGateParser();
+        public static readonly EventParser Event = new EventParser(new UnitNameParser(), Location, Item);
     }
 }

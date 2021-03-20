@@ -121,11 +121,13 @@ namespace advisor.Features {
             await foreach (var r in savedReports) {
                 JReport report = await GetJsonReportAsync(r);
 
-                CreateOrUpdateFaction(factions, report);
+                CreateOrUpdateFaction(factions, report.Faction);
 
                 foreach (var region in report.Regions) {
                     CreateOrUpdateRegion(turnNumber, factions, regions, structures, units, region);
                 }
+
+                AddEvents(factions, units, report);
             }
 
             AddRevealedRegionsFromExits(turnNumber, regions);
@@ -158,10 +160,8 @@ namespace advisor.Features {
             return faction;
         }
 
-        public static DbFaction CreateOrUpdateFaction(FactionsDic factions, JReport report) {
-            var f = report.Faction;
-
-            var faction = CreateOrUpdateFaction(factions, f);
+        public static void AddEvents(FactionsDic factions, UnitsDic units, JReport report) {
+            var faction = factions[report.Faction.Number];
 
             foreach (var error in report.Errors) {
                 faction.Events.Add(new DbEvent {
@@ -173,11 +173,20 @@ namespace advisor.Features {
             foreach (var ev in report.Events) {
                 faction.Events.Add(new DbEvent {
                     Type = EventType.Info,
-                    Message = ev
+                    Category = ev.Category,
+                    Terrain = ev.Terrain,
+                    X = ev.Coords?.X,
+                    Y = ev.Coords?.Y,
+                    Z = ev.Coords?.Z,
+                    Label = ev.Coords?.Label,
+                    Province = ev.Province,
+                    Amount = ev.Amount,
+                    ItemCode = ev.Code,
+                    ItemName = ev.Name,
+                    ItemPrice = ev.Price,
+                    Message = ev.Message
                 });
             }
-
-            return faction;
         }
 
         private static DbRegion CreateOrUpdateRegion(int turnNumber, FactionsDic factions, RegionDic regions, StructuresDic structures,

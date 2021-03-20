@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using advisor.Persistence;
 
 namespace advisor.Migrations.mssql
 {
     [DbContext(typeof(MsSqlDatabase))]
-    partial class MsSqlDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20210319215304_events")]
+    partial class events
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,22 +112,6 @@ namespace advisor.Migrations.mssql
                     b.HasIndex("TurnId");
 
                     b.ToTable("Factions");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbFactionStats", b =>
-                {
-                    b.Property<long>("TurnId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("FactionId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TurnId", "FactionId");
-
-                    b.HasIndex("FactionId")
-                        .IsUnique();
-
-                    b.ToTable("FactionStats");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbGame", b =>
@@ -572,79 +558,6 @@ namespace advisor.Migrations.mssql
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Turn");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbFactionStats", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithOne("Stats")
-                        .HasForeignKey("advisor.Persistence.DbFactionStats", "FactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
-                        .WithMany("Stats")
-                        .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("advisor.Persistence.DbIncomeStats", "Income", b1 =>
-                        {
-                            b1.Property<long>("DbFactionStatsTurnId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("DbFactionStatsFactionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("Pillage")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Tax")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Work")
-                                .HasColumnType("int");
-
-                            b1.HasKey("DbFactionStatsTurnId", "DbFactionStatsFactionId");
-
-                            b1.ToTable("FactionStats");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbFactionStatsTurnId", "DbFactionStatsFactionId");
-                        });
-
-                    b.OwnsMany("advisor.Persistence.DbItem", "Production", b1 =>
-                        {
-                            b1.Property<long>("TurnId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("FactionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<string>("Code")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<int?>("Amount")
-                                .HasColumnType("int");
-
-                            b1.HasKey("TurnId", "FactionId", "Code");
-
-                            b1.ToTable("FactionStats_Production");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TurnId", "FactionId");
-                        });
-
-                    b.Navigation("Faction");
-
-                    b.Navigation("Income");
-
-                    b.Navigation("Production");
 
                     b.Navigation("Turn");
                 });
@@ -1239,8 +1152,6 @@ namespace advisor.Migrations.mssql
                 {
                     b.Navigation("Events");
 
-                    b.Navigation("Stats");
-
                     b.Navigation("Units");
                 });
 
@@ -1283,8 +1194,6 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Regions");
 
                     b.Navigation("Reports");
-
-                    b.Navigation("Stats");
 
                     b.Navigation("Structures");
 

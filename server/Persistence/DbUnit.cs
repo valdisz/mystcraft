@@ -59,5 +59,8 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public DbStudyPlan Plan { get; set; }
+
+        [GraphQLIgnore]
+        public List<DbEvent> Events { get; set; } = new ();
     }
 }

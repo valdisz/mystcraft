@@ -13,7 +13,7 @@ namespace advisor
             await writer.WritePropertyNameAsync("events");
             await writer.WriteStartArrayAsync();
             while (await cursor.NextAsync() && !cursor.Value.EOF) {
-                await writer.WriteValueAsync(cursor.Value.AsString());
+                await AllParsers.Event.Parse(cursor.Value).Value.WriteJson(writer);
             }
             await writer.WriteEndArrayAsync();
         }

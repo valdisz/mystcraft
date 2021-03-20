@@ -22,11 +22,36 @@ namespace advisor.Migrations.sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("FactionId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ItemCode")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ItemName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ItemPrice")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Label")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Message")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Province")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Terrain")
                         .HasColumnType("TEXT");
 
                     b.Property<long>("TurnId")
@@ -36,11 +61,25 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("UnitId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Z")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FactionId");
 
                     b.HasIndex("TurnId");
+
+                    b.HasIndex("UnitId");
 
                     b.ToTable("Events");
                 });
@@ -66,6 +105,22 @@ namespace advisor.Migrations.sqlite
                     b.HasIndex("TurnId");
 
                     b.ToTable("Factions");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbFactionStats", b =>
+                {
+                    b.Property<long>("TurnId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("FactionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("TurnId", "FactionId");
+
+                    b.HasIndex("FactionId")
+                        .IsUnique();
+
+                    b.ToTable("FactionStats");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbGame", b =>
@@ -484,9 +539,15 @@ namespace advisor.Migrations.sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("advisor.Persistence.DbUnit", "Unit")
+                        .WithMany("Events")
+                        .HasForeignKey("UnitId");
+
                     b.Navigation("Faction");
 
                     b.Navigation("Turn");
+
+                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbFaction", b =>
@@ -496,6 +557,79 @@ namespace advisor.Migrations.sqlite
                         .HasForeignKey("TurnId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbFactionStats", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
+                        .WithOne("Stats")
+                        .HasForeignKey("advisor.Persistence.DbFactionStats", "FactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
+                        .WithMany("Stats")
+                        .HasForeignKey("TurnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("advisor.Persistence.DbIncomeStats", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbFactionStatsTurnId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("DbFactionStatsFactionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Pillage")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Tax")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Work")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbFactionStatsTurnId", "DbFactionStatsFactionId");
+
+                            b1.ToTable("FactionStats");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbFactionStatsTurnId", "DbFactionStatsFactionId");
+                        });
+
+                    b.OwnsMany("advisor.Persistence.DbItem", "Production", b1 =>
+                        {
+                            b1.Property<long>("TurnId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<long>("FactionId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Code")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int?>("Amount")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("TurnId", "FactionId", "Code");
+
+                            b1.ToTable("FactionStats_Production");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TurnId", "FactionId");
+                        });
+
+                    b.Navigation("Faction");
+
+                    b.Navigation("Income");
+
+                    b.Navigation("Production");
 
                     b.Navigation("Turn");
                 });
@@ -1076,6 +1210,8 @@ namespace advisor.Migrations.sqlite
                 {
                     b.Navigation("Events");
 
+                    b.Navigation("Stats");
+
                     b.Navigation("Units");
                 });
 
@@ -1119,6 +1255,8 @@ namespace advisor.Migrations.sqlite
 
                     b.Navigation("Reports");
 
+                    b.Navigation("Stats");
+
                     b.Navigation("Structures");
 
                     b.Navigation("Units");
@@ -1126,6 +1264,8 @@ namespace advisor.Migrations.sqlite
 
             modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
                 {
+                    b.Navigation("Events");
+
                     b.Navigation("Plan");
                 });
 
