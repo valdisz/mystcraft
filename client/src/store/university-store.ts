@@ -170,6 +170,17 @@ function* getSkillGroups() {
     }
 }
 
+function levelTodays(level: number) {
+    if (level == 1) return 30;
+
+    return levelTodays(level - 1) + 30 * level;
+}
+
+export interface StudyTarget extends ISkill {
+    effort: number
+    isTarget: boolean
+}
+
 export class Student {
     constructor(public readonly id: string, private readonly location: StudyLocation) {
         makeObservable(this)
@@ -216,8 +227,60 @@ export class Student {
         return value
     }
 
+    getEffort(code: string, level: number) {
+        let totalDays = 0
+
+        const deps = getSkillRequirements(code, level)
+        deps.push({ code, level, days: levelTodays(level) })
+
+        for (const dep of deps) {
+            const currentDays = this.skills[dep.code]?.days ?? 0
+            const targetDays = levelTodays(dep.level)
+
+            totalDays += Math.max(0, targetDays - currentDays)
+        }
+
+        return Math.ceil(totalDays / 30)
+    }
+
     getMissingLevel(skill: string) {
         return this.depSkills[skill] ?? 0
+    }
+
+
+    isTargetSkill(skill: string) {
+        return skill === this.target?.code
+    }
+
+    @computed get studyTarget() {
+        const targets: { [code: string]: StudyTarget } = {}
+
+        for (const code in this.skills) {
+            const skill = this.skills[code]
+
+            const isTarget = this.isTargetSkill(code)
+            let level: number
+            if (isTarget) {
+                level = this.target.level
+            }
+            else {
+                const missingLevel = this.getMissingLevel(code) || 1
+                level = Math.min(5, (skill.level ?? 0) + missingLevel)
+            }
+
+            const effort = this.getEffort(code, level)
+
+            targets[code] = {
+                code,
+                level,
+                days: levelTodays(level),
+                isTarget,
+                effort,
+                title: skill.title
+            }
+        }
+
+        return targets
     }
 
     readonly teach: IObservableArray<Student> = observable([])
@@ -420,11 +483,6 @@ export class Student {
 
             await this.setStudy('')
         }
-    }
-
-
-    isTargetSkill(skill: string) {
-        return skill === this.target?.code
     }
 
     canStudy(code: string) {

@@ -1,15 +1,17 @@
 import * as React from 'react'
 import styled, { css } from 'styled-components'
+import { Tooltip, Typography } from '@material-ui/core'
+import { ISkill } from '../store/skill-tree'
+import { StudyTarget } from '../store'
+
 
 export interface SkillCellProps {
-    title: string
-    days?: number
-    level?: number
+    skill: ISkill
+    study: StudyTarget
 
     active: boolean
     onClick: () => void
 
-    isTarget: boolean
     missing: number
 
     studying: boolean
@@ -31,7 +33,7 @@ const CellBody = styled.div<Partial<SkillCellProps>>`
     border-width: 2px;
     border-style: solid;
     border-color: ${props => {
-        if (props.isTarget) return 'blue'
+        if (props.study?.isTarget) return 'blue'
         if (props.missing) return 'orange'
 
         return 'white'
@@ -96,19 +98,34 @@ const Cell = styled.td<CellProps>`
     }}
 `
 
-export function SkillCell({ title, onClick, ...props }: SkillCellProps) {
+function SkillTootipContent({ study }: Partial<SkillCellProps>) {
+    return <>
+        <Typography variant='h6'>{study.title} [{study.code}]</Typography>
+        <Typography variant='body2'>
+            <strong>Target Level</strong>: {study.level} ({study.days})
+        </Typography>
+        <Typography variant='body2'>
+            <strong>Effort</strong>: {study.effort} turns
+        </Typography>
+    </>
+}
+
+export function SkillCell({ onClick, ...props }: SkillCellProps) {
+    const { title, level, days } = props.skill
     return <Cell active={props.active} studying={props.studying} withTeacher={props.withTeacher}
         title={title}
         onClick={() => props.active && onClick()}>
-        <CellBody {...props}>
-            <SkillDays>{props.days ? props.days : ' '}</SkillDays>
-            { props.level || props.missing > 0
-                ? <SkillInfo>
-                    { props.level ? <SkillLevel>{props.level}</SkillLevel> : <span></span> }
-                    { props.missing > 0 ? <MissingSkillLevel>+{props.missing}</MissingSkillLevel> : null }
-                </SkillInfo>
-                : null
-            }
-        </CellBody>
+        <Tooltip title={<SkillTootipContent {...props} />}>
+            <CellBody {...props}>
+                <SkillDays>{days ? days : ' '}</SkillDays>
+                { level || props.missing > 0
+                    ? <SkillInfo>
+                        { level ? <SkillLevel>{level}</SkillLevel> : <span></span> }
+                        { props.missing > 0 ? <MissingSkillLevel>+{props.missing}</MissingSkillLevel> : null }
+                    </SkillInfo>
+                    : null
+                }
+            </CellBody>
+        </Tooltip>
     </Cell>
 }
