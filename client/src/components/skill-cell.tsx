@@ -114,7 +114,6 @@ function SkillTootipContent({ study }: Partial<SkillCellProps>) {
 export function SkillCell({ onClick, ...props }: SkillCellProps) {
     const { title, level, days } = props.skill
     return <Cell active={props.active} studying={props.studying} withTeacher={props.withTeacher}
-        title={title}
         onClick={() => props.active && onClick()}>
         <Tooltip title={<SkillTootipContent {...props} />}>
             <CellBody {...props}>
