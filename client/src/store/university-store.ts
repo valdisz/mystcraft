@@ -193,6 +193,24 @@ export class Student {
 
     @observable target: Skill = null
 
+    @computed get criticalMessage() {
+        if (!this.study && !this.teach.length) return 'No orders'
+
+        return null
+    }
+
+    @computed get warningMessage() {
+        if (this.criticalMessage) return null
+
+        if (!this.target) return 'Target not selected'
+
+        if (this.study) {
+            if (!this.depSkills[this.study]) return 'Studying out of target'
+        }
+
+        return null
+    }
+
     readonly skillsGroups: IObservableArray<SkillGroup> = observable([])
     @computed get skills() {
         const index: { [code: string]: Skill } = { }

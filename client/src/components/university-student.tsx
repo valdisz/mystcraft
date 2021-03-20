@@ -3,8 +3,11 @@ import styled from 'styled-components'
 import { observer } from 'mobx-react-lite'
 import { SkillCell } from './skill-cell'
 import { Student, StudyLocation } from '../store'
-import { Badge, Box, ButtonGroup, Typography } from '@material-ui/core'
+import { Box, ButtonGroup, Tooltip } from '@material-ui/core'
 import { CopyButton, XsButton } from './buttons'
+import WarningIcon from '@material-ui/icons/Warning'
+import ErrorIcon from '@material-ui/icons/Error'
+import { orange, red } from '@material-ui/core/colors'
 
 export interface UniversityStudentProps {
     student: Student
@@ -36,7 +39,12 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
     return <tr>
         <td className='faction'>{student.factionName} ({student.factionNumber})</td>
         <td className='unit'>
-            { student.teacher && <></> }
+            { (student.criticalMessage || student.warningMessage) && <Tooltip title={student.criticalMessage || student.warningMessage}>
+                <span>
+                    { student.criticalMessage && <ErrorIcon fontSize='small' style={{ color: red[500] }} /> }
+                    { student.warningMessage && <WarningIcon fontSize='small' style={{ color: orange[500] }} /> }
+                </span>
+            </Tooltip> }
             <Unit student={student} />
             <Box ml={1} clone>
                 { student.mode === ''
