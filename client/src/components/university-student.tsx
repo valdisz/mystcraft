@@ -66,6 +66,7 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
                 <td className='empty'></td>
                 { group.skills.map(skill => (
                     <SkillCell key={skill.code}
+                        mode={student.mode}
                         skill={skill}
                         study={student.studyTarget[skill.code]}
                         active={student.isSkillActive(skill.code)}

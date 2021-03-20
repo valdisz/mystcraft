@@ -66,8 +66,6 @@ export interface SkillGroup {
     skills: Skill[]
 }
 
-
-
 function* getSkillGroups() {
     // 'bases'
     yield {
@@ -180,6 +178,8 @@ export interface StudyTarget extends ISkill {
     effort: number
     isTarget: boolean
 }
+
+export type StudentMode = '' | 'target-selection' | 'study' | 'teaching'
 
 export class Student {
     constructor(public readonly id: string, private readonly location: StudyLocation) {
@@ -362,7 +362,7 @@ export class Student {
 
     @observable study = ''
 
-    @observable mode: '' | 'target-selection' | 'study' | 'teaching' = ''
+    @observable mode: StudentMode = ''
 
     @action beginTargetSelection = () => this.mode = 'target-selection'
 

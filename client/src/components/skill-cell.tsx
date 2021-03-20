@@ -2,13 +2,14 @@ import * as React from 'react'
 import styled, { css } from 'styled-components'
 import { Tooltip, Typography } from '@material-ui/core'
 import { ISkill } from '../store/skill-tree'
-import { StudyTarget } from '../store'
+import { StudyTarget, StudentMode } from '../store'
 
 
 export interface SkillCellProps {
     skill: ISkill
     study: StudyTarget
 
+    mode: StudentMode
     active: boolean
     onClick: () => void
 
@@ -117,13 +118,18 @@ export function SkillCell({ onClick, ...props }: SkillCellProps) {
         onClick={() => props.active && onClick()}>
         <Tooltip title={<SkillTootipContent {...props} />}>
             <CellBody {...props}>
-                <SkillDays>{days ? days : ' '}</SkillDays>
-                { level || props.missing > 0
-                    ? <SkillInfo>
-                        { level ? <SkillLevel>{level}</SkillLevel> : <span></span> }
-                        { props.missing > 0 ? <MissingSkillLevel>+{props.missing}</MissingSkillLevel> : null }
-                    </SkillInfo>
-                    : null
+                { props.mode !== 'target-selection'
+                    ? <>
+                        <SkillDays>{days ? days : ' '}</SkillDays>
+                        { level || props.missing > 0
+                            ? <SkillInfo>
+                                { level ? <SkillLevel>{level}</SkillLevel> : <span></span> }
+                                { props.missing > 0 ? <MissingSkillLevel>+{props.missing}</MissingSkillLevel> : null }
+                            </SkillInfo>
+                            : null
+                        }
+                    </>
+                    : <SkillDays>{ props.study.effort }</SkillDays>
                 }
             </CellBody>
         </Tooltip>
