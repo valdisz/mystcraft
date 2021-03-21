@@ -103,8 +103,6 @@ function* getSkillGroups() {
             new Skill({ code: 'CRTA' }),
             new Skill({ code: 'CRRU' }),
             new Skill({ code: 'CFSW' }),
-            // new Skill({ code: 'CRSF' }),
-            // new Skill({ code: 'CRWC' }),
         ]
     }
 
@@ -123,6 +121,7 @@ function* getSkillGroups() {
             new Skill({ code: 'SUIM' }),
             new Skill({ code: 'SUDE' }),
             new Skill({ code: 'SUBA' }),
+            new Skill({ code: 'BDEM' }),
         ]
     }
 
@@ -133,6 +132,7 @@ function* getSkillGroups() {
             new Skill({ code: 'FSHI' }),
             new Skill({ code: 'SSHI' }),
             new Skill({ code: 'ESHI' }),
+            new Skill({ code: 'MHEA' }),
         ]
     }
 
@@ -151,19 +151,64 @@ function* getSkillGroups() {
     yield {
         skills: [
             new Skill({ code: 'NECR' }),
+            new Skill({ code: 'SUSK' }),
+            new Skill({ code: 'RAIS' }),
+            new Skill({ code: 'SULI' }),
+            new Skill({ code: 'FEAR' }),
             new Skill({ code: 'SBLA' }),
+        ]
+    }
+
+    // 'dimensions'
+    yield {
+        skills: [
+            new Skill({ code: 'GATE' }),
+            new Skill({ code: 'FARS' }),
+            new Skill({ code: 'TELE' }),
+        ]
+    }
+
+    // 'weather'
+    yield {
+        skills: [
+            new Skill({ code: 'WEAT' }),
+            new Skill({ code: 'CLEA' }),
+            new Skill({ code: 'SWIN' }),
+            new Skill({ code: 'CALL' }),
         ]
     }
 
     // 'other'
     yield {
         skills: [
-            new Skill({ code: 'WEAT' }),
-            new Skill({ code: 'CLEA' }),
-            new Skill({ code: 'CALL' }),
-            new Skill({ code: 'SWIN' }),
-            new Skill({ code: 'MHEA' }),
-            new Skill({ code: 'FARS' }),
+            new Skill({ code: 'EQUA' }),
+            new Skill({ code: 'PORT' }),
+            new Skill({ code: 'MIND' }),
+            new Skill({ code: 'SSTO' }),
+            new Skill({ code: 'STOR' }),
+            new Skill({ code: 'BUND' }),
+            new Skill({ code: 'PHBE' }),
+            new Skill({ code: 'PHUN' }),
+            new Skill({ code: 'DISP' }),
+            new Skill({ code: 'CRSF' }),
+            new Skill({ code: 'CRPA' }),
+            new Skill({ code: 'CRSS' }),
+            new Skill({ code: 'CRMA' }),
+            new Skill({ code: 'ENGR' }),
+            new Skill({ code: 'CGAT' }),
+            new Skill({ code: 'ESHD' }),
+            new Skill({ code: 'CPOR' }),
+            new Skill({ code: 'CRAG' }),
+            new Skill({ code: 'CRWC' }),
+            new Skill({ code: 'CRGC' }),
+            new Skill({ code: 'CRSH' }),
+            new Skill({ code: 'CRSO' }),
+            new Skill({ code: 'CRCO' }),
+            new Skill({ code: 'CRBX' }),
+            new Skill({ code: 'CRHS' }),
+            new Skill({ code: 'CRCN' }),
+            new Skill({ code: 'TRNS' }),
+            new Skill({ code: 'BRTL' }),
         ]
     }
 }
