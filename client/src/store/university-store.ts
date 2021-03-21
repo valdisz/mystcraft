@@ -84,48 +84,7 @@ function* getSkillGroups() {
         ]
     }
 
-    // 'dragon'
-    yield {
-        skills: [
-            new Skill({ code: 'EART' }),
-            new Skill({ code: 'BIRD' }),
-            new Skill({ code: 'WOLF' }),
-            new Skill({ code: 'DRAG' }),
-        ]
-    }
-
-    // 'artifacts'
-    yield {
-        skills: [
-            new Skill({ code: 'ARTI' }),
-            new Skill({ code: 'CRCL' }),
-            new Skill({ code: 'CRRI' }),
-            new Skill({ code: 'CRTA' }),
-            new Skill({ code: 'CRRU' }),
-            new Skill({ code: 'CFSW' }),
-        ]
-    }
-
-    // enchant
-    yield {
-        skills: [
-            new Skill({ code: 'ESWO' }),
-            new Skill({ code: 'EARM' }),
-        ]
-    }
-
-    // 'demons'
-    yield {
-        skills: [
-            new Skill({ code: 'DEMO' }),
-            new Skill({ code: 'SUIM' }),
-            new Skill({ code: 'SUDE' }),
-            new Skill({ code: 'SUBA' }),
-            new Skill({ code: 'BDEM' }),
-        ]
-    }
-
-    // 'fire'
+    // 'fire, shields and headling'
     yield {
         skills: [
             new Skill({ code: 'FIRE' }),
@@ -144,6 +103,44 @@ function* getSkillGroups() {
             new Skill({ code: 'PHEN' }),
             new Skill({ code: 'INVI' }),
             new Skill({ code: 'PHDE' }),
+            new Skill({ code: 'PHBE' }),
+            new Skill({ code: 'PHUN' }),
+        ]
+    }
+
+    // 'artifacts'
+    yield {
+        skills: [
+            new Skill({ code: 'ARTI' }),
+            new Skill({ code: 'TRNS' }),
+            new Skill({ code: 'ESWO' }),
+            new Skill({ code: 'EARM' }),
+            new Skill({ code: 'CRCL' }),
+            new Skill({ code: 'CRRI' }),
+            new Skill({ code: 'CRTA' }),
+            new Skill({ code: 'CRRU' }),
+            new Skill({ code: 'CFSW' }),
+        ]
+    }
+
+    // 'dragon'
+    yield {
+        skills: [
+            new Skill({ code: 'EART' }),
+            new Skill({ code: 'BIRD' }),
+            new Skill({ code: 'WOLF' }),
+            new Skill({ code: 'DRAG' }),
+        ]
+    }
+
+    // 'demons'
+    yield {
+        skills: [
+            new Skill({ code: 'DEMO' }),
+            new Skill({ code: 'SUIM' }),
+            new Skill({ code: 'SUDE' }),
+            new Skill({ code: 'SUBA' }),
+            new Skill({ code: 'BDEM' }),
         ]
     }
 
@@ -156,6 +153,7 @@ function* getSkillGroups() {
             new Skill({ code: 'SULI' }),
             new Skill({ code: 'FEAR' }),
             new Skill({ code: 'SBLA' }),
+            new Skill({ code: 'BUND' }),
         ]
     }
 
@@ -174,6 +172,8 @@ function* getSkillGroups() {
             new Skill({ code: 'WEAT' }),
             new Skill({ code: 'CLEA' }),
             new Skill({ code: 'SWIN' }),
+            new Skill({ code: 'SSTO' }),
+            new Skill({ code: 'STOR' }),
             new Skill({ code: 'CALL' }),
         ]
     }
@@ -184,11 +184,6 @@ function* getSkillGroups() {
             new Skill({ code: 'EQUA' }),
             new Skill({ code: 'PORT' }),
             new Skill({ code: 'MIND' }),
-            new Skill({ code: 'SSTO' }),
-            new Skill({ code: 'STOR' }),
-            new Skill({ code: 'BUND' }),
-            new Skill({ code: 'PHBE' }),
-            new Skill({ code: 'PHUN' }),
             new Skill({ code: 'DISP' }),
             new Skill({ code: 'CRSF' }),
             new Skill({ code: 'CRPA' }),
@@ -207,7 +202,6 @@ function* getSkillGroups() {
             new Skill({ code: 'CRBX' }),
             new Skill({ code: 'CRHS' }),
             new Skill({ code: 'CRCN' }),
-            new Skill({ code: 'TRNS' }),
             new Skill({ code: 'BRTL' }),
         ]
     }
