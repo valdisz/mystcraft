@@ -10,19 +10,23 @@ namespace advisor {
     using System;
     using System.Linq;
     using Microsoft.AspNetCore.Authentication.Cookies;
+    using MediatR;
+    using advisor.Features;
 
     [AllowAnonymous]
     public class AccountController : ControllerBase {
-        public AccountController(Database db, AccessControl accessControl) {
+        public AccountController(Database db, AccessControl accessControl, IMediator mediator) {
             this.db = db;
             this.accessControl = accessControl;
+            this.mediator = mediator;
         }
 
         private readonly Database db;
         private readonly AccessControl accessControl;
+        private readonly IMediator mediator;
 
         [HttpPost("/login")]
-        public async Task<IActionResult> LoginAsync([FromForm] LoginModel model, [FromQuery] string returnUrl) {
+        public async Task<IActionResult> LoginAsync([FromForm] LoginModel model) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
@@ -51,17 +55,37 @@ namespace advisor {
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            var returnTo = new Uri(returnUrl ?? Url.Content("~/"));
-            // return Redirect(returnTo.PathAndQuery);
+            return Ok();
+        }
+
+        [HttpPost("/register")]
+        public async Task<IActionResult> RegisterAsync([FromForm] LoginModel model) {
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
+
+            if (User.Identity.IsAuthenticated) {
+                await HttpContext.SignOutAsync();
+            }
+
+            var user = await mediator.Send(new CreateUser(model.Email, model.Password));
+            if (user == null) {
+                return BadRequest(new {
+                    General = "User with such email already exists."
+                });
+            }
+
             return Ok();
         }
     }
 
     public class LoginModel {
-        [Required]
+        [Required(ErrorMessage = "Email is required.")]
+        [EmailAddress(ErrorMessage = "Must look like valid email address.")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Password is required.")]
+        [StringLength(64, ErrorMessage = "Password must be from 6 till 64 characters long.", MinimumLength = 6)]
         public string Password { get; set; }
     }
 }

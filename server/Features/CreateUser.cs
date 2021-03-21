@@ -4,6 +4,7 @@ namespace advisor.Features {
     using System.Threading.Tasks;
     using advisor.Persistence;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public record CreateUser(string Email, string Password, params string[] Roles) : IRequest<DbUser> {
     }
@@ -18,10 +19,13 @@ namespace advisor.Features {
         private readonly AccessControl accessControl;
 
         public async Task<DbUser> Handle(CreateUser request, CancellationToken cancellationToken) {
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);
+            if (user != null) return null;
+
             var salt = accessControl.GetSalt();
             var digest = accessControl.ComputeDigest(salt, request.Password);
 
-            var user = new DbUser {
+            user = new DbUser {
                 Email = request.Email,
                 Algorithm = DigestAlgorithm.SHA256,
                 Salt = salt,
