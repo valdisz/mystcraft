@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled, { css } from 'styled-components'
 import { Tooltip, Typography } from '@material-ui/core'
-import { ISkill } from '../store/skill-tree'
+import { getSkillDeps, ISkill } from '../store/skill-tree'
 import { StudyTarget, StudentMode } from '../store'
 
 
@@ -100,13 +100,21 @@ const Cell = styled.td<CellProps>`
 `
 
 function SkillTootipContent({ study }: Partial<SkillCellProps>) {
+    const deps = getSkillDeps(study.code)
     return <>
         <Typography variant='h6'>{study.title} [{study.code}]</Typography>
         <Typography variant='body2'>
             <strong>Target Level</strong>: {study.level} ({study.days})
         </Typography>
         <Typography variant='body2'>
-            <strong>Effort</strong>: {study.effort} turns
+            <strong>Effort:</strong> {study.effort} turns
+        </Typography>
+        <Typography variant='body2'>
+            <strong>To start study:</strong> {
+                deps.length
+                    ? deps.map(dep => `${dep.code} ${dep.level}`).join(', ')
+                    : <em>None</em>
+            }
         </Typography>
     </>
 }
