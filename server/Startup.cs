@@ -1,8 +1,20 @@
-namespace advisor {
+namespace advisor
+{
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using advisor.Authorization;
     using advisor.Persistence;
+    using Hangfire;
+    using Hangfire.Console;
+    using Hangfire.Console.Extensions;
+    using Hangfire.Dashboard;
+    using Hangfire.Heartbeat;
+    using Hangfire.Heartbeat.Server;
+    using Hangfire.PostgreSql;
+    using Hangfire.RecurringJobAdmin;
+    using Hangfire.RecurringJobExtensions;
+    using Hangfire.Storage.SQLite;
     using HotChocolate;
     using HotChocolate.AspNetCore;
     using HotChocolate.Execution.Configuration;
@@ -27,6 +39,10 @@ namespace advisor {
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Env { get; }
+
+        public DatabaseProvider DbProvider => Configuration.GetValue<DatabaseProvider>("Provider");
+        public string DbConnectionString => Configuration.GetConnectionString("database");
+        public string HangfireConnectionString => Configuration.GetConnectionString("hangfire");
 
         public void ConfigureServices(IServiceCollection services) {
             services
@@ -56,11 +72,10 @@ namespace advisor {
                     conf.AddOwnPlayerPolicy();
                 });
 
+
+            services.AddHttpClient();
+
             services
-                .AddLogging(builder => builder
-                    .AddConsole()
-                    .AddDebug()
-                )
                 .AddOptions()
                 .AddCors(opt => {
                     opt.AddDefaultPolicy(builder => builder
@@ -71,16 +86,12 @@ namespace advisor {
 
             services
                 .Configure<DatabaseOptions>(opt => {
-                    var provider = Configuration.GetValue<DatabaseProvider>("Provider");
-                    var connString = Configuration.GetConnectionString("database");
-
-                    opt.Provider = provider;
-                    opt.ConnectionString = connString;
+                    opt.Provider = DbProvider;
+                    opt.ConnectionString = DbConnectionString;
                     opt.IsProduction = Env.IsProduction();
                 });
 
-            var provider = Configuration.GetValue<DatabaseProvider>("Provider");
-            switch (provider) {
+            switch (DbProvider) {
                 case DatabaseProvider.SQLite:
                     services.AddDbContext<Database, SQLiteDatabase>(ServiceLifetime.Transient);
                     break;
@@ -93,6 +104,35 @@ namespace advisor {
                     services.AddDbContext<Database, MsSqlDatabase>(ServiceLifetime.Transient);
                     break;
             }
+
+            services.AddHangfire(conf => {
+                conf.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+                conf.UseSimpleAssemblyNameTypeSerializer();
+                conf.UseRecommendedSerializerSettings();
+
+                switch (DbProvider) {
+                    case DatabaseProvider.SQLite:
+                        conf.UseSQLiteStorage(HangfireConnectionString);
+                        break;
+
+                    case DatabaseProvider.PgSQL:
+                        conf.UsePostgreSqlStorage(HangfireConnectionString);
+                        break;
+
+                    case DatabaseProvider.MsSQL:
+                        conf.UseSqlServerStorage(HangfireConnectionString);
+                        break;
+                }
+
+                conf.UseConsole();
+                conf.UseRecurringJobAdmin(typeof(Startup).Assembly);
+                conf.UseHeartbeatPage(TimeSpan.FromSeconds(5));
+
+                conf.UseRecurringJob(typeof(RemoteGameServerJobs));
+            });
+
+            services.AddHangfireServer();
+            services.AddHangfireConsoleExtensions();
 
             services
                 .AddAutoMapper(typeof(MappingProfile))
@@ -159,6 +199,7 @@ namespace advisor {
                 app.UseDeveloperExceptionPage();
             }
 
+
             app
                 // .UseDefaultFiles()
                 .UseMiddleware<DefaultFilesMiddleware>()
@@ -168,8 +209,14 @@ namespace advisor {
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseGraphQL("/graphql")
+                .UseHangfireServer(additionalProcesses: new[] { new ProcessMonitor(checkInterval: TimeSpan.FromSeconds(5)) })
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
+                    endpoints.MapHangfireDashboard(new DashboardOptions {
+                        Authorization = new[] {
+                            new RoleBasedDashboardAuthorizationFilter(Roles.Root)
+                        }
+                    });
                 });
         }
     }

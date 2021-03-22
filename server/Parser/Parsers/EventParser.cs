@@ -113,7 +113,7 @@ namespace advisor {
                 }
 
                 if (amount) {
-                    keys.Add(ReportNode.Real("amount", amount));
+                    keys.Add(ReportNode.Int("amount", amount));
                 }
 
                 return Ok(ReportNode.Object(keys));

@@ -1,6 +1,7 @@
 namespace advisor.Persistence {
     using advisor.Model;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
@@ -87,6 +88,7 @@ namespace advisor.Persistence {
             }
 
             optionsBuilder.UseLoggerFactory(loggerFactory);
+            optionsBuilder.ConfigureWarnings(c => c.Log((RelationalEventId.CommandExecuting, LogLevel.Debug)));
         }
 
         protected override void OnModelCreating(ModelBuilder model) {

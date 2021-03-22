@@ -52,7 +52,7 @@ namespace advisor.Features {
             var faction = report.Faction;
             var date = report.Date;
             var engine = report.Engine;
-            var ordersTemplate = report.OrdersTemplate;
+            // var ordersTemplate = report.OrdersTemplate;
 
             string factionName = faction.Name;
             int factionNumber = faction.Number;
@@ -97,7 +97,7 @@ namespace advisor.Features {
             if (dbReport.FactionNumber == player.FactionNumber && turnNumber > player.LastTurnNumber) {
                 player.FactionName = dbReport.FactionName;
                 player.LastTurnNumber = turnNumber;
-                player.Password ??= ordersTemplate?.Password;
+                // player.Password ??= ordersTemplate?.Password;
             }
 
             player.Game.EngineVersion ??= engine?.Version;

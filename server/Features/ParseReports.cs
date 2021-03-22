@@ -15,6 +15,7 @@ namespace advisor.Features {
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
     using System.IO;
+    using System;
 
     public record ParseReports(long PlayerId, int EarliestTurn) : IRequest {
 
@@ -78,7 +79,7 @@ namespace advisor.Features {
             }
 
             foreach (var turn in turns) {
-                await MergeReportsAsync(db, turn.Id, turn.Number, regions, factions, structures, units);
+                await MergeReportsAsync(db, request.PlayerId, turn.Id, turn.Number, lastTurn, regions, factions, structures, units);
 
                 await RemoveEventsAsync(db, turn.Id);
                 await RemoveUnitsAsync(db, turn.Id);
@@ -110,16 +111,24 @@ namespace advisor.Features {
         }
 
         // This method will be memory intensive as it must merge all reports into one
-        private static async Task MergeReportsAsync(Database db, long turnId, int turnNumber,
+        private static async Task MergeReportsAsync(Database db, long playerId, long turnId, int turnNumber, int lastTurnNumber,
             RegionDic regions, FactionsDic factions, StructuresDic structures, UnitsDic units) {
 
             var savedReports = db.Reports
                 .Include(x => x.Turn)
+                .ThenInclude(x => x.Player)
                 .Where(x => x.TurnId == turnId)
                 .AsAsyncEnumerable();
 
             await foreach (var r in savedReports) {
                 JReport report = await GetJsonReportAsync(r);
+
+                // update player password if latest turn or newer
+                if (report.OrdersTemplate?.Password != null) {
+                    if (r.Turn.Number >= lastTurnNumber && r.Turn.PlayerId == playerId) {
+                        r.Turn.Player.Password = report.OrdersTemplate.Password;
+                    }
+                }
 
                 CreateOrUpdateFaction(factions, report.Faction);
 
@@ -144,7 +153,8 @@ namespace advisor.Features {
                 return json.ToObject<JReport>();
             }
 
-            return JsonConvert.DeserializeObject<JReport>(rec.Json);
+            var report = JsonConvert.DeserializeObject<JReport>(rec.Json);
+            return report;
         }
 
         public static DbFaction CreateOrUpdateFaction(FactionsDic factions, JFaction f) {

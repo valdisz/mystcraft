@@ -32,7 +32,10 @@
                         .AddCommandLine(args);
                 })
                 .ConfigureServices((context, services) => {
-                    services.AddLogging();
+                    services.AddLogging(conf => {
+                        conf.AddConsole();
+                        conf.AddDebug();
+                    });
                 })
                 .ConfigureLogging((hostingContext, logging) =>
                 {

@@ -23,6 +23,8 @@ namespace advisor {
             if (path.StartsWithSegments("/graphql")) return next(context);
             if (path.StartsWithSegments("/report")) return next(context);
             if (path.StartsWithSegments("/login")) return next(context);
+            if (path.StartsWithSegments("/register")) return next(context);
+            if (path.StartsWithSegments("/hangfire")) return next(context);
 
             if (!path.HasValue || !IsFile(path)) {
                 context.Request.Path = new PathString("/index.html");
