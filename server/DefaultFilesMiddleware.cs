@@ -23,6 +23,7 @@ namespace advisor {
             if (path.StartsWithSegments("/graphql")) return next(context);
             if (path.StartsWithSegments("/report")) return next(context);
             if (path.StartsWithSegments("/login")) return next(context);
+            if (path.StartsWithSegments("/logout")) return next(context);
             if (path.StartsWithSegments("/register")) return next(context);
             if (path.StartsWithSegments("/hangfire")) return next(context);
 

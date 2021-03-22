@@ -32,7 +32,7 @@ namespace advisor {
             }
 
             if (User.Identity.IsAuthenticated) {
-                await HttpContext.SignOutAsync();
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
             var user = await db.Users.SingleOrDefaultAsync(x => x.Email == model.Email);
@@ -55,7 +55,16 @@ namespace advisor {
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            return Ok();
+            return NoContent();
+        }
+
+        [HttpGet("/logout")]
+        public async Task<IActionResult> LogoutAsync() {
+            if (User.Identity.IsAuthenticated) {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            }
+
+            return Redirect("/");
         }
 
         [HttpPost("/register")]
@@ -75,7 +84,7 @@ namespace advisor {
                 });
             }
 
-            return Ok();
+            return NoContent();
         }
     }
 

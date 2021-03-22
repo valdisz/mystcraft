@@ -9,6 +9,7 @@ import GrainIcon from '@material-ui/icons/Grain';
 import { useStore } from '../store'
 import { SplitButton } from '../components'
 import { GameListItemFragment, PlayerItemFragment } from '../schema'
+import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 
 function NoGames() {
     return <ListItem>
@@ -158,6 +159,13 @@ const CenterLayout = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
+`
+
+const TopRightCorner = styled.div`
+    top: 1rem;
+    right: 1rem;
+    position: absolute;
 `
 
 export function HomePage() {
@@ -168,6 +176,9 @@ export function HomePage() {
     }, [])
 
     return <CenterLayout>
+        <TopRightCorner>
+            <Button component={'a'} startIcon={<ExitToAppIcon />} href='/logout' >Sign out</Button>
+        </TopRightCorner>
         <Container>
             <Card>
                 <CardHeader title='Games' action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>} />

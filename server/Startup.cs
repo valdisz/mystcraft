@@ -199,7 +199,6 @@ namespace advisor
                 app.UseDeveloperExceptionPage();
             }
 
-
             app
                 // .UseDefaultFiles()
                 .UseMiddleware<DefaultFilesMiddleware>()
