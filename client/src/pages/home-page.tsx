@@ -85,7 +85,16 @@ function GamePlayer({ factionName, factionNumber, lastTurnNumber }: PlayerItemFr
 
 function GameItem({ game }: GameItemProps) {
     const { home } = useStore()
-    return <ListItem button component={Link} to={`/game/${game.id}`} >
+
+    const props = { } as any
+
+    if (game.myPlayer?.factionNumber) {
+        props.to = `/game/${game.id}`
+        props.button = true
+        props.component = Link
+    }
+
+    return <ListItem {...props}>
         <ListItemIcon>
             <GrainIcon />
         </ListItemIcon>
