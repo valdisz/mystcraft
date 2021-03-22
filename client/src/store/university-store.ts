@@ -688,7 +688,16 @@ export class UniversityStore {
     async load(gameId: string) {
         this.gameId = gameId
 
-        runInAction(() => this.loading = true)
+        runInAction(() => {
+            this.loading = true
+            this.role = UniveristyMemberRole.Member
+            this.id = null
+            this.name = null
+            this.classes.clear()
+            this.members.clear()
+            this.selectedClassId = null
+            this.locations.clear()
+        })
 
         const response = await CLIENT.query<GetUniversityQuery, GetUniversityQueryVariables>({
             query: GetUniversity,
