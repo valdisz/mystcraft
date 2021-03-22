@@ -9,6 +9,16 @@ LEAD:
   weight: 10
   traits:
     - trait: man
+    - trait: consume
+      value: 50
   description: |
     leader [LEAD], weight 10, walking capacity 5, moves 2 hexes per month.
     This race may study all skills to level 5.
+
+GRAI:
+  name: [ grain, grain ]
+  weight: 5
+  traits:
+    - trait: food
+      value: 30
+  description:

@@ -4,7 +4,9 @@ import { CLIENT } from '../client'
 import { TurnSummaryFragment } from '../schema'
 import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
-import { Region, Ruleset, World } from './game/types'
+import { Ruleset } from "./game/ruleset"
+import { Region } from "./game/region"
+import { World } from "./game/world"
 
 export class TurnsStore {
     constructor() {
@@ -71,7 +73,11 @@ export class GameStore {
             }
         }
 
-        this.world = new World({ width: 56, height: 56 }, new Ruleset())
+        this.world = new World({ levels: [
+            {
+                width: 96, height: 72, label: 'surface'
+            }
+        ] }, new Ruleset())
 
         let cursor: string = null
         let regions: ApolloQueryResult<GetRegionsQuery> = null
@@ -84,9 +90,7 @@ export class GameStore {
                 }
             })
 
-            for (const { node } of regions.data.node.regions.edges) {
-                this.world.addRegion(node)
-            }
+            this.world.addRegions(regions.data.node.regions.edges.map(x => x.node))
 
             cursor = regions.data.node.regions.pageInfo.endCursor
         }
@@ -95,20 +99,21 @@ export class GameStore {
         setTimeout(() => runInAction(() => this.loading = false))
     }
 
-    @observable selctedRegion: Region = null
+    @observable region: Region = null
 
     @action selectRegion = (col: number, row: number) => {
         const reg = this.world.getRegion(col, row, 1)
-        this.selctedRegion = reg ? observable(reg) : null
+        this.region = reg ? observable(reg) : null
+        console.log(reg)
     }
 
     @computed get units() {
-        const units = this.selctedRegion?.units ?? []
+        const units = this.region?.units ?? []
         return units
     }
 
     @computed get structures() {
-        const structures = this.selctedRegion?.structures ?? []
+        const structures = this.region?.structures ?? []
         return structures
     }
 }

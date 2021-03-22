@@ -7,7 +7,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
-import { Region } from '../store/game/types'
+import { Region } from "../store/game/region"
 import { GameRouteParams } from './game-route-params'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
@@ -190,11 +190,11 @@ const RegionBody = styled.div`
 `
 
 const RegionComponent = observer(() => {
-    const { game: { selctedRegion: reg } } = useStore()
+    const { game: { region } } = useStore()
 
     return <RegionContainer>
         <RegionBody>
-            <h4>{reg.province.name}</h4>
+            <h4>{region.province.name}</h4>
         </RegionBody>
     </RegionContainer>
 })
@@ -221,7 +221,7 @@ const GameComponent = observer(() => {
             <GameMapComponent getRegion={(x, y) => game.world.getRegion(x, y, 1)} onRegionSelected={game.selectRegion} />
             <UnitsComponent />
             <StructuresComponent />
-            { game.selctedRegion && <RegionComponent /> }
+            { game.region && <RegionComponent /> }
             <Orders />
         </GameGrid>
     </GameContainer>

@@ -9,6 +9,7 @@ app.use('/login', createProxyMiddleware({ target: 'http://localhost:5000', chang
 app.use('/register', createProxyMiddleware({ target: 'http://localhost:5000', changeOrigin: true }));
 app.use('/graphql', createProxyMiddleware({ target: 'http://localhost:5000', changeOrigin: true }));
 app.use('/report', createProxyMiddleware({ target: 'http://localhost:5000', changeOrigin: true }));
+app.use('/hangfire', createProxyMiddleware({ target: 'http://localhost:5000', changeOrigin: true }));
 
 app.use(bundler.middleware());
 
