@@ -199,6 +199,11 @@ namespace advisor
                 app.UseDeveloperExceptionPage();
             }
 
+            if (Env.IsProduction()) {
+                app.UseHsts();
+                app.UseHttpsRedirection();
+            }
+
             app
                 // .UseDefaultFiles()
                 .UseMiddleware<DefaultFilesMiddleware>()
