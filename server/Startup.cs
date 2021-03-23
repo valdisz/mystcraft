@@ -25,6 +25,7 @@ namespace advisor
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -55,6 +56,12 @@ namespace advisor
                 .AddAuthentication()
                 .AddApiKeys()
                 .AddCookie();
+
+            services.AddHttpsRedirection(options =>
+            {
+                options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+                options.HttpsPort = 443;
+            });
 
             services
                 .AddAuthorization(conf => {
@@ -202,10 +209,10 @@ namespace advisor
                 app.UseDeveloperExceptionPage();
             }
 
-            if (Env.IsProduction()) {
-                app.UseHsts();
-                app.UseHttpsRedirection();
-            }
+            // if (Env.IsProduction()) {
+            //     app.UseHsts();
+            //     app.UseHttpsRedirection();
+            // }
 
             app
                 .UseMiddleware<DefaultFilesMiddleware>()

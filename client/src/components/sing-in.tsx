@@ -83,11 +83,9 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
 
             const response = await fetch(store.mode === 'sign-in' ? '/login' : '/register', {
                 method: 'POST',
-                credentials: 'same-origin',
+                credentials: 'include',
                 body: new FormData(e.target as any)
             })
-
-            console.log(response)
 
             if (store.mode === 'sign-in' && response.ok) {
                 onSuccess()
