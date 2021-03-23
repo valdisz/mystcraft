@@ -4,8 +4,9 @@ import { Link, useParams } from 'react-router-dom'
 import { GameRouteParams } from './game-route-params'
 import { useStore } from '../store'
 import { observer, Observer } from 'mobx-react-lite'
-import { Button, ButtonGroup, Container, List, ListItem, ListItemText, makeStyles, Paper, TextField, Typography } from '@material-ui/core'
+import { AppBar, Button, ButtonGroup, Container, IconButton, List, ListItem, ListItemText, makeStyles, Paper, TextField, Toolbar, Typography } from '@material-ui/core'
 import { UniversityLocation } from '../components'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -162,8 +163,15 @@ const University = observer(() => {
 
     return (
         <Container component='main' maxWidth={false}>
+            <AppBar position='static' color='primary'>
+                <Toolbar>
+                    <IconButton component={Link} to='/' edge='start' color='inherit'>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography variant='h6'>{ university.name }</Typography>
+                </Toolbar>
+            </AppBar>
             <div className={classes.paper2}>
-                <Typography component='h1' variant='h5'>{university.name}</Typography>
                 Turns:
                 <ButtonGroup disableElevation>
                     { university.classes.map(x => <Button

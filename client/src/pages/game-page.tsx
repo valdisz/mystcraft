@@ -3,12 +3,12 @@ import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core'
-import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
 import { Region } from "../store/game/region"
 import { GameRouteParams } from './game-route-params'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any

@@ -89,7 +89,10 @@ function GameItem({ game }: GameItemProps) {
 
     const props = { } as any
 
-    if (game.myPlayer?.factionNumber) {
+    const playerJoind = !!game.myPlayer
+    const playerFactionKnown = !!game.myPlayer?.factionNumber
+
+    if (playerFactionKnown) {
         props.to = `/game/${game.id}`
         props.button = true
         props.component = Link
@@ -107,11 +110,11 @@ function GameItem({ game }: GameItemProps) {
 
         <ListItemSecondaryAction>
             <Observer>
-                {() => game.myPlayer
+                {() => playerJoind
                     ? <>
-                        <Box mr={1} clone>
+                        { playerFactionKnown && <Box mr={1} clone>
                             <Button color='primary' size='small' variant='contained' component={Link} to={`/game/${game.id}/university`}>University</Button>
-                        </Box>
+                        </Box> }
                         <GameActions
                             disabled={home.uploading}
                             onUpload={() => home.triggerUploadReport(game.myPlayer.id)}
