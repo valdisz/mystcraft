@@ -25,11 +25,15 @@
 
         public static IWebHostBuilder CreateHostBuilder(string[] args) {
             var builder = new WebHostBuilder()
-                .ConfigureAppConfiguration(conf => {
+                .ConfigureAppConfiguration((hostingContext, conf) => {
+                    conf.Sources.Clear();
+                    IHostEnvironment env = hostingContext.HostingEnvironment;
+
                     conf
-                        .AddJsonFile("appsettings.json")
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{env.EnvironmentName.ToLower()}.json", optional: true, reloadOnChange: true)
                         .AddEnvironmentVariables("ADVISOR_")
-                        .AddCommandLine(args);
+                        .AddCommandLine(args ?? new string[0]);
                 })
                 .ConfigureServices((context, services) => {
                     services.AddLogging(conf => {

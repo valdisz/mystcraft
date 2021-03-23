@@ -15,6 +15,7 @@
             "console": "internalConsole",
             "stopAtEntry": false,
             "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
                 "ADVISOR_SEED__EMAIL": "valdis@zobela.eu",
                 "ADVISOR_SEED__PASSWORD": "valdis"
             }

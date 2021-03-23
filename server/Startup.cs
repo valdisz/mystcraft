@@ -14,6 +14,7 @@ namespace advisor
     using Hangfire.PostgreSql;
     using Hangfire.RecurringJobAdmin;
     using Hangfire.RecurringJobExtensions;
+    using Hangfire.Server;
     using Hangfire.Storage.SQLite;
     using HotChocolate;
     using HotChocolate.AspNetCore;
@@ -131,8 +132,10 @@ namespace advisor
                 conf.UseRecurringJob(typeof(RemoteGameServerJobs));
             });
 
-            services.AddHangfireServer();
-            services.AddHangfireConsoleExtensions();
+            services
+                .AddHangfireServer()
+                .AddHangfireConsoleExtensions()
+                .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
 
             services
                 .AddAutoMapper(typeof(MappingProfile))
@@ -205,7 +208,6 @@ namespace advisor
             }
 
             app
-                // .UseDefaultFiles()
                 .UseMiddleware<DefaultFilesMiddleware>()
                 .UseStaticFiles()
                 .UseRouting()
@@ -213,7 +215,6 @@ namespace advisor
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseGraphQL("/graphql")
-                .UseHangfireServer(additionalProcesses: new[] { new ProcessMonitor(checkInterval: TimeSpan.FromSeconds(5)) })
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
                     endpoints.MapHangfireDashboard(new DashboardOptions {
