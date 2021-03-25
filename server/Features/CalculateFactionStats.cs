@@ -1,5 +1,4 @@
-namespace advisor.Features
-{
+namespace advisor.Features {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -8,7 +7,7 @@ namespace advisor.Features
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record CalculateFactionStats(long playerId, int EarliestTurnNumber) : IRequest<DbGame> {
+    public record CalculateFactionStats(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame> {
 
     }
 
@@ -23,7 +22,7 @@ namespace advisor.Features
         public async Task<DbGame> Handle(CalculateFactionStats request, CancellationToken cancellationToken) {
             var data = await db.Events
                 .Include(x => x.Turn)
-                .Where(x => x.Turn.PlayerId == request.playerId
+                .Where(x => x.Turn.PlayerId == request.PlayerId
                     && x.Turn.Number >= request.EarliestTurnNumber)
                 .ToListAsync();
 
@@ -33,17 +32,28 @@ namespace advisor.Features
                 foreach (var faction in turn.GroupBy(x => x.FactionId)) {
                     var factionId = faction.Key;
 
-                    var stat = await db.FactionStats.SingleOrDefaultAsync(x => x.FactionId == factionId && x.TurnId == turnId);
-                    var newStat = CalculateFactionStats(faction);
+                    foreach (var region in faction.GroupBy(x => x.RegionId)) {
+                        var regionId = region.Key;
 
-                    if (stat != null) {
-                        stat.Income = newStat.Income;
-                        stat.Production = newStat.Production;
-                    }
-                    else {
-                        newStat.FactionId = factionId;
-                        newStat.TurnId = turnId;
-                        await db.FactionStats.AddAsync(newStat);
+                        var stat = await db.FactionStats
+                            .SingleOrDefaultAsync(x => x.FactionId == factionId
+                                && x.TurnId == turnId
+                                && x.RegionId == regionId
+                            );
+
+                        var value = Reduce(region);
+
+                        if (stat != null) {
+                            stat.Income = value.Income;
+                            stat.Production = value.Production;
+                        }
+                        else {
+                            value.FactionId = factionId;
+                            value.TurnId = turnId;
+                            value.RegionId = regionId;
+
+                            await db.FactionStats.AddAsync(value);
+                        }
                     }
                 }
             }
@@ -53,7 +63,7 @@ namespace advisor.Features
             return null;
         }
 
-        private DbFactionStats CalculateFactionStats(IEnumerable<DbEvent> events) {
+        private DbFactionStats Reduce(IEnumerable<DbEvent> events) {
             var income = new DbIncomeStats();
             var production = new List<DbItem>();
 

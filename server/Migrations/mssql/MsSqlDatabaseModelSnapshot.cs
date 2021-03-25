@@ -45,18 +45,12 @@ namespace advisor.Migrations.mssql
                     b.Property<int?>("ItemPrice")
                         .HasColumnType("int");
 
-                    b.Property<string>("Label")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Province")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Terrain")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<long?>("RegionId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("bigint");
@@ -68,18 +62,11 @@ namespace advisor.Migrations.mssql
                     b.Property<long?>("UnitId")
                         .HasColumnType("bigint");
 
-                    b.Property<int?>("X")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Y")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Z")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("FactionId");
+
+                    b.HasIndex("RegionId");
 
                     b.HasIndex("TurnId");
 
@@ -120,10 +107,15 @@ namespace advisor.Migrations.mssql
                     b.Property<long>("FactionId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("RegionId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("TurnId", "FactionId");
 
                     b.HasIndex("FactionId")
                         .IsUnique();
+
+                    b.HasIndex("RegionId");
 
                     b.ToTable("FactionStats");
                 });
@@ -548,6 +540,10 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("advisor.Persistence.DbRegion", "Region")
+                        .WithMany("Events")
+                        .HasForeignKey("RegionId");
+
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Events")
                         .HasForeignKey("TurnId")
@@ -559,6 +555,8 @@ namespace advisor.Migrations.mssql
                         .HasForeignKey("UnitId");
 
                     b.Navigation("Faction");
+
+                    b.Navigation("Region");
 
                     b.Navigation("Turn");
 
@@ -583,6 +581,10 @@ namespace advisor.Migrations.mssql
                         .HasForeignKey("advisor.Persistence.DbFactionStats", "FactionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", "Region")
+                        .WithMany("Stats")
+                        .HasForeignKey("RegionId");
 
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Stats")
@@ -645,6 +647,8 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Income");
 
                     b.Navigation("Production");
+
+                    b.Navigation("Region");
 
                     b.Navigation("Turn");
                 });
@@ -1262,6 +1266,10 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
                 {
+                    b.Navigation("Events");
+
+                    b.Navigation("Stats");
+
                     b.Navigation("Structures");
 
                     b.Navigation("Units");

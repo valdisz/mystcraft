@@ -136,7 +136,7 @@ namespace advisor.Features {
                     CreateOrUpdateRegion(turnNumber, factions, regions, structures, units, region);
                 }
 
-                AddEvents(factions, units, report);
+                AddEvents(factions, regions, units, report);
             }
 
             AddRevealedRegionsFromExits(turnNumber, regions);
@@ -170,7 +170,7 @@ namespace advisor.Features {
             return faction;
         }
 
-        public static void AddEvents(FactionsDic factions, UnitsDic units, JReport report) {
+        public static void AddEvents(FactionsDic factions, RegionDic regions, UnitsDic units, JReport report) {
             var faction = factions[report.Faction.Number];
 
             foreach (var error in report.Errors) {
@@ -181,15 +181,14 @@ namespace advisor.Features {
             }
 
             foreach (var ev in report.Events) {
+                var region = ev.Coords == null
+                    ? null
+                    : regions[DbRegion.GetUID(ev.Coords.X, ev.Coords.Y, ev.Coords.Z ?? DEFAULT_LEVEL_Z)];
+
                 faction.Events.Add(new DbEvent {
+                    RegionId = region?.Id,
                     Type = EventType.Info,
                     Category = ev.Category,
-                    Terrain = ev.Terrain,
-                    X = ev.Coords?.X,
-                    Y = ev.Coords?.Y,
-                    Z = ev.Coords?.Z,
-                    Label = ev.Coords?.Label,
-                    Province = ev.Province,
                     Amount = ev.Amount,
                     ItemCode = ev.Code,
                     ItemName = ev.Name,

@@ -11,6 +11,8 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public long TurnId { get; set; }
 
+        public long? RegionId { get; set; }
+
         [GraphQLIgnore]
         public long FactionId { get; set; }
 
@@ -26,12 +28,6 @@ namespace advisor.Persistence {
         [Required]
         public string Message { get; set; }
 
-        public string Terrain { get; set; }
-        public int? X { get; set; }
-        public int? Y { get; set; }
-        public int? Z { get; set; }
-        public string Label { get; set; }
-        public string Province { get; set; }
         public int? Amount { get; set; }
         public string ItemCode { get; set; }
         public string ItemName { get; set; }
@@ -46,5 +42,8 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public DbUnit Unit { get; set; }
+
+        [GraphQLIgnore]
+        public DbRegion Region { get; set; }
     }
 }

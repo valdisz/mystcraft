@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using advisor.Persistence;
 
 namespace advisor.Migrations.sqlite
 {
     [DbContext(typeof(SQLiteDatabase))]
-    partial class SQLiteDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20210325124313_stats_per_region")]
+    partial class stats_per_region
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

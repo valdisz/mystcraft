@@ -186,6 +186,14 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Region)
                     .HasForeignKey(x => x.RegionId);
 
+                t.HasMany(x => x.Stats)
+                    .WithOne(x => x.Region)
+                    .HasForeignKey(x => x.RegionId);
+
+                t.HasMany(x => x.Events)
+                    .WithOne(x => x.Region)
+                    .HasForeignKey(x => x.RegionId);
+
                 t.OwnsOne(p => p.Settlement, a => {
                     a.Property(x => x.Size).HasConversion<string>();
                 });

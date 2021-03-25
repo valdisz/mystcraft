@@ -67,6 +67,12 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
 
+        [GraphQLIgnore]
+        public List<DbFactionStats> Stats { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbEvent> Events { get; set; } = new ();
+
         public static string GetUID(int x, int y, int z) => $"{x} {y} {z}";
     }
 }
