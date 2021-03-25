@@ -1,41 +1,28 @@
-import { UniqueItem } from "./unique-item";
-import { AllTraits, Trait, Traits, TraitsMap } from './traits';
-import { Item } from "./item";
-
+import { UniqueItem } from "./unique-item"
+import { Traits, TraitsMap } from './traits'
+import { Item } from "./item"
+import { ItemCategory } from "./item-category"
 
 export class ItemInfo implements UniqueItem {
-    constructor(public readonly code: string, singular: string, plural: string, traits: AllTraits[]) {
-        this.name = [singular, plural];
-
-        for (const trait of traits) {
-            if (!this.hasTrait(trait.type)) {
-                this.traits[trait.type] = [];
-            }
-
-            this.traits[trait.type].push(trait);
-        }
+    constructor(public readonly code: string, public readonly category: ItemCategory, singular: string, plural: string) {
+        this.name = [singular, plural]
     }
 
-    private readonly traits: TraitsMap = {};
+    readonly traits: TraitsMap = { }
 
-    weight: number;
-    name: [string, string];
-    description: string;
-
-    trait<T extends Trait>(trait: Traits): T[] | undefined {
-        return this.traits[trait] as T[];
-    }
+    weight: number
+    name: [string, string]
+    description: string
 
     hasTrait(trait: Traits) {
-        return !!this.traits[trait];
+        return !!this.traits[trait]
     }
 
-    get isSilver() {
-        return this.hasTrait("silver");
-    }
-
-    get isMan() {
-        return this.hasTrait('man');
+    /**
+     * Man-like items can act on its own and form a unit.
+     */
+    get isManLike() {
+        return this.category === 'man' || this.hasTrait('freeMovingItem')
     }
 
     create(): Item {

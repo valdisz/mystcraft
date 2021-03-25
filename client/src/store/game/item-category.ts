@@ -1,0 +1,16 @@
+
+export type ItemCategory =
+      'man'
+    | 'trade'
+    | 'monster'
+    | 'weapon'
+    | 'armor'
+    | 'special'
+    | 'money'
+    | 'ship'
+    | 'mount'
+    | 'battle'
+    | 'tool'
+    | 'food'
+    | 'resource'
+    | 'other'

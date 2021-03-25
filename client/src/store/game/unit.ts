@@ -5,7 +5,7 @@ import { List } from './list';
 import { Region } from './region';
 import { Ruleset } from './ruleset';
 import { Structure } from './structure';
-import { Capacity } from './capacity';
+import { Capacity } from './move-capacity';
 import { Faction } from "./faction";
 import { Flag } from "./flag";
 import { Skill } from "./skill";

@@ -7,7 +7,8 @@ export class SkillInfo implements UniqueItem {
     }
 
     name: string;
-    description: string;
+    magic: boolean
+    description: string[];
 
     create(): Skill {
         return new Skill(this);
