@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace advisor.Migrations.pgsql
 {
@@ -7,12 +8,14 @@ namespace advisor.Migrations.pgsql
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "RegionStats",
+                name: "Stats",
                 columns: table => new
                 {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TurnId = table.Column<long>(type: "bigint", nullable: false),
                     FactionId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
+                    RegionId = table.Column<long>(type: "bigint", nullable: true),
                     Income_Work = table.Column<int>(type: "integer", nullable: true),
                     Income_Tax = table.Column<int>(type: "integer", nullable: true),
                     Income_Pillage = table.Column<int>(type: "integer", nullable: true),
@@ -20,21 +23,21 @@ namespace advisor.Migrations.pgsql
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RegionStats", x => new { x.TurnId, x.FactionId, x.RegionId });
+                    table.PrimaryKey("PK_Stats", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_RegionStats_Factions_FactionId",
+                        name: "FK_Stats_Factions_FactionId",
                         column: x => x.FactionId,
                         principalTable: "Factions",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RegionStats_Regions_RegionId",
+                        name: "FK_Stats_Regions_RegionId",
                         column: x => x.RegionId,
                         principalTable: "Regions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_RegionStats_Turns_TurnId",
+                        name: "FK_Stats_Turns_TurnId",
                         column: x => x.TurnId,
                         principalTable: "Turns",
                         principalColumn: "Id",
@@ -42,44 +45,47 @@ namespace advisor.Migrations.pgsql
                 });
 
             migrationBuilder.CreateTable(
-                name: "FactionStats_Production",
+                name: "Stats_Production",
                 columns: table => new
                 {
                     Code = table.Column<string>(type: "text", nullable: false),
-                    TurnId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<long>(type: "bigint", nullable: false),
+                    StatId = table.Column<long>(type: "bigint", nullable: false),
                     Amount = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FactionStats_Production", x => new { x.TurnId, x.FactionId, x.RegionId, x.Code });
+                    table.PrimaryKey("PK_Stats_Production", x => new { x.StatId, x.Code });
                     table.ForeignKey(
-                        name: "FK_FactionStats_Production_RegionStats_TurnId_FactionId_Region~",
-                        columns: x => new { x.TurnId, x.FactionId, x.RegionId },
-                        principalTable: "RegionStats",
-                        principalColumns: new[] { "TurnId", "FactionId", "RegionId" },
+                        name: "FK_Stats_Production_Stats_StatId",
+                        column: x => x.StatId,
+                        principalTable: "Stats",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_RegionStats_FactionId",
-                table: "RegionStats",
+                name: "IX_Stats_FactionId",
+                table: "Stats",
                 column: "FactionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RegionStats_RegionId",
-                table: "RegionStats",
+                name: "IX_Stats_RegionId",
+                table: "Stats",
                 column: "RegionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Stats_TurnId",
+                table: "Stats",
+                column: "TurnId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "FactionStats_Production");
+                name: "Stats_Production");
 
             migrationBuilder.DropTable(
-                name: "RegionStats");
+                name: "Stats");
         }
     }
 }

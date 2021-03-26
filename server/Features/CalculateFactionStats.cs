@@ -33,12 +33,10 @@ namespace advisor.Features {
                     var factionId = faction.Key;
 
                     foreach (var region in faction.GroupBy(x => x.RegionId)) {
-                        if (region.Key == null) continue;
-
-                        var regionId = region.Key.Value;
+                        var regionId = region.Key;
                         var value = Reduce(region);
 
-                        var stat = await db.RegionStats
+                        var stat = await db.Stats
                             .SingleOrDefaultAsync(x => x.FactionId == factionId
                                 && x.TurnId == turnId
                                 && x.RegionId == regionId
@@ -53,7 +51,7 @@ namespace advisor.Features {
                             value.TurnId = turnId;
                             value.RegionId = regionId;
 
-                            await db.RegionStats.AddAsync(value);
+                            await db.Stats.AddAsync(value);
                         }
                     }
                 }
@@ -64,7 +62,7 @@ namespace advisor.Features {
             return null;
         }
 
-        private DbRegionStats Reduce(IEnumerable<DbEvent> events) {
+        private DbStat Reduce(IEnumerable<DbEvent> events) {
             var income = new DbIncomeStats();
             var production = new List<DbItem>();
 
@@ -97,7 +95,7 @@ namespace advisor.Features {
                 }
             }
 
-            return new DbRegionStats {
+            return new DbStat {
                 Income = income,
                 Production = production
             };

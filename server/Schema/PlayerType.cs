@@ -81,5 +81,37 @@ namespace advisor
             return db.Turns
                 .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turn);
         }
+
+        public async Task<FactionsStats> Stats([Parent] DbPlayer player) {
+            var stats = await db.Stats
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(x => x.Turn)
+                .Include(x => x.Faction)
+                .Where(x => x.Turn.PlayerId == player.Id && x.Faction.Number == player.FactionNumber)
+                .ToListAsync();
+
+            DbIncomeStats income = new DbIncomeStats();
+            Dictionary<string, int> production = new Dictionary<string, int>();
+
+            foreach (var stat in stats) {
+                income.Pillage += stat.Income.Pillage;
+                income.Tax += stat.Income.Tax;
+                income.Trade += stat.Income.Trade;
+                income.Work += stat.Income.Work;
+
+                foreach (var item in stat.Production) {
+                    int amount = item.Amount ?? 0;
+                    production[item.Code] = production.TryGetValue(item.Code, out var value)
+                        ? value + amount
+                        : amount;
+                }
+            }
+
+            return new FactionsStats {
+                Income = income,
+                Production = production.Select(x => new DbItem { Code = x.Key, Amount = x.Value }).ToList()
+            };
+        }
     }
 }

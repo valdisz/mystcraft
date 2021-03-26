@@ -27,6 +27,6 @@ namespace advisor.Persistence {
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
 
         [GraphQLIgnore]
-        public List<DbRegionStats> Stats { get; set; } = new ();
+        public List<DbStat> Stats { get; set; } = new ();
     }
 }

@@ -59,6 +59,12 @@
                 .ToListAsync();
         }
 
+        public Task<DbFaction> Faction([Parent] DbTurn turn, int number) {
+            return db.Factions
+                .Where(x => x.TurnId == turn.Id && x.Number == number)
+                .SingleOrDefaultAsync();
+        }
+
         public Task<List<DbEvent>> GetEvents([Parent] DbTurn turn) {
             return db.Events
                 .Include(x => x.Faction)

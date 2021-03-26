@@ -36,10 +36,40 @@ namespace advisor
                 .ToListAsync();
         }
 
-        public Task<DbUnit> UnitByNumber([Parent] DbStructure structure, int number) {
+        public Task<DbUnit> UnitByNumber([Parent] DbFaction faction, int number) {
             return db.Units
                 .Include(x => x.Faction)
-                .SingleOrDefaultAsync(x => x.StrcutureId == structure.Id && x.Number == number);
+                .SingleOrDefaultAsync(x => x.FactionId == faction.Id && x.Number == number);
+        }
+
+        public async Task<FactionsStats> Stats([Parent] DbFaction faction) {
+            var stats = await db.Stats
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Where(x => x.FactionId == faction.Id)
+                .ToListAsync();
+
+            DbIncomeStats income = new DbIncomeStats();
+            Dictionary<string, int> production = new Dictionary<string, int>();
+
+            foreach (var stat in stats) {
+                income.Pillage += stat.Income.Pillage;
+                income.Tax += stat.Income.Tax;
+                income.Trade += stat.Income.Trade;
+                income.Work += stat.Income.Work;
+
+                foreach (var item in stat.Production) {
+                    int amount = item.Amount ?? 0;
+                    production[item.Code] = production.TryGetValue(item.Code, out var value)
+                        ? value + amount
+                        : amount;
+                }
+            }
+
+            return new FactionsStats {
+                Income = income,
+                Production = production.Select(x => new DbItem { Code = x.Key, Amount = x.Value }).ToList()
+            };
         }
     }
 }

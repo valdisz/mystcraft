@@ -56,7 +56,7 @@ namespace advisor.Persistence {
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
-        public DbSet<DbRegionStats> RegionStats { get; set; }
+        public DbSet<DbStat> Stats { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
         public DbSet<DbStructure> Structures { get; set; }
@@ -250,15 +250,13 @@ namespace advisor.Persistence {
                 t.Property(x => x.Category).HasConversion<string>();
             });
 
-            model.Entity<DbRegionStats>(t => {
-                t.HasKey(x => new { x.TurnId, x.FactionId, x.RegionId });
-
+            model.Entity<DbStat>(t => {
                 t.OwnsOne(x => x.Income);
 
                 t.OwnsMany(p => p.Production, a => {
-                    a.WithOwner().HasForeignKey(nameof(DbRegionStats.TurnId), nameof(DbRegionStats.FactionId), nameof(DbRegionStats.RegionId));
-                    a.ToTable("FactionStats_Production");
-                    a.HasKey(nameof(DbRegionStats.TurnId), nameof(DbRegionStats.FactionId), nameof(DbRegionStats.RegionId), nameof(DbItem.Code));
+                    a.WithOwner().HasForeignKey("StatId");
+                    a.ToTable("Stats_Production");
+                    a.HasKey("StatId", nameof(DbItem.Code));
                 });
             });
 

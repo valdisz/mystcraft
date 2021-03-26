@@ -40,6 +40,6 @@ namespace advisor.Persistence {
         public List<DbStudyPlan> Plans { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbRegionStats> Stats { get; set; } = new ();
+        public List<DbStat> Stats { get; set; } = new ();
     }
 }
