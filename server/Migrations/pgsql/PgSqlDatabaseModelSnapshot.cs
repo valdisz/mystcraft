@@ -113,7 +113,10 @@ namespace advisor.Migrations.pgsql
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RemoteGameOptions")
+                    b.Property<string>("Options")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Ruleset")
                         .HasColumnType("text");
 
                     b.Property<string>("RulesetName")

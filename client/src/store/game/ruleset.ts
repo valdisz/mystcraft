@@ -83,74 +83,79 @@ export class Ruleset {
     private loadItems(items: ItemDataMap) {
         const itemMap: {
             [ code: string ]: {
-                item: ItemInfo
+                item: ItemInfo,
                 data: ItemData
             }
-        } = { }
+        } = { };
 
-        for (const code in items) {
-            const data: ItemData = items[code]
-            const item = new ItemInfo(code, data.category, data.name[0], data.name[1])
-            item.description = data.description
-            item.weight = data.weight
+        function populateDict() {
+            for (const code in items) {
+                const data: ItemData = items[code]
+                const item = new ItemInfo(code, data.category, data.name[0], data.name[1])
+                item.description = data.description
+                item.weight = data.weight
 
-            itemMap[code] = { item, data }
+                itemMap[code] = ({ item, data })
+            }
         }
+        populateDict()
 
         for (const code in itemMap) {
             const { item, data } = itemMap[code]
 
-            if (data.traits.advanced) item.traits.advanced = new AdvancedTrait()
-            if (data.traits.noGive) item.traits.noGive = new NoGiveTrait()
-            if (data.traits.noTransport) item.traits.noTransport = new NoTransportTrait()
-            if (data.traits.freeMovingItem) item.traits.freeMovingItem = new FreeMovingItemTrait()
-            if (data.traits.canTeach) item.traits.canTeach = new CanTeachTrait()
+            if (data.traits) {
+                if (data.traits.advanced !== undefined) item.traits.advanced = new AdvancedTrait()
+                if (data.traits.noGive !== undefined) item.traits.noGive = new NoGiveTrait()
+                if (data.traits.noTransport !== undefined) item.traits.noTransport = new NoTransportTrait()
+                if (data.traits.freeMovingItem !== undefined) item.traits.freeMovingItem = new FreeMovingItemTrait()
+                if (data.traits.canTeach !== undefined) item.traits.canTeach = new CanTeachTrait()
 
-            if (data.traits.consume) {
-                const { amount } = data.traits.consume
-                item.traits.consume = new ConsumeTrait(amount)
-            }
+                if (data.traits.consume) {
+                    const { amount } = data.traits.consume
+                    item.traits.consume = new ConsumeTrait(amount)
+                }
 
-            if (data.traits.food) {
-                const { value } = data.traits.food
-                item.traits.food = new FoodTrait(value)
-            }
+                if (data.traits.food) {
+                    const { value } = data.traits.food
+                    item.traits.food = new FoodTrait(value)
+                }
 
-            if (data.traits.canLearn) {
-                const { defaultLevel, skills: _skills } = data.traits.canLearn
-                const skills = (_skills ?? []).map(({ skill, level }) => ({
-                    level,
-                    skill: this.getSkill(skill)
-                }))
+                if (data.traits.canLearn) {
+                    const { defaultLevel, skills: _skills } = data.traits.canLearn
+                    const skills = Object.keys(_skills ?? {}).map(skill => ({
+                        skill: this.getSkill(skill),
+                        level: _skills[skill]
+                    }))
 
-                item.traits.canLearn = new CanLearnTrait(defaultLevel, skills)
-            }
+                    item.traits.canLearn = new CanLearnTrait(defaultLevel, skills)
+                }
 
-            if (data.traits.canMove) {
-                const { capacity, speed, requires: _requires } = data.traits.canMove
-                const requires = _requires ? this.getItem(_requires) : null
+                if (data.traits.canMove) {
+                    const { capacity, speed, requires: _requires } = data.traits.canMove
+                    const requires = _requires ? this.getItem(_requires) : null
 
-                item.traits.canMove = new CanMoveTrait(capacity, speed, requires)
-            }
+                    item.traits.canMove = new CanMoveTrait(capacity, speed, requires)
+                }
 
-            if (data.traits.canSail) {
-                const { capacity, speed, sailors } = data.traits.canSail
+                if (data.traits.canSail) {
+                    const { capacity, speed, sailors } = data.traits.canSail
 
-                item.traits.canSail = new CanSailTrait(capacity, speed, sailors)
-            }
+                    item.traits.canSail = new CanSailTrait(capacity, speed, sailors)
+                }
 
-            if (data.traits.canProduce) {
-                const { skill: _skill, level, effort, amount, productionBonus: _productionBonus } = data.traits.canProduce
+                if (data.traits.canProduce) {
+                    const { skill: _skill, level, effort, amount, productionBonus: _productionBonus } = data.traits.canProduce
 
-                const skill = this.getSkill(_skill as any)
-                const productionBonus: ProductionBonus = _productionBonus
+                    const skill = this.getSkill(_skill as any)
+                    const productionBonus: ProductionBonus = _productionBonus
                     ? {
                         item: this.getItem(_productionBonus.item),
                         amount: _productionBonus.amount
                     }
                     : null
 
-                item.traits.canProduce = new CanProduceTrait(skill, level, effort, amount, productionBonus)
+                    item.traits.canProduce = new CanProduceTrait(skill, level, effort, amount, productionBonus)
+                }
             }
 
             this.items.set(Object.freeze(item))
@@ -205,7 +210,7 @@ interface RulesetData {
 }
 
 interface ObjectData {
-    
+
 }
 
 interface ResourceData {

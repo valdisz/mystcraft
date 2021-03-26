@@ -107,7 +107,10 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RemoteGameOptions")
+                    b.Property<string>("Options")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ruleset")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RulesetName")

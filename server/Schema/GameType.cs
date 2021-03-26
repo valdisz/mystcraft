@@ -3,11 +3,13 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using advisor.Features;
     using HotChocolate;
     using HotChocolate.AspNetCore.Authorization;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
+    using Newtonsoft.Json;
     using Persistence;
 
     public class GameType : ObjectType<DbGame> {
@@ -29,6 +31,12 @@
         }
 
         private readonly Database db;
+
+        public GameOptions Options([Parent] DbGame game) {
+            return game.Options != null
+                ? JsonConvert.DeserializeObject<GameOptions>(game.Options)
+                : null;
+        }
 
         public Task<DbPlayer> MyPlayer([Parent] DbGame game, [GlobalState] long currentUserId) {
             return db.Players

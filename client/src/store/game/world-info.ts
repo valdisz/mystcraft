@@ -6,5 +6,5 @@ export interface WorldLevel {
 }
 
 export interface WorldInfo {
-    levels: WorldLevel[]
+    map: WorldLevel[]
 }

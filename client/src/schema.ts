@@ -37,8 +37,9 @@ export type Game = Node & {
   myPlayer?: Maybe<Player>;
   myUniversity?: Maybe<University>;
   name: Scalars['String'];
+  options?: Maybe<GameOptions>;
   players?: Maybe<Array<Maybe<Player>>>;
-  remoteGameOptions?: Maybe<Scalars['String']>;
+  ruleset?: Maybe<Scalars['String']>;
   rulesetName?: Maybe<Scalars['String']>;
   rulesetVersion?: Maybe<Scalars['String']>;
   type: GameType;
@@ -53,6 +54,7 @@ export type Player = Node & {
   lastTurnNumber: Scalars['Int'];
   password?: Maybe<Scalars['String']>;
   reports?: Maybe<Array<Maybe<Report>>>;
+  stats?: Maybe<FactionsStats>;
   turnByNumber?: Maybe<Turn>;
   turns?: Maybe<Array<Maybe<Turn>>>;
   university?: Maybe<PlayerUniversity>;
@@ -78,6 +80,7 @@ export type Report = Node & {
 
 export type Turn = Node & {
   events?: Maybe<Array<Maybe<Event>>>;
+  faction?: Maybe<Faction>;
   factions?: Maybe<Array<Maybe<Faction>>>;
   id: Scalars['ID'];
   month: Scalars['Int'];
@@ -89,6 +92,11 @@ export type Turn = Node & {
   unitByNumber?: Maybe<Unit>;
   units?: Maybe<UnitConnection>;
   year: Scalars['Int'];
+};
+
+
+export type TurnFactionArgs = {
+  number: Scalars['Int'];
 };
 
 
@@ -216,6 +224,7 @@ export type Faction = Node & {
   id: Scalars['ID'];
   name: Scalars['String'];
   number: Scalars['Int'];
+  stats?: Maybe<FactionsStats>;
   unitByNumber?: Maybe<Unit>;
 };
 
@@ -324,6 +333,8 @@ export type Mutation = {
   joinGame?: Maybe<Player>;
   joinUniversity?: Maybe<University>;
   openUniversity?: Maybe<University>;
+  setGameOptions?: Maybe<Game>;
+  setRuleset?: Maybe<Game>;
   setStudPlanyStudy?: Maybe<StudyPlan>;
   setStudyPlanTarget?: Maybe<StudyPlan>;
   setStudyPlanTeach?: Maybe<StudyPlan>;
@@ -361,6 +372,18 @@ export type MutationJoinUniversityArgs = {
 export type MutationOpenUniversityArgs = {
   name?: Maybe<Scalars['String']>;
   playerId: Scalars['ID'];
+};
+
+
+export type MutationSetGameOptionsArgs = {
+  gameId: Scalars['ID'];
+  options?: Maybe<GameOptionsInput>;
+};
+
+
+export type MutationSetRulesetArgs = {
+  gameId: Scalars['ID'];
+  ruleset?: Maybe<Scalars['String']>;
 };
 
 
@@ -507,22 +530,65 @@ export enum SettlementSize {
   City = 'CITY'
 }
 
+export type GameOptionsInput = {
+  map?: Maybe<Array<Maybe<MapLevelInput>>>;
+};
+
 export type UniversityMember = {
   player?: Maybe<Player>;
   role: UniveristyMemberRole;
 };
 
 export type Event = {
-  faction?: Maybe<Faction>;
+  amount?: Maybe<Scalars['Int']>;
+  category: EventCategory;
   id: Scalars['Long'];
+  itemCode?: Maybe<Scalars['String']>;
+  itemName?: Maybe<Scalars['String']>;
+  itemPrice?: Maybe<Scalars['Int']>;
   message: Scalars['String'];
   type: EventType;
+};
+
+export type FactionsStats = {
+  income?: Maybe<IncomeStats>;
+  production?: Maybe<Array<Maybe<Item>>>;
 };
 
 export type PlayerUniversity = {
   role: UniveristyMemberRole;
   university?: Maybe<University>;
 };
+
+export type GameOptions = {
+  map?: Maybe<Array<Maybe<MapLevel>>>;
+};
+
+export type MapLevel = {
+  height: Scalars['Int'];
+  label?: Maybe<Scalars['String']>;
+  level: Scalars['Int'];
+  width: Scalars['Int'];
+  _Clone__: MapLevel;
+};
+
+export type IncomeStats = {
+  pillage: Scalars['Int'];
+  tax: Scalars['Int'];
+  total: Scalars['Int'];
+  trade: Scalars['Int'];
+  work: Scalars['Int'];
+};
+
+export enum EventCategory {
+  Unknown = 'UNKNOWN',
+  Tax = 'TAX',
+  Sell = 'SELL',
+  Work = 'WORK',
+  Produce = 'PRODUCE',
+  Pillage = 'PILLAGE',
+  Claim = 'CLAIM'
+}
 
 export enum EventType {
   Info = 'INFO',
@@ -535,6 +601,13 @@ export enum UniveristyMemberRole {
   Teacher = 'TEACHER',
   Member = 'MEMBER'
 }
+
+export type MapLevelInput = {
+  height: Scalars['Int'];
+  label?: Maybe<Scalars['String']>;
+  level: Scalars['Int'];
+  width: Scalars['Int'];
+};
 
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -614,9 +687,11 @@ export type GetSingleGameQueryVariables = Exact<{
 
 export type GetSingleGameQuery = { node?: Maybe<SingleGameFragment> };
 
+export type GameOptionsFragment = { map?: Maybe<Array<Maybe<Pick<MapLevel, 'label' | 'level' | 'width' | 'height'>>>> };
+
 export type SingleGameFragment = (
-  Pick<Game, 'id' | 'name' | 'engineVersion' | 'rulesetName' | 'rulesetVersion'>
-  & { myPlayer?: Maybe<(
+  Pick<Game, 'id' | 'name' | 'engineVersion' | 'rulesetName' | 'rulesetVersion' | 'ruleset'>
+  & { options?: Maybe<GameOptionsFragment>, myPlayer?: Maybe<(
     Pick<Player, 'factionName' | 'factionNumber' | 'lastTurnNumber'>
     & { turns?: Maybe<Array<Maybe<TurnSummaryFragment>>> }
   )>, myUniversity?: Maybe<UniversitySummaryFragment> }
@@ -945,6 +1020,16 @@ ${Item}
 ${Exit}
 ${Unit}
 ${Structure}`;
+export const GameOptions = gql`
+    fragment GameOptions on GameOptions {
+  map {
+    label
+    level
+    width
+    height
+  }
+}
+    `;
 export const ReportSummary = gql`
     fragment ReportSummary on Report {
   id
@@ -990,6 +1075,10 @@ export const SingleGame = gql`
   engineVersion
   rulesetName
   rulesetVersion
+  options {
+    ...GameOptions
+  }
+  ruleset
   myPlayer {
     factionName
     factionNumber
@@ -1002,7 +1091,8 @@ export const SingleGame = gql`
     ...UniversitySummary
   }
 }
-    ${TurnSummary}
+    ${GameOptions}
+${TurnSummary}
 ${UniversitySummary}`;
 export const ClassSummary = gql`
     fragment ClassSummary on UniversityClass {

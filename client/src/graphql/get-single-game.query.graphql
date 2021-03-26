@@ -6,12 +6,25 @@ query GetSingleGame($gameId: ID!) {
   }
 }
 
+fragment GameOptions on GameOptions {
+  map {
+    label
+    level
+    width
+    height
+  }
+}
+
 fragment SingleGame on Game {
   id
   name
   engineVersion
   rulesetName
   rulesetVersion
+  options {
+    ...GameOptions
+  }
+  ruleset
   myPlayer {
     factionName
     factionNumber

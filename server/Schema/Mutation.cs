@@ -57,6 +57,22 @@ namespace advisor
             ));
         }
 
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<DbGame> SetGameOptions([GraphQLType(typeof(RelayIdType))] string gameId, GameOptions options) {
+            return mediator.Send(new SetGameOptions(
+                ParseRelayId<long>("Game", gameId),
+                options
+            ));
+        }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<DbGame> SetRuleset([GraphQLType(typeof(RelayIdType))] string gameId, string ruleset) {
+            return mediator.Send(new SetRuleset(
+                ParseRelayId<long>("Game", gameId),
+                ruleset
+            ));
+        }
+
         public Task<DbUniversity> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
             return mediator.Send(new OpenUniversity(
                 currentUserId,

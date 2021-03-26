@@ -14,7 +14,10 @@ namespace advisor.Persistence
 
         public GameType Type { get; set; }
 
-        public string RemoteGameOptions { get; set; }
+        [GraphQLIgnore]
+        public string Options { get; set; }
+
+        public string Ruleset { get; set; }
 
         public string EngineVersion { get; set; }
         public string RulesetName { get; set; }

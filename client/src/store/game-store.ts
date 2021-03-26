@@ -7,6 +7,7 @@ import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema
 import { Ruleset } from "./game/ruleset"
 import { Region } from "./game/region"
 import { World } from "./game/world"
+import { WorldInfo, WorldLevel } from './game/world-info'
 
 export class TurnsStore {
     constructor() {
@@ -73,11 +74,18 @@ export class GameStore {
             }
         }
 
-        this.world = new World({ levels: [
-            {
-                width: 96, height: 72, label: 'surface'
-            }
-        ] }, new Ruleset())
+        game.options.map.sort((a, b) => a.level - b.level)
+        const map: WorldLevel[] = game.options.map.map(level => ({
+            label: level.label,
+            width: level.width,
+            height: level.height
+        }))
+        const worldInfo: WorldInfo = { map }
+
+        const ruleset = new Ruleset()
+        ruleset.load(game.ruleset)
+
+        this.world = new World(worldInfo, ruleset)
 
         let cursor: string = null
         let regions: ApolloQueryResult<GetRegionsQuery> = null
