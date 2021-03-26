@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using advisor.Persistence;
 
 namespace advisor.Migrations.mssql
 {
     [DbContext(typeof(MsSqlDatabase))]
-    partial class MsSqlDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20210326050101_remove_stats")]
+    partial class remove_stats
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,26 +227,6 @@ namespace advisor.Migrations.mssql
                     b.HasIndex("TurnId");
 
                     b.ToTable("Regions");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbRegionStats", b =>
-                {
-                    b.Property<long>("TurnId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("FactionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("RegionId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TurnId", "FactionId", "RegionId");
-
-                    b.HasIndex("FactionId");
-
-                    b.HasIndex("RegionId");
-
-                    b.ToTable("RegionStats");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbReport", b =>
@@ -760,93 +742,6 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Wanted");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbRegionStats", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithMany("Stats")
-                        .HasForeignKey("FactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Stats")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
-                        .WithMany("Stats")
-                        .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("advisor.Persistence.DbIncomeStats", "Income", b1 =>
-                        {
-                            b1.Property<long>("DbRegionStatsTurnId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("DbRegionStatsFactionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("DbRegionStatsRegionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("Pillage")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Tax")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Work")
-                                .HasColumnType("int");
-
-                            b1.HasKey("DbRegionStatsTurnId", "DbRegionStatsFactionId", "DbRegionStatsRegionId");
-
-                            b1.ToTable("RegionStats");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbRegionStatsTurnId", "DbRegionStatsFactionId", "DbRegionStatsRegionId");
-                        });
-
-                    b.OwnsMany("advisor.Persistence.DbItem", "Production", b1 =>
-                        {
-                            b1.Property<long>("TurnId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("FactionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("RegionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<string>("Code")
-                                .HasColumnType("nvarchar(450)");
-
-                            b1.Property<int?>("Amount")
-                                .HasColumnType("int");
-
-                            b1.HasKey("TurnId", "FactionId", "RegionId", "Code");
-
-                            b1.ToTable("FactionStats_Production");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TurnId", "FactionId", "RegionId");
-                        });
-
-                    b.Navigation("Faction");
-
-                    b.Navigation("Income");
-
-                    b.Navigation("Production");
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Turn");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbReport", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
@@ -1250,8 +1145,6 @@ namespace advisor.Migrations.mssql
                 {
                     b.Navigation("Events");
 
-                    b.Navigation("Stats");
-
                     b.Navigation("Units");
                 });
 
@@ -1275,8 +1168,6 @@ namespace advisor.Migrations.mssql
                 {
                     b.Navigation("Events");
 
-                    b.Navigation("Stats");
-
                     b.Navigation("Structures");
 
                     b.Navigation("Units");
@@ -1298,8 +1189,6 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Regions");
 
                     b.Navigation("Reports");
-
-                    b.Navigation("Stats");
 
                     b.Navigation("Structures");
 

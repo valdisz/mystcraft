@@ -68,7 +68,7 @@ namespace advisor.Persistence
         public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
 
         [GraphQLIgnore]
-        public List<DbFactionStats> Stats { get; set; } = new ();
+        public List<DbRegionStats> Stats { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new ();

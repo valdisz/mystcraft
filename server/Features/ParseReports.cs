@@ -185,16 +185,24 @@ namespace advisor.Features {
                     ? null
                     : regions[DbRegion.GetUID(ev.Coords.X, ev.Coords.Y, ev.Coords.Z ?? DEFAULT_LEVEL_Z)];
 
-                faction.Events.Add(new DbEvent {
-                    RegionId = region?.Id,
+                var dbEv = new DbEvent {
                     Type = EventType.Info,
                     Category = ev.Category,
                     Amount = ev.Amount,
                     ItemCode = ev.Code,
                     ItemName = ev.Name,
                     ItemPrice = ev.Price,
-                    Message = ev.Message
-                });
+                    Message = ev.Message,
+                    Region = region,
+                    // Terrain = region?.Terrain,
+                    // X = region?.X,
+                    // Y = region?.Y,
+                    // Z = region?.Z,
+                    // Label = region?.Label,
+                    // Province = region?.Province,
+                };
+
+                faction.Events.Add(dbEv);
             }
         }
 

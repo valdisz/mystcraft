@@ -56,7 +56,7 @@ namespace advisor.Persistence {
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
-        public DbSet<DbFactionStats> FactionStats { get; set; }
+        public DbSet<DbRegionStats> RegionStats { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
         public DbSet<DbStructure> Structures { get; set; }
@@ -82,13 +82,16 @@ namespace advisor.Persistence {
                     break;
             }
 
+            optionsBuilder.UseLoggerFactory(loggerFactory);
+
             if (!options.IsProduction) {
                 optionsBuilder.EnableDetailedErrors();
                 optionsBuilder.EnableSensitiveDataLogging();
             }
 
-            optionsBuilder.UseLoggerFactory(loggerFactory);
-            optionsBuilder.ConfigureWarnings(c => c.Log((RelationalEventId.CommandExecuting, LogLevel.Debug)));
+            if (options.IsProduction) {
+                optionsBuilder.ConfigureWarnings(c => c.Log((RelationalEventId.CommandExecuting, LogLevel.Debug)));
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder model) {
@@ -236,6 +239,10 @@ namespace advisor.Persistence {
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => x.FactionId);
+
+                t.HasMany(x => x.Stats)
+                    .WithOne(x => x.Faction)
+                    .HasForeignKey(x => x.FactionId);
             });
 
             model.Entity<DbEvent>(t => {
@@ -243,28 +250,24 @@ namespace advisor.Persistence {
                 t.Property(x => x.Category).HasConversion<string>();
             });
 
-            model.Entity<DbFactionStats>(t => {
-                t.HasKey(x => new { x.TurnId, x.FactionId });
-
-                t.HasOne(x => x.Faction)
-                    .WithOne(x => x.Stats)
-                    .HasForeignKey<DbFactionStats>(x => x.FactionId);
+            model.Entity<DbRegionStats>(t => {
+                t.HasKey(x => new { x.TurnId, x.FactionId, x.RegionId });
 
                 t.OwnsOne(x => x.Income);
 
                 t.OwnsMany(p => p.Production, a => {
-                    a.WithOwner().HasForeignKey("TurnId", "FactionId");
+                    a.WithOwner().HasForeignKey(nameof(DbRegionStats.TurnId), nameof(DbRegionStats.FactionId), nameof(DbRegionStats.RegionId));
                     a.ToTable("FactionStats_Production");
-                    a.HasKey("TurnId", "FactionId", nameof(DbItem.Code));
+                    a.HasKey(nameof(DbRegionStats.TurnId), nameof(DbRegionStats.FactionId), nameof(DbRegionStats.RegionId), nameof(DbItem.Code));
                 });
             });
 
             model.Entity<DbStructure>(t => {
                 t.Property(p => p.Flags)
-                    .HasConversion(new JsonListConverter<string>());
+                    .HasConversion(new JsonListConverter<string>(), new JsonListValueComparer<string>());
 
                 t.Property(p => p.SailDirections)
-                    .HasConversion(new JsonListConverter<Direction>());
+                    .HasConversion(new JsonListConverter<Direction>(), new JsonListValueComparer<Direction>());
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Structure)
@@ -282,7 +285,7 @@ namespace advisor.Persistence {
 
             model.Entity<DbUnit>(t => {
                 t.Property(p => p.Flags)
-                    .HasConversion(new JsonListConverter<string>());
+                    .HasConversion(new JsonListConverter<string>(), new JsonListValueComparer<string>());
 
                 t.OwnsMany(p => p.Items, a => {
                     a.WithOwner().HasForeignKey("UnitId");
@@ -320,7 +323,7 @@ namespace advisor.Persistence {
 
             model.Entity<DbStudyPlan>(t => {
                 t.Property(x => x.Teach)
-                    .HasConversion(new JsonListConverter<long>());
+                    .HasConversion(new JsonListConverter<long>(), new JsonListValueComparer<long>());
 
                 t.OwnsOne(p => p.Target);
 

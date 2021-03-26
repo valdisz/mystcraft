@@ -99,27 +99,6 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("Factions");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbFactionStats", b =>
-                {
-                    b.Property<long>("TurnId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("FactionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("RegionId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("TurnId", "FactionId");
-
-                    b.HasIndex("FactionId")
-                        .IsUnique();
-
-                    b.HasIndex("RegionId");
-
-                    b.ToTable("FactionStats");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbGame", b =>
                 {
                     b.Property<long>("Id")
@@ -246,6 +225,26 @@ namespace advisor.Migrations.pgsql
                     b.HasIndex("TurnId");
 
                     b.ToTable("Regions");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegionStats", b =>
+                {
+                    b.Property<long>("TurnId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("FactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("RegionId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("TurnId", "FactionId", "RegionId");
+
+                    b.HasIndex("FactionId");
+
+                    b.HasIndex("RegionId");
+
+                    b.ToTable("RegionStats");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbReport", b =>
@@ -574,85 +573,6 @@ namespace advisor.Migrations.pgsql
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbFactionStats", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithOne("Stats")
-                        .HasForeignKey("advisor.Persistence.DbFactionStats", "FactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Stats")
-                        .HasForeignKey("RegionId");
-
-                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
-                        .WithMany("Stats")
-                        .HasForeignKey("TurnId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.OwnsOne("advisor.Persistence.DbIncomeStats", "Income", b1 =>
-                        {
-                            b1.Property<long>("DbFactionStatsTurnId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("DbFactionStatsFactionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("Pillage")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Tax")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Work")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("DbFactionStatsTurnId", "DbFactionStatsFactionId");
-
-                            b1.ToTable("FactionStats");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbFactionStatsTurnId", "DbFactionStatsFactionId");
-                        });
-
-                    b.OwnsMany("advisor.Persistence.DbItem", "Production", b1 =>
-                        {
-                            b1.Property<long>("TurnId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<long>("FactionId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<string>("Code")
-                                .HasColumnType("text");
-
-                            b1.Property<int?>("Amount")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("TurnId", "FactionId", "Code");
-
-                            b1.ToTable("FactionStats_Production");
-
-                            b1.WithOwner()
-                                .HasForeignKey("TurnId", "FactionId");
-                        });
-
-                    b.Navigation("Faction");
-
-                    b.Navigation("Income");
-
-                    b.Navigation("Production");
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Turn");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
                 {
                     b.HasOne("advisor.Persistence.DbGame", "Game")
@@ -838,6 +758,93 @@ namespace advisor.Migrations.pgsql
                     b.Navigation("Turn");
 
                     b.Navigation("Wanted");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegionStats", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
+                        .WithMany("Stats")
+                        .HasForeignKey("FactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", "Region")
+                        .WithMany("Stats")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
+                        .WithMany("Stats")
+                        .HasForeignKey("TurnId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("advisor.Persistence.DbIncomeStats", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbRegionStatsTurnId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("DbRegionStatsFactionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("DbRegionStatsRegionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("Pillage")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Tax")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Work")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("DbRegionStatsTurnId", "DbRegionStatsFactionId", "DbRegionStatsRegionId");
+
+                            b1.ToTable("RegionStats");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbRegionStatsTurnId", "DbRegionStatsFactionId", "DbRegionStatsRegionId");
+                        });
+
+                    b.OwnsMany("advisor.Persistence.DbItem", "Production", b1 =>
+                        {
+                            b1.Property<long>("TurnId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("FactionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<long>("RegionId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<string>("Code")
+                                .HasColumnType("text");
+
+                            b1.Property<int?>("Amount")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("TurnId", "FactionId", "RegionId", "Code");
+
+                            b1.ToTable("FactionStats_Production");
+
+                            b1.WithOwner()
+                                .HasForeignKey("TurnId", "FactionId", "RegionId");
+                        });
+
+                    b.Navigation("Faction");
+
+                    b.Navigation("Income");
+
+                    b.Navigation("Production");
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Turn");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbReport", b =>
