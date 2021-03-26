@@ -118,15 +118,9 @@ export class HexMap {
         const points = this.layout.polygonCorners(this.selectedRegion)
 
         const g = new PIXI.Graphics()
-        g.lineStyle(6, 0x1E4EFF, 0.75)
+        g.lineStyle(2, 0xED2939)
         g.drawPolygon(points)
         this.selected.addChild(g)
-
-        const g2 = new PIXI.Graphics()
-        // g2.lineStyle(2, 0xD46A6A, 0.75)
-        g2.lineStyle(2, 0xAEBFFF, 0.5)
-        g2.drawPolygon(points)
-        this.selected.addChild(g2)
     }
 
     load() {
