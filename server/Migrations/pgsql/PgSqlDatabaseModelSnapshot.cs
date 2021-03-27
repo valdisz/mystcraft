@@ -181,6 +181,9 @@ namespace advisor.Migrations.pgsql
                     b.Property<int>("Entertainment")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("Explored")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasColumnType("text");

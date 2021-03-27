@@ -5,5 +5,7 @@ namespace advisor.Model
         public int Y { get; set; }
         public int? Z { get; set; }
         public string Label { get; set; }
+
+        public override string ToString() => $"{X},{Y}{(Z.HasValue ? $",{Z}" : "")} {Label}";
     }
 }

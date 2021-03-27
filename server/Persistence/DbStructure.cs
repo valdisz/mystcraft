@@ -54,7 +54,7 @@ namespace advisor.Persistence
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
 
         public static string GetUID(int number, int x, int y, int z) => number > GameConsts.MAX_BUILDING_NUMBER
-            ? $"[{number}]"
-            : $"{DbRegion.GetUID(x, y, z)} [{number}]";
+            ? $"{number}"
+            : $"{number}@{DbRegion.GetUID(x, y, z)}";
     }
 }

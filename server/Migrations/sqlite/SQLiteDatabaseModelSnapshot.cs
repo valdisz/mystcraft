@@ -173,6 +173,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<int>("Entertainment")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Explored")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasColumnType("TEXT");

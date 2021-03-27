@@ -20,6 +20,7 @@ namespace advisor.Persistence
         public int Y { get; set; }
         public int Z { get; set; }
 
+        public bool Explored { get; set; }
         public int UpdatedAtTurn { get; set; }
 
         [Required]
