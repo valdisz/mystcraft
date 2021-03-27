@@ -21,11 +21,19 @@ export class Item implements UniqueItem {
         return this.amount * this.info.weight
     }
 
-    get isSilver() {
-        return this.info.isSilver
+    get isMoney() {
+        return this.info.category === 'money'
     }
 
     get isMan() {
-        return this.info.isMan
+        return this.info.category === 'man'
+    }
+
+    get isManLike() {
+        return this.info.isManLike
+    }
+
+    get isMount() {
+        return this.info.category === 'mount'
     }
 }

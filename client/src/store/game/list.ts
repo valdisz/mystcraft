@@ -22,8 +22,10 @@ export class List<T extends UniqueItem> {
         return Object.values(this.items);
     }
 
-    get(code: string): T {
-        return this.items[code];
+    get(code: string | UniqueItem): T {
+        if (!code) return null
+        
+        return this.items[typeof code === 'string' ? code : code.code];
     }
 
     set(item: T): void {

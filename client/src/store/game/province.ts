@@ -1,5 +1,5 @@
 import { TypedMap } from './typed-map';
-import { Region } from "./region";
+import { Region } from './types';
 
 
 export class Province {

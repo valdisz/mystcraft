@@ -4,6 +4,7 @@ import { CLIENT } from '../client'
 import { TurnSummaryFragment } from '../schema'
 import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
+import { GetTurnDetails, GetTurnDetailsQuery, GetTurnDetailsQueryVariables } from '../schema'
 import { Ruleset } from "./game/ruleset"
 import { Region } from "./game/region"
 import { World } from "./game/world"
@@ -87,6 +88,17 @@ export class GameStore {
 
         this.world = new World(worldInfo, ruleset)
 
+        const turnDetails = await CLIENT.query<GetTurnDetailsQuery, GetTurnDetailsQueryVariables>({
+            query: GetTurnDetails,
+            variables: {
+                turnId: latestTurn.id
+            }
+        })
+
+        for (const faction of turnDetails.data.node.factions) {
+            this.world.addFaction(faction.number, faction.name, this.factionNumber === myPlayer.factionNumber)
+        }
+
         let cursor: string = null
         let regions: ApolloQueryResult<GetRegionsQuery> = null
         do {
@@ -117,6 +129,7 @@ export class GameStore {
 
     @computed get units() {
         const units = this.region?.units ?? []
+        console.log(units)
         return units
     }
 

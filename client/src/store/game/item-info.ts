@@ -25,8 +25,11 @@ export class ItemInfo implements UniqueItem {
         return this.category === 'man' || this.hasTrait('freeMovingItem')
     }
 
-    create(): Item {
-        return new Item(this);
+    create(amount: number = 1): Item {
+        const item = new Item(this)
+        item.amount = amount
+
+        return item
     }
 
     getName(count: number) {

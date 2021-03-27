@@ -8,10 +8,10 @@ import { TransferOutcome } from "./transfer-outcome";
 
 
 export class Inventory {
-    constructor(public readonly owner: Unit, items?: Item[]) {
+    constructor(public readonly owner: Unit) {
     }
 
-    private readonly items = new List<Item>();
+    readonly items = new List<Item>();
 
     readonly credit: Transfer[] = [];
     readonly debit: Transfer[] = [];

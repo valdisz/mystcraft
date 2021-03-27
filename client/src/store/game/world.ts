@@ -4,6 +4,7 @@ import { Region } from "./region";
 import { Level, Levels } from "./level";
 import { WorldInfo } from "./world-info";
 import { Provinces } from './province';
+import { Factions } from './types';
 
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {
@@ -11,6 +12,11 @@ export class World {
 
     readonly levels: Levels = {};
     readonly provinces = new Provinces();
+    readonly factions = new Factions();
+
+    addFaction(num: number, name: string, isPlayer: boolean) {
+        this.factions.create(num, name, isPlayer)
+    }
 
     addRegions(regions: RegionFragment[]) {
         for (const reg of regions) {
@@ -19,7 +25,12 @@ export class World {
     }
 
     addRegion(region: RegionFragment) {
-        const reg = Region.from(region, this.ruleset);
+        const reg = Region.from(region, this.factions, this.ruleset);
+
+        // for (const unit of region.units ?? []) {
+        //     const u = Unit.from(unit, this.ruleset)
+        //     reg.units.push(u)
+        // }
 
         const province = this.provinces.getOrCreate(region.province);
         province.add(reg);

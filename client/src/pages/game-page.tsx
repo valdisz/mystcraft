@@ -9,6 +9,8 @@ import { HexMap } from '../map'
 import { Region } from "../store/game/region"
 import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
+import { List } from '../store/game/list'
+import { Item } from '../store/game/item'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any
@@ -117,7 +119,87 @@ const UnitsContainer = styled.div`
 
 const UnitsTable = styled(Table)`
     min-height: 0;
+    width: 100%;
+
+    td, th {
+        white-space: nowrap;
+        font-family: Fira Code, monospace;
+        font-size: 80%;
+    }
+
+    th {
+        font-weight: bold;
+    }
+
+    .faction {
+        width: 1px;
+    }
+
+    .unit-nr {
+        width: 1px;
+        text-align: right;
+        padding-right: 4px;
+    }
+
+    .unit-name {
+        width: 1px;
+        padding-left: 4px;
+    }
+
+    .men {
+        width: 1px;
+    }
+
+    .money {
+        width: 1px;
+    }
+
+    .mounts {
+        width: 1px;
+    }
+
+    .skills {
+        white-space: normal;
+        width: 50%;
+    }
+
+    .items {
+        white-space: normal;
+        width: 50%;
+    }
+
+    .description {
+        white-space: normal;
+        font-size: 70%;
+        font-style: italic;
+        padding-left: 4px;
+    }
+
+    .no-border {
+        border-bottom-width: 0;
+    }
 `
+
+function UnitMen({ items }: { items: List<Item> }) {
+    const men = items.all.filter(x => x.isMan)
+    men.sort((a, b) => b.amount - a.amount)
+    const total = men.map(x => x.amount).reduce((value, next) => value + next, 0)
+    const names = men.map(x => x.name).join(', ')
+
+    return <>{total} {names}</>
+}
+
+function UnitMounts({ items }: { items: List<Item> }) {
+    const mounts = items.all.filter(x => x.isMount)
+    mounts.sort((a, b) => b.amount - a.amount)
+
+    const total = mounts.map(x => x.amount).reduce((value, next) => value + next, 0)
+    if (!total) return null
+
+    const names = mounts.map(x => x.name).join(', ')
+
+    return <>{total} {names}</>
+}
 
 const UnitsComponent = observer(() => {
     const { game } = useStore()
@@ -125,21 +207,44 @@ const UnitsComponent = observer(() => {
         <UnitsTable size='small' stickyHeader>
             <TableHead>
                 <TableRow>
-                    <TableCell>Number</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Skills</TableCell>
-                    <TableCell>Items</TableCell>
+                    <TableCell className='faction'>Faction</TableCell>
+                    <TableCell className='unit-nr'>Unit Nr.</TableCell>
+                    <TableCell className='unit-name'>Name</TableCell>
+                    <TableCell className='men'>Men</TableCell>
+                    <TableCell className='money'>Money</TableCell>
+                    <TableCell className='mounts'>Mounts</TableCell>
+                    <TableCell className='items'>Items</TableCell>
+                    <TableCell className='skills'>Skills</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
-            {game.units.map((row) => (
-                <TableRow key={row.id}>
-                    <TableCell>{row.num}</TableCell>
-                    <TableCell component="th">{row.name}</TableCell>
-                    <TableCell>{row.skills.all.map(x => `${x.code} ${x.level} (${x.days})`).join(', ')}</TableCell>
-                    <TableCell>{row.inventory.balance.all.map(x => `${x.amount} ${x.code}`).join(', ')}</TableCell>
-                </TableRow>
-            ))}
+            {game.units.map((unit) => {
+                const rows = unit.description ? 2 : 1
+                const noBorder = rows > 1 ? 'no-border' : ''
+
+                return <React.Fragment key={unit.id}>
+                    <TableRow>
+                        <TableCell rowSpan={rows} className='faction'>{unit.faction ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
+                        <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
+                        <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
+                        <TableCell className={`men ${noBorder}`}>
+                            <UnitMen items={unit.inventory.items} />
+                        </TableCell>
+                        <TableCell className={`money ${noBorder}`}>{unit.money ? unit.money : null}</TableCell>
+                        <TableCell className={`mounts ${noBorder}`}>
+                            <UnitMounts items={unit.inventory.items} />
+                        </TableCell>
+                        <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isMan && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+                        <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+                    </TableRow>
+                    { rows > 1 && <TableRow>
+                        <TableCell className='unit-nr'></TableCell>
+                        <TableCell colSpan={6} className='description'>
+                            {unit.description}
+                        </TableCell>
+                    </TableRow> }
+                </React.Fragment>
+            })}
             </TableBody>
         </UnitsTable>
     </UnitsContainer>

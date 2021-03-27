@@ -1,6 +1,4 @@
-import { Region } from './region';
-import { Unit } from "./unit";
-
+import { Region, Unit } from "./types";
 
 export class Structure {
     constructor(public readonly region: Region) {

@@ -13,6 +13,8 @@ export class Ruleset {
     readonly items: List<Readonly<ItemInfo>> = new List();
     readonly terrain: List<Readonly<TerrainInfo>> = new List();
 
+    money: Readonly<ItemInfo>
+
     getSkill(nameOrCode: string) {
         let skill = this.skills.get(nameOrCode)
 
@@ -65,6 +67,13 @@ export class Ruleset {
         this.loadSkills(data.skills)
         this.loadItems(data.items)
         this.loadTerrain(data.terrain)
+
+        for (const item of this.items.all) {
+            if (item.category === 'money') {
+                this.money = item
+                break
+            }
+        }
     }
 
     private loadSkills(skills: SkillDataMap) {

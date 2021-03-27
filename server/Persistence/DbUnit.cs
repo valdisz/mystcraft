@@ -20,7 +20,6 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public long? FactionId { get; set; }
 
-        [GraphQLIgnore]
         public int Sequence { get; set; }
 
         public int Number { get; set; }

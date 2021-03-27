@@ -6,6 +6,26 @@ query GetSingleGame($gameId: ID!) {
   }
 }
 
+query GetTurnDetails($turnId: ID!) {
+  node(id: $turnId) {
+    ... on Turn {
+      ...TurnDetails
+    }
+  }
+}
+
+fragment TurnDetails on Turn {
+  id
+  number
+  month
+  year
+  factions {
+    id
+    name
+    number
+  }
+}
+
 fragment GameOptions on GameOptions {
   map {
     label

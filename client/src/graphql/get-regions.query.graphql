@@ -95,6 +95,8 @@ fragment Sailors on DbSailors {
 }
 
 fragment Unit on Unit {
+  id
+  sequence
   canStudy {
     ...Skill
   }
@@ -109,7 +111,6 @@ fragment Unit on Unit {
     ...Faction
   }
   flags
-  id
   items {
     ...Item
   }

@@ -190,6 +190,7 @@ export type Unit = Node & {
   onGuard: Scalars['Boolean'];
   readyItem?: Maybe<Item>;
   region?: Maybe<Region>;
+  sequence: Scalars['Int'];
   skills?: Maybe<Array<Maybe<Skill>>>;
   weight?: Maybe<Scalars['Int']>;
 };
@@ -659,7 +660,7 @@ export type LoadFragment = Pick<DbTransportationLoad, 'used' | 'max'>;
 export type SailorsFragment = Pick<DbSailors, 'current' | 'required'>;
 
 export type UnitFragment = (
-  Pick<Unit, 'description' | 'flags' | 'id' | 'name' | 'number' | 'onGuard' | 'weight'>
+  Pick<Unit, 'id' | 'sequence' | 'description' | 'flags' | 'name' | 'number' | 'onGuard' | 'weight'>
   & { canStudy?: Maybe<Array<Maybe<SkillFragment>>>, capacity?: Maybe<CapacityFragment>, combatSpell?: Maybe<SkillFragment>, faction?: Maybe<FactionFragment>, items: Array<Maybe<ItemFragment>>, readyItem?: Maybe<ItemFragment>, skills?: Maybe<Array<Maybe<SkillFragment>>> }
 );
 
@@ -686,6 +687,18 @@ export type GetSingleGameQueryVariables = Exact<{
 
 
 export type GetSingleGameQuery = { node?: Maybe<SingleGameFragment> };
+
+export type GetTurnDetailsQueryVariables = Exact<{
+  turnId: Scalars['ID'];
+}>;
+
+
+export type GetTurnDetailsQuery = { node?: Maybe<TurnDetailsFragment> };
+
+export type TurnDetailsFragment = (
+  Pick<Turn, 'id' | 'number' | 'month' | 'year'>
+  & { factions?: Maybe<Array<Maybe<Pick<Faction, 'id' | 'name' | 'number'>>>> }
+);
 
 export type GameOptionsFragment = { map?: Maybe<Array<Maybe<Pick<MapLevel, 'label' | 'level' | 'width' | 'height'>>>> };
 
@@ -897,6 +910,8 @@ export const Faction = gql`
     `;
 export const Unit = gql`
     fragment Unit on Unit {
+  id
+  sequence
   canStudy {
     ...Skill
   }
@@ -911,7 +926,6 @@ export const Unit = gql`
     ...Faction
   }
   flags
-  id
   items {
     ...Item
   }
@@ -1020,6 +1034,19 @@ ${Item}
 ${Exit}
 ${Unit}
 ${Structure}`;
+export const TurnDetails = gql`
+    fragment TurnDetails on Turn {
+  id
+  number
+  month
+  year
+  factions {
+    id
+    name
+    number
+  }
+}
+    `;
 export const GameOptions = gql`
     fragment GameOptions on GameOptions {
   map {
@@ -1221,6 +1248,15 @@ export const GetSingleGame = gql`
   }
 }
     ${SingleGame}`;
+export const GetTurnDetails = gql`
+    query GetTurnDetails($turnId: ID!) {
+  node(id: $turnId) {
+    ... on Turn {
+      ...TurnDetails
+    }
+  }
+}
+    ${TurnDetails}`;
 export const GetUniversity = gql`
     query GetUniversity($gameId: ID!) {
   node(id: $gameId) {
