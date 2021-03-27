@@ -300,6 +300,26 @@ const RegionComponent = observer(() => {
     return <RegionContainer>
         <RegionBody>
             <h4>{region.province.name}</h4>
+
+            <div>
+                {region.terrain.code} ({region.coords.x},{region.coords.y}{region.coords.z !== 1 ? `,${region.coords.z}` : ''})
+                {' '}{region.population.amount} {region.population.race.getName(region.population.amount)}
+            </div>
+
+            <h4>Products</h4>
+            { region.products.all.map(p => <div key={p.code}>
+                {p.amount} {p.name}
+            </div>)}
+
+            <h4>Wanted</h4>
+            { region.wanted.all.map(p => <div key={p.code}>
+                {p.amount} {p.name} for ${p.price}
+            </div>)}
+
+            <h4>For sale</h4>
+            { region.forSale.all.map(p => <div key={p.code}>
+                {p.amount} {p.name} for ${p.price}
+            </div>)}
         </RegionBody>
     </RegionContainer>
 })
