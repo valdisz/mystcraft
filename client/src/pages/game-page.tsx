@@ -292,6 +292,7 @@ const RegionContainer = styled.div`
 const RegionBody = styled.div`
     min-height: 0;
     margin: 1rem;
+    font-family: Fira Code, monospace;
 `
 
 const RegionComponent = observer(() => {
