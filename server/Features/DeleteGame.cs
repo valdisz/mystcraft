@@ -32,6 +32,7 @@ namespace advisor.Features
                     .ToListAsync();
 
                 foreach (var turnId in turns) {
+                    await DeleteFromTurnAsync<DbStat>(turnId);
                     await DeleteFromTurnAsync<DbStudyPlan>(turnId);
                     await DeleteFromTurnAsync<DbEvent>(turnId);
                     await DeleteFromTurnAsync<DbUnit>(turnId);
