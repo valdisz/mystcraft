@@ -1,3 +1,4 @@
+import ClipboardJS from 'clipboard';
 import * as React from 'react'
 
 export function joinClasses(...classes: string[]) {
@@ -18,4 +19,18 @@ export function useCallbackRef<T>(initialValue: null | T | (() => T) = null): [ 
     const callback = React.useCallback(value => setRef(value), [ ])
 
     return [ ref, callback ]
+}
+
+export function useCopy() {
+    const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
+
+    React.useEffect(() => {
+        if (!ref) return
+
+        const clip = new ClipboardJS(ref)
+
+        return () => clip.destroy()
+    }, [ ref ])
+
+    return setRef
 }

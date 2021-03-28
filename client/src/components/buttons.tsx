@@ -1,8 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Button, ButtonProps } from '@material-ui/core'
-import ClipboardJS from 'clipboard'
-import { useCallbackRef } from '../lib'
+import { useCopy } from '../lib'
 
 export const XsButton = styled(Button).attrs({
     size: 'small'
@@ -18,15 +17,6 @@ export interface CopyButtonProps extends ButtonProps {
 }
 
 export function XsCopyButton({ text, ...props }: CopyButtonProps) {
-    const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
-
-    React.useEffect(() => {
-        if (!ref) return
-
-        const clip = new ClipboardJS(ref)
-
-        return () => clip.destroy()
-    }, [ ref ])
-
-    return <XsButton {...props as any} ref={setRef as any} data-clipboard-text={text} />
+    const copy = useCopy()
+    return <XsButton {...props as any} ref={copy} data-clipboard-text={text} />
 }
