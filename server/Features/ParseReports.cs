@@ -42,92 +42,145 @@ namespace advisor.Features
             UnitsDic units = new UnitsDic();
             StructuresDic structures = new StructuresDic();
 
-            var turn = await db.Turns
-                .AsSplitQuery()
-                .Include(x => x.Regions)
-                .Include(x => x.Factions)
-                .Include(x => x.Events)
-                .Include(x => x.Structures)
-                .Include(x => x.Units)
-                .SingleOrDefaultAsync(x => x.PlayerId == request.PlayerId && x.Number == request.EarliestTurn);
+            var turns = await db.Turns
+                .Where(x => x.PlayerId == request.PlayerId)
+                .OrderBy(x => x.Number)
+                .Select(x => new { x.Id, x.Number })
+                .ToListAsync();
 
-            if (turn == null) {
-                // when llading prev turn data, do not include ships and units as their location is transient
-                turn = await db.Turns
-                    .AsNoTracking()
-                    .AsSplitQuery()
-                    .Include(x => x.Regions)
-                    .Include(x => x.Factions)
-                    .Include(x => x.Events)
-                    .Include(x => x.Structures.Where(s => s.Number <= GameConsts.MAX_BUILDING_NUMBER))
-                    .Where(x => x.Number < request.EarliestTurn)
-                    .OrderByDescending(x => x.Number)
-                    .FirstOrDefaultAsync();
+            var lastTurnNumber = turns.Last().Number;
 
-                if (turn != null) {
-                    regions = turn.Regions.ToDictionary(k => k.UID, v => mapper.Map<DbRegion>(v));
+            var startingTurnIndex = turns.FindIndex(x => x.Number == request.EarliestTurn);
+            var startingTurn = turns[startingTurnIndex];
 
-                    structures = regions.Values
-                        .SelectMany(x => x.Structures)
-                        .ToDictionary(x => x.UID);
+            // (re)loading turn
+            var isLoaded = (await db.Regions.CountAsync(x => x.TurnId == startingTurn.Id)) > 0;
+            if (isLoaded) {
+                var turn = await GetTurnAsync(startingTurn.Id);
 
-                    factions = turn.Factions.ToDictionary(k => k.Number, v => mapper.Map<DbFaction>(v));
-                }
-            }
-            else {
                 regions = turn.Regions.ToDictionary(k => k.UID);
                 structures = turn.Structures.ToDictionary(x => x.UID);
                 factions = turn.Factions.ToDictionary(k => k.Number);
                 units = turn.Units.ToDictionary(x => x.Number);
             }
+            else if (startingTurnIndex > 0) {
+                startingTurnIndex--;
+                startingTurn = turns[startingTurnIndex];
 
-            var turns = await db.Turns
-                .Where(x => x.PlayerId == request.PlayerId && x.Number >= request.EarliestTurn)
-                .OrderBy(x => x.Number)
-                .Select(x => new { x.Id, x.Number })
-                .ToListAsync();
-            var lastTurnNumber = turns.Last().Number;
+                if (startingTurn != null) {
+                    var turn = await GetTurnAsync(startingTurn.Id, track: false, addUnits: false, addEvents: false);
+
+                    foreach (var reg in turn.Regions.Select(x => mapper.Map<DbRegion>(x))) {
+                        foreach (var str in reg.Structures.ToList()) {
+                            if (str.Number > GameConsts.MAX_BUILDING_NUMBER) {
+                                reg.Structures.Remove(str);
+                                continue;
+                            }
+
+                            str.Units.Clear();
+                            structures.Add(str.UID, str);
+                        }
+
+                        reg.Units.Clear();
+                        regions.Add(reg.UID, reg);
+                    }
+
+                    foreach (var f in turn.Factions.Select(x => mapper.Map<DbFaction>(x))) {
+                        f.Units.Clear();
+                        f.Events.Clear();
+                        f.Stats.Clear();
+
+                        factions.Add(f.Number, f);
+                    }
+                }
+            }
 
             var player = await db.Players.FindAsync(request.PlayerId);
 
-            for (var i = 0; i < turns.Count; i++) {
+            for (var i = startingTurnIndex; i < turns.Count; i++) {
                 var t = turns[i];
                 var report = await MergeReportsAsync(db, request.PlayerId, player.FactionNumber, t.Id);
 
                 if (request.Map != null) {
-                    report.Merge(request.Map, addUnits: false);
+                    report.MergeMap(request.Map);
                 }
-
-                UpdateTurn(db, report, t.Number, regions, factions, structures, units);
 
                 // update player password if latest turn or newer
                 if (t.Number >= lastTurnNumber && report.OrdersTemplate?.Password != null) {
                     player.Password = report.OrdersTemplate.Password;
                 }
 
-                await InsertFactionsAsync(db, turn.Id, factions.Values);
-                await InsertRegionsAsync(db, turn.Id, regions.Values);
+                UpdateTurn(db, report, t.Number, regions, factions, structures, units);
+
+                await InsertFactionsAsync(db, t.Id, factions.Values);
+                await InsertRegionsAsync(db, t.Id, regions.Values);
 
                 await db.SaveChangesAsync();
 
-                if (i < (turns.Count - 1)) {
-                    foreach (var ( key, value ) in regions) {
-                        regions[key] = mapper.Map<DbRegion>(value);
+                if ((turns.Count - 1) > i) {
+                    var nextTurn = await GetTurnAsync(turns[i + 1].Id);
+
+                    var nextRegions = nextTurn.Regions.ToDictionary(k => k.UID);
+                    var nextStructures = nextTurn.Structures.ToDictionary(x => x.UID);
+                    var nextFactions = nextTurn.Factions.ToDictionary(k => k.Number);
+                    var nextUnits = nextTurn.Units.ToDictionary(x => x.Number);
+
+                    var missingRegions = regions.Keys.Except(nextRegions.Keys).Select(x => mapper.Map<DbRegion>(regions[x]));
+                    foreach (var reg in missingRegions) {
+                        foreach (var str in reg.Structures.ToList()) {
+                            if (str.Number > GameConsts.MAX_BUILDING_NUMBER) {
+                                reg.Structures.Remove(str);
+                                continue;
+                            }
+
+                            str.Units.Clear();
+                            nextStructures.Add(str.UID, str);
+                        }
+
+                        reg.Units.Clear();
+                        nextRegions.Add(reg.UID, reg);
                     }
 
-                    foreach (var ( key, value ) in factions) {
-                        factions[key] = mapper.Map<DbFaction>(value);
+                    var missingFactions = factions.Keys.Except(nextFactions.Keys).Select(x => mapper.Map<DbFaction>(factions[x]));
+                    foreach (var f in missingFactions) {
+                        f.Units.Clear();
+                        f.Events.Clear();
+                        f.Stats.Clear();
+
+                        nextFactions.Add(f.Number, f);
                     }
 
-                    units.Clear();
-
-                    structures = regions.Values
-                        .SelectMany(x => x.Structures)
-                        .ToDictionary(x => x.UID);
+                    regions = nextRegions;
+                    structures = nextStructures;
+                    factions = nextFactions;
+                    units = nextUnits;
                 }
             }
 
             return Unit.Value;
+        }
+
+        private Task<DbTurn> GetTurnAsync(long turnId, bool track = true, bool addUnits = true, bool addEvents = true) {
+            var turns = db.Turns.AsSplitQuery();
+
+            if (!track) {
+                turns = turns.AsNoTracking();
+            }
+
+            turns = turns
+                .Include(x => x.Regions)
+                .Include(x => x.Factions)
+                .Include(x => x.Structures);
+
+            if (addUnits) {
+                turns = turns.Include(x => x.Units);
+            }
+
+            if (addEvents) {
+                turns = turns.Include(x => x.Events);
+            }
+
+            return turns.SingleOrDefaultAsync(x => x.Id == turnId);
         }
 
         private static async Task<JReport> MergeReportsAsync(Database db, long playerId, int? playerFactionNumber, long turnId) {

@@ -31,12 +31,19 @@ namespace advisor.Model {
         public List<JOtherReport> OtherReports { get; set; } = new ();
 
         /// Merge and update current report with other report data
-        public void Merge(JReport report, bool addStructures = true, bool addUnits = true) {
-            if (Date.Year != report.Date.Year || Date.Month != report.Date.Month) {
-                throw new InvalidOperationException();
-            }
+        public void MergeMap(JReport report) {
+            report.Date = null;
+            report.Faction = null;
 
-            if (report.Faction != null) {
+            Merge(report, addStructures: true, addUnits: false);
+        }
+
+        public void Merge(JReport report, bool addStructures = true, bool addUnits = true) {
+            if (report.Date != null && report.Faction != null) {
+                if (Date.Year != report.Date.Year || Date.Month != report.Date.Month) {
+                    throw new InvalidOperationException();
+                }
+
                 var other = new JOtherReport {
                     Faction = report.Faction,
                     FactionStatus = report.FactionStatus,
@@ -47,6 +54,7 @@ namespace advisor.Model {
                     Attitudes = report.Attitudes,
                     UnclaimedSilver = report.UnclaimedSilver
                 };
+
                 OtherReports.Add(other);
             }
 

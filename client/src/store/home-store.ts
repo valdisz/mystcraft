@@ -53,13 +53,24 @@ export class HomeStore {
 
     @observable uploading = false
 
-    uploadGameId: string
-    triggerUploadReport = (gameId: string) => {
-        this.uploadGameId = gameId
+    uploadPlayerId: string
+    uploadAction: 'report' | 'map' = 'report'
+
+    triggerUploadReport = (playerId: string) => {
+        this.uploadPlayerId = playerId
+        this.uploadAction = 'report'
+
         this.fileUpload?.click()
     }
 
-    @action uploadReport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    triggerImportMap = (playerId: string) => {
+        this.uploadPlayerId = playerId
+        this.uploadAction = 'map'
+
+        this.fileUpload?.click()
+    }
+
+    @action uploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
         this.uploading = true
 
         const reports = new FormData()
@@ -67,7 +78,7 @@ export class HomeStore {
             reports.append('report', f)
         }
 
-        await fetch(`/api/${this.uploadGameId}/report`, {
+        await fetch(`/api/${this.uploadPlayerId}/${this.uploadAction}`, {
             method: 'POSt',
             body: reports,
             credentials: 'include'

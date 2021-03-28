@@ -23,15 +23,17 @@ interface GameItemProps {
 
 interface GameActionsProps {
     disabled: boolean
-    onUpload: () => void
+    onUploadReport: () => void
+    onUploadMap: () => void
     onDelete: () => void
 }
 
-function GameActions({ disabled, onUpload, onDelete }: GameActionsProps) {
+function GameActions({ disabled, onUploadReport, onDelete, onUploadMap }: GameActionsProps) {
     return <SplitButton disabled={disabled} color='default' size='small' variant='outlined'
-        onClick={onUpload}
+        onClick={onUploadReport}
         actions={[
-            { content: 'Delete', onAction: onDelete }
+            { content: 'Import map', onAction: onUploadMap },
+            { content: 'Delete', onAction: onDelete },
         ]}>
             Load turn
     </SplitButton>
@@ -117,7 +119,8 @@ function GameItem({ game }: GameItemProps) {
                         </Box> }
                         <GameActions
                             disabled={home.uploading}
-                            onUpload={() => home.triggerUploadReport(game.myPlayer.id)}
+                            onUploadReport={() => home.triggerUploadReport(game.myPlayer.id)}
+                            onUploadMap={() => home.triggerImportMap(game.myPlayer.id)}
                             onDelete={() => home.deleteGame(game.id)} />
                     </>
                     : <Button color='primary' size='small' variant='outlined' onClick={() => home.joinGame(game.id)}>Join</Button> }
@@ -185,7 +188,7 @@ export function HomePage() {
         <Container>
             <Card>
                 <CardHeader title='Games' action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>} />
-                <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadReport} />
+                <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
                 <List component='nav' dense>
                     <Observer>
                         {() => <>{ home.games.length
