@@ -269,7 +269,7 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
 			"sourceSize": {"w":49,"h":43}
 		},
-		"wasteland.png":
+		"volcano.png":
 		{
 			"frame": {"x":147,"y":215,"w":49,"h":43},
 			"rotated": false,
@@ -277,9 +277,17 @@
 			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
 			"sourceSize": {"w":49,"h":43}
 		},
-		"wasteland_winter.png":
+		"wasteland.png":
 		{
 			"frame": {"x":196,"y":215,"w":49,"h":43},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
+			"sourceSize": {"w":49,"h":43}
+		},
+		"wasteland_winter.png":
+		{
+			"frame": {"x":245,"y":215,"w":49,"h":43},
 			"rotated": false,
 			"trimmed": false,
 			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},

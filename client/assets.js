@@ -1,3 +1,5 @@
+// required ImageMagic installed globaly
+
 const spritesheet = require('spritesheet-js')
 
 const options = {
