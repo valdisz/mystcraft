@@ -17,7 +17,7 @@ export interface CopyButtonProps extends ButtonProps {
     text: string
 }
 
-export function CopyButton({ text, ...props }: CopyButtonProps) {
+export function XsCopyButton({ text, ...props }: CopyButtonProps) {
     const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
 
     React.useEffect(() => {

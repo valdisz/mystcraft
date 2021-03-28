@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { SkillCell } from './skill-cell'
 import { Student, StudyLocation } from '../store'
 import { Box, ButtonGroup, Tooltip } from '@material-ui/core'
-import { CopyButton, XsButton } from './buttons'
+import { XsCopyButton, XsButton } from './buttons'
 import WarningIcon from '@material-ui/icons/Warning'
 import ErrorIcon from '@material-ui/icons/Error'
 import { orange, red } from '@material-ui/core/colors'
@@ -79,7 +79,7 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
             }
         </td>
         <td className='orders'>
-            { student.ordersShort && <CopyButton fullWidth color='primary' variant='contained' text={student.ordersFull} title={student.ordersFull}>{student.ordersShort}</CopyButton> }
+            { student.ordersShort && <XsCopyButton fullWidth color='primary' variant='contained' text={student.ordersFull} title={student.ordersFull}>{student.ordersShort}</XsCopyButton> }
         </td>
         { student.skillsGroups.map((group, i) => (
             <React.Fragment key={i}>
