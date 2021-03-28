@@ -21,10 +21,8 @@ namespace advisor {
 
             var path = context.Request.Path;
             if (path.StartsWithSegments("/graphql")) return next(context);
-            if (path.StartsWithSegments("/report")) return next(context);
-            if (path.StartsWithSegments("/login")) return next(context);
-            if (path.StartsWithSegments("/logout")) return next(context);
-            if (path.StartsWithSegments("/register")) return next(context);
+            if (path.StartsWithSegments("/api")) return next(context);
+            if (path.StartsWithSegments("/account")) return next(context);
             if (path.StartsWithSegments("/hangfire")) return next(context);
 
             if (!path.HasValue || !IsFile(path)) {

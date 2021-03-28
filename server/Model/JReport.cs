@@ -31,21 +31,24 @@ namespace advisor.Model {
         public List<JOtherReport> OtherReports { get; set; } = new ();
 
         /// Merge and update current report with other report data
-        public void Merge(JReport report) {
+        public void Merge(JReport report, bool addStructures = true, bool addUnits = true) {
             if (Date.Year != report.Date.Year || Date.Month != report.Date.Month) {
                 throw new InvalidOperationException();
             }
 
-            var other = new JOtherReport {
-                Faction = report.Faction,
-                FactionStatus = report.FactionStatus,
-                Errors = report.Errors,
-                Events = report.Events,
-                SkillReports = report.SkillReports,
-                ItemReports = report.ItemReports,
-                Attitudes = report.Attitudes,
-                UnclaimedSilver = report.UnclaimedSilver
-            };
+            if (report.Faction != null) {
+                var other = new JOtherReport {
+                    Faction = report.Faction,
+                    FactionStatus = report.FactionStatus,
+                    Errors = report.Errors,
+                    Events = report.Events,
+                    SkillReports = report.SkillReports,
+                    ItemReports = report.ItemReports,
+                    Attitudes = report.Attitudes,
+                    UnclaimedSilver = report.UnclaimedSilver
+                };
+                OtherReports.Add(other);
+            }
 
             Dictionary<string, JRegion> regs = Regions.ToDictionary(x => x.Coords.ToString());
             foreach (var otherReg in report.Regions) {
@@ -62,17 +65,30 @@ namespace advisor.Model {
                 var key = otherReg.Coords.ToString();
 
                 if (regs.TryGetValue(key, out var reg)) {
-                    MergeRegion(reg, otherReg);
+                    MergeRegion(reg, otherReg, addStructures, addUnits);
                 }
                 else {
+                    if (!addStructures) {
+                        otherReg.Structures.Clear();
+                    }
+
+                    if (!addUnits) {
+                        otherReg.Units.Clear();
+                        foreach (var str in otherReg.Structures) {
+                            str.Units.Clear();
+                        }
+                    }
+
                     Regions.Add(otherReg);
                     regs.Add(key, otherReg);
                 }
             }
         }
 
-        private void MergeRegion(JRegion reg, JRegion other) {
+        private void MergeRegion(JRegion reg, JRegion other, bool addStructures, bool addUnits) {
             if (other.Products.Count > reg.Products.Count) reg.Products = other.Products;
+            if (other.ForSale.Count > reg.ForSale.Count) reg.ForSale = other.ForSale;
+            if (other.Wanted.Count > reg.Wanted.Count) reg.Wanted = other.Wanted;
 
             var units = reg.Units
                 .Concat(reg.Structures.SelectMany(x => x.Units))
@@ -80,32 +96,38 @@ namespace advisor.Model {
 
             var structs = reg.Structures.ToDictionary(x => x.Structure.Number);
 
-            foreach (var otherUnit in other.Units) {
-                var key = otherUnit.Number;
-
-                if (units.TryGetValue(key, out var unit)) {
-                    MergeUnit(unit, otherUnit);
-                }
-                else {
-                    reg.Units.Add(otherUnit);
-                    units.Add(key, otherUnit);
-                }
-            }
-
-            foreach (var otherStruct in other.Structures) {
-                var str = structs[otherStruct.Structure.Number];
-
-                MergeStructure(str.Structure, otherStruct.Structure);
-
-                foreach (var otherUnit in otherStruct.Units) {
+            if (addUnits) {
+                foreach (var otherUnit in other.Units) {
                     var key = otherUnit.Number;
 
                     if (units.TryGetValue(key, out var unit)) {
                         MergeUnit(unit, otherUnit);
                     }
                     else {
-                        str.Units.Add(otherUnit);
+                        reg.Units.Add(otherUnit);
                         units.Add(key, otherUnit);
+                    }
+                }
+            }
+
+            if (addStructures) {
+                foreach (var otherStruct in other.Structures) {
+                    var str = structs[otherStruct.Structure.Number];
+
+                    MergeStructure(str.Structure, otherStruct.Structure);
+
+                    if (addUnits) {
+                        foreach (var otherUnit in otherStruct.Units) {
+                            var key = otherUnit.Number;
+
+                            if (units.TryGetValue(key, out var unit)) {
+                                MergeUnit(unit, otherUnit);
+                            }
+                            else {
+                                str.Units.Add(otherUnit);
+                                units.Add(key, otherUnit);
+                            }
+                        }
                     }
                 }
             }

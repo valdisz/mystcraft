@@ -67,7 +67,7 @@ export class HomeStore {
             reports.append('report', f)
         }
 
-        await fetch(`/report/${this.uploadGameId}`, {
+        await fetch(`/api/${this.uploadGameId}/report`, {
             method: 'POSt',
             body: reports,
             credentials: 'include'

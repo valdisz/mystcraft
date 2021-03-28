@@ -81,7 +81,7 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
             e.preventDefault()
             e.stopPropagation()
 
-            const response = await fetch(store.mode === 'sign-in' ? '/login' : '/register', {
+            const response = await fetch(store.mode === 'sign-in' ? '/account/login' : '/account/register', {
                 method: 'POST',
                 credentials: 'include',
                 body: new FormData(e.target as any)
@@ -179,7 +179,7 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                         value={store.password}
                         onChange={store.setPassword}
                     />
-                    { (store.message && <Box mt={2}>
+                    { store.message && <Box mt={2}>
                         <Alert severity={ store.severity }>{store.message}</Alert>
                     </Box> }
                     {/* <FormControlLabel

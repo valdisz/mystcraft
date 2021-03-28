@@ -12,7 +12,7 @@ namespace advisor {
     using advisor.Features;
 
     [Authorize]
-    [Route("report")]
+    [Route("api")]
     public class ReportsController : ControllerBase {
         public ReportsController(IAuthorizationService authorization,IIdSerializer relayId, IMediator mediator) {
             this.authorization = authorization;
@@ -24,7 +24,7 @@ namespace advisor {
         private readonly IIdSerializer relayId;
         private readonly IMediator mediator;
 
-        [HttpPost("{playerId}")]
+        [HttpPost("{playerId}/report")]
         public async Task<IActionResult> UploadReports([Required, FromRoute] string playerId) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (Request.Form.Files.Count == 0) return UnprocessableEntity();
@@ -44,9 +44,28 @@ namespace advisor {
             }
 
             var earliestTurn = await mediator.Send(new UploadReports(playerIdValue, reports));
-            await mediator.Send(new ParseReports(playerIdValue, earliestTurn));
-            await mediator.Send(new SetupStudyPlans(playerIdValue));
-            await mediator.Send(new CalculateFactionStats(playerIdValue, earliestTurn));
+            await mediator.Send(new ProcessTurn(playerIdValue, earliestTurn));
+
+            return Ok();
+        }
+
+        [HttpPost("{playerId}/map")]
+        public async Task<IActionResult> UploadMap([Required, FromRoute] string playerId) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (Request.Form.Files.Count == 0) return UnprocessableEntity();
+
+            var relayPlayerId = relayId.Deserialize(playerId);
+            if (relayPlayerId.TypeName != "Player") return BadRequest();
+
+            var playerIdValue = (long) relayPlayerId.Value;
+
+            if (! await authorization.AuthorizeOwnPlayer(User, playerIdValue)) return Unauthorized();
+
+            await using var stream = Request.Form.Files[0].OpenReadStream();
+            using var textReader = new StreamReader(stream);
+            string map = await textReader.ReadToEndAsync();
+
+            await mediator.Send(new ImportMap(playerIdValue, map));
 
             return Ok();
         }

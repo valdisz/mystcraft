@@ -1,4 +1,5 @@
-namespace advisor.Features {
+namespace advisor.Features
+{
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -8,7 +9,6 @@ namespace advisor.Features {
     using advisor.Persistence;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
 
     public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<int> {
 

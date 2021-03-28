@@ -1,4 +1,5 @@
-namespace advisor.Features {
+namespace advisor.Features
+{
     using System;
     using System.IO;
     using System.Linq;
@@ -17,7 +18,7 @@ namespace advisor.Features {
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
 
-    public record ParseReports(long PlayerId, int EarliestTurn) : IRequest {
+    public record ParseReports(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest {
 
     }
 
@@ -91,7 +92,13 @@ namespace advisor.Features {
 
             for (var i = 0; i < turns.Count; i++) {
                 var t = turns[i];
-                var report = await MergeReportsAsync(db, request.PlayerId, player.FactionNumber, t.Id, t.Number, regions, factions, structures, units);
+                var report = await MergeReportsAsync(db, request.PlayerId, player.FactionNumber, t.Id);
+
+                if (request.Map != null) {
+                    report.Merge(request.Map, addUnits: false);
+                }
+
+                UpdateTurn(db, report, t.Number, regions, factions, structures, units);
 
                 // update player password if latest turn or newer
                 if (t.Number >= lastTurnNumber && report.OrdersTemplate?.Password != null) {
@@ -123,8 +130,7 @@ namespace advisor.Features {
             return Unit.Value;
         }
 
-        private static async Task<JReport> MergeReportsAsync(Database db, long playerId, int? playerFactionNumber, long turnId, int turnNumber,
-            RegionDic regions, FactionsDic factions, StructuresDic structures, UnitsDic units) {
+        private static async Task<JReport> MergeReportsAsync(Database db, long playerId, int? playerFactionNumber, long turnId) {
 
             var otherReports = await db.Reports
                 .AsNoTracking()
@@ -148,6 +154,12 @@ namespace advisor.Features {
                 report.Merge(otherReport);
             }
 
+            return report;
+        }
+
+        private static void UpdateTurn(Database db, JReport report, int turnNumber,
+            RegionDic regions, FactionsDic factions, StructuresDic structures, UnitsDic units) {
+
             CreateOrUpdateFaction(factions, report.Faction);
 
             foreach (var region in report.Regions) {
@@ -156,8 +168,6 @@ namespace advisor.Features {
 
             AddEvents(factions, regions, report);
             AddRevealedRegionsFromExits(turnNumber, regions);
-
-            return report;
         }
 
         public static async Task<JReport> GetJsonReportAsync(DbReport rec) {

@@ -14,6 +14,7 @@ namespace advisor {
     using advisor.Features;
 
     [AllowAnonymous]
+    [Route("account")]
     public class AccountController : ControllerBase {
         public AccountController(Database db, AccessControl accessControl, IMediator mediator) {
             this.db = db;
@@ -25,7 +26,7 @@ namespace advisor {
         private readonly AccessControl accessControl;
         private readonly IMediator mediator;
 
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromForm] LoginModel model) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
@@ -58,7 +59,7 @@ namespace advisor {
             return NoContent();
         }
 
-        [HttpGet("/logout")]
+        [HttpGet("logout")]
         public async Task<IActionResult> LogoutAsync() {
             if (User.Identity.IsAuthenticated) {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -67,7 +68,7 @@ namespace advisor {
             return Redirect("/");
         }
 
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> RegisterAsync([FromForm] LoginModel model) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);

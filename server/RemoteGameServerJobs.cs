@@ -113,17 +113,10 @@ namespace advisor {
                 logger.LogInformation($"Saving report to database");
                 var turn = await mediator.Send(new UploadReports(f.Id, new[] { report }));
 
-                logger.LogInformation($"Parsing report");
-                await mediator.Send(new ParseReports(f.Id, turn));
-
-                logger.LogInformation($"Setting up study plans");
-                await mediator.Send(new SetupStudyPlans(f.Id));
-
-                logger.LogInformation($"Calculating statistics");
-                await mediator.Send(new CalculateFactionStats(f.Id, turn));
+                await mediator.Send(new ProcessTurn(f.Id, turn));
             }
 
-            logger.LogInformation($"Report for all factions is downloaded");
+            logger.LogInformation($"Report for all factions is downloaded and processed");
         }
     }
 }
