@@ -159,7 +159,7 @@ export class HexMap {
             this.tiles.addChild(tile)
 
             const g = new PIXI.Graphics()
-            g.lineStyle(4, 0x999999)
+            g.lineStyle(4, 0xcccccc)
             g.drawPolygon(this.layout.polygonCorners(hex))
             this.outline.addChild(g)
         }
