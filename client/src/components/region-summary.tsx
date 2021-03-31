@@ -1,7 +1,9 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Box, Typography, Button, Grid, Theme,
-    Table, TableHead, TableRow, TableCell, TableBody
+    Table, TableHead, TableRow, TableCell, TableBody,
+    Tooltip,
+    makeStyles
 } from '@material-ui/core'
 import { observer } from 'mobx-react-lite'
 import { Region } from '../store/game/types'
@@ -10,6 +12,7 @@ import { useCopy } from '../lib'
 import { Province } from '../store/game/province'
 import { TerrainInfo } from '../store/game/terrain-info'
 import { Item } from '../store/game/item'
+import { ItemInfo } from '../store/game/item-info'
 
 const SpaceBetween = styled(Grid)`
     display: flex;
@@ -96,18 +99,41 @@ const ItemMain = styled.div`
     }
 `
 
+interface ItemInfoTooltipProps {
+    info: ItemInfo
+}
+
+function ItemInfoTooltip({ info }: ItemInfoTooltipProps) {
+    return <>
+        <Typography variant='h6'>{info.getName(1)}</Typography>
+        <Typography variant='body2'>
+            {info.description}
+        </Typography>
+    </>
+}
+
 interface ItemComponentProps {
     item: Item
     className?: string
 }
 
+const useStyles = makeStyles((theme) => ({
+    wideTooltip: {
+      maxWidth: 500,
+    },
+}))
+
 function ItemComponent({ item, className }: ItemComponentProps) {
+    const classes = useStyles()
+
     return <ItemMain className={className}>
         <div className="amount">
             {item.amount}
         </div>
         <div className="name">
-            {item.name}
+            <Tooltip title={<ItemInfoTooltip info={item.info} />} classes={{ tooltip: classes.wideTooltip }}>
+                <span>{item.name}</span>
+            </Tooltip>
         </div>
         {item.price &&
         <div className="price">
