@@ -82,7 +82,7 @@
 
                 var games = await db.Games.ToListAsync();
                 foreach (var game in games) {
-                    game.Ruleset = File.ReadAllText("/home/valdis/projects/advisor/client/src/store/game/ruleset.yaml");
+                    game.Ruleset = File.ReadAllText("data/ruleset.yaml");
                     game.Options = JsonConvert.SerializeObject(new GameOptions {
                             // Map =  {
                             //     new MapLevel("nexus",      0, 1,  1),
@@ -91,8 +91,8 @@
                             //     new MapLevel("underdeep",  3, 28, 14)
                             // }
                             Map =  {
-                                new MapLevel("nexus",      0, 1,  1),
-                                new MapLevel("surface",    1, 72, 96),
+                                new MapLevel("nexus",   0, 1,  1),
+                                new MapLevel("surface", 1, 72, 96),
                             }
                     });
                 }
