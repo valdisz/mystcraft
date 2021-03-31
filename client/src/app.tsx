@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createGlobalStyle } from 'styled-components'
+import { createGlobalStyle, ThemeProvider as StyledThemeProvider } from 'styled-components'
 import { createMuiTheme, ThemeProvider, CssBaseline } from '@material-ui/core'
 import { StoreProvider } from './store'
 import { Routes } from './routes'
@@ -12,14 +12,30 @@ html, body, #app-host {
 }
 `
 
-const theme = createMuiTheme({})
+const heading = {
+    fontFamily: 'Almendra, serif'
+}
+
+const theme = createMuiTheme({
+    typography: {
+        fontFamily: 'Fira Code, monospace',
+        h1: heading,
+        h2: heading,
+        h3: heading,
+        h4: heading,
+        h5: heading,
+        h6: heading
+    }
+})
 
 export function App() {
     return <StoreProvider>
         <ThemeProvider theme={theme}>
-            <CssBaseline />
-            <GlobalStyles />
-            <Routes />
+            <StyledThemeProvider theme={theme}>
+                <CssBaseline />
+                <GlobalStyles />
+                <Routes />
+            </StyledThemeProvider>
         </ThemeProvider>
     </StoreProvider>
 }

@@ -10,7 +10,9 @@
     "codegen": "graphql-codegen --config codegen.yaml",
     "terrain:advisor": "spritesheet-js -n terrain-advisor -p assets -f pixi.js src/assets/terrain/advisor/*.png",
     "terrain:fantasy": "spritesheet-js -n terrain-fantasy -p assets -f pixi.js src/assets/terrain/fantasy/*.png",
-    "assets": "yarn run terrain:advisor && yarn run terrain:fantasy"
+    "assets": "yarn run terrain:advisor && yarn run terrain:fantasy",
+    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
+    "coverage": "nyc -r text -e .ts -x \"src/*.test.ts\" yarn run test"
   },
   "dependencies": {
     "@material-ui/core": "^4.0.0",
@@ -42,6 +44,7 @@
     "@graphql-codegen/typescript": "^1.17.9",
     "@graphql-codegen/typescript-document-nodes": "^1.17.8",
     "@graphql-codegen/typescript-operations": "^1.17.8",
+    "@types/jasmine": "^3.6.9",
     "@types/lodash.throttle": "^4.1.6",
     "@types/parsimmon": "^1.10.6",
     "@types/react": "^16.8.6 || ^17.0.0",
@@ -52,10 +55,13 @@
     "graphql": "15.5.0",
     "graphql-cli": "^4.0.0",
     "http-proxy-middleware": "^1.0.6",
+    "jasmine": "^3.7.0",
+    "nyc": "^15.1.0",
     "parcel-bundler": "^1.12.4",
     "parcel-plugin-static-files-copy": "^2.5.1",
     "spritesheet-js": "^1.2.6",
-    "typescript": "^4.0.2"
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
   },
   "resolutions": {
     "graphql": "15.5.0"

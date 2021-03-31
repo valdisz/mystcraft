@@ -6,6 +6,25 @@ import { Transfer } from "./transfer";
 import { Income } from "./income";
 import { TransferOutcome } from "./transfer-outcome";
 
+export class Book {
+
+}
+
+export class Tx {
+    order: number
+    // stage: 'initial' | 'give' | 'exchange' | 'tax' | 'cast' | 'sell' | 'buy' | 'move' | 'produce' | 'build' | 'entertain' | 'work' | 'transport'
+    credit: Account
+    debit: Account
+    item: Item
+}
+
+export class Inventory2 {
+    readonly items = new List<Item>()
+}
+
+export class Account {
+
+}
 
 export class Inventory {
     constructor(public readonly owner: Unit) {
@@ -30,13 +49,10 @@ export class Inventory {
         const item = this.balance.get(code);
         const src = this.items.get(code);
 
-        if (!item)
-            return TransferOutcome.NoItem;
-        if (amount && item.amount < amount)
-            return TransferOutcome.NotEnaugh;
+        if (!item) return TransferOutcome.NoItem;
+        if (amount && item.amount < amount) return TransferOutcome.NotEnaugh;
 
-        if (!amount)
-            amount = item.amount;
+        if (!amount) amount = item.amount;
         if (!src || src.amount < amount) {
             // todo: rewrite incoming transfers
         }

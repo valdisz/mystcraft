@@ -83,6 +83,8 @@ export class HexMap {
     readonly viewport: Viewport
     readonly layout: Layout
 
+    turnNumber: number
+
     onRegionSelected: (col: number, row: number) => void
 
     onClick = (e: MouseEvent) => {
@@ -155,7 +157,12 @@ export class HexMap {
             const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain.code))
             tile.anchor.set(0.5)
             tile.position = p
-            // tile.tint = 0xbbbbbb // darken region when no region report
+            if (!region.isVisible) {
+                tile.tint = region.explored
+                    ? 0xb0b0b0 // darken region when no region report
+                    : 0x707070 // darken region more when not explored
+
+            }
             this.tiles.addChild(tile)
 
             const g = new PIXI.Graphics()

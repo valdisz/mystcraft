@@ -6,11 +6,12 @@ import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, T
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
-import { Region } from "../store/game/region"
+import { Region } from "../store/game/types"
 import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { List } from '../store/game/list'
 import { Item } from '../store/game/item'
+import { RegionSummary } from '../components/region-summary'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any
@@ -30,7 +31,7 @@ const GameGrid = styled.div`
     min-height: 0;
     display: grid;
 
-    grid-template-columns: 1fr 4fr 1fr;
+    grid-template-columns: minmax(200px, 1fr) 4fr minmax(300px, 1fr);
     grid-template-rows: 2fr 1fr;
     grid-template-areas:
         "structures map details"
@@ -98,6 +99,7 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
             .load()
             .then(() => {
                 const { x, y } = game.world.levels[1].regions[0].coords
+                gameMap.turnNumber = game.turn.number
                 gameMap.centerAt(x, y)
                 gameMap.update()
             })
@@ -181,7 +183,7 @@ const UnitsTable = styled(Table)`
 `
 
 function UnitMen({ items }: { items: List<Item> }) {
-    const men = items.all.filter(x => x.isMan)
+    const men = items.all.filter(x => x.isManLike)
     men.sort((a, b) => b.amount - a.amount)
     const total = men.map(x => x.amount).reduce((value, next) => value + next, 0)
     const names = men.map(x => x.name).join(', ')
@@ -234,7 +236,7 @@ const UnitsComponent = observer(() => {
                         <TableCell className={`mounts ${noBorder}`}>
                             <UnitMounts items={unit.inventory.items} />
                         </TableCell>
-                        <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isMan && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+                        <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
                         <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
                     </TableRow>
                     { rows > 1 && <TableRow>
@@ -299,7 +301,8 @@ const RegionComponent = observer(() => {
     const { game: { region } } = useStore()
 
     return <RegionContainer>
-        <RegionBody>
+        <RegionSummary region={region} />
+        {/* <RegionBody>
             <h4>{region.province.name}</h4>
 
             <div>
@@ -321,7 +324,7 @@ const RegionComponent = observer(() => {
             { region.forSale.all.map(p => <div key={p.code}>
                 {p.amount} {p.name} for ${p.price}
             </div>)}
-        </RegionBody>
+        </RegionBody> */}
     </RegionContainer>
 })
 

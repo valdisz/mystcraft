@@ -9,6 +9,7 @@ import { Population } from "./population"
 import { Ruleset } from "./ruleset"
 import { Wages } from "./wages"
 import { Structure, Unit, Troops, Factions } from './types'
+import { SettlementSize } from './settlement-size'
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {
@@ -17,9 +18,16 @@ export class Region {
 
     readonly key: string;
 
+    explored: boolean
+    updatedAtTurn: number
+
+    get isVisible() {
+        return this.units.length > 0 || this.structures.some(x => x.units.length > 0)
+    }
+
     province: Province;
     terrain: TerrainInfo;
-    population: Population | null;
+    population: Item | null;
     settlement: Settlement | null;
     tax: number;
     wages: Wages;
@@ -33,17 +41,21 @@ export class Region {
     readonly structures: Structure[] = [];
 
     static from(src: RegionFragment, factions: Factions, ruleset: Ruleset) {
-        const reg = new Region(src.id, {
-            x: src.x,
-            y: src.y,
-            z: src.z,
-            label: src.label
-        });
+        const reg = new Region(src.id, new Coords(src.x, src.y, src.z, src.label));
 
-        reg.population = {
-            amount: src.population,
-            race: ruleset.getItem(src.race)
-        };
+        reg.explored = src.explored
+        reg.updatedAtTurn = src.updatedAtTurn
+
+        if (src.race) {
+            reg.population = ruleset.getItem(src.race).create(src.population ?? 0)
+        }
+
+        if (src.settlement) {
+            reg.settlement = {
+                name: src.settlement.name,
+                size: src.settlement.size.toLowerCase() as SettlementSize
+            }
+        }
 
         reg.terrain = ruleset.getTerrain(src.terrain);
 

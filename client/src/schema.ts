@@ -138,6 +138,7 @@ export type TurnUnitsArgs = {
 export type Region = Node & {
   entertainment: Scalars['Int'];
   exits?: Maybe<Array<Maybe<Exit>>>;
+  explored: Scalars['Boolean'];
   forSale?: Maybe<Array<Maybe<TradableItem>>>;
   id: Scalars['ID'];
   label: Scalars['String'];
@@ -644,7 +645,7 @@ export type GetRegionsQuery = { node?: Maybe<{ regions?: Maybe<(
     )> }> };
 
 export type RegionFragment = (
-  Pick<Region, 'id' | 'updatedAtTurn' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
+  Pick<Region, 'id' | 'updatedAtTurn' | 'explored' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
   & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, products?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>>, units?: Maybe<Array<Maybe<UnitFragment>>>, structures?: Maybe<Array<Maybe<StructureFragment>>> }
 );
 
@@ -994,6 +995,7 @@ export const Region = gql`
     fragment Region on Region {
   id
   updatedAtTurn
+  explored
   x
   y
   z

@@ -22,7 +22,7 @@ export class ItemInfo implements UniqueItem {
      * Man-like items can act on its own and form a unit.
      */
     get isManLike() {
-        return this.category === 'man' || this.hasTrait('freeMovingItem')
+        return this.category === 'man' || this.category === 'monster'
     }
 
     create(amount: number = 1): Item {

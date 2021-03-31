@@ -24,7 +24,7 @@ export class List<T extends UniqueItem> {
 
     get(code: string | UniqueItem): T {
         if (!code) return null
-        
+
         return this.items[typeof code === 'string' ? code : code.code];
     }
 

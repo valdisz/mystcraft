@@ -20,6 +20,7 @@ query GetRegions($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 1
 fragment Region on Region {
   id
   updatedAtTurn
+  explored
   x
   y
   z

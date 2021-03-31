@@ -20,4 +20,8 @@ export class TerrainInfo implements UniqueItem {
     races: ItemInfo[]
     coastalRaces: ItemInfo[]
     resources: Resource[]
+
+    get name() {
+        return this.code
+    }
 }
