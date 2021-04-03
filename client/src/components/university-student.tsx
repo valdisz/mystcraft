@@ -22,7 +22,7 @@ const UnitName = styled.div<{ teaching: boolean }>`
     font-weight: ${p => p.teaching ? 'bold' : 'normal '};
 `
 
-const StudentCount = styled.em`
+const AdditionalInformation = styled.em`
     font-size: 80%;
 `
 
@@ -34,7 +34,10 @@ const Unit = observer(({ student }: StudentProps) => {
     return <UnitElement>
         <UnitName teaching={!!student.teach.length}>{student.name} ({student.number})</UnitName>
         { student.teach.length > 0 &&
-            <StudentCount>{student.teach.length} of {student.maxStudents} students</StudentCount>
+            <AdditionalInformation>{student.teach.length} of {student.maxStudents} students</AdditionalInformation>
+        }
+        { student.teacher &&
+            <AdditionalInformation>Taught by {student.teacher.name} ({student.teacher.number})</AdditionalInformation>
         }
     </UnitElement>
 })
