@@ -229,6 +229,9 @@ namespace advisor.Persistence {
                         b.Property(x => x.Size).HasConversion<string>();
                     });
                 });
+
+                t.HasIndex(x => new { x.TurnId, x.X, x.Y, x.Z })
+                    .IsUnique();
             });
 
             model.Entity<DbFaction>(t => {
@@ -243,6 +246,9 @@ namespace advisor.Persistence {
                 t.HasMany(x => x.Stats)
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => x.FactionId);
+
+                t.HasIndex(x => new { x.TurnId, x.Number })
+                    .IsUnique();
             });
 
             model.Entity<DbEvent>(t => {
@@ -279,6 +285,9 @@ namespace advisor.Persistence {
                     a.ToTable("Structures_Contents");
                     a.HasKey("StructureId", nameof(DbFleetContent.Type));
                 });
+
+                t.HasIndex(x => new { x.TurnId, x.RegionId, x.Number })
+                    .IsUnique();
             });
 
             model.Entity<DbUnit>(t => {
@@ -311,6 +320,9 @@ namespace advisor.Persistence {
 
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Unit);
+
+                t.HasIndex(x => new { x.TurnId, x.Number })
+                    .IsUnique();
             });
 
             model.Entity<DbUniversity>(t => {

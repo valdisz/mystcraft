@@ -2,52 +2,54 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using advisor.Persistence;
 
-namespace advisor.Migrations.pgsql
+namespace advisor.Migrations.mssql
 {
-    [DbContext(typeof(PgSqlDatabase))]
-    partial class PgSqlDatabaseModelSnapshot : ModelSnapshot
+    [DbContext(typeof(MsSqlDatabase))]
+    [Migration("20210404055730_unique_indices")]
+    partial class unique_indices
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.4")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int?>("Amount")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("FactionId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("ItemCode")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ItemName")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ItemPrice")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("RegionId")
                         .HasColumnType("bigint");
@@ -57,7 +59,7 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("UnitId")
                         .HasColumnType("bigint");
@@ -80,14 +82,14 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("bigint");
@@ -105,30 +107,30 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("EngineVersion")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Ruleset")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RulesetName")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RulesetVersion")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -143,22 +145,22 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("FactionName")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("LastTurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Password")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -177,55 +179,55 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("Entertainment")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<bool>("Explored")
-                        .HasColumnType("boolean");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Label")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Population")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Province")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Race")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Tax")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("TotalWages")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("UpdatedAtTurn")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<double>("Wages")
-                        .HasColumnType("double precision");
+                        .HasColumnType("float");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -240,25 +242,25 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("FactionName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<string>("Json")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Source")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("bigint");
@@ -277,7 +279,7 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("FactionId")
                         .HasColumnType("bigint");
@@ -304,51 +306,51 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Flags")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Needs")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("RegionId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("SailDirections")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Sequence")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int?>("Speed")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -365,13 +367,13 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Study")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Teach")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("TurnId")
                         .HasColumnType("bigint");
@@ -399,19 +401,19 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("Month")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Year")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -425,32 +427,32 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("FactionId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Flags")
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<bool>("OnGuard")
-                        .HasColumnType("boolean");
+                        .HasColumnType("bit");
 
                     b.Property<long>("RegionId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Sequence")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long?>("StrcutureId")
                         .HasColumnType("bigint");
@@ -459,7 +461,7 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("bigint");
 
                     b.Property<int?>("Weight")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -480,14 +482,14 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -505,7 +507,7 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("bigint");
 
                     b.Property<int>("Role")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.HasKey("PlayerId", "UniversityId");
 
@@ -522,23 +524,23 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Algorithm")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Digest")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Salt")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -622,14 +624,14 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbRegionId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<string>("Name")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Size")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.HasKey("DbRegionId");
 
@@ -645,28 +647,28 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Direction")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<string>("Label")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Province")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("Terrain")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<int>("X")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Y")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Z")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("RegionId", "Direction");
 
@@ -681,14 +683,14 @@ namespace advisor.Migrations.pgsql
                                         .HasColumnType("bigint");
 
                                     b2.Property<string>("DbExitDirection")
-                                        .HasColumnType("text");
+                                        .HasColumnType("nvarchar(450)");
 
                                     b2.Property<string>("Name")
-                                        .HasColumnType("text");
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.Property<string>("Size")
                                         .IsRequired()
-                                        .HasColumnType("text");
+                                        .HasColumnType("nvarchar(max)");
 
                                     b2.HasKey("DbExitRegionId", "DbExitDirection");
 
@@ -707,10 +709,10 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int?>("Amount")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("RegionId", "Code");
 
@@ -726,13 +728,13 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int>("Amount")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Price")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("RegionId", "Code");
 
@@ -748,13 +750,13 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int>("Amount")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Price")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("RegionId", "Code");
 
@@ -819,19 +821,19 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbStatId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<int>("Pillage")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Tax")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Trade")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Work")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("DbStatId");
 
@@ -847,10 +849,10 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int?>("Amount")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("StatId", "Code");
 
@@ -890,13 +892,13 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbStructureId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<int>("Current")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Required")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("DbStructureId");
 
@@ -911,13 +913,13 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbStructureId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<int>("Max")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Used")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("DbStructureId");
 
@@ -933,10 +935,10 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Type")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int>("Count")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("StructureId", "Type");
 
@@ -982,16 +984,16 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbStudyPlanId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<int?>("Days")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int?>("Level")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("DbStudyPlanId");
 
@@ -1048,19 +1050,19 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbUnitId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<int>("Flying")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Riding")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Swimming")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int>("Walking")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("DbUnitId");
 
@@ -1075,14 +1077,14 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbUnitId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<int?>("Amount")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<string>("Code")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.HasKey("DbUnitId");
 
@@ -1097,16 +1099,16 @@ namespace advisor.Migrations.pgsql
                             b1.Property<long>("DbUnitId")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("bigint")
-                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(max)");
 
                             b1.Property<int?>("Days")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int?>("Level")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("DbUnitId");
 
@@ -1122,10 +1124,10 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int?>("Amount")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("UnitId", "Code");
 
@@ -1141,13 +1143,13 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int?>("Days")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int?>("Level")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("UnitId", "Code");
 
@@ -1163,13 +1165,13 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Code")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.Property<int?>("Days")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.Property<int?>("Level")
-                                .HasColumnType("integer");
+                                .HasColumnType("int");
 
                             b1.HasKey("UnitId", "Code");
 
@@ -1238,7 +1240,7 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<string>("Role")
-                                .HasColumnType("text");
+                                .HasColumnType("nvarchar(450)");
 
                             b1.HasKey("UserId", "Role");
 

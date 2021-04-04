@@ -94,7 +94,8 @@ namespace advisor.Migrations.mssql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TurnId");
+                    b.HasIndex("TurnId", "Number")
+                        .IsUnique();
 
                     b.ToTable("Factions");
                 });
@@ -228,7 +229,8 @@ namespace advisor.Migrations.mssql
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TurnId");
+                    b.HasIndex("TurnId", "X", "Y", "Z")
+                        .IsUnique();
 
                     b.ToTable("Regions");
                 });
@@ -352,7 +354,8 @@ namespace advisor.Migrations.mssql
 
                     b.HasIndex("RegionId");
 
-                    b.HasIndex("TurnId");
+                    b.HasIndex("TurnId", "RegionId", "Number")
+                        .IsUnique();
 
                     b.ToTable("Structures");
                 });
@@ -466,7 +469,8 @@ namespace advisor.Migrations.mssql
 
                     b.HasIndex("StrcutureId");
 
-                    b.HasIndex("TurnId");
+                    b.HasIndex("TurnId", "Number")
+                        .IsUnique();
 
                     b.ToTable("Units");
                 });
