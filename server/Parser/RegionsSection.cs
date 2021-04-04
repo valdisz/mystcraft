@@ -20,7 +20,11 @@ namespace advisor
         private async Task<bool> IsRegion(Cursor<TextParser> cursor) {
             bool isRegion = false;
             if (await cursor.NextAsync()) {
-                isRegion = cursor.Value.Match("-----");
+                var p = cursor.Value.Pos;
+                cursor.Value.SkipChar('-');
+                var len = cursor.Value.Pos - p;
+
+                isRegion = len == 60;
                 cursor.Value.Reset();
             }
 

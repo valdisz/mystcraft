@@ -12,11 +12,13 @@ namespace advisor
 
         public async Task ParseAsync(Cursor<TextParser> cursor, JsonWriter writer) {
             await writer.WritePropertyNameAsync("factionStatus");
+
             await writer.WriteStartArrayAsync();
             while (await cursor.NextAsync() && !cursor.Value.EOF) {
                 var item = AllParsers.FactionStatusItem.Parse(cursor.Value);
                 if (!item) {
-                    throw new FormatException();
+                    cursor.Back();
+                    break;
                 }
 
                 await item.Value.WriteJson(writer);
