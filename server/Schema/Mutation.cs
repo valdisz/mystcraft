@@ -2,6 +2,7 @@ namespace advisor
 {
     using System;
     using System.Collections.Generic;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using advisor.Features;
     using HotChocolate;
@@ -54,6 +55,13 @@ namespace advisor
         public Task<List<DbGame>> DeleteGame([GraphQLType(typeof(RelayIdType))] string gameId) {
             return mediator.Send(new DeleteGame(
                 ParseRelayId<long>("Game", gameId)
+            ));
+        }
+
+        public Task<int> DeleteTurn([GlobalState] ClaimsPrincipal currentUser, [GraphQLType(typeof(RelayIdType))] string turnId) {
+            return mediator.Send(new DeleteTurn(
+                currentUser,
+                ParseRelayId<long>("Turn", turnId)
             ));
         }
 

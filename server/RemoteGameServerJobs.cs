@@ -7,6 +7,7 @@ namespace advisor {
     using advisor.Features;
     using advisor.Persistence;
     using AngleSharp;
+    using Hangfire;
     using Hangfire.Console;
     using Hangfire.RecurringJobExtensions;
     using Hangfire.Server;
@@ -15,16 +16,20 @@ namespace advisor {
     using Microsoft.Extensions.Logging;
 
     public class RemoteGameServerJobs {
-        public RemoteGameServerJobs(Database db, IMediator mediator, IHttpClientFactory httpClientFactory, ILogger<RemoteGameServerJobs> logger) {
+        public RemoteGameServerJobs(Database db, IMediator mediator, IHttpClientFactory httpClientFactory,
+            IBackgroundJobClient backgroundJobs,
+            ILogger<RemoteGameServerJobs> logger) {
             this.db = db;
             this.mediator = mediator;
             this.httpClientFactory = httpClientFactory;
+            this.backgroundJobs = backgroundJobs;
             this.logger = logger;
         }
 
         private readonly Database db;
         private readonly IMediator mediator;
         private readonly IHttpClientFactory httpClientFactory;
+        private readonly IBackgroundJobClient backgroundJobs;
         private readonly ILogger logger;
 
         [RecurringJob("0 12 * * 1,3,5", TimeZone = "America/Los_Angeles")]
@@ -93,8 +98,8 @@ namespace advisor {
             return report;
         }
 
-        private async Task DownloadReportsAsync() {
-            logger.LogInformation($"Downloading new turns from server");
+        public async Task DownloadReportsAsync() {
+            logger.LogInformation($"Queuing downloading new turns from server");
 
             var factions = await db.Players
                 .Where(x => x.FactionNumber != null && x.Password != null)
@@ -107,16 +112,24 @@ namespace advisor {
             }
 
             foreach (var f in factions) {
-                logger.LogInformation($"Downloading report for {f.FactionName} ({f.FactionNumber})");
-                var report = await DownloadReportForFactionAsync(f.FactionNumber, f.Password);
-
-                logger.LogInformation($"Saving report to database");
-                var turn = await mediator.Send(new UploadReports(f.Id, new[] { report }));
-
-                await mediator.Send(new ProcessTurn(f.Id, turn));
+                backgroundJobs.Enqueue<RemoteGameServerJobs>(x => x.DownloadReportsForFactionAsync(
+                    f.FactionName, f.FactionNumber, f.Password, f.Id
+                ));
             }
 
-            logger.LogInformation($"Report for all factions is downloaded and processed");
+            logger.LogInformation($"Report download for all factions is queued");
+        }
+
+        public async Task DownloadReportsForFactionAsync(string factionName, int factionNumber, string password, long playerId) {
+            logger.LogInformation($"Downloading report for {factionName} ({factionNumber})");
+            var report = await DownloadReportForFactionAsync(factionNumber, password);
+
+            logger.LogInformation($"Saving report to database");
+            var turn = await mediator.Send(new UploadReports(playerId, new[] { report }));
+
+            await mediator.Send(new ProcessTurn(playerId, turn));
+
+            logger.LogInformation($"Report is downloaded and processed");
         }
     }
 }

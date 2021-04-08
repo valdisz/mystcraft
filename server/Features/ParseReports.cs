@@ -64,34 +64,30 @@ namespace advisor.Features
                 units = turn.Units.ToDictionary(x => x.Number);
             }
             else if (startingTurnIndex > 0) {
-                startingTurnIndex--;
-                startingTurn = turns[startingTurnIndex];
+                var prevTurnId = turns[startingTurnIndex - 1].Id;
+                var turn = await GetTurnAsync(prevTurnId, track: false, addUnits: false, addEvents: false);
 
-                if (startingTurn != null) {
-                    var turn = await GetTurnAsync(startingTurn.Id, track: false, addUnits: false, addEvents: false);
-
-                    foreach (var reg in turn.Regions.Select(x => mapper.Map<DbRegion>(x))) {
-                        foreach (var str in reg.Structures.ToList()) {
-                            if (str.Number > GameConsts.MAX_BUILDING_NUMBER) {
-                                reg.Structures.Remove(str);
-                                continue;
-                            }
-
-                            str.Units.Clear();
-                            structures.Add(str.UID, str);
+                foreach (var reg in turn.Regions.Select(x => mapper.Map<DbRegion>(x))) {
+                    foreach (var str in reg.Structures.ToList()) {
+                        if (str.Number > GameConsts.MAX_BUILDING_NUMBER) {
+                            reg.Structures.Remove(str);
+                            continue;
                         }
 
-                        reg.Units.Clear();
-                        regions.Add(reg.UID, reg);
+                        str.Units.Clear();
+                        structures.Add(str.UID, str);
                     }
 
-                    foreach (var f in turn.Factions.Select(x => mapper.Map<DbFaction>(x))) {
-                        f.Units.Clear();
-                        f.Events.Clear();
-                        f.Stats.Clear();
+                    reg.Units.Clear();
+                    regions.Add(reg.UID, reg);
+                }
 
-                        factions.Add(f.Number, f);
-                    }
+                foreach (var f in turn.Factions.Select(x => mapper.Map<DbFaction>(x))) {
+                    f.Units.Clear();
+                    f.Events.Clear();
+                    f.Stats.Clear();
+
+                    factions.Add(f.Number, f);
                 }
             }
 
@@ -269,6 +265,7 @@ namespace advisor.Features
                     : regions[DbRegion.GetUID(ev.Coords.X, ev.Coords.Y, ev.Coords.Z ?? DEFAULT_LEVEL_Z)];
 
                 var dbEv = new DbEvent {
+                    Faction = faction,
                     Type = EventType.Info,
                     Category = ev.Category,
                     Amount = ev.Amount,
@@ -422,14 +419,21 @@ namespace advisor.Features
                 };
 
                 units.Add(unit.Number, unit);
+
+                unit.Region = region;
                 region.Units.Add(unit);
-                if (structure != null) structure.Units.Add(unit);
+
+                if (structure != null) {
+                    unit.Structure = structure;
+                    structure.Units.Add(unit);
+                }
             }
 
             if (source.Faction != null && unit.Faction == null) {
                 var faction = CreateOrUpdateFaction(factions, source.Faction);
-                faction.Units.Add(unit);
+
                 unit.Faction = faction;
+                faction.Units.Add(unit);
             }
 
             unit.Sequence = seq;
@@ -470,6 +474,20 @@ namespace advisor.Features
             return unit;
         }
 
+        private static async Task InsertFactionsAsync(Database db, long turnId, IEnumerable<DbFaction> factions) {
+            foreach (var faction in factions) {
+                faction.TurnId = turnId;
+
+                foreach (var ev in faction.Events) {
+                    ev.TurnId = turnId;
+                }
+
+                if (faction.Id != default(long)) continue;
+
+                await db.AddAsync(faction);
+            }
+        }
+
         private static async Task InsertRegionsAsync(Database db, long turnId, IEnumerable<DbRegion> regions) {
             foreach (var region in regions) {
                 region.TurnId = turnId;
@@ -485,20 +503,6 @@ namespace advisor.Features
                 if (region.Id != default(long)) continue;
 
                 await db.AddAsync(region);
-            }
-        }
-
-        private static async Task InsertFactionsAsync(Database db, long turnId, IEnumerable<DbFaction> factions) {
-            foreach (var faction in factions) {
-                faction.TurnId = turnId;
-
-                foreach (var ev in faction.Events) {
-                    ev.TurnId = turnId;
-                }
-
-                if (faction.Id != default(long)) continue;
-
-                await db.AddAsync(faction);
             }
         }
 
