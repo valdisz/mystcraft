@@ -124,12 +124,10 @@ export class GameStore {
     @action selectRegion = (col: number, row: number) => {
         const reg = this.world.getRegion(col, row, 1)
         this.region = reg ? observable(reg) : null
-        console.log(reg)
     }
 
     @computed get units() {
         const units = this.region?.units ?? []
-        console.log(units)
         return units
     }
 

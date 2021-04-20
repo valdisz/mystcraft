@@ -68,11 +68,11 @@ interface GeographyProps {
 }
 
 function Geography({ coords, terrain }: GeographyProps) {
-    const copyCoords = useCopy(true)
+    const copy = useCopy(false)
 
     const text = coords.toString()
 
-    return <GeographyButton size='small' variant='outlined' ref={copyCoords} data-clipboard-text={text}>
+    return <GeographyButton size='small' variant='outlined' ref={copy} data-clipboard-text={text}>
         <Prefix>
             <Level>{coords.label}</Level>
             <Terrain>{terrain.name}</Terrain>
@@ -177,6 +177,47 @@ export interface RegionSummaryProps {
     region: Region
 }
 
+function getMaxAmount(amount: number) {
+    let total = amount
+
+    let coef = 0.25
+    let delta = 0
+    do {
+        delta = Math.floor(amount * coef)
+        total += delta
+
+        coef = coef / 2
+    }
+    while (delta > 0)
+
+    return total
+}
+
+function CopyRegionDetails({ region }: RegionSummaryProps) {
+    const copy = useCopy(false)
+
+    const lines = []
+
+    lines.push(`${region.province.name}\t${region.terrain.name}\t${region.coords.toString()}`)
+    lines.push('')
+
+    lines.push(`Products`)
+    lines.push(`Name\tAmount\tMax`)
+    for (const p of region.products.all) {
+        lines.push(`${p.name}\t${p.amount}\t${getMaxAmount(p.amount)}`)
+    }
+
+    lines.push('')
+
+    lines.push(`For Sale`)
+    lines.push(`Name\tAmount\tPrice`)
+    for (const p of region.forSale.all) {
+        lines.push(`${p.name}\t${p.amount}\t${p.price}`)
+    }
+
+    return <Button ref={copy} data-clipboard-text={lines.join("\n")}>Copy region details</Button>
+}
+
 export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
 
     return <Box m={1}>
@@ -186,6 +227,10 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                 <ProvinceName province={region.province} />
                 <Geography terrain={region.terrain} coords={region.coords} />
             </SpaceBetween>
+
+            {/* <SpaceBetween item xs={12}>
+                <CopyRegionDetails region={region} />
+            </SpaceBetween> */}
 
             { region.population && <SpaceBetween item xs={12}>
                 <span>
