@@ -16,6 +16,7 @@ namespace advisor.Features
     using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
     using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
+    using UnitOrders = System.Collections.Generic.Dictionary<int, string>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
 
     public record ParseReports(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest {
@@ -211,8 +212,9 @@ namespace advisor.Features
 
             CreateOrUpdateFaction(factions, report.Faction);
 
+            UnitOrders unitOrders = report.OrdersTemplate.Units.ToDictionary(x => x.Unit, x => x.Orders);
             foreach (var region in report.Regions) {
-                CreateOrUpdateRegion(db, turnNumber, factions, regions, structures, units, region);
+                CreateOrUpdateRegion(db, turnNumber, factions, regions, structures, units, region, unitOrders);
             }
 
             AddEvents(factions, regions, report);
@@ -281,7 +283,7 @@ namespace advisor.Features
         }
 
         private static DbRegion CreateOrUpdateRegion(Database db, int turnNumber, FactionsDic factions, RegionDic regions, StructuresDic structures,
-            UnitsDic units, JRegion source) {
+            UnitsDic units, JRegion source, UnitOrders unitOrders) {
             var x = source.Coords.X;
             var y = source.Coords.Y;
             var z = source.Coords.Z ?? DEFAULT_LEVEL_Z;
@@ -326,7 +328,7 @@ namespace advisor.Features
 
             int unitSeq = 0;
             foreach (var unit in source.Units) {
-                CreateOrUpdateUnit(factions, units, region, null, unit, unitSeq++);
+                CreateOrUpdateUnit(factions, units, region, null, unit, unitSeq++, unitOrders);
             }
 
             int structureSeq = 0;
@@ -337,7 +339,7 @@ namespace advisor.Features
                 presentStructures.Add(dbStr.UID);
 
                 foreach (var unit in str.Units) {
-                    var strUnit = CreateOrUpdateUnit(factions, units, region, dbStr, unit, unitSeq++);
+                    var strUnit = CreateOrUpdateUnit(factions, units, region, dbStr, unit, unitSeq++, unitOrders);
                 }
             }
 
@@ -412,7 +414,8 @@ namespace advisor.Features
             return str;
         }
 
-        private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, DbStructure structure, JUnit source, int seq) {
+        private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, DbStructure structure, JUnit source,
+            int seq, UnitOrders unitOrders) {
             if (!units.TryGetValue(source.Number, out var unit)) {
                 unit = new DbUnit {
                     Number = source.Number
@@ -470,6 +473,10 @@ namespace advisor.Features
             SetItems(unit.Items, source.Items);
             SetSkills(unit.Skills, source.Skills);
             SetSkills(unit.CanStudy, source.CanStudy);
+
+            if (unitOrders.ContainsKey(unit.Number)) {
+                unit.Orders = unitOrders[unit.Number];
+            }
 
             return unit;
         }

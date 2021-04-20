@@ -432,6 +432,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<bool>("OnGuard")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Orders")
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("RegionId")
                         .HasColumnType("INTEGER");
 

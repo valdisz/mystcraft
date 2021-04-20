@@ -44,6 +44,8 @@ namespace advisor.Persistence {
         public DbItem ReadyItem { get; set; }
         public DbSkill CombatSpell { get; set; }
 
+        public string Orders { get; set; }
+
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
 

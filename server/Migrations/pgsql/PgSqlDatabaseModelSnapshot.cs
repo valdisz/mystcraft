@@ -446,6 +446,9 @@ namespace advisor.Migrations.pgsql
                     b.Property<bool>("OnGuard")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Orders")
+                        .HasColumnType("text");
+
                     b.Property<long>("RegionId")
                         .HasColumnType("bigint");
 
