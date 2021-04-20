@@ -7,6 +7,7 @@ namespace advisor.Model
         Work,
         Produce,
         Pillage,
-        Claim
+        Claim,
+        Cast
     }
 }

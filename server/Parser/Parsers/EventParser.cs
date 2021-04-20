@@ -24,6 +24,7 @@ namespace advisor {
     // Mage 2 (1100): Studies force and was taught for 30 days.
     // Scout (672): Claims 2 silver for maintenance.
     // Embassy Workers (778): Earns 300 silver entertaining in swamp (52,50) in Poontmagwern.
+    // Casts Phantasmal Entertainment, raising 600 silver.
     public class EventParser : BaseParser {
         public EventParser(UnitNameParser unitNameParser, LocationParser locationParser, ItemParser itemParser) {
             this.unitNameParser = unitNameParser;
@@ -89,6 +90,17 @@ namespace advisor {
                         category = EventCategory.Pillage;
                         amount = Money(msg);
                         location = locationParser.Parse(msg.After(" from ").SkipWhitespaces().BeforeBackwards("."));
+                        break;
+                    }
+
+                    case "casts": {
+                        amount = msg.Try(x => x.BeforeBackwards("raising").SkipWhitespaces().Integer());
+                        if (amount) {
+                            category = EventCategory.Work;
+                        }
+                        else {
+                            category = EventCategory.Cast;
+                        }
                         break;
                     }
 
