@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core'
+import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -12,6 +12,8 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { List } from '../store/game/list'
 import { Item } from '../store/game/item'
 import { RegionSummary } from '../components/region-summary'
+import { Switch, Route, Link, useLocation } from 'react-router-dom'
+import { StatsPage } from './stats-page'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
 // export declare const ResizeObserver: any
@@ -90,7 +92,6 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
 
         if (!gameMapRef.current) {
             gameMapRef.current = new HexMap(canvasRef, { width: 72, height: 96 }, getRegion)
-
             gameMapRef.current.onRegionSelected = onRegionSelected
         }
 
@@ -101,8 +102,12 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
                 const { x, y } = game.world.levels[1].regions[0].coords
                 gameMap.turnNumber = game.turn.number
                 gameMap.centerAt(x, y)
-                gameMap.update()
             })
+
+        return (() => {
+            gameMap.destroy()
+            gameMapRef.current = null
+        })
     }, [ canvasRef ])
 
     return <MapContainer>
@@ -328,8 +333,23 @@ const RegionComponent = observer(() => {
     </RegionContainer>
 })
 
+const MapTab = observer(() => {
+    const { game } = useStore()
+
+    return <GameGrid>
+        <GameMapComponent getRegion={(x, y) => game.world.getRegion(x, y, 1)} onRegionSelected={game.selectRegion} />
+        <UnitsComponent />
+        <StructuresComponent />
+        { game.region && <RegionComponent /> }
+        <Orders />
+    </GameGrid>
+})
+
 const GameComponent = observer(() => {
     const { game } = useStore()
+    const location = useLocation()
+
+    const parent = `/game/${game.gameId}`
 
     return <GameContainer>
         <AppBar position='static' color='primary'>
@@ -344,15 +364,20 @@ const GameComponent = observer(() => {
                 <GameInfo>
                     <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
                 </GameInfo>
+                <Tabs value={location.pathname}>
+                    <Tab label='Map' component={Link} value={`${parent}`} to={`${parent}`} />
+                    <Tab label='Stats' component={Link} value={`${parent}/stats`} to={`${parent}/stats`} />
+                </Tabs>
             </Toolbar>
         </AppBar>
-        <GameGrid>
-            <GameMapComponent getRegion={(x, y) => game.world.getRegion(x, y, 1)} onRegionSelected={game.selectRegion} />
-            <UnitsComponent />
-            <StructuresComponent />
-            { game.region && <RegionComponent /> }
-            <Orders />
-        </GameGrid>
+        <Switch>
+            <Route path={`${parent}/stats`}>
+                <StatsPage />
+            </Route>
+            <Route path={`${parent}`}>
+                <MapTab />
+            </Route>
+        </Switch>
     </GameContainer>
 })
 

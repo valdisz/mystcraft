@@ -72,6 +72,11 @@ export class HexMap {
         canvas.addEventListener('click', this.onClick)
     }
 
+    destroy() {
+        this.viewport.destroy()
+        this.renderer.destroy()
+    }
+
     readonly loader = new Loader()
 
     readonly root: Container

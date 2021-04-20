@@ -35,8 +35,14 @@ export class GameStore {
     @observable turn: TurnSummaryFragment
 
     world: World
+    gameId: string = null
 
     async load(gameId: string) {
+        if (this.gameId === gameId) {
+            return
+        }
+        this.gameId = gameId
+
         runInAction(() => this.loading = true)
 
         const response = await CLIENT.query<GetSingleGameQuery, GetSingleGameQueryVariables>({
@@ -115,7 +121,6 @@ export class GameStore {
             cursor = regions.data.node.regions.pageInfo.endCursor
         }
         while (regions.data.node.regions.pageInfo.hasNextPage)
-
         setTimeout(() => runInAction(() => this.loading = false))
     }
 

@@ -27,9 +27,8 @@ export class Viewport {
 
     private readonly observer;
 
-    // todo: add unobserve
-    free() {
-        this.observer.unobserve()
+    destroy() {
+        this.observer.unobserve(this.element)
     }
 
     pan: PIXI.Point
