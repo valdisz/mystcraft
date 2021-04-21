@@ -206,9 +206,9 @@ export class HexMap {
                 this.settlements.addChild(pin)
 
                 const txt = new PIXI.Text(region.settlement.name, {
-                    fontSize: '12px',
-                    fontFamily: 'Fira Code',
-                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    fontFamily: 'Almendra',
+                    // fontWeight: 'bold',
                     fill: 'white',
                     dropShadow: true,
                     dropShadowColor: '#000000',
