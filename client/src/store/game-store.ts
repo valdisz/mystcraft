@@ -9,6 +9,7 @@ import { Ruleset } from "./game/ruleset"
 import { Region } from "./game/region"
 import { World } from "./game/world"
 import { WorldInfo, WorldLevel } from './game/world-info'
+import { Unit } from './game/types'
 
 export class TurnsStore {
     constructor() {
@@ -34,7 +35,7 @@ export class GameStore {
     turns: IObservableArray<TurnSummaryFragment> = observable([])
     @observable turn: TurnSummaryFragment
 
-    world: World
+    @observable world: World
     gameId: string = null
 
     async load(gameId: string) {
@@ -92,7 +93,7 @@ export class GameStore {
         const ruleset = new Ruleset()
         ruleset.load(game.ruleset)
 
-        this.world = new World(worldInfo, ruleset)
+        const world = new World(worldInfo, ruleset)
 
         const turnDetails = await CLIENT.query<GetTurnDetailsQuery, GetTurnDetailsQueryVariables>({
             query: GetTurnDetails,
@@ -102,7 +103,7 @@ export class GameStore {
         })
 
         for (const faction of turnDetails.data.node.factions) {
-            this.world.addFaction(faction.number, faction.name, this.factionNumber === myPlayer.factionNumber)
+            world.addFaction(faction.number, faction.name, this.factionNumber === myPlayer.factionNumber)
         }
 
         let cursor: string = null
@@ -116,11 +117,13 @@ export class GameStore {
                 }
             })
 
-            this.world.addRegions(regions.data.node.regions.edges.map(x => x.node))
+            world.addRegions(regions.data.node.regions.edges.map(x => x.node))
 
             cursor = regions.data.node.regions.pageInfo.endCursor
         }
         while (regions.data.node.regions.pageInfo.hasNextPage)
+
+        runInAction(() => this.world = world)
         setTimeout(() => runInAction(() => this.loading = false))
     }
 
@@ -128,7 +131,11 @@ export class GameStore {
 
     @action selectRegion = (col: number, row: number) => {
         const reg = this.world.getRegion(col, row, 1)
-        this.region = reg ? observable(reg) : null
+
+        if (reg.id !== this.region?.id) {
+            this.region = reg ? observable(reg) : null
+            this.unit = null
+        }
     }
 
     @computed get units() {
@@ -140,4 +147,7 @@ export class GameStore {
         const structures = this.region?.structures ?? []
         return structures
     }
+
+    @observable unit: Unit = null
+    @action selectUnit = (unit: Unit) => this.unit = unit
 }

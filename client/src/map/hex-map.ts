@@ -65,9 +65,12 @@ export class HexMap {
         this.tiles = new Container()
         this.outline = new Container()
         this.selected = new Container()
+        this.settlements = new Container()
+
         this.root.addChild(this.outline)
         this.root.addChild(this.tiles)
         this.root.addChild(this.selected)
+        this.root.addChild(this.settlements)
 
         canvas.addEventListener('click', this.onClick)
     }
@@ -83,6 +86,7 @@ export class HexMap {
     readonly tiles: Container
     readonly outline: Container
     readonly selected: Container
+    readonly settlements: Container
 
     readonly renderer: Renderer
     readonly viewport: Viewport
@@ -161,7 +165,7 @@ export class HexMap {
 
             const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain.code))
             tile.anchor.set(0.5)
-            tile.position = p
+            tile.position.copyFrom(p)
             if (!region.isVisible) {
                 tile.tint = region.explored
                     ? 0xb0b0b0 // darken region when no region report
@@ -174,6 +178,51 @@ export class HexMap {
             g.lineStyle(4, 0xcccccc)
             g.drawPolygon(this.layout.polygonCorners(hex))
             this.outline.addChild(g)
+
+            // settlement
+            if (region.settlement) {
+                let oX = 4
+
+                const pin = new PIXI.Graphics()
+                pin.beginFill(0xffffff)
+                pin.drawCircle(0, 0, 2)
+                pin.endFill()
+
+                if (region.settlement.size === 'city' || region.settlement.size === 'town') {
+                    pin.lineStyle(1, 0xffffff)
+                    pin.drawCircle(0, 0, 4)
+
+                    oX += 4
+                }
+
+                if (region.settlement.size === 'city') {
+                    pin.lineStyle(1, 0xffffff)
+                    pin.drawCircle(0, 0, 6)
+
+                    oX += 4
+                }
+
+                pin.position.copyFrom(p)
+                this.settlements.addChild(pin)
+
+                const txt = new PIXI.Text(region.settlement.name, {
+                    fontSize: '12px',
+                    fontFamily: 'Fira Code',
+                    fontWeight: 'bold',
+                    fill: 'white',
+                    dropShadow: true,
+                    dropShadowColor: '#000000',
+                    dropShadowAngle: Math.PI / 3,
+                    dropShadowDistance: 4,
+                })
+                txt.calculateBounds()
+
+                txt.position.copyFrom(p)
+                txt.position.x += oX
+                txt.position.y -= (txt.height / 2)
+
+                this.settlements.addChild(txt)
+            }
         }
     }
 
@@ -191,8 +240,10 @@ export class HexMap {
 
         this.tiles.removeChildren()
         this.outline.removeChildren()
+        this.settlements.removeChildren()
+
         for (let row = row0; row <= row1; row++) {
-        for (let col = col0; col <= col1 ; col++) {
+            for (let col = col0; col <= col1 ; col++) {
                 if ((col + row) % 2) continue
 
                 this.drawTile(col, row)

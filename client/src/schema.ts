@@ -189,6 +189,7 @@ export type Unit = Node & {
   name: Scalars['String'];
   number: Scalars['Int'];
   onGuard: Scalars['Boolean'];
+  orders?: Maybe<Scalars['String']>;
   readyItem?: Maybe<Item>;
   region?: Maybe<Region>;
   sequence: Scalars['Int'];
@@ -332,6 +333,7 @@ export type Mutation = {
   createGame?: Maybe<Game>;
   createUser?: Maybe<User>;
   deleteGame?: Maybe<Array<Maybe<Game>>>;
+  deleteTurn: Scalars['Int'];
   joinGame?: Maybe<Player>;
   joinUniversity?: Maybe<University>;
   openUniversity?: Maybe<University>;
@@ -357,6 +359,11 @@ export type MutationCreateUserArgs = {
 
 export type MutationDeleteGameArgs = {
   gameId: Scalars['ID'];
+};
+
+
+export type MutationDeleteTurnArgs = {
+  turnId: Scalars['ID'];
 };
 
 
@@ -589,7 +596,8 @@ export enum EventCategory {
   Work = 'WORK',
   Produce = 'PRODUCE',
   Pillage = 'PILLAGE',
-  Claim = 'CLAIM'
+  Claim = 'CLAIM',
+  Cast = 'CAST'
 }
 
 export enum EventType {
@@ -661,7 +669,7 @@ export type LoadFragment = Pick<DbTransportationLoad, 'used' | 'max'>;
 export type SailorsFragment = Pick<DbSailors, 'current' | 'required'>;
 
 export type UnitFragment = (
-  Pick<Unit, 'id' | 'sequence' | 'description' | 'flags' | 'name' | 'number' | 'onGuard' | 'weight'>
+  Pick<Unit, 'id' | 'sequence' | 'description' | 'flags' | 'name' | 'number' | 'onGuard' | 'weight' | 'orders'>
   & { canStudy?: Maybe<Array<Maybe<SkillFragment>>>, capacity?: Maybe<CapacityFragment>, combatSpell?: Maybe<SkillFragment>, faction?: Maybe<FactionFragment>, items: Array<Maybe<ItemFragment>>, readyItem?: Maybe<ItemFragment>, skills?: Maybe<Array<Maybe<SkillFragment>>> }
 );
 
@@ -940,6 +948,7 @@ export const Unit = gql`
     ...Skill
   }
   weight
+  orders
 }
     ${Skill}
 ${Capacity}

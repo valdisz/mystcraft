@@ -1,8 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, Switch, Route, useLocation } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import { AppBar, Typography, Toolbar, IconButton, TextField, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab } from '@material-ui/core'
+import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, makeStyles } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -12,12 +12,9 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { List } from '../store/game/list'
 import { Item } from '../store/game/item'
 import { RegionSummary } from '../components/region-summary'
-import { Switch, Route, Link, useLocation } from 'react-router-dom'
 import { StatsPage } from './stats-page'
-
-// till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
-// export declare const ResizeObserver: any
-
+import Editor from 'react-simple-code-editor'
+import Prism from 'prismjs'
 
 const GameContainer = styled.div`
     width: 100%;
@@ -42,22 +39,76 @@ const GameGrid = styled.div`
 
 const OrdersContainer = styled.div`
     grid-area: orders;
+    min-height: 0;
+    overflow-y: auto;
+    border-top: 1px solid silver;
+
+    display: flex;
+    align-items: stretch;
 `
 
-const OrdersBody = styled.div`
-    margin: 1rem;
+const OrdersEditor = styled(Editor)`
+    min-height: 100%;
 
     textarea {
-        width: 100%;
-        height: 100%;
+        min-height: 100%;
+    }
+
+    .comment {
+        font-style: italic;
+    }
+
+    .string {
+        color: blue;
+    }
+
+    .directive {
+        font-weight: bold;
+        color: purple;
+    }
+
+    .number {
+        color: green;
+    }
+
+    .repeat {
+        color: #333;
+    }
+
+    .order {
+        font-weight: bold;
     }
 `
 
+const language = {
+    directive: /^@;(needs|tag)/mi,
+    comment: /^@?;.*/m,
+    repeat: /^@/m,
+    string: /"(?:""|[^"\r\f\n])*"/i,
+    number: /\d+/,
+    order: {
+        pattern: /^(@?)(\w+)/m,
+        lookbehind: true
+    }
+}
+
+Prism.languages.atlantis = language
+
+function highlight(s: string) {
+    const result = Prism.highlight(s, language, 'atlantis')
+
+    return result
+}
+
 const Orders = () => {
+    const { game } = useStore()
+
     return <OrdersContainer>
-        <OrdersBody>
-            <TextField variant='outlined' rows={10} multiline fullWidth />
-        </OrdersBody>
+        <Box m={1} flex={1}>
+            <Observer>
+                {() => <OrdersEditor value={game.unit?.orders ?? ''} onValueChange={game.unit?.setOrders} highlight={highlight} />}
+            </Observer>
+        </Box>
     </OrdersContainer>
 }
 
@@ -99,9 +150,16 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
         gameMap
             .load()
             .then(() => {
-                const { x, y } = game.world.levels[1].regions[0].coords
                 gameMap.turnNumber = game.turn.number
-                gameMap.centerAt(x, y)
+
+                if (game.region) {
+                    const { x, y } = game.region.coords
+                    gameMap.centerAt(x, y)
+                }
+                else {
+                    const { x, y } = game.world.levels[1].regions[0].coords
+                    gameMap.centerAt(x, y)
+                }
             })
 
         return (() => {
@@ -138,19 +196,19 @@ const UnitsTable = styled(Table)`
         font-weight: bold;
     }
 
-    .faction {
-        width: 1px;
-    }
-
-    .unit-nr {
+    .structure-nr, .unit-nr {
         width: 1px;
         text-align: right;
         padding-right: 4px;
     }
 
-    .unit-name {
+    .structure-name, .unit-name {
         width: 1px;
         padding-left: 4px;
+    }
+
+    .faction {
+        width: 1px;
     }
 
     .men {
@@ -214,6 +272,8 @@ const UnitsComponent = observer(() => {
         <UnitsTable size='small' stickyHeader>
             <TableHead>
                 <TableRow>
+                    <TableCell className='structure-nr'></TableCell>
+                    <TableCell className='structure-name'>Structure</TableCell>
                     <TableCell className='faction'>Faction</TableCell>
                     <TableCell className='unit-nr'>Unit Nr.</TableCell>
                     <TableCell className='unit-name'>Name</TableCell>
@@ -230,7 +290,9 @@ const UnitsComponent = observer(() => {
                 const noBorder = rows > 1 ? 'no-border' : ''
 
                 return <React.Fragment key={unit.id}>
-                    <TableRow>
+                    <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+                        <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+                        <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
                         <TableCell rowSpan={rows} className='faction'>{unit.faction ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
                         <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
                         <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
@@ -278,11 +340,11 @@ const StructuresComponent = observer(() => {
     const { game } = useStore()
     return <StructuresContainer>
         <StructuresBody>
-            {/* {game.structures.map((row) => (
+            {game.structures.map((row) => (
                 <StructureItem key={row.id}>
-                    {row.name} [{row.number}]: {row.type}
+                    {row.name} [{row.num}]: {row.type}
                 </StructureItem>
-            ))} */}
+            ))}
         </StructuresBody>
     </StructuresContainer>
 })
@@ -307,29 +369,6 @@ const RegionComponent = observer(() => {
 
     return <RegionContainer>
         <RegionSummary region={region} />
-        {/* <RegionBody>
-            <h4>{region.province.name}</h4>
-
-            <div>
-                {region.terrain.code} ({region.coords.x},{region.coords.y}{region.coords.z !== 1 ? `,${region.coords.z}` : ''})
-                {' '}{region.population.amount} {region.population.race.getName(region.population.amount)}
-            </div>
-
-            <h4>Products</h4>
-            { region.products.all.map(p => <div key={p.code}>
-                {p.amount} {p.name}
-            </div>)}
-
-            <h4>Wanted</h4>
-            { region.wanted.all.map(p => <div key={p.code}>
-                {p.amount} {p.name} for ${p.price}
-            </div>)}
-
-            <h4>For sale</h4>
-            { region.forSale.all.map(p => <div key={p.code}>
-                {p.amount} {p.name} for ${p.price}
-            </div>)}
-        </RegionBody> */}
     </RegionContainer>
 })
 
@@ -366,7 +405,7 @@ const GameComponent = observer(() => {
                 </GameInfo>
                 <Tabs value={location.pathname}>
                     <Tab label='Map' component={Link} value={`${parent}`} to={`${parent}`} />
-                    <Tab label='Stats' component={Link} value={`${parent}/stats`} to={`${parent}/stats`} />
+                    <Tab label='Statistics' component={Link} value={`${parent}/stats`} to={`${parent}/stats`} />
                 </Tabs>
             </Toolbar>
         </AppBar>

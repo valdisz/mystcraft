@@ -125,6 +125,7 @@ fragment Unit on Unit {
     ...Skill
   }
   weight
+  orders
 }
 
 fragment Faction on Faction {

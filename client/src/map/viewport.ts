@@ -1,6 +1,8 @@
 import * as PIXI from 'pixi.js'
 import throttle from 'lodash.throttle'
 
+// till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
+// export declare const ResizeObserver: any
 declare const ResizeObserver: any
 
 export class Viewport {

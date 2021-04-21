@@ -97,23 +97,37 @@ export class Region {
             unit.region = reg
             reg.units.push(unit)
 
-            unit.faction = unitSource.faction
-                ? factions.get(unitSource.faction.number)
-                : null
+            if (unitSource.faction) {
+                const faction = factions.get(unitSource.faction.number)
+
+                unit.faction = faction
+                faction.troops.add(unit)
+            }
         }
 
-        for (const struct of src.structures) {
-            for (const unitSource of struct.units) {
+        for (const structSrc of src.structures) {
+            const str = Structure.from(reg, structSrc, ruleset)
+            reg.structures.push(str)
+
+            for (const unitSource of structSrc.units) {
                 const unit = Unit.from(unitSource, ruleset)
 
                 unit.region = reg
-                reg.units.push(unit)
+                unit.structure = str
 
-                unit.faction = unitSource.faction
-                    ? factions.get(unitSource.faction.number)
-                    : null
+                reg.units.push(unit)
+                str.units.push(unit)
+
+                if (unitSource.faction) {
+                    const faction = factions.get(unitSource.faction.number)
+
+                    unit.faction = faction
+                    faction.troops.add(unit)
+                }
             }
         }
+
+        reg.structures.sort((a, b) => a.num - b.num)
 
         return reg;
     }

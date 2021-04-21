@@ -6,4 +6,8 @@ export class Troops {
     }
 
     readonly units: Unit[] = []
+
+    add(unit: Unit) {
+        this.units.push(unit)
+    }
 }

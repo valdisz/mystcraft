@@ -12,6 +12,7 @@ import { Order } from "./order";
 import { Event } from "./event";
 import { Inventory } from "./inventory";
 import { Region, Structure } from './types';
+import { action, makeObservable, observable } from 'mobx';
 
 export class Unit {
     constructor(
@@ -19,6 +20,8 @@ export class Unit {
         public readonly num: number,
         public name: string,
         private readonly ruleset: Ruleset) {
+
+            makeObservable(this)
     }
 
     readonly inventory = new Inventory(this);
@@ -38,7 +41,9 @@ export class Unit {
     readyItem: ItemInfo;
     combatSpell: SkillInfo;
     readonly events: Event[] = [];
-    readonly orders: Order[] = [];
+
+    @observable orders: string = ''
+    @action setOrders = (value: string) => this.orders = value
 
     get money() {
         return this.inventory.items.get(this.ruleset.money)?.amount ?? 0
@@ -82,6 +87,8 @@ export class Unit {
         unit.weight = src.weight
             ? src.weight
             : unit.inventory.items.all.map(x => x.weight).reduce((w, v) => w + v)
+
+        unit.orders = src.orders
 
         if (src.capacity) {
             const { walking, swimming, riding, flying } = src.capacity
