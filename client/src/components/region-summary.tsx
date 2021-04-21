@@ -219,9 +219,7 @@ function CopyRegionDetails({ region }: RegionSummaryProps) {
 }
 
 export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
-
     return <Box m={1}>
-
         <Grid container spacing={1}>
             <SpaceBetween item xs={12}>
                 <ProvinceName province={region.province} />
@@ -232,63 +230,65 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                 <CopyRegionDetails region={region} />
             </SpaceBetween> */}
 
-            { region.population && <SpaceBetween item xs={12}>
-                <span>
-                { region.settlement && <>{region.settlement.name} {region.settlement.size}</> }
-                </span>
-                <ItemComponent item={region.population} />
+            { (region.population || region.settlement) && <SpaceBetween item xs={12}>
+                { region.settlement && <span>
+                    { region.settlement && <>{region.settlement.name} {region.settlement.size}</> }
+                </span> }
+                { region.population && <ItemComponent item={region.population} /> }
             </SpaceBetween> }
 
-            <SpaceBetween item xs={12}>
-                <div>
+            { region.explored && <>
+                <SpaceBetween item xs={12}>
                     <div>
-                        <strong>Ente.</strong>
+                        <div>
+                            <strong>Ente.</strong>
+                        </div>
+                        {region.entertainment}
                     </div>
-                    {region.entertainment}
-                </div>
-                <div>
                     <div>
-                        <strong>Wages</strong>
+                        <div>
+                            <strong>Wages</strong>
+                        </div>
+                        {region.wages.amount} ({region.wages.total})
                     </div>
-                    {region.wages.amount} ({region.wages.total})
-                </div>
-                <div>
                     <div>
-                        <strong>Tax</strong>
+                        <div>
+                            <strong>Tax</strong>
+                        </div>
+                        {region.tax}
                     </div>
-                    {region.tax}
-                </div>
-            </SpaceBetween>
-            { region.products.length ? <Grid item xs={12}>
-                <strong>Products</strong>
-                <ItemTable>
-                    <ItemTableBody>
-                        { region.products.all
-                            .sort((a, b) => b.amount - a.amount)
-                            .map(item => <TableItem key={item.code} item={item} />) }
-                    </ItemTableBody>
-                </ItemTable>
-            </Grid> : null }
-            { region.forSale.length ? <Grid item xs={12}>
-                <strong>For sale</strong>
-                <ItemTable>
-                    <ItemTableBody>
-                        { region.forSale.all
-                            .sort((a, b) => a.price - b.price)
-                            .map(item => <TableItem key={item.code} item={item} />) }
-                    </ItemTableBody>
-                </ItemTable>
-            </Grid> : null }
-            { region.wanted.length ? <Grid item xs={12}>
-                <strong>Wanted</strong>
-                <ItemTable>
-                    <ItemTableBody>
-                        { region.wanted.all
-                            .sort((a, b) => a.price - b.price)
-                            .map(item => <TableItem key={item.code} item={item} />) }
-                    </ItemTableBody>
-                </ItemTable>
-            </Grid> : null }
+                </SpaceBetween>
+                { region.products.length ? <Grid item xs={12}>
+                    <strong>Products</strong>
+                    <ItemTable>
+                        <ItemTableBody>
+                            { region.products.all
+                                .sort((a, b) => b.amount - a.amount)
+                                .map(item => <TableItem key={item.code} item={item} />) }
+                        </ItemTableBody>
+                    </ItemTable>
+                </Grid> : null }
+                { region.forSale.length ? <Grid item xs={12}>
+                    <strong>For sale</strong>
+                    <ItemTable>
+                        <ItemTableBody>
+                            { region.forSale.all
+                                .sort((a, b) => a.price - b.price)
+                                .map(item => <TableItem key={item.code} item={item} />) }
+                        </ItemTableBody>
+                    </ItemTable>
+                </Grid> : null }
+                { region.wanted.length ? <Grid item xs={12}>
+                    <strong>Wanted</strong>
+                    <ItemTable>
+                        <ItemTableBody>
+                            { region.wanted.all
+                                .sort((a, b) => a.price - b.price)
+                                .map(item => <TableItem key={item.code} item={item} />) }
+                        </ItemTableBody>
+                    </ItemTable>
+                </Grid> : null }
+            </> }
         </Grid>
     </Box>
 })
