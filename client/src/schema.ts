@@ -54,7 +54,7 @@ export type Player = Node & {
   lastTurnNumber: Scalars['Int'];
   password?: Maybe<Scalars['String']>;
   reports?: Maybe<Array<Maybe<Report>>>;
-  stats?: Maybe<FactionsStats>;
+  stats?: Maybe<FactionStats>;
   turnByNumber?: Maybe<Turn>;
   turns?: Maybe<Array<Maybe<Turn>>>;
   university?: Maybe<PlayerUniversity>;
@@ -227,7 +227,7 @@ export type Faction = Node & {
   id: Scalars['ID'];
   name: Scalars['String'];
   number: Scalars['Int'];
-  stats?: Maybe<FactionsStats>;
+  stats?: Maybe<FactionStats>;
   unitByNumber?: Maybe<Unit>;
 };
 
@@ -241,6 +241,7 @@ export type University = Node & {
   id: Scalars['ID'];
   members?: Maybe<Array<Maybe<UniversityMember>>>;
   name: Scalars['String'];
+  stats?: Maybe<Array<Maybe<TurnStats>>>;
 };
 
 export type StudyPlan = Node & {
@@ -543,6 +544,11 @@ export type GameOptionsInput = {
   map?: Maybe<Array<Maybe<MapLevelInput>>>;
 };
 
+export type TurnStats = {
+  factions?: Maybe<Array<Maybe<FactionStats>>>;
+  turn: Scalars['Int'];
+};
+
 export type UniversityMember = {
   player?: Maybe<Player>;
   role: UniveristyMemberRole;
@@ -559,7 +565,9 @@ export type Event = {
   type: EventType;
 };
 
-export type FactionsStats = {
+export type FactionStats = {
+  factionName?: Maybe<Scalars['String']>;
+  factionNumber: Scalars['Int'];
   income?: Maybe<IncomeStats>;
   production?: Maybe<Array<Maybe<Item>>>;
 };
@@ -618,6 +626,23 @@ export type MapLevelInput = {
   level: Scalars['Int'];
   width: Scalars['Int'];
 };
+
+export type GetAllianceStatsQueryVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type GetAllianceStatsQuery = { node?: Maybe<{ myUniversity?: Maybe<{ stats?: Maybe<Array<Maybe<TurnStatsFragment>>> }> }> };
+
+export type TurnStatsFragment = (
+  Pick<TurnStats, 'turn'>
+  & { factions?: Maybe<Array<Maybe<(
+    Pick<FactionStats, 'factionNumber' | 'factionName'>
+    & { income?: Maybe<IncomeStatsFragment>, production?: Maybe<Array<Maybe<ItemFragment>>> }
+  )>>> }
+);
+
+export type IncomeStatsFragment = Pick<IncomeStats, 'work' | 'trade' | 'pillage' | 'tax' | 'total'>;
 
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -833,6 +858,37 @@ export type OpenUniversityMutationVariables = Exact<{
 
 export type OpenUniversityMutation = { openUniversity?: Maybe<Pick<University, 'id'>> };
 
+export const IncomeStats = gql`
+    fragment IncomeStats on IncomeStats {
+  work
+  trade
+  pillage
+  tax
+  total
+}
+    `;
+export const Item = gql`
+    fragment Item on Item {
+  code
+  amount
+}
+    `;
+export const TurnStats = gql`
+    fragment TurnStats on TurnStats {
+  turn
+  factions {
+    factionNumber
+    factionName
+    income {
+      ...IncomeStats
+    }
+    production {
+      ...Item
+    }
+  }
+}
+    ${IncomeStats}
+${Item}`;
 export const PlayerItem = gql`
     fragment PlayerItem on Player {
   id
@@ -872,12 +928,6 @@ export const TradableItem = gql`
     fragment TradableItem on TradableItem {
   code
   price
-  amount
-}
-    `;
-export const Item = gql`
-    fragment Item on Item {
-  code
   amount
 }
     `;
@@ -1216,6 +1266,19 @@ export const UniversityClass = gql`
   }
 }
     ${StudyPlan}`;
+export const GetAllianceStats = gql`
+    query GetAllianceStats($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      myUniversity {
+        stats {
+          ...TurnStats
+        }
+      }
+    }
+  }
+}
+    ${TurnStats}`;
 export const GetGames = gql`
     query GetGames {
   games {

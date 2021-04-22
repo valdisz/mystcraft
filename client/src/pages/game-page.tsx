@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Link, useParams, Switch, Route, useLocation } from 'react-router-dom'
+import { Link, useParams, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, makeStyles } from '@material-ui/core'
 import { useStore } from '../store'
@@ -386,9 +386,7 @@ const MapTab = observer(() => {
 
 const GameComponent = observer(() => {
     const { game } = useStore()
-    const location = useLocation()
-
-    const parent = `/game/${game.gameId}`
+    const { path, url } = useRouteMatch()
 
     return <GameContainer>
         <AppBar position='static' color='primary'>
@@ -404,16 +402,16 @@ const GameComponent = observer(() => {
                     <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
                 </GameInfo>
                 <Tabs value={location.pathname}>
-                    <Tab label='Map' component={Link} value={`${parent}`} to={`${parent}`} />
-                    <Tab label='Statistics' component={Link} value={`${parent}/stats`} to={`${parent}/stats`} />
+                    <Tab label='Map' component={Link} value={url} to={url} />
+                    <Tab label='Statistics' component={Link} value={`${url}/stats`} to={`${url}/stats`} />
                 </Tabs>
             </Toolbar>
         </AppBar>
         <Switch>
-            <Route path={`${parent}/stats`}>
+            <Route path={`${path}/stats`}>
                 <StatsPage />
             </Route>
-            <Route path={`${parent}`}>
+            <Route path={path}>
                 <MapTab />
             </Route>
         </Switch>

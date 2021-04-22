@@ -82,7 +82,7 @@ namespace advisor
                 .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turn);
         }
 
-        public async Task<FactionsStats> Stats([Parent] DbPlayer player) {
+        public async Task<FactionStats> Stats([Parent] DbPlayer player) {
             var stats = await db.Stats
                 .AsNoTracking()
                 .AsSplitQuery()
@@ -108,7 +108,7 @@ namespace advisor
                 }
             }
 
-            return new FactionsStats {
+            return new FactionStats {
                 Income = income,
                 Production = production.Select(x => new DbItem { Code = x.Key, Amount = x.Value }).ToList()
             };

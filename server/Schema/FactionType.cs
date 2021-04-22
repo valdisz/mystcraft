@@ -42,7 +42,7 @@ namespace advisor
                 .SingleOrDefaultAsync(x => x.FactionId == faction.Id && x.Number == number);
         }
 
-        public async Task<FactionsStats> Stats([Parent] DbFaction faction) {
+        public async Task<FactionStats> Stats([Parent] DbFaction faction) {
             var stats = await db.Stats
                 .AsNoTracking()
                 .AsSplitQuery()
@@ -66,7 +66,9 @@ namespace advisor
                 }
             }
 
-            return new FactionsStats {
+            return new FactionStats {
+                FactionNumber = faction.Number,
+                FactionName = faction.Name,
                 Income = income,
                 Production = production.Select(x => new DbItem { Code = x.Key, Amount = x.Value }).ToList()
             };

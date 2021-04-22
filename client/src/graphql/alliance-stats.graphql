@@ -1,0 +1,33 @@
+query GetAllianceStats($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      myUniversity {
+        stats {
+          ...TurnStats
+        }
+      }
+    }
+  }
+}
+
+fragment TurnStats on TurnStats {
+  turn
+  factions {
+    factionNumber
+    factionName
+    income {
+      ...IncomeStats
+    }
+    production {
+      ...Item
+    }
+  }
+}
+
+fragment IncomeStats on IncomeStats {
+  work
+  trade
+  pillage
+  tax
+  total
+}
