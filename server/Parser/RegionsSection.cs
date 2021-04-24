@@ -18,19 +18,24 @@ namespace advisor
         public Task<bool> CanParseAsync(Cursor<TextParser> cursor) => IsRegion(cursor);
 
         private async Task<bool> IsRegion(Cursor<TextParser> cursor) {
-            bool isRegion = false;
-            if (await cursor.NextAsync()) {
+            bool isRegionHeader() {
                 var p = cursor.Value.Pos;
                 cursor.Value.SkipChar('-');
                 var len = cursor.Value.Pos - p;
 
-                isRegion = len == 60;
                 cursor.Value.Reset();
+
+                return len > 10;
             }
 
+            if (isRegionHeader()) return true;
+
+            if (!await cursor.NextAsync()) return false;
+
+            var isReg = isRegionHeader();
             cursor.Back();
 
-            return isRegion;
+            return isReg;
         }
 
         private bool IsUnit(TextParser p) {
@@ -148,7 +153,7 @@ namespace advisor
 
                 await writer.WriteEndObjectAsync();
             }
-            while (await cursor.NextAsync() && await IsRegion(cursor));
+            while (await cursor.SkipEmptyLines() && await IsRegion(cursor));
 
             await writer.WriteEndArrayAsync();
             cursor.Back();

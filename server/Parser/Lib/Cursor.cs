@@ -93,6 +93,7 @@
 
         public static async Task<bool> SkipEmptyLines(this Cursor<TextParser> cursor) {
             while (await cursor.NextAsync()) {
+                if (cursor.Value.StartsWith(";")) continue; // comment
                 if (!cursor.Value.EOF) return true;
             }
 

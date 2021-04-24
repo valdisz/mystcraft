@@ -1,9 +1,13 @@
+.*
+facts/
 **/bin/
 **/obj/
 **/node_modules
 **/dist/
-facts/
-**/.*
 **/*.db
 **/wwwroot/
-appsettings.development.json
+server/**/.*
+server/appsettings.development.json
+client/.parcle-cache
+client/.cache
+client/src/assets

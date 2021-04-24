@@ -1,20 +1,20 @@
 {
   "name": "client",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "scripts": {
     "build": "parcel build src/index.html --no-source-maps",
     "build:debug": "parcel build src/index.html",
-    "start": "node proxy.js",
+    "start": "parcel src/index.html",
     "codegen": "graphql-codegen --config codegen.yaml",
-    "terrain:advisor": "spritesheet-js -n terrain-advisor -p assets -f pixi.js src/assets/terrain/advisor/*.png",
-    "terrain:fantasy": "spritesheet-js -n terrain-fantasy -p assets -f pixi.js src/assets/terrain/fantasy/*.png",
+    "terrain:advisor": "spritesheet-js -n terrain-advisor -p static -f pixi.js src/assets/terrain/advisor/*.png",
+    "terrain:fantasy": "spritesheet-js -n terrain-fantasy -p static -f pixi.js src/assets/terrain/fantasy/*.png",
     "assets": "yarn run terrain:advisor && yarn run terrain:fantasy",
     "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
     "coverage": "nyc -r text -e .ts -x \"src/*.test.ts\" yarn run test"
   },
   "dependencies": {
+    "@babel/plugin-proposal-decorators": "^7.13.15",
     "@material-ui/core": "^4.0.0",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -40,6 +40,9 @@
     "yaml": "^1.10.2"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-transform-react-jsx": "^7.13.12",
+    "@babel/preset-typescript": "^7.13.0",
     "@graphql-cli/codegen": "^1.17.8",
     "@graphql-cli/generate": "^4.0.0",
     "@graphql-codegen/cli": "^1.17.8",
@@ -47,6 +50,7 @@
     "@graphql-codegen/typescript": "^1.17.9",
     "@graphql-codegen/typescript-document-nodes": "^1.17.8",
     "@graphql-codegen/typescript-operations": "^1.17.8",
+    "@parcel/babel-preset-env": "^2.0.0-alpha.3",
     "@types/jasmine": "^3.6.9",
     "@types/lodash.throttle": "^4.1.6",
     "@types/parsimmon": "^1.10.6",
@@ -57,11 +61,12 @@
     "express": "^4.17.1",
     "graphql": "15.5.0",
     "graphql-cli": "^4.0.0",
-    "http-proxy-middleware": "^1.0.6",
+    "http-proxy-middleware": "^1.2.0",
     "jasmine": "^3.7.0",
     "nyc": "^15.1.0",
-    "parcel-bundler": "^1.12.4",
-    "parcel-plugin-static-files-copy": "^2.5.1",
+    "parcel": "^2.0.0-beta.2",
+    "parcel-reporter-multiple-static-file-copier": "^1.0.5",
+    "serve-static": "^1.14.1",
     "spritesheet-js": "^1.2.6",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
@@ -69,9 +74,10 @@
   "resolutions": {
     "graphql": "15.5.0"
   },
-  "staticFiles": {
-    "staticPath": [
-      "assets"
-    ]
-  }
+  "multipleStaticFileCopier": [
+    {
+      "origin": "static",
+      "destination": "dist/"
+    }
+  ]
 }

@@ -36,7 +36,7 @@ function SkillsTab() {
     const { stats } = useStore()
     const classes = useStyles()
 
-    return <Table size='small' stickyHeader>
+    return <Table size='small' stickyHeader={true}>
         <TableHead>
             <TableRow>
                 <TableCell>Skill</TableCell>
@@ -76,7 +76,7 @@ const TurnCell = styled(TableCell)`
 function AllianceIncome() {
     const { stats } = useStore()
 
-    return <Table size='small' stickyHeader>
+    return <Table size='small' stickyHeader={true}>
         <TableHead>
             <TableRow>
                 <TableCell>Faction</TableCell>
@@ -110,7 +110,7 @@ function AllianceIncome() {
 function AllianceProduction() {
     const { stats } = useStore()
 
-    return <Table size='small' stickyHeader>
+    return <Table size='small' stickyHeader={true}>
         <Observer>
             {() => <>
             <TableHead>
@@ -135,7 +135,7 @@ function AllianceProduction() {
 }
 
 export function StatsPage() {
-    const { game, stats } = useStore()
+    const { stats } = useStore()
     const { path, url } = useRouteMatch()
 
     React.useEffect(() => { stats.loadAllianceStats() }, [ ])
@@ -145,7 +145,7 @@ export function StatsPage() {
         <Grid container>
             <Grid item xs={12}>
                 <Observer>
-                    {() => <Tabs value={stats.tab} onChange={(_, value) => stats.setTab(value)}>
+                    {() => <Tabs value={url}>
                         <Tab label='Skills' component={Link} value={url} to={url} />
                         <Tab label='Alliance income' component={Link} value={`${url}/alliance-income`} to={`${url}/alliance-income`} />
                         <Tab label='Alliance production' component={Link} value={`${url}/alliance-production`} to={`${url}/alliance-production`} />

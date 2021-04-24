@@ -43,9 +43,6 @@ export class StatsStore {
         makeObservable(this)
     }
 
-    @observable tab: StatTabs = 'skills'
-    @action setTab = (tab: StatTabs) => this.tab = tab
-
     @computed get skills() {
         const { world, factionNumber } = this.game
 
@@ -147,9 +144,6 @@ export class StatsStore {
                 fac.production.sort((a, b) => index[a.code] - index[b.code])
             }
         }
-
-        console.log(index)
-        console.log(producedItems)
 
         runInAction(() => {
             this.allianceStats.replace(stats)

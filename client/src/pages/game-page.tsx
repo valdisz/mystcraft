@@ -401,7 +401,7 @@ const GameComponent = observer(() => {
                 <GameInfo>
                     <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
                 </GameInfo>
-                <Tabs value={location.pathname}>
+                <Tabs value={url}>
                     <Tab label='Map' component={Link} value={url} to={url} />
                     <Tab label='Statistics' component={Link} value={`${url}/stats`} to={`${url}/stats`} />
                 </Tabs>
