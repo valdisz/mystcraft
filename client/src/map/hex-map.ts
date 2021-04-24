@@ -50,7 +50,8 @@ export class HexMap {
                 this.renderer.resize(vp.width, vp.height)
 
                 this.update()
-            }
+            },
+            this.onClick
         )
 
         this.renderer = autoDetectRenderer({
@@ -71,8 +72,6 @@ export class HexMap {
         this.root.addChild(this.tiles)
         this.root.addChild(this.selected)
         this.root.addChild(this.settlements)
-
-        canvas.addEventListener('click', this.onClick)
     }
 
     destroy() {

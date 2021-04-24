@@ -12,6 +12,7 @@ export class Viewport {
         private mapWidth: number,
         private mapHeight: number,
         private onUpdate: (event: Viewport) => void,
+        private onClick: (e: MouseEvent, vp: Viewport) => void,
     ) {
         this.observer = new ResizeObserver(() =>
             this.updateBounds(this.origin.x, this.origin.y)
@@ -87,6 +88,10 @@ export class Viewport {
     }, 20);
 
     private onPanEnd = (e: MouseEvent) => {
+        if (this.paning === 'peding') {
+            this.onClick(e, this)
+        }
+
         this.paning = 'no';
     };
 

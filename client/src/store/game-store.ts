@@ -136,6 +136,10 @@ export class GameStore {
             this.region = reg ? observable(reg) : null
             this.unit = null
         }
+
+        if (reg) {
+            window.localStorage.setItem('coords', JSON.stringify(reg.coords))
+        }
     }
 
     @computed get units() {

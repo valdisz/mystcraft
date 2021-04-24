@@ -35,6 +35,15 @@ const GameGrid = styled.div`
     grid-template-areas:
         "structures map details"
         "units units orders";
+
+    @media (max-width: 640px) {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 2fr 1fr;
+        grid-template-areas:
+            "details"
+            "map"
+            "units";
+    }
 `
 
 const OrdersContainer = styled.div`
@@ -45,6 +54,10 @@ const OrdersContainer = styled.div`
 
     display: flex;
     align-items: stretch;
+
+    @media (max-width: 640px) {
+        display: none;
+    }
 `
 
 const OrdersEditor = styled(Editor)`
@@ -152,12 +165,35 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
             .then(() => {
                 gameMap.turnNumber = game.turn.number
 
+
+
                 if (game.region) {
                     const { x, y } = game.region.coords
                     gameMap.centerAt(x, y)
                 }
                 else {
-                    const { x, y } = game.world.levels[1].regions[0].coords
+                    let x;
+                    let y;
+                    let z = 1;
+
+                    const coords : {
+                        x: number,
+                        y: number,
+                        z: number
+                    } = JSON.parse(window.localStorage.getItem('coords'))
+
+                    if (coords) {
+                        x = coords.x
+                        y = coords.y
+                        z = coords.z
+                    }
+                    else {
+                        const c = game.world.levels[1].regions[0].coords
+                        x = c.x
+                        y = c.y
+                        z = 1
+                    }
+
                     gameMap.centerAt(x, y)
                 }
             })
@@ -326,6 +362,12 @@ const StructuresContainer = styled.div`
     flex-direction: column;
     min-height: 0;
     overflow: auto;
+
+    @media (max-width: 640px) {
+        && {
+            display: none;
+        }
+    }
 `
 
 const StructuresBody = styled.div`
