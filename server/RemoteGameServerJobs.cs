@@ -32,7 +32,7 @@ namespace advisor {
         private readonly IBackgroundJobClient backgroundJobs;
         private readonly ILogger logger;
 
-        [RecurringJob("0 12 * * 1,3,5", TimeZone = "America/Los_Angeles")]
+        [RecurringJob("0 12 * * 2,5", TimeZone = "America/Los_Angeles")]
         public async Task NewOrigins3(PerformContext context) {
             var localTurnNumber = await db.Players
                 .Select(x => x.LastTurnNumber)
