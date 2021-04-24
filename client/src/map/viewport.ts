@@ -34,7 +34,7 @@ export class Viewport {
     }
 
     pan: PIXI.Point
-    paning = false;
+    paning: 'no' | 'peding' | 'yes' = 'no';
 
     private updateBounds(x0: number, y0: number) {
         let x = x0
@@ -59,19 +59,26 @@ export class Viewport {
     }
 
     private onPanStart = (e: MouseEvent) => {
-        if (e.button !== 2) return
+        if (e.button !== 0) return
 
         this.pan = new PIXI.Point(e.clientX, e.clientY)
-        this.paning = true;
+        this.paning = 'peding';
     };
 
     private onPan = throttle((e: MouseEvent) => {
-        if (!this.paning) return;
+        if (this.paning === 'no') return;
 
         const deltaX = e.clientX - this.pan.x
         const deltaY = e.clientY - this.pan.y
 
-        this.pan = new PIXI.Point(e.clientX, e.clientY)
+        const len = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+        if (len > 4) {
+            this.paning = 'yes'
+        }
+
+        if (this.paning === 'yes') {
+            this.pan = new PIXI.Point(e.clientX, e.clientY)
+        }
 
         this.updateBounds(
             Math.floor(this.origin.x + deltaX),
@@ -80,7 +87,7 @@ export class Viewport {
     }, 20);
 
     private onPanEnd = (e: MouseEvent) => {
-        this.paning = false;
+        this.paning = 'no';
     };
 
     private raiseOnUpdate = () => {
