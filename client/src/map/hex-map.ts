@@ -228,6 +228,9 @@ export class HexMap {
     update() {
         if (this.loader.loading) return
 
+        const scale = this.viewport.scale
+        this.root.scale.set(scale)
+
         const p0 = new PIXI.Point(0, 0)
         const p1 = new PIXI.Point(this.viewport.width, this.viewport.height)
         const topLeft = DoubledCoord.fromCube(this.layout.pixelToHex(p0))

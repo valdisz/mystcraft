@@ -1,8 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Link, useParams, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom'
+import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, makeStyles } from '@material-ui/core'
+import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -30,7 +30,7 @@ const GameGrid = styled.div`
     min-height: 0;
     display: grid;
 
-    grid-template-columns: minmax(200px, 1fr) 4fr minmax(300px, 1fr);
+    grid-template-columns: minmax(200px, 1fr) 5fr minmax(300px, 1fr);
     grid-template-rows: 2fr 1fr;
     grid-template-areas:
         "structures map details"
@@ -94,7 +94,7 @@ const OrdersEditor = styled(Editor)`
 `
 
 const language = {
-    directive: /^@;(needs|tag)/mi,
+    directive: /^@;(needs|route|tag)/mi,
     comment: /^@?;.*/m,
     repeat: /^@/m,
     string: /"(?:""|[^"\r\f\n])*"/i,

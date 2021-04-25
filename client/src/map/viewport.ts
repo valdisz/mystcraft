@@ -26,16 +26,26 @@ export class Viewport {
         element.addEventListener('pointerleave', this.onPanEnd)
         element.addEventListener('pointerout', this.onPanEnd)
         element.addEventListener('contextmenu', this.onContextMenu)
+        element.addEventListener('wheel', this.onWheel)
     }
 
     private readonly observer;
 
     destroy() {
+        this.element.removeEventListener('pointerdown', this.onPanStart)
+        this.element.removeEventListener('pointermove', this.onPan)
+        this.element.removeEventListener('pointerup', this.onPanEnd)
+        this.element.removeEventListener('pointercancel', this.onPanEnd)
+        this.element.removeEventListener('pointerleave', this.onPanEnd)
+        this.element.removeEventListener('pointerout', this.onPanEnd)
+        this.element.removeEventListener('contextmenu', this.onContextMenu)
+        this.element.removeEventListener('wheel', this.onWheel)
         this.observer.unobserve(this.element)
     }
 
     pan: PIXI.Point
     paning: 'no' | 'peding' | 'yes' = 'no';
+    scale = 1
 
     private updateBounds(x0: number, y0: number) {
         let x = x0
@@ -57,6 +67,22 @@ export class Viewport {
     private onContextMenu = (e: MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
+    }
+
+    private onWheel = (e: WheelEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        // const s = Math.min(Math.max(.125, this.scale + e.deltaY * -0.001), 1)
+        // const w = this.width
+        // const h = this.height
+
+        // const sW = w > this.mapWidth ? this.element.clientWidth / w : s
+        // const sH = h > this.mapWidth ? this.element.clientHeight / h : s
+
+        // this.scale = Math.min(Math.max(sW, sH), 1)
+
+        // this.raiseOnUpdate();
     }
 
     private onPanStart = (e: MouseEvent) => {
@@ -99,8 +125,8 @@ export class Viewport {
         this.onUpdate && this.onUpdate(this);
     }
 
-    get width() { return this.element.clientWidth; }
-    get height() { return this.element.clientHeight; }
+    get width() { return this.element.clientWidth / this.scale; }
+    get height() { return this.element.clientHeight / this.scale; }
 
     setOffset(p: PIXI.Point) {
         this.origin.copyFrom(p)

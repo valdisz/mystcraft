@@ -145,6 +145,8 @@ export class StatsStore {
             }
         }
 
+        stats.reverse()
+
         runInAction(() => {
             this.allianceStats.replace(stats)
             this.allianceProducts.replace(producedItems.map(x => x.code))
