@@ -91,7 +91,7 @@ function AllianceIncome() {
             {() => <>
                 { stats.allianceStats.map(turn => <TableBody key={turn.turn}>
                     <TableRow>
-                        <TurnCell variant='head' colSpan={6}>Turn {turn.turn}</TurnCell>
+                        <TurnCell colSpan={6}>Turn {turn.turn}</TurnCell>
                     </TableRow>
                     { turn.factions.map(f => <TableRow hover key={f.factionNumber}>
                         <TableCell>{f.factionName} ({f.factionNumber})</TableCell>
@@ -121,7 +121,7 @@ function AllianceProduction() {
             </TableHead>
                 { stats.allianceStats.map(turn => <TableBody key={turn.turn}>
                     <TableRow>
-                        <TurnCell variant='head' colSpan={stats.allianceProducts.length + 1}>Turn {turn.turn}</TurnCell>
+                        <TurnCell colSpan={stats.allianceProducts.length + 1}>Turn {turn.turn}</TurnCell>
                     </TableRow>
                     { turn.factions.map(f => <TableRow hover key={f.factionNumber}>
                         <TableCell>{f.factionName} ({f.factionNumber})</TableCell>
