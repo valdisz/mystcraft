@@ -25,6 +25,16 @@ const TILE_H = 48;
 const OFFSET_X = 0;
 const OFFSET_Y = 0;
 
+/*
+
+hex corner indecies
+
+  2  1
+3      0
+  4  5
+
+*/
+
 export class HexMap {
     constructor(private canvas: HTMLCanvasElement, public readonly size: MapSize, public readonly getRegion: GetRegionCallback) {
         const origin = new Point(TILE_W / 2, TILE_H)
@@ -66,11 +76,13 @@ export class HexMap {
         this.tiles = new Container()
         this.outline = new Container()
         this.selected = new Container()
+        this.units = new Container()
         this.settlements = new Container()
 
         this.root.addChild(this.outline)
         this.root.addChild(this.tiles)
         this.root.addChild(this.selected)
+        this.root.addChild(this.units)
         this.root.addChild(this.settlements)
     }
 
@@ -85,6 +97,7 @@ export class HexMap {
     readonly tiles: Container
     readonly outline: Container
     readonly selected: Container
+    readonly units: Container
     readonly settlements: Container
 
     readonly renderer: Renderer
@@ -136,6 +149,8 @@ export class HexMap {
     load() {
         return new Promise((resolve, reject) => {
             this.loader.add('/terrain-advisor.json');
+            this.loader.add('/flag.svg');
+            this.loader.add('/galleon.svg');
 
             this.loader.onError.once(reject)
 
@@ -157,71 +172,117 @@ export class HexMap {
         if (col < 0) col += this.size.width
 
         const region = this.getRegion(col, row)
-        if (region) {
-            const p = this.layout.hexToPixel(hex)
-            p.x += OFFSET_X
-            p.y += OFFSET_Y
+        if (!region) return
 
-            const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain.code))
-            tile.anchor.set(0.5)
-            tile.position.copyFrom(p)
-            if (!region.isVisible) {
-                tile.tint = region.explored
-                    ? 0xb0b0b0 // darken region when no region report
-                    : 0x707070 // darken region more when not explored
+        const p = this.layout.hexToPixel(hex)
+        p.x += OFFSET_X
+        p.y += OFFSET_Y
 
-            }
-            this.tiles.addChild(tile)
+        const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain.code))
+        tile.anchor.set(0.5)
+        tile.position.copyFrom(p)
+        if (!region.isVisible) {
+            tile.tint = region.explored
+                ? 0xb0b0b0 // darken region when no region report
+                : 0x707070 // darken region more when not explored
 
-            const g = new PIXI.Graphics()
-            g.lineStyle(4, 0xcccccc)
-            g.drawPolygon(this.layout.polygonCorners(hex))
-            this.outline.addChild(g)
+        }
+        this.tiles.addChild(tile)
 
-            // settlement
-            if (region.settlement) {
-                let oX = 4
+        const corners = this.layout.polygonCorners(hex)
 
-                const pin = new PIXI.Graphics()
-                pin.beginFill(0xffffff)
-                pin.drawCircle(0, 0, 2)
-                pin.endFill()
+        const g = new PIXI.Graphics()
+        g.lineStyle(4, 0xcccccc)
+        g.drawPolygon(corners)
+        this.outline.addChild(g)
 
-                if (region.settlement.size === 'city' || region.settlement.size === 'town') {
-                    pin.lineStyle(1, 0xffffff)
-                    pin.drawCircle(0, 0, 4)
+        // settlement
+        if (region.settlement) {
+            let oX = 8
 
-                    oX += 4
+            const pin = new PIXI.Graphics()
+
+            switch (region.settlement.size) {
+                case 'village': {
+                    pin.beginFill(0xffffff)
+                    pin.drawCircle(0, 0, 3)
+                    pin.endFill()
+
+                    break
                 }
 
-                if (region.settlement.size === 'city') {
+                case 'town': {
                     pin.lineStyle(1, 0xffffff)
-                    pin.drawCircle(0, 0, 6)
+                    pin.drawCircle(0, 0, 5)
 
-                    oX += 4
+                    oX += 2
+
+                    break
                 }
 
-                pin.position.copyFrom(p)
-                this.settlements.addChild(pin)
+                case 'city': {
+                    pin.beginFill(0xffffff)
+                    pin.drawCircle(0, 0, 3)
+                    pin.endFill()
 
-                const txt = new PIXI.Text(region.settlement.name, {
-                    fontSize: '16px',
-                    fontFamily: 'Almendra',
-                    // fontWeight: 'bold',
-                    fill: 'white',
-                    dropShadow: true,
-                    dropShadowColor: '#000000',
-                    dropShadowAngle: Math.PI / 3,
-                    dropShadowDistance: 4,
-                })
-                txt.calculateBounds()
+                    pin.lineStyle(1, 0xffffff)
+                    pin.drawCircle(0, 0, 5)
 
-                txt.position.copyFrom(p)
-                txt.position.x += oX
-                txt.position.y -= (txt.height / 2)
+                    oX += 2
 
-                this.settlements.addChild(txt)
+                    break
+                }
             }
+
+            pin.position.copyFrom(p)
+            this.settlements.addChild(pin)
+
+            const txt = new PIXI.Text(region.settlement.name, {
+                fontSize: '16px',
+                fontFamily: 'Almendra',
+                fill: 'white',
+                dropShadow: true,
+                dropShadowColor: '#000000',
+                dropShadowAngle: Math.PI / 3,
+                dropShadowDistance: 4,
+            })
+            txt.calculateBounds()
+
+            txt.position.copyFrom(p)
+            txt.position.x += oX
+            txt.position.y -= (txt.height / 2)
+
+            this.settlements.addChild(txt)
+        }
+
+        // units
+        if (Object.values(region.troops).some(x => x.faction.isPlayer)) {
+            const flag = new PIXI.Sprite(this.loader.resources['/flag.svg'].texture)
+            flag.scale.set(0.125)
+            flag.anchor.set(0, flag.height * 0.125 / 2)
+
+            const yy = (corners[0].y - corners[1].y) / 4 + corners[1].y
+
+            flag.position.set(p.x, yy)
+
+            this.units.addChild(flag)
+        }
+
+        // objects
+        if (region.structures.length) {
+            const pin = new PIXI.Graphics()
+
+            pin.beginFill(0xff33aa)
+            pin.drawCircle(0, 0, 2)
+            pin.endFill()
+
+            const offs = (corners[5].y - corners[0].y) / 4
+            const yy = corners[5].y - offs
+            const xx = corners[4].x + offs
+
+            pin.position.set(xx, yy)
+
+            this.units.addChild(pin)
         }
     }
 
@@ -243,6 +304,7 @@ export class HexMap {
         this.tiles.removeChildren()
         this.outline.removeChildren()
         this.settlements.removeChildren()
+        this.units.removeChildren()
 
         for (let row = row0; row <= row1; row++) {
             for (let col = col0; col <= col1 ; col++) {

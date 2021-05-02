@@ -21,7 +21,7 @@ export function useCallbackRef<T>(initialValue: null | T | (() => T) = null): [ 
     return [ ref, callback ]
 }
 
-export function useCopy(content: boolean = false) {
+export function useCopy(content: boolean = false, options: ClipboardJS.Options = {}) {
     const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
 
     React.useEffect(() => {
@@ -29,9 +29,10 @@ export function useCopy(content: boolean = false) {
 
         const clip = content
             ? new ClipboardJS(ref, {
+                ...options,
                 text: (elm) => elm.textContent
             })
-            : new ClipboardJS(ref)
+            : new ClipboardJS(ref, options)
 
 
         return () => clip.destroy()

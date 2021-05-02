@@ -107,6 +107,7 @@ export class Ruleset {
                 itemMap[code] = ({ item, data })
             }
         }
+
         populateDict()
 
         for (const code in itemMap) {
@@ -304,5 +305,4 @@ interface ItemData {
     category: ItemCategory
     traits: TraitsData
     description: string
-
 }

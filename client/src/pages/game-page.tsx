@@ -1,8 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
-import { useCallbackRef } from '../lib'
-import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab } from '@material-ui/core'
+import { useCallbackRef, useCopy } from '../lib'
+import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -304,7 +304,14 @@ function UnitMounts({ items }: { items: List<Item> }) {
 
 const UnitsComponent = observer(() => {
     const { game } = useStore()
+    const copy = useCopy(false, {
+        text: game.toBattleSim
+    })
+
     return <UnitsContainer>
+        <Paper>
+            <Button ref={copy}>To Battle Sim</Button>
+        </Paper>
         <UnitsTable size='small' stickyHeader>
             <TableHead>
                 <TableRow>

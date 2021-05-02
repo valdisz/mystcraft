@@ -13,7 +13,13 @@ export class Faction {
 }
 
 export class Factions {
+    constructor() {
+        this.unknown = this.create(-1, '', false)
+    }
+
     private readonly factions: TypedMap<Faction> = { }
+
+    readonly unknown: Faction
 
     all() {
         return Object.values(this.factions)

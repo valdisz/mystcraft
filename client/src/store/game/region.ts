@@ -10,13 +10,14 @@ import { Ruleset } from "./ruleset"
 import { Wages } from "./wages"
 import { Structure, Unit, Troops, Factions } from './types'
 import { SettlementSize } from './settlement-size'
+import { TypedMap } from './typed-map'
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {
-        this.key = `${coords.x} ${coords.y} ${coords.z}`;
+        this.key = `${coords.x} ${coords.y} ${coords.z}`
     }
 
-    readonly key: string;
+    readonly key: string
 
     explored: boolean
     updatedAtTurn: number
@@ -25,20 +26,20 @@ export class Region {
         return this.units.length > 0 || this.structures.some(x => x.units.length > 0)
     }
 
-    province: Province;
-    terrain: TerrainInfo;
-    population: Item | null;
-    settlement: Settlement | null;
-    tax: number;
-    wages: Wages;
-    entertainment: number;
-    readonly wanted: List<Item> = new List();
-    readonly forSale: List<Item> = new List();
-    readonly products: List<Item> = new List();
+    province: Province
+    terrain: TerrainInfo
+    population: Item | null
+    settlement: Settlement | null
+    tax: number
+    wages: Wages
+    entertainment: number
+    readonly wanted: List<Item> = new List()
+    readonly forSale: List<Item> = new List()
+    readonly products: List<Item> = new List()
 
-    readonly units: Unit[] = [];
-    // readonly troops: Troops[] = [];
-    readonly structures: Structure[] = [];
+    readonly units: Unit[] = []
+    readonly troops: TypedMap<Troops> = {}
+    readonly structures: Structure[] = []
 
     static from(src: RegionFragment, factions: Factions, ruleset: Ruleset) {
         const reg = new Region(src.id, new Coords(src.x, src.y, src.z, src.label));
@@ -97,12 +98,17 @@ export class Region {
             unit.region = reg
             reg.units.push(unit)
 
-            if (unitSource.faction) {
-                const faction = factions.get(unitSource.faction.number)
+            const faction = unitSource.faction
+                ? factions.get(unitSource.faction.number)
+                : factions.unknown
 
-                unit.faction = faction
-                faction.troops.add(unit)
+            unit.faction = faction
+            faction.troops.add(unit)
+
+            if (!reg.troops[faction.num]) {
+                reg.troops[faction.num] = new Troops(faction)
             }
+            reg.troops[faction.num].add(unit)
         }
 
         for (const structSrc of src.structures) {
@@ -118,12 +124,17 @@ export class Region {
                 reg.units.push(unit)
                 str.units.push(unit)
 
-                if (unitSource.faction) {
-                    const faction = factions.get(unitSource.faction.number)
+                const faction = unitSource.faction
+                    ? factions.get(unitSource.faction.number)
+                    : factions.unknown
 
-                    unit.faction = faction
-                    faction.troops.add(unit)
+                unit.faction = faction
+                faction.troops.add(unit)
+
+                if (!reg.troops[faction.num]) {
+                    reg.troops[faction.num] = new Troops(faction)
                 }
+                reg.troops[faction.num].add(unit)
             }
         }
 

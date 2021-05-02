@@ -103,7 +103,7 @@ export class GameStore {
         })
 
         for (const faction of turnDetails.data.node.factions) {
-            world.addFaction(faction.number, faction.name, this.factionNumber === myPlayer.factionNumber)
+            world.addFaction(faction.number, faction.name, faction.number === this.factionNumber)
         }
 
         let cursor: string = null
@@ -140,6 +140,8 @@ export class GameStore {
         if (reg) {
             window.localStorage.setItem('coords', JSON.stringify(reg.coords))
         }
+
+        console.log(reg)
     }
 
     @computed get units() {
@@ -154,4 +156,21 @@ export class GameStore {
 
     @observable unit: Unit = null
     @action selectUnit = (unit: Unit) => this.unit = unit
+
+    toBattleSim = () => {
+        const list = this.units.map(x => ({
+            name: x.name,
+            skills: x.skills.all.map(s => ({
+                abbr: s.code,
+                level: s.level
+            })),
+            items: x.inventory.items.all.map(i => ({
+                abbr: i.code,
+                amount: i.amount
+            })),
+            flags: x.flags
+        }))
+
+        return JSON.stringify(list)
+    }
 }

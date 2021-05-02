@@ -1,13 +1,20 @@
 import { Item } from './item';
-import { ItemInfo } from "./item-info";
+import { ItemInfo } from './item-info';
 import { List } from './list';
 import { Unit } from './unit';
-import { Transfer } from "./transfer";
-import { Income } from "./income";
-import { TransferOutcome } from "./transfer-outcome";
+import { Income } from './income';
 
-export class Book {
 
+export enum TransferOutcome {
+    Ok,
+    NotEnaugh,
+    NoItem
+}
+
+export interface Transfer {
+    target: Inventory;
+    item: ItemInfo;
+    amount: number;
 }
 
 export class Tx {
@@ -27,7 +34,7 @@ export class Account {
 }
 
 export class Inventory {
-    constructor(public readonly owner: Unit) {
+    constructor() {
     }
 
     readonly items = new List<Item>();
@@ -44,7 +51,7 @@ export class Inventory {
         work: 0
     };
 
-    transfer(target: Unit, itemOrCode: ItemInfo | string, amount?: number) {
+    transfer(target: Inventory, itemOrCode: ItemInfo | string, amount?: number) {
         const code = typeof itemOrCode === 'string' ? itemOrCode : itemOrCode.code;
         const item = this.balance.get(code);
         const src = this.items.get(code);
@@ -58,7 +65,7 @@ export class Inventory {
         }
 
         this.debit.push({ amount, target, item: item.info });
-        target.inventory.credit.push({ amount, target: this.owner, item: item.info });
+        target.credit.push({ amount, target: this, item: item.info });
 
         // todo: update balance
     }
@@ -66,3 +73,33 @@ export class Inventory {
     receive(source: Unit, item: ItemInfo, amount: number) {
     }
 }
+
+/*
+
+Turn processing is divided into several phases, which are producing different inputs and outputs.
+Invetntory movement must take into account those phases.
+Each inventory movement is dependeant on some command.
+As well as subject of movement can be either unit or region itself.
+
+Region contains limited or unlimited set of resources, that can be used.
+Unit contains always limited amount of items.
+
+*/
+
+// class Entry {
+
+// }
+
+// class
+
+// class Book {
+
+
+//     balance() {
+
+//     }
+
+//     entry() {
+
+//     }
+// }
