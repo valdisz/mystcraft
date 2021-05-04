@@ -63,6 +63,7 @@
     "graphql-cli": "^4.0.0",
     "http-proxy-middleware": "^1.2.0",
     "jasmine": "^3.7.0",
+    "jasmine-spec-reporter": "^7.0.0",
     "nyc": "^15.1.0",
     "parcel": "^2.0.0-beta.2",
     "parcel-reporter-multiple-static-file-copier": "^1.0.5",
