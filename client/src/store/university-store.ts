@@ -105,6 +105,7 @@ function* getSkillGroups() {
             new Skill({ code: 'PHDE' }),
             new Skill({ code: 'PHBE' }),
             new Skill({ code: 'PHUN' }),
+            new Skill({ code: 'DISP' }),
         ]
     }
 
@@ -163,6 +164,7 @@ function* getSkillGroups() {
             new Skill({ code: 'GATE' }),
             new Skill({ code: 'FARS' }),
             new Skill({ code: 'TELE' }),
+            new Skill({ code: 'PORT' }),
         ]
     }
 
@@ -182,9 +184,7 @@ function* getSkillGroups() {
     yield {
         skills: [
             new Skill({ code: 'EQUA' }),
-            new Skill({ code: 'PORT' }),
             new Skill({ code: 'MIND' }),
-            new Skill({ code: 'DISP' }),
             new Skill({ code: 'CRSF' }),
             new Skill({ code: 'CRPA' }),
             new Skill({ code: 'CRSS' }),
