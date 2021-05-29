@@ -158,19 +158,32 @@ export class GameStore {
     @action selectUnit = (unit: Unit) => this.unit = unit
 
     toBattleSim = () => {
-        const list = this.units.map(x => ({
-            name: x.name,
-            skills: x.skills.all.map(s => ({
-                abbr: s.code,
-                level: s.level
-            })),
-            items: x.inventory.items.all.map(i => ({
-                abbr: i.code,
-                amount: i.amount
-            })),
-            flags: x.flags
-        }))
+        // const list = this.units.map(x => {
+        //     const unit = { }
 
-        return JSON.stringify(list)
+
+        //     ({
+        //         name: x.name,
+        //         skills: x.skills.all.map(s => ({
+        //             abbr: s.code,
+        //             level: s.level
+        //         })),
+        //         items: x.inventory.items.all.map(i => ({
+        //             abbr: i.code,
+        //             amount: i.amount
+        //         })),
+        //         combatSpell: x.combatSpell?.code,
+        //         flags: x.flags
+        //     })
+
+        // })
+
+        // return JSON.stringify(list)
+
+        return ''
     }
+}
+
+interface BattlesimUnit {
+    name: string
 }
