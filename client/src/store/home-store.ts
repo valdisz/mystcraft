@@ -54,7 +54,7 @@ export class HomeStore {
     @observable uploading = false
 
     uploadPlayerId: string
-    uploadAction: 'report' | 'map' = 'report'
+    uploadAction: 'report' | 'map' | 'ruleset' = 'report'
 
     triggerUploadReport = (playerId: string) => {
         this.uploadPlayerId = playerId
@@ -66,6 +66,13 @@ export class HomeStore {
     triggerImportMap = (playerId: string) => {
         this.uploadPlayerId = playerId
         this.uploadAction = 'map'
+
+        this.fileUpload?.click()
+    }
+
+    triggerRuleset = (gameId: string) => {
+        this.uploadPlayerId = gameId
+        this.uploadAction = 'ruleset'
 
         this.fileUpload?.click()
     }

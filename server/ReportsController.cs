@@ -14,15 +14,17 @@ namespace advisor {
     [Authorize]
     [Route("api")]
     public class ReportsController : ControllerBase {
-        public ReportsController(IAuthorizationService authorization,IIdSerializer relayId, IMediator mediator) {
+        public ReportsController(IAuthorizationService authorization,IIdSerializer relayId, IMediator mediator, Database database) {
             this.authorization = authorization;
             this.relayId = relayId;
             this.mediator = mediator;
+            this.database = database;
         }
 
         private readonly IAuthorizationService authorization;
         private readonly IIdSerializer relayId;
         private readonly IMediator mediator;
+        private readonly Database database;
 
         [HttpPost("{playerId}/report")]
         public async Task<IActionResult> UploadReports([Required, FromRoute] string playerId) {
@@ -66,6 +68,32 @@ namespace advisor {
             string map = await textReader.ReadToEndAsync();
 
             await mediator.Send(new ImportMap(playerIdValue, map));
+
+            return Ok();
+        }
+
+        [HttpPost("{gameId}/ruleset")]
+        [Authorize(Roles = Roles.GameMaster)]
+        public async Task<IActionResult> UploadRuleset([Required, FromRoute] string gameId) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (Request.Form.Files.Count != 1) return UnprocessableEntity();
+
+            var relayGameId = relayId.Deserialize(gameId);
+            if (relayGameId.TypeName != "Game") return BadRequest();
+
+            var gameIdValue = (long) relayGameId.Value;
+
+            var game = await database.Games.FindAsync(gameIdValue);
+            if (game == null) return NotFound();
+
+            var file = Request.Form.Files[0];
+
+            await using var stream = file.OpenReadStream();
+            using var textReader = new StreamReader(stream);
+
+            game.Ruleset = await textReader.ReadToEndAsync();
+
+            await database.SaveChangesAsync();
 
             return Ok();
         }

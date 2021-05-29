@@ -26,14 +26,16 @@ interface GameActionsProps {
     onUploadReport: () => void
     onUploadMap: () => void
     onDelete: () => void
+    onRuleset: () => void
 }
 
-function GameActions({ disabled, onUploadReport, onDelete, onUploadMap }: GameActionsProps) {
+function GameActions({ disabled, onUploadReport, onDelete, onUploadMap, onRuleset }: GameActionsProps) {
     return <SplitButton disabled={disabled} color='default' size='small' variant='outlined'
         onClick={onUploadReport}
         actions={[
             { content: 'Import map', onAction: onUploadMap },
             { content: 'Delete', onAction: onDelete },
+            { content: 'Update Ruleset', onAction: onRuleset }
         ]}>
             Load turn
     </SplitButton>
@@ -121,7 +123,8 @@ function GameItem({ game }: GameItemProps) {
                             disabled={home.uploading}
                             onUploadReport={() => home.triggerUploadReport(game.myPlayer.id)}
                             onUploadMap={() => home.triggerImportMap(game.myPlayer.id)}
-                            onDelete={() => home.deleteGame(game.id)} />
+                            onDelete={() => home.deleteGame(game.id)}
+                            onRuleset={() => home.triggerRuleset(game.id)} />
                     </>
                     : <Button color='primary' size='small' variant='outlined' onClick={() => home.joinGame(game.id)}>Join</Button> }
             </Observer>
