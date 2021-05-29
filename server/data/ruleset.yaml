@@ -4733,7 +4733,7 @@ skills:
 
   MANI:
     name: manipulation
-    magic: false
+    magic: true
     description:
       - "manipulation [MANI] 1: A unit with this skill becomes an apprentice. While apprentices cannot cast spells directly, they can use magic items normally only usable by mages. This skill costs 100 silver per month of study."
       - "manipulation [MANI] 2: No skill report."
