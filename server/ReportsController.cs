@@ -10,6 +10,7 @@ namespace advisor {
     using MediatR;
     using HotChocolate.Types.Relay;
     using advisor.Features;
+    using advisor.Persistence;
 
     [Authorize]
     [Route("api")]
