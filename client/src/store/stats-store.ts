@@ -78,7 +78,7 @@ export class StatsStore {
 
             if (aMagic !== bMagic) return aMagic - bMagic
 
-            return a.skill.name.localeCompare(b.skill.name)
+            return (a.skill.name ?? a.skill.code).localeCompare(b.skill.name ?? b.skill.code)
         })
 
         return skillStats
