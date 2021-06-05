@@ -72,7 +72,7 @@ namespace advisor {
 
             if (report == null) return NotFound();
 
-            return Content(report, "text");
+            return Content(report, "text/plain");
         }
 
         [HttpPost("{playerId}/map")]
