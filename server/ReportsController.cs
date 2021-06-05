@@ -55,7 +55,7 @@ namespace advisor {
         }
 
         [HttpGet("{playerId}/report/{turnNumber}/{factionNumber}")]
-        [Authorize(Roles = Roles.GameMaster)]
+        [Authorize(Policy = Policies.GameMasters)]
         public async Task<IActionResult> UploadRuleset([Required, FromRoute] string playerId, [Required, FromRoute] int turnNumber, [Required, FromRoute] int factionNumber) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -97,7 +97,7 @@ namespace advisor {
         }
 
         [HttpPost("{gameId}/ruleset")]
-        [Authorize(Roles = Roles.GameMaster)]
+        [Authorize(Policy = Policies.GameMasters)]
         public async Task<IActionResult> UploadRuleset([Required, FromRoute] string gameId) {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             if (Request.Form.Files.Count != 1) return UnprocessableEntity();
