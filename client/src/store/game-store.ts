@@ -140,8 +140,6 @@ export class GameStore {
         if (reg) {
             window.localStorage.setItem('coords', JSON.stringify(reg.coords))
         }
-
-        console.log(reg)
     }
 
     @computed get units() {
@@ -157,33 +155,92 @@ export class GameStore {
     @observable unit: Unit = null
     @action selectUnit = (unit: Unit) => this.unit = unit
 
+
+    @observable battleSimOpen = false
+    readonly attackers: IObservableArray<Unit> = observable([])
+    readonly defenders: IObservableArray<Unit> = observable([])
+
+    @action addAttacker = (unit: Unit) => this.attackers.push(unit)
+    @action addDefender = (unit: Unit) => this.defenders.push(unit)
+    @action resetBattleSim = () => {
+        this.attackers.clear()
+        this.defenders.clear()
+    }
+
+    @action openBattleSim = () => {
+        this.resetBattleSim()
+        this.battleSimOpen = true
+    }
+
+    @action closeBattleSim = () => {
+        this.resetBattleSim()
+        this.battleSimOpen = false
+    }
+
     toBattleSim = () => {
-        // const list = this.units.map(x => {
-        //     const unit = { }
+        function toBattleSimUnit(unit: Unit) {
+            const u: BattleSimUnit = {
+                name: `${unit.name} - ${unit.num}`,
+                skills: unit.skills.all.map(s => ({
+                    abbr: s.code,
+                    level: s.level
+                })),
+                items: unit.inventory.items.all
+                    .map(i => ({
+                        abbr: i.code,
+                        amount: i.amount
+                    })),
+                combatSpell: unit.combatSpell?.code,
+                flags: unit.flags.filter(x => x === 'behind') as any[]
+            }
 
+            if (!u.skills.length) delete u.skills
+            if (!u.items.length) delete u.items
+            if (!u.flags.length) delete u.flags
+            if (!u.combatSpell) delete u.combatSpell
 
-        //     ({
-        //         name: x.name,
-        //         skills: x.skills.all.map(s => ({
-        //             abbr: s.code,
-        //             level: s.level
-        //         })),
-        //         items: x.inventory.items.all.map(i => ({
-        //             abbr: i.code,
-        //             amount: i.amount
-        //         })),
-        //         combatSpell: x.combatSpell?.code,
-        //         flags: x.flags
-        //     })
+            return u
+        }
 
-        // })
+        const sim: BattleSim = {
+            attackers: {
+                units: this.attackers.map(toBattleSimUnit)
+            },
+            defenders: {
+                units: this.defenders.map(toBattleSimUnit)
+            }
+        }
 
-        // return JSON.stringify(list)
+        const json = JSON.stringify(sim)
+        console.log(json)
 
-        return ''
+        return json
     }
 }
 
-interface BattlesimUnit {
-    name: string
+export interface BattleSimItem {
+    abbr: string;
+    amount: number;
+}
+
+export interface BattleSimUnit {
+    name: string;
+    items: BattleSimItem[];
+    skills: BattleSimSkill[];
+    flags: ('behind')[];
+    combatSpell: string;
+}
+
+export interface BattleSimSkill {
+    abbr: string;
+    level: number;
+}
+
+export interface BattleSimUnitList {
+    units: BattleSimUnit[]
+}
+
+export interface BattleSim {
+    attackers: BattleSimUnitList
+    defenders: BattleSimUnitList
 }

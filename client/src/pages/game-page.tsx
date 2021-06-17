@@ -2,7 +2,11 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
 import { useCallbackRef, useCopy } from '../lib'
-import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button } from '@material-ui/core'
+import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
+    DialogActions, DialogTitle, DialogContent, DialogContentText,
+    Grid,
+    makeStyles, createStyles, Theme,
+    List as MaterialList, ListItem, ListItemText  } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -15,6 +19,8 @@ import { RegionSummary } from '../components/region-summary'
 import { StatsPage } from './stats-page'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
+import { Dialog } from '@material-ui/core'
+import CloseIcon from '@material-ui/icons/Close'
 
 const GameContainer = styled.div`
     width: 100%;
@@ -302,15 +308,116 @@ function UnitMounts({ items }: { items: List<Item> }) {
     return <>{total} {names}</>
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        appBar: {
+            position: 'relative',
+        },
+        title: {
+            marginLeft: theme.spacing(2),
+            flex: 1
+        }
+    })
+)
+
+
 const UnitsComponent = observer(() => {
     const { game } = useStore()
     const copy = useCopy(false, {
         text: game.toBattleSim
     })
+    const classes = useStyles()
 
     return <UnitsContainer>
         <Paper>
-            <Button ref={copy}>To Battle Sim</Button>
+            <Button onClick={game.openBattleSim}>Battle Sim</Button>
+            <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
+                <AppBar className={classes.appBar}>
+                    <Toolbar>
+                        <IconButton edge="start" color="inherit" onClick={game.closeBattleSim}><CloseIcon /></IconButton>
+                        <Typography variant="h6" className={classes.title}>Battle Sim</Typography>
+                        <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
+                        <Button ref={copy} color="inherit">Copy</Button>
+                    </Toolbar>
+                </AppBar>
+                <DialogContent>
+                    <DialogContentText>Select battle sim sides</DialogContentText>
+                    <Grid container>
+                        <Grid item xs={6}>
+                            <Typography>Attackers</Typography>
+                            <MaterialList>
+                                {game.attackers.map(x => <ListItem key={x.id}>
+                                        <ListItemText primary={`${x.name} (${x.num})`} secondary={<UnitMen items={x.inventory.items} />} />
+                                    </ListItem>
+                                )}
+                            </MaterialList>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography>Defenders</Typography>
+                            <MaterialList>
+                                {game.defenders.map(x => <ListItem key={x.id}>
+                                        <ListItemText primary={`${x.name} (${x.num})`} secondary={<UnitMen items={x.inventory.items} />} />
+                                    </ListItem>
+                                )}
+                            </MaterialList>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Typography>All Units</Typography>
+                            <UnitsTable size='small' stickyHeader>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell></TableCell>
+                                        <TableCell className='structure-nr'></TableCell>
+                                        <TableCell className='structure-name'>Structure</TableCell>
+                                        <TableCell className='faction'>Faction</TableCell>
+                                        <TableCell className='unit-nr'>Unit Nr.</TableCell>
+                                        <TableCell className='unit-name'>Name</TableCell>
+                                        <TableCell className='men'>Men</TableCell>
+                                        <TableCell className='mounts'>Mounts</TableCell>
+                                        <TableCell className='items'>Items</TableCell>
+                                        <TableCell className='skills'>Skills</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                {game.units.map((unit) => {
+                                    const rows = unit.description ? 2 : 1
+                                    const noBorder = rows > 1 ? 'no-border' : ''
+
+                                    return <React.Fragment key={unit.id}>
+                                        <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+                                            <TableCell rowSpan={rows}>
+                                                <Button onClick={() => game.addAttacker(unit)}>Attacker</Button>
+                                                <Button onClick={() => game.addDefender(unit)}>Defender</Button>
+                                            </TableCell>
+                                            <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+                                            <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+                                            <TableCell rowSpan={rows} className='faction'>{unit.faction ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
+                                            <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
+                                            <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
+                                            <TableCell className={`men ${noBorder}`}>
+                                                <UnitMen items={unit.inventory.items} />
+                                            </TableCell>
+                                            <TableCell className={`mounts ${noBorder}`}>
+                                                <UnitMounts items={unit.inventory.items} />
+                                            </TableCell>
+                                            <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+                                            <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+
+                                        </TableRow>
+                                        { rows > 1 && <TableRow>
+                                            <TableCell className='unit-nr'></TableCell>
+                                            <TableCell colSpan={5} className='description'>
+                                                {unit.description}
+                                            </TableCell>
+                                        </TableRow> }
+                                    </React.Fragment>
+                                })}
+                                </TableBody>
+                            </UnitsTable>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+            </Dialog>
         </Paper>
         <UnitsTable size='small' stickyHeader>
             <TableHead>

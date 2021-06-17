@@ -14,7 +14,6 @@
     "coverage": "nyc -r text -e .ts -x \"src/*.test.ts\" yarn run test"
   },
   "dependencies": {
-    "@babel/plugin-proposal-decorators": "^7.13.15",
     "@material-ui/core": "^4.0.0",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
@@ -43,6 +42,7 @@
     "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/plugin-transform-react-jsx": "^7.13.12",
     "@babel/preset-typescript": "^7.13.0",
+    "@babel/plugin-proposal-decorators": "^7.13.15",
     "@graphql-cli/codegen": "^1.17.8",
     "@graphql-cli/generate": "^4.0.0",
     "@graphql-codegen/cli": "^1.17.8",

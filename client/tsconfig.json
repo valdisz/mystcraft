@@ -1,7 +1,8 @@
 {
     "include": [
-        "./src/**/*"
-, "src/.advisor"    ],
+        "./src/**/*",
+        "src/.advisor"
+    ],
     "exclude": [
         "node_modules",
         ".cache",
