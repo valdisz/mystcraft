@@ -26,6 +26,33 @@ namespace advisor {
         private readonly AccessControl accessControl;
         private readonly IMediator mediator;
 
+        [HttpPost("login-as")]
+        [Authorize(Policy = Policies.Root)]
+        public async Task<IActionResult> LoginAsync([FromForm, Required, EmailAddress] string email) {
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
+
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email);
+            if (user == null) {
+                return NotFound();
+            }
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            var roles = user.Roles.Select(x => new Claim(WellKnownClaimTypes.Role, x.Role));
+
+            var identity = new ClaimsIdentity(new[] {
+                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
+                new Claim(WellKnownClaimTypes.Email, user.Email),
+            }.Concat(roles), CookieAuthenticationDefaults.AuthenticationScheme, null, WellKnownClaimTypes.Role);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            return NoContent();
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync([FromForm] LoginModel model) {
             if (!ModelState.IsValid) {
