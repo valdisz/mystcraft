@@ -15,6 +15,10 @@
 
     class Program {
         public static Task Main(string[] args) {
+            if (Console.In.Peek() != -1) {
+                return ConvertAsync(Console.In);
+            }
+
             if (args == null || args.Length == 0) {
                 return RunServerAsync(args);
             }
@@ -101,8 +105,12 @@
             }
         }
 
-        public static async Task RunConverterAsync(string[] args) {
+        public static Task RunConverterAsync(string[] args) {
             using var reader = File.OpenText(string.Concat(args));
+            return ConvertAsync(reader);
+        }
+
+        public static async Task ConvertAsync(TextReader reader) {
             using var converter = new AtlantisReportJsonConverter(reader);
 
             using JsonWriter writer = new JsonTextWriter(Console.Out);
