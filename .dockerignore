@@ -2,10 +2,11 @@
 facts/
 **/bin/
 **/obj/
-**/node_modules
+**/node_modules/
 **/dist/
 **/*.db
 **/wwwroot/
+**/assets/
 server/**/.*
 server/appsettings.development.json
 client/.parcle-cache

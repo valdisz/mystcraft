@@ -10,6 +10,7 @@ import { Region } from "./game/region"
 import { World } from "./game/world"
 import { WorldInfo, WorldLevel } from './game/world-info'
 import { Unit } from './game/types'
+import { saveAs } from 'file-saver'
 
 export class TurnsStore {
     constructor() {
@@ -177,6 +178,9 @@ export class GameStore {
         this.battleSimOpen = false
     }
 
+    isAttacker = (unit: Unit) => this.attackers.some(x => x.id === unit.id)
+    isDefender = (unit: Unit) => this.defenders.some(x => x.id === unit.id)
+
     toBattleSim = () => {
         function toBattleSimUnit(unit: Unit) {
             const u: BattleSimUnit = {
@@ -212,9 +216,9 @@ export class GameStore {
         }
 
         const json = JSON.stringify(sim)
-        console.log(json)
 
-        return json
+        const blob = new Blob([json], { type: 'application/json' })
+        saveAs(blob, 'battlesim.json')
     }
 }
 
