@@ -1,5 +1,4 @@
-namespace advisor
-{
+namespace advisor {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -22,11 +21,17 @@ namespace advisor
 
     [ExtendObjectType(Name = "Structure")]
     public class StructureResolvers {
-        public StructureResolvers(Database db) {
+        public StructureResolvers(Database db, IIdSerializer idSerializer) {
             this.db = db;
+            this.idSerializer = idSerializer;
         }
 
         private readonly Database db;
+        private readonly IIdSerializer idSerializer;
+
+        public string RegionId([Parent] DbStructure structure) {
+            return idSerializer.Serialize("Region", structure.RegionId);
+        }
 
         public Task<List<DbUnit>> GetUnits([Parent] DbStructure structure) {
             return db.Units

@@ -37,22 +37,26 @@
         [UsePaging]
         public IQueryable<DbRegion> GetRegions([Parent] DbTurn turn) {
             return db.Regions
+                .OrderBy(x => x.Id)
                 .Where(x => x.TurnId == turn.Id);
         }
 
         [UsePaging]
         public IQueryable<DbStructure> GetStructures([Parent] DbTurn turn) {
             return db.Structures
-                .Include(x => x.Region)
+                .OrderBy(x => x.Id)
                 .Where(x => x.TurnId == turn.Id);
         }
 
         [UsePaging]
         public IQueryable<DbUnit> GetUnits([Parent] DbTurn turn) {
             return db.Units
+                .AsSplitQuery()
                 .Include(x => x.Faction)
+                .OrderBy(x => x.Id)
                 .Where(x => x.TurnId == turn.Id);
         }
+
         public Task<List<DbFaction>> GetFactions([Parent] DbTurn turn) {
             return db.Factions
                 .Where(x => x.TurnId == turn.Id)

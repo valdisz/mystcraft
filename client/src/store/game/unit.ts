@@ -4,7 +4,7 @@ import { ItemInfo } from "./item-info";
 import { List } from './list';
 import { Ruleset } from './ruleset';
 import { Capacity } from './move-capacity';
-import { Faction } from "./faction";
+import { Faction, Factions } from "./faction";
 import { Flag } from "./flag";
 import { Skill } from "./skill";
 import { SkillInfo } from "./skill-info";
@@ -24,9 +24,10 @@ export class Unit {
             makeObservable(this)
     }
 
-    readonly inventory = new Inventory(this);
+    readonly inventory = new Inventory();
 
-    faction?: Faction;
+    seq: number
+    faction: Faction;
     // troops: Troops;
     region: Region;
     structure?: Structure;
@@ -49,8 +50,19 @@ export class Unit {
         return this.inventory.items.get(this.ruleset.money)?.amount ?? 0
     }
 
-    static from(src: UnitFragment, ruleset: Ruleset) {
+    static from(src: UnitFragment, factions: Factions, ruleset: Ruleset) {
         const unit = new Unit(src.id, src.number, src.name, ruleset)
+        unit.seq = src.sequence
+
+        if (src.faction) {
+            const faction = factions.get(src.faction.number) ?? factions.create(src.faction.number, src.faction.name, false)
+            unit.faction = faction
+        }
+        else {
+            unit.faction = factions.unknown
+        }
+
+        unit.faction.troops.add(unit)
 
         unit.description = src.description
         if (unit.description && !unit.description.endsWith('.')) unit.description += '.'

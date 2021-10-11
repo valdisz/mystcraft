@@ -1,10 +1,12 @@
 import { ApolloQueryResult } from 'apollo-client'
 import { makeObservable, observable, IObservableArray, runInAction, action, computed } from 'mobx'
 import { CLIENT } from '../client'
-import { TurnSummaryFragment } from '../schema'
+import { RegionFragment, StructureFragment, TurnDetailsFragment, TurnSummaryFragment, UnitFragment } from '../schema'
 import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
-import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
 import { GetTurnDetails, GetTurnDetailsQuery, GetTurnDetailsQueryVariables } from '../schema'
+import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
+import { GetStructures, GetStructuresQuery, GetStructuresQueryVariables } from '../schema'
+import { GetUnits, GetUnitsQuery, GetUnitsQueryVariables } from '../schema'
 import { Ruleset } from "./game/ruleset"
 import { Region } from "./game/region"
 import { World } from "./game/world"
@@ -18,12 +20,30 @@ export class TurnsStore {
     }
 }
 
+interface Progress {
+    total: number
+    position: number
+}
+
+interface ProgressCallback {
+    (progress: Progress): void
+}
+
 export class GameStore {
     constructor() {
         makeObservable(this)
     }
 
     @observable loading = true
+    @action startLoading = () => {
+        this.loading = true
+        this.loadingMessage = 'Loading...'
+    }
+
+    @action stopLoading = () => this.loading = false
+
+    @observable loadingMessage = 'Loading...'
+    @action updateLoadingMessage = (message: string) => this.loadingMessage = message
 
     @observable name: string
     @observable rulesetName: string
@@ -33,11 +53,76 @@ export class GameStore {
     @observable factionName: string
     @observable factionNumber: number
 
-    turns: IObservableArray<TurnSummaryFragment> = observable([])
-    @observable turn: TurnSummaryFragment
+    turns: IObservableArray<TurnDetailsFragment> = observable([])
+    @observable turn: TurnDetailsFragment
 
     @observable world: World
     gameId: string = null
+
+    async loadRegions(turnId: string, onProgress: ProgressCallback) {
+        const items: RegionFragment[] = []
+
+        let cursor: string = null
+        let regions: ApolloQueryResult<GetRegionsQuery> = null
+        do {
+            regions = await CLIENT.query<GetRegionsQuery, GetRegionsQueryVariables>({
+                query: GetRegions,
+                variables: { cursor, turnId, pageSize: 1000 },
+            })
+
+
+            regions.data.node.regions.edges.forEach(x => items.push(x.node))
+
+            onProgress({ total: regions.data.node.regions.totalCount, position: items.length })
+            cursor = regions.data.node.regions.pageInfo.endCursor
+        }
+        while (regions.data.node.regions.pageInfo.hasNextPage)
+
+        return items
+    }
+
+    async loadStructures(turnId: string, onProgress: ProgressCallback) {
+        const items: StructureFragment[] = []
+
+        let cursor: string = null
+        let structures: ApolloQueryResult<GetStructuresQuery> = null
+        do {
+            structures = await CLIENT.query<GetStructuresQuery, GetStructuresQueryVariables>({
+                query: GetStructures,
+                variables: { cursor, turnId, pageSize: 1000 }
+            })
+
+
+            structures.data.node.structures.edges.forEach(x => items.push(x.node))
+
+            onProgress({ total: structures.data.node.structures.totalCount, position: items.length })
+            cursor = structures.data.node.structures.pageInfo.endCursor
+        }
+        while (structures.data.node.structures.pageInfo.hasNextPage)
+
+        return items
+    }
+
+    async loadUnits(turnId: string, onProgress: ProgressCallback) {
+        const items: UnitFragment[] = []
+
+        let cursor: string = null
+        let units: ApolloQueryResult<GetUnitsQuery> = null
+        do {
+            units = await CLIENT.query<GetUnitsQuery, GetUnitsQueryVariables>({
+                query: GetUnits,
+                variables: { cursor, turnId, pageSize: 1000 }
+            })
+
+            units.data.node.units.edges.forEach(x => items.push(x.node))
+
+            onProgress({ total: units.data.node.units.totalCount, position: items.length })
+            cursor = units.data.node.units.pageInfo.endCursor
+        }
+        while (units.data.node.units.pageInfo.hasNextPage)
+
+        return items
+    }
 
     async load(gameId: string) {
         if (this.gameId === gameId) {
@@ -45,7 +130,7 @@ export class GameStore {
         }
         this.gameId = gameId
 
-        runInAction(() => this.loading = true)
+        this.startLoading()
 
         const response = await CLIENT.query<GetSingleGameQuery, GetSingleGameQueryVariables>({
             query: GetSingleGame,
@@ -55,7 +140,7 @@ export class GameStore {
         })
 
         const { myPlayer, ...game } = response.data.node
-        const { turns, lastTurnNumber } = myPlayer
+        const { lastTurnNumber } = myPlayer
 
         runInAction(() => {
             this.name = game.name
@@ -65,23 +150,18 @@ export class GameStore {
             this.factionName = myPlayer.factionName
             this.factionNumber = myPlayer.factionNumber
             this.lastTurnNumber = lastTurnNumber
-
-            this.turns.replace(turns)
-            this.turn = turns.find(x => x.number == lastTurnNumber)
         })
 
-        // find latest turn
-        let latestTurn: TurnSummaryFragment
-        for (const turn of turns) {
-            if (!latestTurn) {
-                latestTurn = turn
-                continue
+        const turnDetails = await CLIENT.query<GetTurnDetailsQuery, GetTurnDetailsQueryVariables>({
+            query: GetTurnDetails,
+            variables: {
+                playerId: myPlayer.id,
+                turnNumber: lastTurnNumber
             }
+        })
 
-            if (turn.number > latestTurn.number) {
-                latestTurn = turn
-            }
-        }
+        this.turns.push(turnDetails.data.node.turnByNumber)
+        this.turn = turnDetails.data.node.turnByNumber
 
         game.options.map.sort((a, b) => a.level - b.level)
         const map: WorldLevel[] = game.options.map.map(level => ({
@@ -95,37 +175,36 @@ export class GameStore {
         ruleset.load(game.ruleset)
 
         const world = new World(worldInfo, ruleset)
-
-        const turnDetails = await CLIENT.query<GetTurnDetailsQuery, GetTurnDetailsQueryVariables>({
-            query: GetTurnDetails,
-            variables: {
-                turnId: latestTurn.id
-            }
-        })
-
-        for (const faction of turnDetails.data.node.factions) {
+        for (const faction of this.turn.factions) {
             world.addFaction(faction.number, faction.name, faction.number === this.factionNumber)
         }
 
-        let cursor: string = null
-        let regions: ApolloQueryResult<GetRegionsQuery> = null
-        do {
-            regions = await CLIENT.query<GetRegionsQuery, GetRegionsQueryVariables>({
-                query: GetRegions,
-                variables: {
-                    cursor,
-                    turnId: latestTurn.id
-                }
-            })
+        this.updateLoadingMessage('Loading Regions...')
+        const regions = await this.loadRegions(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Regions: ${position} of ${total}`))
 
-            world.addRegions(regions.data.node.regions.edges.map(x => x.node))
+        this.updateLoadingMessage('Loading Structures...')
+        const structures = await this.loadStructures(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Structures: ${position} of ${total}`))
 
-            cursor = regions.data.node.regions.pageInfo.endCursor
+        this.updateLoadingMessage('Loading Units...')
+        const units = await this.loadUnits(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Units: ${position} of ${total}`))
+
+
+        world.addRegions(regions)
+        world.addStructures(structures)
+        world.addUnits(units)
+
+        for (const level of world.levels) {
+            for (const region of level.regions) {
+                region.sort()
+            }
         }
-        while (regions.data.node.regions.pageInfo.hasNextPage)
 
-        runInAction(() => this.world = world)
-        setTimeout(() => runInAction(() => this.loading = false))
+        runInAction(() =>{
+            console.log(`Turn ${this.turn.number} loaded`)
+
+            this.world = world
+            this.stopLoading()
+        })
     }
 
     @observable region: Region = null

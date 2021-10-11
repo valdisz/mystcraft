@@ -22,11 +22,23 @@ namespace advisor
 
     [ExtendObjectType(Name = "Unit")]
     public class UnitResolvers {
-        public UnitResolvers(Database db) {
+        public UnitResolvers(Database db, IIdSerializer idSerializer) {
             this.db = db;
+            this.idSerializer = idSerializer;
         }
 
         private readonly Database db;
+        private readonly IIdSerializer idSerializer;
+
+        public string RegionId([Parent] DbUnit unit) {
+            return idSerializer.Serialize("Region", unit.RegionId);
+        }
+
+        public string StructureId([Parent] DbUnit unit) {
+            return unit.StrcutureId.HasValue
+                ? idSerializer.Serialize("Structure", unit.StrcutureId)
+                : null;
+        }
 
         public Task<DbRegion> Region([Parent] DbUnit unit) {
             return db.Regions

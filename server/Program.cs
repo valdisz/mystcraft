@@ -15,10 +15,6 @@
 
     class Program {
         public static Task Main(string[] args) {
-            if (Console.In.Peek() != -1) {
-                return ConvertAsync(Console.In);
-            }
-
             if (args == null || args.Length == 0) {
                 return RunServerAsync(args);
             }

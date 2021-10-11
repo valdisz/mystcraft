@@ -6,10 +6,12 @@ query GetSingleGame($gameId: ID!) {
   }
 }
 
-query GetTurnDetails($turnId: ID!) {
-  node(id: $turnId) {
-    ... on Turn {
-      ...TurnDetails
+query GetTurnDetails($playerId: ID!, $turnNumber: Long!) {
+  node(id: $playerId) {
+    ... on Player {
+        turnByNumber(turn: $turnNumber) {
+        ...TurnDetails
+        }
     }
   }
 }
@@ -38,7 +40,6 @@ fragment GameOptions on GameOptions {
 fragment SingleGame on Game {
   id
   name
-  engineVersion
   rulesetName
   rulesetVersion
   options {
@@ -46,15 +47,10 @@ fragment SingleGame on Game {
   }
   ruleset
   myPlayer {
+    id
     factionName
     factionNumber
     lastTurnNumber
-    turns {
-      ...TurnSummary
-    }
-  }
-  myUniversity {
-    ...UniversitySummary
   }
 }
 

@@ -23,7 +23,6 @@ namespace advisor.Persistence
         public int Y { get; set; }
         public int Z { get; set; }
 
-        [GraphQLIgnore]
         public int Sequence { get; set; }
 
         public int Number { get; set; }

@@ -1,4 +1,4 @@
-import { RegionFragment } from '../../schema'
+import { RegionFragment, StructureFragment } from '../../schema'
 import { Item } from './item'
 import { List } from './list'
 import { Province } from './province'
@@ -40,6 +40,38 @@ export class Region {
     readonly units: Unit[] = []
     readonly troops: TypedMap<Troops> = {}
     readonly structures: Structure[] = []
+
+    addUnit(unit: Unit, structure?: Structure) {
+        unit.region = this
+        this.units.push(unit)
+
+        if (structure) {
+            unit.structure = structure
+            structure.units.push(unit)
+        }
+
+        const faction = unit.faction
+        console.log(unit.faction, unit)
+
+        if (!this.troops[faction.num]) {
+            this.troops[faction.num] = new Troops(faction)
+        }
+        this.troops[faction.num].add(unit)
+    }
+
+    addStructure(str: Structure) {
+        str.region = this
+        this.structures.push(str)
+    }
+
+    sort() {
+        this.structures.sort((a, b) => a.seq - b.seq)
+        this.units.sort((a, b) => a.seq - b.seq)
+
+        for (const str of this.structures) {
+            str.units.sort((a, b) => a.seq - b.seq)
+        }
+    }
 
     static from(src: RegionFragment, factions: Factions, ruleset: Ruleset) {
         const reg = new Region(src.id, new Coords(src.x, src.y, src.z, src.label));
@@ -89,56 +121,6 @@ export class Region {
 
             reg.wanted.set(item);
         }
-
-        src.units.sort((a, b) => a.sequence - b.sequence)
-
-        for (const unitSource of src.units) {
-            const unit = Unit.from(unitSource, ruleset)
-
-            unit.region = reg
-            reg.units.push(unit)
-
-            const faction = unitSource.faction
-                ? factions.get(unitSource.faction.number)
-                : factions.unknown
-
-            unit.faction = faction
-            faction.troops.add(unit)
-
-            if (!reg.troops[faction.num]) {
-                reg.troops[faction.num] = new Troops(faction)
-            }
-            reg.troops[faction.num].add(unit)
-        }
-
-        for (const structSrc of src.structures) {
-            const str = Structure.from(reg, structSrc, ruleset)
-            reg.structures.push(str)
-
-            for (const unitSource of structSrc.units) {
-                const unit = Unit.from(unitSource, ruleset)
-
-                unit.region = reg
-                unit.structure = str
-
-                reg.units.push(unit)
-                str.units.push(unit)
-
-                const faction = unitSource.faction
-                    ? factions.get(unitSource.faction.number)
-                    : factions.unknown
-
-                unit.faction = faction
-                faction.troops.add(unit)
-
-                if (!reg.troops[faction.num]) {
-                    reg.troops[faction.num] = new Troops(faction)
-                }
-                reg.troops[faction.num].add(unit)
-            }
-        }
-
-        reg.structures.sort((a, b) => a.num - b.num)
 
         return reg;
     }

@@ -17,6 +17,44 @@ query GetRegions($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 1
   }
 }
 
+query GetStructures($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      structures(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Structure
+          }
+        }
+      }
+    }
+  }
+}
+
+query GetUnits($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      units(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Unit
+          }
+        }
+      }
+    }
+  }
+}
+
 fragment Region on Region {
   id
   updatedAtTurn
@@ -48,15 +86,12 @@ fragment Region on Region {
   exits {
     ...Exit
   }
-  units {
-    ...Unit
-  }
-  structures {
-    ...Structure
-  }
 }
 
 fragment Structure on Structure {
+  id
+  regionId
+  sequence
   contents {
     ...FleetContent
   }
@@ -75,9 +110,6 @@ fragment Structure on Structure {
   }
   speed
   type
-  units {
-    ...Unit
-  }
 }
 
 fragment FleetContent on DbFleetContent {
@@ -97,6 +129,8 @@ fragment Sailors on DbSailors {
 
 fragment Unit on Unit {
   id
+  regionId
+  structureId
   sequence
   canStudy {
     ...Skill

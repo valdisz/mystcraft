@@ -192,8 +192,10 @@ export type Unit = Node & {
   orders?: Maybe<Scalars['String']>;
   readyItem?: Maybe<Item>;
   region?: Maybe<Region>;
+  regionId?: Maybe<Scalars['String']>;
   sequence: Scalars['Int'];
   skills?: Maybe<Array<Maybe<Skill>>>;
+  structureId?: Maybe<Scalars['String']>;
   weight?: Maybe<Scalars['Int']>;
 };
 
@@ -206,8 +208,10 @@ export type Structure = Node & {
   name: Scalars['String'];
   needs?: Maybe<Scalars['Int']>;
   number: Scalars['Int'];
+  regionId?: Maybe<Scalars['String']>;
   sailDirections?: Maybe<Array<Direction>>;
   sailors?: Maybe<DbSailors>;
+  sequence: Scalars['Int'];
   speed?: Maybe<Scalars['Int']>;
   type: Scalars['String'];
   unitByNumber?: Maybe<Unit>;
@@ -677,14 +681,38 @@ export type GetRegionsQuery = { node?: Maybe<{ regions?: Maybe<(
       & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<RegionFragment> }>> }
     )> }> };
 
+export type GetStructuresQueryVariables = Exact<{
+  turnId: Scalars['ID'];
+  cursor?: Maybe<Scalars['String']>;
+  pageSize?: Scalars['PaginationAmount'];
+}>;
+
+
+export type GetStructuresQuery = { node?: Maybe<{ structures?: Maybe<(
+      Pick<StructureConnection, 'totalCount'>
+      & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<StructureFragment> }>> }
+    )> }> };
+
+export type GetUnitsQueryVariables = Exact<{
+  turnId: Scalars['ID'];
+  cursor?: Maybe<Scalars['String']>;
+  pageSize?: Scalars['PaginationAmount'];
+}>;
+
+
+export type GetUnitsQuery = { node?: Maybe<{ units?: Maybe<(
+      Pick<UnitConnection, 'totalCount'>
+      & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<UnitFragment> }>> }
+    )> }> };
+
 export type RegionFragment = (
   Pick<Region, 'id' | 'updatedAtTurn' | 'explored' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
-  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, products?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>>, units?: Maybe<Array<Maybe<UnitFragment>>>, structures?: Maybe<Array<Maybe<StructureFragment>>> }
+  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, products?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>> }
 );
 
 export type StructureFragment = (
-  Pick<Structure, 'description' | 'flags' | 'id' | 'name' | 'needs' | 'number' | 'sailDirections' | 'speed' | 'type'>
-  & { contents?: Maybe<Array<Maybe<FleetContentFragment>>>, load?: Maybe<LoadFragment>, sailors?: Maybe<SailorsFragment>, units?: Maybe<Array<Maybe<UnitFragment>>> }
+  Pick<Structure, 'id' | 'regionId' | 'sequence' | 'description' | 'flags' | 'name' | 'needs' | 'number' | 'sailDirections' | 'speed' | 'type'>
+  & { contents?: Maybe<Array<Maybe<FleetContentFragment>>>, load?: Maybe<LoadFragment>, sailors?: Maybe<SailorsFragment> }
 );
 
 export type FleetContentFragment = Pick<DbFleetContent, 'type' | 'count'>;
@@ -694,7 +722,7 @@ export type LoadFragment = Pick<DbTransportationLoad, 'used' | 'max'>;
 export type SailorsFragment = Pick<DbSailors, 'current' | 'required'>;
 
 export type UnitFragment = (
-  Pick<Unit, 'id' | 'sequence' | 'description' | 'flags' | 'name' | 'number' | 'onGuard' | 'weight' | 'orders'>
+  Pick<Unit, 'id' | 'regionId' | 'structureId' | 'sequence' | 'description' | 'flags' | 'name' | 'number' | 'onGuard' | 'weight' | 'orders'>
   & { canStudy?: Maybe<Array<Maybe<SkillFragment>>>, capacity?: Maybe<CapacityFragment>, combatSpell?: Maybe<SkillFragment>, faction?: Maybe<FactionFragment>, items: Array<Maybe<ItemFragment>>, readyItem?: Maybe<ItemFragment>, skills?: Maybe<Array<Maybe<SkillFragment>>> }
 );
 
@@ -723,11 +751,12 @@ export type GetSingleGameQueryVariables = Exact<{
 export type GetSingleGameQuery = { node?: Maybe<SingleGameFragment> };
 
 export type GetTurnDetailsQueryVariables = Exact<{
-  turnId: Scalars['ID'];
+  playerId: Scalars['ID'];
+  turnNumber: Scalars['Long'];
 }>;
 
 
-export type GetTurnDetailsQuery = { node?: Maybe<TurnDetailsFragment> };
+export type GetTurnDetailsQuery = { node?: Maybe<{ turnByNumber?: Maybe<TurnDetailsFragment> }> };
 
 export type TurnDetailsFragment = (
   Pick<Turn, 'id' | 'number' | 'month' | 'year'>
@@ -737,11 +766,8 @@ export type TurnDetailsFragment = (
 export type GameOptionsFragment = { map?: Maybe<Array<Maybe<Pick<MapLevel, 'label' | 'level' | 'width' | 'height'>>>> };
 
 export type SingleGameFragment = (
-  Pick<Game, 'id' | 'name' | 'engineVersion' | 'rulesetName' | 'rulesetVersion' | 'ruleset'>
-  & { options?: Maybe<GameOptionsFragment>, myPlayer?: Maybe<(
-    Pick<Player, 'factionName' | 'factionNumber' | 'lastTurnNumber'>
-    & { turns?: Maybe<Array<Maybe<TurnSummaryFragment>>> }
-  )>, myUniversity?: Maybe<UniversitySummaryFragment> }
+  Pick<Game, 'id' | 'name' | 'rulesetName' | 'rulesetVersion' | 'ruleset'>
+  & { options?: Maybe<GameOptionsFragment>, myPlayer?: Maybe<Pick<Player, 'id' | 'factionName' | 'factionNumber' | 'lastTurnNumber'>> }
 );
 
 export type UniversitySummaryFragment = (
@@ -945,6 +971,88 @@ export const Exit = gql`
   }
 }
     ${Settlement}`;
+export const Region = gql`
+    fragment Region on Region {
+  id
+  updatedAtTurn
+  explored
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
+  race
+  population
+  tax
+  wages
+  totalWages
+  wanted {
+    ...TradableItem
+  }
+  entertainment
+  products {
+    ...Item
+  }
+  forSale {
+    ...TradableItem
+  }
+  exits {
+    ...Exit
+  }
+}
+    ${Settlement}
+${TradableItem}
+${Item}
+${Exit}`;
+export const FleetContent = gql`
+    fragment FleetContent on DbFleetContent {
+  type
+  count
+}
+    `;
+export const Load = gql`
+    fragment Load on DbTransportationLoad {
+  used
+  max
+}
+    `;
+export const Sailors = gql`
+    fragment Sailors on DbSailors {
+  current
+  required
+}
+    `;
+export const Structure = gql`
+    fragment Structure on Structure {
+  id
+  regionId
+  sequence
+  contents {
+    ...FleetContent
+  }
+  description
+  flags
+  id
+  load {
+    ...Load
+  }
+  name
+  needs
+  number
+  sailDirections
+  sailors {
+    ...Sailors
+  }
+  speed
+  type
+}
+    ${FleetContent}
+${Load}
+${Sailors}`;
 export const Skill = gql`
     fragment Skill on Skill {
   code
@@ -970,6 +1078,8 @@ export const Faction = gql`
 export const Unit = gql`
     fragment Unit on Unit {
   id
+  regionId
+  structureId
   sequence
   canStudy {
     ...Skill
@@ -1004,97 +1114,6 @@ export const Unit = gql`
 ${Capacity}
 ${Faction}
 ${Item}`;
-export const FleetContent = gql`
-    fragment FleetContent on DbFleetContent {
-  type
-  count
-}
-    `;
-export const Load = gql`
-    fragment Load on DbTransportationLoad {
-  used
-  max
-}
-    `;
-export const Sailors = gql`
-    fragment Sailors on DbSailors {
-  current
-  required
-}
-    `;
-export const Structure = gql`
-    fragment Structure on Structure {
-  contents {
-    ...FleetContent
-  }
-  description
-  flags
-  id
-  load {
-    ...Load
-  }
-  name
-  needs
-  number
-  sailDirections
-  sailors {
-    ...Sailors
-  }
-  speed
-  type
-  units {
-    ...Unit
-  }
-}
-    ${FleetContent}
-${Load}
-${Sailors}
-${Unit}`;
-export const Region = gql`
-    fragment Region on Region {
-  id
-  updatedAtTurn
-  explored
-  x
-  y
-  z
-  label
-  terrain
-  province
-  settlement {
-    ...Settlement
-  }
-  race
-  population
-  tax
-  wages
-  totalWages
-  wanted {
-    ...TradableItem
-  }
-  entertainment
-  products {
-    ...Item
-  }
-  forSale {
-    ...TradableItem
-  }
-  exits {
-    ...Exit
-  }
-  units {
-    ...Unit
-  }
-  structures {
-    ...Structure
-  }
-}
-    ${Settlement}
-${TradableItem}
-${Item}
-${Exit}
-${Unit}
-${Structure}`;
 export const TurnDetails = gql`
     fragment TurnDetails on Turn {
   id
@@ -1118,24 +1137,24 @@ export const GameOptions = gql`
   }
 }
     `;
-export const ReportSummary = gql`
-    fragment ReportSummary on Report {
+export const SingleGame = gql`
+    fragment SingleGame on Game {
   id
-  factionName
-  factionNumber
-}
-    `;
-export const TurnSummary = gql`
-    fragment TurnSummary on Turn {
-  id
-  number
-  month
-  year
-  reports {
-    ...ReportSummary
+  name
+  rulesetName
+  rulesetVersion
+  options {
+    ...GameOptions
+  }
+  ruleset
+  myPlayer {
+    id
+    factionName
+    factionNumber
+    lastTurnNumber
   }
 }
-    ${ReportSummary}`;
+    ${GameOptions}`;
 export const PlayerSummary = gql`
     fragment PlayerSummary on Player {
   id
@@ -1156,32 +1175,24 @@ export const UniversitySummary = gql`
   }
 }
     ${PlayerSummary}`;
-export const SingleGame = gql`
-    fragment SingleGame on Game {
+export const ReportSummary = gql`
+    fragment ReportSummary on Report {
   id
-  name
-  engineVersion
-  rulesetName
-  rulesetVersion
-  options {
-    ...GameOptions
-  }
-  ruleset
-  myPlayer {
-    factionName
-    factionNumber
-    lastTurnNumber
-    turns {
-      ...TurnSummary
-    }
-  }
-  myUniversity {
-    ...UniversitySummary
+  factionName
+  factionNumber
+}
+    `;
+export const TurnSummary = gql`
+    fragment TurnSummary on Turn {
+  id
+  number
+  month
+  year
+  reports {
+    ...ReportSummary
   }
 }
-    ${GameOptions}
-${TurnSummary}
-${UniversitySummary}`;
+    ${ReportSummary}`;
 export const ClassSummary = gql`
     fragment ClassSummary on UniversityClass {
   id
@@ -1313,6 +1324,46 @@ export const GetRegions = gql`
   }
 }
     ${Region}`;
+export const GetStructures = gql`
+    query GetStructures($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      structures(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Structure
+          }
+        }
+      }
+    }
+  }
+}
+    ${Structure}`;
+export const GetUnits = gql`
+    query GetUnits($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      units(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Unit
+          }
+        }
+      }
+    }
+  }
+}
+    ${Unit}`;
 export const GetSingleGame = gql`
     query GetSingleGame($gameId: ID!) {
   node(id: $gameId) {
@@ -1323,10 +1374,12 @@ export const GetSingleGame = gql`
 }
     ${SingleGame}`;
 export const GetTurnDetails = gql`
-    query GetTurnDetails($turnId: ID!) {
-  node(id: $turnId) {
-    ... on Turn {
-      ...TurnDetails
+    query GetTurnDetails($playerId: ID!, $turnNumber: Long!) {
+  node(id: $playerId) {
+    ... on Player {
+      turnByNumber(turn: $turnNumber) {
+        ...TurnDetails
+      }
     }
   }
 }

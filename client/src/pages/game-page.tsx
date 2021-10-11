@@ -565,7 +565,7 @@ export function GamePage() {
 
     return <Observer>
         {() => game.loading
-            ? <div>Loading...</div>
+            ? <div>{ game.loadingMessage }</div>
             : <GameComponent />
         }
     </Observer>
