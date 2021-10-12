@@ -6,6 +6,7 @@ namespace advisor
     using advisor.Authorization;
     using advisor.Persistence;
     using Hangfire;
+    using Hangfire.Common;
     using Hangfire.Console;
     using Hangfire.Console.Extensions;
     using Hangfire.Dashboard;
@@ -15,6 +16,7 @@ namespace advisor
     using Hangfire.RecurringJobAdmin;
     using Hangfire.RecurringJobExtensions;
     using Hangfire.Server;
+    using Hangfire.States;
     using Hangfire.Storage.SQLite;
     using HotChocolate;
     using HotChocolate.AspNetCore;
@@ -138,6 +140,9 @@ namespace advisor
 
                 conf.UseRecurringJob(typeof(RemoteGameServerJobs));
             });
+
+            GlobalJobFilters.Filters.Add(new JoiningSupportAttribute(new BackgroundJobStateChanger()));
+            GlobalStateHandlers.Handlers.Add(new JoiningState.Handler());
 
             services
                 .AddHangfireServer()
