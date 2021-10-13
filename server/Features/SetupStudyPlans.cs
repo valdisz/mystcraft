@@ -33,6 +33,8 @@ namespace advisor.Features {
             var universityId = membership.UniversityId;
             var turnNumber = membership.Player.LastTurnNumber;
 
+            var turn = await db.Turns.FirstOrDefaultAsync(x => x.PlayerId == membership.PlayerId && x.Number == turnNumber);
+
             var members = await db.UniversityMemberships
                 .Include(x => x.Player)
                 .Where(x => x.UniversityId == universityId)
@@ -43,12 +45,9 @@ namespace advisor.Features {
             var prevPalns = await GetTurnPlans(turnNumber - 1, universityId);
 
             var mages = (await db.Units
-                .Include(x => x.Turn)
                 .Include(x => x.Faction)
                 .Include(x => x.Plan)
-                .Where(x => x.Turn.Number == turnNumber
-                        && x.Turn.PlayerId == request.PlayerId
-                        && x.Faction != null
+                .Where(x => x.TurnId == turn.Id && x.FactionId != null
                         && x.Skills.Any(s => s.Code == "FORC" || s.Code == "PATT" || s.Code == "SPIR")
                 )
                 .ToListAsync())
@@ -79,12 +78,10 @@ namespace advisor.Features {
             return Unit.Value;
         }
 
-        private async Task<Dictionary<int, DbStudyPlan>> GetTurnPlans(int turnNum, long universityId) {
+        private async Task<Dictionary<int, DbStudyPlan>> GetTurnPlans(long turnId, long universityId) {
             return (await db.StudyPlans
-                .Include(x => x.Turn)
                 .Include(x => x.Unit)
-                .ThenInclude(x => x.Faction)
-                .Where(x => x.UniversityId == universityId && x.Turn.Number == turnNum)
+                .Where(x => x.UniversityId == universityId && x.TurnId == turnId)
                 .ToListAsync())
                 .ToDictionary(x => x.Unit.Number);
         }
