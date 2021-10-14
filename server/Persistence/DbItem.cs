@@ -1,10 +1,7 @@
-namespace advisor.Persistence
-{
+namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
-    using Microsoft.EntityFrameworkCore;
 
-    [Owned]
     [GraphQLName("Item")]
     public class DbItem {
         public DbItem() {
@@ -20,5 +17,19 @@ namespace advisor.Persistence
         public string Code { get; set; }
 
         public int? Amount { get; set; }
+    }
+
+    public class DbUnitItem : DbItem {
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
+
+        [GraphQLIgnore]
+        public int UnitNumber { get; set; }
+
+        [GraphQLIgnore]
+        public DbUnit Unit { get; set; }
     }
 }

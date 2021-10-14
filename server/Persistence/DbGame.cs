@@ -27,6 +27,6 @@ namespace advisor.Persistence
         public List<DbPlayer> Players { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbUniversity> Universities { get; set; } = new ();
+        public List<DbAlliance> Alliances { get; set; } = new ();
     }
 }

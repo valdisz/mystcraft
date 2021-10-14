@@ -43,7 +43,7 @@
                 .SingleOrDefaultAsync(x => x.GameId == game.Id && x.UserId == currentUserId);
         }
 
-        public Task<DbUniversity> MyUniversity([Parent] DbGame game, [GlobalState] long currentUserId) {
+        public Task<DbAlliance> MyUniversity([Parent] DbGame game, [GlobalState] long currentUserId) {
             return db.Players
                 .Include(x => x.UniversityMembership)
                 .ThenInclude(x => x.University)
@@ -58,7 +58,7 @@
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<List<DbUniversity>> Universities([Parent] DbGame game) {
+        public Task<List<DbAlliance>> Universities([Parent] DbGame game) {
             return db.Universities
                 .Include(x => x.Members)
                 .ThenInclude(x => x.Player)

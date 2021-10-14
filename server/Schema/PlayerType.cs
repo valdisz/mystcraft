@@ -26,13 +26,13 @@ namespace advisor
     }
 
     public class PlayerUniversity {
-        public PlayerUniversity(DbUniversity University, UniveristyMemberRole Role) {
+        public PlayerUniversity(DbAlliance University, AllianceMemberRole Role) {
             this.University = University;
             this.Role = Role;
         }
 
-        public DbUniversity University { get; }
-        public UniveristyMemberRole Role { get; }
+        public DbAlliance University { get; }
+        public AllianceMemberRole Role { get; }
     }
 
     [ExtendObjectType(Name = "Player")]

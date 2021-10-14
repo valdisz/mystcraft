@@ -5,33 +5,27 @@ namespace advisor.Persistence
     using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 
-    [Owned]
     [GraphQLName("Exit")]
     public class DbExit {
         [GraphQLIgnore]
-        public string RegionUID => DbRegion.GetUID(X, Y, Z);
+        public long PlayerId { get; set; }
+
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        [Required]
+        public string OriginRegionId { get; set; }
+
+        [GraphQLIgnore]
+        [Required]
+        public string TargetRegionId { get; set; }
 
         [Required]
         public Direction Direction { get; set; }
 
-        [Required]
-        public int X { get; set; }
+        public DbRegion Origin { get; set; }
 
-        [Required]
-        public int Y { get; set; }
-
-        [Required]
-        public int Z { get; set; }
-
-        [Required]
-        public string Label { get; set; }
-
-        [Required]
-        public string Province { get; set; }
-
-        [Required]
-        public string Terrain { get; set; }
-
-        public DbSettlement Settlement { get; set; }
+        public DbRegion Target { get; set; }
     }
 }

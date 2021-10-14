@@ -3,7 +3,6 @@ namespace advisor.Persistence
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
-    using HotChocolate.AspNetCore.Authorization;
 
     [GraphQLName("Player")]
     public class DbPlayer {
@@ -17,11 +16,12 @@ namespace advisor.Persistence
         public long GameId { get; set; }
 
         public int? FactionNumber { get; set; }
-        public string FactionName { get; set; }
 
         public int LastTurnNumber { get; set; }
 
         public string Password { get; set; }
+
+        public bool IsQuit { get; set; }
 
         [GraphQLIgnore]
         public DbUser User { get;set; }
@@ -36,6 +36,6 @@ namespace advisor.Persistence
         public List<DbReport> Reports { get; set; } = new List<DbReport>();
 
         [GraphQLIgnore]
-        public DbUniversityMembership UniversityMembership { get; set; }
+        public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();
     }
 }

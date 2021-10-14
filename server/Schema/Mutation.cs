@@ -81,7 +81,7 @@ namespace advisor
             ));
         }
 
-        public Task<DbUniversity> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
+        public Task<DbAlliance> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
             return mediator.Send(new OpenUniversity(
                 currentUserId,
                 ParseRelayId<long>("Player", playerId),
@@ -89,7 +89,7 @@ namespace advisor
             ));
         }
 
-        public Task<DbUniversity> JoinUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string universityId, [GraphQLType(typeof(RelayIdType))] string playerId) {
+        public Task<DbAlliance> JoinUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string universityId, [GraphQLType(typeof(RelayIdType))] string playerId) {
             return mediator.Send(new JoinUniversity(
                 currentUserId,
                 ParseRelayId<long>("Player", playerId),

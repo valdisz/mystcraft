@@ -5,26 +5,20 @@ namespace advisor.Persistence {
 
     [GraphQLName("StudyPlan")]
     public class DbStudyPlan {
-        [Key]
-        public long Id { get; set; }
+        [GraphQLIgnore]
+        public int UnitNumber { get; set; }
 
         [GraphQLIgnore]
-        public long UniversityId { get; set; }
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public long TurnId { get; set; }
-
-        [GraphQLIgnore]
-        public long UnitId { get; set; }
+        public long PlayerId { get; set; }
 
         public DbSkill Target { get; set; }
 
         public string Study { get; set; }
 
-        public List<long> Teach { get; set; } = new ();
-
-        [GraphQLIgnore]
-        public DbUniversity University { get; set; }
+        public List<int> Teach { get; set; } = new ();
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }

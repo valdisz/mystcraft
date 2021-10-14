@@ -9,13 +9,16 @@ namespace advisor.Persistence {
         public long Id { get; set; }
 
         [GraphQLIgnore]
-        public long TurnId { get; set; }
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public long FactionId { get; set; }
+        public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        public long? RegionId { get; set; }
+        public int FactionNumber { get; set; }
+
+        [GraphQLIgnore]
+        public string RegionId { get; set; }
 
         public DbIncomeStats Income { get; set; }
         public List<DbItem> Production { get; set; } = new ();

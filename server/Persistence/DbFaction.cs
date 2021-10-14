@@ -5,14 +5,14 @@ namespace advisor.Persistence {
 
     [GraphQLName("Faction")]
     public class DbFaction {
-        [Key]
-        public long Id { get; set; }
-
-        [GraphQLIgnore]
-        public long TurnId { get; set; }
-
         [Required]
         public int Number { get; set; }
+
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
 
         [Required]
         public string Name { get; set; }

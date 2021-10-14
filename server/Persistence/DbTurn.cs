@@ -5,13 +5,11 @@ namespace advisor.Persistence {
 
     [GraphQLName("Turn")]
     public class DbTurn {
-        [Key]
-        public long Id { get; set; }
-
+        public int Number { get; set; }
+        
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
-        public int Number { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }
 

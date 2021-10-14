@@ -7,14 +7,13 @@ namespace advisor.Persistence
 
     [GraphQLName("Region")]
     public class DbRegion {
-        [Key]
-        public long Id { get; set; }
+        public string Id => $"{X},{Y},{Z}";
 
         [GraphQLIgnore]
-        public long TurnId { get; set; }
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public string UID => GetUID(X, Y, Z);
+        public long PlayerId { get; set; }
 
         public int X { get; set; }
         public int Y { get; set; }
@@ -73,7 +72,5 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new ();
-
-        public static string GetUID(int x, int y, int z) => $"{x} {y} {z}";
     }
 }

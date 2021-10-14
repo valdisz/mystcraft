@@ -7,21 +7,16 @@ namespace advisor.Persistence
 
     [GraphQLName("Structure")]
     public class DbStructure {
-        [Key]
-        public long Id { get; set; }
+        public string Id => Number > GameConsts.MAX_BUILDING_NUMBER ? $"{Number}" : $"{Number}@{RegionId}";
 
         [GraphQLIgnore]
-        public string UID => GetUID(Number, X, Y, Z);
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public long TurnId { get; set; }
+        public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        public long RegionId { get; set; }
-
-        public int X { get; set; }
-        public int Y { get; set; }
-        public int Z { get; set; }
+        public string RegionId { get; set; }
 
         public int Sequence { get; set; }
 
@@ -51,9 +46,5 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
-
-        public static string GetUID(int number, int x, int y, int z) => number > GameConsts.MAX_BUILDING_NUMBER
-            ? $"{number}"
-            : $"{number}@{DbRegion.GetUID(x, y, z)}";
     }
 }

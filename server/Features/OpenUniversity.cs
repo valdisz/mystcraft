@@ -7,11 +7,11 @@ namespace advisor.Features
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record OpenUniversity(long UserId, long PlayerId, string Name) : IRequest<DbUniversity> {
+    public record OpenUniversity(long UserId, long PlayerId, string Name) : IRequest<DbAlliance> {
 
     }
 
-    public class OpenUniversityHandler : IRequestHandler<OpenUniversity, DbUniversity> {
+    public class OpenUniversityHandler : IRequestHandler<OpenUniversity, DbAlliance> {
         public OpenUniversityHandler(Database db, IMediator mediator) {
             this.db = db;
             this.mediator = mediator;
@@ -20,7 +20,7 @@ namespace advisor.Features
         private readonly Database db;
         private readonly IMediator mediator;
 
-        public async Task<DbUniversity> Handle(OpenUniversity request, CancellationToken cancellationToken) {
+        public async Task<DbAlliance> Handle(OpenUniversity request, CancellationToken cancellationToken) {
             var player = await db.Players
                 .Include(x => x.UniversityMembership)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
@@ -31,14 +31,14 @@ namespace advisor.Features
             // already part of another unversity
             if (player.UniversityMembership != null) return null;
 
-            var membership = new DbUniversityMembership {
-                Role = UniveristyMemberRole.Owner,
+            var membership = new DbAllianceMember {
+                Role = AllianceMemberRole.Owner,
                 PlayerId = request.PlayerId
             };
 
             player.UniversityMembership = membership;
 
-            var university = new DbUniversity {
+            var university = new DbAlliance {
                 GameId = player.GameId,
                 Name = request.Name,
                 Members = {

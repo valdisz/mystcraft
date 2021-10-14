@@ -1,10 +1,8 @@
 namespace advisor.Persistence {
-    using advisor.Model;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using Newtonsoft.Json;
 
     public enum DatabaseProvider {
         SQLite,
@@ -59,11 +57,13 @@ namespace advisor.Persistence {
         public DbSet<DbStat> Stats { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
+        public DbSet<DbExit> Exits { get; set; }
         public DbSet<DbStructure> Structures { get; set; }
         public DbSet<DbUnit> Units { get; set; }
+        public DbSet<DbUnitItem> Items { get; set; }
 
-        public DbSet<DbUniversity> Universities { get; set; }
-        public DbSet<DbUniversityMembership> UniversityMemberships { get; set; }
+        public DbSet<DbAlliance> Universities { get; set; }
+        public DbSet<DbAllianceMember> UniversityMemberships { get; set; }
         public DbSet<DbStudyPlan> StudyPlans { get; set; }
 
 
@@ -98,15 +98,12 @@ namespace advisor.Persistence {
             model.Entity<DbUser>(t => {
                 t.Property(x => x.Algorithm).HasConversion<string>();
 
+                t.Property(p => p.Roles)
+                    .HasJsonConversion(options.Provider);
+
                 t.HasMany(p => p.Players)
                     .WithOne(p => p.User)
                     .HasForeignKey(x => x.UserId);
-
-                t.OwnsMany(x => x.Roles, a => {
-                    a.WithOwner().HasForeignKey("UserId");
-                    a.ToTable("Users_Role");
-                    a.HasKey("UserId", nameof(DbUserRole.Role));
-                });
 
                 t.HasIndex(x => new { x.Email })
                     .IsUnique();
@@ -120,12 +117,9 @@ namespace advisor.Persistence {
                     .WithOne(p => p.Game)
                     .HasForeignKey(x => x.GameId);
 
-                t.HasMany(x => x.Universities)
+                t.HasMany(x => x.Alliances)
                     .WithOne(x => x.Game)
                     .HasForeignKey(x => x.GameId);
-
-                t.HasIndex(x => new { x.Name })
-                    .IsUnique();
             });
 
             model.Entity<DbPlayer>(t => {
@@ -136,66 +130,74 @@ namespace advisor.Persistence {
                 t.HasMany<DbTurn>(x => x.Turns)
                     .WithOne(x => x.Player)
                     .HasForeignKey(x => x.PlayerId);
+
+                t.HasMany(x => x.AllianceMembererships)
+                    .WithOne(x => x.Player)
+                    .HasForeignKey(x => x.PlayerId);
             });
 
             model.Entity<DbTurn>(t => {
+                t.HasKey(x => new { x.PlayerId, x.Number });
+
                 t.HasMany(x => x.Reports)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Regions)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Factions)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Structures)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Plans)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Stats)
                     .WithOne(x => x.Turn)
-                    .HasForeignKey(x => x.TurnId)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
             model.Entity<DbRegion>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Id });
+
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Region)
-                    .HasForeignKey(x => x.RegionId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
                 t.HasMany(x => x.Structures)
                     .WithOne(x => x.Region)
-                    .HasForeignKey(x => x.RegionId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
                 t.HasMany(x => x.Stats)
                     .WithOne(x => x.Region)
-                    .HasForeignKey(x => x.RegionId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Region)
-                    .HasForeignKey(x => x.RegionId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
                 t.OwnsOne(p => p.Settlement, a => {
                     a.Property(x => x.Size).HasConversion<string>();
@@ -218,37 +220,36 @@ namespace advisor.Persistence {
                     a.ToTable("Regions_Products");
                     a.HasKey("RegionId", nameof(DbItem.Code));
                 });
+            });
 
-                t.OwnsMany(p => p.Exits, a => {
-                    a.WithOwner().HasForeignKey("RegionId");
-                    a.ToTable("Regions_Exits");
-                    a.HasKey("RegionId", nameof(DbExit.Direction));
-                    a.Property(x => x.Direction).HasConversion<string>();
+            model.Entity<DbExit>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.OriginRegionId, x.TargetRegionId });
 
-                    a.OwnsOne(x => x.Settlement, b => {
-                        b.Property(x => x.Size).HasConversion<string>();
-                    });
-                });
+                t.Property(p => p.Direction).HasConversion<string>();
 
-                t.HasIndex(x => new { x.TurnId, x.X, x.Y, x.Z })
-                    .IsUnique();
+                t.HasOne(p => p.Target)
+                    .WithMany()
+                    .HasForeignKey(p => new { p.PlayerId, p.TurnNumber, p.TargetRegionId });
+
+                t.HasOne(p => p.Origin)
+                    .WithMany(p => p.Exits)
+                    .HasForeignKey(p => new { p.PlayerId, p.TurnNumber, p.OriginRegionId });
             });
 
             model.Entity<DbFaction>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Number });
+
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Faction)
-                    .HasForeignKey(x => x.FactionId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Faction)
-                    .HasForeignKey(x => x.FactionId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
 
                 t.HasMany(x => x.Stats)
                     .WithOne(x => x.Faction)
-                    .HasForeignKey(x => x.FactionId);
-
-                t.HasIndex(x => new { x.TurnId, x.Number })
-                    .IsUnique();
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
             });
 
             model.Entity<DbEvent>(t => {
@@ -267,93 +268,77 @@ namespace advisor.Persistence {
             });
 
             model.Entity<DbStructure>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Id });
+
                 t.Property(p => p.Flags)
-                    .HasConversion(new JsonListConverter<string>(), new JsonListValueComparer<string>());
+                    .HasJsonConversion(options.Provider);
 
                 t.Property(p => p.SailDirections)
-                    .HasConversion(new JsonListConverter<Direction>(), new JsonListValueComparer<Direction>());
+                    .HasJsonConversion(options.Provider);
+
+                t.Property(p => p.Contents)
+                    .HasJsonConversion(options.Provider);
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Structure)
-                    .HasForeignKey(x => x.StrcutureId);
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.StrcutureId });
 
                 t.OwnsOne(p => p.Load);
                 t.OwnsOne(p => p.Sailors);
-
-                t.OwnsMany(p => p.Contents, a => {
-                    a.WithOwner().HasForeignKey("StructureId");
-                    a.ToTable("Structures_Contents");
-                    a.HasKey("StructureId", nameof(DbFleetContent.Type));
-                });
-
-                t.HasIndex(x => new { x.TurnId, x.RegionId, x.Number })
-                    .IsUnique();
             });
 
             model.Entity<DbUnit>(t => {
-                t.Property(p => p.Flags)
-                    .HasConversion(new JsonListConverter<string>(), new JsonListValueComparer<string>());
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Number });
 
-                t.OwnsMany(p => p.Items, a => {
-                    a.WithOwner().HasForeignKey("UnitId");
-                    a.ToTable("Unit_Items");
-                    a.HasKey("UnitId", nameof(DbItem.Code));
-                });
+                t.Property(p => p.Flags)
+                    .HasJsonConversion(options.Provider);
+
+                t.Property(p => p.CanStudy)
+                    .HasJsonConversion(options.Provider);
+
+                t.Property(p => p.Skills)
+                    .HasJsonConversion(options.Provider);
 
                 t.OwnsOne(p => p.Capacity);
-
-                t.OwnsMany(p => p.Skills, a => {
-                    a.WithOwner().HasForeignKey("UnitId");
-                    a.ToTable("Unit_Skills");
-                    a.HasKey("UnitId", nameof(DbSkill.Code));
-                });
-
-                t.OwnsMany(p => p.CanStudy, a => {
-                    a.WithOwner().HasForeignKey("UnitId");
-                    a.ToTable("Unit_CanStudy");
-                    a.HasKey("UnitId", nameof(DbSkill.Code));
-                });
 
                 t.OwnsOne(p => p.ReadyItem);
 
                 t.OwnsOne(p => p.CombatSpell);
 
                 t.HasMany(x => x.Events)
-                    .WithOne(x => x.Unit);
+                    .WithOne(x => x.Unit)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
 
-                t.HasIndex(x => new { x.TurnId, x.Number })
-                    .IsUnique();
+                t.HasMany(p => p.Items)
+                    .WithOne(p => p.Unit)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
             });
 
-            model.Entity<DbUniversity>(t => {
-                t.HasMany(p => p.Plans)
-                    .WithOne(p => p.University)
-                    .HasForeignKey(p => p.UniversityId);
+            model.Entity<DbUnitItem>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber, x.Code });
             });
 
             model.Entity<DbStudyPlan>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
+
                 t.Property(x => x.Teach)
-                    .HasConversion(new JsonListConverter<long>(), new JsonListValueComparer<long>());
+                    .HasJsonConversion(options.Provider);
 
                 t.OwnsOne(p => p.Target);
 
                 t.HasOne(p => p.Unit)
                     .WithOne(p => p.Plan)
-                    .HasForeignKey<DbStudyPlan>(p => p.UnitId);
+                    .HasForeignKey<DbStudyPlan>(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
             });
 
-            model.Entity<DbUniversityMembership>(t => {
-                t.HasKey(x => new { x.PlayerId, x.UniversityId });
+            model.Entity<DbAlliance>(t => {
+                t.HasMany(p => p.Members)
+                    .WithOne(x => x.Alliance)
+                    .HasForeignKey(x => x.AllianceId);
+            });
 
-                t.HasOne(x => x.Player)
-                    .WithOne(x => x.UniversityMembership)
-                    .HasForeignKey<DbUniversityMembership>(x => x.PlayerId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                t.HasOne(x => x.University)
-                    .WithMany(x => x.Members)
-                    .HasForeignKey(x => x.UniversityId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            model.Entity<DbAllianceMember>(t => {
+                t.HasKey(x => new { x.PlayerId, x.AllianceId });
             });
         }
     }

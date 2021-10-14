@@ -9,8 +9,8 @@ namespace advisor
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
-    public class UniversityType : ObjectType<DbUniversity> {
-        protected override void Configure(IObjectTypeDescriptor<DbUniversity> descriptor) {
+    public class UniversityType : ObjectType<DbAlliance> {
+        protected override void Configure(IObjectTypeDescriptor<DbAlliance> descriptor) {
             descriptor.AsNode()
                 .IdField(x => x.Id)
                 .NodeResolver((ctx, id) => {
@@ -34,14 +34,14 @@ namespace advisor
 
         private readonly Database db;
 
-        public Task<List<DbUniversityMembership>> Members([Parent] DbUniversity university) {
+        public Task<List<DbAllianceMember>> Members([Parent] DbAlliance university) {
             return db.UniversityMemberships
                 .Include(x => x.Player)
                 .Where(x => x.UniversityId == university.Id)
                 .ToListAsync();
         }
 
-        public async Task<List<UniversityClass>> Classes([Parent] DbUniversity university) {
+        public async Task<List<UniversityClass>> Classes([Parent] DbAlliance university) {
             var turns = await db.StudyPlans
                 .Include(x => x.Turn)
                 .Where(x => x.UniversityId == university.Id)
@@ -60,7 +60,7 @@ namespace advisor
             public DbStat Stat { get; set; }
         }
 
-        public async Task<List<TurnStats>> Stats([Parent] DbUniversity university) {
+        public async Task<List<TurnStats>> Stats([Parent] DbAlliance university) {
             var members = await db.UniversityMemberships
                 .Include(x => x.Player)
                 .Where(x => x.UniversityId == university.Id)

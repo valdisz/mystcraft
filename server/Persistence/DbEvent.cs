@@ -9,16 +9,19 @@ namespace advisor.Persistence {
         public long Id { get; set; }
 
         [GraphQLIgnore]
-        public long TurnId { get; set; }
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public long FactionId { get; set; }
+        public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        public long? RegionId { get; set; }
+        public int FactionNumber { get; set; }
 
         [GraphQLIgnore]
-        public long? UnitId { get; set; }
+        public string RegionId { get; set; }
+
+        [GraphQLIgnore]
+        public int? UnitNumber { get; set; }
 
         [Required]
         public EventType Type { get; set; }
@@ -33,13 +36,6 @@ namespace advisor.Persistence {
         public string ItemCode { get; set; }
         public string ItemName { get; set; }
         public int? ItemPrice { get; set; }
-
-        // public int? X { get; set; }
-        // public int? Y { get; set; }
-        // public int? Z { get; set; }
-        // public string Label { get; set; }
-        // public string Province { get; set; }
-        // public string Terrain { get; set; }
 
 
         [GraphQLIgnore]

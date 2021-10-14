@@ -7,11 +7,11 @@ namespace advisor.Features
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record JoinUniversity(long UserId, long PlayerId, long UniversityId) : IRequest<DbUniversity> {
+    public record JoinUniversity(long UserId, long PlayerId, long UniversityId) : IRequest<DbAlliance> {
 
     }
 
-    public class JoinUniversityHandler : IRequestHandler<JoinUniversity, DbUniversity> {
+    public class JoinUniversityHandler : IRequestHandler<JoinUniversity, DbAlliance> {
         public JoinUniversityHandler(Database db, IMediator mediator) {
             this.db = db;
             this.mediator = mediator;
@@ -20,13 +20,13 @@ namespace advisor.Features
         private readonly Database db;
         private readonly IMediator mediator;
 
-        public async Task<DbUniversity> Handle(JoinUniversity request, CancellationToken cancellationToken) {
+        public async Task<DbAlliance> Handle(JoinUniversity request, CancellationToken cancellationToken) {
             var player = await db.Players
                 .Include(x => x.UniversityMembership)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 
             // must close university first
-            if (player.UniversityMembership?.Role == UniveristyMemberRole.Owner) return null;
+            if (player.UniversityMembership?.Role == AllianceMemberRole.Owner) return null;
 
             var university = await db.Universities
                 .Include(x => x.Members)
@@ -44,10 +44,10 @@ namespace advisor.Features
                 university.Members.Remove(player.UniversityMembership);
             }
 
-            var membership = new DbUniversityMembership {
+            var membership = new DbAllianceMember {
                 PlayerId = player.Id,
                 UniversityId = university.Id,
-                Role = UniveristyMemberRole.Member
+                Role = AllianceMemberRole.Member
             };
 
             player.UniversityMembership = membership;

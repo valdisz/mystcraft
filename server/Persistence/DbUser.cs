@@ -28,7 +28,7 @@ namespace advisor.Persistence
         [Required]
         public string Digest { get; set; }
 
-        public List<DbUserRole> Roles { get; set; } = new ();
+        public List<string> Roles { get; set; } = new ();
 
 
         [GraphQLIgnore]

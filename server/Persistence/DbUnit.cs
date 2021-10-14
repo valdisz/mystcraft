@@ -5,24 +5,24 @@ namespace advisor.Persistence {
 
     [GraphQLName("Unit")]
     public class DbUnit {
-        [Key]
-        public long Id { get; set; }
+        public int Number { get; set; }
 
         [GraphQLIgnore]
-        public long TurnId { get; set; }
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public long RegionId { get; set; }
+        public long PlayerId { get; set; }
+
+        [GraphQLIgnore]
+        public string RegionId { get; set; }
 
         [GraphQLIgnore]
         public long? StrcutureId { get; set; }
 
         [GraphQLIgnore]
-        public long? FactionId { get; set; }
+        public int? FactionNumber { get; set; }
 
         public int Sequence { get; set; }
-
-        public int Number { get; set; }
 
         [Required]
         public string Name { get; set; }
@@ -37,7 +37,7 @@ namespace advisor.Persistence {
         public int? Weight { get; set; }
 
         [Required]
-        public List<DbItem> Items { get; set; } = new List<DbItem>();
+        public List<DbUnitItem> Items { get; set; } = new ();
         public DbCapacity Capacity { get; set; }
         public List<DbSkill> Skills { get; set; } = new List<DbSkill>();
         public List<DbSkill> CanStudy { get; set; } = new List<DbSkill>();

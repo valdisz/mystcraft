@@ -4,19 +4,16 @@ namespace advisor.Persistence {
 
     [GraphQLName("Report")]
     public class DbReport {
-        [Key]
-        public long Id { get; set; }
-
-
-        [Required, GraphQLIgnore]
-        public long PlayerId { get; set; }
-
-        [Required, GraphQLIgnore]
-        public long TurnId { get; set; }
-
-
         [Required]
         public int FactionNumber { get; set; }
+
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
+
+
 
         [Required, MaxLength(100)]
         public string FactionName { get; set; }

@@ -4,8 +4,8 @@ namespace advisor.Persistence
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("University")]
-    public class DbUniversity {
+    [GraphQLName("Alliance")]
+    public class DbAlliance {
         [Key]
         public long Id { get; set; }
 
@@ -16,10 +16,7 @@ namespace advisor.Persistence
         public string Name { get; set; }
 
         [GraphQLIgnore]
-        public List<DbStudyPlan> Plans { get; set; } = new ();
-
-        [GraphQLIgnore]
-        public List<DbUniversityMembership> Members { get; set; } = new ();
+        public List<DbAllianceMember> Members { get; set; } = new ();
 
         [GraphQLIgnore]
         public DbGame Game { get; set; }
