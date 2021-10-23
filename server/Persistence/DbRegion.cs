@@ -2,12 +2,15 @@ namespace advisor.Persistence
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Linq;
     using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 
     [GraphQLName("Region")]
-    public class DbRegion {
-        public string Id => $"{X},{Y},{Z}";
+    public class DbRegion : InTurnContext {
+        public string Id => MakeId(X, Y, Z);
+
+        public static string MakeId(int x, int y, int z) => $"({x},{y},{z})";
 
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
@@ -50,11 +53,13 @@ namespace advisor.Persistence
         [Required]
         public int TotalWages { get; set; }
 
-        public List<DbTradableItem> ForSale { get; set; } = new List<DbTradableItem>();
+        [GraphQLIgnore]
+        public List<DbTradableItem> Market { get; set; } = new List<DbTradableItem>();
 
-        public List<DbTradableItem> Wanted { get; set; } = new List<DbTradableItem>();
+        public IEnumerable<DbTradableItem> ForSale => Market.Where(x => x.Market == Persistence.Market.FOR_SALE);
+        public IEnumerable<DbTradableItem> Wanted => Market.Where(x => x.Market == Persistence.Market.WANTED);
 
-        public List<DbItem> Products { get; set; } = new List<DbItem>();
+        public List<DbProductionItem> Products { get; set; } = new List<DbProductionItem>();
 
         public List<DbExit> Exits { get; set; } = new List<DbExit>();
 

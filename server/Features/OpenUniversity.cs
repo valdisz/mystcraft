@@ -21,37 +21,38 @@ namespace advisor.Features
         private readonly IMediator mediator;
 
         public async Task<DbAlliance> Handle(OpenUniversity request, CancellationToken cancellationToken) {
-            var player = await db.Players
-                .Include(x => x.UniversityMembership)
-                .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
-            if (player == null) return null;
+            // var player = await db.Players
+            //     .Include(x => x.UniversityMembership)
+            //     .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
+            // if (player == null) return null;
 
-            if (player.UserId != request.UserId) return null;
+            // if (player.UserId != request.UserId) return null;
 
-            // already part of another unversity
-            if (player.UniversityMembership != null) return null;
+            // // already part of another unversity
+            // if (player.UniversityMembership != null) return null;
 
-            var membership = new DbAllianceMember {
-                Role = AllianceMemberRole.Owner,
-                PlayerId = request.PlayerId
-            };
+            // var membership = new DbAllianceMember {
+            //     Role = AllianceMemberRole.Owner,
+            //     PlayerId = request.PlayerId
+            // };
 
-            player.UniversityMembership = membership;
+            // player.UniversityMembership = membership;
 
-            var university = new DbAlliance {
-                GameId = player.GameId,
-                Name = request.Name,
-                Members = {
-                    membership
-                }
-            };
+            // var university = new DbAlliance {
+            //     GameId = player.GameId,
+            //     Name = request.Name,
+            //     Members = {
+            //         membership
+            //     }
+            // };
 
-            await db.Universities.AddAsync(university);
-            await db.SaveChangesAsync();
+            // await db.Universities.AddAsync(university);
+            // await db.SaveChangesAsync();
 
-            await mediator.Send(new SetupStudyPlans(request.PlayerId));
+            // await mediator.Send(new SetupStudyPlans(request.PlayerId));
 
-            return university;
+            // return university;
+            return null;
         }
     }
 }

@@ -6,7 +6,7 @@ namespace advisor.Persistence
     using Microsoft.EntityFrameworkCore;
 
     [GraphQLName("Exit")]
-    public class DbExit {
+    public class DbExit : InTurnContext {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 

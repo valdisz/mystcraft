@@ -1,4 +1,5 @@
 namespace advisor.Features {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -19,23 +20,11 @@ namespace advisor.Features {
             var user = await db.Users.FindAsync(request.UserId);
             if (user == null) return null;
 
-            var roles = user.Roles.ToDictionary(x => x.Role);
-            foreach (var add in request.Add ?? Enumerable.Empty<string>()) {
-                if (!roles.ContainsKey(add)) {
-                    var role = new DbUserRole { Role = add };
-                    user.Roles.Add(role);
-                    roles.Add(add, role);
-                }
-            }
-
-            foreach (var remove in request.Remove ?? Enumerable.Empty<string>()) {
-                if (roles.ContainsKey(remove)) {
-                    roles.Remove(remove);
-
-                    var i = user.Roles.FindIndex(x => x.Role == remove);
-                    user.Roles.RemoveAt(i);
-                }
-            }
+            user.Roles = user.Roles
+                .Union(request.Add)
+                .Distinct()
+                .Except(request.Remove)
+                .ToList();
 
             await db.SaveChangesAsync();
 

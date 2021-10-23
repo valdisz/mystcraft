@@ -4,7 +4,7 @@ namespace advisor.Persistence {
     using HotChocolate;
 
     [GraphQLName("Unit")]
-    public class DbUnit {
+    public class DbUnit : InTurnContext {
         public int Number { get; set; }
 
         [GraphQLIgnore]

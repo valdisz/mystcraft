@@ -1,10 +1,11 @@
-namespace advisor.Persistence {
+namespace advisor.Persistence
+{
     using System.ComponentModel.DataAnnotations;
     using advisor.Model;
     using HotChocolate;
 
     [GraphQLName("Event")]
-    public class DbEvent {
+    public class DbEvent : InFactionContext {
         [Key]
         public long Id { get; set; }
 

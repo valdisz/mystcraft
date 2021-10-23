@@ -12,7 +12,7 @@ namespace advisor.Features
 
     public record DeleteGame(long GameId) : IRequest<List<DbGame>>;
 
-    public record DeleteTurn(ClaimsPrincipal User, long TurnId) : IRequest<int>;
+    public record DeleteTurn(ClaimsPrincipal User, long PlayerId, int TurnNumber) : IRequest<int>;
 
     public class DeleteGameHandler : IRequestHandler<DeleteGame, List<DbGame>>, IRequestHandler<DeleteTurn, int> {
         public DeleteGameHandler(Database db, IAuthorizationService auth) {
@@ -28,26 +28,14 @@ namespace advisor.Features
             var game = await db.Games.FindAsync(gameId);
 
             if (game != null)  {
-                var turns = await db.Turns
-                    .AsNoTracking()
-                    .Include(x => x.Player)
-                    .Where(x => x.Player.GameId == gameId)
-                    .Select(x => x.Id)
-                    .ToListAsync();
-
-                foreach (var turnId in turns) {
-                    await DeleteTurnDependencies(turnId);
-                }
-
                 var players = await db.Players
                     .AsNoTracking()
-                    .Where(x => x.GameId == gameId)
                     .Select(x => x.Id)
                     .ToListAsync();
 
-                var membershipTable = db.Model.FindEntityType(typeof(DbAllianceMember)).GetTableName();
                 foreach (var playerId in players) {
-                    await db.Database.ExecuteSqlRawAsync($@"delete from {membershipTable} where {nameof(DbAllianceMember.PlayerId)} = {playerId}");
+                    await DeleteTurnDependenciesAsync("PlayerId", playerId);
+                    await DeleteFromTableAsync<DbPlayer>("Id", playerId);
                 }
 
                 db.Remove(game);
@@ -60,16 +48,15 @@ namespace advisor.Features
 
         public async Task<int> Handle(DeleteTurn request, CancellationToken cancellationToken) {
             var isGM = (await auth.AuthorizeAsync(request.User, Roles.GameMaster)).Succeeded;
-
-            var turnId = request.TurnId;
-            var turn = await db.FindAsync<DbTurn>(turnId);
-            var playerId = turn.PlayerId;
+            var playerId = request.PlayerId;
 
             if (!isGM && !(await auth.AuthorizeOwnPlayer(request.User, playerId))) {
                 return -1;
             }
 
-            await DeleteTurnDependencies(turnId);
+            await DeleteTurnDependenciesAsync(playerId, request.TurnNumber);
+
+            var turn = await db.Turns.FirstOrDefaultAsync(x => x.PlayerId == playerId && x.Number == request.TurnNumber);
             db.Remove(turn);
             await db.SaveChangesAsync();
 
@@ -87,21 +74,40 @@ namespace advisor.Features
             return lastTurnNumber;
         }
 
-        private async Task DeleteTurnDependencies(long turnId) {
-            await DeleteFromTurnAsync<DbStat>(turnId);
-            await DeleteFromTurnAsync<DbStudyPlan>(turnId);
-            await DeleteFromTurnAsync<DbEvent>(turnId);
-            await DeleteFromTurnAsync<DbUnit>(turnId);
-            await DeleteFromTurnAsync<DbStructure>(turnId);
-            await DeleteFromTurnAsync<DbRegion>(turnId);
-            await DeleteFromTurnAsync<DbFaction>(turnId);
-            await DeleteFromTurnAsync<DbReport>(turnId);
+        private async Task DeleteTurnDependenciesAsync(string field, long id) {
+            await DeleteFromTableAsync<DbStat>(field, id);
+            await DeleteFromTableAsync<DbStudyPlan>(field, id);
+            await DeleteFromTableAsync<DbEvent>(field, id);
+            await DeleteFromTableAsync<DbUnit>(field, id);
+            await DeleteFromTableAsync<DbStructure>(field, id);
+            await DeleteFromTableAsync<DbRegion>(field, id);
+            await DeleteFromTableAsync<DbFaction>(field, id);
+            await DeleteFromTableAsync<DbReport>(field, id);
+            await DeleteFromTableAsync<DbTurn>(field, id);
         }
 
-        private Task DeleteFromTurnAsync<T>(long turnId) {
+        private async Task DeleteTurnDependenciesAsync(long playerId, int turnNumber) {
+            await DeleteFromTableAsync<DbStat>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbStudyPlan>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbEvent>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbUnit>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbStructure>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbRegion>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbFaction>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbReport>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbTurn>("PlayerId", playerId, "TurnNumber", turnNumber);
+        }
+
+        private Task DeleteFromTableAsync<T>(string field, long id) {
             var targetTable = db.Model.FindEntityType(typeof(T)).GetTableName();
 
-            return db.Database.ExecuteSqlRawAsync($@"delete from {targetTable} where TurnId = {turnId}");
+            return db.Database.ExecuteSqlRawAsync($@"delete from {targetTable} where {field} = {id}");
+        }
+
+        private Task DeleteFromTableAsync<T>(string field1, long id1, string field2, long id2) {
+            var targetTable = db.Model.FindEntityType(typeof(T)).GetTableName();
+
+            return db.Database.ExecuteSqlRawAsync($@"delete from {targetTable} where {field1} = {id1} and {field2} = {id2}");
         }
     }
 }

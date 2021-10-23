@@ -7,9 +7,7 @@ namespace advisor.Features {
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record CalculateFactionStats(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame> {
-
-    }
+    public record CalculateFactionStats(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame>;
 
     public class CalculateFactionStatsHandler : IRequestHandler<CalculateFactionStats, DbGame> {
         public CalculateFactionStatsHandler(Database db)
@@ -26,29 +24,27 @@ namespace advisor.Features {
                     && x.Turn.Number >= request.EarliestTurnNumber)
                 .ToListAsync();
 
-            foreach (var turn in data.GroupBy(x => x.Turn.Id)) {
-                var turnId = turn.Key;
+            foreach (var turn in data.GroupBy(x => x.Turn.Number)) {
+                var turnNumber = turn.Key;
 
-                foreach (var faction in turn.GroupBy(x => x.FactionId)) {
-                    var factionId = faction.Key;
+                foreach (var faction in turn.GroupBy(x => x.FactionNumber)) {
+                    var factionNumber = faction.Key;
+
+                    var stats = await db.Stats
+                        .FilterByTurn(request.PlayerId, turnNumber)
+                        .ToDictionaryAsync(x => x.RegionId);
 
                     foreach (var region in faction.GroupBy(x => x.RegionId)) {
                         var regionId = region.Key;
                         var value = Reduce(region);
 
-                        var stat = await db.Stats
-                            .SingleOrDefaultAsync(x => x.FactionId == factionId
-                                && x.TurnId == turnId
-                                && x.RegionId == regionId
-                            );
-
-                        if (stat != null) {
+                        if (stats.TryGetValue(regionId, out var stat)) {
                             stat.Income = value.Income;
                             stat.Production = value.Production;
                         }
                         else {
-                            value.FactionId = factionId;
-                            value.TurnId = turnId;
+                            value.FactionNumber = factionNumber;
+                            value.TurnNumber = turnNumber;
                             value.RegionId = regionId;
 
                             await db.Stats.AddAsync(value);
@@ -64,7 +60,7 @@ namespace advisor.Features {
 
         private DbStat Reduce(IEnumerable<DbEvent> events) {
             var income = new DbIncomeStats();
-            var production = new List<DbItem>();
+            var production = new List<DbStatItem>();
 
             foreach (var category in events.GroupBy(x => x.Category)) {
                 switch (category.Key) {
@@ -87,7 +83,7 @@ namespace advisor.Features {
                     case Model.EventCategory.Produce:
                         production.AddRange(category
                             .GroupBy(item => item.ItemCode)
-                            .Select(item => new DbItem {
+                            .Select(item => new DbStatItem {
                                 Code = item.Key,
                                 Amount = item.Sum(x => x.Amount)
                             }));

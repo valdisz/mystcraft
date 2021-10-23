@@ -4,7 +4,7 @@ namespace advisor.Persistence {
     using HotChocolate;
 
     [GraphQLName("Stat")]
-    public class DbStat {
+    public class DbStat : InFactionContext {
         [Key]
         public long Id { get; set; }
 
@@ -21,7 +21,8 @@ namespace advisor.Persistence {
         public string RegionId { get; set; }
 
         public DbIncomeStats Income { get; set; }
-        public List<DbItem> Production { get; set; } = new ();
+
+        public List<DbStatItem> Production { get; set; } = new ();
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }

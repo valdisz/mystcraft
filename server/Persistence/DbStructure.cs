@@ -6,7 +6,7 @@ namespace advisor.Persistence
     using HotChocolate;
 
     [GraphQLName("Structure")]
-    public class DbStructure {
+    public class DbStructure : InTurnContext {
         public string Id => Number > GameConsts.MAX_BUILDING_NUMBER ? $"{Number}" : $"{Number}@{RegionId}";
 
         [GraphQLIgnore]

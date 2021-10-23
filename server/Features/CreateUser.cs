@@ -1,4 +1,5 @@
 namespace advisor.Features {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -32,9 +33,11 @@ namespace advisor.Features {
                 Digest = digest
             };
 
-            foreach (var role in request.Roles ?? Enumerable.Empty<string>()) {
-                user.Roles.Add(new DbUserRole { Role = role });
-            }
+            var resultingRoles = new HashSet<string>(user.Roles);
+            resultingRoles.UnionWith(request.Roles);
+
+            user.Roles.Clear();
+            user.Roles.AddRange(resultingRoles);
 
             await db.Users.AddAsync(user);
             await db.SaveChangesAsync();

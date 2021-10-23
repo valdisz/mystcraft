@@ -5,7 +5,7 @@ namespace advisor.Persistence
     using HotChocolate;
 
     [GraphQLName("Player")]
-    public class DbPlayer {
+    public class DbPlayer : InGameContext {
         [Key]
         public long Id { get; set; }
 

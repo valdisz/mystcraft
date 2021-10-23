@@ -27,71 +27,74 @@ namespace advisor.Features {
 
         private readonly Database db;
 
-        private Task<DbStudyPlan> GetPlan(long studyPlanId) {
-            return db.StudyPlans
-                .Include(x => x.Turn)
-                .Include(x => x.Unit)
-                .ThenInclude(x => x.Faction)
-                .SingleOrDefaultAsync(x => x.Id == studyPlanId);
-        }
+        // private Task<DbStudyPlan> GetPlan(long studyPlanId) {
+        //     return db.StudyPlans
+        //         .Include(x => x.Turn)
+        //         .Include(x => x.Unit)
+        //         .ThenInclude(x => x.Faction)
+        //         .SingleOrDefaultAsync(x => x.Id == studyPlanId);
+        // }
 
-        private Task<DbAllianceMember> GetMembershipAsync(long userId, DbStudyPlan plan) {
-            return db.UniversityMemberships
-                .Include(x => x.Player)
-                .SingleOrDefaultAsync(x => x.UniversityId == plan.UniversityId && x.Player.UserId == userId);
-        }
+        // private Task<DbAllianceMember> GetMembershipAsync(long userId, DbStudyPlan plan) {
+        //     return db.UniversityMemberships
+        //         .Include(x => x.Player)
+        //         .SingleOrDefaultAsync(x => x.UniversityId == plan.UniversityId && x.Player.UserId == userId);
+        // }
 
-        private static int LevelToDays(int level) {
-            if (level == 1) return 30;
+        // private static int LevelToDays(int level) {
+        //     if (level == 1) return 30;
 
-            return LevelToDays(level - 1) + 30 * level;
-        }
+        //     return LevelToDays(level - 1) + 30 * level;
+        // }
 
         public async Task<DbStudyPlan> Handle(SetStudyPlanTarget request, CancellationToken cancellationToken) {
-            var plan = await GetPlan(request.StudyPlanId);
-            var membership = await GetMembershipAsync(request.UserId, plan);
+            // var plan = await GetPlan(request.StudyPlanId);
+            // var membership = await GetMembershipAsync(request.UserId, plan);
 
-            var own = plan.Turn.PlayerId == membership.PlayerId;
-            if (!own && membership.Role == AllianceMemberRole.Member) return null;
+            // var own = plan.Turn.PlayerId == membership.PlayerId;
+            // if (!own && membership.Role == AllianceMemberRole.Member) return null;
 
-            plan.Target = new DbSkill {
-                Code = request.Skill,
-                Level = request.Level,
-                Days = LevelToDays(request.Level)
-            };
+            // plan.Target = new DbSkill {
+            //     Code = request.Skill,
+            //     Level = request.Level,
+            //     Days = LevelToDays(request.Level)
+            // };
 
-            await db.SaveChangesAsync();
+            // await db.SaveChangesAsync();
 
-            return plan;
+            // return plan;
+            return null;
         }
 
         public async Task<DbStudyPlan> Handle(SetStudPlanyStudy request, CancellationToken cancellationToken) {
-            var plan = await GetPlan(request.StudyPlanId);
-            var membership = await GetMembershipAsync(request.UserId, plan);
+            // var plan = await GetPlan(request.StudyPlanId);
+            // var membership = await GetMembershipAsync(request.UserId, plan);
 
-            var own = plan.Turn.PlayerId == membership.PlayerId;
-            if (!own && membership.Role == AllianceMemberRole.Member) return null;
+            // var own = plan.Turn.PlayerId == membership.PlayerId;
+            // if (!own && membership.Role == AllianceMemberRole.Member) return null;
 
-            plan.Teach = new ();
-            plan.Study = request.Skill;
+            // plan.Teach = new ();
+            // plan.Study = request.Skill;
 
-            await db.SaveChangesAsync();
+            // await db.SaveChangesAsync();
 
-            return plan;
+            // return plan;
+            return null;
         }
 
         public async Task<DbStudyPlan> Handle(SetStudyPlanTeach request, CancellationToken cancellationToken) {
-            var plan = await GetPlan(request.StudyPlanId);
-            var membership = await GetMembershipAsync(request.UserId, plan);
+            // var plan = await GetPlan(request.StudyPlanId);
+            // var membership = await GetMembershipAsync(request.UserId, plan);
 
-            if (membership.Role == AllianceMemberRole.Member) return null;
+            // if (membership.Role == AllianceMemberRole.Member) return null;
 
-            plan.Study = null;
-            plan.Teach = request.Units.ToList();
+            // plan.Study = null;
+            // plan.Teach = request.Units.ToList();
 
-            await db.SaveChangesAsync();
+            // await db.SaveChangesAsync();
 
-            return plan;
+            // return plan;
+            return null;
         }
     }
 }

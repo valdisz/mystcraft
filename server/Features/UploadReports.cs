@@ -1,5 +1,4 @@
-namespace advisor.Features
-{
+namespace advisor.Features {
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -10,9 +9,7 @@ namespace advisor.Features
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<int> {
-
-    }
+    public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<int>;
 
     public class UploadReportsHandler : IRequestHandler<UploadReports, int> {
         public UploadReportsHandler(Database db) {
@@ -52,7 +49,6 @@ namespace advisor.Features
             var faction = report.Faction;
             var date = report.Date;
             var engine = report.Engine;
-            // var ordersTemplate = report.OrdersTemplate;
 
             string factionName = faction.Name;
             int factionNumber = faction.Number;
@@ -76,13 +72,13 @@ namespace advisor.Features
             }
             else {
                 dbReport = await db.Reports
-                    .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnId == turn.Id);
+                    .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnNumber == turn.Number);
             }
 
             if (dbReport == null) {
                 dbReport = new DbReport {
                     PlayerId = player.Id,
-                    TurnId = turn.Id
+                    TurnNumber = turn.Number
                 };
 
                 player.Reports.Add(dbReport);
@@ -94,10 +90,8 @@ namespace advisor.Features
             dbReport.Source = source;
 
             player.FactionNumber ??= dbReport.FactionNumber;
-            if (dbReport.FactionNumber == player.FactionNumber && turnNumber > player.LastTurnNumber) {
-                player.FactionName = dbReport.FactionName;
+            if (dbReport.FactionNumber == player.FactionNumber && turnNumber >= player.LastTurnNumber) {
                 player.LastTurnNumber = turnNumber;
-                // player.Password ??= ordersTemplate?.Password;
             }
 
             player.Game.EngineVersion ??= engine?.Version;

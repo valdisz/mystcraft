@@ -5,6 +5,9 @@
     // (12,34,2)
     // (12,34,2 <underworld>)
     public class CoordsParser : BaseParser {
+        public const string DEFAULT_LEVEL_LABEL = "surface";
+        public const int DEFAULT_LEVEL_Z = 1;
+
         protected override Maybe<IReportNode> Execute(TextParser p) {
             if (!Mem(p.Between("(", ")"))) return Error(LastResult);
             var content = LastResult.Value;
@@ -15,8 +18,8 @@
             Maybe<int> y = content.SkipWhitespaces().After(",").SkipWhitespaces().Integer();
             if (!y) return Error(y);
 
-            Maybe<int> z = new Maybe<int>(1);
-            Maybe<string> label = new Maybe<string>("surface");
+            Maybe<int> z = new Maybe<int>(DEFAULT_LEVEL_Z);
+            Maybe<string> label = new Maybe<string>(DEFAULT_LEVEL_LABEL);
 
             if (content.SkipWhitespaces().After(",")) {
                 label = content.OneOf(

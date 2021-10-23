@@ -1,9 +1,10 @@
-namespace advisor.Persistence {
+namespace advisor.Persistence
+{
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
     [GraphQLName("Item")]
-    public class DbItem {
+    public abstract class DbItem {
         public DbItem() {
 
         }
@@ -19,7 +20,7 @@ namespace advisor.Persistence {
         public int? Amount { get; set; }
     }
 
-    public class DbUnitItem : DbItem {
+    public class DbUnitItem : DbItem, InTurnContext {
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
@@ -31,5 +32,82 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public DbUnit Unit { get; set; }
+    }
+
+    public class DbProductionItem : DbItem, InTurnContext {
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
+
+        [GraphQLIgnore]
+        public string RegionId { get; set; }
+
+        [GraphQLIgnore]
+        public DbRegion Region { get; set; }
+    }
+
+    [GraphQLName("TradableItem")]
+    public class DbTradableItem : DbItem, InTurnContext  {
+        public DbTradableItem() {
+
+        }
+
+        public DbTradableItem(DbTradableItem other) {
+            this.Code = other.Code;
+            this.Amount = other.Amount;
+            this.Price = other.Price;
+        }
+
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
+
+        [GraphQLIgnore]
+        public string RegionId { get; set; }
+
+        [GraphQLIgnore]
+        public DbRegion Region { get; set; }
+
+        [Required]
+        public int Price { get; set; }
+
+        [Required]
+        public Market Market { get; set; }
+    }
+
+    public class DbStatItem : DbItem, InFactionContext {
+        public DbStatItem() {
+
+        }
+
+        public DbStatItem(DbItem other) {
+            this.Code = other.Code;
+            this.Amount = other.Amount;
+        }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
+
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public int FactionNumber { get; set; }
+
+        [GraphQLIgnore]
+        public string RegionId { get; set; }
+
+        [GraphQLIgnore]
+        public DbRegion Region { get; set; }
+
+        [GraphQLIgnore]
+        public DbFaction Faction { get; set; }
+
+        [GraphQLIgnore]
+        public DbStat Stat { get; set; }
     }
 }

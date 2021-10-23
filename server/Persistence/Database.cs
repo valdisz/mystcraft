@@ -55,8 +55,11 @@ namespace advisor.Persistence {
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
         public DbSet<DbStat> Stats { get; set; }
+        public DbSet<DbStatItem> StatItems { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
+        public DbSet<DbProductionItem> ProductionItems { get; set; }
+        public DbSet<DbTradableItem> TradeItems { get; set; }
         public DbSet<DbExit> Exits { get; set; }
         public DbSet<DbStructure> Structures { get; set; }
         public DbSet<DbUnit> Units { get; set; }
@@ -203,23 +206,26 @@ namespace advisor.Persistence {
                     a.Property(x => x.Size).HasConversion<string>();
                 });
 
-                t.OwnsMany(p => p.ForSale, a => {
-                    a.WithOwner().HasForeignKey("RegionId");
-                    a.ToTable("Regions_ForSale");
-                    a.HasKey("RegionId", nameof(DbTradableItem.Code));
-                });
+                t.HasMany(p => p.Products)
+                    .WithOne(p => p.Region)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
-                t.OwnsMany(p => p.Wanted, a => {
-                    a.WithOwner().HasForeignKey("RegionId");
-                    a.ToTable("Regions_Wanted");
-                    a.HasKey("RegionId", nameof(DbTradableItem.Code));
-                });
+                t.HasMany(p => p.Market)
+                    .WithOne(p => p.Region)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+            });
 
-                t.OwnsMany(p => p.Products, a => {
-                    a.WithOwner().HasForeignKey("RegionId");
-                    a.ToTable("Regions_Products");
-                    a.HasKey("RegionId", nameof(DbItem.Code));
-                });
+            model.Entity<DbTradableItem>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Market, x.Code });
+
+                t.Property(x => x.Amount).IsRequired();
+                t.Property(x => x.Price).IsRequired();
+            });
+
+            model.Entity<DbProductionItem>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
+
+                t.Property(x => x.Amount).IsRequired();
             });
 
             model.Entity<DbExit>(t => {
@@ -260,11 +266,14 @@ namespace advisor.Persistence {
             model.Entity<DbStat>(t => {
                 t.OwnsOne(x => x.Income);
 
-                t.OwnsMany(p => p.Production, a => {
-                    a.WithOwner().HasForeignKey("StatId");
-                    a.ToTable("Stats_Production");
-                    a.HasKey("StatId", nameof(DbItem.Code));
-                });
+                t.HasMany(p => p.Production)
+                    .WithOne(x => x.Stat)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.RegionId });
+            });
+
+            model.Entity<DbStatItem>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.RegionId, x.Code });
+                t.Property(x => x.Amount).IsRequired();
             });
 
             model.Entity<DbStructure>(t => {

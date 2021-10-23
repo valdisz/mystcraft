@@ -4,9 +4,9 @@ namespace advisor.Persistence {
     using HotChocolate;
 
     [GraphQLName("Turn")]
-    public class DbTurn {
+    public class DbTurn : InPlayerContext {
         public int Number { get; set; }
-        
+
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 

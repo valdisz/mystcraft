@@ -3,7 +3,7 @@ namespace advisor.Persistence {
     using HotChocolate;
 
     [GraphQLName("Report")]
-    public class DbReport {
+    public class DbReport : InTurnContext {
         [Required]
         public int FactionNumber { get; set; }
 
