@@ -91,6 +91,14 @@ namespace advisor.Model {
                     regs.Add(key, otherReg);
                 }
             }
+
+            if (OrdersTemplate == null) {
+                OrdersTemplate = new JOrdersTemplate {
+                    Faction = Faction.Number
+                };
+            }
+
+            OrdersTemplate.Units.AddRange(report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>());
         }
 
         private void MergeRegion(JRegion reg, JRegion other, bool addStructures, bool addUnits) {
