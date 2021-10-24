@@ -152,6 +152,16 @@ namespace advisor.Persistence {
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
+                t.HasMany(x => x.Markets)
+                    .WithOne()
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                t.HasMany(x => x.Production)
+                    .WithOne()
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 t.HasMany(x => x.Factions)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
@@ -169,6 +179,11 @@ namespace advisor.Persistence {
 
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Turn)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                t.HasMany(x => x.Items)
+                    .WithOne()
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 

@@ -23,6 +23,12 @@ namespace advisor.Persistence {
         public List<DbRegion> Regions { get; set; } = new List<DbRegion>();
 
         [GraphQLIgnore]
+        public List<DbTradableItem> Markets { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbProductionItem> Production { get; set; } = new ();
+
+        [GraphQLIgnore]
         public List<DbFaction> Factions { get; set; } = new List<DbFaction>();
 
         [GraphQLIgnore]
@@ -30,6 +36,9 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
+
+        [GraphQLIgnore]
+        public List<DbUnitItem> Items { get; set; } = new List<DbUnitItem>();
 
         [GraphQLIgnore]
         public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
