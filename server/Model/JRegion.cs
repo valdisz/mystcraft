@@ -2,6 +2,7 @@ namespace advisor.Model {
     using System.Collections.Generic;
 
     public class JRegion {
+        public bool __Imported { get; set; }
         public string Terrain { get; set; }
         public JCoords Coords { get; set; }
         public string Province { get; set; }

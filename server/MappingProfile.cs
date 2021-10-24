@@ -19,20 +19,19 @@ namespace advisor
             // owner entities
 
             CreateMap<DbFaction, DbFaction>()
-                .ForMember(x => x.Id, opt => opt.Ignore())
-                .ForMember(x => x.TurnId, opt => opt.Ignore())
+                .ForMember(x => x.TurnNumber, opt => opt.Ignore())
                 .ForMember(x => x.Turn, opt => opt.Ignore())
                 .ForMember(x => x.Events, opt => opt.Ignore());
 
             CreateMap<DbRegion, DbRegion>()
                 .ForMember(x => x.Id, opt => opt.Ignore())
-                .ForMember(x => x.TurnId, opt => opt.Ignore())
+                .ForMember(x => x.TurnNumber, opt => opt.Ignore())
                 .ForMember(x => x.Turn, opt => opt.Ignore())
                 .ForMember(x => x.Units, opt => opt.Ignore());
 
             CreateMap<DbStructure, DbStructure>()
                 .ForMember(x => x.Id, opt => opt.Ignore())
-                .ForMember(x => x.TurnId, opt => opt.Ignore())
+                .ForMember(x => x.TurnNumber, opt => opt.Ignore())
                 .ForMember(x => x.RegionId, opt => opt.Ignore())
                 .ForMember(x => x.Turn, opt => opt.Ignore())
                 .ForMember(x => x.Region, opt => opt.Ignore())

@@ -152,6 +152,11 @@ namespace advisor.Persistence {
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
+                t.HasMany(x => x.Exits)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 t.HasMany(x => x.Markets)
                     .WithOne()
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
@@ -196,6 +201,10 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            model.Entity<DbReport>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
             });
 
             model.Entity<DbRegion>(t => {
@@ -279,6 +288,8 @@ namespace advisor.Persistence {
             });
 
             model.Entity<DbStat>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.RegionId });
+
                 t.OwnsOne(x => x.Income);
 
                 t.HasMany(p => p.Production)
@@ -325,10 +336,6 @@ namespace advisor.Persistence {
 
                 t.OwnsOne(p => p.Capacity);
 
-                t.OwnsOne(p => p.ReadyItem);
-
-                t.OwnsOne(p => p.CombatSpell);
-
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Unit)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
@@ -348,7 +355,9 @@ namespace advisor.Persistence {
                 t.Property(x => x.Teach)
                     .HasJsonConversion(options.Provider);
 
-                t.OwnsOne(p => p.Target);
+                t.OwnsOne(p => p.Target, owned => {
+                    owned.Ignore(x => x.Days);
+                });
 
                 t.HasOne(p => p.Unit)
                     .WithOne(p => p.Plan)

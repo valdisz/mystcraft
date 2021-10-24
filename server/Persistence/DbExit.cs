@@ -15,17 +15,24 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         [Required]
+        [MaxLength(14)]
         public string OriginRegionId { get; set; }
 
         [GraphQLIgnore]
         [Required]
+        [MaxLength(14)]
         public string TargetRegionId { get; set; }
 
         [Required]
         public Direction Direction { get; set; }
 
+        [GraphQLIgnore]
         public DbRegion Origin { get; set; }
 
+        [GraphQLIgnore]
         public DbRegion Target { get; set; }
+
+        [GraphQLIgnore]
+        public DbTurn Turn { get; set; }
     }
 }

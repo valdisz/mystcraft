@@ -23,6 +23,9 @@ namespace advisor.Persistence {
         public List<DbRegion> Regions { get; set; } = new List<DbRegion>();
 
         [GraphQLIgnore]
+        public List<DbExit> Exits { get; set; } = new List<DbExit>();
+
+        [GraphQLIgnore]
         public List<DbTradableItem> Markets { get; set; } = new ();
 
         [GraphQLIgnore]

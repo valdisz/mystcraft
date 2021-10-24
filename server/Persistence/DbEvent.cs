@@ -19,6 +19,7 @@ namespace advisor.Persistence
         public int FactionNumber { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]
@@ -34,8 +35,13 @@ namespace advisor.Persistence
         public string Message { get; set; }
 
         public int? Amount { get; set; }
+
+        [MaxLength(8)]
         public string ItemCode { get; set; }
+
+        [MaxLength(256)]
         public string ItemName { get; set; }
+
         public int? ItemPrice { get; set; }
 
 

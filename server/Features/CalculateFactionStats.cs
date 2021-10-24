@@ -85,7 +85,7 @@ namespace advisor.Features {
                             .GroupBy(item => item.ItemCode)
                             .Select(item => new DbStatItem {
                                 Code = item.Key,
-                                Amount = item.Sum(x => x.Amount)
+                                Amount = item.Sum(x => x.Amount ?? 1)
                             }));
                         break;
                 }

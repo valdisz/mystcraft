@@ -87,6 +87,8 @@ namespace advisor.Model {
                         }
                     }
 
+                    otherReg.__Imported = true;
+
                     Regions.Add(otherReg);
                     regs.Add(key, otherReg);
                 }

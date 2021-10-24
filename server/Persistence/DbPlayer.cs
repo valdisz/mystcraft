@@ -19,6 +19,7 @@ namespace advisor.Persistence
 
         public int LastTurnNumber { get; set; }
 
+        [MaxLength(64)]
         public string Password { get; set; }
 
         public bool IsQuit { get; set; }

@@ -112,7 +112,7 @@ namespace advisor {
 
             var factions = await db.Players
                 .Where(x => x.FactionNumber != null && x.Password != null)
-                .Select(x => new { x.Id, x.FactionName, FactionNumber = x.FactionNumber.Value, x.Password })
+                .Select(x => new { x.Id, FactionNumber = x.FactionNumber.Value, x.Password })
                 .ToListAsync();
 
             if (factions.Count == 0) {
@@ -123,7 +123,7 @@ namespace advisor {
             List<string> downloadJobs = new List<string>();
             foreach (var f in factions) {
                 downloadJobs.Add(backgroundJobs.Enqueue<RemoteGameServerJobs>(x => x.DownloadReportsForFactionAsync(
-                    f.FactionName, f.FactionNumber, f.Password, f.Id
+                    f.FactionNumber, f.Password, f.Id
                 )));
             }
 
@@ -144,8 +144,8 @@ namespace advisor {
             logger.LogInformation($"Report joining job queued");
         }
 
-        public async Task DownloadReportsForFactionAsync(string factionName, int factionNumber, string password, long playerId) {
-            logger.LogInformation($"Downloading report for {factionName} ({factionNumber})");
+        public async Task DownloadReportsForFactionAsync(int factionNumber, string password, long playerId) {
+            logger.LogInformation($"Downloading report for faction {factionNumber}");
             var report = await DownloadReportForFactionAsync(factionNumber, password);
 
             logger.LogInformation($"Saving report to database");

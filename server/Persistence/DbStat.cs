@@ -5,9 +5,6 @@ namespace advisor.Persistence {
 
     [GraphQLName("Stat")]
     public class DbStat : InFactionContext {
-        [Key]
-        public long Id { get; set; }
-
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
@@ -18,6 +15,7 @@ namespace advisor.Persistence {
         public int FactionNumber { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         public DbIncomeStats Income { get; set; }

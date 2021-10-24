@@ -14,10 +14,12 @@ namespace advisor.Persistence {
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]
-        public long? StrcutureId { get; set; }
+        [MaxLength(24)]
+        public string StrcutureId { get; set; }
 
         [GraphQLIgnore]
         public int? FactionNumber { get; set; }
@@ -25,8 +27,10 @@ namespace advisor.Persistence {
         public int Sequence { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Name { get; set; }
 
+        [MaxLength(256)]
         public string Description { get; set; }
 
         [Required]
@@ -41,8 +45,12 @@ namespace advisor.Persistence {
         public DbCapacity Capacity { get; set; }
         public List<DbSkill> Skills { get; set; } = new List<DbSkill>();
         public List<DbSkill> CanStudy { get; set; } = new List<DbSkill>();
-        public DbItem ReadyItem { get; set; }
-        public DbSkill CombatSpell { get; set; }
+
+        [MaxLength(8)]
+        public string ReadyItem { get; set; }
+
+        [MaxLength(8)]
+        public string CombatSpell { get; set; }
 
         public string Orders { get; set; }
 

@@ -4,7 +4,13 @@ namespace advisor.Persistence
     using HotChocolate;
 
     [GraphQLName("Item")]
-    public abstract class DbItem {
+    public interface AnItem {
+        string Code { get; set; }
+
+        int Amount { get; set; }
+    }
+
+    public class DbItem : AnItem {
         public DbItem() {
 
         }
@@ -15,12 +21,28 @@ namespace advisor.Persistence
         }
 
         [Required]
+        [MaxLength(8)]
         public string Code { get; set; }
 
-        public int? Amount { get; set; }
+        public int Amount { get; set; }
     }
 
-    public class DbUnitItem : DbItem, InTurnContext {
+    public class DbUnitItem : AnItem, InTurnContext {
+        public DbUnitItem() {
+
+        }
+
+        public DbUnitItem(AnItem other) {
+            this.Code = other.Code;
+            this.Amount = other.Amount;
+        }
+
+        [Required]
+        [MaxLength(8)]
+        public string Code { get; set; }
+
+        public int Amount { get; set; }
+
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
@@ -34,7 +56,22 @@ namespace advisor.Persistence
         public DbUnit Unit { get; set; }
     }
 
-    public class DbProductionItem : DbItem, InTurnContext {
+    public class DbProductionItem : AnItem, InTurnContext {
+        public DbProductionItem() {
+
+        }
+
+        public DbProductionItem(AnItem other) {
+            this.Code = other.Code;
+            this.Amount = other.Amount;
+        }
+
+        [Required]
+        [MaxLength(8)]
+        public string Code { get; set; }
+
+        public int Amount { get; set; }
+
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
@@ -42,6 +79,7 @@ namespace advisor.Persistence
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]
@@ -49,7 +87,7 @@ namespace advisor.Persistence
     }
 
     [GraphQLName("TradableItem")]
-    public class DbTradableItem : DbItem, InTurnContext  {
+    public class DbTradableItem : AnItem, InTurnContext  {
         public DbTradableItem() {
 
         }
@@ -60,6 +98,18 @@ namespace advisor.Persistence
             this.Price = other.Price;
         }
 
+        [Required]
+        [MaxLength(8)]
+        public string Code { get; set; }
+
+        public int Amount { get; set; }
+
+        [Required]
+        public int Price { get; set; }
+
+        [Required]
+        public Market Market { get; set; }
+
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
@@ -67,27 +117,28 @@ namespace advisor.Persistence
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]
         public DbRegion Region { get; set; }
-
-        [Required]
-        public int Price { get; set; }
-
-        [Required]
-        public Market Market { get; set; }
     }
 
-    public class DbStatItem : DbItem, InFactionContext {
+    public class DbStatItem : AnItem, InFactionContext {
         public DbStatItem() {
 
         }
 
-        public DbStatItem(DbItem other) {
+        public DbStatItem(AnItem other) {
             this.Code = other.Code;
             this.Amount = other.Amount;
         }
+
+        [Required]
+        [MaxLength(8)]
+        public string Code { get; set; }
+
+        public int Amount { get; set; }
 
         [GraphQLIgnore]
         public long PlayerId { get; set; }
@@ -99,6 +150,7 @@ namespace advisor.Persistence
         public int FactionNumber { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]

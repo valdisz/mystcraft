@@ -13,6 +13,7 @@ namespace advisor.Persistence
         public long GameId { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Name { get; set; }
 
         [GraphQLIgnore]

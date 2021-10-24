@@ -7,7 +7,14 @@ namespace advisor.Persistence
 
     [GraphQLName("Structure")]
     public class DbStructure : InTurnContext {
-        public string Id => Number > GameConsts.MAX_BUILDING_NUMBER ? $"{Number}" : $"{Number}@{RegionId}";
+        [MaxLength(24)]
+        public string Id { get; set; }
+
+        public static string MakeId(int number, string regionId) => IsBuilding(number) ? number.ToString() : $"{number}@{regionId}";
+
+        public static bool IsBuilding(int number) => number <= GameConsts.MAX_BUILDING_NUMBER;
+
+        public static bool IsShip(int number) => number > GameConsts.MAX_BUILDING_NUMBER;
 
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
@@ -16,6 +23,7 @@ namespace advisor.Persistence
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
+        [MaxLength(14)]
         public string RegionId { get; set; }
 
         public int Sequence { get; set; }
@@ -23,11 +31,14 @@ namespace advisor.Persistence
         public int Number { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Name { get; set; }
 
         [Required]
+        [MaxLength(64)]
         public string Type { get; set; }
 
+        [MaxLength(256)]
         public string Description { get; set; }
 
         public List<DbFleetContent> Contents { get; set; } = new List<DbFleetContent>();

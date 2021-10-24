@@ -39,7 +39,7 @@ namespace advisor {
             }
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var roles = user.Roles.Select(x => new Claim(WellKnownClaimTypes.Role, x.Role));
+            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
 
             var identity = new ClaimsIdentity(new[] {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
@@ -72,7 +72,7 @@ namespace advisor {
                 return Unauthorized();
             }
 
-            var roles = user.Roles.Select(x => new Claim(WellKnownClaimTypes.Role, x.Role));
+            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
 
             var identity = new ClaimsIdentity(new[] {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),

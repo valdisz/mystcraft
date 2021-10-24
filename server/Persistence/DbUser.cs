@@ -14,10 +14,12 @@ namespace advisor.Persistence
         public long Id { get; set; }
 
         [Required]
+        [MaxLength(128)]
         public string Email { get; set; }
 
         [GraphQLIgnore]
         [Required]
+        [MaxLength(32)]
         public string Salt { get; set; }
 
         [GraphQLIgnore]
@@ -26,6 +28,7 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         [Required]
+        [MaxLength(128)]
         public string Digest { get; set; }
 
         public List<string> Roles { get; set; } = new ();

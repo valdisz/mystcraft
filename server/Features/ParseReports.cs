@@ -1,6 +1,4 @@
-namespace advisor.Features
-{
-    using System;
+namespace advisor.Features {
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -13,16 +11,7 @@ namespace advisor.Features
     using advisor.Model;
     using advisor.Persistence;
 
-    using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
-    using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
-    using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
-    using UnitOrders = System.Collections.Generic.Dictionary<int, string>;
-    using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
-    using Newtonsoft.Json.Linq;
-
-    public record ParseReports(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest {
-
-    }
+    public record ParseReports(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
 
     public class ParseReportsHandler : IRequestHandler<ParseReports> {
         public ParseReportsHandler(Database db, IMapper mapper, IMediator mediator) {
@@ -55,17 +44,19 @@ namespace advisor.Features
             ReportSync prev = null;
             for (var i = startIndex; i < turns.Count; i++) {
                 var currentTurn = turns[i];
+                bool isFirstIteration = i == startIndex;
+                bool isLastIteration = i == turns.Count - 1;
 
                 // load and merge
                 var report = await MergeReportsAsync(db, request.PlayerId, currentTurn.TurnNumber, player.FactionNumber);
 
                 //import map if this is last turn in the list
-                if (i < turns.Count - 1 && request.Map != null) {
+                if (isLastIteration && request.Map != null) {
                     report.MergeMap(request.Map);
                 }
 
                 ReportSync sync;
-                if (i == startIndex) {
+                if (isFirstIteration) {
                     // fist iteration
                     // check if current turn was processed before
                     var isLoaded = (await db.Regions.FilterByTurn(currentTurn).CountAsync()) > 0;
@@ -98,7 +89,7 @@ namespace advisor.Features
                 }
 
                 // synchornize report with database
-                await sync.SyncReportAsync(db, report);
+                await sync.SyncReportAsync();
 
                 // update player password if latest turn
                 if (currentTurn.TurnNumber == player.LastTurnNumber && report.OrdersTemplate?.Password != null) {
@@ -125,6 +116,7 @@ namespace advisor.Features
 
             turns = turns
                 .Include(x => x.Regions)
+                .Include(x => x.Exits)
                 .Include(x => x.Production)
                 .Include(x => x.Markets)
                 .Include(x => x.Factions);
@@ -137,10 +129,11 @@ namespace advisor.Features
 
             if (addEvents) {
                 turns = turns
-                    .Include(x => x.Events);
+                    .Include(x => x.Events)
+                    .Include(x => x.Stats);
             }
 
-            if (addStructures) {
+            if (addStructures || addUnits) {
                 turns = turns
                     .Include(x => x.Structures);
             }

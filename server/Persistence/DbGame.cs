@@ -10,6 +10,7 @@ namespace advisor.Persistence
         public long Id { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Name { get; set; }
 
         public GameType Type { get; set; }
@@ -19,8 +20,13 @@ namespace advisor.Persistence
 
         public string Ruleset { get; set; }
 
+        [MaxLength(128)]
         public string EngineVersion { get; set; }
+
+        [MaxLength(128)]
         public string RulesetName { get; set; }
+
+        [MaxLength(128)]
         public string RulesetVersion { get; set; }
 
         [GraphQLIgnore]

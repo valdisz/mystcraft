@@ -8,9 +8,10 @@ namespace advisor.Persistence
 
     [GraphQLName("Region")]
     public class DbRegion : InTurnContext {
-        public string Id => MakeId(X, Y, Z);
+        [MaxLength(14)]
+        public string Id { get; set; }
 
-        public static string MakeId(int x, int y, int z) => $"({x},{y},{z})";
+        public static string MakeId(int x, int y, int z) => $"{x},{y},{z}";
 
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
@@ -22,16 +23,22 @@ namespace advisor.Persistence
         public int Y { get; set; }
         public int Z { get; set; }
 
+        // Full region report was obtained
         public bool Explored { get; set; }
-        public int UpdatedAtTurn { get; set; }
+
+        // Last turn OWN unit was in the region
+        public int? LastVisitedAt { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Label { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Province { get; set; }
 
         [Required]
+        [MaxLength(256)]
         public string Terrain { get; set; }
 
         public DbSettlement Settlement { get; set; }
@@ -39,6 +46,7 @@ namespace advisor.Persistence
         [Required]
         public int Population { get; set; }
 
+        [MaxLength(256)]
         public string Race { get; set; }
 
         [Required]

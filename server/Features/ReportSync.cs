@@ -2,6 +2,7 @@ namespace advisor.Features {
     using System.Linq;
     using System.Threading.Tasks;
     using System.Collections.Generic;
+    using System;
     using AutoMapper;
     using advisor.Model;
     using advisor.Persistence;
@@ -23,6 +24,7 @@ namespace advisor.Features {
         int InTurnContext.TurnNumber { get => this.TurnNumber; set { } }
         long InPlayerContext.PlayerId { get => this.PlayerId; set { } }
 
+        public UnitOrders Orders { get; } = new ();
         public Database Db { get; }
         public long PlayerId { get; }
         public int TurnNumber { get; }
@@ -32,12 +34,18 @@ namespace advisor.Features {
         public UnitsDic Units { get; } = new ();
         public FactionsDic Factions { get; } = new ();
 
-        private void ApplyTurnContext(InTurnContext ctx) {
-            ctx.PlayerId = PlayerId;
-            ctx.TurnNumber = TurnNumber;
-        }
+        public HashSet<string> ProcessedShips = new ();
+        public Dictionary<string, DbStructure> PendingShips = new ();
+
+        public HashSet<int> NewFactions { get; } = new ();
+        public HashSet<string> NewRegions { get; } = new ();
+        public HashSet<string> NewStructures { get; } = new ();
+        public HashSet<int> NewUnits { get; } = new ();
 
         public void Load(DbTurn turn) {
+            var reportOrders = (Report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>())
+                .ToDictionary(x => x.Unit, x => x.Orders);
+
             foreach (var region in turn.Regions) {
                 Regions.Add(region.Id, region);
             }
@@ -52,6 +60,17 @@ namespace advisor.Features {
 
             foreach (var unit in turn.Units) {
                 Units.Add(unit.Number, unit);
+
+                if (unit.Orders != null) {
+                    Orders.Add(unit.Number, unit.Orders);
+                }
+                else  if (reportOrders.TryGetValue(unit.Number, out var orders)) {
+                    Orders.Add(unit.Number, orders);
+                }
+            }
+
+            foreach (var key in reportOrders.Keys.Except(Orders.Keys)) {
+                Orders.Add(key, reportOrders[key]);
             }
         }
 
@@ -81,194 +100,140 @@ namespace advisor.Features {
             }
         }
 
-        public DbFaction SyncFaction(JFaction source) {
+        public async Task SyncReportAsync() {
+            SyncFactions();
+            SyncRegions();
+            SyncEvents();
+
+            await ApplyFactionsAsync();
+            await ApplyRegionsAsync();
+        }
+
+        private async Task ApplyFactionsAsync() {
+            foreach (var faction in Factions.Values) {
+                ApplyTurnContext(faction);
+
+                foreach (var ev in faction.Events) {
+                    ApplyTurnContext(ev);
+                }
+
+                foreach (var stat in faction.Stats) {
+                    ApplyTurnContext(stat);
+                }
+
+                if (NewFactions.Contains(faction.Number)) {
+                    await Db.AddAsync(faction);
+                }
+            }
+        }
+
+        private async Task ApplyRegionsAsync() {
+            foreach (var region in Regions.Values) {
+                ApplyTurnContext(region);
+
+                foreach (var exit in region.Exits) {
+                    ApplyTurnContext(exit);
+                }
+
+                foreach (var item in region.Market) {
+                    ApplyTurnContext(item);
+                }
+
+                foreach (var item in region.Products) {
+                    ApplyTurnContext(item);
+                }
+
+                foreach (var unit in region.Units) {
+                    ApplyTurnContext(unit);
+
+                    foreach (var item in unit.Items) {
+                        ApplyTurnContext(item);
+                    }
+                }
+
+                foreach (var str in region.Structures) {
+                    ApplyTurnContext(str);
+                }
+
+                if (NewRegions.Contains(region.Id)) {
+                    await Db.AddAsync(region);
+                }
+            }
+        }
+
+        private void ApplyTurnContext(InTurnContext ctx) {
+            ctx.PlayerId = PlayerId;
+            ctx.TurnNumber = TurnNumber;
+        }
+
+        private string GetOrders(int unitNumber) {
+            return Orders.TryGetValue(unitNumber, out var orders)
+                ? orders
+                : null;
+        }
+
+        private DbFaction GetFaction(int factionNumber) {
+            return Factions[factionNumber];
+        }
+
+        private DbRegion GetRegion(JCoords coords) {
+            return Regions[DbRegion.MakeId(coords.X, coords.Y, coords.Z)];
+        }
+
+        private void SyncFactions() {
+            var factions = new List<JFaction>();
+
+            var allAttitudes = Report.OtherReports.Select(x => x.Attitudes).Concat(new[] { Report.Attitudes });
+            foreach (var attitudes in allAttitudes) {
+                factions.AddRange(attitudes.Ally);
+                factions.AddRange(attitudes.Friendly);
+                factions.AddRange(attitudes.Neutral);
+                factions.AddRange(attitudes.Unfriendly);
+                factions.AddRange(attitudes.Hostile);
+            }
+
+            factions.Add(Report.Faction);
+            factions.AddRange(Report.OtherReports.Select(x => x.Faction));
+
+            foreach (var faction in factions) {
+                SyncFaction(faction);
+            }
+        }
+
+        private void SyncRegions() {
+            foreach (var region in Report.Regions) {
+                SyncRegion(region);
+            }
+
+            foreach (var region in Report.Regions) {
+                SyncExits(region);
+            }
+        }
+
+        private void SyncEvents() {
+            SyncEvents(Report.Faction.Number, Report.Errors, Report.Events);
+
+            foreach (var othetReport in Report.OtherReports) {
+                SyncEvents(othetReport.Faction.Number, othetReport.Errors, othetReport.Events);
+            }
+        }
+
+        private DbFaction SyncFaction(JFaction source) {
             if (!Factions.TryGetValue(source.Number, out var faction)) {
                 faction = new DbFaction {
                     Number = source.Number
                 };
 
                 Factions.Add(faction.Number, faction);
+                NewFactions.Add(faction.Number);
             }
-
-            ApplyTurnContext(faction);
 
             faction.Name = faction.Name;
 
             return faction;
         }
 
-        public DbUnit SyncUnit(JUnit source, UnitOrders unitOrders, int seq, DbRegion region, DbStructure structure = null) {
-            if (!Units.TryGetValue(source.Number, out var unit)) {
-                unit = new DbUnit {
-                    Number = source.Number
-                };
-
-                Units.Add(unit.Number, unit);
-
-                unit.Region = region;
-                region.Units.Add(unit);
-
-                if (structure != null) {
-                    unit.Structure = structure;
-                    structure.Units.Add(unit);
-                }
-            }
-
-            ApplyTurnContext(unit);
-
-            if (source.Faction != null && unit.Faction == null) {
-                var faction = SyncFaction(source.Faction);
-
-                unit.Faction = faction;
-                faction.Units.Add(unit);
-            }
-
-            unit.Sequence = seq;
-            unit.Name = source.Name;
-            unit.Description = source.Description;
-            unit.OnGuard = source.OnGuard;
-            unit.Flags = source.Flags.ToList();
-            unit.Weight = source.Weight;
-
-            if (source.Capacity != null) {
-                unit.Capacity = new DbCapacity {
-                    Walking = source.Capacity.Walking,
-                    Swimming = source.Capacity.Swimming,
-                    Riding = source.Capacity.Riding,
-                    Flying = source.Capacity.Flying
-                };
-            }
-
-            if (source.ReadyItem != null) {
-                unit.ReadyItem = new DbItem {
-                    Code = source.ReadyItem.Code,
-                    Amount = source.ReadyItem.Amount
-                };
-            }
-
-            if (source.CombatSpell != null) {
-                unit.CombatSpell = new DbSkill {
-                    Code = source.CombatSpell.Code,
-                    Level = source.CombatSpell.Level,
-                    Days = source.CombatSpell.Days
-                };
-            }
-
-            SetItems(unit.Items, source.Items);
-            SetSkills(unit.Skills, source.Skills);
-            SetSkills(unit.CanStudy, source.CanStudy);
-
-            if (unitOrders.ContainsKey(unit.Number)) {
-                unit.Orders = unitOrders[unit.Number];
-            }
-
-            return unit;
-        }
-
-        public void SyncRegion(JRegion region) {
-
-        }
-
-        public async Task SyncReportAsync(Database db, JReport report) {
-            await ApplyFactionsAsync(db);
-            await InsertFactionsAsync(db, t, factions.Values);
-            await InsertRegionsAsync(db, t, regions.Values);
-
-        }
-
-        private async Task ApplyFactionsAsync(Database db) {
-            foreach (var faction in Factions.Values) {
-                faction.TurnId = turnId;
-
-                foreach (var ev in faction.Events) {
-                    ev.TurnId = turnId;
-                }
-
-                if (faction.Id != default(long)) continue;
-
-                await db.AddAsync(faction);
-            }
-        }
-
-        private static async Task InsertRegionsAsync(Database db, long turnId, IEnumerable<DbRegion> regions) {
-            foreach (var region in regions) {
-                region.TurnId = turnId;
-
-                foreach (var unit in region.Units) {
-                    unit.TurnId = turnId;
-                }
-
-                foreach (var str in region.Structures) {
-                    str.TurnId = turnId;
-                }
-
-                if (region.Id != default(long)) continue;
-
-                await db.AddAsync(region);
-            }
-        }
-
-        private static void UpdateTurn(Database db, JReport report, int turnNumber,
-            RegionDic regions, FactionsDic factions, StructuresDic structures, UnitsDic units) {
-
-            CreateOrUpdateFaction(factions, report.Faction);
-
-            UnitOrders unitOrders = report.OrdersTemplate.Units.ToDictionary(x => x.Unit, x => x.Orders);
-            foreach (var region in report.Regions) {
-                CreateOrUpdateRegion(db, turnNumber, factions, regions, structures, units, region, unitOrders);
-            }
-
-            AddEvents(factions, regions, report);
-        }
-
-        public static DbFaction CreateOrUpdateFaction(FactionsDic factions, JFaction f) {
-            if (!factions.TryGetValue(f.Number, out var faction)) {
-                faction = new DbFaction {
-                    Number = f.Number
-                };
-                factions.Add(faction.Number, faction);
-            }
-
-            faction.Name = f.Name;
-
-            return faction;
-        }
-
-        public static void AddEvents(FactionsDic factions, RegionDic regions, JReport report) {
-            var faction = factions[report.Faction.Number];
-
-            if (faction.Events.Count > 0) return;
-
-            foreach (var error in report.Errors) {
-                faction.Events.Add(new DbEvent {
-                    Type = EventType.Error,
-                    Message = error
-                });
-            }
-
-            foreach (var ev in report.Events) {
-                var region = ev.Coords == null
-                    ? null
-                    : regions[DbRegion.MakeId(ev.Coords.X, ev.Coords.Y, ev.Coords.Z ?? DEFAULT_LEVEL_Z)];
-
-                var dbEv = new DbEvent {
-                    Faction = faction,
-                    Type = EventType.Info,
-                    Category = ev.Category,
-                    Amount = ev.Amount,
-                    ItemCode = ev.Code,
-                    ItemName = ev.Name,
-                    ItemPrice = ev.Price,
-                    Message = ev.Message,
-                    Region = region
-                };
-
-                faction.Events.Add(dbEv);
-            }
-        }
-
-        private static DbRegion CreateOrUpdateRegion(Database db, long playerId, int turnNumber, FactionsDic factions, RegionDic regions, StructuresDic structures,
-            UnitsDic units, JRegion source, UnitOrders unitOrders) {
+        private DbRegion SyncRegion(JRegion source) {
             var x = source.Coords.X;
             var y = source.Coords.Y;
             var z = source.Coords.Z;
@@ -276,15 +241,19 @@ namespace advisor.Features {
             var id = DbRegion.MakeId(x, y, z);
 
             DbRegion region;
-            if (!regions.TryGetValue(id, out region)) {
-                region = new DbRegion();
-                regions.Add(id, region);
+            if (!Regions.TryGetValue(id, out region)) {
+                region = new DbRegion { Id = id };
+
+                Regions.Add(id, region);
+                NewRegions.Add(id);
             }
 
-            region.PlayerId = playerId;
-            region.TurnNumber = turnNumber;
+            var containsOwnUnits = source.Units.Any(x => x.Own) || source.Structures.Any(s => s.Units.Any(x => x.Own));
+            if (containsOwnUnits) {
+                region.LastVisitedAt = TurnNumber;
+            }
+
             region.Explored = true;
-            region.UpdatedAtTurn = turnNumber;
             region.X = x;
             region.Y = y;
             region.Z = z;
@@ -309,109 +278,74 @@ namespace advisor.Features {
             region.TotalWages = source.TotalWages;
 
             SetItems(region.Products, source.Products);
-            SetMarketItems(region.Wanted, source.Wanted);
-            SetMarketItems(region.ForSale, source.ForSale);
-            SetExits(region.Exits, source.Exits);
+            SetMarketItems(Market.WANTED, region.Market, source.Wanted);
+            SetMarketItems(Market.FOR_SALE, region.Market, source.ForSale);
 
             int unitSeq = 0;
             foreach (var unit in source.Units) {
-                CreateOrUpdateUnit(factions, units, region, null, unit, unitSeq++, unitOrders);
+                SyncUnit(unit, unitSeq++, region: region, structure: null);
             }
 
             int structureSeq = 0;
 
-            HashSet<string> presentStructures = new HashSet<string>();
+            HashSet<string> ships = new HashSet<string>();
             foreach (var str in source.Structures) {
-                var dbStr = CreateOrUpdateStructure(structures, region, str, structureSeq++);
-                presentStructures.Add(dbStr.Id);
+                var dbStr = SyncStructure(str, structureSeq++, region);
+                if (DbStructure.IsShip(dbStr.Number)) {
+                    ships.Add(dbStr.Id);
+                    ProcessedShips.Add(dbStr.Id);
+                }
 
                 foreach (var unit in str.Units) {
-                    var strUnit = CreateOrUpdateUnit(factions, units, region, dbStr, unit, unitSeq++, unitOrders);
+                    var strUnit = SyncUnit(unit, unitSeq++, region: region, structure: dbStr);
                 }
             }
 
-            // remove structures that are not present anymore
+            // remove ships that are not present anymore
             for (int i = region.Structures.Count - 1; i >= 0 ; i--) {
                 var str = region.Structures[i];
-                var strUid = str.Id;
+                if (DbStructure.IsBuilding(str.Number)) continue;
 
-                if (!presentStructures.Contains(strUid)) {
-                    if (str.Id != null) {
-                        db.Remove(str);
-                    }
+                if (!ships.Contains(str.Id)) {
+                    PendingShips.Add(str.Id, str);
 
-                    structures.Remove(strUid);
                     region.Structures.RemoveAt(i);
+                    str.RegionId = null;
+                    str.Region = null;
                 }
-            }
-
-            // add regions from exits
-            foreach (var exit in source.Exits) {
-                var targetId = DbRegion.MakeId(exit.Coords.X, exit.Coords.Y, exit.Coords.Z ?? DEFAULT_LEVEL_Z);
-                if (!regions.TryGetValue(targetId, out var target)) {
-                    target = new DbRegion {
-                        PlayerId = playerId,
-                        TurnNumber = turnNumber,
-                        X = exit.Coords.X,
-                        Y = exit.Coords.Y,
-                        Z = exit.Coords.Z ?? DEFAULT_LEVEL_Z,
-                        Terrain = exit.Terrain,
-                        Explored = false,
-                        Label = exit.Coords.Label,
-                        Province = exit.Province
-                    };
-
-                    if (exit.Settlement != null) {
-                        target.Settlement = new DbSettlement {
-                            Name = exit.Settlement.Name,
-                            Size = exit.Settlement.Size
-                        };
-                    }
-
-                    regions.Add(targetId, target);
-                }
-
-                if (!region.Exits.Any(x => x.TargetRegionId == targetId)) {
-                    region.Exits.Add(new DbExit {
-                        PlayerId = playerId,
-                        TurnNumber = turnNumber,
-                        Direction = exit.Direction,
-                        OriginRegionId = region.Id,
-                        TargetRegionId = targetId
-                    });
-                }
-
-
-                // region.Explored = false;
-                // region.UpdatedAtTurn = turnNumber;
-                // region.X = exit.X;
-                // region.Y = exit.Y;
-                // region.Z = exit.Z;
-                // region.Label = exit.Label;
-                // region.Province = exit.Province;
-                // region.Terrain = exit.Terrain;
             }
 
             return region;
         }
 
-        private static DbStructure CreateOrUpdateStructure(StructuresDic structures, DbRegion region, JStructure source, int seq) {
-            string uid = DbStructure.GetUID(source.Structure.Number, region.X, region.Y, region.Z);
-            if (!structures.TryGetValue(uid, out var str)) {
-                str = new DbStructure();
-                str.X = region.X;
-                str.Y = region.Y;
-                str.Z = region.Z;
+        private DbStructure SyncStructure(JStructure source, int seq, DbRegion region) {
+            string id = DbStructure.MakeId(source.Structure.Number, region.Id);
+            if (!Structures.TryGetValue(id, out var str)) {
+                str = new DbStructure { Id = id };
+                Structures.Add(id, str);
 
-                structures.Add(uid, str);
+                str.RegionId = region.Id;
+                str.Region = region;
+                region.Structures.Add(str);
+
+                NewStructures.Add(str.Id);
+            }
+            else if (str?.RegionId != region.Id) {
+                if (PendingShips.ContainsKey(id)) {
+                    PendingShips.Remove(id);
+                }
+
+                if (str.Region != null) {
+                    str.Region.Structures.Remove(str);
+                }
+
+                str.RegionId = region.Id;
+                str.Region = region;
                 region.Structures.Add(str);
             }
 
             var info = source.Structure;
 
-            str.X = region.X;
-            str.Y = region.Y;
-            str.Z = region.Z;
             str.Sequence = seq;
             str.Number = info.Number;
             str.Name = info.Name;
@@ -448,14 +382,14 @@ namespace advisor.Features {
             return str;
         }
 
-        private static DbUnit CreateOrUpdateUnit(FactionsDic factions, UnitsDic units, DbRegion region, DbStructure structure, JUnit source,
-            int seq, UnitOrders unitOrders) {
-            if (!units.TryGetValue(source.Number, out var unit)) {
+        private DbUnit SyncUnit(JUnit source, int seq, DbRegion region, DbStructure structure) {
+            if (!Units.TryGetValue(source.Number, out var unit)) {
                 unit = new DbUnit {
                     Number = source.Number
                 };
 
-                units.Add(unit.Number, unit);
+                Units.Add(unit.Number, unit);
+                NewUnits.Add(unit.Number);
 
                 unit.Region = region;
                 region.Units.Add(unit);
@@ -467,7 +401,7 @@ namespace advisor.Features {
             }
 
             if (source.Faction != null && unit.Faction == null) {
-                var faction = CreateOrUpdateFaction(factions, source.Faction);
+                var faction = SyncFaction(source.Faction);
 
                 unit.Faction = faction;
                 faction.Units.Add(unit);
@@ -479,6 +413,7 @@ namespace advisor.Features {
             unit.OnGuard = source.OnGuard;
             unit.Flags = source.Flags.ToList();
             unit.Weight = source.Weight;
+            unit.Orders = GetOrders(unit.Number);
 
             if (source.Capacity != null) {
                 unit.Capacity = new DbCapacity {
@@ -490,47 +425,90 @@ namespace advisor.Features {
             }
 
             if (source.ReadyItem != null) {
-                unit.ReadyItem = new DbItem {
-                    Code = source.ReadyItem.Code,
-                    Amount = source.ReadyItem.Amount
-                };
+                unit.ReadyItem = source.ReadyItem.Code;
             }
 
             if (source.CombatSpell != null) {
-                unit.CombatSpell = new DbSkill {
-                    Code = source.CombatSpell.Code,
-                    Level = source.CombatSpell.Level,
-                    Days = source.CombatSpell.Days
-                };
+                unit.CombatSpell = source.CombatSpell.Code;
             }
 
             SetItems(unit.Items, source.Items);
             SetSkills(unit.Skills, source.Skills);
             SetSkills(unit.CanStudy, source.CanStudy);
 
-            if (unitOrders.ContainsKey(unit.Number)) {
-                unit.Orders = unitOrders[unit.Number];
-            }
-
             return unit;
         }
 
-        public static void SetItems(ICollection<DbItem> dbItems, IEnumerable<JItem> items) {
+        private void SyncEvents(int factionNumber, IEnumerable<string> errors, IEnumerable<JEvent> events) {
+            var faction = GetFaction(Report.Faction.Number);
+
+            if (faction.Events.Count > 0) return;
+
+            foreach (var error in errors) {
+                faction.Events.Add(new DbEvent {
+                    Type = EventType.Error,
+                    Message = error
+                });
+            }
+
+            foreach (var ev in events) {
+                var region = ev.Coords == null
+                    ? null
+                    : GetRegion(ev.Coords);
+
+                var dbEv = new DbEvent {
+                    Faction = faction,
+                    Type = EventType.Info,
+                    Category = ev.Category,
+                    Amount = ev.Amount,
+                    ItemCode = ev.Code,
+                    ItemName = ev.Name,
+                    ItemPrice = ev.Price,
+                    Message = ev.Message,
+                    Region = region
+                };
+
+                faction.Events.Add(dbEv);
+            }
+        }
+
+        public static void SetItems<T>(
+            ICollection<T> dbItems,
+            IEnumerable<JItem> items,
+            Func<T> factory,
+            Action<JItem, T> mapper)
+        where T: AnItem
+        {
             var dest = dbItems.ToDictionary(x => x.Code);
 
             foreach (var item in items) {
                 if (!dest.TryGetValue(item.Code, out var d)) {
-                    d = new DbItem();
+                    d = factory();
                     dbItems.Add(d);
                 }
 
-                d.Code = item.Code;
-                d.Amount = item.Amount;
+                mapper(item, d);
             }
         }
 
-        public static void SetMarketItems(ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
-            var dest = dbItems.ToDictionary(x => x.Code);
+        public static void SetItems(ICollection<DbUnitItem> dbItems, IEnumerable<JItem> items) {
+            SetItems(dbItems, items, () => new DbUnitItem(), (src, dest) => {
+                dest.Code = src.Code;
+                dest.Amount = src.Amount ?? 1;
+            });
+        }
+
+        public static void SetItems(ICollection<DbProductionItem> dbItems, IEnumerable<JItem> items) {
+            SetItems(dbItems, items, () => new DbProductionItem(), (src, dest) => {
+                dest.Code = src.Code;
+                dest.Amount = src.Amount ?? 1;
+            });
+        }
+
+        public static void SetMarketItems(Market market, ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
+            var dest = dbItems
+                .Where(x => x.Market == market)
+                .ToDictionary(x => x.Code);
 
             foreach (var item in items) {
                 if (!dest.TryGetValue(item.Code, out var d)) {
@@ -538,6 +516,7 @@ namespace advisor.Features {
                     dbItems.Add(d);
                 }
 
+                d.Market = market;
                 d.Code = item.Code;
                 d.Amount = item.Amount ?? 1;
                 d.Price = item.Price;
@@ -581,54 +560,69 @@ namespace advisor.Features {
             }
         }
 
-        public static void SetExits(ICollection<DbExit> dbItems, IEnumerable<JExit> items) {
-            var dest = dbItems.ToDictionary(x => x.RegionUID);
-            foreach (var item in items) {
-                var uid = DbRegion.GetUID(item.Coords.X, item.Coords.Y, item.Coords.Z ?? 1);
-                if (!dest.TryGetValue(uid, out var d)) {
-                    d = new DbExit();
-                    dbItems.Add(d);
+        public void SyncExits(JRegion region) {
+            var sourceId = DbRegion.MakeId(region.Coords.X, region.Coords.Y, region.Coords.Z);
+            var source = Regions[sourceId];
+
+            // add regions from exits
+            foreach (var exitSource in region.Exits) {
+                var targetId = DbRegion.MakeId(exitSource.Coords.X, exitSource.Coords.Y, exitSource.Coords.Z);
+                if (!Regions.TryGetValue(targetId, out var target)) {
+                    target = new DbRegion {
+                        Id = targetId,
+                        X = exitSource.Coords.X,
+                        Y = exitSource.Coords.Y,
+                        Z = exitSource.Coords.Z,
+                        Terrain = exitSource.Terrain,
+                        Explored = false,
+                        Label = exitSource.Coords.Label,
+                        Province = exitSource.Province
+                    };
+
+                    if (exitSource.Settlement != null) {
+                        target.Settlement = new DbSettlement {
+                            Name = exitSource.Settlement.Name,
+                            Size = exitSource.Settlement.Size
+                        };
+                    }
+
+                    Regions.Add(targetId, target);
+                    NewRegions.Add(targetId);
                 }
 
-                d.Direction = item.Direction;
-                d.X = item.Coords.X;
-                d.Y = item.Coords.Y;
-                d.Z = item.Coords.Z ?? DEFAULT_LEVEL_Z;
-                d.Label = item.Coords.Label ?? DEFAULT_LEVEL_LABEL;
-                d.Province = item.Province;
-                d.Terrain = item.Terrain;
+                var exit = source.Exits.Find(x => x.Direction == exitSource.Direction);
+                if (exit == null) {
+                    exit = new DbExit {
+                        Direction = exitSource.Direction,
+                        OriginRegionId = sourceId,
+                        Origin = source,
+                        TargetRegionId = targetId,
+                        Target = target,
+                    };
 
-                if (item.Settlement != null) {
-                    d.Settlement ??= new DbSettlement();
-                    d.Settlement.Name = item.Settlement.Name;
-                    d.Settlement.Size = item.Settlement.Size;
+                    source.Exits.Add(exit);
                 }
-                else {
-                    d.Settlement = null;
+
+                if (!target.Explored) {
+                    Direction opositeDirection;
+                    switch (exit.Direction) {
+                        case Direction.North: opositeDirection = Direction.South; break;
+                        case Direction.Northeast: opositeDirection = Direction.Southwest; break;
+                        case Direction.Northwest: opositeDirection = Direction.Southeast; break;
+                        case Direction.South: opositeDirection = Direction.North; break;
+                        case Direction.Southeast: opositeDirection = Direction.Northwest; break;
+                        case Direction.Southwest:
+                        default: opositeDirection = Direction.Northeast; break;
+                    }
+
+                    target.Exits.Add(new DbExit {
+                        Direction = opositeDirection,
+                        Origin = target,
+                        OriginRegionId = targetId,
+                        Target = source,
+                        TargetRegionId = sourceId
+                    });
                 }
-            }
-        }
-
-        public static void AddRevealedRegionsFromExits(int turnNumber, RegionDic regions) {
-            var exits = regions.Values
-                .SelectMany(x => x.Exits)
-                .GroupBy(x => x.TargetRegionId)
-                .ToDictionary(x => x.Key, x => x.First());
-
-            foreach (var uid in exits.Keys.Except(regions.Keys)) {
-                var exit = exits[uid];
-
-                DbRegion region = new DbRegion();
-                regions.Add(uid, region);
-
-                region.Explored = false;
-                region.UpdatedAtTurn = turnNumber;
-                region.X = exit.X;
-                region.Y = exit.Y;
-                region.Z = exit.Z;
-                region.Label = exit.Label;
-                region.Province = exit.Province;
-                region.Terrain = exit.Terrain;
             }
         }
     }

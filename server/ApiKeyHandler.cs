@@ -82,7 +82,7 @@ namespace advisor {
             }
 
             var scheme = Scheme.Name;
-            var roles = user.Roles.Select(x => new Claim(WellKnownClaimTypes.Role, x.Role));
+            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
             var identity = new ClaimsIdentity(new[] {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
                 new Claim(WellKnownClaimTypes.Email, user.Email),

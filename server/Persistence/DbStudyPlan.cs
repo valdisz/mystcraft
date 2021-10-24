@@ -16,6 +16,7 @@ namespace advisor.Persistence {
 
         public DbSkill Target { get; set; }
 
+        [MaxLength(64)]
         public string Study { get; set; }
 
         public List<int> Teach { get; set; } = new ();
