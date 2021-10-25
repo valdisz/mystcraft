@@ -89,8 +89,9 @@ namespace advisor.Features {
             dbReport.FactionName = factionName;
             dbReport.Source = source;
 
-            player.FactionNumber ??= dbReport.FactionNumber;
-            if (dbReport.FactionNumber == player.FactionNumber && turnNumber >= player.LastTurnNumber) {
+            player.Number ??= dbReport.FactionNumber;
+            if (dbReport.FactionNumber == player.Number && turnNumber >= player.LastTurnNumber) {
+                player.Name = factionName;
                 player.LastTurnNumber = turnNumber;
             }
 

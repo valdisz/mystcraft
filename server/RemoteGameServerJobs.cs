@@ -111,8 +111,8 @@ namespace advisor {
             logger.LogInformation($"Queuing downloading new turns from server");
 
             var factions = await db.Players
-                .Where(x => x.FactionNumber != null && x.Password != null)
-                .Select(x => new { x.Id, FactionNumber = x.FactionNumber.Value, x.Password })
+                .Where(x => x.Number != null && x.Password != null)
+                .Select(x => new { x.Id, FactionNumber = x.Number.Value, x.Password })
                 .ToListAsync();
 
             if (factions.Count == 0) {

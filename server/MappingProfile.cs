@@ -9,12 +9,15 @@ namespace advisor
             CreateMap<DbCapacity, DbCapacity>();
             CreateMap<DbExit, DbExit>();
             CreateMap<DbFleetContent, DbFleetContent>();
-            CreateMap<DbItem, DbItem>();
             CreateMap<DbSailors, DbSailors>();
             CreateMap<DbSettlement, DbSettlement>();
             CreateMap<DbSkill, DbSkill>();
-            CreateMap<DbTradableItem, DbTradableItem>();
             CreateMap<DbTransportationLoad, DbTransportationLoad>();
+            CreateMap<DbItem, DbItem>();
+            CreateMap<DbUnitItem, DbUnitItem>();
+            CreateMap<DbProductionItem, DbProductionItem>();
+            CreateMap<DbStatItem, DbStatItem>();
+            CreateMap<DbMarketItem, DbMarketItem>();
 
             // owner entities
 
@@ -32,7 +35,6 @@ namespace advisor
             CreateMap<DbStructure, DbStructure>()
                 .ForMember(x => x.Id, opt => opt.Ignore())
                 .ForMember(x => x.TurnNumber, opt => opt.Ignore())
-                .ForMember(x => x.RegionId, opt => opt.Ignore())
                 .ForMember(x => x.Turn, opt => opt.Ignore())
                 .ForMember(x => x.Region, opt => opt.Ignore())
                 .ForMember(x => x.Units, opt => opt.Ignore());

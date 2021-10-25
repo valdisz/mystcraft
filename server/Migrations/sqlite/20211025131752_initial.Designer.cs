@@ -9,7 +9,7 @@ using advisor.Persistence;
 namespace advisor.Migrations.sqlite
 {
     [DbContext(typeof(SQLiteDatabase))]
-    [Migration("20211024205629_initial")]
+    [Migration("20211025131752_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,7 @@ namespace advisor.Migrations.sqlite
 
                     b.HasIndex("GameId");
 
-                    b.ToTable("Universities");
+                    b.ToTable("Alliances");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbAllianceMember", b =>
@@ -63,7 +63,7 @@ namespace advisor.Migrations.sqlite
 
                     b.HasIndex("AllianceId");
 
-                    b.ToTable("UniversityMemberships");
+                    b.ToTable("AllianceMembers");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
@@ -97,6 +97,9 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("MissingUnitNumber")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("PlayerId")
                         .HasColumnType("INTEGER");
 
@@ -109,6 +112,10 @@ namespace advisor.Migrations.sqlite
 
                     b.Property<string>("Type")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UnitName")
+                        .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("UnitNumber")
@@ -211,13 +218,40 @@ namespace advisor.Migrations.sqlite
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RegionId")
+                        .HasMaxLength(14)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Market")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Market", "Code");
+
+                    b.ToTable("Markets");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("FactionNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("GameId")
@@ -227,6 +261,13 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("LastTurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Number")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Password")
@@ -266,7 +307,7 @@ namespace advisor.Migrations.sqlite
 
                     b.HasKey("PlayerId", "TurnNumber", "RegionId", "Code");
 
-                    b.ToTable("ProductionItems");
+                    b.ToTable("Production");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
@@ -513,58 +554,6 @@ namespace advisor.Migrations.sqlite
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber");
 
                     b.ToTable("StudyPlans");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbTradableItem", b =>
-                {
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RegionId")
-                        .HasMaxLength(14)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Market")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Code")
-                        .HasMaxLength(8)
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("DbRegionId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DbRegionId1")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("DbRegionPlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("DbRegionPlayerId1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("DbRegionTurnNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("DbRegionTurnNumber1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Market", "Code");
-
-                    b.HasIndex("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
-
-                    b.HasIndex("DbRegionPlayerId1", "DbRegionTurnNumber1", "DbRegionId1");
-
-                    b.ToTable("TradeItems");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
@@ -815,6 +804,23 @@ namespace advisor.Migrations.sqlite
                     b.Navigation("Turn");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbTurn", null)
+                        .WithMany("Markets")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", "Region")
+                        .WithMany("Markets")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Region");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
                 {
                     b.HasOne("advisor.Persistence.DbGame", "Game")
@@ -843,7 +849,7 @@ namespace advisor.Migrations.sqlite
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Products")
+                        .WithMany("Produces")
                         .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1114,31 +1120,6 @@ namespace advisor.Migrations.sqlite
                     b.Navigation("Unit");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbTradableItem", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbTurn", null)
-                        .WithMany("Markets")
-                        .HasForeignKey("PlayerId", "TurnNumber")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", null)
-                        .WithMany("ForSale")
-                        .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
-
-                    b.HasOne("advisor.Persistence.DbRegion", null)
-                        .WithMany("Wanted")
-                        .HasForeignKey("DbRegionPlayerId1", "DbRegionTurnNumber1", "DbRegionId1");
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Market")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
@@ -1265,19 +1246,15 @@ namespace advisor.Migrations.sqlite
 
                     b.Navigation("Exits");
 
-                    b.Navigation("ForSale");
+                    b.Navigation("Markets");
 
-                    b.Navigation("Market");
-
-                    b.Navigation("Products");
+                    b.Navigation("Produces");
 
                     b.Navigation("Stats");
 
                     b.Navigation("Structures");
 
                     b.Navigation("Units");
-
-                    b.Navigation("Wanted");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbStat", b =>

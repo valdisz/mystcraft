@@ -19,12 +19,12 @@ namespace advisor.Features {
 
         public async Task<DbGame> Handle(CalculateFactionStats request, CancellationToken cancellationToken) {
             var data = await db.Events
-                .Include(x => x.Turn)
-                .Where(x => x.Turn.PlayerId == request.PlayerId
-                    && x.Turn.Number >= request.EarliestTurnNumber)
+                .AsNoTrackingWithIdentityResolution()
+                .Where(x => x.PlayerId == request.PlayerId
+                    && x.TurnNumber >= request.EarliestTurnNumber)
                 .ToListAsync();
 
-            foreach (var turn in data.GroupBy(x => x.Turn.Number)) {
+            foreach (var turn in data.GroupBy(x => x.TurnNumber)) {
                 var turnNumber = turn.Key;
 
                 foreach (var faction in turn.GroupBy(x => x.FactionNumber)) {
@@ -34,7 +34,7 @@ namespace advisor.Features {
                         .FilterByTurn(request.PlayerId, turnNumber)
                         .ToDictionaryAsync(x => x.RegionId);
 
-                    foreach (var region in faction.GroupBy(x => x.RegionId)) {
+                    foreach (var region in faction.Where(x => x.RegionId != null).GroupBy(x => x.RegionId)) {
                         var regionId = region.Key;
                         var value = Reduce(region);
 
@@ -43,8 +43,9 @@ namespace advisor.Features {
                             stat.Production = value.Production;
                         }
                         else {
-                            value.FactionNumber = factionNumber;
+                            value.PlayerId = request.PlayerId;
                             value.TurnNumber = turnNumber;
+                            value.FactionNumber = factionNumber;
                             value.RegionId = regionId;
 
                             await db.Stats.AddAsync(value);

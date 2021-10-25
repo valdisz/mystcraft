@@ -43,7 +43,7 @@ namespace advisor.Migrations.sqlite
                 });
 
             migrationBuilder.CreateTable(
-                name: "Universities",
+                name: "Alliances",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
@@ -53,9 +53,9 @@ namespace advisor.Migrations.sqlite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Universities", x => x.Id);
+                    table.PrimaryKey("PK_Alliances", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Universities_Games_GameId",
+                        name: "FK_Alliances_Games_GameId",
                         column: x => x.GameId,
                         principalTable: "Games",
                         principalColumn: "Id",
@@ -70,7 +70,8 @@ namespace advisor.Migrations.sqlite
                         .Annotation("Sqlite:Autoincrement", true),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
-                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: true),
+                    Number = table.Column<int>(type: "INTEGER", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
                     LastTurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     Password = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
                     IsQuit = table.Column<bool>(type: "INTEGER", nullable: false)
@@ -93,6 +94,34 @@ namespace advisor.Migrations.sqlite
                 });
 
             migrationBuilder.CreateTable(
+                name: "AllianceMembers",
+                columns: table => new
+                {
+                    AllianceId = table.Column<long>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    ShareMap = table.Column<bool>(type: "INTEGER", nullable: false),
+                    TeachMages = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Owner = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CanInvite = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AllianceMembers", x => new { x.PlayerId, x.AllianceId });
+                    table.ForeignKey(
+                        name: "FK_AllianceMembers_Alliances_AllianceId",
+                        column: x => x.AllianceId,
+                        principalTable: "Alliances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AllianceMembers_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Turns",
                 columns: table => new
                 {
@@ -108,34 +137,6 @@ namespace advisor.Migrations.sqlite
                         name: "FK_Turns_Players_PlayerId",
                         column: x => x.PlayerId,
                         principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UniversityMemberships",
-                columns: table => new
-                {
-                    AllianceId = table.Column<long>(type: "INTEGER", nullable: false),
-                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    ShareMap = table.Column<bool>(type: "INTEGER", nullable: false),
-                    TeachMages = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Owner = table.Column<bool>(type: "INTEGER", nullable: false),
-                    CanInvite = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UniversityMemberships", x => new { x.PlayerId, x.AllianceId });
-                    table.ForeignKey(
-                        name: "FK_UniversityMemberships_Players_PlayerId",
-                        column: x => x.PlayerId,
-                        principalTable: "Players",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_UniversityMemberships_Universities_AllianceId",
-                        column: x => x.AllianceId,
-                        principalTable: "Universities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -257,7 +258,36 @@ namespace advisor.Migrations.sqlite
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductionItems",
+                name: "Markets",
+                columns: table => new
+                {
+                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
+                    Market = table.Column<string>(type: "TEXT", nullable: false),
+                    TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Markets", x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Market, x.Code });
+                    table.ForeignKey(
+                        name: "FK_Markets_Regions_PlayerId_TurnNumber_RegionId",
+                        columns: x => new { x.PlayerId, x.TurnNumber, x.RegionId },
+                        principalTable: "Regions",
+                        principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Markets_Turns_PlayerId_TurnNumber",
+                        columns: x => new { x.PlayerId, x.TurnNumber },
+                        principalTable: "Turns",
+                        principalColumns: new[] { "PlayerId", "Number" },
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Production",
                 columns: table => new
                 {
                     Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
@@ -268,15 +298,15 @@ namespace advisor.Migrations.sqlite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductionItems", x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
+                    table.PrimaryKey("PK_Production", x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
                     table.ForeignKey(
-                        name: "FK_ProductionItems_Regions_PlayerId_TurnNumber_RegionId",
+                        name: "FK_Production_Regions_PlayerId_TurnNumber_RegionId",
                         columns: x => new { x.PlayerId, x.TurnNumber, x.RegionId },
                         principalTable: "Regions",
                         principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductionItems_Turns_PlayerId_TurnNumber",
+                        name: "FK_Production_Turns_PlayerId_TurnNumber",
                         columns: x => new { x.PlayerId, x.TurnNumber },
                         principalTable: "Turns",
                         principalColumns: new[] { "PlayerId", "Number" },
@@ -353,53 +383,6 @@ namespace advisor.Migrations.sqlite
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Structures_Turns_PlayerId_TurnNumber",
-                        columns: x => new { x.PlayerId, x.TurnNumber },
-                        principalTable: "Turns",
-                        principalColumns: new[] { "PlayerId", "Number" },
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TradeItems",
-                columns: table => new
-                {
-                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
-                    Market = table.Column<int>(type: "INTEGER", nullable: false),
-                    TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<int>(type: "INTEGER", nullable: false),
-                    DbRegionId = table.Column<string>(type: "TEXT", nullable: true),
-                    DbRegionId1 = table.Column<string>(type: "TEXT", nullable: true),
-                    DbRegionPlayerId = table.Column<long>(type: "INTEGER", nullable: true),
-                    DbRegionPlayerId1 = table.Column<long>(type: "INTEGER", nullable: true),
-                    DbRegionTurnNumber = table.Column<int>(type: "INTEGER", nullable: true),
-                    DbRegionTurnNumber1 = table.Column<int>(type: "INTEGER", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TradeItems", x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Market, x.Code });
-                    table.ForeignKey(
-                        name: "FK_TradeItems_Regions_DbRegionPlayerId_DbRegionTurnNumber_DbRegionId",
-                        columns: x => new { x.DbRegionPlayerId, x.DbRegionTurnNumber, x.DbRegionId },
-                        principalTable: "Regions",
-                        principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TradeItems_Regions_DbRegionPlayerId1_DbRegionTurnNumber1_DbRegionId1",
-                        columns: x => new { x.DbRegionPlayerId1, x.DbRegionTurnNumber1, x.DbRegionId1 },
-                        principalTable: "Regions",
-                        principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TradeItems_Regions_PlayerId_TurnNumber_RegionId",
-                        columns: x => new { x.PlayerId, x.TurnNumber, x.RegionId },
-                        principalTable: "Regions",
-                        principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TradeItems_Turns_PlayerId_TurnNumber",
                         columns: x => new { x.PlayerId, x.TurnNumber },
                         principalTable: "Turns",
                         principalColumns: new[] { "PlayerId", "Number" },
@@ -512,6 +495,8 @@ namespace advisor.Migrations.sqlite
                     FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: true),
                     UnitNumber = table.Column<int>(type: "INTEGER", nullable: true),
+                    UnitName = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
+                    MissingUnitNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Category = table.Column<string>(type: "TEXT", nullable: false),
                     Message = table.Column<string>(type: "TEXT", nullable: false),
@@ -606,6 +591,16 @@ namespace advisor.Migrations.sqlite
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_AllianceMembers_AllianceId",
+                table: "AllianceMembers",
+                column: "AllianceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Alliances_GameId",
+                table: "Alliances",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Events_PlayerId_TurnNumber_FactionNumber",
                 table: "Events",
                 columns: new[] { "PlayerId", "TurnNumber", "FactionNumber" });
@@ -656,16 +651,6 @@ namespace advisor.Migrations.sqlite
                 columns: new[] { "PlayerId", "TurnNumber", "RegionId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_TradeItems_DbRegionPlayerId_DbRegionTurnNumber_DbRegionId",
-                table: "TradeItems",
-                columns: new[] { "DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TradeItems_DbRegionPlayerId1_DbRegionTurnNumber1_DbRegionId1",
-                table: "TradeItems",
-                columns: new[] { "DbRegionPlayerId1", "DbRegionTurnNumber1", "DbRegionId1" });
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Units_PlayerId_TurnNumber_FactionNumber",
                 table: "Units",
                 columns: new[] { "PlayerId", "TurnNumber", "FactionNumber" });
@@ -681,16 +666,6 @@ namespace advisor.Migrations.sqlite
                 columns: new[] { "PlayerId", "TurnNumber", "StrcutureId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Universities_GameId",
-                table: "Universities",
-                column: "GameId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UniversityMemberships_AllianceId",
-                table: "UniversityMemberships",
-                column: "AllianceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
@@ -699,6 +674,9 @@ namespace advisor.Migrations.sqlite
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AllianceMembers");
+
             migrationBuilder.DropTable(
                 name: "Events");
 
@@ -709,7 +687,10 @@ namespace advisor.Migrations.sqlite
                 name: "Items");
 
             migrationBuilder.DropTable(
-                name: "ProductionItems");
+                name: "Markets");
+
+            migrationBuilder.DropTable(
+                name: "Production");
 
             migrationBuilder.DropTable(
                 name: "Reports");
@@ -721,19 +702,13 @@ namespace advisor.Migrations.sqlite
                 name: "StudyPlans");
 
             migrationBuilder.DropTable(
-                name: "TradeItems");
-
-            migrationBuilder.DropTable(
-                name: "UniversityMemberships");
+                name: "Alliances");
 
             migrationBuilder.DropTable(
                 name: "Stats");
 
             migrationBuilder.DropTable(
                 name: "Units");
-
-            migrationBuilder.DropTable(
-                name: "Universities");
 
             migrationBuilder.DropTable(
                 name: "Factions");

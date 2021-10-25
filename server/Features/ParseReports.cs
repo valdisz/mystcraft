@@ -48,7 +48,7 @@ namespace advisor.Features {
                 bool isLastIteration = i == turns.Count - 1;
 
                 // load and merge
-                var report = await MergeReportsAsync(db, request.PlayerId, currentTurn.TurnNumber, player.FactionNumber);
+                var report = await MergeReportsAsync(db, request.PlayerId, currentTurn.TurnNumber, player.Number);
 
                 //import map if this is last turn in the list
                 if (isLastIteration && request.Map != null) {
@@ -92,8 +92,8 @@ namespace advisor.Features {
                 await sync.SyncReportAsync();
 
                 // update player password if latest turn
-                if (currentTurn.TurnNumber == player.LastTurnNumber && report.OrdersTemplate?.Password != null) {
-                    player.Password = report.OrdersTemplate.Password;
+                if (currentTurn.TurnNumber == player.LastTurnNumber) {
+                    if (report.OrdersTemplate?.Password != null) player.Password = report.OrdersTemplate.Password;
                 }
 
                 // save changes to database
