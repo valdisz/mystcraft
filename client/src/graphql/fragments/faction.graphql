@@ -1,0 +1,9 @@
+fragment Faction on Faction {
+  id
+  name
+  number
+  defaultAttitude
+  attitudes {
+    ...Attitude
+  }
+}

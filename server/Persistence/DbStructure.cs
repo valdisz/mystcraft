@@ -10,7 +10,7 @@ namespace advisor.Persistence
         [MaxLength(24)]
         public string Id { get; set; }
 
-        public static string MakeId(int number, string regionId) => IsBuilding(number) ? number.ToString() : $"{number}@{regionId}";
+        public static string MakeId(int number, string regionId) => IsShip(number) ? number.ToString() : $"{number}@{regionId}";
 
         public static bool IsBuilding(int number) => number <= GameConsts.MAX_BUILDING_NUMBER;
 

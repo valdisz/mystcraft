@@ -1,0 +1,18 @@
+query GetStructures($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+  node(id: $turnId) {
+    ... on Turn {
+      structures(after: $cursor, first: $pageSize) {
+        totalCount
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        edges {
+          node {
+            ...Structure
+          }
+        }
+      }
+    }
+  }
+}

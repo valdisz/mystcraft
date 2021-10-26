@@ -58,79 +58,79 @@ namespace advisor
             ));
         }
 
-        public Task<int> DeleteTurn([GlobalState] ClaimsPrincipal currentUser, [GraphQLType(typeof(RelayIdType))] string turnId) {
-            return mediator.Send(new DeleteTurn(
-                currentUser,
-                ParseRelayId<long>("Turn", turnId)
-            ));
-        }
+        // public Task<int> DeleteTurn([GlobalState] ClaimsPrincipal currentUser, [GraphQLType(typeof(RelayIdType))] string turnId) {
+        //     return mediator.Send(new DeleteTurn(
+        //         currentUser,
+        //         ParseRelayId<long>("Turn", turnId)
+        //     ));
+        // }
 
-        [Authorize(Policy = Policies.GameMasters)]
-        public Task<DbGame> SetGameOptions([GraphQLType(typeof(RelayIdType))] string gameId, GameOptions options) {
-            return mediator.Send(new SetGameOptions(
-                ParseRelayId<long>("Game", gameId),
-                options
-            ));
-        }
+        // [Authorize(Policy = Policies.GameMasters)]
+        // public Task<DbGame> SetGameOptions([GraphQLType(typeof(RelayIdType))] string gameId, GameOptions options) {
+        //     return mediator.Send(new SetGameOptions(
+        //         ParseRelayId<long>("Game", gameId),
+        //         options
+        //     ));
+        // }
 
-        [Authorize(Policy = Policies.GameMasters)]
-        public Task<DbGame> SetRuleset([GraphQLType(typeof(RelayIdType))] string gameId, string ruleset) {
-            return mediator.Send(new SetRuleset(
-                ParseRelayId<long>("Game", gameId),
-                ruleset
-            ));
-        }
+        // [Authorize(Policy = Policies.GameMasters)]
+        // public Task<DbGame> SetRuleset([GraphQLType(typeof(RelayIdType))] string gameId, string ruleset) {
+        //     return mediator.Send(new SetRuleset(
+        //         ParseRelayId<long>("Game", gameId),
+        //         ruleset
+        //     ));
+        // }
 
-        public Task<DbAlliance> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
-            return mediator.Send(new OpenUniversity(
-                currentUserId,
-                ParseRelayId<long>("Player", playerId),
-                name
-            ));
-        }
+        // public Task<DbAlliance> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
+        //     return mediator.Send(new OpenUniversity(
+        //         currentUserId,
+        //         ParseRelayId<long>("Player", playerId),
+        //         name
+        //     ));
+        // }
 
-        public Task<DbAlliance> JoinUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string universityId, [GraphQLType(typeof(RelayIdType))] string playerId) {
-            return mediator.Send(new JoinUniversity(
-                currentUserId,
-                ParseRelayId<long>("Player", playerId),
-                ParseRelayId<long>("University", universityId)
-            ));
-        }
+        // public Task<DbAlliance> JoinUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string universityId, [GraphQLType(typeof(RelayIdType))] string playerId) {
+        //     return mediator.Send(new JoinUniversity(
+        //         currentUserId,
+        //         ParseRelayId<long>("Player", playerId),
+        //         ParseRelayId<long>("University", universityId)
+        //     ));
+        // }
 
-        public Task<DbStudyPlan> SetStudyPlanTarget(
-            [GlobalState] long currentUserId,
-            [GraphQLType(typeof(RelayIdType))] string studyPlanId,
-            string skill,
-            int level) {
-                return mediator.Send(new SetStudyPlanTarget(
-                    currentUserId,
-                    ParseRelayId<long>("StudyPlan", studyPlanId),
-                    skill,
-                    level
-                ));
-            }
+        // public Task<DbStudyPlan> SetStudyPlanTarget(
+        //     [GlobalState] long currentUserId,
+        //     [GraphQLType(typeof(RelayIdType))] string studyPlanId,
+        //     string skill,
+        //     int level) {
+        //         return mediator.Send(new SetStudyPlanTarget(
+        //             currentUserId,
+        //             ParseRelayId<long>("StudyPlan", studyPlanId),
+        //             skill,
+        //             level
+        //         ));
+        //     }
 
-        public Task<DbStudyPlan> SetStudPlanyStudy(
-            [GlobalState] long currentUserId,
-            [GraphQLType(typeof(RelayIdType))] string studyPlanId,
-            string skill) {
-                return mediator.Send(new SetStudPlanyStudy(
-                    currentUserId,
-                    ParseRelayId<long>("StudyPlan", studyPlanId),
-                    skill
-                ));
-            }
+        // public Task<DbStudyPlan> SetStudPlanyStudy(
+        //     [GlobalState] long currentUserId,
+        //     [GraphQLType(typeof(RelayIdType))] string studyPlanId,
+        //     string skill) {
+        //         return mediator.Send(new SetStudPlanyStudy(
+        //             currentUserId,
+        //             ParseRelayId<long>("StudyPlan", studyPlanId),
+        //             skill
+        //         ));
+        //     }
 
-        public Task<DbStudyPlan> SetStudyPlanTeach(
-            [GlobalState] long currentUserId,
-            [GraphQLType(typeof(RelayIdType))] string studyPlanId,
-            long[] units) {
-                return mediator.Send(new SetStudyPlanTeach(
-                    currentUserId,
-                    ParseRelayId<long>("StudyPlan", studyPlanId),
-                    units
-                ));
-            }
+        // public Task<DbStudyPlan> SetStudyPlanTeach(
+        //     [GlobalState] long currentUserId,
+        //     [GraphQLType(typeof(RelayIdType))] string studyPlanId,
+        //     long[] units) {
+        //         return mediator.Send(new SetStudyPlanTeach(
+        //             currentUserId,
+        //             ParseRelayId<long>("StudyPlan", studyPlanId),
+        //             units
+        //         ));
+        //     }
 
         private T ParseRelayId<T>(string typeName, string value) {
             var id = idSerializer.Deserialize(value);

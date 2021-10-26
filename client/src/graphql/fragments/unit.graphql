@@ -1,0 +1,26 @@
+fragment Unit on Unit {
+  id
+  region
+  structure
+  sequence
+  canStudy
+  capacity {
+    ...Capacity
+  }
+  combatSpell
+  description
+  factionNumber
+  flags
+  items {
+    ...Item
+  }
+  name
+  number
+  onGuard
+  readyItem
+  skills {
+    ...Skill
+  }
+  weight
+  orders
+}

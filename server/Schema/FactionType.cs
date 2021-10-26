@@ -1,5 +1,4 @@
-namespace advisor
-{
+namespace advisor {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -9,14 +8,21 @@ namespace advisor
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
+    public record FactionId(long Player, int Turn, int Faction);
+
     public class FactionType : ObjectType<DbFaction> {
         protected override void Configure(IObjectTypeDescriptor<DbFaction> descriptor) {
             descriptor.AsNode()
-                .IdField(x => x.Id)
-                .NodeResolver((ctx, id) => {
+                .IdField(x => new FactionId(x.PlayerId, x.TurnNumber, x.Number))
+                .NodeResolver((ctx, factionId) => {
                     var db = ctx.Service<Database>();
                     return db.Factions
-                        .SingleOrDefaultAsync(x => x.Id == id);
+                        .AsNoTracking()
+                        .SingleOrDefaultAsync(x =>
+                               x.PlayerId == factionId.Player
+                            && x.TurnNumber == factionId.Turn
+                            && x.Number == factionId.Faction
+                        );
                 });
         }
     }
@@ -31,22 +37,15 @@ namespace advisor
 
         public Task<List<DbEvent>> GetEvents([Parent] DbFaction faction) {
             return db.Events
-                .Include(x => x.Faction)
-                .Where(x => x.FactionId == faction.Id)
+                .AsNoTracking()
+                .FilterByFaction(faction)
                 .ToListAsync();
-        }
-
-        public Task<DbUnit> UnitByNumber([Parent] DbFaction faction, int number) {
-            return db.Units
-                .Include(x => x.Faction)
-                .SingleOrDefaultAsync(x => x.FactionId == faction.Id && x.Number == number);
         }
 
         public async Task<FactionStats> Stats([Parent] DbFaction faction) {
             var stats = await db.Stats
                 .AsNoTracking()
-                .AsSplitQuery()
-                .Where(x => x.FactionId == faction.Id)
+                .FilterByFaction(faction)
                 .ToListAsync();
 
             DbIncomeStats income = new DbIncomeStats();
@@ -59,10 +58,9 @@ namespace advisor
                 income.Work += stat.Income.Work;
 
                 foreach (var item in stat.Production) {
-                    int amount = item.Amount ?? 0;
                     production[item.Code] = production.TryGetValue(item.Code, out var value)
-                        ? value + amount
-                        : amount;
+                        ? value + item.Amount
+                        : item.Amount;
                 }
             }
 
@@ -70,7 +68,7 @@ namespace advisor
                 FactionNumber = faction.Number,
                 FactionName = faction.Name,
                 Income = income,
-                Production = production.Select(x => new DbItem { Code = x.Key, Amount = x.Value }).ToList()
+                Production = production.Select(x => new Item { Code = x.Key, Amount = x.Value }).ToList()
             };
         }
     }

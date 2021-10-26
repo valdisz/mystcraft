@@ -1,0 +1,8 @@
+fragment GameOptions on GameOptions {
+  map {
+    label
+    level
+    width
+    height
+  }
+}

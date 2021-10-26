@@ -102,6 +102,7 @@ namespace advisor.Features {
 
         public async Task SyncReportAsync() {
             SyncFactions();
+            SyncAttitudes();
             SyncRegions();
             SyncEvents();
 
@@ -119,6 +120,10 @@ namespace advisor.Features {
 
                 foreach (var stat in faction.Stats) {
                     ApplyTurnContext(stat);
+                }
+
+                foreach (var attitude in faction.Attitudes) {
+                    ApplyTurnContext(attitude);
                 }
 
                 if (NewFactions.Contains(faction.Number)) {
@@ -202,6 +207,46 @@ namespace advisor.Features {
             foreach (var faction in factions) {
                 SyncFaction(faction);
             }
+        }
+
+        private void SyncAttitudes() {
+            var faction = Report.Faction;
+            SyncAttitudes(GetFaction(faction.Number), faction, Report.Attitudes);
+
+            foreach (var other in Report.OtherReports) {
+                faction = other.Faction;
+                SyncAttitudes(GetFaction(faction.Number), faction, other.Attitudes);
+            }
+        }
+
+        private void SyncAttitudes(DbFaction faction, JFaction source, JAttitudes attitudes) {
+            void syncStances(Stance stance, IEnumerable<DbAttitude> current, IEnumerable<int> incoming) {
+                var index = current.Where(x => x.Stance == stance).ToDictionary(x => x.TargetFactionNumber);
+
+                var toRemove = index.Keys.Except(incoming).ToArray();
+                var toAdd = incoming.Except(index.Keys).ToArray();
+
+                foreach (var number in toAdd) {
+                    faction.Attitudes.Add(new DbAttitude {
+                        Stance = stance,
+                        TargetFactionNumber = number
+                    });
+                }
+
+                foreach (var number in toRemove) {
+                    var attitude = index[number];
+                    faction.Attitudes.Remove(attitude);
+                    Db.Remove(attitude);
+                }
+            }
+
+            faction.DefaultAttitude = attitudes.Default;
+
+            syncStances(Stance.Ally, faction.Attitudes, attitudes.Ally.Select(x => x.Number));
+            syncStances(Stance.Friendly, faction.Attitudes, attitudes.Friendly.Select(x => x.Number));
+            syncStances(Stance.Neutral, faction.Attitudes, attitudes.Neutral.Select(x => x.Number));
+            syncStances(Stance.Unfriendly, faction.Attitudes, attitudes.Unfriendly.Select(x => x.Number));
+            syncStances(Stance.Hostile, faction.Attitudes, attitudes.Hostile.Select(x => x.Number));
         }
 
         private void SyncRegions() {
@@ -392,16 +437,19 @@ namespace advisor.Features {
                     Number = source.Number
                 };
 
-                Units.Add(unit.Number, unit);
-                NewUnits.Add(unit.Number);
-
                 unit.Region = region;
+                unit.RegionId = region.Id;
                 region.Units.Add(unit);
 
                 if (structure != null) {
+                    unit.StrcutureId = structure.Id;
+                    unit.StrcutureNumber = structure.Number;
                     unit.Structure = structure;
                     structure.Units.Add(unit);
                 }
+
+                Units.Add(unit.Number, unit);
+                NewUnits.Add(unit.Number);
             }
 
             if (source.Faction != null && unit.Faction == null) {

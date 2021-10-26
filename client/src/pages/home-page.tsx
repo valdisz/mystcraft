@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom'
 import GrainIcon from '@material-ui/icons/Grain';
 import { useStore } from '../store'
 import { SplitButton } from '../components'
-import { GameListItemFragment, PlayerItemFragment } from '../schema'
+import { GameHeaderFragment, PlayerHeaderFragment } from '../schema'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 
 function NoGames() {
@@ -18,7 +18,7 @@ function NoGames() {
 }
 
 interface GameItemProps {
-    game: GameListItemFragment
+    game: GameHeaderFragment
 }
 
 interface GameActionsProps {
@@ -75,11 +75,11 @@ function Ruleset({ name, version}) {
     </span>
 }
 
-function GamePlayer({ factionName, factionNumber, lastTurnNumber }: PlayerItemFragment) {
+function GamePlayer({ name, number, lastTurnNumber }: PlayerHeaderFragment) {
     return <ListItemText>
         <UnstyledList>
             <li>
-                <strong>Faction</strong> <Faction name={factionName} number={factionNumber} />
+                <strong>Faction</strong> <Faction name={name} number={number} />
             </li>
             <li>
                 <strong>Turn</strong> {lastTurnNumber}
@@ -93,8 +93,8 @@ function GameItem({ game }: GameItemProps) {
 
     const props = { } as any
 
-    const playerJoind = !!game.myPlayer
-    const playerFactionKnown = !!game.myPlayer?.factionNumber
+    const playerJoind = !!game.me
+    const playerFactionKnown = !!game.me?.number
 
     if (playerFactionKnown) {
         props.to = `/game/${game.id}`
@@ -110,7 +110,7 @@ function GameItem({ game }: GameItemProps) {
             primary={<Game name={game.name} />}
             secondary={<Ruleset name={game.rulesetName} version={game.rulesetVersion} />} />
 
-        { game.myPlayer && <GamePlayer {...game.myPlayer} />}
+        { game.me && <GamePlayer {...game.me} />}
 
         <ListItemSecondaryAction>
             <Observer>
@@ -121,8 +121,8 @@ function GameItem({ game }: GameItemProps) {
                         </Box> }
                         <GameActions
                             disabled={home.uploading}
-                            onUploadReport={() => home.triggerUploadReport(game.myPlayer.id)}
-                            onUploadMap={() => home.triggerImportMap(game.myPlayer.id)}
+                            onUploadReport={() => home.triggerUploadReport(game.me.id)}
+                            onUploadMap={() => home.triggerImportMap(game.me.id)}
                             onDelete={() => home.deleteGame(game.id)}
                             onRuleset={() => home.triggerRuleset(game.id)} />
                     </>

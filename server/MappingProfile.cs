@@ -13,7 +13,7 @@ namespace advisor
             CreateMap<DbSettlement, DbSettlement>();
             CreateMap<DbSkill, DbSkill>();
             CreateMap<DbTransportationLoad, DbTransportationLoad>();
-            CreateMap<DbItem, DbItem>();
+            CreateMap<Item, Item>();
             CreateMap<DbUnitItem, DbUnitItem>();
             CreateMap<DbProductionItem, DbProductionItem>();
             CreateMap<DbStatItem, DbStatItem>();

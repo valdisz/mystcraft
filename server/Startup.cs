@@ -59,8 +59,7 @@ namespace advisor
                 .AddApiKeys()
                 .AddCookie();
 
-            services.AddHttpsRedirection(options =>
-            {
+            services.AddHttpsRedirection(options => {
                 options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
                 options.HttpsPort = 443;
             });
@@ -165,17 +164,21 @@ namespace advisor
                     .AddType<TurnType>()
                         .AddType<TurnResolvers>()
                     .AddType<RegionType>()
-                        .AddType<RegionResolvers>()
+                        // .AddType<RegionResolvers>()
                     .AddType<UnitType>()
                         .AddType<UnitResolvers>()
                     .AddType<StructureType>()
                         .AddType<StructureResolvers>()
                     .AddType<FactionType>()
                         .AddType<FactionResolvers>()
-                    .AddType<UniversityType>()
-                        .AddType<UniversityResolvers>()
-                    .AddType<StudyPlanType>()
-                    .AddType<UniversityClassType>()
+                    // .AddType<UniversityType>()
+                    //     .AddType<UniversityResolvers>()
+                    // .AddType<StudyPlanType>()
+                    // .AddType<UniversityClassType>()
+                    .BindClrType<Item, ItemType>()
+                    .BindClrType<DbUnitItem, ItemType>()
+                    .BindClrType<DbProductionItem, ItemType>()
+                    .BindClrType<DbStatItem, ItemType>()
                     .AddQueryType<QueryType>()
                     .AddMutationType<Mutation>()
                     .Create(),

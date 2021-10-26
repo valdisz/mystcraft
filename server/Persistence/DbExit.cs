@@ -18,7 +18,7 @@ namespace advisor.Persistence
         [MaxLength(14)]
         public string OriginRegionId { get; set; }
 
-        [GraphQLIgnore]
+        [GraphQLName("targetRegion")]
         [Required]
         [MaxLength(14)]
         public string TargetRegionId { get; set; }

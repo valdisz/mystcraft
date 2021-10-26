@@ -1,5 +1,4 @@
-namespace advisor
-{
+namespace advisor {
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
@@ -22,17 +21,20 @@ namespace advisor
                         var authorization = ctx.Service<IAuthorizationService>();
                         var principal = ctx.ContextData["ClaimsPrincipal"] as ClaimsPrincipal;
                         var result = await authorization.AuthorizeAsync(principal, ctx, Policies.UserManagers);
+
                         if (!result.Succeeded) {
                             ctx.ReportError(ErrorBuilder.New()
                                 .SetCode(ErrorCodes.Authentication.NotAuthorized)
                                 .Build()
                             );
+
                             return null;
                         }
                     }
 
                     var db = ctx.Service<Database>();
                     return await db.Users
+                        .AsNoTracking()
                         .SingleOrDefaultAsync(x => x.Id == id);
                 });
 
@@ -50,9 +52,7 @@ namespace advisor
 
         public Task<List<DbPlayer>> Players([Parent] DbUser user) {
             return db.Players
-                .Include(x => x.Game)
-                .Include(x => x.UniversityMembership)
-                .ThenInclude(x => x.University)
+                .AsNoTracking()
                 .Where(x => x.UserId == user.Id)
                 .ToListAsync();
         }

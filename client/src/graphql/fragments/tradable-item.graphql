@@ -1,0 +1,5 @@
+fragment TradableItem on TradableItem {
+  code
+  price
+  amount
+}

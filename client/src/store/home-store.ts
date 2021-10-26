@@ -1,6 +1,6 @@
 import { action, makeObservable, observable, runInAction, transaction } from 'mobx'
 import { CLIENT } from '../client'
-import { GameListItemFragment, GetGamesQuery, GetGames } from '../schema'
+import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
 import { CreateGame, CreateGameMutation, CreateGameMutationVariables } from '../schema'
 import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
 import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
@@ -11,9 +11,9 @@ export class HomeStore {
         makeObservable(this)
     }
 
-    readonly games = observable<GameListItemFragment>([]);
+    readonly games = observable<GameHeaderFragment>([]);
 
-    load = (games?: GameListItemFragment[]) => {
+    load = (games?: GameHeaderFragment[]) => {
         if (games) {
             runInAction(() => {
                 this.games.replace(games);

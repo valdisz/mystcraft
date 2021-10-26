@@ -1,0 +1,4 @@
+fragment Load on TransportationLoad {
+  used
+  max
+}

@@ -1,0 +1,4 @@
+fragment Item on Item {
+  code
+  amount
+}

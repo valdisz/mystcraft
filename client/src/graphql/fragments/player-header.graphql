@@ -1,0 +1,7 @@
+fragment PlayerHeader on Player {
+  id
+  number
+  name
+  lastTurnNumber
+  lastTurnId
+}

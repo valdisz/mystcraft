@@ -149,7 +149,8 @@ namespace advisor.Migrations.pgsql
                     Number = table.Column<int>(type: "integer", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false)
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    DefaultAttitude = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -219,6 +220,33 @@ namespace advisor.Migrations.pgsql
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Reports_Turns_PlayerId_TurnNumber",
+                        columns: x => new { x.PlayerId, x.TurnNumber },
+                        principalTable: "Turns",
+                        principalColumns: new[] { "PlayerId", "Number" },
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attitudes",
+                columns: table => new
+                {
+                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
+                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    FactionNumber = table.Column<int>(type: "integer", nullable: false),
+                    TargetFactionNumber = table.Column<int>(type: "integer", nullable: false),
+                    Stance = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attitudes", x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.TargetFactionNumber });
+                    table.ForeignKey(
+                        name: "FK_Attitudes_Factions_PlayerId_TurnNumber_FactionNumber",
+                        columns: x => new { x.PlayerId, x.TurnNumber, x.FactionNumber },
+                        principalTable: "Factions",
+                        principalColumns: new[] { "PlayerId", "TurnNumber", "Number" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Attitudes_Turns_PlayerId_TurnNumber",
                         columns: x => new { x.PlayerId, x.TurnNumber },
                         principalTable: "Turns",
                         principalColumns: new[] { "PlayerId", "Number" },
@@ -439,6 +467,7 @@ namespace advisor.Migrations.pgsql
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
                     StrcutureId = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: true),
+                    StrcutureNumber = table.Column<int>(type: "integer", nullable: true),
                     FactionNumber = table.Column<int>(type: "integer", nullable: true),
                     Sequence = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
@@ -677,6 +706,9 @@ namespace advisor.Migrations.pgsql
         {
             migrationBuilder.DropTable(
                 name: "AllianceMembers");
+
+            migrationBuilder.DropTable(
+                name: "Attitudes");
 
             migrationBuilder.DropTable(
                 name: "Events");

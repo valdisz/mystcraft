@@ -7,6 +7,6 @@ namespace advisor
         public int FactionNumber { get; set; }
         public string FactionName { get; set; }
         public DbIncomeStats Income { get; set; }
-        public List<DbItem> Production { get; set; }
+        public List<Item> Production { get; set; }
     }
 }

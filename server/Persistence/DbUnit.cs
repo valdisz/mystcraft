@@ -21,7 +21,8 @@ namespace advisor.Persistence {
         [MaxLength(24)]
         public string StrcutureId { get; set; }
 
-        [GraphQLIgnore]
+        public int? StrcutureNumber { get; set; }
+
         public int? FactionNumber { get; set; }
 
         public int Sequence { get; set; }
@@ -42,9 +43,12 @@ namespace advisor.Persistence {
 
         [Required]
         public List<DbUnitItem> Items { get; set; } = new ();
+
         public DbCapacity Capacity { get; set; }
+
         public List<DbSkill> Skills { get; set; } = new List<DbSkill>();
-        public List<DbSkill> CanStudy { get; set; } = new List<DbSkill>();
+
+        public List<string> CanStudy { get; set; } = new List<string>();
 
         [MaxLength(8)]
         public string ReadyItem { get; set; }
@@ -60,8 +64,8 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public DbRegion Region { get; set; }
 
+        [GraphQLIgnore]
         public DbFaction Faction { get; set; }
-
 
         [GraphQLIgnore]
         public DbStructure Structure { get; set; }

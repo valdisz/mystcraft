@@ -1,0 +1,4 @@
+fragment FleetContent on FleetContent {
+  type
+  count
+}

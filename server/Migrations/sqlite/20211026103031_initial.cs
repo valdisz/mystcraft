@@ -148,7 +148,8 @@ namespace advisor.Migrations.sqlite
                     Number = table.Column<int>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    DefaultAttitude = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -218,6 +219,33 @@ namespace advisor.Migrations.sqlite
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Reports_Turns_PlayerId_TurnNumber",
+                        columns: x => new { x.PlayerId, x.TurnNumber },
+                        principalTable: "Turns",
+                        principalColumns: new[] { "PlayerId", "Number" },
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Attitudes",
+                columns: table => new
+                {
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    TargetFactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    Stance = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attitudes", x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.TargetFactionNumber });
+                    table.ForeignKey(
+                        name: "FK_Attitudes_Factions_PlayerId_TurnNumber_FactionNumber",
+                        columns: x => new { x.PlayerId, x.TurnNumber, x.FactionNumber },
+                        principalTable: "Factions",
+                        principalColumns: new[] { "PlayerId", "TurnNumber", "Number" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Attitudes_Turns_PlayerId_TurnNumber",
                         columns: x => new { x.PlayerId, x.TurnNumber },
                         principalTable: "Turns",
                         principalColumns: new[] { "PlayerId", "Number" },
@@ -438,6 +466,7 @@ namespace advisor.Migrations.sqlite
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: true),
                     StrcutureId = table.Column<string>(type: "TEXT", maxLength: 24, nullable: true),
+                    StrcutureNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     FactionNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     Sequence = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
@@ -676,6 +705,9 @@ namespace advisor.Migrations.sqlite
         {
             migrationBuilder.DropTable(
                 name: "AllianceMembers");
+
+            migrationBuilder.DropTable(
+                name: "Attitudes");
 
             migrationBuilder.DropTable(
                 name: "Events");

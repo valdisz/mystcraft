@@ -1,0 +1,7 @@
+query GetGame($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      ...GameDetails
+    }
+  }
+}

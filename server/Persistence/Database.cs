@@ -54,19 +54,20 @@ namespace advisor.Persistence {
         public DbSet<DbTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
+        public DbSet<DbAttitude> Attitudes { get; set; }
         public DbSet<DbStat> Stats { get; set; }
         public DbSet<DbStatItem> StatItems { get; set; }
         public DbSet<DbEvent> Events { get; set; }
         public DbSet<DbRegion> Regions { get; set; }
-        public DbSet<DbProductionItem> ProductionItems { get; set; }
-        public DbSet<DbTradableItem> TradeItems { get; set; }
+        public DbSet<DbProductionItem> Production { get; set; }
+        public DbSet<DbMarketItem> Markets { get; set; }
         public DbSet<DbExit> Exits { get; set; }
         public DbSet<DbStructure> Structures { get; set; }
         public DbSet<DbUnit> Units { get; set; }
         public DbSet<DbUnitItem> Items { get; set; }
 
-        public DbSet<DbAlliance> Universities { get; set; }
-        public DbSet<DbAllianceMember> UniversityMemberships { get; set; }
+        public DbSet<DbAlliance> Alliances { get; set; }
+        public DbSet<DbAllianceMember> AllianceMembers { get; set; }
         public DbSet<DbStudyPlan> StudyPlans { get; set; }
 
 
@@ -172,6 +173,11 @@ namespace advisor.Persistence {
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
 
+                t.HasMany(x => x.Attitudes)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
@@ -210,6 +216,9 @@ namespace advisor.Persistence {
             model.Entity<DbRegion>(t => {
                 t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Id });
 
+                t.Ignore(x => x.ForSale);
+                t.Ignore(x => x.Wanted);
+
                 t.HasMany(x => x.Units)
                     .WithOne(x => x.Region)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
@@ -230,20 +239,22 @@ namespace advisor.Persistence {
                     a.Property(x => x.Size).HasConversion<string>();
                 });
 
-                t.HasMany(p => p.Products)
+                t.HasMany(p => p.Produces)
                     .WithOne(p => p.Region)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
-                t.HasMany(p => p.Market)
+                t.HasMany(p => p.Markets)
                     .WithOne(p => p.Region)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
             });
 
-            model.Entity<DbTradableItem>(t => {
+            model.Entity<DbMarketItem>(t => {
                 t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Market, x.Code });
 
                 t.Property(x => x.Amount).IsRequired();
                 t.Property(x => x.Price).IsRequired();
+                t.Property(x => x.Market)
+                    .HasConversion<string>();
             });
 
             model.Entity<DbProductionItem>(t => {
@@ -269,6 +280,8 @@ namespace advisor.Persistence {
             model.Entity<DbFaction>(t => {
                 t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Number });
 
+                t.Property(x => x.DefaultAttitude).HasConversion<string>();
+
                 t.HasMany(x => x.Events)
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
@@ -280,6 +293,16 @@ namespace advisor.Persistence {
                 t.HasMany(x => x.Stats)
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
+
+                t.HasMany(x => x.Attitudes)
+                    .WithOne(x => x.Faction)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
+            });
+
+            model.Entity<DbAttitude>(t => {
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.TargetFactionNumber });
+
+                t.Property(x => x.Stance).HasConversion<string>();
             });
 
             model.Entity<DbEvent>(t => {

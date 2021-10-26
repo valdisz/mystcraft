@@ -155,7 +155,7 @@ namespace advisor {
     {
         public ReportStr(string value) : base("str", false)
         {
-            Value = value;
+            Value = value != null ? value.Trim() : value;
         }
 
         public string Value { get; }

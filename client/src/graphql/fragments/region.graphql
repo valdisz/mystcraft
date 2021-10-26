@@ -1,0 +1,32 @@
+fragment Region on Region {
+  id
+  lastVisitedAt
+  explored
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
+  race
+  population
+  tax
+  wages
+  totalWages
+  wanted {
+    ...TradableItem
+  }
+  entertainment
+  produces {
+    ...Item
+  }
+  forSale {
+    ...TradableItem
+  }
+  exits {
+    ...Exit
+  }
+}

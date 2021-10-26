@@ -1,0 +1,5 @@
+mutation JoinGame($gameId: ID!) {
+  joinGame(gameId: $gameId) {
+    ...PlayerHeader
+  }
+}

@@ -1,0 +1,9 @@
+fragment GameHeader on Game {
+  id
+  name
+  rulesetName
+  rulesetVersion
+  me {
+    ...PlayerHeader
+  }
+}

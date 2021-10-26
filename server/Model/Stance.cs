@@ -1,6 +1,5 @@
-namespace advisor.Model
-{
-    public enum Attitude {
+namespace advisor.Model {
+    public enum Stance {
         Hostile = 1,
         Unfriendly = 2,
         Neutral = 3,

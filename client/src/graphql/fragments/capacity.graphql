@@ -1,0 +1,6 @@
+fragment Capacity on Capacity {
+  walking
+  riding
+  flying
+  swimming
+}

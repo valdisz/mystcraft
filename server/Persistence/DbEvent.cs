@@ -25,6 +25,12 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public int? UnitNumber { get; set; }
 
+        [MaxLength(128)]
+        public string UnitName { get; set; }
+
+        [GraphQLIgnore]
+        public int? MissingUnitNumber { get; set; }
+
         [Required]
         public EventType Type { get; set; }
 

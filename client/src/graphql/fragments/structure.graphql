@@ -1,0 +1,23 @@
+fragment Structure on Structure {
+  id
+  region
+  sequence
+  contents {
+    ...FleetContent
+  }
+  description
+  flags
+  id
+  load {
+    ...Load
+  }
+  name
+  needs
+  number
+  sailDirections
+  sailors {
+    ...Sailors
+  }
+  speed
+  type
+}

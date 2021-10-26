@@ -1,6 +1,5 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
     [GraphQLName("Turn")]
@@ -26,13 +25,16 @@ namespace advisor.Persistence {
         public List<DbExit> Exits { get; set; } = new List<DbExit>();
 
         [GraphQLIgnore]
-        public List<DbTradableItem> Markets { get; set; } = new ();
+        public List<DbMarketItem> Markets { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbProductionItem> Production { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbFaction> Factions { get; set; } = new List<DbFaction>();
+
+        [GraphQLIgnore]
+        public List<DbAttitude> Attitudes { get; set; } = new List<DbAttitude>();
 
         [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new List<DbEvent>();

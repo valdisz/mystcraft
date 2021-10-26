@@ -1,0 +1,5 @@
+fragment Skill on Skill {
+  code
+  level
+  days
+}

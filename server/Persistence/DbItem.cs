@@ -2,26 +2,30 @@ namespace advisor.Persistence
 {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
+    using HotChocolate.Types;
 
-    [GraphQLName("Item")]
+    public class ItemType : ObjectType<AnItem> {
+        protected override void Configure(IObjectTypeDescriptor<AnItem> descriptor) {
+            descriptor.Name("Item");
+        }
+    }
+
     public interface AnItem {
         string Code { get; set; }
 
         int Amount { get; set; }
     }
 
-    public class DbItem : AnItem {
-        public DbItem() {
+    public class Item : AnItem {
+        public Item() {
 
         }
 
-        public DbItem(DbItem other) {
+        public Item(Item other) {
             this.Code = other.Code;
             this.Amount = other.Amount;
         }
 
-        [Required]
-        [MaxLength(8)]
         public string Code { get; set; }
 
         public int Amount { get; set; }
@@ -87,12 +91,12 @@ namespace advisor.Persistence
     }
 
     [GraphQLName("TradableItem")]
-    public class DbTradableItem : AnItem, InTurnContext  {
-        public DbTradableItem() {
+    public class DbMarketItem : AnItem, InTurnContext  {
+        public DbMarketItem() {
 
         }
 
-        public DbTradableItem(DbTradableItem other) {
+        public DbMarketItem(DbMarketItem other) {
             this.Code = other.Code;
             this.Amount = other.Amount;
             this.Price = other.Price;

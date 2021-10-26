@@ -1,0 +1,4 @@
+fragment Settlement on Settlement {
+    name
+    size
+}

@@ -1,6 +1,7 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using advisor.Model;
     using HotChocolate;
 
     [GraphQLName("Faction")]
@@ -17,6 +18,10 @@ namespace advisor.Persistence {
         [Required]
         [MaxLength(256)]
         public string Name { get; set; }
+
+        public Stance? DefaultAttitude { get; set; }
+
+        public List<DbAttitude> Attitudes { get; set; } = new List<DbAttitude>();
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }

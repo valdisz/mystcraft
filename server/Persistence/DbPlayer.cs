@@ -15,7 +15,10 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public long GameId { get; set; }
 
-        public int? FactionNumber { get; set; }
+        public int? Number { get; set; }
+
+        [MaxLength(128)]
+        public string Name { get; set; }
 
         public int LastTurnNumber { get; set; }
 

@@ -111,7 +111,7 @@ namespace advisor.Features {
                 .FilterByPlayer(context);
 
             if (!track) {
-                turns = turns.AsNoTracking();
+                turns = turns.AsNoTrackingWithIdentityResolution();
             }
 
             turns = turns
@@ -119,7 +119,8 @@ namespace advisor.Features {
                 .Include(x => x.Exits)
                 .Include(x => x.Production)
                 .Include(x => x.Markets)
-                .Include(x => x.Factions);
+                .Include(x => x.Factions)
+                .Include(x => x.Attitudes);
 
             if (addUnits) {
                 turns = turns

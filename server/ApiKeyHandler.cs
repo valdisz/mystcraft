@@ -62,8 +62,7 @@ namespace advisor {
         private readonly Database db;
         private readonly IApiKeyStore apiKeys;
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
-        {
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync() {
             var xApiKey = Request.Headers[Options.ApiKeyHeaderName];
             if (xApiKey.Count == 0) {
                 xApiKey = Request.Query[Options.ApiKeyHeaderName];

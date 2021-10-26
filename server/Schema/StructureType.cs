@@ -1,21 +1,33 @@
 namespace advisor {
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
+    using StructureId = System.ValueTuple<long, int, string>;
+
     public class StructureType : ObjectType<DbStructure> {
         protected override void Configure(IObjectTypeDescriptor<DbStructure> descriptor) {
             descriptor.AsNode()
-                .IdField(x => x.Id)
+                .IdField(x => MakeId(x))
                 .NodeResolver((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    return db.Structures.FirstOrDefaultAsync(x => x.Id == id);
+                    return FilterById(db.Structures.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
+        }
+
+        private static StructureId MakeId(long playerId, int turnNumber, string structureId) => (playerId, turnNumber, structureId);
+        private static StructureId MakeId(DbStructure structure) => (structure.PlayerId, structure.TurnNumber, structure.Id);
+
+        private static IQueryable<DbStructure> FilterById(IQueryable<DbStructure> q, StructureId id) {
+            var (playerId, turnNumber, structureId) = id;
+            return q.Where(x =>
+                    x.PlayerId == playerId
+                && x.TurnNumber == turnNumber
+                && x.Id == structureId
+            );
         }
     }
 
@@ -29,21 +41,8 @@ namespace advisor {
         private readonly Database db;
         private readonly IIdSerializer idSerializer;
 
-        public string RegionId([Parent] DbStructure structure) {
-            return idSerializer.Serialize("Region", structure.RegionId);
-        }
-
-        public Task<List<DbUnit>> GetUnits([Parent] DbStructure structure) {
-            return db.Units
-                .Include(x => x.Faction)
-                .Where(x => x.StrcutureId == structure.Id)
-                .ToListAsync();
-        }
-
-        public Task<DbUnit> UnitByNumber([Parent] DbStructure structure, int number) {
-            return db.Units
-                .Include(x => x.Faction)
-                .SingleOrDefaultAsync(x => x.StrcutureId == structure.Id && x.Number == number);
+        public string Region([Parent] DbStructure structure) {
+            return structure.RegionId;
         }
     }
 }

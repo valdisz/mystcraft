@@ -1,8 +1,10 @@
 namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
+    using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 
     [Owned]
+    [GraphQLName("FleetContent")]
     public class DbFleetContent {
         [MaxLength(64)]
         public string Type { get; set; }

@@ -68,6 +68,29 @@ namespace advisor.Migrations.mssql
                     b.ToTable("AllianceMembers");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbAttitude", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FactionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TargetFactionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Stance")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "TargetFactionNumber");
+
+                    b.ToTable("Attitudes");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
                 {
                     b.Property<long>("Id")
@@ -172,6 +195,9 @@ namespace advisor.Migrations.mssql
 
                     b.Property<int>("Number")
                         .HasColumnType("int");
+
+                    b.Property<string>("DefaultAttitude")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -637,6 +663,9 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(24)
                         .HasColumnType("nvarchar(24)");
 
+                    b.Property<int?>("StrcutureNumber")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Weight")
                         .HasColumnType("int");
 
@@ -739,6 +768,25 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Alliance");
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbAttitude", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
+                        .WithMany("Attitudes")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
+                        .WithMany("Attitudes")
+                        .HasForeignKey("PlayerId", "TurnNumber", "FactionNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Faction");
+
+                    b.Navigation("Turn");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
@@ -1223,6 +1271,8 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbFaction", b =>
                 {
+                    b.Navigation("Attitudes");
+
                     b.Navigation("Events");
 
                     b.Navigation("Stats");
@@ -1275,6 +1325,8 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
+                    b.Navigation("Attitudes");
+
                     b.Navigation("Events");
 
                     b.Navigation("Exits");

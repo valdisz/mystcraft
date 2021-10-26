@@ -1,61 +1,32 @@
-﻿namespace advisor
-{
-    using System.Collections.Generic;
+﻿namespace advisor {
     using System.Linq;
-    using System.Threading.Tasks;
-    using HotChocolate;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
+    using RegionId = System.ValueTuple<long, int, string>;
+
     public class RegionType : ObjectType<DbRegion> {
         protected override void Configure(IObjectTypeDescriptor<DbRegion> descriptor) {
             descriptor.AsNode()
-                .IdField(x => x.Id)
-                .NodeResolver(async (ctx, id) => {
+                .IdField(x => MakeId(x))
+                .NodeResolver((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    var region = await db.Regions.FirstOrDefaultAsync(x => x.Id == id);
-                    return region;
+                    return FilterById(db.Regions.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
         }
-    }
 
-    [ExtendObjectType(Name = "Region")]
-    public class RegionResolvers {
-        public RegionResolvers(Database db) {
-            this.db = db;
-        }
+        public static RegionId MakeId(long playerId, int turnNumber, string regionId) => (playerId, turnNumber, regionId);
+        public static RegionId MakeId(DbRegion region) => (region.PlayerId, region.TurnNumber, region.Id);
 
-        private readonly Database db;
-
-        public Task<List<DbUnit>> GetUnits([Parent] DbRegion region, bool insideStructures = false) {
-            IQueryable<DbUnit> q = insideStructures
-                ? db.Units
-                    .Include(x => x.Faction)
-                    .Where(x => x.RegionId == region.Id)
-                : db.Units
-                    .Include(x => x.Faction)
-                    .Where(x => x.RegionId == region.Id && x.StrcutureId == null);
-
-            return q.ToListAsync();
-        }
-
-        public Task<List<DbStructure>> GetStructures([Parent] DbRegion region) {
-            return db.Structures
-                .Where(x => x.RegionId == region.Id)
-                .ToListAsync();
-        }
-
-        public Task<DbUnit> UnitByNumber([Parent] DbRegion region, int number) {
-            return db.Units
-                .Include(x => x.Faction)
-                .SingleOrDefaultAsync(x => x.RegionId == region.Id && x.Number == number);
-        }
-
-        public Task<DbStructure> StructureByNumber([Parent] DbRegion region, int number) {
-            return db.Structures
-                .SingleOrDefaultAsync(x => x.RegionId == region.Id && x.Number == number);
+        public static IQueryable<DbRegion> FilterById(IQueryable<DbRegion> q, RegionId id) {
+            var (playerId, turnNumber, regionId) = id;
+            return q.Where(x =>
+                    x.PlayerId == playerId
+                && x.TurnNumber == turnNumber
+                && x.Id == regionId
+            );
         }
     }
 }

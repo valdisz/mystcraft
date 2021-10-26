@@ -1,0 +1,4 @@
+fragment Attitude on Attitude {
+    factionNumber
+    stance
+}

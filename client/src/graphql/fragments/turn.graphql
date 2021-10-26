@@ -1,0 +1,9 @@
+fragment Turn on Turn {
+  id
+  number
+  month
+  year
+  factions {
+    ...Faction
+  }
+}

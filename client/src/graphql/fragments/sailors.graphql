@@ -1,0 +1,4 @@
+fragment Sailors on Sailors {
+  current
+  required
+}
