@@ -1,19 +1,39 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
     using advisor.Model;
     using HotChocolate;
 
+    using FactionId = System.ValueTuple<long, int, int>;
+
     [GraphQLName("Faction")]
     public class DbFaction : InTurnContext {
-        [Required]
-        public int Number { get; set; }
+        [GraphQLIgnore]
+        [NotMapped]
+        public FactionId CompsiteId => MakeId(this);
+
+        public static FactionId MakeId(long playerId, int turnNumber, int factionNumber) => (playerId, turnNumber, factionNumber);
+        public static FactionId MakeId(DbFaction faction) => (faction.PlayerId, faction.TurnNumber, faction.Number);
+
+        public static IQueryable<DbFaction> FilterById(IQueryable<DbFaction> q, FactionId id) {
+            var (playerId, turnNumber, factionNumber) = id;
+            return q.Where(x =>
+                    x.PlayerId == playerId
+                && x.TurnNumber == turnNumber
+                && x.Number == factionNumber
+            );
+        }
+
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
 
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
-        [GraphQLIgnore]
-        public long PlayerId { get; set; }
+        [Required]
+        public int Number { get; set; }
 
         [Required]
         [MaxLength(256)]

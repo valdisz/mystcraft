@@ -5,16 +5,16 @@ namespace advisor {
     using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
     public class UserType : ObjectType<DbUser> {
         protected override void Configure(IObjectTypeDescriptor<DbUser> descriptor) {
-            descriptor.AsNode()
+            descriptor
+                .ImplementsNode()
                 .IdField(x => x.Id)
-                .NodeResolver(async (ctx, id) => {
+                .ResolveNode(async (ctx, id) => {
                     var currentUserId = (long) ctx.ContextData["currentUserId"];
 
                     if (id != currentUserId) {
@@ -42,15 +42,9 @@ namespace advisor {
         }
     }
 
-    [ExtendObjectType(Name = "User")]
+    [ExtendObjectType("User")]
     public class UserResolvers {
-        public UserResolvers(Database db) {
-            this.db = db;
-        }
-
-        private readonly Database db;
-
-        public Task<List<DbPlayer>> Players([Parent] DbUser user) {
+        public Task<List<DbPlayer>> Players(Database db, [Parent] DbUser user) {
             return db.Players
                 .AsNoTracking()
                 .Where(x => x.UserId == user.Id)

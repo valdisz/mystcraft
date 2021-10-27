@@ -1,6 +1,7 @@
 fragment Structure on Structure {
   id
-  region
+  code
+  regionCode
   sequence
   contents {
     ...FleetContent

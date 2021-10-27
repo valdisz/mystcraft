@@ -4,45 +4,31 @@ namespace advisor {
     using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
-    public record FactionId(long Player, int Turn, int Faction);
-
     public class FactionType : ObjectType<DbFaction> {
         protected override void Configure(IObjectTypeDescriptor<DbFaction> descriptor) {
-            descriptor.AsNode()
-                .IdField(x => new FactionId(x.PlayerId, x.TurnNumber, x.Number))
-                .NodeResolver((ctx, factionId) => {
+            descriptor
+                .ImplementsNode()
+                .IdField(x => x.CompsiteId)
+                .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    return db.Factions
-                        .AsNoTracking()
-                        .SingleOrDefaultAsync(x =>
-                               x.PlayerId == factionId.Player
-                            && x.TurnNumber == factionId.Turn
-                            && x.Number == factionId.Faction
-                        );
+                    return DbFaction.FilterById(db.Factions.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
         }
     }
 
-    [ExtendObjectType(Name = "Faction")]
+    [ExtendObjectType("Faction")]
     public class FactionResolvers {
-        public FactionResolvers(Database db) {
-            this.db = db;
-        }
-
-        private readonly Database db;
-
-        public Task<List<DbEvent>> GetEvents([Parent] DbFaction faction) {
+        public Task<List<DbEvent>> Events(Database db, [Parent] DbFaction faction) {
             return db.Events
                 .AsNoTracking()
                 .FilterByFaction(faction)
                 .ToListAsync();
         }
 
-        public async Task<FactionStats> Stats([Parent] DbFaction faction) {
+        public async Task<FactionStats> Stats(Database db, [Parent] DbFaction faction) {
             var stats = await db.Stats
                 .AsNoTracking()
                 .FilterByFaction(faction)

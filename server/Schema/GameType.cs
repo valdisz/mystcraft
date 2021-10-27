@@ -6,16 +6,16 @@
     using HotChocolate;
     using HotChocolate.AspNetCore.Authorization;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using Persistence;
 
     public class GameType : ObjectType<DbGame> {
         protected override void Configure(IObjectTypeDescriptor<DbGame> descriptor) {
-            descriptor.AsNode()
+            descriptor
+                .ImplementsNode()
                 .IdField(x => x.Id)
-                .NodeResolver((ctx, id) =>
+                .ResolveNode((ctx, id) =>
                 {
                     var db = ctx.Service<Database>();
                     return db.Games
@@ -25,21 +25,15 @@
         }
     }
 
-    [ExtendObjectType(Name = "Game")]
+    [ExtendObjectType("Game")]
     public class GameResolvers {
-        public GameResolvers(Database db) {
-            this.db = db;
-        }
-
-        private readonly Database db;
-
-        public GameOptions Options([Parent] DbGame game) {
+        public GameOptions Options(Database db, [Parent] DbGame game) {
             return game.Options != null
                 ? JsonConvert.DeserializeObject<GameOptions>(game.Options)
                 : null;
         }
 
-        public Task<DbPlayer> Me([Parent] DbGame game, [GlobalState] long currentUserId) {
+        public Task<DbPlayer> Me(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
             return db.Players
                 .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.GameId == game.Id && x.UserId == currentUserId);
@@ -55,7 +49,7 @@
         // }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<List<DbPlayer>> Players([Parent] DbGame game) {
+        public Task<List<DbPlayer>> Players(Database db, [Parent] DbGame game) {
             return db.Players
                 .AsNoTracking()
                 .Where(x => x.GameId == game.Id).ToListAsync();

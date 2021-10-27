@@ -1,12 +1,31 @@
-namespace advisor.Persistence
-{
+namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
     using advisor.Model;
     using HotChocolate;
 
+    using StructureId = System.ValueTuple<long, int, string>;
+
     [GraphQLName("Structure")]
     public class DbStructure : InTurnContext {
+        [GraphQLIgnore]
+        [NotMapped]
+        public StructureId CompositeId => MakeId(this);
+
+        public static StructureId MakeId(long playerId, int turnNumber, string structureId) => (playerId, turnNumber, structureId);
+        public static StructureId MakeId(DbStructure structure) => (structure.PlayerId, structure.TurnNumber, structure.Id);
+
+        public static IQueryable<DbStructure> FilterById(IQueryable<DbStructure> q, StructureId id) {
+            var (playerId, turnNumber, structureId) = id;
+            return q.Where(x =>
+                    x.PlayerId == playerId
+                && x.TurnNumber == turnNumber
+                && x.Id == structureId
+            );
+        }
+
         [MaxLength(24)]
         public string Id { get; set; }
 

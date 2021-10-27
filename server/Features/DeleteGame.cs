@@ -50,7 +50,7 @@ namespace advisor.Features
             var isGM = (await auth.AuthorizeAsync(request.User, Roles.GameMaster)).Succeeded;
             var playerId = request.PlayerId;
 
-            if (!isGM && !(await auth.AuthorizeOwnPlayer(request.User, playerId))) {
+            if (!isGM && !(await auth.AuthorizeOwnPlayerAsync(request.User, playerId))) {
                 return -1;
             }
 

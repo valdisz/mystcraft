@@ -38,7 +38,7 @@ namespace advisor
             });
         }
 
-        public static async Task<bool> AuthorizeOwnPlayer(this IAuthorizationService authorization, ClaimsPrincipal user, long playerId) {
+        public static async Task<bool> AuthorizeOwnPlayerAsync(this IAuthorizationService authorization, ClaimsPrincipal user, long playerId) {
             var result = await authorization.AuthorizeAsync(user, new GameContext(playerId), Policies.OwnPlayer);
 
             return result.Succeeded;

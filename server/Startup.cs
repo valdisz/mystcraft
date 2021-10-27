@@ -1,15 +1,11 @@
 namespace advisor
 {
     using System;
-    using System.Linq;
-    using System.Threading.Tasks;
     using advisor.Authorization;
     using advisor.Persistence;
     using Hangfire;
-    using Hangfire.Common;
     using Hangfire.Console;
     using Hangfire.Console.Extensions;
-    using Hangfire.Dashboard;
     using Hangfire.Heartbeat;
     using Hangfire.Heartbeat.Server;
     using Hangfire.PostgreSql;
@@ -19,9 +15,7 @@ namespace advisor
     using Hangfire.States;
     using Hangfire.Storage.SQLite;
     using HotChocolate;
-    using HotChocolate.AspNetCore;
-    using HotChocolate.Execution.Configuration;
-    using HotChocolate.Types.Relay;
+    using HotChocolate.Execution;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
@@ -33,7 +27,6 @@ namespace advisor
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
 
     public class Startup {
         public Startup(IConfiguration configuration, IWebHostEnvironment env) {
@@ -149,45 +142,67 @@ namespace advisor
                 .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
 
             services
-                .AddAutoMapper(typeof(MappingProfile))
-                .AddDataLoaderRegistry()
-                .AddGraphQL(SchemaBuilder.New()
-                    .EnableRelaySupport()
-                    .AddAuthorizeDirectiveType()
-                    .AddType<UserType>()
-                        .AddType<UserResolvers>()
-                    .AddType<GameType>()
-                        .AddType<GameResolvers>()
-                    .AddType<PlayerType>()
-                        .AddType<PlayerResolvers>()
-                    .AddType<ReportType>()
-                    .AddType<TurnType>()
-                        .AddType<TurnResolvers>()
-                    .AddType<RegionType>()
-                        // .AddType<RegionResolvers>()
-                    .AddType<UnitType>()
-                        .AddType<UnitResolvers>()
-                    .AddType<StructureType>()
-                        .AddType<StructureResolvers>()
-                    .AddType<FactionType>()
-                        .AddType<FactionResolvers>()
-                    // .AddType<UniversityType>()
-                    //     .AddType<UniversityResolvers>()
-                    // .AddType<StudyPlanType>()
-                    // .AddType<UniversityClassType>()
-                    .BindClrType<Item, ItemType>()
-                    .BindClrType<DbUnitItem, ItemType>()
-                    .BindClrType<DbProductionItem, ItemType>()
-                    .BindClrType<DbStatItem, ItemType>()
-                    .AddQueryType<QueryType>()
-                    .AddMutationType<Mutation>()
-                    .Create(),
-                    new QueryExecutionOptions() {
-                        IncludeExceptionDetails = true,
-                        ForceSerialExecution = true
-                    }
-                )
-                .AddSingleton<IIdSerializer, IdSerializer>()
+                .AddAutoMapper(typeof(MappingProfile));
+
+            services
+                .AddGraphQLServer()
+                .AddHttpRequestInterceptor<GraphQLHttpRequestInterceptor>()
+                .ModifyRequestOptions(opt => {
+                    opt.IncludeExceptionDetails = !Env.IsProduction();
+                })
+                .ModifyOptions(opt => {
+                    opt.DefaultResolverStrategy = ExecutionStrategy.Serial;
+                })
+                .ConfigureResolverCompiler(r => {
+                    r.AddService<Database>();
+                    r.AddService<IMediator>();
+                    r.AddService<IAuthorizationService>();
+                })
+                .AddApolloTracing()
+                .AddQueryType<QueryType>()
+                .AddMutationType<MutationType>()
+                .AddGlobalObjectIdentification()
+                .AddType<UserType>()
+                    .AddType<UserResolvers>()
+                .AddType<GameType>()
+                    .AddType<GameResolvers>()
+                .AddType<PlayerType>()
+                    .AddType<PlayerResolvers>()
+                .AddType<ReportType>()
+                .AddType<TurnType>()
+                    .AddType<TurnResolvers>()
+                .AddType<RegionType>()
+                    .AddType<RegionResolvers>()
+                .AddType<UnitType>()
+                    .AddType<UnitResolvers>()
+                .AddType<StructureType>()
+                    .AddType<StructureResolvers>()
+                .AddType<FactionType>()
+                    .AddType<FactionResolvers>()
+                .AddType<EventType>()
+                .AddType<MutationResult<string>>()
+                // .AddType<UniversityType>()
+                //     .AddType<UniversityResolvers>()
+                // .AddType<StudyPlanType>()
+                // .AddType<UniversityClassType>()
+                .BindRuntimeType<Item, ItemType>()
+                .BindRuntimeType<DbUnitItem, ItemType>()
+                .BindRuntimeType<DbProductionItem, ItemType>()
+                .BindRuntimeType<DbStatItem, ItemType>()
+                ;
+
+                // .AddDataLoaderRegistry()
+                // .AddGraphQL(SchemaBuilder.New()
+                //     .EnableRelaySupport()
+                //     .Create(),
+                //     new QueryExecutionOptions() {
+                //         IncludeExceptionDetails = true,
+                //         ForceSerialExecution = true
+                //     }
+                // )
+                // .AddSingleton<IIdSerializer, IdSerializer>()
+
+            services
                 .AddSingleton<AccessControl>()
                 .AddScoped<IAuthorizationHandler, OwnPlayerAuthorizationHandler>()
                 .AddMediatR(typeof(Startup))
@@ -195,21 +210,8 @@ namespace advisor
                     .AddDataAnnotations()
                     .SetCompatibilityVersion(CompatibilityVersion.Latest);
 
-            services.AddQueryRequestInterceptor((context, builder, ct) => {
-                if (!context.User.Identity.IsAuthenticated) {
-                    return Task.CompletedTask;
-                }
-
-                var userId = context.User.FindFirst(WellKnownClaimTypes.UserId)?.Value;
-                if (userId == null) {
-                    return Task.CompletedTask;
-                }
-
-                builder.AddProperty("currentUserId", long.Parse(userId));
-                builder.AddProperty("currentUserEmail", context.User.FindFirst(WellKnownClaimTypes.Email)?.Value);
-
-                return Task.CompletedTask;
-            });
+            services
+                .AddMemoryCache();
         }
 
         public void Configure(IApplicationBuilder app) {
@@ -229,9 +231,10 @@ namespace advisor
                 .UseCors()
                 .UseAuthentication()
                 .UseAuthorization()
-                .UseGraphQL("/graphql")
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
+                    endpoints
+                        .MapGraphQL();
                     endpoints.MapHangfireDashboard(new DashboardOptions {
                         Authorization = new[] {
                             new RoleBasedDashboardAuthorizationFilter(Roles.Root)

@@ -9,23 +9,13 @@
 
     public class ReportType : ObjectType<DbReport> {
         protected override void Configure(IObjectTypeDescriptor<DbReport> descriptor) {
-            descriptor.AsNode()
-                .IdField(x => MakeId(x))
-                .NodeResolver((ctx, id) => {
+            descriptor
+                .ImplementsNode()
+                .IdField(x => x.CompsiteId)
+                .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    return FilterById(db.Reports.AsNoTracking(), id).SingleOrDefaultAsync();
+                    return DbReport.FilterById(db.Reports.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
-        }
-
-        private static ReportId MakeId(DbReport report) => (report.PlayerId, report.TurnNumber, report.FactionNumber);
-
-        private static IQueryable<DbReport> FilterById(IQueryable<DbReport> q, ReportId id) {
-            var (playerId, turnNumber, factionNumber) = id;
-            return q.Where(x =>
-                    x.PlayerId == playerId
-                && x.TurnNumber == turnNumber
-                && x.FactionNumber == factionNumber
-            );
         }
     }
 }

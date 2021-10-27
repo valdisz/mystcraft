@@ -1,7 +1,7 @@
 fragment Unit on Unit {
   id
-  region
-  structure
+  regionCode
+  structureNumber
   sequence
   canStudy
   capacity {

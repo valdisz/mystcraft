@@ -1,16 +1,13 @@
-query GetUnits($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+query GetUnits($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
   node(id: $turnId) {
     ... on Turn {
-      units(after: $cursor, first: $pageSize) {
+      units(skip: $skip, take: $pageSize) {
         totalCount
         pageInfo {
           hasNextPage
-          endCursor
         }
-        edges {
-          node {
-            ...Unit
-          }
+        items {
+          ...Unit
         }
       }
     }

@@ -3,6 +3,7 @@ namespace advisor.Persistence
     using System.ComponentModel.DataAnnotations;
     using advisor.Model;
     using HotChocolate;
+    using Microsoft.EntityFrameworkCore;
 
     [GraphQLName("Event")]
     public class DbEvent : InFactionContext {
@@ -15,10 +16,9 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
-        [GraphQLIgnore]
         public int FactionNumber { get; set; }
 
-        [GraphQLIgnore]
+        [GraphQLName("regionCode")]
         [MaxLength(14)]
         public string RegionId { get; set; }
 
@@ -49,7 +49,6 @@ namespace advisor.Persistence
         public string ItemName { get; set; }
 
         public int? ItemPrice { get; set; }
-
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }

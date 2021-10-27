@@ -26,6 +26,7 @@ namespace advisor.Persistence
             this.Amount = other.Amount;
         }
 
+        [MaxLength(8)]
         public string Code { get; set; }
 
         public int Amount { get; set; }

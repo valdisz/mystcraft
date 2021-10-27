@@ -1,10 +1,37 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
     using HotChocolate;
+
+    public record UnitId(long PlayerId, int TurnNumber, int UnitNumber);
 
     [GraphQLName("Unit")]
     public class DbUnit : InTurnContext {
+        [GraphQLIgnore]
+        [NotMapped]
+        public string CompositeId => MakeId(this);
+
+        public static string MakeId(DbUnit unit) => MakeId(unit.PlayerId, unit.TurnNumber, unit.Number);
+        public static string MakeId(long playerId, int turnNumber, int unitNumber) => $"{playerId}/{turnNumber}/{unitNumber}";
+        public static UnitId ParseId(string id) {
+            var segments = id.Split("/");
+            return new (
+                long.Parse(segments[0]),
+                int.Parse(segments[1]),
+                int.Parse(segments[2])
+            );
+        }
+
+        public static IQueryable<DbUnit> FilterById(IQueryable<DbUnit> q, UnitId id) {
+            return q.Where(x =>
+                    x.PlayerId == id.PlayerId
+                && x.TurnNumber == id.TurnNumber
+                && x.Number == id.UnitNumber
+            );
+        }
+
         public int Number { get; set; }
 
         [GraphQLIgnore]

@@ -1,11 +1,30 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using HotChocolate;
 
+    using RegionId = System.ValueTuple<long, int, string>;
+
     [GraphQLName("Region")]
     public class DbRegion : InTurnContext {
+        [GraphQLIgnore]
+        [NotMapped]
+        public RegionId CompositeId => MakeId(this);
+
+        public static RegionId MakeId(long playerId, int turnNumber, string regionId) => (playerId, turnNumber, regionId);
+        public static RegionId MakeId(DbRegion region) => (region.PlayerId, region.TurnNumber, region.Id);
+
+        public static IQueryable<DbRegion> FilterById(IQueryable<DbRegion> q, RegionId id) {
+            var (playerId, turnNumber, regionId) = id;
+            return q.Where(x =>
+                    x.PlayerId == playerId
+                && x.TurnNumber == turnNumber
+                && x.Id == regionId
+            );
+        }
+
         [MaxLength(14)]
         [Required]
         public string Id { get; set; }
@@ -76,13 +95,14 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();
 
-        [GraphQLIgnore]
-        public List<DbStructure> Structures { get; set; } = new List<DbStructure>();
+        public List<DbStructure> Structures { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbStat> Stats { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new ();
+
+        public override string ToString() => Id;
     }
 }

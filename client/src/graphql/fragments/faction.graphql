@@ -6,4 +6,7 @@ fragment Faction on Faction {
   attitudes {
     ...Attitude
   }
+  events {
+    ...Event
+  }
 }

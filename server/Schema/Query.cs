@@ -6,27 +6,20 @@ namespace advisor {
     using HotChocolate.AspNetCore.Authorization;
     using HotChocolate;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
 
     [Authorize]
     public class Query {
-        public Query(Database db) {
-            this.db = db;
-        }
-
-        private readonly Database db;
-
-        public Task<List<DbGame>> Games() => db.Games.ToListAsync();
+        public Task<List<DbGame>> Games(Database db) => db.Games.ToListAsync();
 
         [Authorize(Policy = Policies.UserManagers)]
-        [UsePaging]
-        public IQueryable<DbUser> Users() {
+        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        public IQueryable<DbUser> Users(Database db) {
             return db.Users;
         }
 
         [Authorize]
-        public async Task<DbUser> Me([GlobalState] long currentUserId) {
+        public async Task<DbUser> Me(Database db, [GlobalState] long currentUserId) {
             return await db.Users.FindAsync(currentUserId);
         }
     }

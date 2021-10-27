@@ -37,7 +37,7 @@ function GameActions({ disabled, onUploadReport, onDelete, onUploadMap, onRulese
             { content: 'Delete', onAction: onDelete },
             { content: 'Update Ruleset', onAction: onRuleset }
         ]}>
-            Load turn
+            Upload report
     </SplitButton>
 }
 
@@ -116,9 +116,6 @@ function GameItem({ game }: GameItemProps) {
             <Observer>
                 {() => playerJoind
                     ? <>
-                        { playerFactionKnown && <Box mr={1} clone>
-                            <Button color='primary' size='small' variant='contained' component={Link} to={`/game/${game.id}/university`}>University</Button>
-                        </Box> }
                         <GameActions
                             disabled={home.uploading}
                             onUploadReport={() => home.triggerUploadReport(game.me.id)}

@@ -1,0 +1,12 @@
+fragment Event on Event {
+  type
+  category
+  message
+  regionCode
+  unitNumber
+  unitName
+  itemCode
+  itemName
+  itemPrice
+  amount
+}

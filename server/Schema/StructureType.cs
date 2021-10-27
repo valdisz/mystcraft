@@ -6,43 +6,24 @@ namespace advisor {
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
-    using StructureId = System.ValueTuple<long, int, string>;
 
     public class StructureType : ObjectType<DbStructure> {
         protected override void Configure(IObjectTypeDescriptor<DbStructure> descriptor) {
-            descriptor.AsNode()
-                .IdField(x => MakeId(x))
-                .NodeResolver((ctx, id) => {
+            descriptor
+                .ImplementsNode()
+                .IdField(x => x.CompositeId)
+                .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    return FilterById(db.Structures.AsNoTracking(), id).SingleOrDefaultAsync();
+                    return DbStructure.FilterById(db.Structures.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
-        }
 
-        private static StructureId MakeId(long playerId, int turnNumber, string structureId) => (playerId, turnNumber, structureId);
-        private static StructureId MakeId(DbStructure structure) => (structure.PlayerId, structure.TurnNumber, structure.Id);
+            descriptor.Field("code").Resolve(x => x.Parent<DbStructure>().Id);
 
-        private static IQueryable<DbStructure> FilterById(IQueryable<DbStructure> q, StructureId id) {
-            var (playerId, turnNumber, structureId) = id;
-            return q.Where(x =>
-                    x.PlayerId == playerId
-                && x.TurnNumber == turnNumber
-                && x.Id == structureId
-            );
+            descriptor.Field("regionCode").Resolve(x => x.Parent<DbStructure>().RegionId);
         }
     }
 
-    [ExtendObjectType(Name = "Structure")]
+    [ExtendObjectType("Structure")]
     public class StructureResolvers {
-        public StructureResolvers(Database db, IIdSerializer idSerializer) {
-            this.db = db;
-            this.idSerializer = idSerializer;
-        }
-
-        private readonly Database db;
-        private readonly IIdSerializer idSerializer;
-
-        public string Region([Parent] DbStructure structure) {
-            return structure.RegionId;
-        }
     }
 }

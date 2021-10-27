@@ -1,15 +1,11 @@
-namespace advisor.Features
-{
+namespace advisor.Features {
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using advisor.Persistence;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
 
-    public record JoinUniversity(long UserId, long PlayerId, long UniversityId) : IRequest<DbAlliance> {
-
-    }
+    public record JoinUniversity(long UserId, long PlayerId, long UniversityId) : IRequest<DbAlliance>;
 
     public class JoinUniversityHandler : IRequestHandler<JoinUniversity, DbAlliance> {
         public JoinUniversityHandler(Database db, IMediator mediator) {

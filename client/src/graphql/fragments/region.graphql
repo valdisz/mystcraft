@@ -1,5 +1,6 @@
 fragment Region on Region {
   id
+  code
   lastVisitedAt
   explored
   x
@@ -28,5 +29,8 @@ fragment Region on Region {
   }
   exits {
     ...Exit
+  }
+  structures {
+    ...Structure
   }
 }

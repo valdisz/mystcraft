@@ -1,9 +1,32 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Linq;
     using HotChocolate;
+
+    using TurnId = System.ValueTuple<long, int>;
 
     [GraphQLName("Turn")]
     public class DbTurn : InPlayerContext {
+        [GraphQLIgnore]
+        [NotMapped]
+        public string CompsiteId => MakeId(this);
+
+        public static string MakeId(DbTurn turn) => MakeId(turn.PlayerId, turn.Number);
+        public static string MakeId(long playerId, int turnNumber) => $"{playerId}/{turnNumber}";
+        public static TurnId ParseId(string id) {
+            var segments = id.Split("/");
+            return (
+                long.Parse(segments[0]),
+                int.Parse(segments[1])
+            );
+        }
+
+        public static IQueryable<DbTurn> FilterById(IQueryable<DbTurn> q, TurnId id) {
+            var (playerId, turnNumber) = id;
+            return q.Where(x => x.PlayerId == playerId && x.Number == turnNumber);
+        }
+
         public int Number { get; set; }
 
         [GraphQLIgnore]

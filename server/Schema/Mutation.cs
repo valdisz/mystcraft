@@ -1,62 +1,79 @@
-namespace advisor
-{
+namespace advisor {
     using System;
     using System.Collections.Generic;
-    using System.Security.Claims;
     using System.Threading.Tasks;
     using advisor.Features;
     using HotChocolate;
     using HotChocolate.AspNetCore.Authorization;
+    using HotChocolate.Resolvers;
+    using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using MediatR;
     using Persistence;
 
-    using RelayIdType = HotChocolate.Types.NonNullType<HotChocolate.Types.IdType>;
+    [InterfaceType("MutationResult")]
+    public interface IMutationResult {
+        bool IsSuccess { get; }
+        string Error { get; }
+    }
+
+    public record MutationResult<T>(bool IsSuccess, T data, string Error) : IMutationResult;
 
     [Authorize]
-    public class Mutation {
-        public Mutation(Database db, IMediator mediator, IIdSerializer idSerializer) {
-            this.db = db;
-            this.mediator = mediator;
-            this.idSerializer = idSerializer;
-        }
-
-        private readonly Database db;
-        private readonly IMediator mediator;
-        private readonly IIdSerializer idSerializer;
-
+    public class MutationType {
         [Authorize(Policy = Policies.UserManagers)]
-        public Task<DbUser> CreateUser(string email, string password) {
+        public Task<DbUser> CreateUser(IMediator mediator, string email, string password) {
             return mediator.Send(new CreateUser(email, password));
         }
 
         [Authorize(Policy = Policies.UserManagers)]
-        public Task<DbUser> UpdateUserRoles([GraphQLType(typeof(RelayIdType))] string userId, string[] add, string[] remove) {
-            return mediator.Send(new UpdateUserRoles(
-                ParseRelayId<long>("User", userId),
-                add,
-                remove
-            ));
+        public Task<DbUser> UpdateUserRoles(IMediator mediator, [ID("User")] long userId, string[] add, string[] remove) {
+            return mediator.Send(new UpdateUserRoles(userId, add, remove));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<DbGame> CreateGame(string name) {
+        public Task<DbGame> CreateGame(IMediator mediator, string name) {
             return mediator.Send(new CreateGame(name));
         }
 
-        public Task<DbPlayer> JoinGame([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string gameId) {
-            return mediator.Send(new JoinGame(
-                currentUserId,
-                ParseRelayId<long>("Game", gameId)
-            ));
+        public Task<DbPlayer> JoinGame(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {
+            return mediator.Send(new JoinGame(currentUserId, gameId));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<List<DbGame>> DeleteGame([GraphQLType(typeof(RelayIdType))] string gameId) {
-            return mediator.Send(new DeleteGame(
-                ParseRelayId<long>("Game", gameId)
-            ));
+        public Task<List<DbGame>> DeleteGame(IMediator mediator, [ID("Game")] long gameId) {
+            return mediator.Send(new DeleteGame(gameId));
         }
+
+        public async Task<MutationResult<string>> SetOrders(
+            IResolverContext context,
+            IMediator mediator,
+            Microsoft.AspNetCore.Authorization.IAuthorizationService auth,
+            [ID("Unit")] string unitId,
+            string orders) {
+                var parsedId = DbUnit.ParseId(unitId);
+
+                if (!await auth.AuthorizeOwnPlayerAsync(context.GetUser()!, parsedId.PlayerId)) {
+                    context.ReportError(ErrorBuilder.New()
+                        .SetMessage("You are not allowed to set orders for this Unit")
+                        .SetCode(ErrorCodes.Authentication.NotAuthorized)
+                        .SetPath(context.Path)
+                        .AddLocation(context.Selection.SyntaxNode)
+                        .Build());
+
+                    return null;
+                }
+
+                try {
+                    var result = await mediator.Send(new SetOrders(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));
+                    return result == "Ok"
+                        ? new MutationResult<string>(true, null, null)
+                        : new MutationResult<string>(false, null, result);
+                }
+                catch (Exception ex) {
+                    return new MutationResult<string>(false, null, ex.Message);
+                }
+            }
 
         // public Task<int> DeleteTurn([GlobalState] ClaimsPrincipal currentUser, [GraphQLType(typeof(RelayIdType))] string turnId) {
         //     return mediator.Send(new DeleteTurn(
@@ -131,15 +148,5 @@ namespace advisor
         //             units
         //         ));
         //     }
-
-        private T ParseRelayId<T>(string typeName, string value) {
-            var id = idSerializer.Deserialize(value);
-
-            if (id.TypeName != typeName) {
-                throw new ArgumentException($"Expected ID of type {typeName}, but got {id.TypeName}");
-            }
-
-            return (T) Convert.ChangeType(id.Value, typeof(T));
-        }
     }
 }

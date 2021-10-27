@@ -4,40 +4,26 @@
     using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
-    using TurnId = System.ValueTuple<long, int>;
 
     public class TurnType : ObjectType<DbTurn> {
         protected override void Configure(IObjectTypeDescriptor<DbTurn> descriptor) {
-            descriptor.AsNode()
-                .IdField(x => MakeId(x))
-                .NodeResolver((ctx, id) => {
+            descriptor
+                .ImplementsNode()
+                .IdField(x => x.CompsiteId)
+                .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    return FilterById(db.Turns.AsNoTracking(), id).SingleOrDefaultAsync();
+                    var parsedId = DbTurn.ParseId(id);
+                    return DbTurn.FilterById(db.Turns.AsNoTracking(), parsedId).SingleOrDefaultAsync();
                 });
-        }
-
-        public static TurnId MakeId(long playerId, int turnNumber) => (playerId, turnNumber);
-        public static TurnId MakeId(DbTurn turn) => (turn.PlayerId, turn.Number);
-
-        private static IQueryable<DbTurn> FilterById(IQueryable<DbTurn> q, TurnId id) {
-            var (playerId, turnNumber) = id;
-            return q.Where(x => x.PlayerId == playerId && x.Number == turnNumber);
         }
     }
 
-    [ExtendObjectType(Name = "Turn")]
+    [ExtendObjectType("Turn")]
     public class TurnResolvers {
-        public TurnResolvers(Database db) {
-            this.db = db;
-        }
-
-        private readonly Database db;
-
-        public Task<List<DbReport>> GetReports([Parent] DbTurn turn) {
+        public Task<List<DbReport>> GetReports(Database db, [Parent] DbTurn turn) {
             return db.Reports
                 .AsNoTracking()
                 .FilterByTurn(turn)
@@ -45,16 +31,25 @@
                 .ToListAsync();
         }
 
-        [UsePaging]
-        public IQueryable<DbRegion> GetRegions([Parent] DbTurn turn) {
-            return db.Regions
-                .AsNoTracking()
-                .OrderBy(x => x.Id)
-                .FilterByTurn(turn);
+        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        public IQueryable<DbRegion> GetRegions(Database db, [Parent] DbTurn turn, bool withStructures = false) {
+            IQueryable<DbRegion> query = db.Regions
+                .AsSplitQuery()
+                .AsNoTrackingWithIdentityResolution()
+                .FilterByTurn(turn)
+                .Include(x => x.Exits)
+                .Include(x => x.Produces)
+                .Include(x => x.Markets);
+
+            if (withStructures) {
+                query = query.Include(x => x.Structures);
+            }
+
+            return query.OrderBy(x => x.Id);
         }
 
-        [UsePaging]
-        public IQueryable<DbStructure> Structures([Parent] DbTurn turn) {
+        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        public IQueryable<DbStructure> Structures(Database db, [Parent] DbTurn turn) {
             return db.Structures
                 .AsNoTracking()
                 .OrderBy(x => x.RegionId)
@@ -62,8 +57,8 @@
                 .FilterByTurn(turn);
         }
 
-        [UsePaging]
-        public IQueryable<DbUnit> Units([Parent] DbTurn turn) {
+        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        public IQueryable<DbUnit> Units(Database db, [Parent] DbTurn turn) {
             return db.Units
                 .AsNoTrackingWithIdentityResolution()
                 .Include(x => x.Items)
@@ -71,9 +66,18 @@
                 .FilterByTurn(turn);
         }
 
-        public Task<List<DbFaction>> Factions([Parent] DbTurn turn) {
-            return db.Factions
+        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        public IQueryable<DbEvent> Events(Database db, [Parent] DbTurn turn) {
+            return db.Events
                 .AsNoTracking()
+                .OrderBy(x => x.Id)
+                .FilterByTurn(turn);
+        }
+
+        public Task<List<DbFaction>> Factions(Database db, [Parent] DbTurn turn) {
+            return db.Factions
+                .AsNoTrackingWithIdentityResolution()
+                .Include(x => x.Attitudes)
                 .OrderBy(x => x.Number)
                 .FilterByTurn(turn)
                 .ToListAsync();

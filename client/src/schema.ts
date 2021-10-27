@@ -10,9 +10,6 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The multiplier path scalar represents a valid GraphQL multiplier path string. */
-  MultiplierPath: any;
-  PaginationAmount: any;
   /** The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1. */
   Long: any;
 };
@@ -20,8 +17,34 @@ export type Scalars = {
 
 
 export type Item = {
-  amount: Scalars['Int'];
   code?: Maybe<Scalars['String']>;
+  amount: Scalars['Int'];
+};
+
+export type Query = {
+  /** Fetches an object given its ID. */
+  node?: Maybe<Node>;
+  /** Lookup nodes by a list of IDs. */
+  nodes: Array<Maybe<Node>>;
+  games?: Maybe<Array<Maybe<Game>>>;
+  users?: Maybe<UserCollectionSegment>;
+  me?: Maybe<User>;
+};
+
+
+export type QueryNodeArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryNodesArgs = {
+  ids: Array<Scalars['ID']>;
+};
+
+
+export type QueryUsersArgs = {
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 /** The node interface is implemented by entities that have a global unique identifier. */
@@ -30,37 +53,37 @@ export type Node = {
 };
 
 export type User = Node & {
-  email: Scalars['String'];
   id: Scalars['ID'];
-  players?: Maybe<Array<Maybe<Player>>>;
+  email: Scalars['String'];
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
+  players?: Maybe<Array<Maybe<Player>>>;
 };
 
 export type Game = Node & {
-  engineVersion?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
-  me?: Maybe<Player>;
   name: Scalars['String'];
-  options?: Maybe<GameOptions>;
-  players?: Maybe<Array<Maybe<Player>>>;
+  type: GameType;
   ruleset?: Maybe<Scalars['String']>;
+  engineVersion?: Maybe<Scalars['String']>;
   rulesetName?: Maybe<Scalars['String']>;
   rulesetVersion?: Maybe<Scalars['String']>;
-  type: GameType;
+  options?: Maybe<GameOptions>;
+  me?: Maybe<Player>;
+  players?: Maybe<Array<Maybe<Player>>>;
 };
 
 export type Player = Node & {
-  game?: Maybe<Game>;
   id: Scalars['ID'];
-  isQuit: Scalars['Boolean'];
-  lastTurnId?: Maybe<Scalars['String']>;
-  lastTurnNumber: Scalars['Int'];
-  name?: Maybe<Scalars['String']>;
   number?: Maybe<Scalars['Int']>;
+  name?: Maybe<Scalars['String']>;
+  lastTurnNumber: Scalars['Int'];
   password?: Maybe<Scalars['String']>;
+  isQuit: Scalars['Boolean'];
+  game?: Maybe<Game>;
+  lastTurnId?: Maybe<Scalars['String']>;
   reports?: Maybe<Array<Maybe<Report>>>;
-  turn?: Maybe<Turn>;
   turns?: Maybe<Array<Maybe<Turn>>>;
+  turn?: Maybe<Turn>;
 };
 
 
@@ -74,227 +97,209 @@ export type PlayerTurnArgs = {
 };
 
 export type Report = Node & {
-  factionName: Scalars['String'];
-  factionNumber: Scalars['Int'];
   id: Scalars['ID'];
-  json?: Maybe<Scalars['String']>;
+  factionNumber: Scalars['Int'];
+  factionName: Scalars['String'];
   source: Scalars['String'];
+  json?: Maybe<Scalars['String']>;
 };
 
 export type Turn = Node & {
-  factions?: Maybe<Array<Maybe<Faction>>>;
   id: Scalars['ID'];
-  month: Scalars['Int'];
   number: Scalars['Int'];
-  regions?: Maybe<RegionConnection>;
-  reports?: Maybe<Array<Maybe<Report>>>;
-  structures?: Maybe<StructureConnection>;
-  units?: Maybe<UnitConnection>;
+  month: Scalars['Int'];
   year: Scalars['Int'];
+  reports?: Maybe<Array<Maybe<Report>>>;
+  regions?: Maybe<RegionCollectionSegment>;
+  structures?: Maybe<StructureCollectionSegment>;
+  units?: Maybe<UnitCollectionSegment>;
+  events?: Maybe<EventCollectionSegment>;
+  factions?: Maybe<Array<Maybe<Faction>>>;
 };
 
 
 export type TurnRegionsArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
+  withStructures?: Scalars['Boolean'];
 };
 
 
 export type TurnStructuresArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 
 export type TurnUnitsArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
+};
+
+
+export type TurnEventsArgs = {
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 export type Region = Node & {
-  entertainment: Scalars['Int'];
-  exits?: Maybe<Array<Maybe<Exit>>>;
-  explored: Scalars['Boolean'];
-  forSale?: Maybe<Array<Maybe<TradableItem>>>;
   id: Scalars['ID'];
-  label: Scalars['String'];
-  lastVisitedAt?: Maybe<Scalars['Int']>;
-  population: Scalars['Int'];
-  produces?: Maybe<Array<Maybe<Item>>>;
-  province: Scalars['String'];
-  race?: Maybe<Scalars['String']>;
-  settlement?: Maybe<Settlement>;
-  tax: Scalars['Int'];
-  terrain: Scalars['String'];
-  totalWages: Scalars['Int'];
-  wages: Scalars['Float'];
-  wanted?: Maybe<Array<Maybe<TradableItem>>>;
+  code?: Maybe<Scalars['String']>;
   x: Scalars['Int'];
   y: Scalars['Int'];
   z: Scalars['Int'];
+  explored: Scalars['Boolean'];
+  lastVisitedAt?: Maybe<Scalars['Int']>;
+  label: Scalars['String'];
+  province: Scalars['String'];
+  terrain: Scalars['String'];
+  settlement?: Maybe<Settlement>;
+  population: Scalars['Int'];
+  race?: Maybe<Scalars['String']>;
+  entertainment: Scalars['Int'];
+  tax: Scalars['Int'];
+  wages: Scalars['Float'];
+  totalWages: Scalars['Int'];
+  forSale?: Maybe<Array<Maybe<TradableItem>>>;
+  wanted?: Maybe<Array<Maybe<TradableItem>>>;
+  produces?: Maybe<Array<Maybe<Item>>>;
+  exits?: Maybe<Array<Maybe<Exit>>>;
+  structures?: Maybe<Array<Maybe<Structure>>>;
 };
 
 export type Unit = Node & {
-  canStudy?: Maybe<Array<Maybe<Scalars['String']>>>;
-  capacity?: Maybe<Capacity>;
-  combatSpell?: Maybe<Scalars['String']>;
-  description?: Maybe<Scalars['String']>;
-  factionNumber?: Maybe<Scalars['Int']>;
-  flags?: Maybe<Array<Maybe<Scalars['String']>>>;
   id: Scalars['ID'];
-  items: Array<Maybe<Item>>;
-  name: Scalars['String'];
+  regionCode?: Maybe<Scalars['String']>;
+  structureNumber?: Maybe<Scalars['Int']>;
   number: Scalars['Int'];
-  onGuard: Scalars['Boolean'];
-  orders?: Maybe<Scalars['String']>;
-  readyItem?: Maybe<Scalars['String']>;
-  region?: Maybe<Scalars['String']>;
-  sequence: Scalars['Int'];
-  skills?: Maybe<Array<Maybe<Skill>>>;
   strcutureNumber?: Maybe<Scalars['Int']>;
-  structure?: Maybe<Scalars['Int']>;
+  factionNumber?: Maybe<Scalars['Int']>;
+  sequence: Scalars['Int'];
+  name: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  onGuard: Scalars['Boolean'];
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>;
   weight?: Maybe<Scalars['Int']>;
+  items: Array<Maybe<Item>>;
+  capacity?: Maybe<Capacity>;
+  skills?: Maybe<Array<Maybe<Skill>>>;
+  canStudy?: Maybe<Array<Maybe<Scalars['String']>>>;
+  readyItem?: Maybe<Scalars['String']>;
+  combatSpell?: Maybe<Scalars['String']>;
+  orders?: Maybe<Scalars['String']>;
 };
 
 export type Structure = Node & {
-  contents?: Maybe<Array<Maybe<FleetContent>>>;
-  description?: Maybe<Scalars['String']>;
-  flags?: Maybe<Array<Maybe<Scalars['String']>>>;
   id: Scalars['ID'];
-  load?: Maybe<TransportationLoad>;
-  name: Scalars['String'];
-  needs?: Maybe<Scalars['Int']>;
-  number: Scalars['Int'];
-  region?: Maybe<Scalars['String']>;
-  sailDirections?: Maybe<Array<Direction>>;
-  sailors?: Maybe<Sailors>;
+  code?: Maybe<Scalars['String']>;
+  regionCode?: Maybe<Scalars['String']>;
   sequence: Scalars['Int'];
-  speed?: Maybe<Scalars['Int']>;
+  number: Scalars['Int'];
+  name: Scalars['String'];
   type: Scalars['String'];
+  description?: Maybe<Scalars['String']>;
+  contents?: Maybe<Array<Maybe<FleetContent>>>;
+  flags?: Maybe<Array<Maybe<Scalars['String']>>>;
+  sailDirections?: Maybe<Array<Direction>>;
+  speed?: Maybe<Scalars['Int']>;
+  needs?: Maybe<Scalars['Int']>;
+  load?: Maybe<TransportationLoad>;
+  sailors?: Maybe<Sailors>;
 };
 
 export type Faction = Node & {
-  attitudes?: Maybe<Array<Maybe<Attitude>>>;
-  defaultAttitude?: Maybe<Stance>;
-  events?: Maybe<Array<Maybe<Event>>>;
   id: Scalars['ID'];
-  name: Scalars['String'];
   number: Scalars['Int'];
+  name: Scalars['String'];
+  defaultAttitude?: Maybe<Stance>;
+  attitudes?: Maybe<Array<Maybe<Attitude>>>;
+  events?: Maybe<Array<Maybe<Event>>>;
   stats?: Maybe<FactionStats>;
 };
 
-export type Query = {
-  games?: Maybe<Array<Maybe<Game>>>;
-  me?: Maybe<User>;
-  node?: Maybe<Node>;
-  users?: Maybe<UserConnection>;
+export type Event = {
+  unitNumber?: Maybe<Scalars['Int']>;
+  id: Scalars['Long'];
+  factionNumber: Scalars['Int'];
+  regionCode?: Maybe<Scalars['String']>;
+  unitName?: Maybe<Scalars['String']>;
+  type: EventType;
+  category: EventCategory;
+  message: Scalars['String'];
+  amount?: Maybe<Scalars['Int']>;
+  itemCode?: Maybe<Scalars['String']>;
+  itemName?: Maybe<Scalars['String']>;
+  itemPrice?: Maybe<Scalars['Int']>;
 };
 
-
-export type QueryNodeArgs = {
-  id: Scalars['ID'];
-};
-
-
-export type QueryUsersArgs = {
-  after?: Maybe<Scalars['String']>;
-  before?: Maybe<Scalars['String']>;
-  first?: Maybe<Scalars['PaginationAmount']>;
-  last?: Maybe<Scalars['PaginationAmount']>;
-};
-
-
-
-/** A connection to a list of items. */
-export type UserConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<UserEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<User>>>;
+export type UserCollectionSegment = {
+  items?: Maybe<Array<Maybe<User>>>;
   /** Information to aid in pagination. */
-  pageInfo: PageInfo;
+  pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
 };
 
-/** A connection to a list of items. */
-export type UnitConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<UnitEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Unit>>>;
-  /** Information to aid in pagination. */
-  pageInfo: PageInfo;
-  totalCount: Scalars['Int'];
-};
-
-/** Information about pagination in a connection. */
-export type PageInfo = {
-  /** When paginating forwards, the cursor to continue. */
-  endCursor?: Maybe<Scalars['String']>;
-  /** Indicates whether more edges exist following the set defined by the clients arguments. */
+/** Information about the offset pagination. */
+export type CollectionSegmentInfo = {
+  /** Indicates whether more items exist following the set defined by the clients arguments. */
   hasNextPage: Scalars['Boolean'];
-  /** Indicates whether more edges exist prior the set defined by the clients arguments. */
+  /** Indicates whether more items exist prior the set defined by the clients arguments. */
   hasPreviousPage: Scalars['Boolean'];
-  /** When paginating backwards, the cursor to continue. */
-  startCursor?: Maybe<Scalars['String']>;
 };
 
-/** An edge in a connection. */
-export type UserEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<User>;
-};
-
-/** An edge in a connection. */
-export type StructureEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Structure>;
-};
-
-export type Mutation = {
-  createGame?: Maybe<Game>;
+export type MutationType = {
   createUser?: Maybe<User>;
-  deleteGame?: Maybe<Array<Maybe<Game>>>;
-  joinGame?: Maybe<Player>;
   updateUserRoles?: Maybe<User>;
+  createGame?: Maybe<Game>;
+  joinGame?: Maybe<Player>;
+  deleteGame?: Maybe<Array<Maybe<Game>>>;
+  setOrders?: Maybe<MutationResultOfString>;
 };
 
 
-export type MutationCreateGameArgs = {
-  name?: Maybe<Scalars['String']>;
-};
-
-
-export type MutationCreateUserArgs = {
+export type MutationTypeCreateUserArgs = {
   email?: Maybe<Scalars['String']>;
   password?: Maybe<Scalars['String']>;
 };
 
 
-export type MutationDeleteGameArgs = {
-  gameId: Scalars['ID'];
-};
-
-
-export type MutationJoinGameArgs = {
-  gameId: Scalars['ID'];
-};
-
-
-export type MutationUpdateUserRolesArgs = {
+export type MutationTypeUpdateUserRolesArgs = {
+  userId: Scalars['ID'];
   add?: Maybe<Array<Maybe<Scalars['String']>>>;
   remove?: Maybe<Array<Maybe<Scalars['String']>>>;
-  userId: Scalars['ID'];
+};
+
+
+export type MutationTypeCreateGameArgs = {
+  name?: Maybe<Scalars['String']>;
+};
+
+
+export type MutationTypeJoinGameArgs = {
+  gameId: Scalars['ID'];
+};
+
+
+export type MutationTypeDeleteGameArgs = {
+  gameId: Scalars['ID'];
+};
+
+
+export type MutationTypeSetOrdersArgs = {
+  unitId?: Maybe<Scalars['ID']>;
+  orders?: Maybe<Scalars['String']>;
+};
+
+export type MutationResultOfString = {
+  isSuccess: Scalars['Boolean'];
+  data?: Maybe<Scalars['String']>;
+  error?: Maybe<Scalars['String']>;
+};
+
+export type AuthorizeDirective = {
+  policy?: Maybe<Scalars['String']>;
+  roles?: Maybe<Array<Scalars['String']>>;
+  apply: ApplyPolicy;
 };
 
 export enum GameType {
@@ -308,33 +313,33 @@ export type Settlement = {
 };
 
 export type TradableItem = {
-  amount: Scalars['Int'];
   code: Scalars['String'];
-  market: Market;
+  amount: Scalars['Int'];
   price: Scalars['Int'];
+  market: Market;
 };
 
 export type Exit = {
-  direction: Direction;
   targetRegion: Scalars['String'];
+  direction: Direction;
 };
 
 export type Capacity = {
   flying: Scalars['Int'];
   riding: Scalars['Int'];
-  swimming: Scalars['Int'];
   walking: Scalars['Int'];
+  swimming: Scalars['Int'];
 };
 
 export type Skill = {
   code?: Maybe<Scalars['String']>;
-  days?: Maybe<Scalars['Int']>;
   level?: Maybe<Scalars['Int']>;
+  days?: Maybe<Scalars['Int']>;
 };
 
 export type FleetContent = {
-  count: Scalars['Int'];
   type?: Maybe<Scalars['String']>;
+  count: Scalars['Int'];
 };
 
 export enum Direction {
@@ -347,8 +352,8 @@ export enum Direction {
 }
 
 export type TransportationLoad = {
-  max: Scalars['Int'];
   used: Scalars['Int'];
+  max: Scalars['Int'];
 };
 
 export type Sailors = {
@@ -369,42 +374,50 @@ export type Attitude = {
   stance: Stance;
 };
 
-/** A connection to a list of items. */
-export type RegionConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<RegionEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Region>>>;
+
+export enum EventType {
+  Info = 'INFO',
+  Battle = 'BATTLE',
+  Error = 'ERROR'
+}
+
+export enum EventCategory {
+  Unknown = 'UNKNOWN',
+  Tax = 'TAX',
+  Sell = 'SELL',
+  Work = 'WORK',
+  Produce = 'PRODUCE',
+  Pillage = 'PILLAGE',
+  Claim = 'CLAIM',
+  Cast = 'CAST'
+}
+
+export type RegionCollectionSegment = {
+  items?: Maybe<Array<Maybe<Region>>>;
   /** Information to aid in pagination. */
-  pageInfo: PageInfo;
+  pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
 };
 
-/** A connection to a list of items. */
-export type StructureConnection = {
-  /** A list of edges. */
-  edges?: Maybe<Array<StructureEdge>>;
-  /** A flattened list of the nodes. */
-  nodes?: Maybe<Array<Maybe<Structure>>>;
+export type StructureCollectionSegment = {
+  items?: Maybe<Array<Maybe<Structure>>>;
   /** Information to aid in pagination. */
-  pageInfo: PageInfo;
+  pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
 };
 
-/** An edge in a connection. */
-export type UnitEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Unit>;
+export type UnitCollectionSegment = {
+  items?: Maybe<Array<Maybe<Unit>>>;
+  /** Information to aid in pagination. */
+  pageInfo: CollectionSegmentInfo;
+  totalCount: Scalars['Int'];
 };
 
-/** An edge in a connection. */
-export type RegionEdge = {
-  /** A cursor for use in pagination. */
-  cursor: Scalars['String'];
-  /** The item at the end of the edge. */
-  node?: Maybe<Region>;
+export type EventCollectionSegment = {
+  items?: Maybe<Array<Maybe<Event>>>;
+  /** Information to aid in pagination. */
+  pageInfo: CollectionSegmentInfo;
+  totalCount: Scalars['Int'];
 };
 
 export enum Market {
@@ -418,23 +431,16 @@ export enum SettlementSize {
   City = 'CITY'
 }
 
+export enum ApplyPolicy {
+  BeforeResolver = 'BEFORE_RESOLVER',
+  AfterResolver = 'AFTER_RESOLVER'
+}
+
 export type FactionStats = {
-  factionName?: Maybe<Scalars['String']>;
   factionNumber: Scalars['Int'];
+  factionName?: Maybe<Scalars['String']>;
   income?: Maybe<IncomeStats>;
   production?: Maybe<Array<Maybe<Item>>>;
-};
-
-export type Event = {
-  amount?: Maybe<Scalars['Int']>;
-  category: EventCategory;
-  id: Scalars['Long'];
-  itemCode?: Maybe<Scalars['String']>;
-  itemName?: Maybe<Scalars['String']>;
-  itemPrice?: Maybe<Scalars['Int']>;
-  message: Scalars['String'];
-  type: EventType;
-  unitName?: Maybe<Scalars['String']>;
 };
 
 export type GameOptions = {
@@ -442,48 +448,31 @@ export type GameOptions = {
 };
 
 export type MapLevel = {
-  height: Scalars['Int'];
   label?: Maybe<Scalars['String']>;
   level: Scalars['Int'];
   width: Scalars['Int'];
-  _Clone__: MapLevel;
+  height: Scalars['Int'];
 };
 
-export enum EventCategory {
-  Unknown = 'UNKNOWN',
-  Tax = 'TAX',
-  Sell = 'SELL',
-  Work = 'WORK',
-  Produce = 'PRODUCE',
-  Pillage = 'PILLAGE',
-  Claim = 'CLAIM',
-  Cast = 'CAST'
-}
-
-export enum EventType {
-  Info = 'INFO',
-  Battle = 'BATTLE',
-  Error = 'ERROR'
-}
-
-
 export type IncomeStats = {
-  pillage: Scalars['Int'];
-  tax: Scalars['Int'];
-  total: Scalars['Int'];
-  trade: Scalars['Int'];
   work: Scalars['Int'];
+  tax: Scalars['Int'];
+  pillage: Scalars['Int'];
+  trade: Scalars['Int'];
+  total: Scalars['Int'];
 };
 
 export type AttitudeFragment = Pick<Attitude, 'factionNumber' | 'stance'>;
 
 export type CapacityFragment = Pick<Capacity, 'walking' | 'riding' | 'flying' | 'swimming'>;
 
+export type EventFragment = Pick<Event, 'type' | 'category' | 'message' | 'regionCode' | 'unitNumber' | 'unitName' | 'itemCode' | 'itemName' | 'itemPrice' | 'amount'>;
+
 export type ExitFragment = Pick<Exit, 'direction' | 'targetRegion'>;
 
 export type FactionFragment = (
   Pick<Faction, 'id' | 'name' | 'number' | 'defaultAttitude'>
-  & { attitudes?: Maybe<Array<Maybe<AttitudeFragment>>> }
+  & { attitudes?: Maybe<Array<Maybe<AttitudeFragment>>>, events?: Maybe<Array<Maybe<EventFragment>>> }
 );
 
 export type FleetContentFragment = Pick<FleetContent, 'type' | 'count'>;
@@ -507,18 +496,20 @@ export type LoadFragment = Pick<TransportationLoad, 'used' | 'max'>;
 export type PlayerHeaderFragment = Pick<Player, 'id' | 'number' | 'name' | 'lastTurnNumber' | 'lastTurnId'>;
 
 export type RegionFragment = (
-  Pick<Region, 'id' | 'lastVisitedAt' | 'explored' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
-  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, produces?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>> }
+  Pick<Region, 'id' | 'code' | 'lastVisitedAt' | 'explored' | 'x' | 'y' | 'z' | 'label' | 'terrain' | 'province' | 'race' | 'population' | 'tax' | 'wages' | 'totalWages' | 'entertainment'>
+  & { settlement?: Maybe<SettlementFragment>, wanted?: Maybe<Array<Maybe<TradableItemFragment>>>, produces?: Maybe<Array<Maybe<ItemFragment>>>, forSale?: Maybe<Array<Maybe<TradableItemFragment>>>, exits?: Maybe<Array<Maybe<ExitFragment>>>, structures?: Maybe<Array<Maybe<StructureFragment>>> }
 );
 
 export type SailorsFragment = Pick<Sailors, 'current' | 'required'>;
+
+export type SetOrderResultFragment = Pick<MutationResultOfString, 'isSuccess' | 'error'>;
 
 export type SettlementFragment = Pick<Settlement, 'name' | 'size'>;
 
 export type SkillFragment = Pick<Skill, 'code' | 'level' | 'days'>;
 
 export type StructureFragment = (
-  Pick<Structure, 'id' | 'region' | 'sequence' | 'description' | 'flags' | 'name' | 'needs' | 'number' | 'sailDirections' | 'speed' | 'type'>
+  Pick<Structure, 'id' | 'code' | 'regionCode' | 'sequence' | 'description' | 'flags' | 'name' | 'needs' | 'number' | 'sailDirections' | 'speed' | 'type'>
   & { contents?: Maybe<Array<Maybe<FleetContentFragment>>>, load?: Maybe<LoadFragment>, sailors?: Maybe<SailorsFragment> }
 );
 
@@ -530,7 +521,7 @@ export type TurnFragment = (
 );
 
 export type UnitFragment = (
-  Pick<Unit, 'id' | 'region' | 'structure' | 'sequence' | 'canStudy' | 'combatSpell' | 'description' | 'factionNumber' | 'flags' | 'name' | 'number' | 'onGuard' | 'readyItem' | 'weight' | 'orders'>
+  Pick<Unit, 'id' | 'regionCode' | 'structureNumber' | 'sequence' | 'canStudy' | 'combatSpell' | 'description' | 'factionNumber' | 'flags' | 'name' | 'number' | 'onGuard' | 'readyItem' | 'weight' | 'orders'>
   & { capacity?: Maybe<CapacityFragment>, items: Array<Maybe<ItemFragment>>, skills?: Maybe<Array<Maybe<SkillFragment>>> }
 );
 
@@ -555,6 +546,14 @@ export type JoinGameMutationVariables = Exact<{
 
 export type JoinGameMutation = { joinGame?: Maybe<PlayerHeaderFragment> };
 
+export type SetOrderMutationVariables = Exact<{
+  unitId: Scalars['ID'];
+  orders?: Maybe<Scalars['String']>;
+}>;
+
+
+export type SetOrderMutation = { setOrders?: Maybe<SetOrderResultFragment> };
+
 export type GetGameQueryVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
@@ -569,26 +568,14 @@ export type GetGamesQuery = { games?: Maybe<Array<Maybe<GameHeaderFragment>>> };
 
 export type GetRegionsQueryVariables = Exact<{
   turnId: Scalars['ID'];
-  cursor?: Maybe<Scalars['String']>;
-  pageSize?: Scalars['PaginationAmount'];
+  skip?: Scalars['Int'];
+  pageSize?: Scalars['Int'];
 }>;
 
 
 export type GetRegionsQuery = { node?: Maybe<{ regions?: Maybe<(
-      Pick<RegionConnection, 'totalCount'>
-      & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<RegionFragment> }>> }
-    )> }> };
-
-export type GetStructuresQueryVariables = Exact<{
-  turnId: Scalars['ID'];
-  cursor?: Maybe<Scalars['String']>;
-  pageSize?: Scalars['PaginationAmount'];
-}>;
-
-
-export type GetStructuresQuery = { node?: Maybe<{ structures?: Maybe<(
-      Pick<StructureConnection, 'totalCount'>
-      & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<StructureFragment> }>> }
+      Pick<RegionCollectionSegment, 'totalCount'>
+      & { pageInfo: Pick<CollectionSegmentInfo, 'hasNextPage'>, items?: Maybe<Array<Maybe<RegionFragment>>> }
     )> }> };
 
 export type GetTurnQueryVariables = Exact<{
@@ -600,14 +587,14 @@ export type GetTurnQuery = { node?: Maybe<TurnFragment> };
 
 export type GetUnitsQueryVariables = Exact<{
   turnId: Scalars['ID'];
-  cursor?: Maybe<Scalars['String']>;
-  pageSize?: Scalars['PaginationAmount'];
+  skip?: Scalars['Int'];
+  pageSize?: Scalars['Int'];
 }>;
 
 
 export type GetUnitsQuery = { node?: Maybe<{ units?: Maybe<(
-      Pick<UnitConnection, 'totalCount'>
-      & { pageInfo: Pick<PageInfo, 'hasNextPage' | 'endCursor'>, edges?: Maybe<Array<{ node?: Maybe<UnitFragment> }>> }
+      Pick<UnitCollectionSegment, 'totalCount'>
+      & { pageInfo: Pick<CollectionSegmentInfo, 'hasNextPage'>, items?: Maybe<Array<Maybe<UnitFragment>>> }
     )> }> };
 
 export const GameOptions = gql`
@@ -681,9 +668,56 @@ export const Exit = gql`
   targetRegion
 }
     `;
+export const FleetContent = gql`
+    fragment FleetContent on FleetContent {
+  type
+  count
+}
+    `;
+export const Load = gql`
+    fragment Load on TransportationLoad {
+  used
+  max
+}
+    `;
+export const Sailors = gql`
+    fragment Sailors on Sailors {
+  current
+  required
+}
+    `;
+export const Structure = gql`
+    fragment Structure on Structure {
+  id
+  code
+  regionCode
+  sequence
+  contents {
+    ...FleetContent
+  }
+  description
+  flags
+  id
+  load {
+    ...Load
+  }
+  name
+  needs
+  number
+  sailDirections
+  sailors {
+    ...Sailors
+  }
+  speed
+  type
+}
+    ${FleetContent}
+${Load}
+${Sailors}`;
 export const Region = gql`
     fragment Region on Region {
   id
+  code
   lastVisitedAt
   explored
   x
@@ -713,60 +747,39 @@ export const Region = gql`
   exits {
     ...Exit
   }
+  structures {
+    ...Structure
+  }
 }
     ${Settlement}
 ${TradableItem}
 ${Item}
-${Exit}`;
-export const FleetContent = gql`
-    fragment FleetContent on FleetContent {
-  type
-  count
+${Exit}
+${Structure}`;
+export const SetOrderResult = gql`
+    fragment SetOrderResult on MutationResultOfString {
+  isSuccess
+  error
 }
     `;
-export const Load = gql`
-    fragment Load on TransportationLoad {
-  used
-  max
-}
-    `;
-export const Sailors = gql`
-    fragment Sailors on Sailors {
-  current
-  required
-}
-    `;
-export const Structure = gql`
-    fragment Structure on Structure {
-  id
-  region
-  sequence
-  contents {
-    ...FleetContent
-  }
-  description
-  flags
-  id
-  load {
-    ...Load
-  }
-  name
-  needs
-  number
-  sailDirections
-  sailors {
-    ...Sailors
-  }
-  speed
-  type
-}
-    ${FleetContent}
-${Load}
-${Sailors}`;
 export const Attitude = gql`
     fragment Attitude on Attitude {
   factionNumber
   stance
+}
+    `;
+export const Event = gql`
+    fragment Event on Event {
+  type
+  category
+  message
+  regionCode
+  unitNumber
+  unitName
+  itemCode
+  itemName
+  itemPrice
+  amount
 }
     `;
 export const Faction = gql`
@@ -778,8 +791,12 @@ export const Faction = gql`
   attitudes {
     ...Attitude
   }
+  events {
+    ...Event
+  }
 }
-    ${Attitude}`;
+    ${Attitude}
+${Event}`;
 export const Turn = gql`
     fragment Turn on Turn {
   id
@@ -809,8 +826,8 @@ export const Skill = gql`
 export const Unit = gql`
     fragment Unit on Unit {
   id
-  region
-  structure
+  regionCode
+  structureNumber
   sequence
   canStudy
   capacity {
@@ -857,6 +874,13 @@ export const JoinGame = gql`
   }
 }
     ${PlayerHeader}`;
+export const SetOrder = gql`
+    mutation SetOrder($unitId: ID!, $orders: String) {
+  setOrders(unitId: $unitId, orders: $orders) {
+    ...SetOrderResult
+  }
+}
+    ${SetOrderResult}`;
 export const GetGame = gql`
     query GetGame($gameId: ID!) {
   node(id: $gameId) {
@@ -874,45 +898,22 @@ export const GetGames = gql`
 }
     ${GameHeader}`;
 export const GetRegions = gql`
-    query GetRegions($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+    query GetRegions($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
   node(id: $turnId) {
     ... on Turn {
-      regions(after: $cursor, first: $pageSize) {
+      regions(skip: $skip, take: $pageSize, withStructures: true) {
         totalCount
         pageInfo {
           hasNextPage
-          endCursor
         }
-        edges {
-          node {
-            ...Region
-          }
+        items {
+          ...Region
         }
       }
     }
   }
 }
     ${Region}`;
-export const GetStructures = gql`
-    query GetStructures($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
-  node(id: $turnId) {
-    ... on Turn {
-      structures(after: $cursor, first: $pageSize) {
-        totalCount
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        edges {
-          node {
-            ...Structure
-          }
-        }
-      }
-    }
-  }
-}
-    ${Structure}`;
 export const GetTurn = gql`
     query GetTurn($turnId: ID!) {
   node(id: $turnId) {
@@ -923,19 +924,16 @@ export const GetTurn = gql`
 }
     ${Turn}`;
 export const GetUnits = gql`
-    query GetUnits($turnId: ID!, $cursor: String, $pageSize: PaginationAmount! = 100) {
+    query GetUnits($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
   node(id: $turnId) {
     ... on Turn {
-      units(after: $cursor, first: $pageSize) {
+      units(skip: $skip, take: $pageSize) {
         totalCount
         pageInfo {
           hasNextPage
-          endCursor
         }
-        edges {
-          node {
-            ...Unit
-          }
+        items {
+          ...Unit
         }
       }
     }

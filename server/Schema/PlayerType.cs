@@ -3,6 +3,7 @@ namespace advisor {
     using System.Linq;
     using System.Threading.Tasks;
     using HotChocolate;
+    using HotChocolate.Resolvers;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
@@ -10,9 +11,10 @@ namespace advisor {
 
     public class PlayerType : ObjectType<DbPlayer> {
         protected override void Configure(IObjectTypeDescriptor<DbPlayer> descriptor) {
-            descriptor.AsNode()
+            descriptor
+                .ImplementsNode()
                 .IdField(x => x.Id)
-                .NodeResolver((ctx, id) => {
+                .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
                     return db.Players
                         .AsNoTracking()
@@ -34,24 +36,23 @@ namespace advisor {
     //     public AllianceMemberRole Role { get; }
     // }
 
-    [ExtendObjectType(Name = "Player")]
+    [ExtendObjectType("Player")]
     public class PlayerResolvers {
-        public PlayerResolvers(Database db, IIdSerializer idSerializer) {
-            this.db = db;
+        public PlayerResolvers(IIdSerializer idSerializer) {
             this.idSerializer = idSerializer;
         }
 
-        private readonly Database db;
         private readonly IIdSerializer idSerializer;
 
-        public Task<DbGame> Game([Parent] DbPlayer player) {
+        public Task<DbGame> Game(Database db, [Parent] DbPlayer player) {
             return db.Games
                 .AsNoTracking()
                 .SingleOrDefaultAsync(x => x.Id == player.GameId);
         }
 
-        public string LastTurnId([Parent] DbPlayer player) {
-            return idSerializer.Serialize("Turn", TurnType.MakeId(player.Id, player.LastTurnNumber));
+        public string LastTurnId(IResolverContext context, [Parent] DbPlayer player) {
+            var id = idSerializer.Serialize(null, "Turn", DbTurn.MakeId(player.Id, player.LastTurnNumber));
+            return id;
         }
 
         // public async Task<PlayerUniversity> University([Parent] DbPlayer player) {
@@ -64,7 +65,7 @@ namespace advisor {
         //         : new PlayerUniversity(membership.University, membership.Role);
         // }
 
-        public Task<List<DbReport>> Reports([Parent] DbPlayer player, int? turn = null) {
+        public Task<List<DbReport>> Reports(Database db, [Parent] DbPlayer player, int? turn = null) {
             var q = db.Reports
                 .AsNoTracking()
                 .FilterByPlayer(player);
@@ -76,7 +77,7 @@ namespace advisor {
             return q.ToListAsync();
         }
 
-        public Task<List<DbTurn>> Turns([Parent] DbPlayer player) {
+        public Task<List<DbTurn>> Turns(Database db, [Parent] DbPlayer player) {
             return db.Turns
                 .AsNoTracking()
                 .FilterByPlayer(player)
@@ -84,7 +85,7 @@ namespace advisor {
                 .ToListAsync();
         }
 
-        public Task<DbTurn> Turn([Parent] DbPlayer player, int number) {
+        public Task<DbTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
             return db.Turns
                 .AsNoTracking()
                 .FilterByPlayer(player)

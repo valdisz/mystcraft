@@ -17,7 +17,7 @@ namespace advisor {
     [Authorize]
     [Route("api")]
     public class ReportsController : ControllerBase {
-        public ReportsController(IAuthorizationService authorization,IIdSerializer relayId, IMediator mediator, Database database) {
+        public ReportsController(IAuthorizationService authorization, IIdSerializer relayId, IMediator mediator, Database database) {
             this.authorization = authorization;
             this.relayId = relayId;
             this.mediator = mediator;
@@ -39,7 +39,7 @@ namespace advisor {
 
             var playerIdValue = (long) relayPlayerId.Value;
 
-            if (! await authorization.AuthorizeOwnPlayer(User, playerIdValue)) return Unauthorized();
+            if (! await authorization.AuthorizeOwnPlayerAsync(User, playerIdValue)) return Unauthorized();
 
             List<string> reports = new List<string>();
             foreach (var file in Request.Form.Files) {
@@ -85,7 +85,7 @@ namespace advisor {
 
             var playerIdValue = (long) relayPlayerId.Value;
 
-            if (! await authorization.AuthorizeOwnPlayer(User, playerIdValue)) return Unauthorized();
+            if (! await authorization.AuthorizeOwnPlayerAsync(User, playerIdValue)) return Unauthorized();
 
             await using var stream = Request.Form.Files[0].OpenReadStream();
             using var textReader = new StreamReader(stream);
