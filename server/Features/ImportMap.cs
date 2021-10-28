@@ -20,6 +20,7 @@ namespace advisor.Features {
 
         public async Task<MediatR.Unit> Handle(ImportMap request, CancellationToken cancellationToken) {
             DbPlayer player = await db.Players
+                .AsNoTracking()
                 .Include(x => x.Game)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 

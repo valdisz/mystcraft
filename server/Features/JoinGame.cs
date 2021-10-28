@@ -4,6 +4,7 @@ namespace advisor.Features {
     using System.Threading.Tasks;
     using advisor.Persistence;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public record JoinGame(long UserId, long GameId) : IRequest<DbPlayer> {
     }
@@ -19,7 +20,7 @@ namespace advisor.Features {
             var game = await db.Games.FindAsync(request.GameId);
             if (game == null) return null;
 
-            var player = db.Players.SingleOrDefault(x => x.GameId == request.GameId && x.UserId == request.UserId);
+            var player = db.Players.AsNoTracking().SingleOrDefault(x => x.GameId == request.GameId && x.UserId == request.UserId);
             if (player == null) {
                 player = new DbPlayer {
                     GameId = request.GameId,

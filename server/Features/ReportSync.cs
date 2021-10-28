@@ -43,8 +43,6 @@ namespace advisor.Features {
         public HashSet<int> NewUnits { get; } = new ();
 
         public void Load(DbTurn turn) {
-            var reportOrders = (Report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>())
-                .ToDictionary(x => x.Unit, x => x.Orders);
 
             foreach (var region in turn.Regions) {
                 Regions.Add(region.Id, region);
@@ -60,34 +58,29 @@ namespace advisor.Features {
 
             foreach (var unit in turn.Units) {
                 Units.Add(unit.Number, unit);
-
-                if (unit.Orders != null) {
-                    Orders.Add(unit.Number, unit.Orders);
-                }
-                else  if (reportOrders.TryGetValue(unit.Number, out var orders)) {
-                    Orders.Add(unit.Number, orders);
-                }
+                Orders.Add(unit.Number, unit.Orders);
             }
 
-            foreach (var key in reportOrders.Keys.Except(Orders.Keys)) {
-                Orders.Add(key, reportOrders[key]);
-            }
+            LoadOrdersFromReport();
         }
 
         public void Copy(DbTurn turn, IMapper mapper) {
             foreach (var region in turn.Regions.Select(mapper.Map<DbRegion>)) {
                 region.Units.Clear();
+
                 Regions.Add(region.Id, region);
+                NewRegions.Add(region.Id);
 
                 foreach (var str in region.Structures.ToList()) {
                     str.Units.Clear();
 
-                    if (str.Number > GameConsts.MAX_BUILDING_NUMBER) {
+                    if (DbStructure.IsShip(str.Number)) {
                         region.Structures.Remove(str);
                         continue;
                     }
 
                     Structures.Add(str.Id, str);
+                    NewStructures.Add(str.Id);
                 }
             }
 
@@ -96,7 +89,28 @@ namespace advisor.Features {
                 fac.Units.Clear();
                 fac.Stats.Clear();
 
+                var attitudes = fac.Attitudes.Select(x => new DbAttitude {
+                    FactionNumber = x.FactionNumber,
+                    Stance = x.Stance,
+                    TargetFactionNumber = x.TargetFactionNumber
+                }).ToList();
+
+                fac.Attitudes.Clear();
+                fac.Attitudes.AddRange(attitudes);
+
                 Factions.Add(fac.Number, fac);
+                NewFactions.Add(fac.Number);
+            }
+
+            LoadOrdersFromReport();
+        }
+
+        public void LoadOrdersFromReport() {
+            var reportOrders = (Report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>())
+                .ToDictionary(x => x.Unit, x => x.Orders);
+
+            foreach (var key in reportOrders.Keys.Except(Orders.Keys)) {
+                Orders.Add(key, reportOrders[key]);
             }
         }
 
@@ -125,10 +139,10 @@ namespace advisor.Features {
                 foreach (var attitude in faction.Attitudes) {
                     ApplyTurnContext(attitude);
                 }
+            }
 
-                if (NewFactions.Contains(faction.Number)) {
-                    await Db.AddAsync(faction);
-                }
+            foreach (var faction in Factions.Values.Where(x => NewFactions.Contains(x.Number))) {
+                await Db.AddAsync(faction);
             }
         }
 
@@ -159,10 +173,10 @@ namespace advisor.Features {
                 foreach (var str in region.Structures) {
                     ApplyTurnContext(str);
                 }
+            }
 
-                if (NewRegions.Contains(region.Id)) {
-                    await Db.AddAsync(region);
-                }
+            foreach (var region in Regions.Values.Where(x => NewRegions.Contains(x.Id))) {
+                await Db.AddAsync(region);
             }
         }
 
@@ -236,7 +250,10 @@ namespace advisor.Features {
                 foreach (var number in toRemove) {
                     var attitude = index[number];
                     faction.Attitudes.Remove(attitude);
-                    Db.Remove(attitude);
+
+                    if (attitude.TurnNumber != default) {
+                        Db.Remove(attitude);
+                    }
                 }
             }
 

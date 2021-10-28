@@ -52,9 +52,9 @@
         public IQueryable<DbStructure> Structures(Database db, [Parent] DbTurn turn) {
             return db.Structures
                 .AsNoTracking()
+                .FilterByTurn(turn)
                 .OrderBy(x => x.RegionId)
-                .ThenBy(x => x.Sequence)
-                .FilterByTurn(turn);
+                .ThenBy(x => x.Sequence);
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
@@ -62,16 +62,16 @@
             return db.Units
                 .AsNoTrackingWithIdentityResolution()
                 .Include(x => x.Items)
-                .OrderBy(x => x.Number)
-                .FilterByTurn(turn);
+                .FilterByTurn(turn)
+                .OrderBy(x => x.Number);
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
         public IQueryable<DbEvent> Events(Database db, [Parent] DbTurn turn) {
             return db.Events
                 .AsNoTracking()
-                .OrderBy(x => x.Id)
-                .FilterByTurn(turn);
+                .FilterByTurn(turn)
+                .OrderBy(x => x.Id);
         }
 
         public Task<List<DbFaction>> Factions(Database db, [Parent] DbTurn turn) {

@@ -44,6 +44,7 @@ namespace advisor {
         [RecurringJob("0 12 * * 2,5", TimeZone = "America/Los_Angeles")]
         public async Task NewOrigins3(PerformContext context) {
             var localTurnNumber = await db.Players
+                .AsNoTracking()
                 .Select(x => x.LastTurnNumber)
                 .MaxAsync();
 
@@ -111,6 +112,7 @@ namespace advisor {
             logger.LogInformation($"Queuing downloading new turns from server");
 
             var factions = await db.Players
+                .AsNoTracking()
                 .Where(x => x.Number != null && x.Password != null)
                 .Select(x => new { x.Id, FactionNumber = x.Number.Value, x.Password })
                 .ToListAsync();
@@ -158,6 +160,7 @@ namespace advisor {
 
         public async Task CombineReportsAsync() {
             var localTurnNumber = await db.Players
+                .AsNoTracking()
                 .Select(x => x.LastTurnNumber)
                 .MaxAsync();
 

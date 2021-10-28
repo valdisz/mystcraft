@@ -1,12 +1,12 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
-import { useCallbackRef, useCopy } from '../lib'
-import { Box, AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
-    DialogActions, DialogTitle, DialogContent, DialogContentText,
-    Grid,
-    makeStyles, createStyles, Theme,
-    List as MaterialList, ListItem, ListItemText, Chip, ButtonGroup  } from '@material-ui/core'
+import { useCallbackRef } from '../lib'
+import {
+    AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
+    DialogContent, DialogContentText,
+    makeStyles, createStyles, Theme, Chip, ButtonGroup, CircularProgress
+} from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
@@ -15,12 +15,15 @@ import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@material-ui/icons/ArrowBack'
 import { List } from '../store/game/list'
 import { Item } from '../store/game/item'
+import { Unit } from '../store/game/unit'
 import { RegionSummary } from '../components/region-summary'
 import { StatsPage } from './stats-page'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
 import { Dialog } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
+import { GameStore, OrdersState } from '../store/game-store'
+import { Ruleset } from '../store/game/ruleset'
 
 const GameContainer = styled.div`
     width: 100%;
@@ -60,6 +63,7 @@ const OrdersContainer = styled.div`
 
     display: flex;
     align-items: stretch;
+    flex-direction: column;
 
     @media (max-width: 640px) {
         display: none;
@@ -71,6 +75,10 @@ const OrdersEditor = styled(Editor)`
 
     textarea {
         min-height: 100%;
+
+        &:focus-visible {
+            outline: none;
+        }
     }
 
     .comment {
@@ -97,6 +105,10 @@ const OrdersEditor = styled(Editor)`
     .order {
         font-weight: bold;
     }
+
+    .error {
+        text-decoration: red wavy underline;
+    }
 `
 
 const language = {
@@ -111,25 +123,78 @@ const language = {
     }
 }
 
-Prism.languages.atlantis = language
+const ORDER_VALIDATOR = {
+    isValidOrder: (order: string) => true
+}
 
-function highlight(s: string) {
-    const result = Prism.highlight(s, language, 'atlantis')
+Prism.hooks.add('wrap', env => {
+    if (env.type !== 'order') {
+        return
+    }
+
+    if (!ORDER_VALIDATOR.isValidOrder(env.content)) {
+        env.classes.push('error')
+    }
+})
+
+function highlight(ruleset: Ruleset, s: string) {
+    ORDER_VALIDATOR.isValidOrder = order => {
+        return ruleset.orders.includes(order.toUpperCase())
+    }
+
+    const result = Prism.highlight(s, language, null)
 
     return result
 }
 
-const Orders = () => {
-    const { game } = useStore()
+const OrdersEditorBox = styled.div`
+    flex: 1;
+    padding: 0.5rem;
+`
+
+const OrdersStatusBox = styled.div`
+    padding: 0.25rem;
+    text-align: center;
+
+    &.order-state--saved {
+        color: ${x => x.theme.palette.success.main};
+        font-weight: bold;
+    }
+
+    &.order-state--error {
+        background-color: ${x => x.theme.palette.error.main};
+        color: white;
+    }
+`
+
+interface OrdersStatusProps {
+    state: OrdersState
+}
+
+function OrdersStatus({ state }: OrdersStatusProps) {
+    return <OrdersStatusBox className={`order-state--${state.toLowerCase()}`}>
+        { state === 'SAVING'
+            ? <CircularProgress size={1} />
+            : state === 'UNSAVED'
+                ? null
+                : state
+        }
+    </OrdersStatusBox>
+}
+
+
+const Orders = observer(() => {
+    const store = useStore()
+    const game = store.game
+    const ruleset = game.world.ruleset
 
     return <OrdersContainer>
-        <Box m={1} flex={1}>
-            <Observer>
-                {() => <OrdersEditor value={game.unit?.orders ?? ''} onValueChange={game.unit?.setOrders} highlight={highlight} />}
-            </Observer>
-        </Box>
+        <OrdersEditorBox>
+            <OrdersEditor value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
+        </OrdersEditorBox>
+        <OrdersStatus state={game.ordersState} />
     </OrdersContainer>
-}
+})
 
 const MapContainer = styled.div`
     grid-area: map;
@@ -320,6 +385,45 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 )
 
+function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
+    const rows = unit.description ? 2 : 1
+    const noBorder = rows > 1 ? 'no-border' : ''
+
+    return <React.Fragment>
+        <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+            <TableCell rowSpan={rows}>
+                { game.isAttacker(unit)
+                    ? <Chip label='Attacker' color='primary' />
+                    : game.isDefender(unit)
+                        ? <Chip label='Defender' color='secondary' />
+                        : <ButtonGroup>
+                            <Button variant='outlined' onClick={() => game.addAttacker(unit)}>Attacker</Button>
+                            <Button variant='outlined' onClick={() => game.addDefender(unit)}>Defender</Button>
+                        </ButtonGroup>
+                }
+            </TableCell>
+            <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+            <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+            <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : ''}</TableCell>
+            <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
+            <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
+            <TableCell className={`men ${noBorder}`}>
+                <UnitMen items={unit.inventory.items} />
+            </TableCell>
+            <TableCell className={`mounts ${noBorder}`}>
+                <UnitMounts items={unit.inventory.items} />
+            </TableCell>
+            <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+            <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+        </TableRow>
+        { rows > 1 && <TableRow>
+            <TableCell className='unit-nr'></TableCell>
+            <TableCell colSpan={5} className='description'>
+                {unit.description}
+            </TableCell>
+        </TableRow> }
+    </React.Fragment>
+}
 
 const UnitsComponent = observer(() => {
     const { game } = useStore()
@@ -355,46 +459,7 @@ const UnitsComponent = observer(() => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                        {game.units.map((unit) => {
-                            const rows = unit.description ? 2 : 1
-                            const noBorder = rows > 1 ? 'no-border' : ''
-
-                            return <React.Fragment key={unit.id}>
-                                <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
-                                    <TableCell rowSpan={rows}>
-                                        { game.isAttacker(unit)
-                                            ? <Chip label='Attacker' color='primary' />
-                                            : game.isDefender(unit)
-                                                ? <Chip label='Defender' color='secondary' />
-                                                : <ButtonGroup>
-                                                    <Button variant='outlined' onClick={() => game.addAttacker(unit)}>Attacker</Button>
-                                                    <Button variant='outlined' onClick={() => game.addDefender(unit)}>Defender</Button>
-                                                </ButtonGroup>
-                                        }
-                                    </TableCell>
-                                    <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
-                                    <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-                                    <TableCell rowSpan={rows} className='faction'>{unit.faction ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
-                                    <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
-                                    <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
-                                    <TableCell className={`men ${noBorder}`}>
-                                        <UnitMen items={unit.inventory.items} />
-                                    </TableCell>
-                                    <TableCell className={`mounts ${noBorder}`}>
-                                        <UnitMounts items={unit.inventory.items} />
-                                    </TableCell>
-                                    <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
-                                    <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
-
-                                </TableRow>
-                                { rows > 1 && <TableRow>
-                                    <TableCell className='unit-nr'></TableCell>
-                                    <TableCell colSpan={5} className='description'>
-                                        {unit.description}
-                                    </TableCell>
-                                </TableRow> }
-                            </React.Fragment>
-                        })}
+                            {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
                         </TableBody>
                     </UnitsTable>
                 </DialogContent>
@@ -424,7 +489,7 @@ const UnitsComponent = observer(() => {
                     <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
                         <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
                         <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-                        <TableCell rowSpan={rows} className='faction'>{unit.faction ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
+                        <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
                         <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
                         <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
                         <TableCell className={`men ${noBorder}`}>
@@ -517,7 +582,7 @@ const MapTab = observer(() => {
         <UnitsComponent />
         <StructuresComponent />
         { game.region && <RegionComponent /> }
-        <Orders />
+        { game.isOrdersVisible && <Orders /> }
     </GameGrid>
 })
 

@@ -3,8 +3,10 @@ import { List } from './list'
 import { ItemInfo } from './item-info'
 import { ItemCategory } from './item-category'
 import { TerrainInfo } from './terrain-info'
-import { AdvancedTrait, CanLearnTrait, CanMoveTrait, CanProduceTrait, CanSailTrait, CanTeachTrait, ConsumeTrait, FoodTrait, FreeMovingItemTrait,
-    NoGiveTrait, NoTransportTrait, ProductionBonus } from './traits'
+import {
+    AdvancedTrait, CanLearnTrait, CanMoveTrait, CanProduceTrait, CanSailTrait, CanTeachTrait, ConsumeTrait, FoodTrait,
+    FreeMovingItemTrait, NoGiveTrait, NoTransportTrait, ProductionBonus
+} from './traits'
 import { SkillInfo } from './skill-info'
 import { Capacity } from './move-capacity'
 
@@ -12,6 +14,7 @@ export class Ruleset {
     readonly skills: List<Readonly<SkillInfo>> = new List();
     readonly items: List<Readonly<ItemInfo>> = new List();
     readonly terrain: List<Readonly<TerrainInfo>> = new List();
+    readonly orders: string[] = [];
 
     money: Readonly<ItemInfo>
 
@@ -67,6 +70,7 @@ export class Ruleset {
         this.loadSkills(data.skills)
         this.loadItems(data.items)
         this.loadTerrain(data.terrain)
+        this.loadOrders(data.orders)
 
         for (const item of this.items.all) {
             if (item.category === 'money') {
@@ -74,6 +78,10 @@ export class Ruleset {
                 break
             }
         }
+    }
+
+    private loadOrders(orders: OrdersDataMap) {
+        Object.keys(orders).forEach(x => this.orders.push(x))
     }
 
     private loadSkills(skills: SkillDataMap) {
@@ -217,6 +225,11 @@ interface RulesetData {
     terrain: TerrainDataMap
     items: ItemDataMap
     skills: SkillDataMap
+    orders: OrdersDataMap
+}
+
+interface OrdersDataMap {
+    [ order: string ]: any
 }
 
 interface ObjectData {

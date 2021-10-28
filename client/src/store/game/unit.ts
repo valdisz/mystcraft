@@ -1,5 +1,4 @@
 import { UnitFragment } from '../../schema';
-import { Item } from './item';
 import { ItemInfo } from "./item-info";
 import { List } from './list';
 import { Ruleset } from './ruleset';
@@ -8,11 +7,9 @@ import { Faction, Factions } from "./faction";
 import { Flag } from "./flag";
 import { Skill } from "./skill";
 import { SkillInfo } from "./skill-info";
-import { Order } from "./order";
 import { Event } from "./event";
 import { Inventory } from "./inventory";
 import { Region, Structure } from './types';
-import { action, makeObservable, observable } from 'mobx';
 
 export class Unit {
     constructor(
@@ -20,8 +17,6 @@ export class Unit {
         public readonly num: number,
         public name: string,
         private readonly ruleset: Ruleset) {
-
-            makeObservable(this)
     }
 
     readonly inventory = new Inventory();
@@ -31,6 +26,9 @@ export class Unit {
     // troops: Troops;
     region: Region;
     structure?: Structure;
+    get isPlayer() {
+        return this.faction.isPlayer
+    }
 
     description?: string;
     onGuard = false;
@@ -42,9 +40,7 @@ export class Unit {
     readyItem: ItemInfo;
     combatSpell: SkillInfo;
     readonly events: Event[] = [];
-
-    @observable orders: string = ''
-    @action setOrders = (value: string) => this.orders = value
+    orders: string
 
     get money() {
         return this.inventory.items.get(this.ruleset.money)?.amount ?? 0
@@ -54,8 +50,8 @@ export class Unit {
         const unit = new Unit(src.id, src.number, src.name, ruleset)
         unit.seq = src.sequence
 
-        if (src.faction) {
-            const faction = factions.get(src.faction.number) ?? factions.create(src.faction.number, src.faction.name, false)
+        if (src.factionNumber) {
+            const faction = factions.get(src.factionNumber)
             unit.faction = faction
         }
         else {
@@ -83,17 +79,17 @@ export class Unit {
             unit.skills.set(skill)
         }
 
-        for (const { code } of src.canStudy) {
+        for (const code of src.canStudy) {
             const skillInfo = ruleset.getSkill(code)
             unit.canStudy.set(skillInfo)
         }
 
         unit.readyItem = src.readyItem
-             ? ruleset.getItem(src.readyItem.code)
+             ? ruleset.getItem(src.readyItem)
              : null
 
         unit.combatSpell = src.combatSpell
-            ? ruleset.getSkill(src.combatSpell.code)
+            ? ruleset.getSkill(src.combatSpell)
             : null
 
         unit.weight = src.weight

@@ -12,15 +12,19 @@ export class Level {
 
     add(region: Region) {
         this.regions.push(region);
-        this.regionMap[region.key] = region;
+        this.regionMap[region.code] = region;
         this.regionIdMap[region.id] = region;
     }
 
     get(x: number, y: number) {
-        return this.regionMap[`${x} ${y} ${this.index}`];
+        return this.regionMap[`${x},${y},${this.index}`];
     }
 
     getById(id: string) {
         return this.regionIdMap[id]
+    }
+
+    getByCode(code: string) {
+        return this.regionMap[code]
     }
 }

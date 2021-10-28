@@ -57,6 +57,7 @@ namespace advisor.Features {
             int turnNumber = month + (year - 1) * 12;
 
             var turn = await db.Turns
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turnNumber);
             DbReport dbReport = null;
 

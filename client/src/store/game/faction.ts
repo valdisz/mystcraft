@@ -6,15 +6,17 @@ export class Faction {
         public readonly num: number,
         public readonly name: string,
         public readonly isPlayer: boolean) {
-
+            this.known = num > 0
         }
 
     readonly troops: Troops = new Troops(this)
+
+    readonly known: boolean
 }
 
 export class Factions {
     constructor() {
-        this.unknown = this.create(-1, '', false)
+        this.unknown = this.create(0, '', false)
     }
 
     private readonly factions: TypedMap<Faction> = { }

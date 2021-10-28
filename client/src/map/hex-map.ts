@@ -192,7 +192,7 @@ export class HexMap {
         const corners = this.layout.polygonCorners(hex)
 
         const g = new PIXI.Graphics()
-        g.lineStyle(4, 0xcccccc)
+        g.lineStyle(3, 0x6f6f6f)
         g.drawPolygon(corners)
         this.outline.addChild(g)
 

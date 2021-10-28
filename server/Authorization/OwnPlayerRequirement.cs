@@ -3,6 +3,7 @@ namespace advisor.Authorization {
     using System.Threading.Tasks;
     using advisor.Persistence;
     using Microsoft.AspNetCore.Authorization;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Caching.Memory;
 
     public class OwnPlayerRequirement : IAuthorizationRequirement {
@@ -22,9 +23,9 @@ namespace advisor.Authorization {
             var key = $"{resource.PlayerId}-PlayerUserId";
             var playerUserId = await cache.GetOrCreateAsync(key, async entry => {
                 entry.SetSlidingExpiration(TimeSpan.FromMinutes(15));
-                var player = await db.Players.FindAsync(resource.PlayerId);
+                var player = await db.Players.AsNoTracking().FirstOrDefaultAsync(x => x.Id == resource.PlayerId);
 
-                return player.UserId;
+                return player?.UserId;
             });
 
             var userId = context.User.FindFirst(WellKnownClaimTypes.UserId)?.Value;

@@ -14,13 +14,13 @@ import { TypedMap } from './typed-map'
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {
-        this.key = `${coords.x} ${coords.y} ${coords.z}`
+        this.code = `${coords.x},${coords.y},${coords.z}`
     }
 
-    readonly key: string
+    readonly code: string
 
     explored: boolean
-    updatedAtTurn: number
+    lastVisitedAt: number
 
     get isVisible() {
         return this.units.length > 0 || this.structures.some(x => x.units.length > 0)
@@ -51,7 +51,6 @@ export class Region {
         }
 
         const faction = unit.faction
-        console.log(unit.faction, unit)
 
         if (!this.troops[faction.num]) {
             this.troops[faction.num] = new Troops(faction)
@@ -73,11 +72,11 @@ export class Region {
         }
     }
 
-    static from(src: RegionFragment, factions: Factions, ruleset: Ruleset) {
+    static from(src: RegionFragment, ruleset: Ruleset) {
         const reg = new Region(src.id, new Coords(src.x, src.y, src.z, src.label));
 
         reg.explored = src.explored
-        reg.updatedAtTurn = src.updatedAtTurn
+        reg.lastVisitedAt = src.lastVisitedAt
 
         if (src.race) {
             reg.population = ruleset.getItem(src.race).create(src.population ?? 0)
@@ -99,7 +98,7 @@ export class Region {
         };
         reg.entertainment = src.entertainment;
 
-        for (const prod of src.products) {
+        for (const prod of src.produces) {
             const item = ruleset.getItem(prod.code).create();
             item.amount = prod.amount;
 

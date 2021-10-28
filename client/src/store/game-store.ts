@@ -1,12 +1,12 @@
 import { ApolloQueryResult } from 'apollo-client'
-import { makeObservable, observable, IObservableArray, runInAction, action, computed } from 'mobx'
+import { makeObservable, observable, IObservableArray, runInAction, action, computed, reaction, comparer } from 'mobx'
 import { CLIENT } from '../client'
-import { RegionFragment, StructureFragment, TurnDetailsFragment, TurnSummaryFragment, UnitFragment } from '../schema'
-import { GetSingleGame, GetSingleGameQuery, GetSingleGameQueryVariables } from '../schema'
-import { GetTurnDetails, GetTurnDetailsQuery, GetTurnDetailsQueryVariables } from '../schema'
+import { RegionFragment, StructureFragment, UnitFragment, TurnFragment } from '../schema'
+import { GetGame, GetGameQuery, GetGameQueryVariables } from '../schema'
+import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
-import { GetStructures, GetStructuresQuery, GetStructuresQueryVariables } from '../schema'
 import { GetUnits, GetUnitsQuery, GetUnitsQueryVariables } from '../schema'
+import { SetOrder, SetOrderMutation, SetOrderMutationVariables } from '../schema'
 import { Ruleset } from "./game/ruleset"
 import { Region } from "./game/region"
 import { World } from "./game/world"
@@ -29,10 +29,61 @@ interface ProgressCallback {
     (progress: Progress): void
 }
 
+export type OrdersState = 'SAVED' | 'UNSAVED' | 'SAVING' | 'ERROR'
+
 export class GameStore {
     constructor() {
         makeObservable(this)
+
+        reaction(
+            () => ({ unit: this.unit, orders: this.unitOrders }),
+            async ({ unit, orders }, { unit: prevUnit, orders: prevOrders }) => {
+                if (!unit || !prevUnit || unit.num !== prevUnit.num) return
+
+                this.startOrdersSaving()
+
+                if (this.ordersSaveAbortController) {
+                    this.ordersSaveAbortController.abort()
+                }
+                this.ordersSaveAbortController = new AbortController()
+
+                try {
+                    const response = await CLIENT.mutate<SetOrderMutation, SetOrderMutationVariables>({
+                        mutation: SetOrder,
+                        variables: {
+                            unitId: unit.id,
+                            orders
+                        },
+                        context: {
+                            fetchOptions: {
+                                signal: this.ordersSaveAbortController.signal
+                            }
+                        }
+                    })
+
+                    const result = response.data?.setOrders
+                    if (!response.errors && result?.isSuccess) {
+                        unit.orders = orders
+                    }
+                    else {
+                        this.setOrders(prevOrders)
+                        this.errorOrdersSaving()
+                    }
+
+                    this.stopOrdersSaving()
+                }
+                catch {
+                    this.errorOrdersSaving()
+                }
+            },
+            {
+                equals: comparer.shallow,
+                delay: 300
+            }
+        )
     }
+
+    private ordersSaveAbortController: AbortController
 
     @observable loading = true
     @action startLoading = () => {
@@ -53,8 +104,7 @@ export class GameStore {
     @observable factionName: string
     @observable factionNumber: number
 
-    turns: IObservableArray<TurnDetailsFragment> = observable([])
-    @observable turn: TurnDetailsFragment
+    @observable turn: TurnFragment
 
     @observable world: World
     gameId: string = null
@@ -62,43 +112,21 @@ export class GameStore {
     async loadRegions(turnId: string, onProgress: ProgressCallback) {
         const items: RegionFragment[] = []
 
-        let cursor: string = null
-        let regions: ApolloQueryResult<GetRegionsQuery> = null
+        let skip = 0
+        let response: ApolloQueryResult<GetRegionsQuery> = null
         do {
-            regions = await CLIENT.query<GetRegionsQuery, GetRegionsQueryVariables>({
+            response = await CLIENT.query<GetRegionsQuery, GetRegionsQueryVariables>({
                 query: GetRegions,
-                variables: { cursor, turnId, pageSize: 1000 },
+                variables: { skip, turnId, pageSize: 1000 },
             })
 
+            const data = response.data.node
+            data.regions.items.forEach(x => items.push(x))
 
-            regions.data.node.regions.edges.forEach(x => items.push(x.node))
-
-            onProgress({ total: regions.data.node.regions.totalCount, position: items.length })
-            cursor = regions.data.node.regions.pageInfo.endCursor
+            onProgress({ total: data.regions.totalCount, position: items.length })
+            skip = items.length
         }
-        while (regions.data.node.regions.pageInfo.hasNextPage)
-
-        return items
-    }
-
-    async loadStructures(turnId: string, onProgress: ProgressCallback) {
-        const items: StructureFragment[] = []
-
-        let cursor: string = null
-        let structures: ApolloQueryResult<GetStructuresQuery> = null
-        do {
-            structures = await CLIENT.query<GetStructuresQuery, GetStructuresQueryVariables>({
-                query: GetStructures,
-                variables: { cursor, turnId, pageSize: 1000 }
-            })
-
-
-            structures.data.node.structures.edges.forEach(x => items.push(x.node))
-
-            onProgress({ total: structures.data.node.structures.totalCount, position: items.length })
-            cursor = structures.data.node.structures.pageInfo.endCursor
-        }
-        while (structures.data.node.structures.pageInfo.hasNextPage)
+        while (response.data.node.regions.pageInfo.hasNextPage)
 
         return items
     }
@@ -106,20 +134,21 @@ export class GameStore {
     async loadUnits(turnId: string, onProgress: ProgressCallback) {
         const items: UnitFragment[] = []
 
-        let cursor: string = null
-        let units: ApolloQueryResult<GetUnitsQuery> = null
+        let skip = 0
+        let response: ApolloQueryResult<GetUnitsQuery> = null
         do {
-            units = await CLIENT.query<GetUnitsQuery, GetUnitsQueryVariables>({
+            response = await CLIENT.query<GetUnitsQuery, GetUnitsQueryVariables>({
                 query: GetUnits,
-                variables: { cursor, turnId, pageSize: 1000 }
+                variables: { skip, turnId, pageSize: 1000 }
             })
 
-            units.data.node.units.edges.forEach(x => items.push(x.node))
+            const data = response.data.node
+            data.units.items.forEach(x => items.push(x))
 
-            onProgress({ total: units.data.node.units.totalCount, position: items.length })
-            cursor = units.data.node.units.pageInfo.endCursor
+            onProgress({ total: data.units.totalCount, position: items.length })
+            skip = items.length
         }
-        while (units.data.node.units.pageInfo.hasNextPage)
+        while (response.data.node.units.pageInfo.hasNextPage)
 
         return items
     }
@@ -132,36 +161,33 @@ export class GameStore {
 
         this.startLoading()
 
-        const response = await CLIENT.query<GetSingleGameQuery, GetSingleGameQueryVariables>({
-            query: GetSingleGame,
+        const response = await CLIENT.query<GetGameQuery, GetGameQueryVariables>({
+            query: GetGame,
             variables: {
                 gameId
             }
         })
 
-        const { myPlayer, ...game } = response.data.node
-        const { lastTurnNumber } = myPlayer
+        const { me, ...game } = response.data.node
 
         runInAction(() => {
             this.name = game.name
             this.rulesetName = game.rulesetName
             this.rulesetVersion = game.rulesetVersion
 
-            this.factionName = myPlayer.factionName
-            this.factionNumber = myPlayer.factionNumber
-            this.lastTurnNumber = lastTurnNumber
+            this.factionName = me.name
+            this.factionNumber = me.number
+            this.lastTurnNumber = me.lastTurnNumber
         })
 
-        const turnDetails = await CLIENT.query<GetTurnDetailsQuery, GetTurnDetailsQueryVariables>({
-            query: GetTurnDetails,
+        const turnDetails = await CLIENT.query<GetTurnQuery, GetTurnQueryVariables>({
+            query: GetTurn,
             variables: {
-                playerId: myPlayer.id,
-                turnNumber: lastTurnNumber
+                turnId: me.lastTurnId
             }
         })
 
-        this.turns.push(turnDetails.data.node.turnByNumber)
-        this.turn = turnDetails.data.node.turnByNumber
+        this.turn = turnDetails.data.node
 
         game.options.map.sort((a, b) => a.level - b.level)
         const map: WorldLevel[] = game.options.map.map(level => ({
@@ -182,15 +208,10 @@ export class GameStore {
         this.updateLoadingMessage('Loading Regions...')
         const regions = await this.loadRegions(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Regions: ${position} of ${total}`))
 
-        this.updateLoadingMessage('Loading Structures...')
-        const structures = await this.loadStructures(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Structures: ${position} of ${total}`))
-
         this.updateLoadingMessage('Loading Units...')
         const units = await this.loadUnits(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Units: ${position} of ${total}`))
 
-
         world.addRegions(regions)
-        world.addStructures(structures)
         world.addUnits(units)
 
         for (const level of world.levels) {
@@ -233,8 +254,29 @@ export class GameStore {
     }
 
     @observable unit: Unit = null
-    @action selectUnit = (unit: Unit) => this.unit = unit
+    @observable unitOrders: string
+    @observable ordersState: OrdersState = 'SAVED'
 
+    @computed get isOrdersVisible() {
+        return this.unit?.isPlayer ?? false
+    }
+
+    @action selectUnit = (unit: Unit) => {
+        this.unit = unit
+        this.unitOrders = unit?.orders
+        this.ordersState = 'SAVED'
+    }
+
+    @action setOrders = (orders: string) => {
+        const changed = this.unitOrders !== orders
+        this.unitOrders = orders
+
+        if (changed) this.ordersState = 'UNSAVED'
+    }
+
+    @action startOrdersSaving = () => this.ordersState = 'SAVING'
+    @action stopOrdersSaving = () => this.ordersState = 'SAVED'
+    @action errorOrdersSaving = () => this.ordersState = 'ERROR'
 
     @observable battleSimOpen = false
     readonly attackers: IObservableArray<Unit> = observable([])

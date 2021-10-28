@@ -136,10 +136,10 @@ namespace advisor
             GlobalJobFilters.Filters.Add(new JoiningSupportAttribute(new BackgroundJobStateChanger()));
             GlobalStateHandlers.Handlers.Add(new JoiningState.Handler());
 
-            services
-                .AddHangfireServer()
-                .AddHangfireConsoleExtensions()
-                .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
+            // services
+            //     .AddHangfireServer()
+            //     .AddHangfireConsoleExtensions()
+            //     .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
 
             services
                 .AddAutoMapper(typeof(MappingProfile));
@@ -235,11 +235,11 @@ namespace advisor
                     endpoints.MapControllers();
                     endpoints
                         .MapGraphQL();
-                    endpoints.MapHangfireDashboard(new DashboardOptions {
-                        Authorization = new[] {
-                            new RoleBasedDashboardAuthorizationFilter(Roles.Root)
-                        }
-                    });
+                    // endpoints.MapHangfireDashboard(new DashboardOptions {
+                    //     Authorization = new[] {
+                    //         new RoleBasedDashboardAuthorizationFilter(Roles.Root)
+                    //     }
+                    // });
                 });
         }
     }

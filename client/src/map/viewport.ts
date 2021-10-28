@@ -14,9 +14,9 @@ export class Viewport {
         private onUpdate: (event: Viewport) => void,
         private onClick: (e: MouseEvent, vp: Viewport) => void,
     ) {
-        this.observer = new ResizeObserver(() =>
+        this.observer = new ResizeObserver(() => {
             this.updateBounds(this.origin.x, this.origin.y)
-        )
+        })
         this.observer.observe(element)
 
         element.addEventListener('pointerdown', this.onPanStart)
@@ -59,9 +59,9 @@ export class Viewport {
         if (x !== this.origin.x || y !== this.origin.y) {
             this.origin.x = x
             this.origin.y = y
-
-            window.requestAnimationFrame(() => this.raiseOnUpdate());
         }
+
+        window.requestAnimationFrame(() => this.raiseOnUpdate());
     }
 
     private onContextMenu = (e: MouseEvent) => {

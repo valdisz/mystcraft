@@ -26,10 +26,13 @@ namespace advisor.Features {
 
         public async Task<Unit> Handle(ParseReports request, CancellationToken cancellationToken) {
             var playerId = request.PlayerId;
-            var player = await db.Players.FindAsync(playerId);
+            var player = await db.Players
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == playerId);
 
             // load all turn numbers of the player so that we can properly transfer history
             List<TurnContext> turns = new List<TurnContext>((await db.Turns
+                .AsNoTracking()
                 .Where(x => x.PlayerId == playerId)
                 .OrderBy(x => x.Number)
                 .Select(x => x.Number)
@@ -70,6 +73,7 @@ namespace advisor.Features {
                         if (startIndex == 0) {
                             // this is first turn for current player
                             sync = new ReportSync(db, currentTurn.PlayerId, currentTurn.TurnNumber, report);
+                            sync.LoadOrdersFromReport();
                         }
                         else {
                             // no data present for turn and this is not very first turn for this faction
@@ -105,7 +109,8 @@ namespace advisor.Features {
             return Unit.Value;
         }
 
-        private Task<DbTurn> GetTurnAsync(InTurnContext context, bool track = true, bool addUnits = true, bool addEvents = true, bool addStructures = true) {
+        private Task<DbTurn> GetTurnAsync(InTurnContext context, bool track = true, bool addUnits = true, bool addEvents = true,
+            bool addStructures = true, bool addFactions = true) {
             IQueryable<DbTurn> turns = db.Turns
                 .AsSplitQuery()
                 .FilterByPlayer(context);
@@ -118,9 +123,13 @@ namespace advisor.Features {
                 .Include(x => x.Regions)
                 .Include(x => x.Exits)
                 .Include(x => x.Production)
-                .Include(x => x.Markets)
-                .Include(x => x.Factions)
-                .Include(x => x.Attitudes);
+                .Include(x => x.Markets);
+
+            if (addFactions) {
+                turns = turns
+                    .Include(x => x.Factions)
+                    .Include(x => x.Attitudes);
+            }
 
             if (addUnits) {
                 turns = turns

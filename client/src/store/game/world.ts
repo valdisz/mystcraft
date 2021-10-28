@@ -9,6 +9,9 @@ import { Structure } from './structure';
 
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {
+        for (let i = 0; i < info.map.length; i++) {
+            this.addLevel(i, info.map[i].label)
+        }
     }
 
 
@@ -23,12 +26,10 @@ export class World {
     addRegions(regions: RegionFragment[]) {
         for (const reg of regions) {
             this.addRegion(reg);
-        }
-    }
 
-    addStructures(structures: StructureFragment[]) {
-        for (const str of structures) {
-            this.addStructure(str);
+            for (const str of reg.structures) {
+                this.addStructure(str);
+            }
         }
     }
 
@@ -39,7 +40,7 @@ export class World {
     }
 
     addRegion(region: RegionFragment) {
-        const reg = Region.from(region, this.factions, this.ruleset);
+        const reg = Region.from(region, this.ruleset);
 
         const province = this.provinces.getOrCreate(region.province);
         province.add(reg);
@@ -56,15 +57,15 @@ export class World {
 
     addStructure(structure: StructureFragment) {
         const str = Structure.from(structure, this.ruleset)
-        const region = this.getRegionById(structure.regionId)
+        const region = this.getRegionByCode(structure.regionCode)
 
         region.addStructure(str)
     }
 
     addUnit(unit: UnitFragment) {
         const u = Unit.from(unit, this.factions, this.ruleset)
-        const region = this.getRegionById(unit.regionId)
-        const structure = unit.structureId ? region.structures.find(x => x.id === unit.structureId) : null
+        const region = this.getRegionByCode(unit.regionCode)
+        const structure = unit.structureNumber ? region.structures.find(x => x.num === unit.structureNumber) : null
 
         region.addUnit(u, structure)
     }
@@ -86,16 +87,21 @@ export class World {
         return null
     }
 
-    getLevel(z: number) {
+    getRegionByCode(code: string) {
         for (let i = 0; i < this.levels.length; i++) {
             const level = this.levels[i]
-            if (level.index === z) return level
+            const region = level.getByCode(code)
+            if (region) return region
         }
 
         return null
     }
 
-    addLevel(z: number, label: string) {
+    getLevel(z: number) {
+        return this.levels[z]
+    }
+
+    private addLevel(z: number, label: string) {
         const level = new Level(z, label)
         this.levels.push(level)
 
