@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
-import { useCallbackRef } from '../lib'
+import { useCallbackRef, useClasses } from '../lib'
 import {
     AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
     DialogContent, DialogContentText,
@@ -26,6 +26,9 @@ import { GameStore, OrdersState } from '../store/game-store'
 import { Ruleset } from '../store/game/ruleset'
 import { UnitSummary } from '../components'
 import { Capacity } from '../store/game/move-capacity'
+
+import green from '@material-ui/core/colors/green'
+import lightBlue from '@material-ui/core/colors/lightBlue'
 
 const GameContainer = styled.div`
     width: 100%;
@@ -362,6 +365,18 @@ const UnitsTable = styled(Table)`
             border-bottom-width: 0;
         }
     }
+
+    .Mui-selected, .Mui-selected:hover {
+        background-color: ${lightBlue[300]};
+    }
+
+    .own {
+        background-color: ${green[100]};
+    }
+
+    .own.Mui-selected {
+        background-color: ${green[300]};
+    }
 `
 
 function UnitMen({ items }: { items: List<Item> }) {
@@ -544,9 +559,12 @@ const UnitsComponent = observer(() => {
             {game.units.map((unit) => {
                 const rows = unit.description ? 2 : 1
                 const noBorder = rows > 1 ? 'no-border' : ''
+                const ownUnit = unit.isPlayer ? 'own' : ''
+
+                const unitClasses = [ownUnit, noBorder].join(' ')
 
                 return <React.Fragment key={unit.id}>
-                    <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+                    <TableRow className={unitClasses} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
                         <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
                         <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
                         <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
@@ -571,7 +589,7 @@ const UnitsComponent = observer(() => {
                         </TableCell>
                         <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
                     </TableRow>
-                    { rows > 1 && <TableRow selected={unit.num === game.unit?.num}>
+                    { rows > 1 && <TableRow className={ownUnit} selected={unit.num === game.unit?.num}>
                         <TableCell colSpan={9} className='description'>
                             {unit.description}
                         </TableCell>
