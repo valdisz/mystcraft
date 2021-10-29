@@ -1,11 +1,11 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
-import { useCallbackRef, useClasses } from '../lib'
+import { useCallbackRef } from '../lib'
 import {
     AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
     DialogContent, DialogContentText,
-    makeStyles, createStyles, Theme, Chip, ButtonGroup, CircularProgress, Badge, Avatar
+    makeStyles, createStyles, Theme, Chip, ButtonGroup, Avatar, Box
 } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
@@ -694,6 +694,8 @@ const GameComponent = observer(() => {
                     <Tab label='Map' component={Link} value={url} to={url} />
                     <Tab label='Statistics' component={Link} value={`${url}/stats`} to={`${url}/stats`} />
                 </Tabs>
+                <Box flex={1} />
+                <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
             </Toolbar>
         </AppBar>
         <Switch>

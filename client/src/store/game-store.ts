@@ -341,6 +341,26 @@ export class GameStore {
         const blob = new Blob([json], { type: 'application/json' })
         saveAs(blob, 'battlesim.json')
     }
+
+    getOrders = () => {
+        const lines = [
+            '#atlantis ""'
+        ]
+
+        var faction = this.world.factions.get(this.factionNumber)
+        for (const unit of faction.troops.units) {
+            lines.push(`unit ${unit.num}`)
+            lines.push(unit.orders)
+            lines.push('')
+        }
+
+        lines.push('#end')
+        lines.push('')
+
+        const orders = lines.join('\n')
+        const blob = new Blob([ orders ], { type: 'text/plain' })
+        saveAs(blob, `orders-${this.turn.number}.ord`)
+    }
 }
 
 export interface BattleSimItem {
