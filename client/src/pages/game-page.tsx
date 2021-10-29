@@ -5,7 +5,7 @@ import { useCallbackRef } from '../lib'
 import {
     AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
     DialogContent, DialogContentText,
-    makeStyles, createStyles, Theme, Chip, ButtonGroup, CircularProgress
+    makeStyles, createStyles, Theme, Chip, ButtonGroup, CircularProgress, Badge, Avatar
 } from '@material-ui/core'
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
@@ -24,6 +24,8 @@ import { Dialog } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 import { GameStore, OrdersState } from '../store/game-store'
 import { Ruleset } from '../store/game/ruleset'
+import { UnitSummary } from '../components'
+import { Capacity } from '../store/game/move-capacity'
 
 const GameContainer = styled.div`
     width: 100%;
@@ -59,11 +61,13 @@ const OrdersContainer = styled.div`
     grid-area: orders;
     min-height: 0;
     overflow-y: auto;
-    border-top: 1px solid silver;
+    border: 1px solid ${({ theme }) => theme.palette.divider};
 
     display: flex;
     align-items: stretch;
     flex-direction: column;
+
+
 
     @media (max-width: 640px) {
         display: none;
@@ -150,6 +154,7 @@ function highlight(ruleset: Ruleset, s: string) {
 const OrdersEditorBox = styled.div`
     flex: 1;
     padding: 0.5rem;
+    background-color: ${x => x.theme.palette.common.white};
 `
 
 const OrdersStatusBox = styled.div`
@@ -158,14 +163,26 @@ const OrdersStatusBox = styled.div`
 
     &.order-state--saved {
         color: ${x => x.theme.palette.success.main};
-        font-weight: bold;
+    }
+
+    &.order-state--saving, &.order-state--unsaved {
+        background-color: ${x => x.theme.palette.info.light};
+        color: ${x => x.theme.palette.info.contrastText};
     }
 
     &.order-state--error {
         background-color: ${x => x.theme.palette.error.main};
-        color: white;
+        color: ${x => x.theme.palette.error.contrastText};
     }
 `
+
+function renderOrderState(state: OrdersState) {
+    switch (state) {
+        case 'ERROR': return 'Error'
+        case 'SAVED': return 'Saved'
+        default: return 'Saving...'
+    }
+}
 
 interface OrdersStatusProps {
     state: OrdersState
@@ -173,15 +190,15 @@ interface OrdersStatusProps {
 
 function OrdersStatus({ state }: OrdersStatusProps) {
     return <OrdersStatusBox className={`order-state--${state.toLowerCase()}`}>
-        { state === 'SAVING'
-            ? <CircularProgress size={1} />
-            : state === 'UNSAVED'
-                ? null
-                : state
-        }
+        <Typography variant='caption'>{renderOrderState(state)}</Typography>
     </OrdersStatusBox>
 }
 
+const OrdersTitle = styled(Typography).attrs({
+    variant: 'subtitle1'
+})`
+    padding: 0.5rem;
+`
 
 const Orders = observer(() => {
     const store = useStore()
@@ -189,6 +206,7 @@ const Orders = observer(() => {
     const ruleset = game.world.ruleset
 
     return <OrdersContainer>
+        <OrdersTitle>Orders</OrdersTitle>
         <OrdersEditorBox>
             <OrdersEditor value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
         </OrdersEditorBox>
@@ -303,30 +321,18 @@ const UnitsTable = styled(Table)`
         font-weight: bold;
     }
 
-    .structure-nr, .unit-nr {
+    .faction-nr, .structure-nr, .unit-nr {
         width: 1px;
         text-align: right;
         padding-right: 4px;
     }
 
-    .structure-name, .unit-name {
+    .faction-name, .structure-name, .unit-name {
         width: 1px;
         padding-left: 4px;
     }
 
-    .faction {
-        width: 1px;
-    }
-
-    .men {
-        width: 1px;
-    }
-
-    .money {
-        width: 1px;
-    }
-
-    .mounts {
+    .men, .money, .mounts, .movement, .weight, .capacity {
         width: 1px;
     }
 
@@ -347,8 +353,14 @@ const UnitsTable = styled(Table)`
         padding-left: 4px;
     }
 
+    .flags {
+
+    }
+
     .no-border {
-        border-bottom-width: 0;
+        .unit-nr, .unit-name, .men, .money, .mounts, .items, .skills, .movement, .weight, .capacity, .flags {
+            border-bottom-width: 0;
+        }
     }
 `
 
@@ -390,7 +402,7 @@ function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
     const noBorder = rows > 1 ? 'no-border' : ''
 
     return <React.Fragment>
-        <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+        <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
             <TableCell rowSpan={rows}>
                 { game.isAttacker(unit)
                     ? <Chip label='Attacker' color='primary' />
@@ -405,16 +417,16 @@ function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
             <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
             <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
             <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : ''}</TableCell>
-            <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
-            <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
-            <TableCell className={`men ${noBorder}`}>
+            <TableCell className='unit-nr'>{unit.num}</TableCell>
+            <TableCell component='th' className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
+            <TableCell className='men'>
                 <UnitMen items={unit.inventory.items} />
             </TableCell>
-            <TableCell className={`mounts ${noBorder}`}>
+            <TableCell className='mounts'>
                 <UnitMounts items={unit.inventory.items} />
             </TableCell>
-            <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
-            <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+            <TableCell className='items'>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+            <TableCell className='skills'>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
         </TableRow>
         { rows > 1 && <TableRow>
             <TableCell className='unit-nr'></TableCell>
@@ -423,6 +435,51 @@ function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
             </TableCell>
         </TableRow> }
     </React.Fragment>
+}
+
+function renderUnitMovement(unit: Unit) {
+    if (!unit || !unit.capacity.known) return null
+
+    const move = unit.isOverweight
+        ? <Chip size='small' color='error' label='overweight' />
+        : <Chip size='small' label={unit.movement} />
+
+    const swim = unit.canSwim
+        ? <Chip size='small' color='info' label='swim' />
+        : null
+
+    return <>
+        {move}
+        {swim}
+    </>
+}
+
+const UnitCapacityContainer = styled.div`
+    display: flex;
+    gap: 0.5rem;
+`
+
+const UnitCapacityItem = styled.span`
+    white-space: pre;
+`
+
+function renderCapacity(value: number) {
+    const s = (value || 0).toString()
+    return s.padStart(5, ' ')
+}
+
+interface UnitCapacityProps {
+    weight: number
+    capacity: Capacity
+}
+
+function UnitCapacity({ weight, capacity }: UnitCapacityProps) {
+    return <UnitCapacityContainer>
+        { capacity.fly > 0 && <Chip size='small' avatar={<Avatar>F</Avatar>} label={<UnitCapacityItem>{capacity.fly - weight}</UnitCapacityItem>} /> }
+        { capacity.ride > 0 && <Chip size='small' avatar={<Avatar>R</Avatar>} label={<UnitCapacityItem>{capacity.ride - weight}</UnitCapacityItem>} /> }
+        { capacity.walk > 0 && <Chip size='small' avatar={<Avatar>W</Avatar>} label={<UnitCapacityItem>{capacity.walk - weight}</UnitCapacityItem>} /> }
+        { capacity.swim > 0 && <Chip size='small' avatar={<Avatar>S</Avatar>} label={<UnitCapacityItem>{capacity.swim - weight}</UnitCapacityItem>} /> }
+    </UnitCapacityContainer>
 }
 
 const UnitsComponent = observer(() => {
@@ -470,14 +527,17 @@ const UnitsComponent = observer(() => {
                 <TableRow>
                     <TableCell className='structure-nr'></TableCell>
                     <TableCell className='structure-name'>Structure</TableCell>
-                    <TableCell className='faction'>Faction</TableCell>
-                    <TableCell className='unit-nr'>Unit Nr.</TableCell>
-                    <TableCell className='unit-name'>Name</TableCell>
+                    <TableCell className='faction-nr'></TableCell>
+                    <TableCell className='faction-name'>Faction</TableCell>
+                    <TableCell className='unit-nr'></TableCell>
+                    <TableCell className='unit-name'>Unit</TableCell>
                     <TableCell className='men'>Men</TableCell>
                     <TableCell className='money'>Money</TableCell>
                     <TableCell className='mounts'>Mounts</TableCell>
-                    <TableCell className='items'>Items</TableCell>
-                    <TableCell className='skills'>Skills</TableCell>
+                    <TableCell className='movement'>Movement</TableCell>
+                    <TableCell className='weight'>Weight</TableCell>
+                    <TableCell className='capacity'>Capacity</TableCell>
+                    <TableCell className='flags'>Flags</TableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -486,25 +546,33 @@ const UnitsComponent = observer(() => {
                 const noBorder = rows > 1 ? 'no-border' : ''
 
                 return <React.Fragment key={unit.id}>
-                    <TableRow onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+                    <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
                         <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
                         <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-                        <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : null}</TableCell>
-                        <TableCell className={`unit-nr ${noBorder}`}>{unit.num}</TableCell>
-                        <TableCell component="th" className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
-                        <TableCell className={`men ${noBorder}`}>
+                        <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
+                        <TableCell component='th' rowSpan={rows} className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
+                        <TableCell className='unit-nr'>{unit.num}</TableCell>
+                        <TableCell component='th' className={`unit-name ${noBorder}`}>
+                            {unit.name}
+                            { ' ' }
+                            { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
+                        </TableCell>
+                        <TableCell className='men'>
                             <UnitMen items={unit.inventory.items} />
                         </TableCell>
-                        <TableCell className={`money ${noBorder}`}>{unit.money ? unit.money : null}</TableCell>
-                        <TableCell className={`mounts ${noBorder}`}>
+                        <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
+                        <TableCell className='mounts'>
                             <UnitMounts items={unit.inventory.items} />
                         </TableCell>
-                        <TableCell className={`items ${noBorder}`}>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
-                        <TableCell className={`skills ${noBorder}`}>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+                        <TableCell className='movement'>{renderUnitMovement(unit)}</TableCell>
+                        <TableCell className='weight'>{unit.weight}</TableCell>
+                        <TableCell className='capacity'>
+                            <UnitCapacity weight={unit.weight} capacity={unit.capacity} />
+                        </TableCell>
+                        <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
                     </TableRow>
-                    { rows > 1 && <TableRow>
-                        <TableCell className='unit-nr'></TableCell>
-                        <TableCell colSpan={6} className='description'>
+                    { rows > 1 && <TableRow selected={unit.num === game.unit?.num}>
+                        <TableCell colSpan={9} className='description'>
                             {unit.description}
                         </TableCell>
                     </TableRow> }
@@ -567,10 +635,11 @@ const RegionBody = styled.div`
 `
 
 const RegionComponent = observer(() => {
-    const { game: { region } } = useStore()
+    const { game: { region, unit } } = useStore()
 
     return <RegionContainer>
         <RegionSummary region={region} />
+        { unit && <UnitSummary unit={unit} /> }
     </RegionContainer>
 })
 

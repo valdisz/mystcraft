@@ -78,7 +78,7 @@ export class GameStore {
             },
             {
                 equals: comparer.shallow,
-                delay: 300
+                delay: 1000
             }
         )
     }

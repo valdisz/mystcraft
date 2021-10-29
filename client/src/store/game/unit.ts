@@ -2,7 +2,7 @@ import { UnitFragment } from '../../schema';
 import { ItemInfo } from "./item-info";
 import { List } from './list';
 import { Ruleset } from './ruleset';
-import { Capacity } from './move-capacity';
+import { Capacity, MoveType } from './move-capacity';
 import { Faction, Factions } from "./faction";
 import { Flag } from "./flag";
 import { Skill } from "./skill";
@@ -44,6 +44,24 @@ export class Unit {
 
     get money() {
         return this.inventory.items.get(this.ruleset.money)?.amount ?? 0
+    }
+
+    get canSwim() {
+        return this.weight > 0 && this.capacity.swim >= this.weight
+    }
+
+    get movement(): MoveType | null {
+        if (this.weight == 0) return null
+
+        if (this.capacity.fly >= this.weight) return 'fly'
+        if (this.capacity.ride >= this.weight) return 'ride'
+        if (this.capacity.walk >= this.weight) return 'walk'
+
+        return null
+    }
+
+    get isOverweight() {
+        return this.weight > 0 && this.movement === null
     }
 
     static from(src: UnitFragment, factions: Factions, ruleset: Ruleset) {
@@ -114,11 +132,21 @@ export class Unit {
                         continue
                     }
 
-                    unit.capacity.add(canMove.capacity)
+                    addCapacity(unit.capacity, 'fly', canMove.capacity, item.amount, item.weight)
+                    addCapacity(unit.capacity, 'ride', canMove.capacity, item.amount, item.weight)
+                    addCapacity(unit.capacity, 'walk', canMove.capacity, item.amount, item.weight)
+                    addCapacity(unit.capacity, 'swim', canMove.capacity, item.amount, item.weight)
                 }
             }
         }
 
         return unit
+    }
+}
+
+function addCapacity(target: Capacity, moveType: MoveType, itemCapacity: Capacity, itemCount: number, itemOwnWeigh: number) {
+    const cap = itemCapacity[moveType]
+    if (cap) {
+        target[moveType] += (cap * itemCount) + itemOwnWeigh
     }
 }
