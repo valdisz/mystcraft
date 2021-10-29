@@ -3,7 +3,8 @@ import styled from 'styled-components'
 import { Box, Typography, Button, Grid, Theme,
     Table, TableHead, TableRow, TableCell, TableBody,
     Tooltip,
-    makeStyles
+    makeStyles,
+    Chip
 } from '@material-ui/core'
 import { observer } from 'mobx-react-lite'
 import { Region, Unit } from '../store/game/types'
@@ -14,6 +15,7 @@ import { TerrainInfo } from '../store/game/terrain-info'
 import { Item } from '../store/game/item'
 import { ItemInfo } from '../store/game/item-info'
 import { Skill } from '../store/game/skill'
+import { SkillInfo } from '../store/game/skill-info'
 
 const SpaceBetween = styled(Grid)`
     display: flex;
@@ -59,29 +61,6 @@ interface ProvinceNameProps {
     province: Province
 }
 
-function ProvinceName({ province }: ProvinceNameProps) {
-    return <Typography variant='h5'>{province.name}</Typography>
-}
-
-interface GeographyProps {
-    coords: Coords
-    terrain: TerrainInfo
-}
-
-function Geography({ coords, terrain }: GeographyProps) {
-    const copy = useCopy(false)
-
-    const text = coords.toString()
-
-    return <GeographyButton size='small' variant='outlined' ref={copy} data-clipboard-text={text}>
-        <Prefix>
-            <Level>{coords.label}</Level>
-            <Terrain>{terrain.name}</Terrain>
-        </Prefix>
-        <Coordinates>{text}</Coordinates>
-    </GeographyButton>
-}
-
 const ItemMain = styled.div`
     display: flex;
     flex-shrink: 1;
@@ -110,6 +89,23 @@ function ItemInfoTooltip({ info }: ItemInfoTooltipProps) {
         <Typography variant='body2'>
             {info.description}
         </Typography>
+    </>
+}
+
+interface SkillInfoTooltipProps {
+    skill: SkillInfo
+}
+
+function SkillInfoTooltip({ skill }: SkillInfoTooltipProps) {
+    return <>
+        <Typography variant='h6'>
+            <span>{skill.name}</span>
+            { ' ' }
+            { skill.magic && <Chip size='small' label='Magic' /> }
+        </Typography>
+        { skill.description
+            .map((x, i) => <Typography key={i} variant='body2'>{x}</Typography>)
+        }
     </>
 }
 
@@ -149,9 +145,13 @@ interface SkillComponentProps {
 }
 
 function SkillComponent({ skill, className }: SkillComponentProps) {
+    const classes = useStyles()
+
     return <ItemMain className={className}>
         <div className="name">
+            <Tooltip title={<SkillInfoTooltip skill={skill.info} />} classes={{ tooltip: classes.wideTooltip }}>
             <span>{skill.name}</span>
+            </Tooltip>
         </div>
         <div className="amount">
             {skill.level} ({skill.days})
@@ -205,22 +205,6 @@ const TableSkill = styled(SkillComponent)`
         margin-left: 0;
     }
 `
-
-function getMaxAmount(amount: number) {
-    let total = amount
-
-    let coef = 0.25
-    let delta = 0
-    do {
-        delta = Math.floor(amount * coef)
-        total += delta
-
-        coef = coef / 2
-    }
-    while (delta > 0)
-
-    return total
-}
 
 const UnitContainer = styled.div`
     padding: ${({ theme }) => theme.spacing(1)}px;
