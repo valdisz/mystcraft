@@ -100,6 +100,7 @@ function GameItem({ game }: GameItemProps) {
         props.to = `/game/${game.id}`
         props.button = true
         props.component = Link
+        props.replace = true
     }
 
     return <ListItem {...props}>
