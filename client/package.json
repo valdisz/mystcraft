@@ -10,8 +10,8 @@
     "terrain:advisor": "spritesheet-js -n terrain-advisor -p static -f pixi.js src/assets/terrain/advisor/*.png",
     "terrain:fantasy": "spritesheet-js -n terrain-fantasy -p static -f pixi.js src/assets/terrain/fantasy/*.png",
     "assets": "yarn run terrain:advisor && yarn run terrain:fantasy",
-    "test": "ts-node node_modules/jasmine/bin/jasmine --config=jasmine.json",
-    "coverage": "nyc -r text -e .ts -x \"src/*.test.ts\" yarn run test"
+    "test": "nodemon --ext ts --exec 'jasmine-ts  --config=./jasmine.json'",
+    "coverage": "nyc -r text -e .ts -x \"src/*.spec.ts\" yarn run test"
   },
   "dependencies": {
     "@emotion/react": "^11.5.0",
@@ -66,6 +66,9 @@
     "http-proxy-middleware": "^2.0.1",
     "jasmine": "^3.10.0",
     "jasmine-spec-reporter": "^7.0.0",
+    "jasmine-ts": "^0.4.0",
+    "jasmine-ts-console-reporter": "^3.1.1",
+    "nodemon": "^2.0.14",
     "nyc": "^15.1.0",
     "parcel": "^2.0.0",
     "serve-static": "^1.14.1",
