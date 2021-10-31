@@ -1,42 +1,29 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material/styles'
 import { Link, useParams } from 'react-router-dom'
 import { GameRouteParams } from './game-route-params'
 import { useStore } from '../store'
 import { observer, Observer } from 'mobx-react-lite'
-import { AppBar, Button, ButtonGroup, Container, IconButton, List, ListItem, ListItemText, makeStyles, Paper, TextField, Toolbar, Typography } from '@material-ui/core'
+import {
+    Box,
+    AppBar,
+    Button,
+    ButtonGroup,
+    Container,
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    Paper,
+    TextField,
+    Toolbar,
+    Typography,
+} from '@mui/material'
 import { UniversityLocation } from '../components'
-import ArrowBackIcon from '@material-ui/icons/ArrowBack'
-
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        marginTop: theme.spacing(8),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    paper2: {
-        marginTop: theme.spacing(8),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-    },
-    avatar: {
-        margin: theme.spacing(1),
-        backgroundColor: theme.palette.secondary.main,
-    },
-    form: {
-        width: '100%', // Fix IE 11 issue.
-        marginTop: theme.spacing(1),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-}));
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 
 const NewUniversity = observer(() => {
     const { university } = useStore()
-    const classes = useStyles()
 
     const nu = university.newUniversity
 
@@ -44,7 +31,12 @@ const NewUniversity = observer(() => {
 
     return (
         <Container component='main' maxWidth='xs'>
-            <div className={classes.paper}>
+            <Box sx={{
+                marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+            }}>
                 <Typography component='h1' variant='h5'>Open new magic university</Typography>
                 <TextField
                     variant='outlined'
@@ -58,13 +50,15 @@ const NewUniversity = observer(() => {
                     value={nu.name}
                     onChange={nu.setName}
                 />
-                <Button fullWidth variant='contained' color='primary' className={classes.submit} onClick={nu.open}>Open</Button>
-            </div>
+                <Button sx={{
+                    margin: [3, 0, 2],
+                }} fullWidth variant='contained' color='primary' onClick={nu.open}>Open</Button>
+            </Box>
         </Container>
     )
 })
 
-const StudySchedule = styled.table`
+const StudySchedule = styled('table')`
     border-collapse: collapse;
     height: 100%;
 
@@ -159,19 +153,23 @@ function Members() {
 
 const University = observer(() => {
     const { university } = useStore()
-    const classes = useStyles()
 
     return (
         <Container component='main' maxWidth={false}>
             <AppBar position='static' color='primary'>
                 <Toolbar>
-                    <IconButton component={Link} to='/' edge='start' color='inherit'>
+                    <IconButton component={Link} to='/' edge='start' color='inherit' size="large">
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant='h6'>{ university.name }</Typography>
                 </Toolbar>
             </AppBar>
-            <div className={classes.paper2}>
+            <Box sx={{
+                marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+            }}>
                 Turns:
                 <ButtonGroup disableElevation>
                     { university.classes.map(x => <Button
@@ -186,9 +184,9 @@ const University = observer(() => {
                 </StudySchedule>
 
                 <Members />
-            </div>
+            </Box>
         </Container>
-    )
+    );
 })
 
 export function UniversityPage() {

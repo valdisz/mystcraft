@@ -1,22 +1,22 @@
 import * as React from 'react'
-import { createGlobalStyle, ThemeProvider as StyledThemeProvider } from 'styled-components'
-import { createMuiTheme, ThemeProvider, CssBaseline } from '@material-ui/core'
 import { StoreProvider } from './store'
 import { Routes } from './routes'
+import { CssBaseline, GlobalStyles } from '@mui/material'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 
-const GlobalStyles = createGlobalStyle`
-html, body, #app-host {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-`
+const globalStyles = <GlobalStyles styles={`
+    html, body, #app-host {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+`} />
 
 const heading = {
     fontFamily: 'Almendra, serif'
 }
 
-const theme = createMuiTheme({
+const theme = createTheme({
     typography: {
         fontFamily: 'Fira Code, monospace',
         h1: heading,
@@ -31,11 +31,9 @@ const theme = createMuiTheme({
 export function App() {
     return <StoreProvider>
         <ThemeProvider theme={theme}>
-            <StyledThemeProvider theme={theme}>
-                <CssBaseline />
-                <GlobalStyles />
-                <Routes />
-            </StyledThemeProvider>
+            <CssBaseline />
+            {globalStyles}
+            <Routes />
         </ThemeProvider>
     </StoreProvider>
 }

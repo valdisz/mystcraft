@@ -1,17 +1,9 @@
 import * as React from 'react'
-import styled from 'styled-components'
-import { Box, Typography, Button, Grid, Theme,
-    Table, TableHead, TableRow, TableCell, TableBody,
-    Tooltip,
-    makeStyles,
-    Chip
-} from '@material-ui/core'
-import { observer } from 'mobx-react-lite'
-import { Region, Unit } from '../store/game/types'
-import { Coords } from '../store/game/coords'
+import styled from '@emotion/styled'
+import { Typography, Button, Grid, Box, Tooltip, Chip } from '@mui/material'
+import { Unit } from '../store/game/types'
 import { useCopy } from '../lib'
 import { Province } from '../store/game/province'
-import { TerrainInfo } from '../store/game/terrain-info'
 import { Item } from '../store/game/item'
 import { ItemInfo } from '../store/game/item-info'
 import { Skill } from '../store/game/skill'
@@ -22,44 +14,6 @@ const SpaceBetween = styled(Grid)`
     justify-content: space-between;
     align-items: center;
 `
-
-const Terrain = styled.div`
-    font-size: 80%;
-`
-
-const Level = styled.div`
-    font-size: 70%;
-`
-
-const Prefix = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    flex-direction: column;
-
-    padding: ${({ theme }) => (theme as Theme).spacing(0, .5)};
-    border-right: 1px solid ${({ theme }) => (theme as Theme).palette.divider};
-`
-
-const Coordinates = styled.div`
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    padding: ${({ theme }) => (theme as Theme).spacing(0, .5)};
-`
-
-const GeographyButton = styled(Button)`
-    padding: 0 !important;
-
-    .MuiButton-label {
-        height: 100%;
-        align-items: stretch;
-    }
-`
-
-interface ProvinceNameProps {
-    province: Province
-}
 
 const ItemMain = styled.div`
     display: flex;
@@ -114,23 +68,19 @@ interface ItemComponentProps {
     className?: string
 }
 
-const useStyles = makeStyles((theme) => ({
-    wideTooltip: {
-      maxWidth: 500,
-    },
-}))
+const WideTooltip = styled(Tooltip)`
+    max-width: 500px;
+`
 
 function ItemComponent({ item, className }: ItemComponentProps) {
-    const classes = useStyles()
-
     return <ItemMain className={className}>
         <div className="amount">
             {item.amount}
         </div>
         <div className="name">
-            <Tooltip title={<ItemInfoTooltip info={item.info} />} classes={{ tooltip: classes.wideTooltip }}>
+            <WideTooltip title={<ItemInfoTooltip info={item.info} />}>
                 <span>{item.name}</span>
-            </Tooltip>
+            </WideTooltip>
         </div>
         {item.price &&
         <div className="price">
@@ -145,13 +95,11 @@ interface SkillComponentProps {
 }
 
 function SkillComponent({ skill, className }: SkillComponentProps) {
-    const classes = useStyles()
-
     return <ItemMain className={className}>
         <div className="name">
-            <Tooltip title={<SkillInfoTooltip skill={skill.info} />} classes={{ tooltip: classes.wideTooltip }}>
+            <WideTooltip title={<SkillInfoTooltip skill={skill.info} />}>
             <span>{skill.name}</span>
-            </Tooltip>
+            </WideTooltip>
         </div>
         <div className="amount">
             {skill.level} ({skill.days})
@@ -230,7 +178,11 @@ export interface UnitSummaryProps {
 }
 
 export function UnitSummary({ unit }: UnitSummaryProps) {
-    return <UnitContainer>
+    return <Box sx={{
+        padding: 1,
+        borderTop: 1,
+        borderColor: 'divider'
+    }}>
         <Grid container spacing={1}>
             <SpaceBetween item xs={12}>
                 <Typography variant='h5'>{unit.name}</Typography>
@@ -263,5 +215,5 @@ export function UnitSummary({ unit }: UnitSummaryProps) {
                 </ItemTable>
             </Grid> }
         </Grid>
-    </UnitContainer>
+    </Box>
 }

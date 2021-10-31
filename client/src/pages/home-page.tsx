@@ -1,15 +1,15 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/system'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, ButtonGroup, Box
-} from '@material-ui/core'
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
+} from '@mui/material'
 import { Observer, observer } from 'mobx-react-lite'
 import { Link } from 'react-router-dom'
-import GrainIcon from '@material-ui/icons/Grain';
+import GrainIcon from '@mui/icons-material/Grain';
 import { useStore } from '../store'
 import { SplitButton } from '../components'
 import { GameHeaderFragment, PlayerHeaderFragment } from '../schema'
-import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 
 function NoGames() {
     return <ListItem>
@@ -30,7 +30,7 @@ interface GameActionsProps {
 }
 
 function GameActions({ disabled, onUploadReport, onDelete, onUploadMap, onRuleset }: GameActionsProps) {
-    return <SplitButton disabled={disabled} color='default' size='small' variant='outlined'
+    return <SplitButton disabled={disabled} color='secondary' size='small' variant='outlined'
         onClick={onUploadReport}
         actions={[
             { content: 'Import map', onAction: onUploadMap },
@@ -45,7 +45,7 @@ function Game({ name }) {
     return name ? <strong>{name}</strong> : <em>No name</em>
 }
 
-const FactionNumber = styled.code`
+const FactionNumber = styled('code')`
     font-weight: bold;
     &::before {
         content: '[';
@@ -55,7 +55,7 @@ const FactionNumber = styled.code`
     }
 `
 
-const UnstyledList = styled.ul`
+const UnstyledList = styled('ul')`
     list-style: none;
     margin: 0;
     padding: 0;
@@ -159,7 +159,7 @@ const NewGameDialog = observer(() => {
     </Dialog>
 })
 
-const CenterLayout = styled.div`
+const CenterLayout = styled('div')`
     display: flex;
     min-height: 0;
     height: 100%;
@@ -169,7 +169,7 @@ const CenterLayout = styled.div`
     position: relative;
 `
 
-const TopRightCorner = styled.div`
+const TopRightCorner = styled('div')`
     top: 1rem;
     right: 1rem;
     position: absolute;

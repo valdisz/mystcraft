@@ -1,11 +1,12 @@
 {
     "include": [
-        "./src/**/*",
-        "src/.advisor"
+        "./src/**/*"
     ],
     "exclude": [
+        "src/.advisor",
         "node_modules",
         ".cache",
+        ".parcel-cache",
         "dist",
     ],
     "compilerOptions": {

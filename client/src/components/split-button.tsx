@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { Button, ButtonProps, ButtonGroup, ButtonGroupProps, MenuItem, Menu, PopoverOrigin } from '@material-ui/core'
-import MoreVertIcon from '@material-ui/icons/MoreVert'
+import { Button, ButtonProps, ButtonGroup, ButtonGroupProps, MenuItem, Menu, PopoverOrigin } from '@mui/material'
+import { MoreVert } from '@mui/icons-material'
 
 export interface SplitButtonAction {
     disabled?: boolean
@@ -29,7 +29,7 @@ function SplitButtonMenu({ open, actions, anchor, onClose }: SplitButtonMenuProp
         open={open}
         onClose={onClose}
         anchorEl={anchor}
-        getContentAnchorEl={null}
+        // getContentAnchorEl={null}
         anchorOrigin={BOTTOM_RIGHT}
         transformOrigin={TOP_RIGHT}
         >
@@ -78,7 +78,7 @@ export function SplitButton({ disabled, actions, moreButtonProps, buttonGroupPro
                     ref={anchorRef}
                     onClick={handleToggle}
                 >
-                    <MoreVertIcon />
+                    <MoreVert />
                 </Button> }
             </ButtonGroup>
             { showMoreButton && <SplitButtonMenu

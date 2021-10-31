@@ -1,13 +1,12 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import styled from '@emotion/styled'
 import { observer } from 'mobx-react-lite'
 import { SkillCell } from './skill-cell'
 import { Student, StudyLocation } from '../store'
-import { Box, ButtonGroup, Tooltip } from '@material-ui/core'
+import { Box, ButtonGroup, Tooltip } from '@mui/material'
 import { XsCopyButton, XsButton } from './buttons'
-import WarningIcon from '@material-ui/icons/Warning'
-import ErrorIcon from '@material-ui/icons/Error'
-import { orange, red } from '@material-ui/core/colors'
+import { Warning, Error } from '@mui/icons-material'
+import { orange, red } from '@mui/material/colors'
 
 export interface UniversityStudentProps {
     student: Student
@@ -45,14 +44,14 @@ const Unit = observer(({ student }: StudentProps) => {
 const UnitMessages = observer(({ student }: StudentProps) => {
     return <Tooltip title={student.criticalMessage || student.warningMessage}>
         <span>
-            { student.criticalMessage && <ErrorIcon fontSize='small' style={{ color: red[500] }} /> }
-            { student.warningMessage && <WarningIcon fontSize='small' style={{ color: orange[500] }} /> }
+            { student.criticalMessage && <Error fontSize='small' style={{ color: red[500] }} /> }
+            { student.warningMessage && <Warning fontSize='small' style={{ color: orange[500] }} /> }
         </span>
     </Tooltip>
 })
 
 const UnitActions = observer(({ student }: StudentProps) => {
-    return <Box ml={1} clone>
+    return <Box ml={1}>
         { student.mode === ''
             ? <ButtonGroup>
                 <XsButton variant='outlined' title='Study' onClick={student.beginStudy}>S</XsButton>

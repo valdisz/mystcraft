@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js'
-import { autoDetectRenderer, Container, Loader, Point, Renderer } from 'pixi.js'
+import { autoDetectRenderer, Container, Loader, Point, AbstractRenderer } from 'pixi.js'
 import { Hex, DoubledCoord, Layout, Orientation } from '../geometry'
 import { Link, Region } from "../store/game/region"
 import { Viewport } from './viewport'
@@ -100,7 +100,7 @@ export class HexMap {
     readonly units: Container
     readonly settlements: Container
 
-    readonly renderer: Renderer
+    readonly renderer: AbstractRenderer
     readonly viewport: Viewport
     readonly layout: Layout
 

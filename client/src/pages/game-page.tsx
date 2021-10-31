@@ -1,18 +1,35 @@
 import * as React from 'react'
-import styled from 'styled-components'
+import { styled } from '@mui/material/styles'
 import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import {
-    AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Paper, Button,
-    DialogContent, DialogContentText,
-    makeStyles, createStyles, Theme, Chip, ButtonGroup, Avatar, Box
-} from '@material-ui/core'
+    AppBar,
+    Typography,
+    Toolbar,
+    IconButton,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Tabs,
+    Tab,
+    Paper,
+    Button,
+    DialogContent,
+    DialogContentText,
+    Theme,
+    Chip,
+    ButtonGroup,
+    Avatar,
+    Box,
+} from '@mui/material';
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
 import { Region } from "../store/game/types"
 import { GameRouteParams } from './game-route-params'
-import ArrowBackIcon from '@material-ui/icons/ArrowBack'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { List } from '../store/game/list'
 import { Item } from '../store/game/item'
 import { Unit } from '../store/game/unit'
@@ -20,17 +37,15 @@ import { RegionSummary } from '../components/region-summary'
 import { StatsPage } from './stats-page'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
-import { Dialog } from '@material-ui/core'
-import CloseIcon from '@material-ui/icons/Close'
+import { Dialog } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { GameStore, OrdersState } from '../store/game-store'
 import { Ruleset } from '../store/game/ruleset'
 import { UnitSummary } from '../components'
 import { Capacity } from '../store/game/move-capacity'
+import { green, lightBlue } from '@mui/material/colors'
 
-import green from '@material-ui/core/colors/green'
-import lightBlue from '@material-ui/core/colors/lightBlue'
-
-const GameContainer = styled.div`
+const GameContainer = styled('div')`
     width: 100%;
     height: 100%;
 
@@ -38,7 +53,7 @@ const GameContainer = styled.div`
     flex-direction: column;
 `
 
-const GameGrid = styled.div`
+const GameGrid = styled('div')`
     flex: 1;
 
     min-height: 0;
@@ -60,7 +75,7 @@ const GameGrid = styled.div`
     }
 `
 
-const OrdersContainer = styled.div`
+const OrdersContainer = styled('div')`
     grid-area: orders;
     min-height: 0;
     overflow-y: auto;
@@ -69,8 +84,6 @@ const OrdersContainer = styled.div`
     display: flex;
     align-items: stretch;
     flex-direction: column;
-
-
 
     @media (max-width: 640px) {
         display: none;
@@ -154,13 +167,13 @@ function highlight(ruleset: Ruleset, s: string) {
     return result
 }
 
-const OrdersEditorBox = styled.div`
+const OrdersEditorBox = styled('div')`
     flex: 1;
     padding: 0.5rem;
     background-color: ${x => x.theme.palette.common.white};
 `
 
-const OrdersStatusBox = styled.div`
+const OrdersStatusBox = styled('div')`
     padding: 0.25rem;
     text-align: center;
 
@@ -197,9 +210,7 @@ function OrdersStatus({ state }: OrdersStatusProps) {
     </OrdersStatusBox>
 }
 
-const OrdersTitle = styled(Typography).attrs({
-    variant: 'subtitle1'
-})`
+const OrdersTitle = styled(Typography)`
     padding: 0.5rem;
 `
 
@@ -209,7 +220,7 @@ const Orders = observer(() => {
     const ruleset = game.world.ruleset
 
     return <OrdersContainer>
-        <OrdersTitle>Orders</OrdersTitle>
+        <OrdersTitle variant='subtitle1'>Orders</OrdersTitle>
         <OrdersEditorBox>
             <OrdersEditor value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
         </OrdersEditorBox>
@@ -217,18 +228,18 @@ const Orders = observer(() => {
     </OrdersContainer>
 })
 
-const MapContainer = styled.div`
+const MapContainer = styled('div')`
     grid-area: map;
     background-color: #000;
     min-height: 0;
 `
 
-const MapCanvas = styled.canvas`
+const MapCanvas = styled('canvas')`
     width: 100%;
     height: 100%;
 `
 
-const GameInfo = styled.div`
+const GameInfo = styled('div')`
     margin-left: 1rem;
 `
 
@@ -301,7 +312,7 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
     </MapContainer>
 }
 
-const UnitsContainer = styled.div`
+const UnitsContainer = styled('div')`
     grid-area: units;
 
     display: flex;
@@ -400,18 +411,6 @@ function UnitMounts({ items }: { items: List<Item> }) {
     return <>{total} {names}</>
 }
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        appBar: {
-            position: 'relative',
-        },
-        title: {
-            marginLeft: theme.spacing(2),
-            flex: 1
-        }
-    })
-)
-
 function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
     const rows = unit.description ? 2 : 1
     const noBorder = rows > 1 ? 'no-border' : ''
@@ -469,12 +468,12 @@ function renderUnitMovement(unit: Unit) {
     </>
 }
 
-const UnitCapacityContainer = styled.div`
+const UnitCapacityContainer = styled('div')`
     display: flex;
     gap: 0.5rem;
 `
 
-const UnitCapacityItem = styled.span`
+const UnitCapacityItem = styled('span')`
     white-space: pre;
 `
 
@@ -499,111 +498,115 @@ function UnitCapacity({ weight, capacity }: UnitCapacityProps) {
 
 const UnitsComponent = observer(() => {
     const { game } = useStore()
-    const classes = useStyles()
 
-    return <UnitsContainer>
-        <Paper>
-            <Button onClick={game.openBattleSim}>Battle Sim</Button>
-            <Button onClick={game.markStart}>MARK START</Button>
-            <Button onClick={game.searchPath}>SEARCH PATH</Button>
-            <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
-                <AppBar className={classes.appBar}>
-                    <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={game.closeBattleSim}><CloseIcon /></IconButton>
-                        <Typography variant="h6" className={classes.title}>Battle Sim</Typography>
-                        <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
-                        <Button color="inherit" onClick={game.toBattleSim}>Get BattleSim JSON</Button>
-                    </Toolbar>
-                </AppBar>
-                <DialogContent>
-                    <DialogContentText>Select battle sim sides</DialogContentText>
-                    <UnitsTable size='small' stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell></TableCell>
-                                <TableCell className='structure-nr'></TableCell>
-                                <TableCell className='structure-name'>Structure</TableCell>
-                                <TableCell className='faction'>Faction</TableCell>
-                                <TableCell className='unit-nr'>Unit Nr.</TableCell>
-                                <TableCell className='unit-name'>Name</TableCell>
-                                <TableCell className='men'>Men</TableCell>
-                                <TableCell className='mounts'>Mounts</TableCell>
-                                <TableCell className='items'>Items</TableCell>
-                                <TableCell className='skills'>Skills</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
-                        </TableBody>
-                    </UnitsTable>
-                </DialogContent>
-            </Dialog>
-        </Paper>
-        <UnitsTable size='small' stickyHeader>
-            <TableHead>
-                <TableRow>
-                    <TableCell className='structure-nr'></TableCell>
-                    <TableCell className='structure-name'>Structure</TableCell>
-                    <TableCell className='faction-nr'></TableCell>
-                    <TableCell className='faction-name'>Faction</TableCell>
-                    <TableCell className='unit-nr'></TableCell>
-                    <TableCell className='unit-name'>Unit</TableCell>
-                    <TableCell className='men'>Men</TableCell>
-                    <TableCell className='money'>Money</TableCell>
-                    <TableCell className='mounts'>Mounts</TableCell>
-                    <TableCell className='movement'>Movement</TableCell>
-                    <TableCell className='weight'>Weight</TableCell>
-                    <TableCell className='capacity'>Capacity</TableCell>
-                    <TableCell className='flags'>Flags</TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-            {game.units.map((unit) => {
-                const rows = unit.description ? 2 : 1
-                const noBorder = rows > 1 ? 'no-border' : ''
-                const ownUnit = unit.isPlayer ? 'own' : ''
-
-                const unitClasses = [ownUnit, noBorder].join(' ')
-
-                return <React.Fragment key={unit.id}>
-                    <TableRow className={unitClasses} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
-                        <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
-                        <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-                        <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
-                        <TableCell component='th' rowSpan={rows} className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
-                        <TableCell className='unit-nr'>{unit.num}</TableCell>
-                        <TableCell component='th' className={`unit-name ${noBorder}`}>
-                            {unit.name}
-                            { ' ' }
-                            { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
-                        </TableCell>
-                        <TableCell className='men'>
-                            <UnitMen items={unit.inventory.items} />
-                        </TableCell>
-                        <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
-                        <TableCell className='mounts'>
-                            <UnitMounts items={unit.inventory.items} />
-                        </TableCell>
-                        <TableCell className='movement'>{renderUnitMovement(unit)}</TableCell>
-                        <TableCell className='weight'>{unit.weight}</TableCell>
-                        <TableCell className='capacity'>
-                            <UnitCapacity weight={unit.weight} capacity={unit.capacity} />
-                        </TableCell>
-                        <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
+    return (
+        <UnitsContainer>
+            <Paper>
+                <Button onClick={game.openBattleSim}>Battle Sim</Button>
+                <Button onClick={game.markStart}>MARK START</Button>
+                <Button onClick={game.searchPath}>SEARCH PATH</Button>
+                <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
+                    <AppBar sx={{ position: 'relative' }}>
+                        <Toolbar>
+                            <IconButton edge="start" color="inherit" onClick={game.closeBattleSim} size="large"><CloseIcon /></IconButton>
+                            <Typography variant="h6" sx={{
+                                marginLeft: 2,
+                                flex: 1
+                            }}>Battle Sim</Typography>
+                            <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
+                            <Button color="inherit" onClick={game.toBattleSim}>Get BattleSim JSON</Button>
+                        </Toolbar>
+                    </AppBar>
+                    <DialogContent>
+                        <DialogContentText>Select battle sim sides</DialogContentText>
+                        <UnitsTable size='small' stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell></TableCell>
+                                    <TableCell className='structure-nr'></TableCell>
+                                    <TableCell className='structure-name'>Structure</TableCell>
+                                    <TableCell className='faction'>Faction</TableCell>
+                                    <TableCell className='unit-nr'>Unit Nr.</TableCell>
+                                    <TableCell className='unit-name'>Name</TableCell>
+                                    <TableCell className='men'>Men</TableCell>
+                                    <TableCell className='mounts'>Mounts</TableCell>
+                                    <TableCell className='items'>Items</TableCell>
+                                    <TableCell className='skills'>Skills</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
+                            </TableBody>
+                        </UnitsTable>
+                    </DialogContent>
+                </Dialog>
+            </Paper>
+            <UnitsTable size='small' stickyHeader>
+                <TableHead>
+                    <TableRow>
+                        <TableCell className='structure-nr'></TableCell>
+                        <TableCell className='structure-name'>Structure</TableCell>
+                        <TableCell className='faction-nr'></TableCell>
+                        <TableCell className='faction-name'>Faction</TableCell>
+                        <TableCell className='unit-nr'></TableCell>
+                        <TableCell className='unit-name'>Unit</TableCell>
+                        <TableCell className='men'>Men</TableCell>
+                        <TableCell className='money'>Money</TableCell>
+                        <TableCell className='mounts'>Mounts</TableCell>
+                        <TableCell className='movement'>Movement</TableCell>
+                        <TableCell className='weight'>Weight</TableCell>
+                        <TableCell className='capacity'>Capacity</TableCell>
+                        <TableCell className='flags'>Flags</TableCell>
                     </TableRow>
-                    { rows > 1 && <TableRow className={ownUnit} selected={unit.num === game.unit?.num}>
-                        <TableCell colSpan={9} className='description'>
-                            {unit.description}
-                        </TableCell>
-                    </TableRow> }
-                </React.Fragment>
-            })}
-            </TableBody>
-        </UnitsTable>
-    </UnitsContainer>
+                </TableHead>
+                <TableBody>
+                {game.units.map((unit) => {
+                    const rows = unit.description ? 2 : 1
+                    const noBorder = rows > 1 ? 'no-border' : ''
+                    const ownUnit = unit.isPlayer ? 'own' : ''
+
+                    const unitClasses = [ownUnit, noBorder].join(' ')
+
+                    return <React.Fragment key={unit.id}>
+                        <TableRow className={unitClasses} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+                            <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+                            <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+                            <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
+                            <TableCell component='th' rowSpan={rows} className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
+                            <TableCell className='unit-nr'>{unit.num}</TableCell>
+                            <TableCell component='th' className={`unit-name ${noBorder}`}>
+                                {unit.name}
+                                { ' ' }
+                                { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
+                            </TableCell>
+                            <TableCell className='men'>
+                                <UnitMen items={unit.inventory.items} />
+                            </TableCell>
+                            <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
+                            <TableCell className='mounts'>
+                                <UnitMounts items={unit.inventory.items} />
+                            </TableCell>
+                            <TableCell className='movement'>{renderUnitMovement(unit)}</TableCell>
+                            <TableCell className='weight'>{unit.weight}</TableCell>
+                            <TableCell className='capacity'>
+                                <UnitCapacity weight={unit.weight} capacity={unit.capacity} />
+                            </TableCell>
+                            <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
+                        </TableRow>
+                        { rows > 1 && <TableRow className={ownUnit} selected={unit.num === game.unit?.num}>
+                            <TableCell colSpan={9} className='description'>
+                                {unit.description}
+                            </TableCell>
+                        </TableRow> }
+                    </React.Fragment>
+                })}
+                </TableBody>
+            </UnitsTable>
+        </UnitsContainer>
+    );
 })
 
-const StructuresContainer = styled.div`
+const StructuresContainer = styled('div')`
     grid-area: structures;
 
     display: flex;
@@ -618,11 +621,11 @@ const StructuresContainer = styled.div`
     }
 `
 
-const StructuresBody = styled.div`
+const StructuresBody = styled('div')`
     min-height: 0;
 `
 
-const StructureItem = styled.div`
+const StructureItem = styled('div')`
     margin: 0.5rem 1rem;
 `
 
@@ -639,7 +642,7 @@ const StructuresComponent = observer(() => {
     </StructuresContainer>
 })
 
-const RegionContainer = styled.div`
+const RegionContainer = styled('div')`
     grid-area: details;
 
     display: flex;
@@ -648,7 +651,7 @@ const RegionContainer = styled.div`
     overflow: auto;
 `
 
-const RegionBody = styled.div`
+const RegionBody = styled('div')`
     min-height: 0;
     margin: 1rem;
     font-family: Fira Code, monospace;
@@ -679,36 +682,38 @@ const GameComponent = observer(() => {
     const { game } = useStore()
     const { path, url } = useRouteMatch()
 
-    return <GameContainer>
-        <AppBar position='static' color='primary'>
-            <Toolbar>
-                <IconButton component={Link} to='/' edge='start' color='inherit'>
-                    <ArrowBackIcon />
-                </IconButton>
-                <Typography variant='h6'>{ game.name }</Typography>
-                <GameInfo>
-                    <Typography variant='subtitle2'>{ game.factionName } [{ game.factionNumber }]</Typography>
-                </GameInfo>
-                <GameInfo>
-                    <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
-                </GameInfo>
-                <Tabs value={url}>
-                    <Tab label='Map' component={Link} value={url} to={url} />
-                    <Tab label='Statistics' component={Link} value={`${url}/stats`} to={`${url}/stats`} />
-                </Tabs>
-                <Box flex={1} />
-                <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
-            </Toolbar>
-        </AppBar>
-        <Switch>
-            <Route path={`${path}/stats`}>
-                <StatsPage />
-            </Route>
-            <Route path={path}>
-                <MapTab />
-            </Route>
-        </Switch>
-    </GameContainer>
+    return (
+        <GameContainer>
+            <AppBar position='static' color='primary'>
+                <Toolbar>
+                    <IconButton component={Link} to='/' edge='start' color='inherit' size="large">
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography variant='h6'>{ game.name }</Typography>
+                    <GameInfo>
+                        <Typography variant='subtitle2'>{ game.factionName } [{ game.factionNumber }]</Typography>
+                    </GameInfo>
+                    <GameInfo>
+                        <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
+                    </GameInfo>
+                    <Tabs value={url}>
+                        <Tab label='Map' component={Link} value={url} to={url} />
+                        <Tab label='Statistics' component={Link} value={`${url}/stats`} to={`${url}/stats`} />
+                    </Tabs>
+                    <Box flex={1} />
+                    <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
+                </Toolbar>
+            </AppBar>
+            <Switch>
+                <Route path={`${path}/stats`}>
+                    <StatsPage />
+                </Route>
+                <Route path={path}>
+                    <MapTab />
+                </Route>
+            </Switch>
+        </GameContainer>
+    );
 })
 
 export function GamePage() {

@@ -1,14 +1,8 @@
-import React from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Box from '@material-ui/core/Box';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
-import { Alert } from '@material-ui/lab';
+import React from 'react'
+import { Avatar, Button, TextField, Link, Box, Alert, Typography, Container } from '@mui/material'
+import { LockOutlined } from '@mui/icons-material'
+import { styled } from '@mui/material/styles'
+
 import { observer, useLocalStore } from 'mobx-react-lite';
 import { runInAction } from 'mobx';
 
@@ -21,33 +15,16 @@ function Copyright() {
     );
 }
 
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        marginTop: theme.spacing(8),
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    avatar: {
-        margin: theme.spacing(1),
-        backgroundColor: theme.palette.secondary.main,
-    },
-    form: {
-        width: '100%', // Fix IE 11 issue.
-        marginTop: theme.spacing(1),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-}));
+const Form = styled('form')`
+    width: 100%;
+    margin-top: ${p => p.theme.spacing(1)};
+`
 
 export interface SignInProps {
     onSuccess: () => void
 }
 
 export const SignIn = observer(({ onSuccess }: SignInProps) => {
-    const classes = useStyles();
-
     const store = useLocalStore(() => ({
         message: '',
         severity: 'error' as ('error' | 'success'),
@@ -141,14 +118,22 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
 
     return (
         <Container component='main' maxWidth='xs'>
-            <div className={classes.paper}>
-                <Avatar className={classes.avatar}>
-                    <LockOutlinedIcon />
+            <Box sx={{
+                marginTop: 8,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+            }}>
+                <Avatar sx={{
+                    margin: 1,
+                    backgroundColor: 'secondary.main',
+                }}>
+                    <LockOutlined />
                 </Avatar>
                 <Typography component='h1' variant='h5'>
                     { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
                 </Typography>
-                <form className={classes.form} noValidate onSubmit={store.proceed}>
+                <Form noValidate onSubmit={store.proceed}>
                     <TextField
                         variant='outlined'
                         margin='normal'
@@ -190,7 +175,11 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                         variant='contained'
                         color='primary'
                         type='submit'
-                        className={classes.submit}>
+                        sx={{
+                            margin: [3, 0, 2]
+                        }}
+                        /* className={classes.submit} */
+                        >
                             { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
                         </Button>
 
@@ -199,8 +188,8 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                             { store.mode === 'sign-in' ? `Don't have an account? Sign Up` : `Already have an account? Sign in` }
                         </Button>
                     </Box>
-                </form>
-            </div>
+                </Form>
+            </Box>
             <Box mt={8}>
                 <Copyright />
             </Box>

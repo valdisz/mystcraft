@@ -1,6 +1,7 @@
 import * as React from 'react'
-import styled, { css } from 'styled-components'
-import { Tooltip, Typography } from '@material-ui/core'
+import styled from '@emotion/styled'
+import { css } from '@emotion/react'
+import { Tooltip, Typography } from '@mui/material'
 import { getSkillDeps, ISkill } from '../store/skill-tree'
 import { StudyTarget, StudentMode } from '../store'
 

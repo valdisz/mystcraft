@@ -1,6 +1,18 @@
 import * as React from 'react'
-import styled from 'styled-components'
-import { Typography, Container, Table, TableHead, TableRow, TableCell, TableBody, Grid, Tabs, Tab, Tooltip, makeStyles } from '@material-ui/core'
+import {
+    Typography,
+    Container,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Grid,
+    Tabs,
+    Tab,
+    Tooltip,
+} from '@mui/material';
+import { styled } from '@mui/material/styles'
 import { useStore } from '../store'
 import { Observer } from 'mobx-react-lite'
 import { SkillInfo } from '../store/game/skill-info'
@@ -26,15 +38,12 @@ function SkillInfoTooltip({ info, level }: SkillInfoTooltipProps) {
     </>
 }
 
-const useStyles = makeStyles((theme) => ({
-    wideTooltip: {
-      maxWidth: 500,
-    },
-}))
+const WideTooltip = styled(Tooltip)`
+    max-width: 500px;
+`
 
 function SkillsTab() {
     const { stats } = useStore()
-    const classes = useStyles()
 
     return <Table size='small' stickyHeader={true}>
         <TableHead>
@@ -53,14 +62,14 @@ function SkillsTab() {
             {() => <TableBody>
                 { stats.skills.map(({ skill, levels, total }) => <TableRow key={skill.code}>
                     <TableCell>
-                        <Tooltip title={<SkillInfoTooltip info={skill} level={1} />} classes={{ tooltip: classes.wideTooltip }}>
+                        <WideTooltip title={<SkillInfoTooltip info={skill} level={1} />}>
                             <span>{skill.name}</span>
-                        </Tooltip>
+                        </WideTooltip>
                     </TableCell>
                     { [0, 1, 2, 3, 4, 5].map(x => <TableCell key={x}>
-                        <Tooltip title={<SkillInfoTooltip info={skill} level={x} />} classes={{ tooltip: classes.wideTooltip }}>
+                        <WideTooltip title={<SkillInfoTooltip info={skill} level={x} />}>
                             <span>{levels[x]}</span>
-                        </Tooltip>
+                        </WideTooltip>
                     </TableCell>) }
                     <TableCell>{total}</TableCell>
                 </TableRow>) }
