@@ -10,10 +10,10 @@ import { Structure } from './structure';
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {
         for (let i = 0; i < info.map.length; i++) {
-            this.addLevel(i, info.map[i].label)
+            var { width, label } = info.map[i]
+            this.addLevel(width, i, label)
         }
     }
-
 
     readonly levels: Level[] = [];
     readonly provinces = new Provinces();
@@ -31,6 +31,34 @@ export class World {
                 this.addStructure(str);
             }
         }
+
+        // exits
+        for (const reg of regions) {
+            var source = this.getRegionByCode(reg.code)
+
+            for (const exit of reg.exits) {
+                const target = this.getRegionByCode(exit.targetRegion)
+
+                source.neighbors.set(source, exit.direction, target)
+            }
+        }
+
+        // neighbors
+        for (const province of this.provinces.all()) {
+            const neighbors = new Set<string>()
+            for (const reg of province.regions) {
+                for (const exit of reg.neighbors.all()) {
+                    neighbors.add(exit.target.province.name)
+                }
+            }
+
+            for (const name of neighbors) {
+                if (name === province.name) continue
+
+                const other = this.provinces.get(name)
+                province.addBorderWith(other)
+            }
+        }
     }
 
     addUnits(units: UnitFragment[]) {
@@ -46,10 +74,6 @@ export class World {
         province.add(reg);
 
         let level: Level = this.getLevel(reg.coords.z);
-        if (!level) {
-            level = this.addLevel(reg.coords.z, reg.coords.label);
-        }
-
         level.add(reg);
 
         return reg;
@@ -101,8 +125,8 @@ export class World {
         return this.levels[z]
     }
 
-    private addLevel(z: number, label: string) {
-        const level = new Level(z, label)
+    private addLevel(width: number, z: number, label: string) {
+        const level = new Level(width, z, label)
         this.levels.push(level)
 
         return level

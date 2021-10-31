@@ -1,16 +1,45 @@
-import { RegionFragment, StructureFragment } from '../../schema'
+import { Direction, RegionFragment } from '../../schema'
 import { Item } from './item'
 import { List } from './list'
 import { Province } from './province'
 import { Coords } from "./coords"
 import { TerrainInfo } from "./terrain-info"
 import { Settlement } from "./settlement"
-import { Population } from "./population"
 import { Ruleset } from "./ruleset"
 import { Wages } from "./wages"
 import { Structure, Unit, Troops, Factions } from './types'
 import { SettlementSize } from './settlement-size'
 import { TypedMap } from './typed-map'
+
+export class Link {
+    constructor(public readonly source: Region, public readonly direction: Direction, public readonly target: Region) {
+
+    }
+
+    get cost() {
+        return this.target.terrain.movement
+    }
+
+    toString() {
+        return `${this.direction} : ${this.target}`;
+    }
+}
+
+export class Links {
+    private readonly links: Map<Direction, Link> = new Map()
+
+    all(): Link[] {
+        return Array.from(this.links.values())
+    }
+
+    get(direction: Direction) {
+        return this.links.get(direction)
+    }
+
+    set(source: Region, direction: Direction, target: Region) {
+        this.links.set(direction, new Link(source, direction, target))
+    }
+}
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {
@@ -27,6 +56,8 @@ export class Region {
     }
 
     province: Province
+    readonly neighbors: Links = new Links()
+
     terrain: TerrainInfo
     population: Item | null
     settlement: Settlement | null
@@ -122,5 +153,9 @@ export class Region {
         }
 
         return reg;
+    }
+
+    toString() {
+        return `${this.terrain.name} (${this.coords}) in ${this.province.name}`;
     }
 }

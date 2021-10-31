@@ -186,6 +186,7 @@ export class Ruleset {
                 allowFlying,
                 allowRiding,
                 isBarren,
+                isWater,
                 movement,
                 coastalRaces: _coastalRaces,
                 races: _races,
@@ -197,6 +198,7 @@ export class Ruleset {
             info.allowRiding = allowRiding
             info.allowFlying = allowFlying
             info.isBarren = isBarren
+            info.isWater = isWater
 
             info.coastalRaces = (_coastalRaces ?? []).map(race => this.getItem(race))
             info.races = (_races ?? []).map(race => this.getItem(race))
@@ -246,6 +248,7 @@ interface TerrainData {
     allowFlying: boolean
     allowRiding: boolean
     isBarren: boolean
+    isWater: boolean
     races?: string[]
     coastalRaces?: string[]
     resources?: {

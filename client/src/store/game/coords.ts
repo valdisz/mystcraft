@@ -1,3 +1,4 @@
+import { DoubledCoord, Hex } from "../../geometry"
 
 export class Coords {
     constructor(
@@ -6,6 +7,14 @@ export class Coords {
         public readonly z: number,
         public readonly label?: string) {
 
+    }
+
+    toDouble() {
+        return new DoubledCoord(this.x, this.y)
+    }
+
+    toCube() {
+        return this.toDouble().toCube();
     }
 
     toString() {

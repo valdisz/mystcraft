@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js'
 import { autoDetectRenderer, Container, Loader, Point, Renderer } from 'pixi.js'
 import { Hex, DoubledCoord, Layout, Orientation } from '../geometry'
-import { Region } from "../store/game/region"
+import { Link, Region } from "../store/game/region"
 import { Viewport } from './viewport'
 
 export interface GetRegionCallback {
@@ -156,6 +156,10 @@ export class HexMap {
 
             this.loader.load((_, res) => resolve(res))
         })
+    }
+
+    setPath(path: Link[]) {
+
     }
 
     getTerrainTexture(name: string): PIXI.Texture {

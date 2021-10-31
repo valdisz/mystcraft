@@ -17,6 +17,7 @@ export class TerrainInfo implements UniqueItem {
     allowFlying: boolean
     allowRiding: boolean
     isBarren: boolean
+    isWater: boolean
     races: ItemInfo[]
     coastalRaces: ItemInfo[]
     resources: Resource[]

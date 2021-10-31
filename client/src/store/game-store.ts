@@ -1,7 +1,7 @@
 import { ApolloQueryResult } from 'apollo-client'
 import { makeObservable, observable, IObservableArray, runInAction, action, computed, reaction, comparer } from 'mobx'
 import { CLIENT } from '../client'
-import { RegionFragment, StructureFragment, UnitFragment, TurnFragment } from '../schema'
+import { RegionFragment, UnitFragment, TurnFragment } from '../schema'
 import { GetGame, GetGameQuery, GetGameQueryVariables } from '../schema'
 import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
@@ -360,6 +360,18 @@ export class GameStore {
         const orders = lines.join('\n')
         const blob = new Blob([ orders ], { type: 'text/plain' })
         saveAs(blob, `orders-${this.turn.number}.ord`)
+    }
+
+    start: Region
+
+    markStart = () => {
+        this.start = this.region
+
+        console.log(this.world.getLevel(this.region.coords.z).estimate('walk', this.start, 2))
+    }
+
+    searchPath = () => {
+        console.log(this.world.getLevel(this.region.coords.z).search('walk', this.start, this.region))
     }
 }
 

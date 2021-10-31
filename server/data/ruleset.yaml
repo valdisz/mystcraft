@@ -67,6 +67,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: true
+    isWater: true
     pop: 0
     wages: 0
     economy: 0
@@ -90,6 +91,7 @@ terrain:
     allowFlying: true
     allowRiding: true
     isBarren: false
+    isWater: false
     pop: 800
     wages: 12
     economy: 40
@@ -119,6 +121,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 600
     wages: 12
     economy: 20
@@ -153,6 +156,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 400
     wages: 11
     economy: 20
@@ -190,6 +194,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 500
     wages: 11
     economy: 10
@@ -225,6 +230,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 500
     wages: 11
     economy: 20
@@ -263,6 +269,7 @@ terrain:
     allowFlying: true
     allowRiding: true
     isBarren: false
+    isWater: false
     pop: 500
     wages: 11
     economy: 10
@@ -300,6 +307,7 @@ terrain:
     allowFlying: true
     allowRiding: true
     isBarren: false
+    isWater: false
     pop: 400
     wages: 11
     economy: 10
@@ -334,6 +342,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 100
     wages: 11
     economy: 10
@@ -368,6 +377,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 100
     wages: 11
     economy: 10
@@ -399,6 +409,7 @@ terrain:
     allowFlying: false
     allowRiding: false
     isBarren: true
+    isWater: false
     pop: 0
     wages: 0
     economy: 0
@@ -431,6 +442,7 @@ terrain:
     allowFlying: true
     allowRiding: true
     isBarren: true
+    isWater: false
     pop: 0
     wages: 0
     economy: 0
@@ -444,6 +456,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 100
     wages: 11
     economy: 12
@@ -474,6 +487,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: false
+    isWater: false
     pop: 100
     wages: 11
     economy: 12
@@ -508,6 +522,7 @@ terrain:
     allowFlying: false
     allowRiding: false
     isBarren: true
+    isWater: false
     pop: 0
     wages: 0
     economy: 0
@@ -540,6 +555,7 @@ terrain:
     allowFlying: true
     allowRiding: false
     isBarren: true
+    isWater: false
     pop: 0
     wages: 0
     economy: 0
@@ -569,6 +585,7 @@ terrain:
     allowFlying: false
     allowRiding: false
     isBarren: true
+    isWater: true
     pop: 0
     wages: 0
     economy: 0

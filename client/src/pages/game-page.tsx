@@ -453,7 +453,7 @@ function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
 }
 
 function renderUnitMovement(unit: Unit) {
-    if (!unit || !unit.capacity.known) return null
+    if (!unit) return null
 
     const move = unit.isOverweight
         ? <Chip size='small' color='error' label='overweight' />
@@ -504,6 +504,8 @@ const UnitsComponent = observer(() => {
     return <UnitsContainer>
         <Paper>
             <Button onClick={game.openBattleSim}>Battle Sim</Button>
+            <Button onClick={game.markStart}>MARK START</Button>
+            <Button onClick={game.searchPath}>SEARCH PATH</Button>
             <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
                 <AppBar className={classes.appBar}>
                     <Toolbar>
