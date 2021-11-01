@@ -378,13 +378,18 @@ export class OrderComment {
     readonly order = 'comment'
 }
 
+export class OrderUnknown {
+    constructor (public readonly command: string, public readonly args: string = null) { }
+    readonly order = 'unknown'
+}
+
 export type Order = OrderTurn | OrderEndTurn | OrderLeave | OrderPillage | OrderTax | OrderEntertain | OrderWork | OrderDestroy
     | OrderAddress | OrderForm | OrderEndForm | OrderArmor | OrderWeapon | OrderAutotax | OrderAvoid | OrderBehind | OrderHold | OrderNoAid
     | OrderShare | OrderNoCross | OrderGuard | OrderConsume | OrderReveal | OrderSpoils | OrderPrepare | OrderCombat | OrderName
     | OrderDescribe | OrderMove | OrderAdvance | OrderSail | OrderPromote | OrderEvict | OrderEnter | OrderAttack | OrderAssassinate
     | OrderSteal | OrderTeach | OrderWithdraw | OrderClaim | OrderStudy | OrderProduce | OrderBuild | OrderTransport | OrderDistribute
     | OrderDeclare | OrderFaction | OrderGive | OrderTake | OrderJoin | OrderCast | OrderBuy | OrderSell | OrderForget | OrderOption
-    | OrderPassword | OrderQuit | OrderRestart | OrderShow | OrderExchange | OrderComment
+    | OrderPassword | OrderQuit | OrderRestart | OrderShow | OrderExchange | OrderComment | OrderUnknown
 
 export class RepeatOrder {
     constructor (public readonly other: Order) { }
@@ -968,6 +973,13 @@ export function createOrderParser() {
             .then(r.Comment)
             .then(P.takeWhile(() => true))
             .map(text => new OrderComment(text)),
+
+        OUnknown: r => P.regex(/[a-z]+/i)
+            .chain(command => r.__
+                .then(P.takeWhile(x => true))
+                .fallback(null)
+                .map(args => new OrderUnknown(command, args))
+            ),
 
         RepeatableOrder: r => P.alt(
             r.OComment,
