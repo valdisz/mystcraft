@@ -373,13 +373,18 @@ export class OrderExchange {
     readonly order = 'exchange'
 }
 
+export class OrderComment {
+    constructor (public readonly text: string) { }
+    readonly order = 'comment'
+}
+
 export type Order = OrderTurn | OrderEndTurn | OrderLeave | OrderPillage | OrderTax | OrderEntertain | OrderWork | OrderDestroy
     | OrderAddress | OrderForm | OrderEndForm | OrderArmor | OrderWeapon | OrderAutotax | OrderAvoid | OrderBehind | OrderHold | OrderNoAid
     | OrderShare | OrderNoCross | OrderGuard | OrderConsume | OrderReveal | OrderSpoils | OrderPrepare | OrderCombat | OrderName
     | OrderDescribe | OrderMove | OrderAdvance | OrderSail | OrderPromote | OrderEvict | OrderEnter | OrderAttack | OrderAssassinate
     | OrderSteal | OrderTeach | OrderWithdraw | OrderClaim | OrderStudy | OrderProduce | OrderBuild | OrderTransport | OrderDistribute
     | OrderDeclare | OrderFaction | OrderGive | OrderTake | OrderJoin | OrderCast | OrderBuy | OrderSell | OrderForget | OrderOption
-    | OrderPassword | OrderQuit | OrderRestart | OrderShow | OrderExchange
+    | OrderPassword | OrderQuit | OrderRestart | OrderShow | OrderExchange | OrderComment
 
 export class RepeatOrder {
     constructor (public readonly other: Order) { }
@@ -959,7 +964,13 @@ export function createOrderParser() {
             .skip(r.EndCommand)
             .map(([ unit, quantityGiven, itemGiven, quantityExpected, itemExpected ]) => new OrderExchange(unit, quantityGiven, itemGiven, quantityExpected, itemExpected)),
 
+        OComment: r => r._
+            .then(r.Comment)
+            .then(P.takeWhile(() => true))
+            .map(text => new OrderComment(text)),
+
         RepeatableOrder: r => P.alt(
+            r.OComment,
             r.OSimpleOrders,
             r.OArmor,
             r.OWeapon,
@@ -1003,18 +1014,15 @@ export function createOrderParser() {
         ),
 
         Order: r => P.alt(
-            r.EndCommand.result(null),
-            P.alt(
-                r.Repeat.then(r.RepeatableOrder).map(order => new RepeatOrder(order)),
-                r.RepeatableOrder,
-                r.OEndTurn,
-                r.OAddress,
-                r.OForm,
-                r.OEndForm,
-                r.OPassword,
-                r.OQuit,
-                r.ORestart,
-            )
+            r.Repeat.then(r.RepeatableOrder).map(order => new RepeatOrder(order)),
+            r.RepeatableOrder,
+            r.OEndTurn,
+            r.OAddress,
+            r.OForm,
+            r.OEndForm,
+            r.OPassword,
+            r.OQuit,
+            r.ORestart,
         )
     })
 

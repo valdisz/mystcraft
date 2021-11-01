@@ -57,7 +57,13 @@ describe('Order Parser', () => {
     }
 
     it('comment', () => {
-        expect(parser(';comment').status).toBe(true)
+        expect(isOrder<Parser.OrderComment>(parser(';comment'), 'comment')).toEqual(new Parser.OrderComment('comment'))
+        expect(isOrder<Parser.OrderComment>(parser(';comment word 2'), 'comment')).toEqual(new Parser.OrderComment('comment word 2'))
+        expect(isOrder<Parser.OrderComment>(parser('  ;comment'), 'comment')).toEqual(new Parser.OrderComment('comment'))
+        expect(isOrder<Parser.OrderComment>(parser('  ;comment word 2'), 'comment')).toEqual(new Parser.OrderComment('comment word 2'))
+
+        expect(isRepeatOrder(parser('@;comment'), 'comment')).toEqual(new Parser.RepeatOrder(new Parser.OrderComment('comment')))
+        expect(isRepeatOrder(parser('@;comment word 2'), 'comment')).toEqual(new Parser.RepeatOrder(new Parser.OrderComment('comment word 2')))
     })
 
     describe('turn', () => pass<Parser.OrderTurn>(true, 'turn', 'turn', o => expect(o).toEqual(new Parser.OrderTurn())))
