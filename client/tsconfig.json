@@ -25,6 +25,7 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
+        "isolatedModules": true,
         "noEmit": true,
         "noImplicitAny": false,
         "skipLibCheck": true

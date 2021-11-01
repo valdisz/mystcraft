@@ -13,6 +13,7 @@ import { World } from "./game/world"
 import { WorldInfo, WorldLevel } from './game/world-info'
 import { Unit } from './game/types'
 import { saveAs } from 'file-saver'
+import { createOrderParser } from './game/orders/parser'
 
 export class TurnsStore {
     constructor() {
@@ -96,17 +97,17 @@ export class GameStore {
     @observable loadingMessage = 'Loading...'
     @action updateLoadingMessage = (message: string) => this.loadingMessage = message
 
-    @observable name: string
-    @observable rulesetName: string
-    @observable rulesetVersion: string
+    @observable name: string = null
+    @observable rulesetName: string = null
+    @observable rulesetVersion: string = null
 
-    @observable lastTurnNumber: number
-    @observable factionName: string
-    @observable factionNumber: number
+    @observable lastTurnNumber: number = null
+    @observable factionName: string = null
+    @observable factionNumber: number = null
 
-    @observable turn: TurnFragment
+    @observable turn: TurnFragment = null
 
-    @observable world: World
+    @observable world: World = null
     gameId: string = null
 
     async loadRegions(turnId: string, onProgress: ProgressCallback) {
@@ -254,8 +255,9 @@ export class GameStore {
     }
 
     @observable unit: Unit = null
-    @observable unitOrders: string
+    @observable unitOrders: string = ''
     @observable ordersState: OrdersState = 'SAVED'
+    ordersChanged = false
 
     @computed get isOrdersVisible() {
         return this.unit?.isPlayer ?? false
@@ -271,7 +273,14 @@ export class GameStore {
         const changed = this.unitOrders !== orders
         this.unitOrders = orders
 
-        if (changed) this.ordersState = 'UNSAVED'
+        if (changed) {
+            this.ordersState = 'UNSAVED'
+            this.ordersChanged = true
+
+            const parser = createOrderParser()
+            const lines = this.unitOrders.split(/\r?\n/)
+            console.log(this.unitOrders, lines, lines.map(parser))
+        }
     }
 
     @action startOrdersSaving = () => this.ordersState = 'SAVING'
