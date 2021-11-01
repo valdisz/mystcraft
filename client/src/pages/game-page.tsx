@@ -30,7 +30,7 @@ import { HexMap } from '../map'
 import { Region } from "../store/game/types"
 import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { List } from '../store/game/list'
+import { ItemMap } from '../store/game/item-map'
 import { Item } from '../store/game/item'
 import { Unit } from '../store/game/unit'
 import { RegionSummary } from '../components/region-summary'
@@ -390,7 +390,7 @@ const UnitsTable = styled(Table)`
     }
 `
 
-function UnitMen({ items }: { items: List<Item> }) {
+function UnitMen({ items }: { items: ItemMap<Item> }) {
     const men = items.all.filter(x => x.isManLike)
     men.sort((a, b) => b.amount - a.amount)
     const total = men.map(x => x.amount).reduce((value, next) => value + next, 0)
@@ -399,7 +399,7 @@ function UnitMen({ items }: { items: List<Item> }) {
     return <>{total} {names}</>
 }
 
-function UnitMounts({ items }: { items: List<Item> }) {
+function UnitMounts({ items }: { items: ItemMap<Item> }) {
     const mounts = items.all.filter(x => x.isMount)
     mounts.sort((a, b) => b.amount - a.amount)
 

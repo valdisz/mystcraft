@@ -1,5 +1,5 @@
 import YAML from 'yaml'
-import { List } from './list'
+import { ItemMap } from './item-map'
 import { ItemInfo } from './item-info'
 import { ItemCategory } from './item-category'
 import { TerrainInfo } from './terrain-info'
@@ -11,9 +11,9 @@ import { SkillInfo } from './skill-info'
 import { Capacity } from './move-capacity'
 
 export class Ruleset {
-    readonly skills: List<Readonly<SkillInfo>> = new List();
-    readonly items: List<Readonly<ItemInfo>> = new List();
-    readonly terrain: List<Readonly<TerrainInfo>> = new List();
+    readonly skills: ItemMap<Readonly<SkillInfo>> = new ItemMap();
+    readonly items: ItemMap<Readonly<ItemInfo>> = new ItemMap();
+    readonly terrain: ItemMap<Readonly<TerrainInfo>> = new ItemMap();
     readonly orders: string[] = [];
 
     money: Readonly<ItemInfo>

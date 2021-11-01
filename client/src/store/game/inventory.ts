@@ -1,6 +1,6 @@
 import { Item } from './item';
 import { ItemInfo } from './item-info';
-import { List } from './list';
+import { ItemMap } from './item-map';
 import { Unit } from './unit';
 import { Income } from './income';
 
@@ -26,7 +26,7 @@ export class Tx {
 }
 
 export class Inventory2 {
-    readonly items = new List<Item>()
+    readonly items = new ItemMap<Item>()
 }
 
 export class Account {
@@ -37,12 +37,12 @@ export class Inventory {
     constructor() {
     }
 
-    readonly items = new List<Item>();
+    readonly items = new ItemMap<Item>();
 
     readonly credit: Transfer[] = [];
     readonly debit: Transfer[] = [];
 
-    readonly balance = new List<Item>();
+    readonly balance = new ItemMap<Item>();
 
     readonly income: Income = {
         tax: 0,

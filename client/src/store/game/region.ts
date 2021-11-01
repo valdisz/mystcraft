@@ -1,45 +1,16 @@
 import { Direction, RegionFragment } from '../../schema'
 import { Item } from './item'
-import { List } from './list'
+import { ItemMap } from './item-map'
 import { Province } from './province'
 import { Coords } from "./coords"
 import { TerrainInfo } from "./terrain-info"
 import { Settlement } from "./settlement"
 import { Ruleset } from "./ruleset"
 import { Wages } from "./wages"
-import { Structure, Unit, Troops, Factions } from './types'
+import { Structure, Unit, Troops } from './types'
 import { SettlementSize } from './settlement-size'
 import { TypedMap } from './typed-map'
-
-export class Link {
-    constructor(public readonly source: Region, public readonly direction: Direction, public readonly target: Region) {
-
-    }
-
-    get cost() {
-        return this.target.terrain.movement
-    }
-
-    toString() {
-        return `${this.direction} : ${this.target}`;
-    }
-}
-
-export class Links {
-    private readonly links: Map<Direction, Link> = new Map()
-
-    all(): Link[] {
-        return Array.from(this.links.values())
-    }
-
-    get(direction: Direction) {
-        return this.links.get(direction)
-    }
-
-    set(source: Region, direction: Direction, target: Region) {
-        this.links.set(direction, new Link(source, direction, target))
-    }
-}
+import { Links } from './link'
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {
@@ -56,7 +27,7 @@ export class Region {
     }
 
     province: Province
-    readonly neighbors: Links = new Links()
+    readonly neighbors = new Links()
 
     terrain: TerrainInfo
     population: Item | null
@@ -64,12 +35,12 @@ export class Region {
     tax: number
     wages: Wages
     entertainment: number
-    readonly wanted: List<Item> = new List()
-    readonly forSale: List<Item> = new List()
-    readonly products: List<Item> = new List()
+    readonly wanted: ItemMap<Item> = new ItemMap()
+    readonly forSale: ItemMap<Item> = new ItemMap()
+    readonly products: ItemMap<Item> = new ItemMap()
 
     readonly units: Unit[] = []
-    readonly troops: TypedMap<Troops> = {}
+    readonly troops = new Map<number, Troops>()
     readonly structures: Structure[] = []
 
     addUnit(unit: Unit, structure?: Structure) {
@@ -83,10 +54,11 @@ export class Region {
 
         const faction = unit.faction
 
-        if (!this.troops[faction.num]) {
-            this.troops[faction.num] = new Troops(faction)
+        if (!this.troops.has(faction.num)) {
+            this.troops.set(faction.num, new Troops(faction))
         }
-        this.troops[faction.num].add(unit)
+
+        this.troops.get(faction.num).add(unit)
     }
 
     addStructure(str: Structure) {

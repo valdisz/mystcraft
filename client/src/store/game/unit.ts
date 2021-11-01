@@ -1,6 +1,6 @@
 import { UnitFragment } from '../../schema';
 import { ItemInfo } from "./item-info";
-import { List } from './list';
+import { ItemMap } from './item-map';
 import { Ruleset } from './ruleset';
 import { Capacity, MoveType } from './move-capacity';
 import { Faction, Factions } from "./faction";
@@ -33,8 +33,8 @@ export class Unit {
     description?: string;
     onGuard = false;
     readonly flags: Flag[] = [];
-    readonly skills = new List<Skill>();
-    readonly canStudy = new List<SkillInfo>();
+    readonly skills = new ItemMap<Skill>();
+    readonly canStudy = new ItemMap<SkillInfo>();
     weight = 0;
     readonly capacity = new Capacity();
     readyItem: ItemInfo;
@@ -128,7 +128,7 @@ export class Unit {
                 const { canMove } = item.info.traits
                 if (canMove) {
                     const { requires } = canMove
-                    if (requires && !unit.inventory.items.contains(requires.code)) {
+                    if (requires && !unit.inventory.items.has(requires.code)) {
                         continue
                     }
 

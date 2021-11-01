@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js'
 import { autoDetectRenderer, Container, Loader, Point, AbstractRenderer } from 'pixi.js'
 import { Hex, DoubledCoord, Layout, Orientation } from '../geometry'
-import { Link, Region } from "../store/game/region"
+import { Link } from '../store/game/link'
+import { Region } from "../store/game/region"
 import { Viewport } from './viewport'
 
 export interface GetRegionCallback {
@@ -260,7 +261,7 @@ export class HexMap {
         }
 
         // units
-        if (Object.values(region.troops).some(x => x.faction.isPlayer)) {
+        if (Array.from(region.troops.values()).some(x => x.faction.isPlayer)) {
             const flag = new PIXI.Sprite(this.loader.resources['/flag.svg'].texture)
             flag.scale.set(0.125)
             flag.anchor.set(0, flag.height * 0.125 / 2)
