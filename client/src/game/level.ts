@@ -2,7 +2,7 @@ import { Link, Region } from './region'
 import { TypedMap } from './typed-map'
 import { Pathfinder } from './algo/pathfinder'
 import { MoveType } from './move-capacity'
-import { DoubledCoord } from '../../geometry'
+import { DoubledCoord } from '../geometry'
 
 class RegionAStar extends Pathfinder<Region, Link> {
     neighbors(node: Region): Link[] {

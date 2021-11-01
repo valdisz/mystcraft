@@ -1,8 +1,8 @@
 import * as PIXI from 'pixi.js'
 import { autoDetectRenderer, Container, Loader, Point, AbstractRenderer } from 'pixi.js'
 import { Hex, DoubledCoord, Layout, Orientation } from '../geometry'
-import { Link } from '../store/game/link'
-import { Region } from "../store/game/region"
+import { Link } from '../game/link'
+import { Region } from "../game/region"
 import { Viewport } from './viewport'
 
 export interface GetRegionCallback {

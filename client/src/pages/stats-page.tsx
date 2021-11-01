@@ -15,7 +15,7 @@ import {
 import { styled } from '@mui/material/styles'
 import { useStore } from '../store'
 import { Observer } from 'mobx-react-lite'
-import { SkillInfo } from '../store/game/skill-info'
+import { SkillInfo } from '../game/skill-info'
 import { Link, useParams, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom'
 
 interface SkillInfoTooltipProps {

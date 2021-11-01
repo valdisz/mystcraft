@@ -1,13 +1,13 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
 import { Typography, Button, Grid, Box, Tooltip, Chip } from '@mui/material'
-import { Unit } from '../store/game/types'
+import { Unit } from '../game/types'
 import { useCopy } from '../lib'
-import { Province } from '../store/game/province'
-import { Item } from '../store/game/item'
-import { ItemInfo } from '../store/game/item-info'
-import { Skill } from '../store/game/skill'
-import { SkillInfo } from '../store/game/skill-info'
+import { Province } from '../game/province'
+import { Item } from '../game/item'
+import { ItemInfo } from '../game/item-info'
+import { Skill } from '../game/skill'
+import { SkillInfo } from '../game/skill-info'
 
 const SpaceBetween = styled(Grid)`
     display: flex;

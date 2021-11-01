@@ -1,4 +1,4 @@
-import { DoubledCoord, Hex } from "../../geometry"
+import { DoubledCoord, Hex } from "../geometry"
 
 export class Coords {
     constructor(

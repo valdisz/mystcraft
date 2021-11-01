@@ -27,12 +27,12 @@ import {
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
 import { HexMap } from '../map'
-import { Region } from "../store/game/types"
+import { Region } from "../game/types"
 import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { ItemMap } from '../store/game/item-map'
-import { Item } from '../store/game/item'
-import { Unit } from '../store/game/unit'
+import { ItemMap } from '../game/item-map'
+import { Item } from '../game/item'
+import { Unit } from '../game/unit'
 import { RegionSummary } from '../components/region-summary'
 import { StatsPage } from './stats-page'
 import Editor from 'react-simple-code-editor'
@@ -40,9 +40,9 @@ import Prism from 'prismjs'
 import { Dialog } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { GameStore, OrdersState } from '../store/game-store'
-import { Ruleset } from '../store/game/ruleset'
+import { Ruleset } from '../game/ruleset'
 import { UnitSummary } from '../components'
-import { Capacity } from '../store/game/move-capacity'
+import { Capacity } from '../game/move-capacity'
 import { green, lightBlue } from '@mui/material/colors'
 
 const GameContainer = styled('div')`

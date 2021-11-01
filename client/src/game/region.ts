@@ -1,4 +1,4 @@
-import { Direction, RegionFragment } from '../../schema'
+import { Direction, RegionFragment } from '../schema'
 import { Item } from './item'
 import { ItemMap } from './item-map'
 import { Province } from './province'

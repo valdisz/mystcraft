@@ -1,4 +1,4 @@
-import { UnitFragment } from '../../schema';
+import { UnitFragment } from '../schema';
 import { ItemInfo } from "./item-info";
 import { ItemMap } from './item-map';
 import { Ruleset } from './ruleset';

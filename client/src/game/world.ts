@@ -1,4 +1,4 @@
-import { RegionFragment, StructureFragment, UnitFragment } from '../../schema';
+import { RegionFragment, StructureFragment, UnitFragment } from '../schema';
 import { Ruleset } from "./ruleset";
 import { Region } from "./region";
 import { Level } from "./level";

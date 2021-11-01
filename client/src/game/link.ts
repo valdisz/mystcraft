@@ -1,4 +1,4 @@
-import { Direction } from "../../schema";
+import { Direction } from "../schema";
 import { Region } from "./types";
 
 export class Link {

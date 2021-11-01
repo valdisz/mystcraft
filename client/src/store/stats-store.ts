@@ -2,10 +2,10 @@ import { makeObservable, computed, action, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
 import { TurnStatsFragment } from '../schema'
 import { GameStore } from './game-store'
-import { SkillInfo } from './game/skill-info'
+import { SkillInfo } from '../game/skill-info'
 import { GetAllianceStats, GetAllianceStatsQuery, GetAllianceStatsQueryVariables } from '../schema'
-import { ItemCategory } from './game/item-category'
-import { ItemInfo } from './game/item-info'
+import { ItemCategory } from '../game/item-category'
+import { ItemInfo } from '../game/item-info'
 
 interface KnownSkill {
     skill: SkillInfo

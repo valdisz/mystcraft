@@ -5,13 +5,13 @@ import { Box, Typography, Button, Grid, Theme,
     Tooltip,
 } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { Region } from '../store/game/types'
-import { Coords } from '../store/game/coords'
+import { Region } from '../game/types'
+import { Coords } from '../game/coords'
 import { useCopy } from '../lib'
-import { Province } from '../store/game/province'
-import { TerrainInfo } from '../store/game/terrain-info'
-import { Item } from '../store/game/item'
-import { ItemInfo } from '../store/game/item-info'
+import { Province } from '../game/province'
+import { TerrainInfo } from '../game/terrain-info'
+import { Item } from '../game/item'
+import { ItemInfo } from '../game/item-info'
 
 
 const WideTooltip = styled(Tooltip)`
