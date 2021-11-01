@@ -180,11 +180,200 @@ export class OrderSteal {
     readonly order = 'steal'
 }
 
+
+
+export class OrderTeach {
+    constructor (public readonly units: UnitNumber[]) { }
+    readonly order = 'teach'
+}
+
+export class OrderWithdraw {
+    constructor (public readonly quantity: number, public readonly item: string) { }
+    readonly order = 'withdraw'
+}
+
+export class OrderClaim {
+    constructor (public readonly amount: number) { }
+    readonly order = 'claim'
+}
+
+export class OrderStudy {
+    constructor (public readonly skill: string, public readonly level: number = null) { }
+    readonly order = 'study'
+}
+
+export class OrderProduce {
+    constructor (public readonly item: string, public readonly quantity: number = null) { }
+    readonly order = 'withdraw'
+}
+
+export class OrderBuild {
+    constructor (public readonly type: string) { }
+    readonly order = 'build'
+}
+
+export class OrderBuildContinue {
+    readonly order = 'build/continue'
+}
+
+export class OrderBuildHelp {
+    constructor (public readonly unit: UnitNumber) { }
+    readonly order = 'build/help'
+}
+
+export class OrderTransport {
+    constructor (
+        public readonly unit: UnitNumber,
+        public readonly quantity: number | 'all',
+        public readonly item: string,
+        public readonly except: number = null
+    ) { }
+
+    readonly order = 'transport'
+}
+
+export class OrderDistribute {
+    constructor (
+        public readonly unit: UnitNumber,
+        public readonly quantity: number | 'all',
+        public readonly item: string,
+        public readonly except: number = null
+    ) { }
+
+    readonly order = 'distribute'
+}
+
+export class OrderDeclare {
+    constructor (public readonly faction: number, public readonly attitude: string = null) { }
+    readonly order = 'declare'
+}
+
+export class OrderDeclareDefault {
+    constructor (public readonly attitude: string) { }
+    readonly order = 'declare/default'
+}
+
+export class FactionType {
+    constructor (public readonly type: string, public readonly points: number) { }
+}
+
+export class OrderFaction {
+    constructor (public readonly type: FactionType[]) { }
+    readonly order = 'faction'
+}
+
+export class OrderGive {
+    constructor (
+        public readonly toUnit: UnitNumber,
+        public readonly quantity: number | 'all',
+        public readonly itemOrClass: string,
+        public readonly except: number = null
+    ) { }
+
+    readonly order = 'give'
+}
+
+export class OrderGiveUnit {
+    constructor (public readonly toUnit: UnitNumber) { }
+
+    readonly order = 'give/unit'
+}
+
+export class OrderTake {
+    constructor (
+        public readonly fromUnit: UnitNumber,
+        public readonly quantity: number | 'all',
+        public readonly itemOrClass: string,
+        public readonly except: number = null
+    ) { }
+
+    readonly order = 'take'
+}
+
+export class OrderJoin {
+    constructor (public readonly withUnit: UnitNumber, public readonly mode: string = null) { }
+
+    readonly order = 'join'
+}
+
+export class OrderCast {
+    constructor (public readonly skill: string, public readonly args: string[] = []) { }
+
+    readonly order = 'cast'
+}
+
+export class OrderBuy {
+    constructor (public readonly quantity: number | 'all', public readonly item: string) { }
+
+    readonly order = 'buy'
+}
+
+export class OrderSell {
+    constructor (public readonly quantity: number | 'all', public readonly item: string) { }
+
+    readonly order = 'sell'
+}
+
+export class OrderForget {
+    constructor (public readonly skill: string) { }
+
+    readonly order = 'forget'
+
+}
+
+export class OrderOption {
+    constructor (public readonly setting: string) { }
+
+    readonly order = 'option'
+}
+
+export class OrderPassword {
+    constructor (public readonly password: string) { }
+
+    readonly order = 'password'
+}
+
+export class OrderQuit {
+    constructor (public readonly password: string) { }
+
+    readonly order = 'quit'
+}
+
+export class OrderRestart {
+    constructor (public readonly password: string) { }
+
+    readonly order = 'restart'
+}
+
+export class OrderShow {
+    constructor (
+        public readonly type: string,
+        public readonly itemSkillObject: string,
+        public readonly level: number = null
+    ) { }
+
+    readonly order = 'show'
+}
+
+export class OrderExchange {
+    constructor (
+        public readonly unit: UnitNumber,
+        public readonly quantityGiven: number,
+        public readonly itemGiven: string,
+        public readonly quantityExpected: number,
+        public readonly itemExpected: string
+    ) { }
+
+    readonly order = 'exchange'
+}
+
 export type Order = OrderTurn | OrderEndTurn | OrderLeave | OrderPillage | OrderTax | OrderEntertain | OrderWork | OrderDestroy
     | OrderAddress | OrderForm | OrderEndForm | OrderArmor | OrderWeapon | OrderAutotax | OrderAvoid | OrderBehind | OrderHold | OrderNoAid
     | OrderShare | OrderNoCross | OrderGuard | OrderConsume | OrderReveal | OrderSpoils | OrderPrepare | OrderCombat | OrderName
     | OrderDescribe | OrderMove | OrderAdvance | OrderSail | OrderPromote | OrderEvict | OrderEnter | OrderAttack | OrderAssassinate
-    | OrderSteal
+    | OrderSteal | OrderTeach | OrderWithdraw | OrderClaim | OrderStudy | OrderProduce | OrderBuild | OrderBuildContinue | OrderBuildHelp
+    | OrderTransport | OrderDistribute | OrderDeclare | OrderDeclareDefault | OrderFaction | OrderGive | OrderGiveUnit | OrderTake
+    | OrderJoin | OrderCast | OrderBuy | OrderSell | OrderForget | OrderOption | OrderPassword | OrderQuit | OrderRestart | OrderExchange
 
 export class RepeatOrder {
     constructor (public readonly other: Order) { }
@@ -268,6 +457,10 @@ export function createOrderParser() {
         FactionPointItem: r => r.__.then(P.seq(r.FactionType.skip(r.__), r.Num)),
 
         FactionPointList: r => r.FactionPointItem.atLeast(1),
+
+        ExceptNum: r => r.__.then(r.Except).then(r.__).then(r.Num),
+
+        ItemClassToken: r => r.__.then(r.ItemClass),
 
         //////
 
@@ -430,44 +623,47 @@ export function createOrderParser() {
         OTeach: r => P.regex(/teach/i)
             .then(r.__)
             .then(r.UnitList)
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(units => new OrderTeach(units)),
 
         // WITHDRAW [item]
         // WITHDRAW [quantity] [item]
         OWithdraw: r => P.regex(/withdraw/i)
             .then(r.__)
             .then(P.alt(
-                r.Num
-                    .chain(quantity => r.TokenItem),
-                r.Token
+                P.seq(r.Num, r.TokenItem),
+                P.seq(P.succeed(1), r.Token)
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ quantity, item ]) => new OrderWithdraw(quantity, item)),
 
         // CLAIM [amount]
         OClaim: r => P.regex(/claim/i)
             .then(r.__)
             .then(r.Num)
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(amount => new OrderClaim(amount)),
 
         // STUDY [skill]
         // STUDY [skill] [level]
         OStudy: r => P.regex(/study/i)
             .then(P.alt(
-                r.TokenItem
-                    .chain(skill => r.__.then(r.Num)),
-                r.TokenItem
+                P.seq(r.TokenItem, r.__.then(r.Num)),
+                P.seq(r.TokenItem, P.succeed(null))
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ skill, level ]) => new OrderStudy(skill, level)),
 
         // PRODUCE [item]
         // PRODUCE [number] [item]
         OProduce: r => P.regex(/produce/i)
             .then(r.__)
             .then(P.alt(
-                r.Num.chain(number => r.TokenItem),
-                r.Token
+                P.seq(r.Num, r.TokenItem),
+                P.seq(P.succeed(null), r.Token)
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ quantity, item ]) => new OrderProduce(item, quantity)),
 
         // BUILD
         // BUILD [object type]
@@ -477,9 +673,11 @@ export function createOrderParser() {
             .then(P.alt(
                 P.regex(/help/i)
                     .then(r.__)
-                    .then(r.UnitNumber),
-                r.Token,
-                P.succeed(null)
+                    .then(r.UnitNumber)
+                    .map(unit => new OrderBuildHelp(unit)),
+                r.Token
+                    .map(type => new OrderBuild(type)),
+                P.succeed(new OrderBuildContinue())
             ))
             .skip(r.EndCommand),
 
@@ -490,11 +688,14 @@ export function createOrderParser() {
             .then(r.__)
             .then(r.UnitNumber)
             .skip(r.__)
-            .chain(unit => P.alt(
-                P.seq(r.All, r.TokenItem, r.__.then(r.Except).then(r.__).then(r.Num)),
-                P.seq(r.All, r.TokenItem),
-                P.seq(r.Num, r.TokenItem),
-            ))
+            .chain(unit => P
+                .alt(
+                    P.seq(r.All, r.TokenItem, r.ExceptNum),
+                    P.seq(r.All, r.TokenItem, P.succeed(null)),
+                    P.seq(r.Num, r.TokenItem, P.succeed(null))
+                )
+                .map(([ quantity, item, except ]) => new OrderTransport(unit, quantity, item, except))
+            )
             .skip(r.EndCommand),
 
         // DISTRIBUTE [unit] [num] [item]
@@ -504,11 +705,14 @@ export function createOrderParser() {
             .then(r.__)
             .then(r.UnitNumber)
             .skip(r.__)
-            .chain(unit => P.alt(
-                P.seq(r.All, r.TokenItem, r.__.then(r.Except).then(r.__).then(r.Num)),
-                P.seq(r.All, r.TokenItem),
-                P.seq(r.Num, r.TokenItem),
-            ))
+            .chain(unit => P
+                .alt(
+                    P.seq(r.All, r.TokenItem, r.ExceptNum),
+                    P.seq(r.All, r.TokenItem, P.succeed(null)),
+                    P.seq(r.Num, r.TokenItem, P.succeed(null))
+                )
+                .map(([ quantity, item, except ]) => new OrderTransport(unit, quantity, item, except))
+            )
             .skip(r.EndCommand),
 
         // DECLARE [faction] [attitude]
@@ -517,9 +721,14 @@ export function createOrderParser() {
         ODeclare: r => P.regex(/declare/i)
             .then(r.__)
             .then(P.alt(
-                P.regex(/default/i).then(r.__).then(r.Attitude),
-                P.seq(r.Num, r.__.then(r.Attitude)),
+                P.regex(/default/i)
+                    .then(r.__)
+                    .then(r.Attitude)
+                    .map(attitude => new OrderDeclareDefault(attitude)),
+                P.seq(r.Num, r.__.then(r.Attitude))
+                    .map(([ faction, attitude ]) => new OrderDeclare(faction, attitude)),
                 r.Num
+                    .map(faction => new OrderDeclare(faction))
             ))
             .skip(r.EndCommand),
 
@@ -527,99 +736,97 @@ export function createOrderParser() {
         OFaction: r => P.regex(/faction/i)
             .then(r.__)
             .then(r.FactionPointList)
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(type => new OrderFaction(type)),
 
-        // GIVE [unit] [quantity] [item]
-        // GIVE [unit] ALL [item]
+        // GIVE [unit] UNIT
         // GIVE [unit] ALL [item] EXCEPT [quantity]
         // GIVE [unit] ALL [item class]
-        // GIVE [unit] UNIT
+        // GIVE [unit] ALL [item]
+        // GIVE [unit] [quantity] [item]
         OGive: r => P.regex(/give/i)
             .then(r.__)
             .then(r.UnitNumber)
             .skip(r.__)
             .chain(unit => P.alt(
-                P.regex(/unit/i),
-                r.All
-                    .then(r.__)
-                    .then(P.alt(
-                        P.seq(r.Token, r.__.then(r.Except).then(r.Num)),
-                        r.ItemClass,
-                        r.Token
-                    )),
-                P.seq(r.Num.skip(r.__), r.Token)
+                P.regex(/unit/i)
+                    .map(() => new OrderGiveUnit(unit)),
+                P.alt(
+                    P.seq(r.All, r.TokenItem, r.ExceptNum),
+                    P.seq(r.All, r.ItemClassToken, P.succeed(null)),
+                    P.seq(r.All, r.TokenItem, P.succeed(null)),
+                    P.seq(r.Num, r.TokenItem, P.succeed(null))
+                )
+                    .map(([ quantity, item, except ]) => new OrderGive(unit, quantity, item, except))
             ))
             .skip(r.EndCommand),
 
-        // TAKE FROM [unit] [quantity] [item]
-        // TAKE FROM [unit] ALL [item]
         // TAKE FROM [unit] ALL [item] EXCEPT [quantity]
         // TAKE FROM [unit] ALL [item class]
+        // TAKE FROM [unit] ALL [item]
+        // TAKE FROM [unit] [quantity] [item]
         OTake: r => P.regex(/take/i)
             .then(r.__)
-            .then(P.regex(/from/i))
-            .then(r.__)
             .then(r.UnitNumber)
             .skip(r.__)
             .chain(unit => P.alt(
-                P.regex(/unit/i),
-                r.All
-                    .then(r.__)
-                    .then(P.alt(
-                        P.seq(r.Token, r.__.then(r.Except).then(r.Num)),
-                        r.ItemClass,
-                        r.Token
-                    )),
-                P.seq(r.Num.skip(r.__), r.Token)
-            ))
+                    P.seq(r.All, r.TokenItem, r.ExceptNum),
+                    P.seq(r.All, r.ItemClassToken, P.succeed(null)),
+                    P.seq(r.All, r.TokenItem, P.succeed(null)),
+                    P.seq(r.Num, r.TokenItem, P.succeed(null))
+                )
+                .map(([ quantity, item, except ]) => new OrderTake(unit, quantity, item, except))
+            )
             .skip(r.EndCommand),
 
-        //JOIN [unit]
         //JOIN [unit] NOOVERLOAD
         //JOIN [unit] MERGE
+        //JOIN [unit]
         OJoin: r => P.regex(/join/i)
             .then(r.__)
-            .then(r.UnitNumber)
-            .skip(r.__)
-            .chain(unit => P.alt(
-                P.regex(/merge/i),
-                P.regex(/nooverload/i),
-                P.succeed(null)
+            .then(P.alt(
+                P.seq(r.UnitNumber, r.__.then(P.regex(/nooverload/i))),
+                P.seq(r.UnitNumber, r.__.then(P.regex(/merge/i))),
+                P.seq(r.UnitNumber, P.succeed(null))
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ unit, mode ]) => new OrderJoin(unit, mode)),
 
         // CAST [skill] [arguments]
         OCast: r => P.regex(/cast/i)
-            .then(P.seq(
-                r.TokenItem,
-                r.TokenItem.many()
-            ))
-            .skip(r.EndCommand),
+            .then(
+                P.seq(r.TokenItem, r.TokenItem.many())
+            )
+            .skip(r.EndCommand)
+            .map(([ skill, args ]) => new OrderCast(skill, args)),
 
-        // SELL [quantity] [item]
         // SELL ALL [item]
+        // SELL [quantity] [item]
         OSell: r => P.regex(/sell/i)
             .then(r.__)
             .then(P.alt(
-                r.All.then(r.TokenItem),
+                P.seq(r.All, r.TokenItem),
                 P.seq(r.Num, r.TokenItem)
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ quantity, item ]) => new OrderSell(quantity, item)),
 
         // BUY [quantity] [item]
         // BUY ALL [item]
         OBuy: r => P.regex(/buy/i)
             .then(r.__)
             .then(P.alt(
-                r.All.then(r.TokenItem),
+                P.seq(r.All, r.TokenItem),
                 P.seq(r.Num, r.TokenItem)
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ quantity, item ]) => new OrderBuy(quantity, item)),
 
         // FORGET [skill]
         OForget: r => P.regex(/forget/i)
             .then(r.TokenItem)
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(skill => new OrderForget(skill)),
 
         // OPTION TIMES
         // OPTION NOTIMES
@@ -636,22 +843,40 @@ export function createOrderParser() {
                 P.regex(/notimes/i),
                 P.regex(/showattitudes/i),
                 P.regex(/dontshowattitudes/i),
-                P.regex(/template/i).then(P.alt(
-                    P.regex(/off/i),
-                    P.regex(/short/i),
-                    P.regex(/long/i),
-                    P.regex(/map/i),
-                )),
+                P.regex(/template/i)
+                    .chain(template => P.alt(
+                            P.regex(/off/i),
+                            P.regex(/short/i),
+                            P.regex(/long/i),
+                            P.regex(/map/i),
+                        )
+                        .map(mode => `${template} ${mode}`)
+                    )
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(setting => new OrderOption(setting)),
 
         // PASSWORD [password]
         // PASSWORD
         OPassword: r => P.regex(/password/i)
             .then(P.alt(
-                r.TokenItem.skip(r.EndCommand),
-                r.EndCommand
-            )),
+                r.TokenItem,
+                P.succeed(null)
+            ))
+            .skip(r.EndCommand)
+            .map(passwrod => new OrderPassword(passwrod)),
+
+        // QUIT [password]
+        OQuit: r => P.regex(/quit/i)
+            .then(r.TokenItem)
+            .skip(r.EndCommand)
+            .map(password => new OrderQuit(password)),
+
+        // RESTART [password]
+        ORestart: r => P.regex(/restart/i)
+            .then(r.TokenItem)
+            .skip(r.EndCommand)
+            .map(password => new OrderRestart(password)),
 
         // SHOW SKILL [skill] [level]
         // SHOW ITEM [item]
@@ -659,11 +884,12 @@ export function createOrderParser() {
         OShow: r => P.regex(/show/i)
             .then(r.__)
             .then(P.alt(
-                P.regex(/skill/i).then(P.seq(r.TokenItem, r.TokenItem)),
-                P.regex(/item/i).then(r.TokenItem),
-                P.regex(/object/i).then(r.TokenItem)
+                P.seq(P.regex(/skill/i), r.TokenItem, r.NumItem),
+                P.seq(P.regex(/item/i), r.TokenItem, P.succeed(null)),
+                P.seq(P.regex(/object/i), r.TokenItem, P.succeed(null))
             ))
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ type, token, level ]) => new OrderShow(type, token, level)),
 
         // EXCHANGE [unit] [quantity given] [item given] [quantity expected] [item expected]
         OExchange: r => P.regex(/exchange/i)
@@ -675,17 +901,8 @@ export function createOrderParser() {
                 r.__.then(r.Num),
                 r.TokenItem
             ))
-            .skip(r.EndCommand),
-
-        // QUIT [password]
-        OQuit: r => P.regex(/quit/i)
-            .then(r.TokenItem)
-            .skip(r.EndCommand),
-
-        // RESTART [password]
-        ORestart: r => P.regex(/restart/i)
-            .then(r.TokenItem)
-            .skip(r.EndCommand),
+            .skip(r.EndCommand)
+            .map(([ unit, quantityGiven, itemGiven, quantityExpected, itemExpected ]) => new OrderExchange(unit, quantityGiven, itemGiven, quantityExpected, itemExpected)),
 
         RepeatableOrder: r => P.alt(
             r.OSimpleOrders,
