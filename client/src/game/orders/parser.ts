@@ -396,6 +396,8 @@ export class RepeatOrder {
     readonly order = '@'
 }
 
+export type UnitOrder = Order | RepeatOrder
+
 export function createOrderParser() {
     const language = P.createLanguage({
         _:              () => P.regex(/\s*/).desc('whitepsace'),
@@ -974,7 +976,7 @@ export function createOrderParser() {
             .then(P.takeWhile(() => true))
             .map(text => new OrderComment(text)),
 
-        OUnknown: r => P.regex(/[a-z]+/i)
+        OUnknown: r => P.takeWhile(x => !r.__.parse(x).status)
             .chain(command => r.__
                 .then(P.takeWhile(x => true))
                 .fallback(null)
@@ -1035,8 +1037,26 @@ export function createOrderParser() {
             r.OPassword,
             r.OQuit,
             r.ORestart,
-        )
+        ).or(r.OUnknown)
     })
 
-    return (line: string) => language.Order.parse(line) as P.Result<Order | RepeatOrder>
+    return (line: string) => language.Order.parse(line) as P.Result<UnitOrder>
 }
+
+export class OrderParser {
+    private readonly parser = createOrderParser()
+
+    parse(orders: string): UnitOrder[] {
+        const items = []
+        for (const line of orders.split(/\r?\n/g)) {
+            const r = this.parser(line)
+            if (r.status) {
+                items.push(r.value)
+            }
+        }
+
+        return items
+    }
+}
+
+export const ORDER_PARSER = new OrderParser()

@@ -52,7 +52,15 @@ describe('Order Parser', () => {
         }
 
         if (!repeat) {
-            it('@' + order, () => expect(parser('@' + order).status).toBe(false))
+            it('@' + order, () => {
+                const r = parser('@' + order)
+                if (r.status === true) {
+                    expect(r.value.order).toBe('unknown')
+                }
+                else {
+                    expect(r.status).toBe(false)
+                }
+            })
         }
     }
 
