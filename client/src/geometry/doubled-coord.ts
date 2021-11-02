@@ -1,7 +1,7 @@
 import { Hex } from './hex';
 
 export class DoubledCoord {
-    constructor(public col: number, public row: number) { }
+    constructor(public x: number, public y: number) { }
 
     readonly type = 'double'
 
@@ -12,8 +12,8 @@ export class DoubledCoord {
     }
 
     public toCube(): Hex {
-        var q: number = this.col;
-        var r: number = (this.row - this.col) / 2;
+        var q: number = this.x;
+        var r: number = (this.y - this.x) / 2;
         var s: number = -q - r;
         return new Hex(q, r, s);
     }

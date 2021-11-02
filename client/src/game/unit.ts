@@ -10,6 +10,7 @@ import { SkillInfo } from "./skill-info";
 import { Event } from "./event";
 import { Inventory } from "./inventory";
 import { Region, Structure } from './types';
+import { OrderParser, ORDER_PARSER, UnitOrder, Order } from './orders/parser';
 
 export class Unit {
     constructor(
@@ -40,7 +41,23 @@ export class Unit {
     readyItem: ItemInfo;
     combatSpell: SkillInfo;
     readonly events: Event[] = [];
-    orders: string
+
+    ordersSrc: string
+    orders: UnitOrder[] = []
+
+    setOrders(orders: string, parser: OrderParser = null) {
+        this.ordersSrc = orders
+        this.parseOrders(parser)
+    }
+
+    parseOrders(parser: OrderParser = null) {
+        if (this.ordersSrc) {
+            this.orders = (parser ?? ORDER_PARSER).parse(this.ordersSrc)
+        }
+        else {
+            this.orders = []
+        }
+    }
 
     get money() {
         return this.inventory.items.get(this.ruleset.money)?.amount ?? 0
@@ -114,7 +131,7 @@ export class Unit {
             ? src.weight
             : unit.inventory.items.all.map(x => x.weight).reduce((w, v) => w + v)
 
-        unit.orders = src.orders
+        unit.setOrders(src.orders)
 
         if (src.capacity) {
             const { walking, swimming, riding, flying } = src.capacity

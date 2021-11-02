@@ -119,10 +119,10 @@ export class HexMap {
 
         const dc = DoubledCoord.fromCube(this.selectedRegion)
 
-        dc.col = dc.col % this.size.width
-        if (dc.col < 0) dc.col += this.size.width
+        dc.x = dc.x % this.size.width
+        if (dc.x < 0) dc.x += this.size.width
 
-        if (this.onRegionSelected) this.onRegionSelected(dc.col, dc.row)
+        if (this.onRegionSelected) this.onRegionSelected(dc.x, dc.y)
     }
 
     selectedRegion: Hex
@@ -301,10 +301,10 @@ export class HexMap {
         const p1 = new PIXI.Point(this.viewport.width, this.viewport.height)
         const topLeft = DoubledCoord.fromCube(this.layout.pixelToHex(p0))
         const bottomRight = DoubledCoord.fromCube(this.layout.pixelToHex(p1))
-        const col0 = topLeft.col - 2
-        const row0 = Math.max(0, topLeft.row - 2)
-        const col1 = bottomRight.col + 2
-        const row1 = Math.min(bottomRight.row + 2, this.size.height - 1)
+        const col0 = topLeft.x - 2
+        const row0 = Math.max(0, topLeft.y - 2)
+        const col1 = bottomRight.x + 2
+        const row1 = Math.min(bottomRight.y + 2, this.size.height - 1)
 
         this.tiles.removeChildren()
         this.outline.removeChildren()

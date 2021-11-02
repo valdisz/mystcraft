@@ -1,8 +1,9 @@
-import { Link, Region } from './region'
+import { Region } from './region'
 import { TypedMap } from './typed-map'
 import { Pathfinder } from './algo/pathfinder'
 import { MoveType } from './move-capacity'
 import { DoubledCoord } from '../geometry'
+import { Link } from './link'
 
 class RegionAStar extends Pathfinder<Region, Link> {
     neighbors(node: Region): Link[] {
@@ -15,14 +16,14 @@ class RegionAStar extends Pathfinder<Region, Link> {
 }
 
 function distanceHeuristic(mapWidth: number, start: Region, goal: Region) {
-    const s = start.coords.toDouble()
-    const g = goal.coords.toDouble()
+    const s = start.coords
+    const g = goal.coords
 
-    const s0 = s.toCube()
-    const g0 = g.toCube()
+    const s0 = s.cube
+    const g0 = g.cube
 
-    const s1 = new DoubledCoord(s.col + mapWidth, s.row).toCube()
-    const g1 = new DoubledCoord(g.col + mapWidth, g.row).toCube()
+    const s1 = new DoubledCoord(s.x + mapWidth, s.y).toCube()
+    const g1 = new DoubledCoord(g.x + mapWidth, g.y).toCube()
 
     const d0 = s0.distance(g0)
     const d1 = s0.distance(g1)

@@ -1,21 +1,17 @@
 import { DoubledCoord, Hex } from "../geometry"
 
-export class Coords {
+export class Coords extends DoubledCoord {
     constructor(
-        public readonly x: number,
-        public readonly y: number,
+        x: number,
+        y: number,
         public readonly z: number,
         public readonly label?: string) {
+            super(x, y)
 
-    }
+            this.cube = this.toCube()
+        }
 
-    toDouble() {
-        return new DoubledCoord(this.x, this.y)
-    }
-
-    toCube() {
-        return this.toDouble().toCube();
-    }
+    readonly cube: Hex
 
     toString() {
         const parts = [ this.x, this.y ]

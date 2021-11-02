@@ -64,7 +64,7 @@ export class GameStore {
 
                     const result = response.data?.setOrders
                     if (!response.errors && result?.isSuccess) {
-                        unit.orders = orders
+                        unit.setOrders(orders)
                     }
                     else {
                         this.setOrders(prevOrders)
@@ -265,7 +265,7 @@ export class GameStore {
 
     @action selectUnit = (unit: Unit) => {
         this.unit = unit
-        this.unitOrders = unit?.orders
+        this.unitOrders = unit?.ordersSrc
         this.ordersState = 'SAVED'
     }
 
@@ -276,10 +276,6 @@ export class GameStore {
         if (changed) {
             this.ordersState = 'UNSAVED'
             this.ordersChanged = true
-
-            const parser = createOrderParser()
-            const lines = this.unitOrders.split(/\r?\n/)
-            console.log(this.unitOrders, lines, lines.map(parser))
         }
     }
 
@@ -359,7 +355,7 @@ export class GameStore {
         var faction = this.world.factions.get(this.factionNumber)
         for (const unit of faction.troops.units) {
             lines.push(`unit ${unit.num}`)
-            lines.push(unit.orders)
+            lines.push(unit.ordersSrc)
             lines.push('')
         }
 
