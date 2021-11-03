@@ -1,83 +1,56 @@
 import { Region } from './region'
-import { TypedMap } from './typed-map'
-import { Pathfinder } from './algo/pathfinder'
-import { MoveType } from './move-capacity'
-import { DoubledCoord } from '../geometry'
-import { Link } from './link'
+import { Coords } from './coords'
 
-class RegionAStar extends Pathfinder<Region, Link> {
-    neighbors(node: Region): Link[] {
-        return node.neighbors.all()
+export class Level implements Iterable<Region> {
+    constructor(public readonly width: number, public readonly height: number, public readonly index: number, public readonly label: string) {
+        this.regions = new Array(Math.floor(this.width * this.height / 2) + 1)
     }
 
-    getNode(edge: Link): Region {
-        return edge.target
-    }
-}
+    private readonly regions: Region[]
+    private readonly regionIdMap = new Map<string, Region>()
+    private readonly regionCodeMap = new Map<string, Region>()
 
-function distanceHeuristic(mapWidth: number, start: Region, goal: Region) {
-    const s = start.coords
-    const g = goal.coords
-
-    const s0 = s.cube
-    const g0 = g.cube
-
-    const s1 = new DoubledCoord(s.x + mapWidth, s.y).toCube()
-    const g1 = new DoubledCoord(g.x + mapWidth, g.y).toCube()
-
-    const d0 = s0.distance(g0)
-    const d1 = s0.distance(g1)
-    const d2 = s1.distance(g0)
-
-    return Math.min(d0, d1, d2)
-}
-
-function terrainMoveCost(moveType: MoveType, node: Region, edge: Link) {
-    let effectiveMoveType = moveType
-    if (effectiveMoveType === 'swim' && node.terrain.isWater && !edge.target.terrain.isWater) {
-        effectiveMoveType = 'walk'
+    private getIndex(x: number, y: number) {
+        return x / 2 + y * this.width / 2
     }
 
-    const cost = edge.cost[effectiveMoveType]
-    return cost
-}
-
-export class Level {
-    constructor(public width: number, public readonly index: number, public readonly label: string) {
+    private *getRegions() {
+        for (const reg of this.regions) {
+            if (reg) yield reg
+        }
     }
 
-    private readonly pathfinder = new RegionAStar()
-
-    readonly regions: Region[] = [];
-    readonly regionMap: TypedMap<Region> = {};
-    readonly regionIdMap: TypedMap<Region> = {};
+    [Symbol.iterator](): Iterator<Region, any, undefined> {
+        return this.getRegions()
+    }
 
     add(region: Region) {
-        this.regions.push(region);
-        this.regionMap[region.code] = region;
-        this.regionIdMap[region.id] = region;
+        this.regions[this.getIndex(region.coords.x, region.coords.y)] = region
+
+        if (region.id) {
+            this.regionIdMap.set(region.id, region)
+        }
+
+        if (region.code) {
+            this.regionCodeMap.set(region.code, region)
+        }
     }
 
-    get(x: number, y: number) {
-        return this.regionMap[`${x},${y},${this.index}`];
+    get(coords: Coords)
+    get(x: number, y: number)
+    get(coordsOrX: number | Coords, y?: number) {
+        const index = typeof coordsOrX === 'number'
+            ? this.getIndex(coordsOrX, y)
+            : this.getIndex(coordsOrX.x, coordsOrX.y)
+
+        return index >= 0 ? this.regions[index] : null
     }
 
     getById(id: string) {
-        return this.regionIdMap[id]
+        return this.regionIdMap.get(id)
     }
 
     getByCode(code: string) {
-        return this.regionMap[code]
-    }
-
-    search(moveType: MoveType, start: Region, goal: Region) {
-        return this.pathfinder.search(start, goal, {
-            cost: (node, edge) => terrainMoveCost(moveType, node, edge),
-            heuristic: (start, goal) => distanceHeuristic(this.width, start, goal)
-        })
-    }
-
-    estimate(moveType: MoveType, start: Region, movePoints: number) {
-        return this.pathfinder.estimate(start, movePoints, (node, edge) => terrainMoveCost(moveType, node, edge))
+        return this.regionCodeMap.get(code)
     }
 }

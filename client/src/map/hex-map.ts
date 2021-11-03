@@ -177,7 +177,7 @@ export class HexMap {
         if (col < 0) col += this.size.width
 
         const region = this.getRegion(col, row)
-        if (!region) return
+        if (!region || region.covered) return
 
         const p = this.layout.hexToPixel(hex)
         p.x += OFFSET_X

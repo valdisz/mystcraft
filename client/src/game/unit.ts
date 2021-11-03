@@ -11,6 +11,7 @@ import { Event } from "./event";
 import { Inventory } from "./inventory";
 import { Region, Structure } from './types';
 import { OrderParser, ORDER_PARSER, UnitOrder, Order } from './orders/parser';
+import { Link } from './link';
 
 export class Unit {
     constructor(
@@ -44,6 +45,9 @@ export class Unit {
 
     ordersSrc: string
     orders: UnitOrder[] = []
+
+    // order simulation
+    path: Link[]
 
     setOrders(orders: string, parser: OrderParser = null) {
         this.ordersSrc = orders

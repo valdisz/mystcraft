@@ -25,4 +25,6 @@ export class TerrainInfo implements UniqueItem {
     get name() {
         return this.code
     }
+
+    static readonly UNKNOWN = 'unknown'
 }

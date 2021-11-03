@@ -13,7 +13,7 @@ import { World } from "../game/world"
 import { WorldInfo, WorldLevel } from '../game/world-info'
 import { Unit } from '../game/types'
 import { saveAs } from 'file-saver'
-import { createOrderParser } from '../game/orders/parser'
+import { InterfaceCommand, MoveCommand } from './commands/move'
 
 export class TurnsStore {
     constructor() {
@@ -82,7 +82,11 @@ export class GameStore {
                 delay: 1000
             }
         )
+
+        this.commands.push(new MoveCommand(this))
     }
+
+    readonly commands: InterfaceCommand[] = [ ]
 
     private ordersSaveAbortController: AbortController
 
@@ -216,7 +220,7 @@ export class GameStore {
         world.addUnits(units)
 
         for (const level of world.levels) {
-            for (const region of level.regions) {
+            for (const region of level) {
                 region.sort()
             }
         }
@@ -235,7 +239,7 @@ export class GameStore {
         const reg = this.world.getRegion(col, row, 1)
 
         if (reg.id !== this.region?.id) {
-            this.region = reg ? observable(reg) : null
+            this.region = reg && !reg.covered ? observable(reg) : null
             this.unit = null
         }
 
@@ -353,7 +357,7 @@ export class GameStore {
         ]
 
         var faction = this.world.factions.get(this.factionNumber)
-        for (const unit of faction.troops.units) {
+        for (const unit of faction.troops) {
             lines.push(`unit ${unit.num}`)
             lines.push(unit.ordersSrc)
             lines.push('')
@@ -365,18 +369,6 @@ export class GameStore {
         const orders = lines.join('\n')
         const blob = new Blob([ orders ], { type: 'text/plain' })
         saveAs(blob, `orders-${this.turn.number}.ord`)
-    }
-
-    start: Region
-
-    markStart = () => {
-        this.start = this.region
-
-        console.log(this.world.getLevel(this.region.coords.z).estimate('walk', this.start, 2))
-    }
-
-    searchPath = () => {
-        console.log(this.world.getLevel(this.region.coords.z).search('walk', this.start, this.region))
     }
 }
 

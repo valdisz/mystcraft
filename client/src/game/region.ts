@@ -20,6 +20,7 @@ export class Region {
     readonly code: string
 
     explored: boolean
+    covered: boolean
     lastVisitedAt: number
 
     get isVisible() {
@@ -75,10 +76,15 @@ export class Region {
         }
     }
 
+    toString() {
+        return `${this.terrain.name} (${this.coords}) in ${this.province.name}`;
+    }
+
     static from(src: RegionFragment, ruleset: Ruleset) {
         const reg = new Region(src.id, new Coords(src.x, src.y, src.z, src.label));
 
         reg.explored = src.explored
+        reg.covered = false
         reg.lastVisitedAt = src.lastVisitedAt
 
         if (src.race) {
@@ -127,7 +133,14 @@ export class Region {
         return reg;
     }
 
-    toString() {
-        return `${this.terrain.name} (${this.coords}) in ${this.province.name}`;
+    static createCovered(x: number, y: number, z: number, label: string, ruleset: Ruleset) {
+        const reg = new Region(null, new Coords(x, y, z, label))
+
+        reg.explored = false
+        reg.covered = true
+        reg.lastVisitedAt = 0
+        reg.terrain = ruleset.getTerrain(TerrainInfo.UNKNOWN)
+
+        return reg
     }
 }

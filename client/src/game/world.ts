@@ -2,16 +2,17 @@ import { RegionFragment, StructureFragment, UnitFragment } from '../schema';
 import { Ruleset } from "./ruleset";
 import { Region } from "./region";
 import { Level } from "./level";
-import { WorldInfo } from "./world-info";
+import { WorldInfo, WorldLevel } from "./world-info";
 import { Provinces } from './province';
 import { Factions, Unit } from './types';
 import { Structure } from './structure';
+import { MovementPathfinder } from './movement-pathfinder';
+import { Coords } from './coords';
 
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {
         for (let i = 0; i < info.map.length; i++) {
-            var { width, label } = info.map[i]
-            this.addLevel(width, i, label)
+            this.addLevel(i, info.map[i])
         }
     }
 
@@ -19,20 +20,16 @@ export class World {
     readonly provinces = new Provinces();
     readonly factions = new Factions();
 
-    addFaction(num: number, name: string, isPlayer: boolean) {
-        this.factions.create(num, name, isPlayer)
+    readonly pathfinder = new MovementPathfinder()
+
+    private addLevel(z: number, { width, height, label }: WorldLevel) {
+        const level = new Level(width, height, z, label)
+        this.levels.push(level)
+
+        return level
     }
 
-    addRegions(regions: RegionFragment[]) {
-        for (const reg of regions) {
-            this.addRegion(reg);
-
-            for (const str of reg.structures) {
-                this.addStructure(str);
-            }
-        }
-
-        // exits
+    private linkRegions(regions: RegionFragment[]) {
         for (const reg of regions) {
             var source = this.getRegionByCode(reg.code)
 
@@ -42,8 +39,39 @@ export class World {
                 source.neighbors.set(source, exit.direction, target)
             }
         }
+    }
 
-        // neighbors
+    private addCoveredRegions() {
+        for (const level of this.levels) {
+            for (let x = 1; x <= level.width; x++) {
+                for (let y = 1; y <= level.height; y++) {
+                    if ((x + y) % 2) {
+                        continue
+                    }
+
+                    if (level.get(x, y)) {
+                        continue
+                    }
+
+                    level.add(Region.createCovered(x, y, level.index, level.label, this.ruleset))
+                }
+            }
+        }
+    }
+
+    private linkCoveredRegions() {
+        for (const level of this.levels) {
+            for (const reg of level) {
+                if (!reg || !reg.covered) {
+                    continue
+                }
+
+                //
+            }
+        }
+    }
+
+    private linkProvinces() {
         for (const province of this.provinces.all()) {
             const neighbors = new Set<string>()
             for (const reg of province.regions) {
@@ -59,6 +87,25 @@ export class World {
                 province.addBorderWith(other)
             }
         }
+    }
+
+    addFaction(num: number, name: string, isPlayer: boolean) {
+        this.factions.create(num, name, isPlayer)
+    }
+
+    addRegions(regions: RegionFragment[]) {
+        for (const reg of regions) {
+            this.addRegion(reg);
+
+            for (const str of reg.structures) {
+                this.addStructure(str);
+            }
+        }
+
+        this.linkRegions(regions)
+        this.linkProvinces()
+        this.addCoveredRegions()
+        this.linkCoveredRegions()
     }
 
     addUnits(units: UnitFragment[]) {
@@ -123,12 +170,5 @@ export class World {
 
     getLevel(z: number) {
         return this.levels[z]
-    }
-
-    private addLevel(width: number, z: number, label: string) {
-        const level = new Level(width, z, label)
-        this.levels.push(level)
-
-        return level
     }
 }

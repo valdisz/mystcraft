@@ -18,11 +18,12 @@ export interface MoveEstimate<TNode> {
     cost: number
 }
 
-export abstract class Pathfinder<TNode, TEdge> {
+export abstract class Pathfinder<TNode, TEdge, TStep> {
     abstract neighbors(node: TNode): TEdge[];
     abstract getNode(edge: TEdge): TNode;
+    abstract toStep(edge: TEdge, cost: number): TStep;
 
-    search(start: TNode, goal: TNode, { cost, heuristic }: PathfinderOptions<TNode, TEdge>): TEdge[] {
+    search(start: TNode, goal: TNode, { cost, heuristic }: PathfinderOptions<TNode, TEdge>): TStep[] {
         if (start === goal) return []
 
         // priority queue where smaller priority number is on top
@@ -63,15 +64,20 @@ export abstract class Pathfinder<TNode, TEdge> {
         }
 
         let current = cameFrom.get(goal)
+        let currentCost = costSoFar.get(goal)
+
         if (!current) return []
 
-        const path: TEdge[] = []
+        const path: TStep[] = []
         while (current.node !== start) {
-            path.push(current.edge)
+            path.push(this.toStep(current.edge, currentCost))
+
             current = cameFrom.get(current.node)
+            currentCost = costSoFar.get(current.node)
         }
 
-        path.push(current.edge)
+        path.push(this.toStep(current.edge, currentCost))
+        
         path.reverse()
 
         return path

@@ -23,6 +23,7 @@ import {
     ButtonGroup,
     Avatar,
     Box,
+    Tooltip,
 } from '@mui/material';
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
@@ -44,6 +45,7 @@ import { Ruleset } from '../game/ruleset'
 import { UnitSummary } from '../components'
 import { Capacity } from '../game/move-capacity'
 import { green, lightBlue } from '@mui/material/colors'
+import { InterfaceCommand } from '../store/commands/move';
 
 const GameContainer = styled('div')`
     width: 100%;
@@ -496,15 +498,35 @@ function UnitCapacity({ weight, capacity }: UnitCapacityProps) {
     </UnitCapacityContainer>
 }
 
+interface CommandButtonProps {
+    command: InterfaceCommand
+}
+
+const CommandButton = observer(({ command: { title, tooltip, canExecute, error, execute } }: CommandButtonProps) => {
+    const text = []
+    if (tooltip) text.push(tooltip)
+    if (error) text.push(`!: ${error}`)
+
+    console.log('canExecute', canExecute)
+
+    const btn = <Button disabled={!canExecute} onClick={execute} variant='contained'>{title}</Button>
+
+    return text.length
+        ? <Tooltip title={text.join('\n')}><span>{btn}</span></Tooltip>
+        : btn
+})
+
 const UnitsComponent = observer(() => {
     const { game } = useStore()
 
     return (
         <UnitsContainer>
             <Paper>
-                <Button onClick={game.openBattleSim}>Battle Sim</Button>
-                <Button onClick={game.markStart}>MARK START</Button>
-                <Button onClick={game.searchPath}>SEARCH PATH</Button>
+                <Box p={1}>
+                    <Button onClick={game.openBattleSim}>Battle Sim</Button>
+                    {game.commands.filter(x => x.visible).map(x => { console.log(x); return <CommandButton key={x.title} command={x} /> })}
+                </Box>
+
                 <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
                     <AppBar sx={{ position: 'relative' }}>
                         <Toolbar>

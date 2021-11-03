@@ -218,6 +218,20 @@ export class Ruleset {
 
             this.terrain.set(Object.freeze(info))
         }
+
+        const info = new TerrainInfo(TerrainInfo.UNKNOWN)
+        info.movement = {
+            fly: 1,
+            ride: 1,
+            swim: 1,
+            walk: 1
+        }
+        info.allowRiding = true
+        info.allowFlying = true
+        info.isBarren = true
+        info.isWater = false
+
+        this.terrain.set(Object.freeze(info))
     }
 }
 
