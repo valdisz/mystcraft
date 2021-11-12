@@ -1,3 +1,6 @@
+using System.Linq;
+using System.Text.RegularExpressions;
+
 namespace advisor
 {
     // high elf [HELF]
@@ -8,42 +11,38 @@ namespace advisor
     // unlimited high elves [HELF] at $75
     public class ItemParser : BaseParser {
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            p.PushBookmark();
-            var word = p.Word();
-            if (!word) return Error(word);
+            var amount = p.Try(pp => pp.Word().OneOf(
+                _ => _.Match("unlimited").Map(_ => -1),
+                _ => _.Integer()
+            ));
 
-            int amount = 1;
-            if (word.Match("unlimited")) {
-                amount = -1;
-                p.RemoveBookmark();
-            }
-            else {
-                var intAmount = word.Integer();
-                if (intAmount) {
-                    amount = intAmount.Value;
-                    p.RemoveBookmark();
-                }
-                else {
-                    p.PopBookmark();
-                }
-            }
-
-            Maybe<string> name = p.SkipWhitespaces().Before("[").SkipWhitespacesBackwards().AsString();
+            var name = p.Words().Map(words => string.Join(" ", words));
             if (!name) return Error(name);
 
-            Maybe<string> code = p.Between("[", "]").AsString();
+            var code = p.Skip(" ").SkipWhitespaces().Between("[", "]").AsString();
             if (!code) return Error(code);
 
-            Maybe<int> price = p.Try(parser => parser.SkipWhitespaces().Word().Match("at")
-                ? p.SkipWhitespaces().Word().Seek(1).Integer()
-                : Maybe<int>.NA
-            );
+            var propOrPrice = p.Try(_ => _.OneOf(
+                pp => pp
+                    .Skip(" ")
+                    .SkipWhitespaces()
+                    .Between("(", ")")
+                    .AsString()
+                    .Map(props => ReportNode.Str("props", props)),
+                pp => pp
+                    .After(" at ")
+                    .SkipWhitespaces()
+                    .Seek(1)
+                    .Word()
+                    .Integer()
+                    .Map(price => ReportNode.Int("price", price))
+            ));
 
             return Ok(ReportNode.Object(
-                ReportNode.Int("amount", amount),
+                ReportNode.Int("amount", amount ? amount.Value : 1),
                 ReportNode.Str("name", name),
                 ReportNode.Str("code", code),
-                price ? ReportNode.Int("price", price) : null
+                propOrPrice ? propOrPrice.Value : null
             ));
         }
     }

@@ -27,6 +27,10 @@ namespace advisor
 
         private ReadOnlySpan<char> GetSpan() => Text.Span.Slice(Pos);
 
+        private char Peek() {
+            return Text.Span[Pos];
+        }
+
         private int LFind(ReadOnlySpan<char> s) {
             if (EOF) return -1;
 
@@ -169,13 +173,17 @@ namespace advisor
             return new Maybe<TextParser>($"Cant find {s.ToString()}", Ln, Pos + 1);
         }
 
-        public Maybe<TextParser> SkipWhitespaces() {
+        public Maybe<TextParser> SkipWhitespaces(int minTimes = 0) {
             if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             var span = GetSpan();
             int i;
             for (i = 0; i < span.Length; i++) {
                 if (!char.IsWhiteSpace(span[i])) {
+                    if (i < minTimes) {
+                        return new Maybe<TextParser>($"Whitespace must present at least {minTimes} times", Ln, Pos + 1);
+                    }
+
                     break;
                 }
             }
@@ -183,13 +191,17 @@ namespace advisor
             return Seek(i);
         }
 
-        public Maybe<TextParser> SkipWhitespacesBackwards() {
+        public Maybe<TextParser> SkipWhitespacesBackwards(int minTimes = 0) {
             if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             var span = GetSpan();
             int i;
             for (i = span.Length - 1; i >= 0; i--) {
                 if (!char.IsWhiteSpace(span[i])) {
+                    if ((span.Length - i - 1) < minTimes) {
+                        return new Maybe<TextParser>($"Whitespace must present at least {minTimes} times", Ln, Pos + 1);
+                    }
+
                     break;
                 }
             }
@@ -223,6 +235,16 @@ namespace advisor
             }
 
             return Seek(i);
+        }
+
+        public Maybe<TextParser> Skip(ReadOnlySpan<char> s) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
+            var span = GetSpan();
+            if (span.Length < s.Length || !span.StartsWith(s, StringComparison.OrdinalIgnoreCase))
+                return new Maybe<TextParser>("does not match", Ln, Pos + 1);
+
+            return Seek(s.Length);
         }
 
         public Maybe<int> Integer() {
@@ -333,21 +355,50 @@ namespace advisor
                 }
             }
 
-            RemoveBookmark();
+            if (i == 0) {
+                PopBookmark();
+                return new Maybe<TextParser>("Not a word", Ln, Pos + 1);
+            }
 
+            RemoveBookmark();
             return new Maybe<TextParser>(Slice(i));
         }
 
-        public Maybe<TextParser[]> Words() {
-            List<TextParser> words = new List<TextParser>();
-            while (!EOF) {
-                var w = Word();
-                if (!w) return w.Convert<TextParser[]>();
+        public Maybe<string[]> Words() {
+            if (EOF) return new Maybe<string[]>("EOF", Ln, Pos + 1);
 
+            PushBookmark();
+
+            var first = Word();
+            if (!first) {
+                PopBookmark();
+                return first.Convert<string[]>();
+            }
+
+            // todo: w.Value.Length == 0 is workardound
+            if (first.Value.Length == 0) {
+                PopBookmark();
+                return new Maybe<string[]>("Not a word", Ln, Pos);
+            }
+
+            List<string> words = new List<string> { first.Value };
+
+            while (!EOF) {
+                PushBookmark();
+
+                SkipWhitespaces();
+                var w = Word();
+                if (!w) {
+                    PopBookmark();
+                    break;
+                }
+
+                RemoveBookmark();
                 words.Add(w.Value);
             }
 
-            return new Maybe<TextParser[]>(words.ToArray());
+            RemoveBookmark();
+            return new Maybe<string[]>(words.ToArray());
         }
 
         public bool StartsWith(ReadOnlySpan<char> s) {
@@ -355,7 +406,15 @@ namespace advisor
 
             var span = GetSpan();
 
-            return span.StartsWith(s);
+            return span.StartsWith(s, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public bool EndsWith(ReadOnlySpan<char> s) {
+            if (EOF) return false;
+
+            var span = GetSpan();
+
+            return span.EndsWith(s, StringComparison.OrdinalIgnoreCase);
         }
 
         public Maybe<TextParser> Match(ReadOnlySpan<char> s) {
@@ -418,14 +477,14 @@ namespace advisor
             return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
         }
 
-        public static Maybe<TextParser> SkipWhitespaces(this Maybe<TextParser> p) {
+        public static Maybe<TextParser> SkipWhitespaces(this Maybe<TextParser> p, int minTimes = 0) {
             if (!p) return p;
-            return p.Value.SkipWhitespaces();
+            return p.Value.SkipWhitespaces(minTimes);
         }
 
-        public static Maybe<TextParser> SkipWhitespacesBackwards(this Maybe<TextParser> p) {
+        public static Maybe<TextParser> SkipWhitespacesBackwards(this Maybe<TextParser> p, int minTimes = 0) {
             if (!p) return p;
-            return p.Value.SkipWhitespacesBackwards();
+            return p.Value.SkipWhitespacesBackwards(minTimes);
         }
 
         public static Maybe<TextParser> Word(this Maybe<TextParser> p) => p ? p.Value.Word() : p;
@@ -531,5 +590,7 @@ namespace advisor
         public static Maybe<T> RecoverWith<T>(this Maybe<T> p, Func<T> onFailure) => p ? p : new Maybe<T>(onFailure());
 
         public static Maybe<P> Map<T, P>(this Maybe<T> p, Func<T, P> mapping) => p ? new Maybe<P>(mapping(p.Value)) : p.Convert<P>();
+
+        public static Maybe<TextParser> Skip(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Skip(s) : p;
     }
 }

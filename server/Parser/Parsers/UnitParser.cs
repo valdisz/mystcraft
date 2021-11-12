@@ -130,15 +130,13 @@ Ready item: book of exorcism [BKEX].
                 // , flag
                 if (!Mem(p.After(",").SkipWhitespaces())) return Error(LastResult);
 
-                // there could be no flags
-                var flagOrItem = p.Before(",", ".").RecoverWith(() => p);
-
-                var item = itemParser.Parse(flagOrItem);
+                var item = p.Try(_ => itemParser.Parse(_));
                 if (item) {
                     items.Add(item.Value);
                 }
                 else {
-                    flags.Add(flagOrItem.Reset().AsString());
+                    var flag = p.Before(",", ".").RecoverWith(() => p).AsString();
+                    flags.Add(flag);
                 }
             }
 

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
@@ -13,11 +13,10 @@
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
     <PackageReference Include="Pidgin" Version="2.2.0" />
-
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\server\atlantis.csproj" />
+    <ProjectReference Include="..\server\advisor.csproj" />
   </ItemGroup>
 
 </Project>

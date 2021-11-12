@@ -16,8 +16,8 @@ namespace advisor.facts {
         [InlineData("+ The Kings Highway [1] : Road N.")]
         [InlineData("+ Trade Academy [NIMB] [Nort Triders] [2] : Tower; comment.")]
         public void foo(string s) {
-            var parser = new StructureParser();
-            var result = parser.Parse(new TextParser(0, s));
+            // var parser = new StructureParser();
+            // var result = parser.Parse(new TextParser(0, s));
         }
     }
 }
