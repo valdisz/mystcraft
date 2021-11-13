@@ -15,16 +15,23 @@ namespace advisor.Persistence {
         public GameType Type { get; set; }
 
         [GraphQLIgnore]
-        public string Options { get; set; }
+        public byte[] Engine { get; set; }
 
+        [Required]
+        public GameOptions Options { get; set; }
+
+        [Required]
         public string Ruleset { get; set; }
 
+        [Required]
         [MaxLength(128)]
         public string EngineVersion { get; set; }
 
+        [Required]
         [MaxLength(128)]
         public string RulesetName { get; set; }
 
+        [Required]
         [MaxLength(128)]
         public string RulesetVersion { get; set; }
 

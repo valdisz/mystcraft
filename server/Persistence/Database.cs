@@ -120,6 +120,9 @@ namespace advisor.Persistence {
                 t.Property(x => x.Type)
                     .HasConversion<string>();
 
+                t.Property(x => x.Options)
+                    .HasJsonConversion(options.Provider);
+
                 t.HasMany(p => p.Players)
                     .WithOne(p => p.Game)
                     .HasForeignKey(x => x.GameId);

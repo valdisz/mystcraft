@@ -27,12 +27,6 @@
 
     [ExtendObjectType("Game")]
     public class GameResolvers {
-        public GameOptions Options(Database db, [Parent] DbGame game) {
-            return game.Options != null
-                ? JsonConvert.DeserializeObject<GameOptions>(game.Options)
-                : null;
-        }
-
         public Task<DbPlayer> Me(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
             return db.Players
                 .AsNoTracking()

@@ -32,8 +32,14 @@ namespace advisor {
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<DbGame> CreateGame(IMediator mediator, string name) {
-            return mediator.Send(new CreateGame(name));
+        public async Task<DbGame> CreateLocalGame(IMediator mediator, string name, GameOptions options, IFile engine, IFile playerData, IFile gameData) {
+            using var engineStream = engine.OpenReadStream();
+            using var playersDataStream = playerData.OpenReadStream();
+            using var gameDataStream = gameData.OpenReadStream();
+
+            var result = await mediator.Send(new CreateLocalGame(name, engineStream, options, playersDataStream, gameDataStream));
+
+            return result;
         }
 
         public Task<DbPlayer> JoinGame(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {

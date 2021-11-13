@@ -210,7 +210,11 @@ namespace advisor.Migrations.sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<byte[]>("Engine")
+                        .HasColumnType("BLOB");
+
                     b.Property<string>("EngineVersion")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
@@ -220,16 +224,20 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Options")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Ruleset")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RulesetName")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RulesetVersion")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 

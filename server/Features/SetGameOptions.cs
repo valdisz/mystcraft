@@ -19,7 +19,7 @@ namespace advisor.Features {
             var game = await db.Games.FindAsync(request.GameId);
             if (game == null) return null;
 
-            game.Options = JsonConvert.SerializeObject(request.Options);
+            game.Options = request.Options;
 
             await db.SaveChangesAsync();
 

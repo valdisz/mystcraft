@@ -5,17 +5,15 @@ namespace advisor
     using advisor.Persistence;
     using Hangfire;
     using Hangfire.Console;
-    using Hangfire.Console.Extensions;
     using Hangfire.Heartbeat;
-    using Hangfire.Heartbeat.Server;
     using Hangfire.PostgreSql;
     using Hangfire.RecurringJobAdmin;
     using Hangfire.RecurringJobExtensions;
-    using Hangfire.Server;
     using Hangfire.States;
     using Hangfire.Storage.SQLite;
     using HotChocolate;
     using HotChocolate.Execution;
+    using HotChocolate.Types;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
@@ -162,6 +160,7 @@ namespace advisor
                 .AddQueryType<QueryType>()
                 .AddMutationType<MutationType>()
                 .AddGlobalObjectIdentification()
+                .AddType<UploadType>()
                 .AddType<UserType>()
                     .AddType<UserResolvers>()
                 .AddType<GameType>()

@@ -216,7 +216,11 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<byte[]>("Engine")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("EngineVersion")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
@@ -226,16 +230,20 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Ruleset")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RulesetName")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
                     b.Property<string>("RulesetVersion")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
