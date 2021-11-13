@@ -49,6 +49,9 @@ namespace advisor.Persistence {
         public DbSet<DbUser> Users { get; set; }
 
         public DbSet<DbGame> Games { get; set; }
+        public DbSet<DbGameTurn> GameTurns { get; set; }
+        public DbSet<DbGameArticle> Articles{ get; set; }
+
         public DbSet<DbPlayer> Players { get; set; }
 
         public DbSet<DbTurn> Turns { get; set; }
@@ -124,6 +127,29 @@ namespace advisor.Persistence {
                 t.HasMany(x => x.Alliances)
                     .WithOne(x => x.Game)
                     .HasForeignKey(x => x.GameId);
+
+                t.HasMany(x => x.Turns)
+                    .WithOne(x => x.Game)
+                    .HasForeignKey(x => x.GameId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                t.HasMany(x => x.Articles)
+                    .WithOne(x => x.Game)
+                    .HasForeignKey(x => x.GameId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            model.Entity<DbGameTurn>(t => {
+                t.HasKey(x => new { x.GameId, x.Number });
+
+                t.HasMany(x => x.Articles)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => new { x.GameId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            model.Entity<DbGameArticle>(t => {
+                t.HasKey(x => x.Id);
             });
 
             model.Entity<DbPlayer>(t => {

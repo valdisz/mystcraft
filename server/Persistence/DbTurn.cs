@@ -32,6 +32,8 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
+        public bool Ready { get; set; }
+
         public int Month { get; set; }
         public int Year { get; set; }
 

@@ -1,5 +1,4 @@
-namespace advisor.Persistence
-{
+namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
@@ -34,5 +33,11 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         public List<DbAlliance> Alliances { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbGameTurn> Turns { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbGameArticle> Articles { get; set; } = new ();
     }
 }

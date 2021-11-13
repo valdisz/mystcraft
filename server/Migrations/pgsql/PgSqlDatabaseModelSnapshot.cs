@@ -248,6 +248,54 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("Games");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGameArticle", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId", "TurnNumber");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
+                {
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<byte[]>("GameData")
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("PlayerData")
+                        .HasColumnType("bytea");
+
+                    b.HasKey("GameId", "Number");
+
+                    b.ToTable("GameTurns");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
                 {
                     b.Property<long>("PlayerId")
@@ -598,6 +646,9 @@ namespace advisor.Migrations.pgsql
                     b.Property<int>("Month")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("Ready")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("Year")
                         .HasColumnType("integer");
 
@@ -856,6 +907,36 @@ namespace advisor.Migrations.pgsql
                         .IsRequired();
 
                     b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameArticle", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany("Articles")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "Turn")
+                        .WithMany("Articles")
+                        .HasForeignKey("GameId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany("Turns")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
@@ -1284,7 +1365,16 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Navigation("Alliances");
 
+                    b.Navigation("Articles");
+
                     b.Navigation("Players");
+
+                    b.Navigation("Turns");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
+                {
+                    b.Navigation("Articles");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
