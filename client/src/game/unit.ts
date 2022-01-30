@@ -71,8 +71,8 @@ export class Unit {
         return this.weight > 0 && this.capacity.swim >= this.weight
     }
 
-    get movement(): MoveType | null {
-        if (this.weight == 0) return null
+    get moveType(): MoveType | null {
+        if (this.weight === 0) return null
 
         if (this.capacity.fly >= this.weight) return 'fly'
         if (this.capacity.ride >= this.weight) return 'ride'
@@ -81,8 +81,16 @@ export class Unit {
         return null
     }
 
+    get movePoints() {
+        const mt = this.moveType
+        if (!mt) return 0
+
+        this.ruleset.getMovePoints(mt)
+    }
+
+
     get isOverweight() {
-        return this.weight > 0 && this.movement === null
+        return this.weight > 0 && this.moveType === null
     }
 
     static from(src: UnitFragment, factions: Factions, ruleset: Ruleset) {

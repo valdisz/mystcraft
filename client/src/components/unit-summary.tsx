@@ -188,7 +188,7 @@ export function UnitSummary({ unit }: UnitSummaryProps) {
                 <Typography variant='h5'>{unit.name}</Typography>
                 <UnitNumber num={unit.num} />
             </SpaceBetween>
-            { !!unit.skills.length && <Grid item xs={12}>
+            { !!unit.skills.size && <Grid item xs={12}>
                 <strong>Skills</strong>
                 <ItemTable>
                     <ItemTableBody>
@@ -198,7 +198,7 @@ export function UnitSummary({ unit }: UnitSummaryProps) {
                     </ItemTableBody>
                 </ItemTable>
             </Grid> }
-            { !!unit.inventory.items.length && <Grid item xs={12}>
+            { !!unit.inventory.items.size && <Grid item xs={12}>
                 <strong>Items</strong>
                 <ItemTable>
                     <ItemTableBody>

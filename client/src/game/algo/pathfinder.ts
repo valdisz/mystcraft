@@ -46,6 +46,7 @@ export abstract class Pathfinder<TNode, TEdge, TStep> {
             for (const edge of neighbors) {
                 const moveCost = cost(current, edge)
                 if (moveCost <= 0) {
+                    // impassable
                     continue
                 }
 
@@ -77,15 +78,14 @@ export abstract class Pathfinder<TNode, TEdge, TStep> {
         }
 
         path.push(this.toStep(current.edge, currentCost))
-        
+
         path.reverse()
 
         return path
     }
 
     estimate(start: TNode, maxCost: number, cost: PathfinderCost<TNode, TEdge>): MoveEstimate<TNode>[] {
-        // priority queue where smaller priority number is on top
-        const frontier = new PriorityQueue<TNode>((a, b) => a < b)
+        const frontier = new PriorityQueue<TNode>((a, b) => a < b) // smaller priority value will be on top
         frontier.push(start, 0)
 
         const cameFrom: Map<TNode, { node: TNode, edge: TEdge } | null> = new Map()

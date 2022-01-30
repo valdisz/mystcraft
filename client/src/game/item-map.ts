@@ -12,7 +12,7 @@ export class ItemMap<T extends UniqueItem> {
 
     private readonly items = new Map<string, T>()
 
-    get length() {
+    get size() {
         return this.items.size
     }
 
@@ -34,7 +34,7 @@ export class ItemMap<T extends UniqueItem> {
         return this.items.has(typeof item === 'string' ? item : item.code)
     }
 
-    remove(item: T | string) {
+    delete(item: T | string) {
         const code = typeof item === 'string'
             ? item
             : item.code;

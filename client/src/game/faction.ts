@@ -22,6 +22,7 @@ export class Factions {
     private readonly factions: TypedMap<Faction> = { }
 
     readonly unknown: Faction
+    player: Faction
 
     all() {
         return Object.values(this.factions)
@@ -34,6 +35,11 @@ export class Factions {
     create(num: number, name: string, isPlayer: boolean) {
         const faction = new Faction(num, name, isPlayer)
         this.factions[num] = faction
+
+        if (isPlayer) {
+            this.player = faction
+        }
+
         return faction
     }
 }

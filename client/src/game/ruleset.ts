@@ -8,12 +8,13 @@ import {
     FreeMovingItemTrait, NoGiveTrait, NoTransportTrait, ProductionBonus
 } from './traits'
 import { SkillInfo } from './skill-info'
-import { Capacity } from './move-capacity'
+import { Capacity, MoveType } from './move-capacity'
 
 export class Ruleset {
     readonly skills: ItemMap<Readonly<SkillInfo>> = new ItemMap();
     readonly items: ItemMap<Readonly<ItemInfo>> = new ItemMap();
     readonly terrain: ItemMap<Readonly<TerrainInfo>> = new ItemMap();
+    readonly movePoints: Map<MoveType, number> = new Map();
     readonly orders: string[] = [];
 
     money: Readonly<ItemInfo>
@@ -64,6 +65,10 @@ export class Ruleset {
         return terrain;
     }
 
+    getMovePoints(moveType: MoveType) {
+        return this.movePoints.get(moveType)
+    }
+
     load(source: string) {
         const data: RulesetData = YAML.parse(source)
 
@@ -71,6 +76,7 @@ export class Ruleset {
         this.loadItems(data.items)
         this.loadTerrain(data.terrain)
         this.loadOrders(data.orders)
+        this.loadMovePoints(data.movePoints)
 
         for (const item of this.items.all) {
             if (item.category === 'money') {
@@ -78,6 +84,10 @@ export class Ruleset {
                 break
             }
         }
+    }
+
+    private loadMovePoints(movePoints: MovePointsMap) {
+        Object.keys(movePoints).forEach(x => this.movePoints.set(x as MoveType, movePoints[x]))
     }
 
     private loadOrders(orders: OrdersDataMap) {
@@ -242,6 +252,11 @@ interface RulesetData {
     items: ItemDataMap
     skills: SkillDataMap
     orders: OrdersDataMap
+    movePoints: MovePointsMap
+}
+
+interface MovePointsMap {
+    [ moveType: string ]: number
 }
 
 interface OrdersDataMap {

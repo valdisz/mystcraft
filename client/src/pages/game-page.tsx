@@ -46,6 +46,7 @@ import { UnitSummary } from '../components'
 import { Capacity } from '../game/move-capacity'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move';
+import { Coords } from '../game/coords';
 
 const GameContainer = styled('div')`
     width: 100%;
@@ -260,7 +261,8 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
         if (!canvasRef) return
 
         if (!gameMapRef.current) {
-            gameMapRef.current = new HexMap(canvasRef, { width: 72, height: 96 }, getRegion)
+            const { width, height } = game.world.getLevel(1)
+            gameMapRef.current = new HexMap(canvasRef, { width, height }, getRegion)
             gameMapRef.current.onRegionSelected = onRegionSelected
         }
 
@@ -270,37 +272,12 @@ function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
             .then(() => {
                 gameMap.turnNumber = game.turn.number
 
+                const { player } = game.world.factions
+                const { x, y, z }: Coords = game.region?.coords
+                    ?? JSON.parse(window.localStorage.getItem('coords'))
+                    ?? player.troops.all[0].region.coords
 
-
-                if (game.region) {
-                    const { x, y } = game.region.coords
-                    gameMap.centerAt(x, y)
-                }
-                else {
-                    let x;
-                    let y;
-                    let z = 1;
-
-                    const coords : {
-                        x: number,
-                        y: number,
-                        z: number
-                    } = JSON.parse(window.localStorage.getItem('coords'))
-
-                    if (coords) {
-                        x = coords.x
-                        y = coords.y
-                        z = coords.z
-                    }
-                    else {
-                        const c = game.world.levels[1].regions[0].coords
-                        x = c.x
-                        y = c.y
-                        z = 1
-                    }
-
-                    gameMap.centerAt(x, y)
-                }
+                gameMap.centerAt(x, y)
             })
 
         return (() => {
@@ -458,7 +435,7 @@ function renderUnitMovement(unit: Unit) {
 
     const move = unit.isOverweight
         ? <Chip size='small' color='error' label='overweight' />
-        : <Chip size='small' label={unit.movement} />
+        : <Chip size='small' label={unit.moveType} />
 
     const swim = unit.canSwim
         ? <Chip size='small' color='info' label='swim' />

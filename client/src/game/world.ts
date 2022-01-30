@@ -1,13 +1,12 @@
-import { RegionFragment, StructureFragment, UnitFragment } from '../schema';
-import { Ruleset } from "./ruleset";
-import { Region } from "./region";
-import { Level } from "./level";
-import { WorldInfo, WorldLevel } from "./world-info";
-import { Provinces } from './province';
-import { Factions, Unit } from './types';
-import { Structure } from './structure';
-import { MovementPathfinder } from './movement-pathfinder';
-import { Coords } from './coords';
+import { RegionFragment, StructureFragment, UnitFragment } from '../schema'
+import { Ruleset } from './ruleset'
+import { Region } from './region'
+import { Level } from './level'
+import { WorldInfo, WorldLevel } from './world-info'
+import { Provinces } from './province'
+import { Factions, Unit } from './types'
+import { Structure } from './structure'
+import { MovementPathfinder } from './movement-pathfinder'
 
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {
@@ -16,9 +15,9 @@ export class World {
         }
     }
 
-    readonly levels: Level[] = [];
-    readonly provinces = new Provinces();
-    readonly factions = new Factions();
+    readonly levels: Level[] = []
+    readonly provinces = new Provinces()
+    readonly factions = new Factions()
 
     readonly pathfinder = new MovementPathfinder()
 

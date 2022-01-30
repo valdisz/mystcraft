@@ -1,0 +1,5 @@
+mutation CreateLocalGame($name: String!, $options: GameOptionsInput!, $engine: Upload!, $playerData: Upload!, $gameData: Upload!) {
+  createLocalGame(name: $name, options: $options, engine: $engine, playerData: $playerData, gameData: $gameData) {
+    ...GameHeader
+  }
+}

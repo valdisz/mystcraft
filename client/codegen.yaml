@@ -1,6 +1,6 @@
 overwrite: true
 schema:
-  - "http://localhost:5000/graphql":
+  - http://localhost:5000/graphql:
       headers:
         X-API-KEY: "local:valdis@zobela.eu"
 documents:

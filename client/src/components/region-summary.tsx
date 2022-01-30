@@ -254,7 +254,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                         {region.tax}
                     </div>
                 </SpaceBetween>
-                { region.products.length ? <Grid item xs={12}>
+                { region.products.size ? <Grid item xs={12}>
                     <strong>Products</strong>
                     <ItemTable>
                         <ItemTableBody>
@@ -264,7 +264,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                         </ItemTableBody>
                     </ItemTable>
                 </Grid> : null }
-                { region.forSale.length ? <Grid item xs={12}>
+                { region.forSale.size ? <Grid item xs={12}>
                     <strong>For sale</strong>
                     <ItemTable>
                         <ItemTableBody>
@@ -274,7 +274,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                         </ItemTableBody>
                     </ItemTable>
                 </Grid> : null }
-                { region.wanted.length ? <Grid item xs={12}>
+                { region.wanted.size ? <Grid item xs={12}>
                     <strong>Wanted</strong>
                     <ItemTable>
                         <ItemTableBody>

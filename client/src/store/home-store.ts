@@ -1,7 +1,7 @@
-import { action, makeObservable, observable, runInAction, transaction } from 'mobx'
+import { action, makeObservable, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
 import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
-import { CreateGame, CreateGameMutation, CreateGameMutationVariables } from '../schema'
+import { CreateLocalGame, CreateLocalGameMutation, CreateLocalGameMutationVariables } from '../schema'
 import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
 import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
 import { NewGameStore } from './new-game-store'
@@ -33,15 +33,25 @@ export class HomeStore {
     readonly newGame = new NewGameStore()
 
     confirmNewGame = async () => {
-        const response = await CLIENT.mutate<CreateGameMutation, CreateGameMutationVariables>({
-            mutation: CreateGame,
+        const response = await CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({
+            mutation: CreateLocalGame,
             variables: {
-                name: this.newGame.name
+                name: this.newGame.name,
+                options: {
+                    schedule: '',
+                    map: [
+                        { level: 0, label: 'nexus', width: 1, height: 1 },
+                        { level: 1, label: 'surface', width: 32, height: 32 }
+                    ]
+                },
+                engine: this.newGame.engineFile,
+                playerData: this.newGame.playersFile,
+                gameData: this.newGame.gameFile
             }
         });
 
-        transaction(() => {
-            this.games.push(response.data.createGame);
+        runInAction(() => {
+            this.games.push(response.data.createLocalGame);
             this.newGame.cancel();
         });
     };

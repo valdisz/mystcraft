@@ -57,6 +57,13 @@ orders:
   WORK:
   TRANSPORT:
   DISTRIBUTE:
+
+movePoints:
+  walk: 2
+  swim: 2
+  ride: 4
+  fly: 6
+
 terrain:
   ocean:
     movement:

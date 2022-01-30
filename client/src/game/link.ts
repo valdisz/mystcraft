@@ -15,8 +15,16 @@ export class Link {
     }
 }
 
-export class Links {
-    private readonly links: Map<Direction, Link> = new Map()
+export class Links implements Iterable<Link> {
+    private readonly links: Map<Direction, Link> = new Map();
+
+    [Symbol.iterator](): Iterator<Link, any, undefined> {
+        return this.links.values()
+    }
+
+    get size() {
+        return this.links.size
+    }
 
     all(): Link[] {
         return Array.from(this.links.values())
@@ -28,5 +36,16 @@ export class Links {
 
     set(source: Region, direction: Direction, target: Region) {
         this.links.set(direction, new Link(source, direction, target))
+    }
+
+    find(predicate: (link: Link) => boolean) {
+        const linksIterator = this.links.values()
+        for (const l of linksIterator) {
+            if (predicate(l)) {
+                return l
+            }
+        }
+
+        return null
     }
 }

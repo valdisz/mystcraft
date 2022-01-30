@@ -1,5 +1,5 @@
 import { ItemInfo } from './item-info';
-import { Capacity } from './move-capacity';
+import { Capacity, MoveType } from './move-capacity';
 import { UniqueItem } from './unique-item';
 
 export interface Resource {
@@ -7,6 +7,11 @@ export interface Resource {
     min: number
     max: number
     chance: number
+}
+
+export interface MoveCost {
+    cost: number
+    type: MoveType
 }
 
 export class TerrainInfo implements UniqueItem {
@@ -24,6 +29,32 @@ export class TerrainInfo implements UniqueItem {
 
     get name() {
         return this.code
+    }
+
+    getMoveCost(capacity: Capacity): MoveCost {
+        let currentMt = null
+        let curretCost = 0
+
+        for (const mt of Object.keys(capacity)) {
+            if (!capacity[mt]) {
+                continue
+            }
+
+            const cost = this.movement[mt]
+            if (curretCost > cost) {
+                curretCost = cost
+                currentMt = mt
+            }
+        }
+
+        if (!currentMt) {
+            return null
+        }
+
+        return {
+            cost: curretCost,
+            type: currentMt
+        }
     }
 
     static readonly UNKNOWN = 'unknown'

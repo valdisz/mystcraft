@@ -9,7 +9,6 @@ import { Ruleset } from "./ruleset"
 import { Wages } from "./wages"
 import { Structure, Unit, Troops } from './types'
 import { SettlementSize } from './settlement-size'
-import { TypedMap } from './typed-map'
 import { Links } from './link'
 
 export class Region {

@@ -135,7 +135,7 @@ const NewGameDialog = observer(() => {
     const { newGame } = home
 
     return <Dialog open={newGame.isOpen} onClose={newGame.cancel} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">New game</DialogTitle>
+        <DialogTitle id="form-dialog-title">New local game</DialogTitle>
         <DialogContent>
             <TextField
                 autoFocus
@@ -147,13 +147,40 @@ const NewGameDialog = observer(() => {
                 value={newGame.name}
                 onChange={newGame.setName}
             />
+            <input
+                style={{ display: 'none' }}
+                id='upload-game-engine'
+                type='file'
+                onChange={({ target }) => newGame.setFile('engine', target.files[0])}
+            />
+            <input
+                style={{ display: 'none' }}
+                id='upload-players'
+                type='file'
+                onChange={({ target }) => newGame.setFile('players', target.files[0])}
+            />
+            <input
+                style={{ display: 'none' }}
+                id='upload-game'
+                type='file'
+                onChange={({ target }) => newGame.setFile('game', target.files[0])}
+            />
+            <label htmlFor='upload-game-engine'>
+                <Button variant='outlined' component='span'>Select Game Engine</Button>
+            </label>
+            <label htmlFor='upload-players'>
+                <Button variant='outlined' component='span'>Select players.*</Button>
+            </label>
+            <label htmlFor='upload-game'>
+                <Button variant='outlined' component='span'>Select game.*</Button>
+            </label>
         </DialogContent>
         <DialogActions>
             <Button onClick={newGame.cancel}>
                 Cancel
             </Button>
             <Button onClick={home.confirmNewGame} color='primary' variant='outlined'>
-                Add new game
+                Start new game
             </Button>
         </DialogActions>
     </Dialog>
