@@ -1,0 +1,3703 @@
+.item-house {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -0px -0px;
+	background-size: 372px 367px;
+}
+
+.item-idol {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -17px -0px;
+	background-size: 372px 367px;
+}
+
+.item-ilbr {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -0px -16px;
+	background-size: 372px 367px;
+}
+
+.item-jetty {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -17px -16px;
+	background-size: 372px 367px;
+}
+
+.item-mirr {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -34px -0px;
+	background-size: 372px 367px;
+}
+
+.item-parf {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -34px -16px;
+	background-size: 372px 367px;
+}
+
+.item-port {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -0px -32px;
+	background-size: 372px 367px;
+}
+
+.item-ratt {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -17px -32px;
+	background-size: 372px 367px;
+}
+
+.item-ruby {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -34px -32px;
+	background-size: 372px 367px;
+}
+
+.item-ruin {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -51px -0px;
+	background-size: 372px 367px;
+}
+
+.item-stat {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -51px -16px;
+	background-size: 372px 367px;
+}
+
+.item-statue {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -51px -32px;
+	background-size: 372px 367px;
+}
+
+.item-swcy {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -0px -48px;
+	background-size: 372px 367px;
+}
+
+.item-tali {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -17px -48px;
+	background-size: 372px 367px;
+}
+
+.item-tome {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -34px -48px;
+	background-size: 372px 367px;
+}
+
+.item-unic {
+    width: 17px;
+    height: 16px;
+    background: url("items-css.png") -51px -48px;
+	background-size: 372px 367px;
+}
+
+.item-abax {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -68px -0px;
+	background-size: 372px 367px;
+}
+
+.item-absw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -68px -16px;
+	background-size: 372px 367px;
+}
+
+.item-acid {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -68px -32px;
+	background-size: 372px 367px;
+}
+
+.item-adag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -68px -48px;
+	background-size: 372px 367px;
+}
+
+.item-admt {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -64px;
+	background-size: 372px 367px;
+}
+
+.item-alsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -64px;
+	background-size: 372px 367px;
+}
+
+.item-amar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -64px;
+	background-size: 372px 367px;
+}
+
+.item-amaz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -64px;
+	background-size: 372px 367px;
+}
+
+.item-amca {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -64px;
+	background-size: 372px 367px;
+}
+
+.item-amdo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -84px -0px;
+	background-size: 372px 367px;
+}
+
+.item-amhc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -84px -16px;
+	background-size: 372px 367px;
+}
+
+.item-ampr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -84px -32px;
+	background-size: 372px 367px;
+}
+
+.item-amsm {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -84px -48px;
+	background-size: 372px 367px;
+}
+
+.item-amts {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -84px -64px;
+	background-size: 372px 367px;
+}
+
+.item-anac {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -80px;
+	background-size: 372px 367px;
+}
+
+.item-antr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -80px;
+	background-size: 372px 367px;
+}
+
+.item-aobs {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -80px;
+	background-size: 372px 367px;
+}
+
+.item-aors {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -80px;
+	background-size: 372px 367px;
+}
+
+.item-aswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -80px;
+	background-size: 372px 367px;
+}
+
+.item-aswr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -80px;
+	background-size: 372px 367px;
+}
+
+.item-axe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -100px -0px;
+	background-size: 372px 367px;
+}
+
+.item-bag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -100px -16px;
+	background-size: 372px 367px;
+}
+
+.item-balr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -100px -32px;
+	background-size: 372px 367px;
+}
+
+.item-barb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -100px -48px;
+	background-size: 372px 367px;
+}
+
+.item-bard {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -100px -64px;
+	background-size: 372px 367px;
+}
+
+.item-barr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -100px -80px;
+	background-size: 372px 367px;
+}
+
+.item-baxe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -96px;
+	background-size: 372px 367px;
+}
+
+.item-bbea {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -96px;
+	background-size: 372px 367px;
+}
+
+.item-bdra {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -96px;
+	background-size: 372px 367px;
+}
+
+.item-becl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -96px;
+	background-size: 372px 367px;
+}
+
+.item-beer {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -96px;
+	background-size: 372px 367px;
+}
+
+.item-behe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -96px;
+	background-size: 372px 367px;
+}
+
+.item-bham {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -96px;
+	background-size: 372px 367px;
+}
+
+.item-blan {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -0px;
+	background-size: 372px 367px;
+}
+
+.item-bldr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -16px;
+	background-size: 372px 367px;
+}
+
+.item-bliz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -32px;
+	background-size: 372px 367px;
+}
+
+.item-blsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -48px;
+	background-size: 372px 367px;
+}
+
+.item-bmac {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -64px;
+	background-size: 372px 367px;
+}
+
+.item-boar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -80px;
+	background-size: 372px 367px;
+}
+
+.item-bogt {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -116px -96px;
+	background-size: 372px 367px;
+}
+
+.item-boot {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -112px;
+	background-size: 372px 367px;
+}
+
+.item-bow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -112px;
+	background-size: 372px 367px;
+}
+
+.item-brdr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -112px;
+	background-size: 372px 367px;
+}
+
+.item-bspe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -112px;
+	background-size: 372px 367px;
+}
+
+.item-bsta {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -112px;
+	background-size: 372px 367px;
+}
+
+.item-bswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -112px;
+	background-size: 372px 367px;
+}
+
+.item-bzdr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -112px;
+	background-size: 372px 367px;
+}
+
+.item-came {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -112px;
+	background-size: 372px 367px;
+}
+
+.item-capl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -0px;
+	background-size: 372px 367px;
+}
+
+.item-carp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -16px;
+	background-size: 372px 367px;
+}
+
+.item-carr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -32px;
+	background-size: 372px 367px;
+}
+
+.item-cash {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -48px;
+	background-size: 372px 367px;
+}
+
+.item-cavi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -64px;
+	background-size: 372px 367px;
+}
+
+.item-cbow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -80px;
+	background-size: 372px 367px;
+}
+
+.item-cent {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -96px;
+	background-size: 372px 367px;
+}
+
+.item-chai {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -132px -112px;
+	background-size: 372px 367px;
+}
+
+.item-char {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -128px;
+	background-size: 372px 367px;
+}
+
+.item-chim {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -128px;
+	background-size: 372px 367px;
+}
+
+.item-chis {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -128px;
+	background-size: 372px 367px;
+}
+
+.item-choc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -128px;
+	background-size: 372px 367px;
+}
+
+.item-ciga {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -128px;
+	background-size: 372px 367px;
+}
+
+.item-clea {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -128px;
+	background-size: 372px 367px;
+}
+
+.item-clgi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -128px;
+	background-size: 372px 367px;
+}
+
+.item-clos {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -128px;
+	background-size: 372px 367px;
+}
+
+.item-club {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -128px;
+	background-size: 372px 367px;
+}
+
+.item-codr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -0px;
+	background-size: 372px 367px;
+}
+
+.item-copr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -16px;
+	background-size: 372px 367px;
+}
+
+.item-core {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -32px;
+	background-size: 372px 367px;
+}
+
+.item-cott {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -48px;
+	background-size: 372px 367px;
+}
+
+.item-craw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -64px;
+	background-size: 372px 367px;
+}
+
+.item-crin {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -80px;
+	background-size: 372px 367px;
+}
+
+.item-croc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -96px;
+	background-size: 372px 367px;
+}
+
+.item-crow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -112px;
+	background-size: 372px 367px;
+}
+
+.item-cutl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -148px -128px;
+	background-size: 372px 367px;
+}
+
+.item-dagg {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -144px;
+	background-size: 372px 367px;
+}
+
+.item-dblo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -144px;
+	background-size: 372px 367px;
+}
+
+.item-dbow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -144px;
+	background-size: 372px 367px;
+}
+
+.item-ddwa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -144px;
+	background-size: 372px 367px;
+}
+
+.item-deat {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -144px;
+	background-size: 372px 367px;
+}
+
+.item-deli {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -144px;
+	background-size: 372px 367px;
+}
+
+.item-demo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -144px;
+	background-size: 372px 367px;
+}
+
+.item-dewa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -144px;
+	background-size: 372px 367px;
+}
+
+.item-dman {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -144px;
+	background-size: 372px 367px;
+}
+
+.item-dpla {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -144px;
+	background-size: 372px 367px;
+}
+
+.item-dpri {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -0px;
+	background-size: 372px 367px;
+}
+
+.item-draf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -16px;
+	background-size: 372px 367px;
+}
+
+.item-drag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -32px;
+	background-size: 372px 367px;
+}
+
+.item-drak {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -48px;
+	background-size: 372px 367px;
+}
+
+.item-drlf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -64px;
+	background-size: 372px 367px;
+}
+
+.item-dsca {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -80px;
+	background-size: 372px 367px;
+}
+
+.item-dwlf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -96px;
+	background-size: 372px 367px;
+}
+
+.item-dye {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -112px;
+	background-size: 372px 367px;
+}
+
+.item-eagl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -128px;
+	background-size: 372px 367px;
+}
+
+.item-eaxe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -164px -144px;
+	background-size: 372px 367px;
+}
+
+.item-ebax {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -160px;
+	background-size: 372px 367px;
+}
+
+.item-ebha {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -160px;
+	background-size: 372px 367px;
+}
+
+.item-ebsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -160px;
+	background-size: 372px 367px;
+}
+
+.item-eclu {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -160px;
+	background-size: 372px 367px;
+}
+
+.item-edag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -160px;
+	background-size: 372px 367px;
+}
+
+.item-egg {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -160px;
+	background-size: 372px 367px;
+}
+
+.item-eham {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -160px;
+	background-size: 372px 367px;
+}
+
+.item-ekni {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -160px;
+	background-size: 372px 367px;
+}
+
+.item-elan {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -160px;
+	background-size: 372px 367px;
+}
+
+.item-elem {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -160px;
+	background-size: 372px 367px;
+}
+
+.item-elep {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -160px;
+	background-size: 372px 367px;
+}
+
+.item-elsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -0px;
+	background-size: 372px 367px;
+}
+
+.item-emac {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -16px;
+	background-size: 372px 367px;
+}
+
+.item-emst {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -32px;
+	background-size: 372px 367px;
+}
+
+.item-emsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -48px;
+	background-size: 372px 367px;
+}
+
+.item-enax {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -64px;
+	background-size: 372px 367px;
+}
+
+.item-ensp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -80px;
+	background-size: 372px 367px;
+}
+
+.item-epda {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -96px;
+	background-size: 372px 367px;
+}
+
+.item-epee {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -112px;
+	background-size: 372px 367px;
+}
+
+.item-epic {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -128px;
+	background-size: 372px 367px;
+}
+
+.item-epik {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -144px;
+	background-size: 372px 367px;
+}
+
+.item-equa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -180px -160px;
+	background-size: 372px 367px;
+}
+
+.item-esab {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -176px;
+	background-size: 372px 367px;
+}
+
+.item-esbo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -176px;
+	background-size: 372px 367px;
+}
+
+.item-eski {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -176px;
+	background-size: 372px 367px;
+}
+
+.item-espe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -176px;
+	background-size: 372px 367px;
+}
+
+.item-esta {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -176px;
+	background-size: 372px 367px;
+}
+
+.item-eswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -176px;
+	background-size: 372px 367px;
+}
+
+.item-etti {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -176px;
+	background-size: 372px 367px;
+}
+
+.item-fair {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -176px;
+	background-size: 372px 367px;
+}
+
+.item-fali {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -176px;
+	background-size: 372px 367px;
+}
+
+.item-fdra {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -176px;
+	background-size: 372px 367px;
+}
+
+.item-figu {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -176px;
+	background-size: 372px 367px;
+}
+
+.item-fish {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -176px;
+	background-size: 372px 367px;
+}
+
+.item-fliz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -0px;
+	background-size: 372px 367px;
+}
+
+.item-floa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -16px;
+	background-size: 372px 367px;
+}
+
+.item-foil {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -32px;
+	background-size: 372px 367px;
+}
+
+.item-food {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -48px;
+	background-size: 372px 367px;
+}
+
+.item-fspe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -64px;
+	background-size: 372px 367px;
+}
+
+.item-fswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -80px;
+	background-size: 372px 367px;
+}
+
+.item-fung {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -96px;
+	background-size: 372px 367px;
+}
+
+.item-fur {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -112px;
+	background-size: 372px 367px;
+}
+
+.item-furc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -128px;
+	background-size: 372px 367px;
+}
+
+.item-furn {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -144px;
+	background-size: 372px 367px;
+}
+
+.item-furr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -160px;
+	background-size: 372px 367px;
+}
+
+.item-game {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -196px -176px;
+	background-size: 372px 367px;
+}
+
+.item-garm {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gbln {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gcen {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gelf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gem {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -192px;
+	background-size: 372px 367px;
+}
+
+.item-glid {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gliz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gnol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gnom {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gobl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -192px;
+	background-size: 372px 367px;
+}
+
+.item-godr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -192px;
+	background-size: 372px 367px;
+}
+
+.item-gold {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -192px;
+	background-size: 372px 367px;
+}
+
+.item-grai {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -192px;
+	background-size: 372px 367px;
+}
+
+.item-grap {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -0px;
+	background-size: 372px 367px;
+}
+
+.item-grat {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -16px;
+	background-size: 372px 367px;
+}
+
+.item-grdr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -32px;
+	background-size: 372px 367px;
+}
+
+.item-grif {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -48px;
+	background-size: 372px 367px;
+}
+
+.item-griz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -64px;
+	background-size: 372px 367px;
+}
+
+.item-gspi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -80px;
+	background-size: 372px 367px;
+}
+
+.item-gsqu {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -96px;
+	background-size: 372px 367px;
+}
+
+.item-gtru {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -112px;
+	background-size: 372px 367px;
+}
+
+.item-halb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -128px;
+	background-size: 372px 367px;
+}
+
+.item-hamm {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -144px;
+	background-size: 372px 367px;
+}
+
+.item-harp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -160px;
+	background-size: 372px 367px;
+}
+
+.item-hary {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -176px;
+	background-size: 372px 367px;
+}
+
+.item-hdwa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -212px -192px;
+	background-size: 372px 367px;
+}
+
+.item-helf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -208px;
+	background-size: 372px 367px;
+}
+
+.item-herb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hero {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hide {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hila {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hobb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hors {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hpot {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hund {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hwma {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hybl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -208px;
+	background-size: 372px 367px;
+}
+
+.item-hydr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -208px;
+	background-size: 372px 367px;
+}
+
+.item-ibalr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -208px;
+	background-size: 372px 367px;
+}
+
+.item-ibsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -208px;
+	background-size: 372px 367px;
+}
+
+.item-icew {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -0px;
+	background-size: 372px 367px;
+}
+
+.item-icsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -16px;
+	background-size: 372px 367px;
+}
+
+.item-idag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -32px;
+	background-size: 372px 367px;
+}
+
+.item-idemo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -48px;
+	background-size: 372px 367px;
+}
+
+.item-idra {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -64px;
+	background-size: 372px 367px;
+}
+
+.item-idrag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -80px;
+	background-size: 372px 367px;
+}
+
+.item-idwa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -96px;
+	background-size: 372px 367px;
+}
+
+.item-ieagl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -112px;
+	background-size: 372px 367px;
+}
+
+.item-iimp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -128px;
+	background-size: 372px 367px;
+}
+
+.item-ilich {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -144px;
+	background-size: 372px 367px;
+}
+
+.item-illy {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -160px;
+	background-size: 372px 367px;
+}
+
+.item-ilsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -176px;
+	background-size: 372px 367px;
+}
+
+.item-imp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -192px;
+	background-size: 372px 367px;
+}
+
+.item-invp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -228px -208px;
+	background-size: 372px 367px;
+}
+
+.item-iron {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -224px;
+	background-size: 372px 367px;
+}
+
+.item-irwd {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -224px;
+	background-size: 372px 367px;
+}
+
+.item-iskel {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -224px;
+	background-size: 372px 367px;
+}
+
+.item-ispe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -224px;
+	background-size: 372px 367px;
+}
+
+.item-iswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -224px;
+	background-size: 372px 367px;
+}
+
+.item-iunde {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -224px;
+	background-size: 372px 367px;
+}
+
+.item-ivor {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -224px;
+	background-size: 372px 367px;
+}
+
+.item-iwol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -224px;
+	background-size: 372px 367px;
+}
+
+.item-iwolf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -224px;
+	background-size: 372px 367px;
+}
+
+.item-jewe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -224px;
+	background-size: 372px 367px;
+}
+
+.item-klio {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -224px;
+	background-size: 372px 367px;
+}
+
+.item-knif {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -224px;
+	background-size: 372px 367px;
+}
+
+.item-kobo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -224px;
+	background-size: 372px 367px;
+}
+
+.item-kong {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -224px;
+	background-size: 372px 367px;
+}
+
+.item-krak {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -224px;
+	background-size: 372px 367px;
+}
+
+.item-krey {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -0px;
+	background-size: 372px 367px;
+}
+
+.item-lamaz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -16px;
+	background-size: 372px 367px;
+}
+
+.item-lanc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -32px;
+	background-size: 372px 367px;
+}
+
+.item-lass {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -48px;
+	background-size: 372px 367px;
+}
+
+.item-lbarb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -64px;
+	background-size: 372px 367px;
+}
+
+.item-lblac {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -80px;
+	background-size: 372px 367px;
+}
+
+.item-lbond {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -96px;
+	background-size: 372px 367px;
+}
+
+.item-lbow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -112px;
+	background-size: 372px 367px;
+}
+
+.item-lbucc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -128px;
+	background-size: 372px 367px;
+}
+
+.item-lcaju {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -144px;
+	background-size: 372px 367px;
+}
+
+.item-lcar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -160px;
+	background-size: 372px 367px;
+}
+
+.item-ldark {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -176px;
+	background-size: 372px 367px;
+}
+
+.item-lderv {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -192px;
+	background-size: 372px 367px;
+}
+
+.item-ldrow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -208px;
+	background-size: 372px 367px;
+}
+
+.item-lduer {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -244px -224px;
+	background-size: 372px 367px;
+}
+
+.item-ldwar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lead {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lelf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lffol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lgnom {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lhead {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lhigh {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lhobg {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lhuma {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lica {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lich {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -240px;
+	background-size: 372px 367px;
+}
+
+.item-limpe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -240px;
+	background-size: 372px 367px;
+}
+
+.item-lion {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -240px;
+	background-size: 372px 367px;
+}
+
+.item-live {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -240px;
+	background-size: 372px 367px;
+}
+
+.item-liza {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -240px;
+	background-size: 372px 367px;
+}
+
+.item-llea {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -240px -240px;
+	background-size: 372px 367px;
+}
+
+.item-llowl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -0px;
+	background-size: 372px 367px;
+}
+
+.item-lman {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -16px;
+	background-size: 372px 367px;
+}
+
+.item-lmino {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -32px;
+	background-size: 372px 367px;
+}
+
+.item-logre {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -48px;
+	background-size: 372px 367px;
+}
+
+.item-loom {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -64px;
+	background-size: 372px 367px;
+}
+
+.item-lrepu {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -80px;
+	background-size: 372px 367px;
+}
+
+.item-lsand {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -96px;
+	background-size: 372px 367px;
+}
+
+.item-lserp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -112px;
+	background-size: 372px 367px;
+}
+
+.item-lswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -128px;
+	background-size: 372px 367px;
+}
+
+.item-ltre {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -144px;
+	background-size: 372px 367px;
+}
+
+.item-ltrib {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -160px;
+	background-size: 372px 367px;
+}
+
+.item-ltrol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -176px;
+	background-size: 372px 367px;
+}
+
+.item-luruk {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -192px;
+	background-size: 372px 367px;
+}
+
+.item-lviki {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -208px;
+	background-size: 372px 367px;
+}
+
+.item-lwag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -224px;
+	background-size: 372px 367px;
+}
+
+.item-lxbo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -260px -240px;
+	background-size: 372px 367px;
+}
+
+.item-mace {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -256px;
+	background-size: 372px 367px;
+}
+
+.item-magi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mamm {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mana {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mast {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -256px;
+	background-size: 372px 367px;
+}
+
+.item-maul {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mbat {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mbax {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mbsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mdag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -256px;
+	background-size: 372px 367px;
+}
+
+.item-meag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -256px;
+	background-size: 372px 367px;
+}
+
+.item-meat {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -256px;
+	background-size: 372px 367px;
+}
+
+.item-medi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mepl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -256px;
+	background-size: 372px 367px;
+}
+
+.item-merf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mfli {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -240px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mgas {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -256px -256px;
+	background-size: 372px 367px;
+}
+
+.item-mink {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -0px;
+	background-size: 372px 367px;
+}
+
+.item-mino {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -16px;
+	background-size: 372px 367px;
+}
+
+.item-mith {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -32px;
+	background-size: 372px 367px;
+}
+
+.item-mlio {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -48px;
+	background-size: 372px 367px;
+}
+
+.item-mliz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -64px;
+	background-size: 372px 367px;
+}
+
+.item-mliz2 {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -80px;
+	background-size: 372px 367px;
+}
+
+.item-mlsw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -96px;
+	background-size: 372px 367px;
+}
+
+.item-mole {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -112px;
+	background-size: 372px 367px;
+}
+
+.item-mpot {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -128px;
+	background-size: 372px 367px;
+}
+
+.item-mspi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -144px;
+	background-size: 372px 367px;
+}
+
+.item-msta {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -160px;
+	background-size: 372px 367px;
+}
+
+.item-mswo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -176px;
+	background-size: 372px 367px;
+}
+
+.item-mush {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -192px;
+	background-size: 372px 367px;
+}
+
+.item-muss {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -208px;
+	background-size: 372px 367px;
+}
+
+.item-muta {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -224px;
+	background-size: 372px 367px;
+}
+
+.item-mwag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -240px;
+	background-size: 372px 367px;
+}
+
+.item-mwol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -276px -256px;
+	background-size: 372px 367px;
+}
+
+.item-neck {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -272px;
+	background-size: 372px 367px;
+}
+
+.item-net {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -272px;
+	background-size: 372px 367px;
+}
+
+.item-noma {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -272px;
+	background-size: 372px 367px;
+}
+
+.item-oger {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -272px;
+	background-size: 372px 367px;
+}
+
+.item-ogre {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -272px;
+	background-size: 372px 367px;
+}
+
+.item-oil {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -272px;
+	background-size: 372px 367px;
+}
+
+.item-orc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -272px;
+	background-size: 372px 367px;
+}
+
+.item-orna {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -272px;
+	background-size: 372px 367px;
+}
+
+.item-oxca {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pdag {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pear {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pela {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pelc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pelt {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -272px;
+	background-size: 372px 367px;
+}
+
+.item-perf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pick {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -240px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pike {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -256px -272px;
+	background-size: 372px 367px;
+}
+
+.item-pira {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -272px -272px;
+	background-size: 372px 367px;
+}
+
+.item-plai {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -0px;
+	background-size: 372px 367px;
+}
+
+.item-poin {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -16px;
+	background-size: 372px 367px;
+}
+
+.item-pois {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -32px;
+	background-size: 372px 367px;
+}
+
+.item-pola {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -48px;
+	background-size: 372px 367px;
+}
+
+.item-pony {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -64px;
+	background-size: 372px 367px;
+}
+
+.item-pres {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -80px;
+	background-size: 372px 367px;
+}
+
+.item-pspi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -96px;
+	background-size: 372px 367px;
+}
+
+.item-quar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -112px;
+	background-size: 372px 367px;
+}
+
+.item-ramaz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -128px;
+	background-size: 372px 367px;
+}
+
+.item-rat {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -144px;
+	background-size: 372px 367px;
+}
+
+.item-rati {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -160px;
+	background-size: 372px 367px;
+}
+
+.item-rbarb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -176px;
+	background-size: 372px 367px;
+}
+
+.item-rblac {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -192px;
+	background-size: 372px 367px;
+}
+
+.item-rbond {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -208px;
+	background-size: 372px 367px;
+}
+
+.item-rbucc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -224px;
+	background-size: 372px 367px;
+}
+
+.item-rclan {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -240px;
+	background-size: 372px 367px;
+}
+
+.item-rdark {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -256px;
+	background-size: 372px 367px;
+}
+
+.item-rdrow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -292px -272px;
+	background-size: 372px 367px;
+}
+
+.item-rduer {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -288px;
+	background-size: 372px 367px;
+}
+
+.item-redr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rffol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rgem {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rgnol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rgobl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rhalf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rhead {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rhelf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rhigh {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rhuma {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -288px;
+	background-size: 372px 367px;
+}
+
+.item-riai {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -288px;
+	background-size: 372px 367px;
+}
+
+.item-riar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -288px;
+	background-size: 372px 367px;
+}
+
+.item-ricp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -288px;
+	background-size: 372px 367px;
+}
+
+.item-riho {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rimpe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -240px -288px;
+	background-size: 372px 367px;
+}
+
+.item-ring {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -256px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rinv {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -272px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rise {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -288px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rliza {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -0px;
+	background-size: 372px 367px;
+}
+
+.item-rmino {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -16px;
+	background-size: 372px 367px;
+}
+
+.item-rnoma {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -32px;
+	background-size: 372px 367px;
+}
+
+.item-robb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -48px;
+	background-size: 372px 367px;
+}
+
+.item-roc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -64px;
+	background-size: 372px 367px;
+}
+
+.item-rofe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -80px;
+	background-size: 372px 367px;
+}
+
+.item-rogre {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -96px;
+	background-size: 372px 367px;
+}
+
+.item-root {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -112px;
+	background-size: 372px 367px;
+}
+
+.item-rorc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -128px;
+	background-size: 372px 367px;
+}
+
+.item-rorcs {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -144px;
+	background-size: 372px 367px;
+}
+
+.item-rose {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -160px;
+	background-size: 372px 367px;
+}
+
+.item-rrepu {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -176px;
+	background-size: 372px 367px;
+}
+
+.item-rsand {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -192px;
+	background-size: 372px 367px;
+}
+
+.item-rserp {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -208px;
+	background-size: 372px 367px;
+}
+
+.item-rtrib {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -224px;
+	background-size: 372px 367px;
+}
+
+.item-rune {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -240px;
+	background-size: 372px 367px;
+}
+
+.item-rviki {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -256px;
+	background-size: 372px 367px;
+}
+
+.item-rwar {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -272px;
+	background-size: 372px 367px;
+}
+
+.item-rydwa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -308px -288px;
+	background-size: 372px 367px;
+}
+
+.item-rygno {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -304px;
+	background-size: 372px 367px;
+}
+
+.item-sabr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -304px;
+	background-size: 372px 367px;
+}
+
+.item-sand {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -304px;
+	background-size: 372px 367px;
+}
+
+.item-saw {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -304px;
+	background-size: 372px 367px;
+}
+
+.item-saxe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -304px;
+	background-size: 372px 367px;
+}
+
+.item-sbow {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -304px;
+	background-size: 372px 367px;
+}
+
+.item-scor {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -304px;
+	background-size: 372px 367px;
+}
+
+.item-seat {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -304px;
+	background-size: 372px 367px;
+}
+
+.item-self {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -304px;
+	background-size: 372px 367px;
+}
+
+.item-shbo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -304px;
+	background-size: 372px 367px;
+}
+
+.item-shie {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -304px;
+	background-size: 372px 367px;
+}
+
+.item-shst {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -304px;
+	background-size: 372px 367px;
+}
+
+.item-sidr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -304px;
+	background-size: 372px 367px;
+}
+
+.item-silk {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -304px;
+	background-size: 372px 367px;
+}
+
+.item-silv {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -304px;
+	background-size: 372px 367px;
+}
+
+.item-skel {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -240px -304px;
+	background-size: 372px 367px;
+}
+
+.item-skul {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -256px -304px;
+	background-size: 372px 367px;
+}
+
+.item-slim {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -272px -304px;
+	background-size: 372px 367px;
+}
+
+.item-snak {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -288px -304px;
+	background-size: 372px 367px;
+}
+
+.item-sorc {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -304px -304px;
+	background-size: 372px 367px;
+}
+
+.item-spea {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -0px;
+	background-size: 372px 367px;
+}
+
+.item-special {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -16px;
+	background-size: 372px 367px;
+}
+
+.item-sphi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -32px;
+	background-size: 372px 367px;
+}
+
+.item-spic {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -48px;
+	background-size: 372px 367px;
+}
+
+.item-spid {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -64px;
+	background-size: 372px 367px;
+}
+
+.item-spin {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -80px;
+	background-size: 372px 367px;
+}
+
+.item-sqbe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -96px;
+	background-size: 372px 367px;
+}
+
+.item-staf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -112px;
+	background-size: 372px 367px;
+}
+
+.item-stai {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -128px;
+	background-size: 372px 367px;
+}
+
+.item-stal {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -144px;
+	background-size: 372px 367px;
+}
+
+.item-stam {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -160px;
+	background-size: 372px 367px;
+}
+
+.item-stas {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -176px;
+	background-size: 372px 367px;
+}
+
+.item-stco {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -192px;
+	background-size: 372px 367px;
+}
+
+.item-stdr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -208px;
+	background-size: 372px 367px;
+}
+
+.item-stfl {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -224px;
+	background-size: 372px 367px;
+}
+
+.item-stgi {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -240px;
+	background-size: 372px 367px;
+}
+
+.item-ston {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -256px;
+	background-size: 372px 367px;
+}
+
+.item-stpo {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -272px;
+	background-size: 372px 367px;
+}
+
+.item-stro {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -288px;
+	background-size: 372px 367px;
+}
+
+.item-swcr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -324px -304px;
+	background-size: 372px 367px;
+}
+
+.item-swor {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -320px;
+	background-size: 372px 367px;
+}
+
+.item-taro {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -320px;
+	background-size: 372px 367px;
+}
+
+.item-telf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -320px;
+	background-size: 372px 367px;
+}
+
+.item-thie {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -320px;
+	background-size: 372px 367px;
+}
+
+.item-tige {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -320px;
+	background-size: 372px 367px;
+}
+
+.item-tita {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -320px;
+	background-size: 372px 367px;
+}
+
+.item-tman {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -320px;
+	background-size: 372px 367px;
+}
+
+.item-toba {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -320px;
+	background-size: 372px 367px;
+}
+
+.item-tren {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -128px -320px;
+	background-size: 372px 367px;
+}
+
+.item-trol {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -144px -320px;
+	background-size: 372px 367px;
+}
+
+.item-truf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -160px -320px;
+	background-size: 372px 367px;
+}
+
+.item-tsta {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -176px -320px;
+	background-size: 372px 367px;
+}
+
+.item-twor {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -192px -320px;
+	background-size: 372px 367px;
+}
+
+.item-udwa {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -208px -320px;
+	background-size: 372px 367px;
+}
+
+.item-unde {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -224px -320px;
+	background-size: 372px 367px;
+}
+
+.item-uruk {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -240px -320px;
+	background-size: 372px 367px;
+}
+
+.item-velv {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -256px -320px;
+	background-size: 372px 367px;
+}
+
+.item-viki {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -272px -320px;
+	background-size: 372px 367px;
+}
+
+.item-vodk {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -288px -320px;
+	background-size: 372px 367px;
+}
+
+.item-wago {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -304px -320px;
+	background-size: 372px 367px;
+}
+
+.item-walf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -320px -320px;
+	background-size: 372px 367px;
+}
+
+.item-warg {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -0px;
+	background-size: 372px 367px;
+}
+
+.item-warh {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -16px;
+	background-size: 372px 367px;
+}
+
+.item-warr {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -32px;
+	background-size: 372px 367px;
+}
+
+.item-waxe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -48px;
+	background-size: 372px 367px;
+}
+
+.item-wdra {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -64px;
+	background-size: 372px 367px;
+}
+
+.item-wele {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -80px;
+	background-size: 372px 367px;
+}
+
+.item-welf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -96px;
+	background-size: 372px 367px;
+}
+
+.item-whal {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -112px;
+	background-size: 372px 367px;
+}
+
+.item-wham {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -128px;
+	background-size: 372px 367px;
+}
+
+.item-whor {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -144px;
+	background-size: 372px 367px;
+}
+
+.item-will {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -160px;
+	background-size: 372px 367px;
+}
+
+.item-wine {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -176px;
+	background-size: 372px 367px;
+}
+
+.item-wing {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -192px;
+	background-size: 372px 367px;
+}
+
+.item-wlan {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -208px;
+	background-size: 372px 367px;
+}
+
+.item-wliz {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -224px;
+	background-size: 372px 367px;
+}
+
+.item-wmac {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -240px;
+	background-size: 372px 367px;
+}
+
+.item-wmam {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -256px;
+	background-size: 372px 367px;
+}
+
+.item-wman {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -272px;
+	background-size: 372px 367px;
+}
+
+.item-wmas {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -288px;
+	background-size: 372px 367px;
+}
+
+.item-wolf {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -304px;
+	background-size: 372px 367px;
+}
+
+.item-wood {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -340px -320px;
+	background-size: 372px 367px;
+}
+
+.item-wool {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -0px -336px;
+	background-size: 372px 367px;
+}
+
+.item-woor {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -16px -336px;
+	background-size: 372px 367px;
+}
+
+.item-wspe {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -32px -336px;
+	background-size: 372px 367px;
+}
+
+.item-wsta {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -48px -336px;
+	background-size: 372px 367px;
+}
+
+.item-xxxx {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -64px -336px;
+	background-size: 372px 367px;
+}
+
+.item-yeti {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -80px -336px;
+	background-size: 372px 367px;
+}
+
+.item-yew {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -96px -336px;
+	background-size: 372px 367px;
+}
+
+.item-zomb {
+    width: 16px;
+    height: 16px;
+    background: url("items-css.png") -112px -336px;
+	background-size: 372px 367px;
+}
+
+.item-aarm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -128px -336px;
+	background-size: 372px 367px;
+}
+
+.item-acar {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -144px -336px;
+	background-size: 372px 367px;
+}
+
+.item-apla {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -160px -336px;
+	background-size: 372px 367px;
+}
+
+.item-arba {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -176px -336px;
+	background-size: 372px 367px;
+}
+
+.item-arng {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -192px -336px;
+	background-size: 372px 367px;
+}
+
+.item-asca {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -208px -336px;
+	background-size: 372px 367px;
+}
+
+.item-bclo {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -224px -336px;
+	background-size: 372px 367px;
+}
+
+.item-bech {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -240px -336px;
+	background-size: 372px 367px;
+}
+
+.item-bpla {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -256px -336px;
+	background-size: 372px 367px;
+}
+
+.item-carm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -272px -336px;
+	background-size: 372px 367px;
+}
+
+.item-clar {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -288px -336px;
+	background-size: 372px 367px;
+}
+
+.item-cloa {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -304px -336px;
+	background-size: 372px 367px;
+}
+
+.item-clod {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -320px -336px;
+	background-size: 372px 367px;
+}
+
+.item-clon {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -336px -336px;
+	background-size: 372px 367px;
+}
+
+.item-clor {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -0px;
+	background-size: 372px 367px;
+}
+
+.item-cltd {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -15px;
+	background-size: 372px 367px;
+}
+
+.item-cpro {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -30px;
+	background-size: 372px 367px;
+}
+
+.item-cshd {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -45px;
+	background-size: 372px 367px;
+}
+
+.item-cstb {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -60px;
+	background-size: 372px 367px;
+}
+
+.item-darm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -75px;
+	background-size: 372px 367px;
+}
+
+.item-earb {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -90px;
+	background-size: 372px 367px;
+}
+
+.item-ecar {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -105px;
+	background-size: 372px 367px;
+}
+
+.item-ecla {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -120px;
+	background-size: 372px 367px;
+}
+
+.item-ecrm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -135px;
+	background-size: 372px 367px;
+}
+
+.item-ejav {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -150px;
+	background-size: 372px 367px;
+}
+
+.item-elar {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -165px;
+	background-size: 372px 367px;
+}
+
+.item-elxb {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -180px;
+	background-size: 372px 367px;
+}
+
+.item-emcr {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -195px;
+	background-size: 372px 367px;
+}
+
+.item-emrm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -210px;
+	background-size: 372px 367px;
+}
+
+.item-epla {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -225px;
+	background-size: 372px 367px;
+}
+
+.item-eprm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -240px;
+	background-size: 372px 367px;
+}
+
+.item-esca {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -255px;
+	background-size: 372px 367px;
+}
+
+.item-exbo {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -270px;
+	background-size: 372px 367px;
+}
+
+.item-fcha {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -285px;
+	background-size: 372px 367px;
+}
+
+.item-fich {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -300px;
+	background-size: 372px 367px;
+}
+
+.item-fuch {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -315px;
+	background-size: 372px 367px;
+}
+
+.item-hech {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -356px -330px;
+	background-size: 372px 367px;
+}
+
+.item-hlch {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -0px -352px;
+	background-size: 372px 367px;
+}
+
+.item-hxbo {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -16px -352px;
+	background-size: 372px 367px;
+}
+
+.item-icar {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -32px -352px;
+	background-size: 372px 367px;
+}
+
+.item-imth {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -48px -352px;
+	background-size: 372px 367px;
+}
+
+.item-ipla {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -64px -352px;
+	background-size: 372px 367px;
+}
+
+.item-isca {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -80px -352px;
+	background-size: 372px 367px;
+}
+
+.item-jave {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -96px -352px;
+	background-size: 372px 367px;
+}
+
+.item-larm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -112px -352px;
+	background-size: 372px 367px;
+}
+
+.item-marm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -128px -352px;
+	background-size: 372px 367px;
+}
+
+.item-mcar {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -144px -352px;
+	background-size: 372px 367px;
+}
+
+.item-mpla {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -160px -352px;
+	background-size: 372px 367px;
+}
+
+.item-msca {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -176px -352px;
+	background-size: 372px 367px;
+}
+
+.item-mxbo {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -192px -352px;
+	background-size: 372px 367px;
+}
+
+.item-orch {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -208px -352px;
+	background-size: 372px 367px;
+}
+
+.item-parm {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -224px -352px;
+	background-size: 372px 367px;
+}
+
+.item-ptch {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -240px -352px;
+	background-size: 372px 367px;
+}
+
+.item-roch {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -256px -352px;
+	background-size: 372px 367px;
+}
+
+.item-shee {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -272px -352px;
+	background-size: 372px 367px;
+}
+
+.item-vech {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -288px -352px;
+	background-size: 372px 367px;
+}
+
+.item-wich {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -304px -352px;
+	background-size: 372px 367px;
+}
+
+.item-woch {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -320px -352px;
+	background-size: 372px 367px;
+}
+
+.item-xbow {
+    width: 16px;
+    height: 15px;
+    background: url("items-css.png") -336px -352px;
+	background-size: 372px 367px;
+}
+

@@ -1,177 +1,177 @@
 {
 	"meta": {
 		"image": "terrain.png",
-		"size": {"w":245,"h":215},
+		"size": {"w":294,"h":212},
 		"scale": "1"
 	},
 	"frames": {
 		"cavern.png":
 		{
-			"frame": {"x":0,"y":0,"w":49,"h":43},
+			"frame": {"x":0,"y":0,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"chasm.png":
 		{
-			"frame": {"x":49,"y":0,"w":49,"h":43},
+			"frame": {"x":49,"y":0,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"deepforest.png":
 		{
-			"frame": {"x":0,"y":43,"w":49,"h":43},
+			"frame": {"x":98,"y":0,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"deeps.png":
 		{
-			"frame": {"x":49,"y":43,"w":49,"h":43},
+			"frame": {"x":0,"y":53,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"desert.png":
 		{
-			"frame": {"x":98,"y":0,"w":49,"h":43},
+			"frame": {"x":49,"y":53,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"forest.png":
 		{
-			"frame": {"x":98,"y":43,"w":49,"h":43},
+			"frame": {"x":98,"y":53,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"grotto.png":
 		{
-			"frame": {"x":0,"y":86,"w":49,"h":43},
+			"frame": {"x":147,"y":0,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"hill.png":
 		{
-			"frame": {"x":49,"y":86,"w":49,"h":43},
+			"frame": {"x":147,"y":53,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"jungle.png":
 		{
-			"frame": {"x":98,"y":86,"w":49,"h":43},
+			"frame": {"x":0,"y":106,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"lake.png":
 		{
-			"frame": {"x":147,"y":0,"w":49,"h":43},
+			"frame": {"x":49,"y":106,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"mountain.png":
 		{
-			"frame": {"x":147,"y":43,"w":49,"h":43},
+			"frame": {"x":98,"y":106,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"mystforest.png":
 		{
-			"frame": {"x":147,"y":86,"w":49,"h":43},
+			"frame": {"x":147,"y":106,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"ocean.png":
 		{
-			"frame": {"x":0,"y":129,"w":49,"h":43},
+			"frame": {"x":196,"y":0,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"plain.png":
 		{
-			"frame": {"x":49,"y":129,"w":49,"h":43},
+			"frame": {"x":196,"y":53,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"shallows.png":
 		{
-			"frame": {"x":98,"y":129,"w":49,"h":43},
+			"frame": {"x":196,"y":106,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"swamp.png":
 		{
-			"frame": {"x":147,"y":129,"w":49,"h":43},
+			"frame": {"x":0,"y":159,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"tundra.png":
 		{
-			"frame": {"x":196,"y":0,"w":49,"h":43},
+			"frame": {"x":49,"y":159,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"tunnels.png":
 		{
-			"frame": {"x":196,"y":43,"w":49,"h":43},
+			"frame": {"x":98,"y":159,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"underforest.png":
 		{
-			"frame": {"x":196,"y":86,"w":49,"h":43},
+			"frame": {"x":147,"y":159,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"volcano.png":
 		{
-			"frame": {"x":196,"y":129,"w":49,"h":43},
+			"frame": {"x":196,"y":159,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		},
 		"wasteland.png":
 		{
-			"frame": {"x":0,"y":172,"w":49,"h":43},
+			"frame": {"x":245,"y":0,"w":49,"h":53},
 			"rotated": false,
 			"trimmed": false,
-			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":43},
-			"sourceSize": {"w":49,"h":43}
+			"spriteSourceSize": {"x":0,"y":0,"w":49,"h":53},
+			"sourceSize": {"w":49,"h":53}
 		}
 	}
 }

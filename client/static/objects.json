@@ -1,0 +1,1585 @@
+{
+	"meta": {
+		"image": "objects.png",
+		"size": {"w":230,"h":208},
+		"scale": "1"
+	},
+	"frames": {
+		"Cage Trap.png":
+		{
+			"frame": {"x":0,"y":0,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Drakenstein.png":
+		{
+			"frame": {"x":17,"y":0,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Firedrake Cliff.png":
+		{
+			"frame": {"x":0,"y":16,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Forest Preserve.png":
+		{
+			"frame": {"x":17,"y":16,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Griffon Stable.png":
+		{
+			"frame": {"x":34,"y":0,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Hexagonal Portal Tower.png":
+		{
+			"frame": {"x":34,"y":16,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Hexagonal Tower.png":
+		{
+			"frame": {"x":0,"y":32,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Horticulture.png":
+		{
+			"frame": {"x":17,"y":32,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Irrigation.png":
+		{
+			"frame": {"x":34,"y":32,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Lair.png":
+		{
+			"frame": {"x":51,"y":0,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Necromancers Guild.png":
+		{
+			"frame": {"x":51,"y":16,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Ranch.png":
+		{
+			"frame": {"x":51,"y":32,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Slaughterhouse.png":
+		{
+			"frame": {"x":0,"y":48,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Thicket.png":
+		{
+			"frame": {"x":17,"y":48,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Tobacco Plantation.png":
+		{
+			"frame": {"x":34,"y":48,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Trapping Hut.png":
+		{
+			"frame": {"x":51,"y":48,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Virginary.png":
+		{
+			"frame": {"x":68,"y":0,"w":17,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":17,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Island.png":
+		{
+			"frame": {"x":68,"y":16,"w":17,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":17,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Cloud Palace.png":
+		{
+			"frame": {"x":68,"y":31,"w":17,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":17,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Palace.png":
+		{
+			"frame": {"x":68,"y":45,"w":17,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":17,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Druid Circle.png":
+		{
+			"frame": {"x":0,"y":64,"w":17,"h":11},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":4,"w":17,"h":11},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Faerie Ring.png":
+		{
+			"frame": {"x":17,"y":64,"w":17,"h":11},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":4,"w":17,"h":11},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Artificial Reef.png":
+		{
+			"frame": {"x":85,"y":0,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Chimera Roost.png":
+		{
+			"frame": {"x":85,"y":16,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Derelict Ship.png":
+		{
+			"frame": {"x":85,"y":32,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Elephant Stable.png":
+		{
+			"frame": {"x":85,"y":48,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Fishing Fleet.png":
+		{
+			"frame": {"x":0,"y":75,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Hunting Hut.png":
+		{
+			"frame": {"x":16,"y":75,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Hunting Stand.png":
+		{
+			"frame": {"x":32,"y":75,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Menagerie.png":
+		{
+			"frame": {"x":48,"y":75,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Shepherd Hut.png":
+		{
+			"frame": {"x":64,"y":75,"w":16,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Chandler.png":
+		{
+			"frame": {"x":80,"y":75,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Crypt.png":
+		{
+			"frame": {"x":101,"y":0,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Dark Priest Tower.png":
+		{
+			"frame": {"x":101,"y":16,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Giants Castle.png":
+		{
+			"frame": {"x":101,"y":32,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Hermits Hut.png":
+		{
+			"frame": {"x":101,"y":48,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Sheep Dip.png":
+		{
+			"frame": {"x":101,"y":64,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Sheep Farm.png":
+		{
+			"frame": {"x":0,"y":91,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Volcanic Pool.png":
+		{
+			"frame": {"x":15,"y":91,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Whaling Fleet.png":
+		{
+			"frame": {"x":30,"y":91,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Woolinger Dip.png":
+		{
+			"frame": {"x":45,"y":91,"w":15,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Ancient Temple.png":
+		{
+			"frame": {"x":60,"y":91,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Aqueduct.png":
+		{
+			"frame": {"x":76,"y":91,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Bat Cave.png":
+		{
+			"frame": {"x":92,"y":91,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Behemoth Warschool.png":
+		{
+			"frame": {"x":116,"y":0,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Elefant Warschool.png":
+		{
+			"frame": {"x":116,"y":15,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Elephant Warschool.png":
+		{
+			"frame": {"x":116,"y":30,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Farmhouse.png":
+		{
+			"frame": {"x":116,"y":45,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Gem Appraiser.png":
+		{
+			"frame": {"x":116,"y":60,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Gem Mine.png":
+		{
+			"frame": {"x":116,"y":75,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Kennel.png":
+		{
+			"frame": {"x":116,"y":90,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Lizard Ranch.png":
+		{
+			"frame": {"x":0,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Lizard Slaughterhouse.png":
+		{
+			"frame": {"x":16,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Mythic Stables.png":
+		{
+			"frame": {"x":32,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Team Trainer's Shop.png":
+		{
+			"frame": {"x":48,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Temple.png":
+		{
+			"frame": {"x":64,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Training Pen.png":
+		{
+			"frame": {"x":80,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Training Pit.png":
+		{
+			"frame": {"x":96,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Vineyard.png":
+		{
+			"frame": {"x":112,"y":107,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Warg Pit.png":
+		{
+			"frame": {"x":132,"y":0,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Winged Horse Stable.png":
+		{
+			"frame": {"x":132,"y":15,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":16,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Wolf Pen.png":
+		{
+			"frame": {"x":132,"y":30,"w":16,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Dragon Cliff.png":
+		{
+			"frame": {"x":132,"y":45,"w":14,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":14,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Hut.png":
+		{
+			"frame": {"x":132,"y":61,"w":14,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":14,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Mammoth Stable.png":
+		{
+			"frame": {"x":132,"y":77,"w":14,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":14,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Tournament Course.png":
+		{
+			"frame": {"x":132,"y":93,"w":14,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":14,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Tournament Parcours.png":
+		{
+			"frame": {"x":0,"y":122,"w":14,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":14,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Wyrm Lair.png":
+		{
+			"frame": {"x":14,"y":122,"w":14,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":14,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Corestone Quarry.png":
+		{
+			"frame": {"x":28,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Herbalist Store.png":
+		{
+			"frame": {"x":44,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Mystic Quarry.png":
+		{
+			"frame": {"x":60,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Pyramid.png":
+		{
+			"frame": {"x":76,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":16,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Runemaster.png":
+		{
+			"frame": {"x":92,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Stonecutters Hut.png":
+		{
+			"frame": {"x":108,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Stonemasons Hut.png":
+		{
+			"frame": {"x":124,"y":122,"w":16,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Eyrie.png":
+		{
+			"frame": {"x":148,"y":0,"w":13,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":13,"h":16},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Adamantium mine.png":
+		{
+			"frame": {"x":132,"y":109,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Admantium mine.png":
+		{
+			"frame": {"x":0,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Arcane Mine.png":
+		{
+			"frame": {"x":16,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Furnace.png":
+		{
+			"frame": {"x":32,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Gold mine.png":
+		{
+			"frame": {"x":48,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Mine.png":
+		{
+			"frame": {"x":64,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Mithril mine.png":
+		{
+			"frame": {"x":80,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Prospectors Hut.png":
+		{
+			"frame": {"x":96,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Road N.png":
+		{
+			"frame": {"x":112,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Road S.png":
+		{
+			"frame": {"x":128,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Root Road N.png":
+		{
+			"frame": {"x":144,"y":138,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Root Road S.png":
+		{
+			"frame": {"x":161,"y":0,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Sawing Mill.png":
+		{
+			"frame": {"x":161,"y":13,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Timber Yard.png":
+		{
+			"frame": {"x":161,"y":26,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Trapping Lodge.png":
+		{
+			"frame": {"x":161,"y":39,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Tree Nursery.png":
+		{
+			"frame": {"x":161,"y":52,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Treetenders Hut.png":
+		{
+			"frame": {"x":161,"y":65,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Yew Grove.png":
+		{
+			"frame": {"x":161,"y":78,"w":16,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":16,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"giant bat.png":
+		{
+			"frame": {"x":161,"y":91,"w":16,"h":11},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":16,"h":11},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Monument.png":
+		{
+			"frame": {"x":161,"y":102,"w":5,"h":16},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":5,"y":0,"w":5,"h":16},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Apothecary.png":
+		{
+			"frame": {"x":161,"y":118,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Armorforge.png":
+		{
+			"frame": {"x":161,"y":133,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Cave.png":
+		{
+			"frame": {"x":0,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Cog.png":
+		{
+			"frame": {"x":15,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Cotton Collectors.png":
+		{
+			"frame": {"x":30,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Cotton Plantation.png":
+		{
+			"frame": {"x":45,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Demon Pit.png":
+		{
+			"frame": {"x":60,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Floating Fortress.png":
+		{
+			"frame": {"x":75,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Flying Lizard Stable.png":
+		{
+			"frame": {"x":90,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Ghost Ship.png":
+		{
+			"frame": {"x":105,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Ice Cave.png":
+		{
+			"frame": {"x":120,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Inn.png":
+		{
+			"frame": {"x":135,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Quarry.png":
+		{
+			"frame": {"x":150,"y":151,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Rootstone Quarry.png":
+		{
+			"frame": {"x":177,"y":0,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"War Galleon.png":
+		{
+			"frame": {"x":177,"y":15,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":15,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Winepress.png":
+		{
+			"frame": {"x":177,"y":30,"w":15,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Fortress.png":
+		{
+			"frame": {"x":177,"y":45,"w":14,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":14,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Grand Fortress.png":
+		{
+			"frame": {"x":177,"y":60,"w":14,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":14,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Magical Fortress.png":
+		{
+			"frame": {"x":177,"y":75,"w":14,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":14,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Mammoth Warschool.png":
+		{
+			"frame": {"x":177,"y":90,"w":14,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":14,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Boar Pen.png":
+		{
+			"frame": {"x":177,"y":105,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Camel Stable.png":
+		{
+			"frame": {"x":177,"y":119,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Drying Shed.png":
+		{
+			"frame": {"x":177,"y":133,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Lizard Stable.png":
+		{
+			"frame": {"x":177,"y":147,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Mill.png":
+		{
+			"frame": {"x":0,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Mole Burrow.png":
+		{
+			"frame": {"x":15,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Mushroom Farm.png":
+		{
+			"frame": {"x":30,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Pony Stable.png":
+		{
+			"frame": {"x":45,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Ranch House.png":
+		{
+			"frame": {"x":60,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Sculptor's Workshop.png":
+		{
+			"frame": {"x":75,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Sculptors Workshop.png":
+		{
+			"frame": {"x":90,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Stable.png":
+		{
+			"frame": {"x":105,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Stables.png":
+		{
+			"frame": {"x":120,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Truffles Plantation.png":
+		{
+			"frame": {"x":135,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Walkway.png":
+		{
+			"frame": {"x":150,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":0,"w":15,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Woolinger Farm.png":
+		{
+			"frame": {"x":165,"y":166,"w":15,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Brig.png":
+		{
+			"frame": {"x":148,"y":16,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Citadel.png":
+		{
+			"frame": {"x":148,"y":31,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Dhow.png":
+		{
+			"frame": {"x":148,"y":46,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Grand Citadel.png":
+		{
+			"frame": {"x":148,"y":61,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Magicians Tower.png":
+		{
+			"frame": {"x":148,"y":76,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Schooner.png":
+		{
+			"frame": {"x":148,"y":91,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Snow.png":
+		{
+			"frame": {"x":148,"y":106,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Tartan.png":
+		{
+			"frame": {"x":148,"y":121,"w":13,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":13,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Diving Floats.png":
+		{
+			"frame": {"x":192,"y":0,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Fishery.png":
+		{
+			"frame": {"x":192,"y":13,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Fungus Garden.png":
+		{
+			"frame": {"x":192,"y":26,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Jeweler.png":
+		{
+			"frame": {"x":192,"y":39,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Joiner's Workshop.png":
+		{
+			"frame": {"x":192,"y":52,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Peltmonger's Workshop.png":
+		{
+			"frame": {"x":192,"y":65,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Peltmongers Workshop.png":
+		{
+			"frame": {"x":192,"y":78,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Road NE.png":
+		{
+			"frame": {"x":192,"y":91,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Road NW.png":
+		{
+			"frame": {"x":192,"y":104,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Road SE.png":
+		{
+			"frame": {"x":192,"y":117,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Road SW.png":
+		{
+			"frame": {"x":192,"y":130,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Root Road NE.png":
+		{
+			"frame": {"x":192,"y":143,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Root Road NW.png":
+		{
+			"frame": {"x":192,"y":156,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Root Road SE.png":
+		{
+			"frame": {"x":0,"y":180,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Root Road SW.png":
+		{
+			"frame": {"x":15,"y":180,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Smithy.png":
+		{
+			"frame": {"x":30,"y":180,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Spider Stable.png":
+		{
+			"frame": {"x":45,"y":180,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Tavern.png":
+		{
+			"frame": {"x":60,"y":180,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":1,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Weaponforge.png":
+		{
+			"frame": {"x":75,"y":180,"w":15,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":2,"w":15,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Airship.png":
+		{
+			"frame": {"x":165,"y":151,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Armored Galleon.png":
+		{
+			"frame": {"x":207,"y":0,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Caravel.png":
+		{
+			"frame": {"x":207,"y":15,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Carrack.png":
+		{
+			"frame": {"x":207,"y":30,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Galleon.png":
+		{
+			"frame": {"x":207,"y":45,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Galley.png":
+		{
+			"frame": {"x":207,"y":60,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Tepuke.png":
+		{
+			"frame": {"x":207,"y":75,"w":12,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":12,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Herb Garden.png":
+		{
+			"frame": {"x":90,"y":180,"w":15,"h":12},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":3,"w":15,"h":12},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Peat Bog.png":
+		{
+			"frame": {"x":105,"y":180,"w":15,"h":12},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":0,"y":4,"w":15,"h":12},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Clipper.png":
+		{
+			"frame": {"x":207,"y":90,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Cutter.png":
+		{
+			"frame": {"x":207,"y":105,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Junk.png":
+		{
+			"frame": {"x":207,"y":120,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Longboat.png":
+		{
+			"frame": {"x":207,"y":135,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Pink.png":
+		{
+			"frame": {"x":207,"y":150,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Rowingboat.png":
+		{
+			"frame": {"x":207,"y":165,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":3,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Sloop.png":
+		{
+			"frame": {"x":166,"y":102,"w":11,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":0,"w":11,"h":15},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Grand Tower.png":
+		{
+			"frame": {"x":108,"y":91,"w":7,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":5,"y":0,"w":7,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Magical Tower.png":
+		{
+			"frame": {"x":0,"y":193,"w":7,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":5,"y":0,"w":7,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Tower.png":
+		{
+			"frame": {"x":7,"y":193,"w":7,"h":15},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":5,"y":0,"w":7,"h":15},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Harpy Nest.png":
+		{
+			"frame": {"x":14,"y":193,"w":13,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":13,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Farm.png":
+		{
+			"frame": {"x":27,"y":193,"w":14,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":14,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Grave.png":
+		{
+			"frame": {"x":180,"y":166,"w":12,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":1,"w":12,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Linked Shaft.png":
+		{
+			"frame": {"x":120,"y":180,"w":14,"h":12},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":2,"w":14,"h":12},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Gas Tank.png":
+		{
+			"frame": {"x":219,"y":0,"w":11,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":3,"y":1,"w":11,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Balloon.png":
+		{
+			"frame": {"x":219,"y":14,"w":9,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":4,"y":1,"w":9,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Raft.png":
+		{
+			"frame": {"x":219,"y":28,"w":9,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":4,"y":1,"w":9,"h":14},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Signpost.png":
+		{
+			"frame": {"x":219,"y":42,"w":5,"h":14},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":6,"y":1,"w":5,"h":14},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Shaft.png":
+		{
+			"frame": {"x":192,"y":169,"w":14,"h":5},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":9,"w":14,"h":5},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Breeding Pit.png":
+		{
+			"frame": {"x":207,"y":180,"w":12,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":3,"y":3,"w":12,"h":13},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Castle.png":
+		{
+			"frame": {"x":134,"y":180,"w":13,"h":12},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":3,"w":13,"h":12},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Grand Castle.png":
+		{
+			"frame": {"x":147,"y":180,"w":13,"h":12},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":3,"w":13,"h":12},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Magical Castle.png":
+		{
+			"frame": {"x":160,"y":180,"w":13,"h":12},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":3,"w":13,"h":12},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Fort.png":
+		{
+			"frame": {"x":101,"y":80,"w":13,"h":11},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":4,"w":13,"h":11},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Grand Fort.png":
+		{
+			"frame": {"x":85,"y":64,"w":13,"h":11},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":1,"y":4,"w":13,"h":11},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Grand Stockade.png":
+		{
+			"frame": {"x":34,"y":64,"w":13,"h":8},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":7,"w":13,"h":8},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Stockade.png":
+		{
+			"frame": {"x":47,"y":64,"w":13,"h":8},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":7,"w":13,"h":8},
+			"sourceSize": {"w":17,"h":16}
+		},
+		"Obelisk.png":
+		{
+			"frame": {"x":224,"y":42,"w":5,"h":13},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":6,"y":2,"w":5,"h":13},
+			"sourceSize": {"w":16,"h":16}
+		},
+		"Whirlpool.png":
+		{
+			"frame": {"x":219,"y":56,"w":11,"h":7},
+			"rotated": false,
+			"trimmed": true,
+			"spriteSourceSize": {"x":2,"y":5,"w":11,"h":7},
+			"sourceSize": {"w":16,"h":16}
+		}
+	}
+}
