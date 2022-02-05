@@ -1,9 +1,11 @@
-import * as PIXI from 'pixi.js'
-import { autoDetectRenderer, Container, Loader, Point, AbstractRenderer } from 'pixi.js'
+import { autoDetectRenderer, Container, DisplayObject, Sprite, Texture, Text, Loader, Point, AbstractRenderer } from 'pixi.js'
+import { GlowFilter } from '@pixi/filter-glow'
 import { Hex, DoubledCoord, Layout, Orientation } from '../geometry'
 import { Link } from '../game/link'
 import { Region } from "../game/region"
 import { Viewport } from './viewport'
+import { TerrainInfo } from '../game/terrain-info'
+import { Settlement } from '../game/settlement'
 
 export interface GetRegionCallback {
     (x: number, y: number): Region
@@ -35,6 +37,112 @@ hex corner indecies
   4  5
 
 */
+
+class Layers {
+    readonly backdrop = new Container()
+    readonly terrain = new Container()
+    readonly path = new Container()
+    readonly settlements = new Container()
+    readonly text = new Container()
+
+    add(layer: keyof Omit<Layers, 'add'>, o: DisplayObject) {
+        this[layer].addChild(o)
+    }
+}
+
+class Resources {
+    constructor(private loader: Loader) {
+
+    }
+
+    private readonly cache: Map<string, Texture> = new Map()
+
+    sprite(name: string): Sprite {
+        const s = new Sprite(this.texture(name))
+        s.anchor.set(0.5, 0.5)
+
+        return s
+    }
+
+    texture(name: string): Texture | null {
+        if (this.cache.has(name)) {
+            return this.cache.get(name)
+        }
+
+        if (name.includes('/')) {
+            const [ key, spriteName ] = name.split('/')
+
+            const sprites = this.loader.resources[key];
+            const sheet = sprites.spritesheet
+
+            return sheet.textures[spriteName] ?? sheet.textures[`${spriteName}.png`]
+        }
+
+        return this.loader.resources[name]?.texture
+    }
+
+    add(name: string, texture: Texture) {
+        this.cache.set(name, texture)
+    }
+
+    load() {
+        this.loader.add('terrain', '/terrain-advisor.json')
+    }
+}
+
+class Tile {
+    public constructor(private region: Region, private layers: Layers, private res: Resources) {
+        this.bakcdrop = region.covered
+            ? this.res.sprite('terrain/terra-incognita')
+            : this.res.sprite('terrain/terra')
+        this.layers.add('backdrop', this.bakcdrop)
+
+        if (!region.covered) {
+            this.terrain = res.sprite(`terrain/${region.terrain.code}`)
+            this.layers.add('terrain', this.terrain)
+
+            if (region.settlement) {
+                this.updateSettlement(region.settlement)
+            }
+        }
+    }
+
+    private bakcdrop: Sprite
+    private terrain: Sprite
+    private settlementLabel: Text
+    private setllementMark: Sprite
+
+    active: boolean = false
+
+    private updateSettlement(settlement: Settlement) {
+        this.settlementLabel = new Text(settlement.name)
+        this.settlementLabel.anchor.set(0, 0.5);
+
+        this.setllementMark = this.res.sprite(`settlement-${settlement.size}`)
+
+        this.layers.add('text', this.settlementLabel)
+        this.layers.add('settlements', this.setllementMark)
+    }
+
+    update() {
+        if (this.active) {
+            this.terrain.filters.push(new GlowFilter({
+                distance: 2
+            }))
+        }
+        else {
+            this.terrain.filters.splice(0)
+        }
+    }
+}
+
+export class HexMap2 {
+    constructor(private canvas: HTMLCanvasElement) {
+
+    }
+
+    readonly renderer: AbstractRenderer
+}
 
 export class HexMap {
     constructor(private canvas: HTMLCanvasElement, public readonly size: MapSize, public readonly getRegion: GetRegionCallback) {
@@ -113,7 +221,7 @@ export class HexMap {
         const x = e.clientX - this.canvas.offsetLeft
         const y = e.clientY - this.canvas.offsetTop
 
-        this.selectedRegion = this.layout.pixelToHex(new PIXI.Point(x, y))
+        this.selectedRegion = this.layout.pixelToHex(new Point(x, y))
 
         this.update()
 
@@ -147,8 +255,35 @@ export class HexMap {
         this.selected.addChild(g)
     }
 
+    textureVillage: PIXI.Texture
+    textureTown: PIXI.Texture
+    textureCity: PIXI.Texture
+
     load() {
+        const g1 = new PIXI.Graphics()
+        g1.beginFill(0xffffff)
+        g1.drawCircle(0, 0, 3)
+        g1.endFill()
+        this.textureVillage = this.renderer.generateTexture(g1)
+
+        const g2 = new PIXI.Graphics()
+        g2.lineStyle(1, 0xffffff)
+        g2.drawCircle(0, 0, 5)
+        this.textureTown = this.renderer.generateTexture(g2)
+
+        const g3 = new PIXI.Graphics()
+        g3.beginFill(0xffffff)
+        g3.drawCircle(0, 0, 3)
+        g3.endFill()
+        g3.lineStyle(1, 0xffffff)
+        g3.drawCircle(0, 0, 5)
+        this.textureCity = this.renderer.generateTexture(g3)
+
         return new Promise((resolve, reject) => {
+            if (this.loader.resources['/terrain-advisor.json']) {
+                return
+            }
+
             this.loader.add('/terrain-advisor.json');
             this.loader.add('/flag.svg');
             this.loader.add('/galleon.svg');
@@ -163,10 +298,53 @@ export class HexMap {
 
     }
 
-    getTerrainTexture(name: string): PIXI.Texture {
+    terrain(t: TerrainInfo | string): PIXI.Texture {
         const sprites = this.loader.resources['/terrain-advisor.json'];
         const sheet = sprites.spritesheet
+
+        const name = typeof t === 'string' ? t : t.code
         return sheet.textures[`${name}.png`]
+    }
+
+    drawSettlement(settlement: Settlement, p: Point) {
+        let texture: PIXI.Texture
+        switch (settlement.size) {
+            case 'village': {
+                texture = this.textureVillage
+                break
+            }
+
+            case 'town': {
+                texture = this.textureTown
+                break
+            }
+
+            case 'city': {
+                texture = this.textureCity
+                break
+            }
+        }
+
+        const pin = new PIXI.Sprite(texture)
+        pin.position.copyFrom(p)
+        this.settlements.addChild(pin)
+
+        const txt = new PIXI.Text(settlement.name, {
+            fontSize: '16px',
+            fontFamily: 'Almendra',
+            fill: 'white',
+            dropShadow: true,
+            dropShadowColor: '#000000',
+            dropShadowAngle: Math.PI / 3,
+            dropShadowDistance: 4,
+        })
+        txt.calculateBounds()
+
+        txt.position.copyFrom(p)
+        txt.position.x += pin.width / 2 + 8
+        txt.position.y -= (txt.height / 2)
+
+        this.settlements.addChild(txt)
     }
 
     drawTile(col, row) {
@@ -183,9 +361,10 @@ export class HexMap {
         p.x += OFFSET_X
         p.y += OFFSET_Y
 
-        const tile = new PIXI.Sprite(this.getTerrainTexture(region.terrain.code))
+        const tile = new PIXI.Sprite(this.terrain(region.terrain))
         tile.anchor.set(0.5)
         tile.position.copyFrom(p)
+
         if (!region.isVisible) {
             tile.tint = region.explored
                 ? 0xb0b0b0 // darken region when no region report
@@ -203,61 +382,7 @@ export class HexMap {
 
         // settlement
         if (region.settlement) {
-            let oX = 8
-
-            const pin = new PIXI.Graphics()
-
-            switch (region.settlement.size) {
-                case 'village': {
-                    pin.beginFill(0xffffff)
-                    pin.drawCircle(0, 0, 3)
-                    pin.endFill()
-
-                    break
-                }
-
-                case 'town': {
-                    pin.lineStyle(1, 0xffffff)
-                    pin.drawCircle(0, 0, 5)
-
-                    oX += 2
-
-                    break
-                }
-
-                case 'city': {
-                    pin.beginFill(0xffffff)
-                    pin.drawCircle(0, 0, 3)
-                    pin.endFill()
-
-                    pin.lineStyle(1, 0xffffff)
-                    pin.drawCircle(0, 0, 5)
-
-                    oX += 2
-
-                    break
-                }
-            }
-
-            pin.position.copyFrom(p)
-            this.settlements.addChild(pin)
-
-            const txt = new PIXI.Text(region.settlement.name, {
-                fontSize: '16px',
-                fontFamily: 'Almendra',
-                fill: 'white',
-                dropShadow: true,
-                dropShadowColor: '#000000',
-                dropShadowAngle: Math.PI / 3,
-                dropShadowDistance: 4,
-            })
-            txt.calculateBounds()
-
-            txt.position.copyFrom(p)
-            txt.position.x += oX
-            txt.position.y -= (txt.height / 2)
-
-            this.settlements.addChild(txt)
+            this.drawSettlement(region.settlement, p)
         }
 
         // units

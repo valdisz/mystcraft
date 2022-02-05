@@ -19,6 +19,9 @@ export class Region {
     readonly code: string
 
     explored: boolean
+
+
+    /** Is region information about the region hidden or not */
     covered: boolean
     lastVisitedAt: number
 
