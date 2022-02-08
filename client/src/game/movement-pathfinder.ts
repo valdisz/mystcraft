@@ -2,7 +2,7 @@ import { Pathfinder } from './algo/pathfinder'
 import { MoveType } from './move-capacity'
 import { Link } from './link'
 import { Region } from './region'
-import { DoubledCoord } from '../geometry'
+import { Coord } from '../geometry'
 import { Level } from './level'
 
 export function distanceHeuristic(mapWidth: number, start: Region, goal: Region) {
@@ -12,8 +12,8 @@ export function distanceHeuristic(mapWidth: number, start: Region, goal: Region)
     const s0 = s.cube
     const g0 = g.cube
 
-    const s1 = new DoubledCoord(s.x + mapWidth, s.y).toCube()
-    const g1 = new DoubledCoord(g.x + mapWidth, g.y).toCube()
+    const s1 = new Coord(s.x + mapWidth, s.y).toCube()
+    const g1 = new Coord(g.x + mapWidth, g.y).toCube()
 
     const d0 = s0.distance(g0)
     const d1 = s0.distance(g1)

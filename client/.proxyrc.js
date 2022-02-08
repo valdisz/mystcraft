@@ -10,5 +10,4 @@ module.exports = function (app) {
 
   app.use(serveStatic(path.join(__dirname, 'static')))
   app.use(serveStatic(path.join(__dirname, 'dist')))
-//   app.use('/assets', express.static(path.join(__dirname, 'src/assets')))
 };

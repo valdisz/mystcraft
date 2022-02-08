@@ -7,8 +7,7 @@
     "build:debug": "parcel build src/index.html",
     "start": "parcel src/index.html",
     "codegen": "graphql-codegen --config codegen.yaml",
-    "assets:terrain": "spritesheet-js -n terrain -p static -f pixi.js src/assets/terrain/*.png",
-    "assets": "yarn run assets:terrain",
+    "assets": "node ./assets.js",
     "test": "jasmine-ts  --config=./jasmine.json",
     "test:watch": "nodemon --ext ts --exec 'jasmine-ts  --config=./jasmine.json'",
     "coverage": "nyc -r text -e .ts -x \"src/*.spec.ts\" yarn run test"

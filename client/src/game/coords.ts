@@ -1,6 +1,6 @@
-import { DoubledCoord, Hex } from "../geometry"
+import { Coord, Hex } from '../geometry'
 
-export class Coords extends DoubledCoord {
+export class Coords extends Coord {
     constructor(
         x: number,
         y: number,

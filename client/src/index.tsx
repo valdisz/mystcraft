@@ -7,11 +7,11 @@ import { App } from './app'
 import { Authenticate } from './auth'
 
 const RoutedApp = () => (
-    <Authenticate>
+    // <Authenticate>
         <BrowserRouter>
             <App />
         </BrowserRouter>
-    </Authenticate>
+    // </Authenticate>
 )
 
 const host = document.getElementById('app-host');

@@ -1,62 +1,61 @@
-import { Point } from 'pixi.js';
-import { DoubledCoord } from './doubled-coord';
-import { Hex } from './hex';
-import { Orientation } from './orientation';
+import { Point, IPointData } from 'pixi.js'
+import { Coord } from './doubled-coord'
+import { Hex } from './hex'
+import { Orientation } from './orientation'
 
 export class Layout {
-    constructor(
-        public orientation: Orientation,
-        public size: Point,
-        public origin: Point
-    ) { }
-
-    public hexToPixel(h: Hex | DoubledCoord): Point {
-        if (h.type === 'double') {
-            return this.hexToPixel(h.toCube())
-        }
-
-        const M: Orientation = this.orientation;
-        const size: Point = this.size;
-        const origin: Point = this.origin;
-
-        const x = (M.f0 * h.q + M.f1 * h.r) * size.x;
-        const y = (M.f2 * h.q + M.f3 * h.r) * size.y;
-
-        return new Point(x + origin.x, y + origin.y);
+    constructor(size: IPointData, origin: IPointData) {
+        this.size = new Point(size.x, size.y)
+        this.origin = new Point(origin.x, origin.y)
     }
 
-    public pixelToHex(p: Point): Hex {
-        const M: Orientation = this.orientation;
+    public readonly orientation = Orientation.FLAT
+    public readonly size: Point
+    public readonly origin: Point
 
-        const size: Point = this.size;
-        const origin: Point = this.origin;
-        const pt: Point = new Point(
-            (p.x - origin.x) / size.x,
-            (p.y - origin.y) / size.y
-        );
+    public toPixel(h: Hex | Coord): IPointData {
+        if (h.type === 'double') {
+            return this.toPixel(h.toCube())
+        }
 
-        let q: number = M.b0 * pt.x + M.b1 * pt.y;
-        const r: number = M.b2 * pt.x + M.b3 * pt.y;
+        const M = this.orientation
+        const x = (M.f0 * h.q + M.f1 * h.r) * this.size.x
+        const y = (M.f2 * h.q + M.f3 * h.r) * this.size.y
 
-        let hex = new Hex(q, r, -q - r).round();
+        return { x: x + this.origin.x, y: y + this.origin.y }
+    }
 
+    public toHex(p: IPointData): Hex {
+        const x = (p.x - this.origin.x) / this.size.x
+        const y = (p.y - this.origin.y) / this.size.y
+
+        const M = this.orientation
+        const q = M.b0 * x + M.b1 * y
+        const r = M.b2 * x + M.b3 * y
+
+        const hex = new Hex(q, r, -q - r).round()
         return hex;
     }
 
-    public hexCornerOffset(corner: number): Point {
-        var M: Orientation = this.orientation;
-        var size: Point = this.size;
-        var angle: number = (2.0 * Math.PI * (M.start_angle - corner)) / 6.0;
-        return new Point(size.x * Math.cos(angle), size.y * Math.sin(angle));
+    public toCoord(p: IPointData): Coord {
+        return Coord.fromCube(this.toHex(p))
     }
 
-    public polygonCorners(h: Hex): Point[] {
-        var corners: Point[] = [];
-        var center: Point = this.hexToPixel(h);
-        for (var i = 0; i < 6; i++) {
-            var offset: Point = this.hexCornerOffset(i);
-            corners.push(new Point(center.x + offset.x, center.y + offset.y));
+    public cornerOffset(corner: number): IPointData {
+        const M = this.orientation
+        const angle = (2.0 * Math.PI * (M.start_angle - corner)) / 6.0
+        return { x: this.size.x * Math.cos(angle), y: this.size.y * Math.sin(angle) }
+    }
+
+    public corners(h: Hex): IPointData[] {
+        const corners: IPointData[] = []
+
+        const center = this.toPixel(h)
+        for (let i = 0; i < 6; i++) {
+            const offset = this.cornerOffset(i)
+            corners.push({x: center.x + offset.x, y: center.y + offset.y })
         }
-        return corners;
+
+        return corners
     }
 }

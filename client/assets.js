@@ -16,7 +16,7 @@ const optionsCss = {
     path: 'static'
 }
 
-spritesheet('./src/assets/terrain/*.png', { ...options, name: 'terrain' }, function (err) {
+spritesheet('./src/assets/terrain/*.png', { ...options, trim: false, name: 'terrain' }, function (err) {
     if (err) throw err;
 
     console.log('Terrain spritesheet... DONE');
@@ -32,6 +32,12 @@ spritesheet('./src/assets/objects/*.png', { ...options, name: 'objects' }, funct
     if (err) throw err;
 
     console.log('Objects spritesheet... DONE');
+})
+
+spritesheet('./src/assets/map/*.png', { ...options, name: 'map' }, function (err) {
+    if (err) throw err;
+
+    console.log('Map features spritesheet... DONE');
 })
 
 spritesheet('./src/assets/items/*.png', { ...optionsCss, prefix: 'item-', name: 'items-css' }, function (err) {
