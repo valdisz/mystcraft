@@ -1,5 +1,5 @@
-import { TypedMap } from "./typed-map";
-import { Troops } from "./types";
+import { Stance } from '../schema'
+import { Troops } from './troops'
 
 export class Faction {
     constructor(
@@ -12,6 +12,8 @@ export class Faction {
     readonly troops: Troops = new Troops(this)
 
     readonly known: boolean
+
+    stance: Stance = Stance.Neutral
 }
 
 export class Factions {
@@ -19,22 +21,26 @@ export class Factions {
         this.unknown = this.create(0, '', false)
     }
 
-    private readonly factions: TypedMap<Faction> = { }
+    private readonly factions: Map<number,Faction> = new Map()
 
     readonly unknown: Faction
     player: Faction
 
     all() {
-        return Object.values(this.factions)
+        return this.factions.values()
     }
 
     get(num: number) {
-        return this.factions[num]
+        return this.factions.get(num)
     }
 
     create(num: number, name: string, isPlayer: boolean) {
+        if (this.factions.has(num)) {
+            return this.get(num)
+        }
+
         const faction = new Faction(num, name, isPlayer)
-        this.factions[num] = faction
+        this.factions.set(num, faction)
 
         if (isPlayer) {
             this.player = faction

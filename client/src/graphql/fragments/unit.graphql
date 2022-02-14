@@ -1,6 +1,8 @@
 fragment Unit on Unit {
   id
-  regionCode
+  x
+  y
+  z
   structureNumber
   sequence
   canStudy

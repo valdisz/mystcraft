@@ -26,6 +26,24 @@ namespace advisor.Persistence
         [Required]
         public Direction Direction { get; set; }
 
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+
+        [Required]
+        [MaxLength(256)]
+        public string Label { get; set; }
+
+        [Required]
+        [MaxLength(256)]
+        public string Province { get; set; }
+
+        [Required]
+        [MaxLength(256)]
+        public string Terrain { get; set; }
+
+        public DbSettlement Settlement { get; set; }
+
         [GraphQLIgnore]
         public DbRegion Origin { get; set; }
 

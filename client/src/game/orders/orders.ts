@@ -107,9 +107,8 @@ export class Move extends BaseOrder {
     }
 
     toString(): string {
-
         return this.isValid
-            ? `move ${this.path.map(x => d.to).join(' ')}`
+            ? `move ${this.path.join(' ')}`
             : `move; ${this.error}`
     }
 }

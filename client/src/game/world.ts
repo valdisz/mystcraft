@@ -7,6 +7,8 @@ import { Provinces } from './province'
 import { Factions, Unit } from './types'
 import { Structure } from './structure'
 import { MovementPathfinder } from './movement-pathfinder'
+import { Coords, ICoords } from './coords'
+import { oppositeDirection } from './link'
 
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {
@@ -30,20 +32,36 @@ export class World {
 
     private linkRegions(regions: RegionFragment[]) {
         for (const reg of regions) {
-            var source = this.getRegionByCode(reg.code)
+            var source = this.getRegion(reg)
 
             for (const exit of reg.exits) {
-                const target = this.getRegionByCode(exit.targetRegion)
+                if (source.neighbors.has(exit.direction)) {
+                    continue
+                }
+
+                let target = this.getRegion(exit)
+
+                if (!target) {
+                    target = Region.fromExit(exit, this.ruleset)
+
+                    const province = this.provinces.getOrCreate(exit.province)
+                    target.province = province
+                    province.add(target)
+
+                    let level: Level = this.getLevel(target.coords.z)
+                    level.add(target);
+                }
 
                 source.neighbors.set(source, exit.direction, target)
+                target.neighbors.set(target, oppositeDirection(exit.direction), source)
             }
         }
     }
 
     private addCoveredRegions() {
         for (const level of this.levels) {
-            for (let x = 1; x <= level.width; x++) {
-                for (let y = 1; y <= level.height; y++) {
+            for (let x = 0; x < level.width; x++) {
+                for (let y = 0; y < level.height; y++) {
                     if ((x + y) % 2) {
                         continue
                     }
@@ -71,10 +89,10 @@ export class World {
     }
 
     private linkProvinces() {
-        for (const province of this.provinces.all()) {
+        for (const province of this.provinces) {
             const neighbors = new Set<string>()
             for (const reg of province.regions) {
-                for (const exit of reg.neighbors.all()) {
+                for (const exit of reg.neighbors) {
                     neighbors.add(exit.target.province.name)
                 }
             }
@@ -104,7 +122,7 @@ export class World {
         this.linkRegions(regions)
         this.linkProvinces()
         this.addCoveredRegions()
-        this.linkCoveredRegions()
+        // this.linkCoveredRegions()
     }
 
     addUnits(units: UnitFragment[]) {
@@ -127,47 +145,42 @@ export class World {
 
     addStructure(structure: StructureFragment) {
         const str = Structure.from(structure, this.ruleset)
-        const region = this.getRegionByCode(structure.regionCode)
+        const region = this.getRegion(structure)
 
         region.addStructure(str)
     }
 
     addUnit(unit: UnitFragment) {
         const u = Unit.from(unit, this.factions, this.ruleset)
-        const region = this.getRegionByCode(unit.regionCode)
+        const region = this.getRegion(unit)
         const structure = unit.structureNumber ? region.structures.find(x => x.num === unit.structureNumber) : null
 
         region.addUnit(u, structure)
     }
 
-    getRegion(x: number, y: number, z: number) {
-        const level = this.getLevel(z);
-        if (!level) return null;
 
-        return level.get(x, y);
-    }
+    getRegion(id: string): Region
+    getRegion(coords: ICoords): Region
+    getRegion(x: number, y: number, z: number): Region
+    getRegion(multi: ICoords | number | string, y?: number, z?: number): Region {
+        if (typeof(multi) === 'string') {
+            for (const level of this.levels) {
+                const region = level.getById(multi)
+                if (region) return region
+            }
 
-    getRegionById(id: string) {
-        for (let i = 0; i < this.levels.length; i++) {
-            const level = this.levels[i]
-            const region = level.getById(id)
-            if (region) return region
+            return null
         }
 
-        return null
+        const level = this.getLevel(typeof(multi) === 'number' ? z : multi.z)
+        if (!level) return null
+
+        return typeof(multi) === 'number'
+            ? level.get(multi, y)
+            : level.get(multi)
     }
 
-    getRegionByCode(code: string) {
-        for (let i = 0; i < this.levels.length; i++) {
-            const level = this.levels[i]
-            const region = level.getByCode(code)
-            if (region) return region
-        }
-
-        return null
-    }
-
-    getLevel(z: number) {
+    getLevel(z: number): Level {
         return this.levels[z]
     }
 }

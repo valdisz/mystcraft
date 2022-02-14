@@ -13,10 +13,6 @@ namespace advisor {
                     var db = ctx.Service<Database>();
                     return DbUnit.FilterById(db.Units.AsNoTracking(), parsedId).SingleOrDefaultAsync();
                 });
-
-            descriptor.Field("regionCode").Resolve(x => x.Parent<DbUnit>().RegionId);
-
-            descriptor.Field("structureNumber").Resolve(x => x.Parent<DbUnit>().StrcutureNumber);
         }
     }
 

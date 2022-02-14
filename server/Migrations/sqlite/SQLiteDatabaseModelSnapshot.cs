@@ -173,6 +173,30 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Terrain")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("PlayerId", "TurnNumber", "OriginRegionId", "TargetRegionId");
 
                     b.HasIndex("PlayerId", "TurnNumber", "TargetRegionId");
@@ -605,6 +629,15 @@ namespace advisor.Migrations.sqlite
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
                     b.HasIndex("PlayerId", "TurnNumber", "RegionId");
@@ -714,10 +747,19 @@ namespace advisor.Migrations.sqlite
                         .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("StrcutureNumber")
+                    b.Property<int?>("StructureNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("Weight")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Z")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
@@ -890,7 +932,39 @@ namespace advisor.Migrations.sqlite
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                        {
+                            b1.Property<long>("DbExitPlayerId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DbExitTurnNumber")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("DbExitOriginRegionId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("DbExitTargetRegionId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Size")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
+
+                            b1.ToTable("Exits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
+                        });
+
                     b.Navigation("Origin");
+
+                    b.Navigation("Settlement");
 
                     b.Navigation("Target");
 

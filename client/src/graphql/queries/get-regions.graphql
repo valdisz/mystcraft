@@ -7,7 +7,7 @@ query GetRegions($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
           hasNextPage
         }
         items {
-            ...Region
+          ...Region
         }
       }
     }

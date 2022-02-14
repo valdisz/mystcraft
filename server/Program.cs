@@ -82,9 +82,9 @@
             }
         }
 
-        public static Task RunConverterAsync(string[] args) {
+        public static async Task RunConverterAsync(string[] args) {
             using var reader = File.OpenText(string.Concat(args));
-            return ConvertAsync(reader);
+            await ConvertAsync(reader);
         }
 
         public static async Task ConvertAsync(TextReader reader) {

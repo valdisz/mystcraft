@@ -141,7 +141,7 @@ export class Unit {
 
         unit.weight = src.weight
             ? src.weight
-            : unit.inventory.items.all.map(x => x.weight).reduce((w, v) => w + v)
+            : unit.inventory.items.toArray().map(x => x.weight).reduce((w, v) => w + v)
 
         unit.setOrders(src.orders)
 
@@ -153,7 +153,7 @@ export class Unit {
             unit.capacity.fly = flying
         }
         else {
-            for (const item of unit.inventory.items.all) {
+            for (const item of unit.inventory.items) {
                 const { canMove } = item.info.traits
                 if (canMove) {
                     const { requires } = canMove

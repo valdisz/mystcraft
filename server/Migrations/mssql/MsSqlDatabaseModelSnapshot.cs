@@ -178,6 +178,30 @@ namespace advisor.Migrations.mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Terrain")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("X")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("int");
+
                     b.HasKey("PlayerId", "TurnNumber", "OriginRegionId", "TargetRegionId");
 
                     b.HasIndex("PlayerId", "TurnNumber", "TargetRegionId");
@@ -613,6 +637,15 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<int>("X")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("int");
+
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
                     b.HasIndex("PlayerId", "TurnNumber", "RegionId");
@@ -722,10 +755,19 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(24)
                         .HasColumnType("nvarchar(24)");
 
-                    b.Property<int?>("StrcutureNumber")
+                    b.Property<int?>("StructureNumber")
                         .HasColumnType("int");
 
                     b.Property<int?>("Weight")
+                        .HasColumnType("int");
+
+                    b.Property<int>("X")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Z")
                         .HasColumnType("int");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
@@ -899,7 +941,39 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                        {
+                            b1.Property<long>("DbExitPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbExitTurnNumber")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("DbExitOriginRegionId")
+                                .HasColumnType("nvarchar(14)");
+
+                            b1.Property<string>("DbExitTargetRegionId")
+                                .HasColumnType("nvarchar(14)");
+
+                            b1.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+
+                            b1.Property<string>("Size")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
+
+                            b1.ToTable("Exits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
+                        });
+
                     b.Navigation("Origin");
+
+                    b.Navigation("Settlement");
 
                     b.Navigation("Target");
 

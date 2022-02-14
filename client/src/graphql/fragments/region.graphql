@@ -1,6 +1,5 @@
 fragment Region on Region {
   id
-  code
   lastVisitedAt
   explored
   x

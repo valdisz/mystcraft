@@ -1,5 +1,5 @@
 import { Region } from './region'
-import { Coords } from './coords'
+import { ICoords } from './coords'
 
 export class Level implements Iterable<Region> {
     constructor(public readonly width: number, public readonly height: number, public readonly index: number, public readonly label: string) {
@@ -8,10 +8,9 @@ export class Level implements Iterable<Region> {
 
     private readonly regions: Region[]
     private readonly regionIdMap = new Map<string, Region>()
-    private readonly regionCodeMap = new Map<string, Region>()
 
     private getIndex(x: number, y: number) {
-        return x / 2 + y * this.width / 2
+        return x + y * this.width / 2
     }
 
     private *getRegions() {
@@ -30,15 +29,11 @@ export class Level implements Iterable<Region> {
         if (region.id) {
             this.regionIdMap.set(region.id, region)
         }
-
-        if (region.code) {
-            this.regionCodeMap.set(region.code, region)
-        }
     }
 
-    get(coords: Coords)
+    get(coords: ICoords)
     get(x: number, y: number)
-    get(coordsOrX: number | Coords, y?: number) {
+    get(coordsOrX: number | ICoords, y?: number) {
         const index = typeof coordsOrX === 'number'
             ? this.getIndex(coordsOrX, y)
             : this.getIndex(coordsOrX.x, coordsOrX.y)
@@ -48,9 +43,5 @@ export class Level implements Iterable<Region> {
 
     getById(id: string) {
         return this.regionIdMap.get(id)
-    }
-
-    getByCode(code: string) {
-        return this.regionCodeMap.get(code)
     }
 }

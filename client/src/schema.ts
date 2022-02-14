@@ -97,7 +97,14 @@ export enum EventType {
 
 export type Exit = {
   direction: Direction;
+  label: Scalars['String'];
+  province: Scalars['String'];
+  settlement?: Maybe<Settlement>;
   targetRegion: Scalars['String'];
+  terrain: Scalars['String'];
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+  z: Scalars['Int'];
 };
 
 export type Faction = Node & {
@@ -291,7 +298,6 @@ export type QueryUsersArgs = {
 };
 
 export type Region = Node & {
-  code?: Maybe<Scalars['String']>;
   entertainment: Scalars['Int'];
   exits?: Maybe<Array<Maybe<Exit>>>;
   explored: Scalars['Boolean'];
@@ -361,7 +367,6 @@ export enum Stance {
 }
 
 export type Structure = Node & {
-  code?: Maybe<Scalars['String']>;
   contents?: Maybe<Array<Maybe<FleetContent>>>;
   description?: Maybe<Scalars['String']>;
   flags?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -370,12 +375,14 @@ export type Structure = Node & {
   name: Scalars['String'];
   needs?: Maybe<Scalars['Int']>;
   number: Scalars['Int'];
-  regionCode?: Maybe<Scalars['String']>;
   sailDirections?: Maybe<Array<Direction>>;
   sailors?: Maybe<Sailors>;
   sequence: Scalars['Int'];
   speed?: Maybe<Scalars['Int']>;
   type: Scalars['String'];
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+  z: Scalars['Int'];
 };
 
 export type StructureCollectionSegment = {
@@ -450,12 +457,13 @@ export type Unit = Node & {
   onGuard: Scalars['Boolean'];
   orders?: Maybe<Scalars['String']>;
   readyItem?: Maybe<Scalars['String']>;
-  regionCode?: Maybe<Scalars['String']>;
   sequence: Scalars['Int'];
   skills?: Maybe<Array<Maybe<Skill>>>;
-  strcutureNumber?: Maybe<Scalars['Int']>;
   structureNumber?: Maybe<Scalars['Int']>;
   weight?: Maybe<Scalars['Int']>;
+  x: Scalars['Int'];
+  y: Scalars['Int'];
+  z: Scalars['Int'];
 };
 
 export type UnitCollectionSegment = {
@@ -485,7 +493,7 @@ export type CapacityFragment = { walking: number, riding: number, flying: number
 
 export type EventFragment = { type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined };
 
-export type ExitFragment = { direction: Direction, targetRegion: string };
+export type ExitFragment = { direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined };
 
 export type FactionFragment = { id: string, name: string, number: number, defaultAttitude?: Stance | null | undefined, attitudes?: Array<{ factionNumber: number, stance: Stance } | null | undefined> | null | undefined, events?: Array<{ type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined } | null | undefined> | null | undefined };
 
@@ -503,7 +511,7 @@ export type LoadFragment = { used: number, max: number };
 
 export type PlayerHeaderFragment = { id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined };
 
-export type RegionFragment = { id: string, code?: string | null | undefined, lastVisitedAt?: number | null | undefined, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null | undefined, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined, wanted?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, produces?: Array<{ code?: string | null | undefined, amount: number } | null | undefined> | null | undefined, forSale?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, exits?: Array<{ direction: Direction, targetRegion: string } | null | undefined> | null | undefined, structures?: Array<{ id: string, code?: string | null | undefined, regionCode?: string | null | undefined, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { used: number, max: number } | null | undefined, sailors?: { current: number, required: number } | null | undefined } | null | undefined> | null | undefined };
+export type RegionFragment = { id: string, lastVisitedAt?: number | null | undefined, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null | undefined, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined, wanted?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, produces?: Array<{ code?: string | null | undefined, amount: number } | null | undefined> | null | undefined, forSale?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, exits?: Array<{ direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined } | null | undefined> | null | undefined, structures?: Array<{ id: string, x: number, y: number, z: number, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { used: number, max: number } | null | undefined, sailors?: { current: number, required: number } | null | undefined } | null | undefined> | null | undefined };
 
 export type SailorsFragment = { current: number, required: number };
 
@@ -513,13 +521,13 @@ export type SettlementFragment = { name?: string | null | undefined, size: Settl
 
 export type SkillFragment = { code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined };
 
-export type StructureFragment = { id: string, code?: string | null | undefined, regionCode?: string | null | undefined, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { used: number, max: number } | null | undefined, sailors?: { current: number, required: number } | null | undefined };
+export type StructureFragment = { id: string, x: number, y: number, z: number, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { used: number, max: number } | null | undefined, sailors?: { current: number, required: number } | null | undefined };
 
 export type TradableItemFragment = { code: string, price: number, amount: number };
 
 export type TurnFragment = { id: string, number: number, month: number, year: number, factions?: Array<{ id: string, name: string, number: number, defaultAttitude?: Stance | null | undefined, attitudes?: Array<{ factionNumber: number, stance: Stance } | null | undefined> | null | undefined, events?: Array<{ type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined };
 
-export type UnitFragment = { id: string, regionCode?: string | null | undefined, structureNumber?: number | null | undefined, sequence: number, canStudy?: Array<string | null | undefined> | null | undefined, combatSpell?: string | null | undefined, description?: string | null | undefined, factionNumber?: number | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, number: number, onGuard: boolean, readyItem?: string | null | undefined, weight?: number | null | undefined, orders?: string | null | undefined, capacity?: { walking: number, riding: number, flying: number, swimming: number } | null | undefined, items: Array<{ code?: string | null | undefined, amount: number } | null | undefined>, skills?: Array<{ code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined } | null | undefined> | null | undefined };
+export type UnitFragment = { id: string, x: number, y: number, z: number, structureNumber?: number | null | undefined, sequence: number, canStudy?: Array<string | null | undefined> | null | undefined, combatSpell?: string | null | undefined, description?: string | null | undefined, factionNumber?: number | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, number: number, onGuard: boolean, readyItem?: string | null | undefined, weight?: number | null | undefined, orders?: string | null | undefined, capacity?: { walking: number, riding: number, flying: number, swimming: number } | null | undefined, items: Array<{ code?: string | null | undefined, amount: number } | null | undefined>, skills?: Array<{ code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined } | null | undefined> | null | undefined };
 
 export type CreateLocalGameMutationVariables = Exact<{
   name: Scalars['String'];
@@ -573,7 +581,7 @@ export type GetRegionsQueryVariables = Exact<{
 }>;
 
 
-export type GetRegionsQuery = { node?: { regions?: { totalCount: number, pageInfo: { hasNextPage: boolean }, items?: Array<{ id: string, code?: string | null | undefined, lastVisitedAt?: number | null | undefined, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null | undefined, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined, wanted?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, produces?: Array<{ code?: string | null | undefined, amount: number } | null | undefined> | null | undefined, forSale?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, exits?: Array<{ direction: Direction, targetRegion: string } | null | undefined> | null | undefined, structures?: Array<{ id: string, code?: string | null | undefined, regionCode?: string | null | undefined, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { used: number, max: number } | null | undefined, sailors?: { current: number, required: number } | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | null | undefined } | {} | null | undefined };
+export type GetRegionsQuery = { node?: { regions?: { totalCount: number, pageInfo: { hasNextPage: boolean }, items?: Array<{ id: string, lastVisitedAt?: number | null | undefined, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null | undefined, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined, wanted?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, produces?: Array<{ code?: string | null | undefined, amount: number } | null | undefined> | null | undefined, forSale?: Array<{ code: string, price: number, amount: number } | null | undefined> | null | undefined, exits?: Array<{ direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { name?: string | null | undefined, size: SettlementSize } | null | undefined } | null | undefined> | null | undefined, structures?: Array<{ id: string, x: number, y: number, z: number, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { used: number, max: number } | null | undefined, sailors?: { current: number, required: number } | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | null | undefined } | {} | null | undefined };
 
 export type GetTurnQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -589,7 +597,7 @@ export type GetUnitsQueryVariables = Exact<{
 }>;
 
 
-export type GetUnitsQuery = { node?: { units?: { totalCount: number, pageInfo: { hasNextPage: boolean }, items?: Array<{ id: string, regionCode?: string | null | undefined, structureNumber?: number | null | undefined, sequence: number, canStudy?: Array<string | null | undefined> | null | undefined, combatSpell?: string | null | undefined, description?: string | null | undefined, factionNumber?: number | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, number: number, onGuard: boolean, readyItem?: string | null | undefined, weight?: number | null | undefined, orders?: string | null | undefined, capacity?: { walking: number, riding: number, flying: number, swimming: number } | null | undefined, items: Array<{ code?: string | null | undefined, amount: number } | null | undefined>, skills?: Array<{ code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | null | undefined } | {} | null | undefined };
+export type GetUnitsQuery = { node?: { units?: { totalCount: number, pageInfo: { hasNextPage: boolean }, items?: Array<{ id: string, x: number, y: number, z: number, structureNumber?: number | null | undefined, sequence: number, canStudy?: Array<string | null | undefined> | null | undefined, combatSpell?: string | null | undefined, description?: string | null | undefined, factionNumber?: number | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, number: number, onGuard: boolean, readyItem?: string | null | undefined, weight?: number | null | undefined, orders?: string | null | undefined, capacity?: { walking: number, riding: number, flying: number, swimming: number } | null | undefined, items: Array<{ code?: string | null | undefined, amount: number } | null | undefined>, skills?: Array<{ code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | null | undefined } | {} | null | undefined };
 
 export const GameOptions = gql`
     fragment GameOptions on GameOptions {
@@ -659,9 +667,17 @@ export const Item = gql`
 export const Exit = gql`
     fragment Exit on Exit {
   direction
-  targetRegion
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
 }
-    `;
+    ${Settlement}`;
 export const FleetContent = gql`
     fragment FleetContent on FleetContent {
   type
@@ -683,15 +699,15 @@ export const Sailors = gql`
 export const Structure = gql`
     fragment Structure on Structure {
   id
-  code
-  regionCode
+  x
+  y
+  z
   sequence
   contents {
     ...FleetContent
   }
   description
   flags
-  id
   load {
     ...Load
   }
@@ -711,7 +727,6 @@ ${Sailors}`;
 export const Region = gql`
     fragment Region on Region {
   id
-  code
   lastVisitedAt
   explored
   x
@@ -820,7 +835,9 @@ export const Skill = gql`
 export const Unit = gql`
     fragment Unit on Unit {
   id
-  regionCode
+  x
+  y
+  z
   structureNumber
   sequence
   canStudy

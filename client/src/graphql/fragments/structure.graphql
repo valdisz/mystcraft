@@ -1,14 +1,14 @@
 fragment Structure on Structure {
   id
-  code
-  regionCode
+  x
+  y
+  z
   sequence
   contents {
     ...FleetContent
   }
   description
   flags
-  id
   load {
     ...Load
   }

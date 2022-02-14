@@ -203,7 +203,7 @@ export class GameStore {
         const worldInfo: WorldInfo = { map }
 
         const ruleset = new Ruleset()
-        ruleset.load(game.ruleset)
+        ruleset.parse(game.ruleset)
 
         const world = new World(worldInfo, ruleset)
         for (const faction of this.turn.factions) {

@@ -228,8 +228,8 @@ namespace advisor
                 .UseStaticFiles()
                 .UseRouting()
                 .UseCors()
-                .UseAuthentication()
-                .UseAuthorization()
+                // .UseAuthentication()
+                // .UseAuthorization()
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
                     endpoints

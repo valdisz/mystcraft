@@ -16,10 +16,6 @@ namespace advisor {
                     var db = ctx.Service<Database>();
                     return DbStructure.FilterById(db.Structures.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
-
-            descriptor.Field("code").Resolve(x => x.Parent<DbStructure>().Id);
-
-            descriptor.Field("regionCode").Resolve(x => x.Parent<DbStructure>().RegionId);
         }
     }
 

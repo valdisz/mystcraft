@@ -17,8 +17,6 @@
                     var db = ctx.Service<Database>();
                     return DbRegion.FilterById(db.Regions.AsNoTracking(), id).SingleOrDefaultAsync();
                 });
-
-            descriptor.Field("code").Resolve(x => x.Parent<DbRegion>().Id);
         }
     }
 

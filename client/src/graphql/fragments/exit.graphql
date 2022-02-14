@@ -1,4 +1,12 @@
 fragment Exit on Exit {
   direction
-  targetRegion
+  x
+  y
+  z
+  label
+  terrain
+  province
+  settlement {
+    ...Settlement
+  }
 }

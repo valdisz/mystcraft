@@ -34,6 +34,10 @@ namespace advisor.Persistence {
 
         public int Number { get; set; }
 
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
+
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
@@ -48,7 +52,7 @@ namespace advisor.Persistence {
         [MaxLength(24)]
         public string StrcutureId { get; set; }
 
-        public int? StrcutureNumber { get; set; }
+        public int? StructureNumber { get; set; }
 
         public int? FactionNumber { get; set; }
 

@@ -1,6 +1,13 @@
 import { Coord, Hex } from '../geometry'
 
-export class Coords extends Coord {
+export interface ICoords {
+    x: number
+    y: number
+    z: number
+    label?: string
+}
+
+export class Coords extends Coord implements ICoords {
     constructor(
         x: number,
         y: number,
@@ -18,5 +25,9 @@ export class Coords extends Coord {
         if (this.z !== 1) parts.push(this.z)
 
         return parts.join(',')
+    }
+
+    equals({ x, y, z}: Coords) {
+        return this.x === x && this.y === y && this.z === z
     }
 }

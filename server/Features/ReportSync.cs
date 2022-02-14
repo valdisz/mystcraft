@@ -417,6 +417,9 @@ namespace advisor.Features {
             str.Name = info.Name;
             str.Type = info.Type;
             str.Description = info.Description;
+            str.X = region.X;
+            str.Y = region.Y;
+            str.Z = region.Z;
 
             str.Speed = info.Speed ?? str.Speed;
             str.Needs = info.Needs ?? str.Needs;
@@ -460,7 +463,7 @@ namespace advisor.Features {
 
                 if (structure != null) {
                     unit.StrcutureId = structure.Id;
-                    unit.StrcutureNumber = structure.Number;
+                    unit.StructureNumber = structure.Number;
                     unit.Structure = structure;
                     structure.Units.Add(unit);
                 }
@@ -476,6 +479,9 @@ namespace advisor.Features {
                 faction.Units.Add(unit);
             }
 
+            unit.X = region.X;
+            unit.Y = region.Y;
+            unit.Z = region.Z;
             unit.Sequence = seq;
             unit.Name = source.Name;
             unit.Description = source.Description;
@@ -689,12 +695,21 @@ namespace advisor.Features {
         private static void AddExit(DbRegion origin, DbRegion target, Direction direction) {
             var exit = origin.Exits.Find(x => x.Direction == direction);
             if (exit == null) {
-                exit = new DbExit {
-                    Direction = direction,
-                };
-
+                exit = new DbExit { Direction = direction };
                 origin.Exits.Add(exit);
             }
+
+            exit.X = target.X;
+            exit.Y = target.Y;
+            exit.Z = target.Z;
+            exit.Label = target.Label;
+            exit.Terrain = target.Terrain;
+            exit.Settlement = target.Settlement != null
+                ? new  DbSettlement {
+                    Name = target.Settlement.Name,
+                    Size = target.Settlement.Size
+                }
+                : null;
 
             exit.OriginRegionId = origin.Id;
             exit.Origin = origin;

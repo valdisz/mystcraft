@@ -297,6 +297,10 @@ namespace advisor.Persistence {
 
                 t.Property(p => p.Direction).HasConversion<string>();
 
+                t.OwnsOne(p => p.Settlement, a => {
+                    a.Property(x => x.Size).HasConversion<string>();
+                });
+
                 t.HasOne(p => p.Target)
                     .WithMany()
                     .HasForeignKey(p => new { p.PlayerId, p.TurnNumber, p.TargetRegionId });

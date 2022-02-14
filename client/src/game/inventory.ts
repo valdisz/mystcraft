@@ -49,7 +49,24 @@ export class Inventory {
         sell: 0,
         entertain: 0,
         work: 0
-    };
+    }
+
+    get men() {
+        return this.items.toArray().filter(x => x.isManLike)
+    }
+
+    get menCount() {
+        let count = 0
+        for (const item of this.items) {
+            if (!item.isManLike) {
+                continue
+            }
+
+            count += item.amount
+        }
+
+        return count
+    }
 
     transfer(target: Inventory, itemOrCode: ItemInfo | string, amount?: number) {
         const code = typeof itemOrCode === 'string' ? itemOrCode : itemOrCode.code;

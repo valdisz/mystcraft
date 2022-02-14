@@ -1,4 +1,4 @@
-import { Direction, RegionFragment } from '../schema'
+import { Direction, ExitFragment, RegionFragment } from '../schema'
 import { Item } from './item'
 import { ItemMap } from './item-map'
 import { Province } from './province'
@@ -13,13 +13,9 @@ import { Links } from './link'
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {
-        this.code = `${coords.x},${coords.y},${coords.z}`
     }
 
-    readonly code: string
-
     explored: boolean
-
 
     /** Is region information about the region hidden or not */
     covered: boolean
@@ -38,6 +34,7 @@ export class Region {
     tax: number
     wages: Wages
     entertainment: number
+    gate: number
     readonly wanted: ItemMap<Item> = new ItemMap()
     readonly forSale: ItemMap<Item> = new ItemMap()
     readonly products: ItemMap<Item> = new ItemMap()
@@ -133,6 +130,25 @@ export class Region {
         }
 
         return reg;
+    }
+
+    static fromExit({ x, y, z, label, terrain, settlement }: ExitFragment, ruleset: Ruleset) {
+        const reg = new Region(null, new Coords(x, y, z, label))
+
+        reg.explored = false
+        reg.covered = false
+        reg.lastVisitedAt = 0
+
+        if (settlement) {
+            reg.settlement = {
+                name: settlement.name,
+                size: settlement.size.toLowerCase() as SettlementSize
+            }
+        }
+
+        reg.terrain = ruleset.getTerrain(terrain)
+
+        return reg
     }
 
     static createCovered(x: number, y: number, z: number, label: string, ruleset: Ruleset) {

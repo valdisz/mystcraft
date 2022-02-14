@@ -1,5 +1,6 @@
-import { autoDetectRenderer, Container, DisplayObject, Sprite, Texture, Text, Loader, Point, IPointData, AbstractRenderer, Graphics } from 'pixi.js'
+import { autoDetectRenderer, Container, DisplayObject, Sprite, Texture, Text, Loader, Point, IPointData, AbstractRenderer, Graphics, Spritesheet, ISpritesheetData, BLEND_MODES } from 'pixi.js'
 import { GlowFilter } from '@pixi/filter-glow'
+import { BlurFilter } from '@pixi/filter-blur'
 import { Hex, Coord, Layout, Orientation } from '../geometry'
 import { Link } from '../game/link'
 import { Region } from "../game/region"
@@ -8,6 +9,13 @@ import { TerrainInfo } from '../game/terrain-info'
 import { Settlement } from '../game/settlement'
 import { Coords } from '../game/coords'
 import { Structure } from '../game/structure'
+
+import rulesetData from './ruleset.yaml'
+import report from './report.json'
+import { Faction } from '../game/faction'
+import { Ruleset } from '../game/ruleset'
+import { World } from '../game/world'
+import { Unit } from '../game/unit'
 
 export interface GetRegionCallback {
     (x: number, y: number): Region
@@ -25,10 +33,8 @@ export interface MapSize {
 // const OFFSET_Y = -8;
 
 // advisor
-const TILE_W = 48;
-const TILE_H = 48;
-const OFFSET_X = 0;
-const OFFSET_Y = 0;
+const TILE_W = 94;
+const TILE_H = 82;
 
 /*
 
@@ -70,12 +76,47 @@ class Layers {
 
 type LayerName = keyof Omit<Omit<Omit<Layers, 'add'>, 'clearAll'>, 'sort'>
 
+interface TailSetSpec {
+    main: number
+}
+
+interface TailSetManifest extends ISpritesheetData {
+    tiles: {
+        [name: string]: TailSetSpec
+    }
+}
+
+class TileSet {
+    constructor(private readonly spritesheet: Spritesheet) {
+
+    }
+
+    mainTile(name: string, hash: number) {
+        if (name === 'ocean') {
+            name = 'water'
+        }
+
+        const { tiles } = this.spritesheet.data as TailSetManifest
+        const frameCount = tiles[name].main
+        const index = hash % frameCount
+
+        const frameName = `${name}-main-${index}`
+        const texture = this.spritesheet.textures[frameName]
+
+        const sprite = new Sprite(texture)
+        sprite.anchor.set(0.5, 0.5)
+
+        return sprite
+    }
+}
+
 class Resources {
     constructor(private loader: Loader) {
 
     }
 
     private readonly cache: Map<string, Texture> = new Map()
+    private tileSet: TileSet
 
     sprite(name: string): Sprite {
         const s = new Sprite(this.texture(name))
@@ -101,11 +142,15 @@ class Resources {
         return this.loader.resources[name]?.texture
     }
 
+    tile(name: string, hash: number): Sprite {
+        return this.tileSet.mainTile(name, hash)
+    }
+
     add(name: string, texture: Texture) {
         this.cache.set(name, texture)
     }
 
-    private loadSpritesheet(name: string, url: string) {
+    private queueSpritesheet(name: string, url: string) {
         return new Promise((resolve, reject) => {
             if (this.loader.resources[name]) {
                 console.log(`Resource ${name} (${url}) already exists`)
@@ -115,6 +160,8 @@ class Resources {
 
             this.loader.add(name, url, res => {
                 if (res) {
+                    this.tileSet = new TileSet(this.loader.resources['sprites'].spritesheet)
+
                     resolve(res)
                     console.log(`Loaded ${name} from ${url}`, res)
                 }
@@ -122,28 +169,30 @@ class Resources {
                     reject()
                 }
             })
-
-            this.loader.load()
         })
+    }
+
+    private queueFont(name: string, size: string = '12px') {
+        const fontFamily = `${size} ${name}`
+        if (!document.fonts.check(fontFamily)) {
+            document.fonts.load(fontFamily)
+        }
     }
 
     async load() {
         console.log('Loading resources')
 
-        if (!document.fonts.check('12px Fira Code')) {
-            document.fonts.load('12px Fira Code')
-        }
+        this.queueFont('Fira Code')
+        this.queueFont('Almendra')
 
-        if (!document.fonts.check('12px Almendra')) {
-            document.fonts.load('12px Almendra')
-        }
+        const tasks = Promise.all([
+            document.fonts.ready,
+            this.queueSpritesheet('sprites', '/sprites.json'),
+        ])
 
-        await this.loadSpritesheet('terrain', '/terrain.json')
-        await this.loadSpritesheet('items', '/items.json'),
-        await this.loadSpritesheet('objects', '/objects.json')
-        await this.loadSpritesheet('map', '/map.json')
+        this.loader.load()
 
-        await document.fonts.ready
+        return tasks
     }
 }
 
@@ -152,8 +201,8 @@ function arrayEquals(a: any[], b: any[]) {
 }
 
 abstract class Feature<T = any> {
-    constructor(protected readonly layer: LayerName) {
-
+    constructor(protected readonly layer: LayerName, position: IPointData) {
+        this.position.copyFrom(position)
     }
 
     private _key: any[] = []
@@ -161,6 +210,8 @@ abstract class Feature<T = any> {
 
     get key() { return this._key }
     get graphics() { return this._graphics }
+
+    readonly position: Point = new Point()
 
     update(value: T, layers: Layers, res: Resources) {
         const key = this.getKey(value)
@@ -176,6 +227,7 @@ abstract class Feature<T = any> {
 
         this._graphics = this.getGraphics(value, res)
         if (this._graphics) {
+            this._graphics.position.copyFrom(this.position)
             layers.add(this.layer, this._graphics)
         }
     }
@@ -191,9 +243,13 @@ abstract class Feature<T = any> {
 }
 
 class TerrainFeature extends Feature<Region> {
-    constructor(layer: LayerName) {
-        super(layer)
+    constructor(layer: LayerName, position: IPointData) {
+        super(layer, position)
+
+        this.hash = Math.abs(pointHash(position))
     }
+
+    readonly hash: number
 
     protected getKey(reg: Region): any[] {
         return [ reg.covered, reg.terrain?.code ]
@@ -202,24 +258,24 @@ class TerrainFeature extends Feature<Region> {
     protected getGraphics(reg: Region, res: Resources): DisplayObject {
         let sprite: Sprite
         if (reg.covered) {
-            sprite = res.sprite(`terrain/unexplored`)
+            sprite = res.tile('unexplored', this.hash)
             sprite.zIndex = -1
         }
         else {
-            sprite = res.sprite(`terrain/${reg.terrain.code}`)
+            sprite = res.tile(reg.terrain.code, this.hash)
         }
 
         return sprite
     }
 }
 
-class SettlementLabelFeature extends Feature<Region> {
-    constructor(layer: LayerName) {
-        super(layer)
+class SettlementFeature extends Feature<Region> {
+    constructor(layer: LayerName, position: IPointData) {
+        super(layer, position)
     }
 
     protected getKey(reg: Region): any[] {
-        return [ reg.settlement?.name ]
+        return [ reg.settlement?.name, reg.settlement?.size ]
     }
 
     protected getGraphics(reg: Region, res: Resources): DisplayObject {
@@ -227,48 +283,37 @@ class SettlementLabelFeature extends Feature<Region> {
             return
         }
 
+        const p = new Point(12, 0)
+
         const text = new Text(reg.settlement.name, {
             fontSize: '16px',
-            fontFamily: 'Almendra',
-            // fontFamily: 'Fira Code',
-            fill: 'white',
+            // fontFamily: 'Almendra',
+            fontFamily: 'Fira Code',
+            fill: 'yellow',
+            fontWeight: 'bold',
             dropShadow: true,
-            dropShadowColor: '#000000',
-            dropShadowAngle: Math.PI / 3,
-            dropShadowDistance: 4,
+            dropShadowColor: 'black',
+            dropShadowBlur: 4,
+            dropShadowDistance: 2
         })
-        text.alpha = 0.9
-        text.anchor.set(0, 1)
+        text.anchor.set(0, 0.5)
+        text.position.copyFrom(p)
 
-        return text
-    }
-}
+        const group = new Container()
+        group.addChild(res.sprite(`sprites/map-${reg.settlement.size}`))
+        group.addChild(text)
 
-class SettlementMarkFeature extends Feature<Region> {
-    constructor(layer: LayerName) {
-        super(layer)
-    }
-
-    protected getKey(reg: Region): any[] {
-        return [ reg.settlement?.size ]
-    }
-
-    protected getGraphics(reg: Region, res: Resources): DisplayObject {
-        if (!reg.settlement?.size) {
-            return
-        }
-
-        return res.sprite(`map/${reg.settlement.size}`)
+        return group
     }
 }
 
 class RoadsFeature extends Feature<Region> {
-    constructor(layer: LayerName) {
-        super(layer)
+    constructor(layer: LayerName, position: IPointData) {
+        super(layer, position)
     }
 
     protected getKey(reg: Region): any[] {
-        return reg.structures.filter(x => x.type.startsWith('Road ')).map(x => x.type.toLowerCase().replace(/\s+/, '-'))
+        return reg.structures.filter(x => x.type.startsWith('Road ')).map(x => x.type)
     }
 
     protected getGraphics(reg: Region, res: Resources): DisplayObject {
@@ -276,127 +321,441 @@ class RoadsFeature extends Feature<Region> {
             return
         }
 
-        const roads = new Container()
-        for (const r of this.key) {
-            roads.addChild(res.sprite(`terrain/${r}`))
+        const roads: string[] = []
+        if (this.key.includes('Road N')) roads.push('n')
+        if (this.key.includes('Road NW')) roads.push('nw')
+        if (this.key.includes('Road NE')) roads.push('ne')
+        if (this.key.includes('Road S')) roads.push('s')
+        if (this.key.includes('Road SW')) roads.push('sw')
+        if (this.key.includes('Road SE')) roads.push('se')
+
+        if (!roads.length) {
+            return null
         }
 
-        return roads
+        const spriteName = `sprites/road-${roads.join('-')}`
+        const sprite = res.sprite(spriteName)
+        sprite.tint = 0x666666
+
+        return sprite
     }
 }
+
+interface StructuresFeatureOptions {
+    spriteName: string
+    countPosition?: 'top' | 'bottom'
+    hideCount?: boolean
+    matchStructure: (str: Structure) => boolean
+}
+
+class StructuresFeature extends Feature<Region> {
+    constructor(layer: LayerName, position: IPointData, private readonly options: StructuresFeatureOptions) {
+        super(layer, position)
+    }
+
+    protected getKey(reg: Region): any[] {
+        if (reg.covered) return [ ]
+        return reg.structures.filter(x => this.options.matchStructure(x))
+        // return [ 1 ]
+    }
+
+    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+        if (!this.key.length) {
+            return
+        }
+
+        const group = new Container()
+        const icon = res.sprite(this.options.spriteName)
+        icon.zIndex = 1
+        group.addChild(icon)
+
+        if (!this.options.hideCount) {
+            const countStr = this.key.length > 9
+                ? '9+'
+                : this.key.length.toString()
+
+            const count = new Text(countStr, {
+                fontSize: '10px',
+                fontFamily: 'Fira Code',
+                fill: 'black',
+                fontWeight: 'bold'
+            })
+            count.anchor.set(0.5, 0.5)
+
+            if (this.options.countPosition === 'top') {
+                icon.position.set(0, -6)
+                count.position.set(0, -16)
+            }
+            else {
+                count.position.set(0, -6)
+                icon.position.set(0, -16)
+            }
+
+            const bg = res.sprite('sprites/map-bg-1')
+            bg.alpha = 0.67
+            bg.position.copyFrom(count)
+
+            group.addChild(bg)
+            group.addChild(count)
+            group.sortChildren()
+        }
+
+        return group
+    }
+}
+
+interface MenCount {
+    own: number
+    hostile: number
+    unfriendly: number
+    neutral: number
+    friendly: number
+    ally: number
+}
+
+class TroopsFeature extends Feature<Region> {
+    constructor(layer: LayerName, position: IPointData) {
+        super(layer, position)
+    }
+
+    static attitudeCount(value: MenCount, unit: Unit): MenCount {
+        const next = { ...value }
+
+        const key = unit.isPlayer ? 'own' : unit.faction.stance.toLowerCase()
+        next[key] += unit.inventory.menCount
+
+        return next
+    }
+
+    protected getKey(reg: Region): any[] {
+        const { own, hostile, unfriendly, neutral, friendly, ally } = reg.units
+            .reduce(
+                (value, next) => TroopsFeature.attitudeCount(value, next),
+                { own: 0, hostile: 0, unfriendly: 0, neutral: 0, friendly: 0, ally: 0 } as MenCount
+            )
+
+        return [ own, hostile, unfriendly, neutral, friendly, ally ]
+    }
+
+    static formatOwn(count: number) {
+        if (count < 3000) return count.toString()
+        if (count < 10000) return `${(count / 1000).toPrecision(1)}k`
+
+        return `${Math.trunc(count / 1000).toFixed(0)}k`
+    }
+
+    static formatOther(count: number) {
+        if (count === 0) return '.'
+        if (count < 100) return count.toString()
+        if (count < 1000) return `${Math.trunc(count / 100).toFixed(0)}h`
+
+        return `${Math.trunc(count / 1000).toFixed(0)}k`
+    }
+
+    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+        const [ own, ...other ] = this.key as number[]
+        if (!own && other.every(x => x === 0)) {
+            return
+        }
+
+        const group = new Container()
+
+        if (own) {
+            const ownCountText = new Text(TroopsFeature.formatOwn(own), {
+                fontSize: '10px',
+                fontFamily: 'Fira Code',
+                fill: 'lime',
+                fontWeight: 'bold',
+                dropShadow: true,
+                dropShadowColor: 'black',
+                dropShadowBlur: 4,
+                dropShadowDistance: 2
+            })
+            ownCountText.anchor.set(0.5, 0.5)
+            ownCountText.position.set(0, -6)
+
+            group.addChild(ownCountText)
+        }
+
+        if (other.some(x => x !== 0)) {
+            const s = other.map(x => TroopsFeature.formatOther(x)).join(' ')
+            const otherCountText = new Text(s, {
+                fontSize: '8px',
+                fontFamily: 'Fira Code',
+                fill: 'yellow',
+                fontWeight: 'bold',
+                dropShadow: true,
+                dropShadowColor: 'black',
+                dropShadowBlur: 4,
+                dropShadowDistance: 2
+            })
+            otherCountText.anchor.set(0.5, 0.5)
+            otherCountText.position.set(0, 6)
+
+            group.addChild(otherCountText)
+        }
+
+        return group
+    }
+}
+
+class OnGuardFeature extends Feature<Region> {
+    constructor(layer: LayerName, position: IPointData) {
+        super(layer, position)
+
+        this.hash = Math.abs(pointHash(position))
+    }
+
+    readonly hash: number
+
+    protected getKey(reg: Region): any[] {
+        return [ reg.units.some(x => x.onGuard) ]
+    }
+
+    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+        if (!this.key[0]) {
+            return
+        }
+
+        return res.sprite('sprites/map-guard')
+    }
+}
+
+class GateFeature extends Feature<Region> {
+    constructor(layer: LayerName, position: IPointData) {
+        super(layer, position)
+
+        this.hash = Math.abs(pointHash(position))
+    }
+
+    readonly hash: number
+
+    protected getKey(reg: Region): any[] {
+        return [ reg.gate > 0 ]
+    }
+
+    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+        if (!this.key[0]) {
+            return
+        }
+
+        return res.sprite('sprites/map-gate')
+    }
+}
+
+function numhash(value: number) {
+    value = ((value >> 16) ^ value) * 0x45d9f3b
+    value = ((value >> 16) ^ value) * 0x45d9f3b
+    value = (value >> 16) ^ value
+
+    return value
+}
+
+function pointHash({ x, y}: IPointData) {
+    let seed = 1430287
+    seed = seed * 7302013 ^ numhash(x)
+    seed = seed * 7302013 ^ numhash(y)
+
+    return seed
+}
+
+
+const FORTS = [ 'Tower', 'Fort', 'Castle', 'Citadel' ]
+const TRADE = [ 'Inn', 'Farm', 'Ranch', 'Quarry', 'Mine' ]
+const SHIP = [ 'Longboat' ]
+const FLYINGSHIP = [ 'Baloon' ]
+const LAIRS = [ 'Lair' ]
 
 class Tile {
     public constructor(position: IPointData, private region: Region, private layers: Layers, private res: Resources) {
         this.position.copyFrom(position)
 
-        this.terrain = new TerrainFeature('terrain')
-        this.settlementLabel = new SettlementLabelFeature('settlements')
-        this.setllementMark = new SettlementMarkFeature('settlements')
-        this.roads = new RoadsFeature('roads')
+        this.terrain = new TerrainFeature('terrain', this.getPos(0, -12))   // need to offest terrain tile
+        this.roads = new RoadsFeature('roads', this.getPos(0, -12))
+        this.settlement = new SettlementFeature('settlements', this.getPos(0, 0))
+
+        this.baloon = new StructuresFeature('text', this.getPos(-18, TILE_H / 2), {
+            spriteName: 'sprites/map-flying-ship',
+            countPosition: 'top',
+            matchStructure: str => FLYINGSHIP.includes(str.type)
+        })
+
+        this.ship = new StructuresFeature('text', this.getPos(-6, TILE_H / 2), {
+            spriteName: 'sprites/map-ship',
+            countPosition: 'top',
+            matchStructure: str => SHIP.includes(str.type)
+        })
+
+        this.trade = new StructuresFeature('text', this.getPos(6, TILE_H / 2), {
+            spriteName: 'sprites/map-building',
+            countPosition: 'top',
+            matchStructure: str => TRADE.includes(str.type)
+        })
+
+        this.forifications = new StructuresFeature( 'text', this.getPos(18, TILE_H / 2), {
+            spriteName: 'sprites/map-fort',
+            countPosition: 'top',
+            matchStructure: str => FORTS.includes(str.type)
+        })
+
+        this.lair = new StructuresFeature('text', this.getPos(0, 0), {
+            spriteName: 'sprites/map-lair',
+            hideCount: true,
+            matchStructure: str => LAIRS.includes(str.type)
+        })
+
+        this.troops = new TroopsFeature('text', this.getPos(0, 20 - TILE_H / 2))
+        this.onGuard = new OnGuardFeature('text', this.getPos(-TILE_W / 2 + 12, 0))
+        this.gate = new GateFeature('text', this.getPos(-TILE_W / 2 + 24, 0))
 
         this.update()
     }
 
     readonly terrain: Feature<Region>
-    readonly settlementLabel: Feature<Region>
-    readonly setllementMark: Feature<Region>
+    readonly settlement: Feature<Region>
     readonly roads: Feature<Region>
+    readonly forifications: Feature<Region>
+    readonly trade: Feature<Region>
+    readonly ship: Feature<Region>
+    readonly baloon: Feature<Region>
+    readonly lair: Feature<Region>
+    readonly troops: Feature<Region>
+    readonly onGuard: Feature<Region>
+    readonly gate: Feature<Region>
 
     active: boolean = false
     readonly position: Point = new Point()
 
-    private setPosition(target: Feature, x: number = 0, y: number = 0) {
-        const g = target.graphics
-        if (!g) {
-            return
+    private getPos(x: number = 0, y: number = 0): IPointData {
+        return {
+            x: this.position.x + x,
+            y: this.position.y + y
         }
-
-        g.position.set(this.position.x + x, this.position.y + y)
     }
 
     update() {
         this.terrain.update(this.region, this.layers, this.res)
-        this.setPosition(this.terrain, 0, 6)
-
-        this.setllementMark.update(this.region, this.layers, this.res)
-        this.setPosition(this.setllementMark)
-
-        this.settlementLabel.update(this.region, this.layers, this.res)
-        this.setPosition(this.settlementLabel, 8)
-
+        this.settlement.update(this.region, this.layers, this.res)
         this.roads.update(this.region, this.layers, this.res)
-        this.setPosition(this.roads, 0, 6)
+        this.forifications.update(this.region, this.layers, this.res)
+        this.trade.update(this.region, this.layers, this.res)
+        this.ship.update(this.region, this.layers, this.res)
+        this.baloon.update(this.region, this.layers, this.res)
+        this.lair.update(this.region, this.layers, this.res)
+        this.troops.update(this.region, this.layers, this.res)
+        this.onGuard.update(this.region, this.layers, this.res)
+        this.gate.update(this.region, this.layers, this.res)
     }
 
     destroy() {
         this.terrain.destroy()
-        this.settlementLabel.destroy()
-        this.setllementMark.destroy()
+        this.settlement.destroy()
         this.roads.destroy()
+        this.forifications.destroy()
+        this.trade.destroy()
+        this.ship.destroy()
+        this.baloon.destroy()
+        this.lair.destroy()
+        this.troops.destroy()
+        this.onGuard.destroy()
+        this.gate.destroy()
     }
-}
-
-let lastId = 0
-function makeRegion(x: number, y: number, conf: (reg: Region) => void) {
-    const reg = new Region((lastId++).toString(), new Coords(x, y, 1))
-    conf(reg)
-
-    return reg
 }
 
 function addTestData(map: HexMap2) {
-    const regions: Region[] = [ ]
+    const ruleset = new Ruleset()
+    ruleset.load(rulesetData)
 
-    regions.push(makeRegion(0, 0, reg => { reg.terrain = new TerrainInfo('plain') }))
-    regions.push(makeRegion(1, 1, reg => {
-        reg.terrain = new TerrainInfo('plain')
+    const world = new World({
+        map: [
+            { label: 'nexus', width: 1, height: 1 },
+            { label: 'surface', width: 64, height: 64 }
+        ]
+    }, ruleset)
 
-        const roadS = new Structure();
-        roadS.id = '1'
-        roadS.num = 1
-        roadS.type = 'Road S'
+    world.addFaction(report.faction.number, report.faction.name, true)
 
-        reg.addStructure(roadS)
-    }))
-    regions.push(makeRegion(2, 0, reg => { reg.terrain = new TerrainInfo('forest') }))
-    regions.push(makeRegion(0, 2, reg => { reg.terrain = new TerrainInfo('plain') }))
-    regions.push(makeRegion(1, 3, reg => {
-        reg.terrain = new TerrainInfo('plain')
-        reg.settlement = {
-            name: 'Avalon',
-            size: 'city'
+    report.attitudes.hostile
+        .concat(report.attitudes.hostile)
+        .concat(report.attitudes.unfriendly)
+        .concat(report.attitudes.neutral)
+        .concat(report.attitudes.friendly)
+        .concat(report.attitudes.ally)
+        .forEach(({ name, number }) => world.addFaction(number, name, false))
+
+    for (const reg of report.regions) {
+        Object.assign(reg, reg.coords)
+        reg.produces = reg.products
+        reg.structures = reg.structures ?? []
+        reg.units = reg.units ?? []
+
+        for (const exit of reg.exits) {
+            Object.assign(exit, exit.coords)
         }
 
-        const roadN = new Structure();
-        roadN.id = '1'
-        roadN.num = 1
-        roadN.type = 'Road N'
+        for (const str of reg.structures) {
+            Object.assign(str, str.structure)
+            Object.assign(str, reg.coords)
 
-        reg.addStructure(roadN)
-    }))
-    regions.push(makeRegion(2, 2, reg => { reg.terrain = new TerrainInfo('forest') }))
-    regions.push(makeRegion(0, 4, reg => { reg.terrain = new TerrainInfo('volcano') }))
-    regions.push(makeRegion(2, 4, reg => { reg.terrain = new TerrainInfo('plain') }))
-    regions.push(makeRegion(3, 1, reg => { reg.terrain = new TerrainInfo('plain') }))
-    regions.push(makeRegion(3, 3, reg => { reg.terrain = new TerrainInfo('plain') }))
-    regions.push(makeRegion(3, 5, reg => { reg.terrain = new TerrainInfo('plain') }))
-    regions.push(makeRegion(4, 4, reg => { reg.terrain = new TerrainInfo('plain') }))
+            str.units = str.units ?? []
 
-    for (let x = 0; x < 32; x++) {
-        for (let y = 0; y < 32; y++) {
-            if ((x + y) % 2) {
-                continue
+            for (const unit of str.units) {
+                Object.assign(unit, reg.coords)
+                unit.canStudy = unit.canStudy ?? []
+
+                if (unit.faction) {
+                    world.addFaction(unit.faction.number, unit.faction.name, false)
+                    unit.factionNumber = unit.faction.number
+                }
             }
+        }
 
-            if (regions.find(r => r.coords.x === x && r.coords.y === y)) {
-                continue
+        for (const unit of reg.units) {
+            Object.assign(unit, reg.coords)
+            unit.canStudy = unit.canStudy ?? []
+
+            if (unit.faction) {
+                world.addFaction(unit.faction.number, unit.faction.name, false)
+                unit.factionNumber = unit.faction.number
             }
-
-            regions.push(makeRegion(x, y, reg => reg.covered = true))
         }
     }
 
-    map.setRegions(regions)
+    world.addRegions(report.regions as any)
+
+    for (const reg of report.regions) {
+        const r = world.getRegion(reg.coords)
+        if (r.coords.x === 12 && r.coords.y === 30) {
+            r.gate = 1
+        }
+
+        for (const unit of reg.units) {
+            if (unit.faction) {
+                world.addFaction(unit.faction.number, unit.faction.name, false)
+            }
+
+            const u = Unit.from(unit, world.factions, ruleset)
+            r.addUnit(u)
+        }
+
+        for (const str of reg.structures) {
+            const s = r.structures.find(x => x.num == str.structure.number)
+
+            for (const unit of str.units) {
+                if (unit.faction) {
+                    world.addFaction(unit.faction.number, unit.faction.name, false)
+                }
+
+                const u = Unit.from(unit, world.factions, ruleset)
+                r.addUnit(u, s)
+            }
+        }
+    }
+
+    console.log(world)
+
+    const regs = Array.from(world.getLevel(1))
+    map.setRegions(regs)
 }
 
 export class HexMap2 {
@@ -420,12 +779,12 @@ export class HexMap2 {
         this.scene.addChild(this.layers.settlements)
         this.scene.addChild(this.layers.text)
 
-        this.layout = new Layout({ x: 24, y: 24 }, { x: 48, y: 48})
+        // this.layout = new Layout({ x: TILE_W / 2, y: TILE_H / 2 }, { x: -100, y: -400 })
     }
 
     readonly renderer: AbstractRenderer
     readonly resources: Resources
-    readonly layout: Layout
+    // readonly layout: Layout
 
     readonly scene: Container
     readonly layers: Layers
@@ -462,7 +821,11 @@ export class HexMap2 {
         })
 
         for (const reg of regions) {
-            const p = this.layout.toPixel(reg.coords)
+            const p = {
+                x: reg.coords.x * (TILE_W * 3 / 4),
+                y: reg.coords.y * TILE_H / 2,
+            }
+
             this.tiles.push(new Tile(p, reg, this.layers, this.resources))
         }
 
@@ -471,11 +834,11 @@ export class HexMap2 {
 
     render() {
         requestAnimationFrame(() => {
-            this.scene.position.set(0, 0)
+            this.scene.position.set(-200, -600)
             this.renderer.render(this.scene)
 
-            this.scene.position.set(this.scene.width - 13, 0)
-            this.renderer.render(this.scene, { clear: false })
+            // this.scene.position.set(this.scene.width - 13, 0)
+            // this.renderer.render(this.scene, { clear: false })
         })
     }
 

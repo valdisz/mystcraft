@@ -1,6 +1,6 @@
 import { UniqueItem } from './unique-item'
 
-export class ItemMap<T extends UniqueItem> {
+export class ItemMap<T extends UniqueItem> implements Iterable<T> {
     constructor(items?: T[]) {
         if (!items)
             return;
@@ -10,13 +10,17 @@ export class ItemMap<T extends UniqueItem> {
         }
     }
 
-    private readonly items = new Map<string, T>()
+    private readonly items = new Map<string, T>();
+
+    [Symbol.iterator](): Iterator<T, any, undefined> {
+        return this.items.values()
+    }
 
     get size() {
         return this.items.size
     }
 
-    get all() {
+    toArray() {
         return Array.from(this.items.values())
     }
 

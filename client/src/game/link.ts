@@ -85,4 +85,19 @@ export class Links implements Iterable<Link> {
 
         return null
     }
+
+    has(direction: Direction): boolean {
+        return this.links.has(direction)
+    }
+}
+
+export function oppositeDirection(dir: Direction) {
+    switch (dir) {
+        case Direction.North: return Direction.South
+        case Direction.Northwest: return Direction.Southeast
+        case Direction.Northeast: return Direction.Southwest
+        case Direction.South: return Direction.North
+        case Direction.Southwest: return Direction.Northeast
+        case Direction.Southeast: return Direction.Northwest
+    }
 }

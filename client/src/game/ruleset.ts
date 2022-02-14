@@ -34,7 +34,7 @@ export class Ruleset {
         let item = this.items.get(nameOrCode);
 
         if (!item) {
-            for (const i of this.items.all) {
+            for (const i of this.items) {
                 for (const name of i.name) {
                     if (nameOrCode === name) {
                         item = i;
@@ -69,16 +69,19 @@ export class Ruleset {
         return this.movePoints.get(moveType)
     }
 
-    load(source: string) {
+    parse(source: string) {
         const data: RulesetData = YAML.parse(source)
+        this.load(data)
+    }
 
+    load(data: RulesetData) {
         this.loadSkills(data.skills)
         this.loadItems(data.items)
         this.loadTerrain(data.terrain)
         this.loadOrders(data.orders)
         this.loadMovePoints(data.movePoints)
 
-        for (const item of this.items.all) {
+        for (const item of this.items) {
             if (item.category === 'money') {
                 this.money = item
                 break
