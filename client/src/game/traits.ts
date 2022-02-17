@@ -81,6 +81,10 @@ export interface ProductionBonus {
     readonly amount: number
 }
 
+export interface Input {
+    [code: string]: number
+}
+
 export class CanProduceTrait extends Trait {
     readonly type: Traits = 'canProduce'
 
@@ -89,6 +93,7 @@ export class CanProduceTrait extends Trait {
         public readonly level: number,
         public readonly effort: number,
         public readonly amount: number,
+        public readonly input: Input[],
         public readonly productionBonus?: ProductionBonus
         ) {
         super()

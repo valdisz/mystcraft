@@ -1,4 +1,4 @@
-import { UniqueItem } from "./unique-item"
+import { UniqueItem } from './unique-item'
 import { Traits, TraitsMap } from './traits'
 import { Item } from "./item"
 import { ItemCategory } from "./item-category"

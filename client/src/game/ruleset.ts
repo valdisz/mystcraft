@@ -185,7 +185,7 @@ export class Ruleset {
                     }
                     : null
 
-                    item.traits.canProduce = new CanProduceTrait(skill, level, effort, amount, productionBonus)
+                    item.traits.canProduce = new CanProduceTrait(skill, level, effort, amount, [], productionBonus)
                 }
             }
 

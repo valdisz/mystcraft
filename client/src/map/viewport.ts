@@ -8,7 +8,7 @@ declare const ResizeObserver: any
 export class Viewport {
     constructor(
         private element: HTMLElement,
-        public origin: PIXI.Point,
+        public origin: PIXI.IPointData,
         private mapWidth: number,
         private mapHeight: number,
         private onUpdate: (event: Viewport) => void,
