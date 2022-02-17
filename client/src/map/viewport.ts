@@ -92,7 +92,7 @@ export class Viewport {
         this.paning = 'peding';
     };
 
-    private onPan = throttle((e: MouseEvent) => {
+    private onPan = (e: MouseEvent) => {
         if (this.paning === 'no') return;
 
         const deltaX = e.clientX - this.pan.x
@@ -111,7 +111,7 @@ export class Viewport {
             Math.floor(this.origin.x + deltaX),
             Math.floor(this.origin.y + deltaY)
         )
-    }, 20);
+    }
 
     private onPanEnd = (e: MouseEvent) => {
         if (this.paning === 'peding') {

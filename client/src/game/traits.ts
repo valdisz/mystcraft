@@ -1,6 +1,6 @@
-import { ItemInfo } from "./item-info"
-import { Capacity } from "./move-capacity"
-import { SkillInfo } from "./skill-info"
+import { ItemInfo } from './item-info'
+import { Capacity } from './move-capacity'
+import { SkillInfo } from './skill-info'
 
 export type Traits = keyof TraitsMap
 
@@ -81,8 +81,13 @@ export interface ProductionBonus {
     readonly amount: number
 }
 
+export interface Ingridient {
+    item: Readonly<ItemInfo>
+    amount: number
+}
+
 export interface Input {
-    [code: string]: number
+    items: Ingridient[]
 }
 
 export class CanProduceTrait extends Trait {
@@ -95,7 +100,7 @@ export class CanProduceTrait extends Trait {
         public readonly amount: number,
         public readonly input: Input[],
         public readonly productionBonus?: ProductionBonus
-        ) {
+    ) {
         super()
     }
 }
