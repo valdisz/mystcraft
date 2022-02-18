@@ -17,7 +17,7 @@ export function Hexmap2Page() {
         if (!canvasRef) return
 
         if (!gameMapRef.current) {
-            gameMapRef.current = new HexMap2(canvasRef)
+            gameMapRef.current = new HexMap2(canvasRef, 64, 64)
         }
 
         if (!observerRef.current) {

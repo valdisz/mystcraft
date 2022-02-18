@@ -1,4 +1,4 @@
-import { autoDetectRenderer, Container, Loader, AbstractRenderer } from 'pixi.js'
+import { autoDetectRenderer, Container, Loader, AbstractRenderer, Point, Rectangle } from 'pixi.js'
 import { Region } from "../game/region"
 
 import rulesetData from './ruleset.yaml'
@@ -11,6 +11,7 @@ import { Layers } from './layers'
 import { Resources } from './resources'
 import { Tile, TILE_H, TILE_W } from './tile'
 import { Viewport } from './viewport'
+import { overlapping } from './utils'
 
 export interface GetRegionCallback {
     (x: number, y: number): Region
@@ -128,10 +129,19 @@ function addTestData(map: HexMap2) {
 }
 
 export class HexMap2 {
-    constructor(private canvas: HTMLCanvasElement) {
+    constructor(private canvas: HTMLCanvasElement, widht: number, height: number) {
+        this.viewport = new Viewport(this.canvas, { x: 50, y: 50 }, widht * (TILE_W * 3 / 4) + TILE_W / 4, height * TILE_H / 2,
+            vp => {
+                this.render()
+            },
+            (e, vp) => { }
+        )
+
+        console.log('viewport', this.viewport)
+
         this.renderer = autoDetectRenderer({
-            width: this.canvas.width,
-            height: this.canvas.height,
+            width: this.viewport.width,
+            height: this.viewport.height,
             view: canvas,
             antialias: true,
             resolution: window.devicePixelRatio || 1
@@ -147,21 +157,11 @@ export class HexMap2 {
         this.scene.addChild(this.layers.path)
         this.scene.addChild(this.layers.settlements)
         this.scene.addChild(this.layers.text)
-
-        // this.layout = new Layout({ x: TILE_W / 2, y: TILE_H / 2 }, { x: -100, y: -400 })
-
-        this.viewport = new Viewport(this.canvas, { x: 50, y: 50 }, 64 * TILE_W, 64 * TILE_H,
-            vp => {
-                this.render()
-            },
-            (e, vp) => { }
-        )
     }
 
     readonly viewport: Viewport
     readonly renderer: AbstractRenderer
     readonly resources: Resources
-    // readonly layout: Layout
 
     readonly scene: Container
     readonly layers: Layers
@@ -211,13 +211,40 @@ export class HexMap2 {
 
     render() {
         requestAnimationFrame(() => {
-            this.scene.position.copyFrom(this.viewport.origin)
-            // this.scene.scale.set(0.25, 0.25)
+            const { x, y } = this.viewport.origin
+
+            this.scene.position.set(x, y)
+            this.updateVisibility()
             this.renderer.render(this.scene)
 
-            // this.scene.position.set(this.scene.width - 13, 0)
-            // this.renderer.render(this.scene, { clear: false })
+            this.scene.position.set(x + this.viewport.mapWidth - TILE_W / 4, y)
+            this.updateVisibility()
+            this.renderer.render(this.scene, { clear: false })
+
+            this.scene.position.set(x - this.viewport.mapWidth + TILE_W / 4, y)
+            this.updateVisibility()
+            this.renderer.render(this.scene, { clear: false })
         })
+    }
+
+    updateVisibility() {
+        const p = new Point()
+
+        const viewRect = this.viewport.rect
+        const r = new Rectangle()
+
+        for (const layer of this.scene.children as Container[]) {
+            for (const o of layer.children as Container[]) {
+                o.toGlobal(this.viewport.origin, p)
+
+                r.x = p.x - TILE_W
+                r.y = p.y - TILE_H
+                r.width = o.width + TILE_W
+                r.height = o.height + TILE_H
+
+                o.visible = overlapping(viewRect, r)
+            }
+        }
     }
 
     resize(width: number, height: number) {

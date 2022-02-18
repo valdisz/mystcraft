@@ -1,9 +1,9 @@
 import { DisplayObject, IPointData, Text, Container } from 'pixi.js'
-import { Region } from '../game/region'
 import { Structure } from '../game/structure'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
+import { TileState } from './tile-state'
 
 export interface StructuresFeatureOptions {
     spriteName: string
@@ -12,18 +12,18 @@ export interface StructuresFeatureOptions {
     matchStructure: (str: Structure) => boolean
 }
 
-export class StructuresFeature extends Feature<Region> {
+export class StructuresFeature extends Feature<TileState> {
     constructor(layer: LayerName, position: IPointData, private readonly options: StructuresFeatureOptions) {
         super(layer, position)
     }
 
-    protected getKey(reg: Region): any[] {
+    protected getKey({ reg }: TileState): any[] {
         if (reg.covered) return [ ]
         return reg.structures.filter(x => this.options.matchStructure(x))
         // return [ 1 ]
     }
 
-    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+    protected getGraphics(value: TileState, res: Resources): DisplayObject {
         if (!this.key.length) {
             return
         }

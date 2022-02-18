@@ -10,12 +10,13 @@ import { SettlementFeature } from './settlement-feature'
 import { StructuresFeature } from './structures-feature'
 import { TerrainFeature } from './terrain-feature'
 import { TroopsFeature } from './troops-feature'
+import { TileState } from './tile-state'
 
 export const TILE_W = 94;
 export const TILE_H = 82;
 
-export class Tile {
-    public constructor(position: IPointData, private region: Region, private layers: Layers, private res: Resources) {
+export class Tile implements TileState {
+    public constructor(position: IPointData, public readonly reg: Region, private layers: Layers, private res: Resources) {
         this.position.copyFrom(position)
 
         this.terrain = new TerrainFeature('terrain', this.getPos(0, -12))   // need to offest terrain tile
@@ -59,17 +60,17 @@ export class Tile {
         this.update()
     }
 
-    readonly terrain: Feature<Region>
-    readonly settlement: Feature<Region>
-    readonly roads: Feature<Region>
-    readonly forifications: Feature<Region>
-    readonly trade: Feature<Region>
-    readonly ship: Feature<Region>
-    readonly baloon: Feature<Region>
-    readonly lair: Feature<Region>
-    readonly troops: Feature<Region>
-    readonly onGuard: Feature<Region>
-    readonly gate: Feature<Region>
+    readonly terrain: Feature<TileState>
+    readonly settlement: Feature<TileState>
+    readonly roads: Feature<TileState>
+    readonly forifications: Feature<TileState>
+    readonly trade: Feature<TileState>
+    readonly ship: Feature<TileState>
+    readonly baloon: Feature<TileState>
+    readonly lair: Feature<TileState>
+    readonly troops: Feature<TileState>
+    readonly onGuard: Feature<TileState>
+    readonly gate: Feature<TileState>
 
     active = false
     readonly position = new Point()
@@ -82,17 +83,17 @@ export class Tile {
     }
 
     update() {
-        this.terrain.update(this.region, this.layers, this.res)
-        this.settlement.update(this.region, this.layers, this.res)
-        this.roads.update(this.region, this.layers, this.res)
-        this.forifications.update(this.region, this.layers, this.res)
-        this.trade.update(this.region, this.layers, this.res)
-        this.ship.update(this.region, this.layers, this.res)
-        this.baloon.update(this.region, this.layers, this.res)
-        this.lair.update(this.region, this.layers, this.res)
-        this.troops.update(this.region, this.layers, this.res)
-        this.onGuard.update(this.region, this.layers, this.res)
-        this.gate.update(this.region, this.layers, this.res)
+        this.terrain.update(this, this.layers, this.res)
+        this.settlement.update(this, this.layers, this.res)
+        this.roads.update(this, this.layers, this.res)
+        this.forifications.update(this, this.layers, this.res)
+        this.trade.update(this, this.layers, this.res)
+        this.ship.update(this, this.layers, this.res)
+        this.baloon.update(this, this.layers, this.res)
+        this.lair.update(this, this.layers, this.res)
+        this.troops.update(this, this.layers, this.res)
+        this.onGuard.update(this, this.layers, this.res)
+        this.gate.update(this, this.layers, this.res)
     }
 
     destroy() {

@@ -1,19 +1,19 @@
 import { DisplayObject, IPointData, Point, Text, Container } from 'pixi.js'
-import { Region } from '../game/region'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
+import { TileState } from './tile-state'
 
-export class SettlementFeature extends Feature<Region> {
+export class SettlementFeature extends Feature<TileState> {
     constructor(layer: LayerName, position: IPointData) {
         super(layer, position)
     }
 
-    protected getKey(reg: Region): any[] {
+    protected getKey({ reg }: TileState): any[] {
         return [ reg.settlement?.name, reg.settlement?.size ]
     }
 
-    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+    protected getGraphics({ reg }: TileState, res: Resources): DisplayObject {
         if (!reg.settlement?.name) {
             return
         }

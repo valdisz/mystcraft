@@ -1,4 +1,4 @@
-import * as PIXI from 'pixi.js'
+import { IPointData, Point, Rectangle } from 'pixi.js'
 import throttle from 'lodash.throttle'
 
 // till Typescript adds official declarations for this API (https://github.com/microsoft/TypeScript/issues/37861)
@@ -8,12 +8,14 @@ declare const ResizeObserver: any
 export class Viewport {
     constructor(
         private element: HTMLElement,
-        public origin: PIXI.IPointData,
-        private mapWidth: number,
-        private mapHeight: number,
+        origin: IPointData,
+        public readonly mapWidth: number,
+        public readonly mapHeight: number,
         private onUpdate: (event: Viewport) => void,
         private onClick: (e: MouseEvent, vp: Viewport) => void,
     ) {
+        this.origin.copyFrom(origin)
+
         this.observer = new ResizeObserver(() => {
             this.updateBounds(this.origin.x, this.origin.y)
         })
@@ -43,25 +45,31 @@ export class Viewport {
         this.observer.unobserve(this.element)
     }
 
-    pan: PIXI.Point
-    paning: 'no' | 'peding' | 'yes' = 'no';
-    scale = 1
+    readonly origin = new Point()
+    readonly pan = new Point()
+    paning: 'no' | 'pending' | 'yes' = 'no';
 
     private updateBounds(x0: number, y0: number) {
-        let x = x0
-        if (Math.abs(x) > this.mapWidth) {
-            if (x > 0) x -= this.mapWidth
-            if (x < 0) x += this.mapWidth
+        let x = x0 % this.mapWidth
+        if (x < 0) {
+            x += this.mapWidth
         }
 
-        const y = Math.max(-this.mapHeight + this.height, Math.min(y0, 100))
+        let y = Math.min(100, y0)
+        y = Math.max(y, this.height - this.mapHeight - 100)
+
+        // const y = Math.max(-this.mapHeight + this.height, Math.min(y0, 100))
 
         if (x !== this.origin.x || y !== this.origin.y) {
-            this.origin.x = x
-            this.origin.y = y
+            this.origin.set(x, y)
         }
 
-        window.requestAnimationFrame(() => this.raiseOnUpdate());
+        this.raiseOnUpdate()
+    }
+
+    private onWheel = (e: MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
     }
 
     private onContextMenu = (e: MouseEvent) => {
@@ -69,27 +77,11 @@ export class Viewport {
         e.stopPropagation()
     }
 
-    private onWheel = (e: WheelEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        // const s = Math.min(Math.max(.125, this.scale + e.deltaY * -0.001), 1)
-        // const w = this.width
-        // const h = this.height
-
-        // const sW = w > this.mapWidth ? this.element.clientWidth / w : s
-        // const sH = h > this.mapWidth ? this.element.clientHeight / h : s
-
-        // this.scale = Math.min(Math.max(sW, sH), 1)
-
-        // this.raiseOnUpdate();
-    }
-
     private onPanStart = (e: MouseEvent) => {
         if (e.button !== 0) return
 
-        this.pan = new PIXI.Point(e.clientX, e.clientY)
-        this.paning = 'peding';
+        this.pan.set(e.clientX, e.clientY)
+        this.paning = 'pending';
     };
 
     private onPan = (e: MouseEvent) => {
@@ -104,7 +96,7 @@ export class Viewport {
         }
 
         if (this.paning === 'yes') {
-            this.pan = new PIXI.Point(e.clientX, e.clientY)
+            this.pan.set(e.clientX, e.clientY)
         }
 
         this.updateBounds(
@@ -114,7 +106,7 @@ export class Viewport {
     }
 
     private onPanEnd = (e: MouseEvent) => {
-        if (this.paning === 'peding') {
+        if (this.paning === 'pending') {
             this.onClick(e, this)
         }
 
@@ -125,11 +117,7 @@ export class Viewport {
         this.onUpdate && this.onUpdate(this);
     }
 
-    get width() { return this.element.clientWidth / this.scale; }
-    get height() { return this.element.clientHeight / this.scale; }
-
-    setOffset(p: PIXI.Point) {
-        this.origin.copyFrom(p)
-        this.raiseOnUpdate()
-    }
+    get width() { return this.element.clientWidth }
+    get height() { return this.element.clientHeight }
+    get rect() { return new Rectangle(this.origin.x, this.origin.y, this.width, this.height) }
 }

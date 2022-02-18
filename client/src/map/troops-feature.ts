@@ -1,8 +1,9 @@
-import { DisplayObject, IPointData, Point, Text, Container } from 'pixi.js'
-import { Region } from '../game/region'
+import { DisplayObject, IPointData, Text, Container } from 'pixi.js'
+import { Unit } from '../game/unit'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
+import { TileState } from './tile-state'
 
 interface MenCount {
     own: number
@@ -13,7 +14,7 @@ interface MenCount {
     ally: number
 }
 
-export class TroopsFeature extends Feature<Region> {
+export class TroopsFeature extends Feature<TileState> {
     constructor(layer: LayerName, position: IPointData) {
         super(layer, position)
     }
@@ -27,7 +28,7 @@ export class TroopsFeature extends Feature<Region> {
         return next
     }
 
-    protected getKey(reg: Region): any[] {
+    protected getKey({ reg }: TileState): any[] {
         const { own, hostile, unfriendly, neutral, friendly, ally } = reg.units
             .reduce(
                 (value, next) => TroopsFeature.attitudeCount(value, next),
@@ -52,7 +53,7 @@ export class TroopsFeature extends Feature<Region> {
         return `${Math.trunc(count / 1000).toFixed(0)}k`
     }
 
-    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+    protected getGraphics(value: TileState, res: Resources): DisplayObject {
         const [ own, ...other ] = this.key as number[]
         if (!own && other.every(x => x === 0)) {
             return

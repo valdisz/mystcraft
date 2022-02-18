@@ -1,19 +1,19 @@
 import { DisplayObject, IPointData } from 'pixi.js'
-import { Region } from '../game/region'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
+import { TileState } from './tile-state'
 
-export class RoadsFeature extends Feature<Region> {
+export class RoadsFeature extends Feature<TileState> {
     constructor(layer: LayerName, position: IPointData) {
         super(layer, position)
     }
 
-    protected getKey(reg: Region): any[] {
+    protected getKey({ reg }: TileState): any[] {
         return reg.structures.filter(x => x.type.startsWith('Road ')).map(x => x.type)
     }
 
-    protected getGraphics(reg: Region, res: Resources): DisplayObject {
+    protected getGraphics(value: TileState, res: Resources): DisplayObject {
         if (!this.key.length) {
             return
         }
