@@ -11,7 +11,7 @@ import { StructuresFeature } from './structures-feature'
 import { TerrainFeature } from './terrain-feature'
 import { TroopsFeature } from './troops-feature'
 import { TileState } from './tile-state'
-import { ActiveFeature } from './ative-feature'
+import { ActiveFeature } from './active-feature'
 
 export const TILE_W = 94;
 export const TILE_H = 82;
