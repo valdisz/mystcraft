@@ -1,4 +1,4 @@
-import { autoDetectRenderer, Container, Loader, AbstractRenderer, Point, Rectangle } from 'pixi.js'
+import { autoDetectRenderer, Container, Loader, AbstractRenderer, Point, Rectangle, IPointData } from 'pixi.js'
 import { Region } from "../game/region"
 
 import rulesetData from './ruleset.yaml'
@@ -12,6 +12,8 @@ import { Resources } from './resources'
 import { Tile, TILE_H, TILE_W } from './tile'
 import { Viewport } from './viewport'
 import { overlapping } from './utils'
+import { Layout } from '../geometry'
+import { ICoords } from '../game/coords'
 
 export interface GetRegionCallback {
     (x: number, y: number): Region
@@ -58,6 +60,7 @@ function addTestData(map: HexMap2) {
         reg.produces = reg.products
         reg.structures = reg.structures ?? []
         reg.units = reg.units ?? []
+        reg.explored = true
 
         for (const exit of reg.exits) {
             Object.assign(exit, exit.coords)
@@ -128,16 +131,32 @@ function addTestData(map: HexMap2) {
     map.setRegions(regs)
 }
 
+export interface HexMapOptions {
+    onClick?: (reg: Region) => void
+    onDblClick?: (reg: Region) => void
+}
+
 export class HexMap2 {
-    constructor(private canvas: HTMLCanvasElement, widht: number, height: number) {
-        this.viewport = new Viewport(this.canvas, { x: 50, y: 50 }, widht * (TILE_W * 3 / 4) + TILE_W / 4, height * TILE_H / 2,
-            vp => {
-                this.render()
-            },
-            (e, vp) => { }
+    constructor(private canvas: HTMLCanvasElement, private readonly mapWidth: number, private readonly mapHeight: number,
+        private readonly options?: HexMapOptions
+    ) {
+        const origin = { x: 50, y: 50 }
+        this.layout = new Layout({ x: 48, y: 48 }, origin)
+        const wh = this.toPixel({ x: mapWidth - 1, y: mapHeight - 1, z: 0 })
+
+        this.viewport = new Viewport(this.canvas, origin, wh.x + 48 / 3, wh.y,
+            vp => { this.render() },
+            (e, vp) => {
+                const tile = this.getTileAtPixel(e.clientX, e.clientY)
+                if (tile) {
+                    if (options?.onClick) {
+                        options.onClick(tile.reg)
+                    }
+                }
+            }
         )
 
-        console.log('viewport', this.viewport)
+        this.canvas.addEventListener('dblclick', this.onDblClick)
 
         this.renderer = autoDetectRenderer({
             width: this.viewport.width,
@@ -155,18 +174,93 @@ export class HexMap2 {
         this.scene.addChild(this.layers.terrain)
         this.scene.addChild(this.layers.roads)
         this.scene.addChild(this.layers.path)
+        this.scene.addChild(this.layers.highlight)
         this.scene.addChild(this.layers.settlements)
         this.scene.addChild(this.layers.text)
     }
 
     readonly viewport: Viewport
+    readonly layout: Layout
     readonly renderer: AbstractRenderer
     readonly resources: Resources
 
     readonly scene: Container
     readonly layers: Layers
 
+    private readonly index: number[] = []
     readonly tiles: Tile[] = []
+
+    selectedTile: Tile
+
+    select(coords?: ICoords) {
+        if (this.selectedTile) {
+            this.selectedTile.isActive = false
+            this.selectedTile.update()
+        }
+
+        if (coords) {
+            const tile = this.getTile(coords.x, coords.y)
+            if (tile) {
+                this.selectedTile = tile
+                this.selectedTile.isActive = true
+                this.selectedTile.update()
+            }
+        }
+
+        this.render()
+    }
+
+    centerAt(coords: ICoords) {
+        const p = this.toPixel(coords)
+        this.viewport.updateBounds(-(p.x - this.viewport.width / 2), -(p.y - this.viewport.height / 2))
+    }
+
+    private onDblClick = (e: MouseEvent) => {
+        const tile = this.getTileAtPixel(e.clientX, e.clientY)
+        if (tile) {
+            if (this.options?.onDblClick) {
+                this.options.onDblClick(tile.reg)
+            }
+        }
+    }
+
+    private getTileIndex(x: number, y: number) {
+        return x + y * this.mapWidth / 2
+    }
+
+    private getTile(x: number, y: number) {
+        if (y < 0) {
+            return null
+        }
+
+        if (y >= this.mapHeight) {
+            return null
+        }
+
+        let xx = x % this.mapWidth
+        if (xx < 0) {
+            xx += this.mapWidth
+        }
+
+        const ti = this.getTileIndex(xx, y)
+        const i = this.index[ti]
+        return this.tiles[i]
+    }
+
+    private getTileAtPixel(x: number, y: number) {
+        const coord = this.fromPixel(x, y)
+        const tile = this.getTile(coord.x, coord.y)
+        return tile
+    }
+
+    toPixel(coords: ICoords): IPointData {
+        return this.layout.toPixel(coords)
+    }
+
+    fromPixel(x: number, y: number) {
+        const origin = this.viewport.origin
+        return this.layout.toCoord({ x: x - origin.x, y: y - origin.y })
+    }
 
     load() {
         return this.resources
@@ -178,12 +272,15 @@ export class HexMap2 {
     }
 
     clearAll() {
+        this.selectedTile = null
         this.layers.clearAll()
 
         for (const tile of this.tiles) {
             tile.destroy()
         }
+
         this.tiles.splice(0)
+        this.index.splice(0)
     }
 
     setRegions(regions: Region[]) {
@@ -197,13 +294,16 @@ export class HexMap2 {
             return a.coords.y - b.coords.y
         })
 
-        for (const reg of regions) {
-            const p = {
-                x: reg.coords.x * (TILE_W * 3 / 4),
-                y: reg.coords.y * TILE_H / 2,
-            }
+        this.index.length = this.mapWidth * this.mapHeight
 
-            this.tiles.push(new Tile(p, reg, this.layers, this.resources))
+        for (const reg of regions) {
+            const p = this.toPixel(reg.coords)
+
+            const t = new Tile(p, reg, this.layers, this.resources)
+
+            this.index[this.getTileIndex(reg.coords.x, reg.coords.y)] = this.tiles.length
+            this.tiles.push(t)
+            t.update()
         }
 
         this.layers.sort()
@@ -217,11 +317,11 @@ export class HexMap2 {
             this.updateVisibility()
             this.renderer.render(this.scene)
 
-            this.scene.position.set(x + this.viewport.mapWidth - TILE_W / 4, y)
+            this.scene.position.set(x + this.viewport.mapWidth, y)
             this.updateVisibility()
             this.renderer.render(this.scene, { clear: false })
 
-            this.scene.position.set(x - this.viewport.mapWidth + TILE_W / 4, y)
+            this.scene.position.set(x - this.viewport.mapWidth, y)
             this.updateVisibility()
             this.renderer.render(this.scene, { clear: false })
         })
@@ -255,6 +355,7 @@ export class HexMap2 {
         this.clearAll()
 
         this.renderer.destroy()
+        this.canvas.removeEventListener('dblclick', this.onDblClick)
     }
 }
 

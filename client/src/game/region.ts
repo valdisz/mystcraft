@@ -22,7 +22,7 @@ export class Region {
     lastVisitedAt: number
 
     get isVisible() {
-        return this.units.length > 0 || this.structures.some(x => x.units.length > 0)
+        return this.units.length > 0
     }
 
     province: Province

@@ -63,7 +63,7 @@ export class TroopsFeature extends Feature<TileState> {
 
         if (own) {
             const ownCountText = new Text(TroopsFeature.formatOwn(own), {
-                fontSize: '10px',
+                fontSize: '12px',
                 fontFamily: 'Fira Code',
                 fill: 'lime',
                 fontWeight: 'bold',
@@ -81,7 +81,7 @@ export class TroopsFeature extends Feature<TileState> {
         if (other.some(x => x !== 0)) {
             const s = other.map(x => TroopsFeature.formatOther(x)).join(' ')
             const otherCountText = new Text(s, {
-                fontSize: '8px',
+                fontSize: '9px',
                 fontFamily: 'Fira Code',
                 fill: 'yellow',
                 fontWeight: 'bold',

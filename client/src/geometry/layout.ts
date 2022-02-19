@@ -1,5 +1,5 @@
 import { Point, IPointData } from 'pixi.js'
-import { Coord } from './doubled-coord'
+import { Coord, ICoord } from './doubled-coord'
 import { Hex } from './hex'
 import { Orientation } from './orientation'
 
@@ -13,9 +13,9 @@ export class Layout {
     public readonly size: Point
     public readonly origin: Point
 
-    public toPixel(h: Hex | Coord): IPointData {
-        if (h.type === 'double') {
-            return this.toPixel(h.toCube())
+    public toPixel(h: Hex | ICoord): IPointData {
+        if (!(h instanceof Hex)) {
+            return this.toPixel(Coord.toCube(h))
         }
 
         const M = this.orientation

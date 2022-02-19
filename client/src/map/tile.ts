@@ -1,4 +1,4 @@
-import { IPointData, Point } from 'pixi.js'
+import { Graphics, IPointData, Point } from 'pixi.js'
 import { Region } from '../game/region'
 import { Feature } from './feature'
 import { Layers } from './layers'
@@ -11,9 +11,38 @@ import { StructuresFeature } from './structures-feature'
 import { TerrainFeature } from './terrain-feature'
 import { TroopsFeature } from './troops-feature'
 import { TileState } from './tile-state'
+import { ActiveFeature } from './ative-feature'
 
 export const TILE_W = 94;
 export const TILE_H = 82;
+
+export const TILE_W4 = TILE_W / 4;
+export const TILE_H2 = TILE_H / 2;
+
+
+/*
+
+hex corner indecies
+
+  2  1
+3      0
+  4  5
+
+*/
+
+export function corners(): Point[] {
+    return [
+        new Point(TILE_W4 * 2, 0),
+
+        new Point(TILE_W4, -TILE_H2),
+        new Point(-TILE_W4, -TILE_H2),
+
+        new Point(-TILE_W4 * 2, 0),
+
+        new Point(-TILE_W4, TILE_H2),
+        new Point(TILE_W4, TILE_H2),
+    ]
+}
 
 export class Tile implements TileState {
     public constructor(position: IPointData, public readonly reg: Region, private layers: Layers, private res: Resources) {
@@ -21,6 +50,7 @@ export class Tile implements TileState {
 
         this.terrain = new TerrainFeature('terrain', this.getPos(0, -12))   // need to offest terrain tile
         this.roads = new RoadsFeature('roads', this.getPos(0, -12))
+        this.active = new ActiveFeature('highlight', this.getPos(0, 0))
         this.settlement = new SettlementFeature('settlements', this.getPos(0, 0))
 
         this.baloon = new StructuresFeature('text', this.getPos(-18, TILE_H / 2), {
@@ -54,15 +84,22 @@ export class Tile implements TileState {
         })
 
         this.troops = new TroopsFeature('text', this.getPos(0, 20 - TILE_H / 2))
-        this.onGuard = new OnGuardFeature('text', this.getPos(-TILE_W / 2 + 12, 0))
+        this.onGuard = new OnGuardFeature('text', this.getPos(-14, 0))
         this.gate = new GateFeature('text', this.getPos(-TILE_W / 2 + 24, 0))
 
-        this.update()
+        // // debug: Show tile center
+        // const g = new Graphics()
+        // g.position.copyFrom(this.getPos())
+        // g.beginFill(0xff0000, 1)
+        // g.drawCircle(0, 0, 2)
+        // g.endFill()
+        // this.layers.add('text', g)
     }
 
     readonly terrain: Feature<TileState>
     readonly settlement: Feature<TileState>
     readonly roads: Feature<TileState>
+    readonly active: Feature<TileState>
     readonly forifications: Feature<TileState>
     readonly trade: Feature<TileState>
     readonly ship: Feature<TileState>
@@ -72,7 +109,7 @@ export class Tile implements TileState {
     readonly onGuard: Feature<TileState>
     readonly gate: Feature<TileState>
 
-    active = false
+    isActive = false
     readonly position = new Point()
 
     private getPos(x: number = 0, y: number = 0): IPointData {
@@ -86,6 +123,7 @@ export class Tile implements TileState {
         this.terrain.update(this, this.layers, this.res)
         this.settlement.update(this, this.layers, this.res)
         this.roads.update(this, this.layers, this.res)
+        this.active.update(this, this.layers, this.res)
         this.forifications.update(this, this.layers, this.res)
         this.trade.update(this, this.layers, this.res)
         this.ship.update(this, this.layers, this.res)
@@ -100,6 +138,7 @@ export class Tile implements TileState {
         this.terrain.destroy()
         this.settlement.destroy()
         this.roads.destroy()
+        this.active.destroy()
         this.forifications.destroy()
         this.trade.destroy()
         this.ship.destroy()

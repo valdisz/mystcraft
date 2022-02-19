@@ -49,7 +49,7 @@ export class Viewport {
     readonly pan = new Point()
     paning: 'no' | 'pending' | 'yes' = 'no';
 
-    private updateBounds(x0: number, y0: number) {
+    public updateBounds(x0: number, y0: number) {
         let x = x0 % this.mapWidth
         if (x < 0) {
             x += this.mapWidth
