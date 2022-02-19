@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import { useStore } from '../store'
 import { Observer, observer } from 'mobx-react-lite'
-import { HexMap } from '../map'
+import { HexMap2 } from '../map'
 import { Region } from "../game/types"
 import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -46,7 +46,7 @@ import { UnitSummary } from '../components'
 import { Capacity } from '../game/move-capacity'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move';
-import { Coords } from '../game/coords';
+import { Coords, ICoords } from '../game/coords';
 
 const GameContainer = styled('div')`
     width: 100%;
@@ -247,44 +247,49 @@ const GameInfo = styled('div')`
 `
 
 interface GameMapProps {
-    getRegion: (col: number, row: number) => Region
-    onRegionSelected: (col: number, row: number) => void
+    selectedRegion: ICoords | null
+    onRegionSelected: (reg: Region) => void
 }
 
-function GameMapComponent({ getRegion, onRegionSelected }: GameMapProps) {
+function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
     const { game } = useStore()
 
     const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
-    const gameMapRef = React.useRef<HexMap>(null)
+    const [ gameMap, setGameMap ] = React.useState<HexMap2>(null)
 
     React.useEffect(() => {
         if (!canvasRef) return
 
-        if (!gameMapRef.current) {
-            const { width, height } = game.world.getLevel(1)
-            gameMapRef.current = new HexMap(canvasRef, { width, height }, getRegion)
-            gameMapRef.current.onRegionSelected = onRegionSelected
-        }
+        const level = game.world.getLevel(1)
+        const map = new HexMap2(canvasRef, level.width, level.height, {
+            onClick: onRegionSelected
+        })
 
-        const gameMap = gameMapRef.current
-        gameMap
+        map
             .load()
             .then(() => {
-                gameMap.turnNumber = game.turn.number
+                gameMap.setRegions(level.toArray())
 
                 const { player } = game.world.factions
-                const { x, y, z }: Coords = game.region?.coords
+                const coords: Coords = game.region?.coords
                     ?? JSON.parse(window.localStorage.getItem('coords'))
                     ?? player.troops.all[0].region.coords
 
-                gameMap.centerAt(x, y)
+                gameMap.centerAt(coords)
+
+                setGameMap(map)
             })
 
-        return (() => {
-            gameMap.destroy()
-            gameMapRef.current = null
-        })
+        return (() => map.destroy())
     }, [ canvasRef ])
+
+    React.useEffect(() => {
+        if (!gameMap) {
+            return
+        }
+
+        gameMap.select(selectedRegion)
+    }, [ selectedRegion, gameMap ])
 
     return <MapContainer>
         <MapCanvas ref={setCanvasRef} />
@@ -370,7 +375,7 @@ const UnitsTable = styled(Table)`
 `
 
 function UnitMen({ items }: { items: ItemMap<Item> }) {
-    const men = items.all.filter(x => x.isManLike)
+    const men = items.filter(x => x.isManLike)
     men.sort((a, b) => b.amount - a.amount)
     const total = men.map(x => x.amount).reduce((value, next) => value + next, 0)
     const names = men.map(x => x.name).join(', ')
@@ -379,7 +384,7 @@ function UnitMen({ items }: { items: ItemMap<Item> }) {
 }
 
 function UnitMounts({ items }: { items: ItemMap<Item> }) {
-    const mounts = items.all.filter(x => x.isMount)
+    const mounts = items.filter(x => x.isMount)
     mounts.sort((a, b) => b.amount - a.amount)
 
     const total = mounts.map(x => x.amount).reduce((value, next) => value + next, 0)
@@ -418,8 +423,8 @@ function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
             <TableCell className='mounts'>
                 <UnitMounts items={unit.inventory.items} />
             </TableCell>
-            <TableCell className='items'>{unit.inventory.items.all.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
-            <TableCell className='skills'>{unit.skills.all.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+            <TableCell className='items'>{unit.inventory.items.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+            <TableCell className='skills'>{unit.skills.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
         </TableRow>
         { rows > 1 && <TableRow>
             <TableCell className='unit-nr'></TableCell>
@@ -669,7 +674,7 @@ const MapTab = observer(() => {
     const { game } = useStore()
 
     return <GameGrid>
-        <GameMapComponent getRegion={(x, y) => game.world.getRegion(x, y, 1)} onRegionSelected={game.selectRegion} />
+        <GameMapComponent selectedRegion={game.region?.coords} onRegionSelected={game.selectRegion} />
         <UnitsComponent />
         <StructuresComponent />
         { game.region && <RegionComponent /> }

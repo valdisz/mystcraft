@@ -107,6 +107,10 @@ export class HexMap2 {
     }
 
     centerAt(coords: ICoords) {
+        if (!coords) {
+            return
+        }
+
         const p = this.toPixel(coords)
         this.viewport.updateBounds(-(p.x - this.viewport.width / 2), -(p.y - this.viewport.height / 2))
     }

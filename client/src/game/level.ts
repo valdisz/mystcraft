@@ -44,4 +44,8 @@ export class Level implements Iterable<Region> {
     getById(id: string) {
         return this.regionIdMap.get(id)
     }
+
+    toArray() {
+        return this.regions
+    }
 }

@@ -1,5 +1,13 @@
 import { UniqueItem } from './unique-item'
 
+export interface ItemMapPredicate<T extends UniqueItem> {
+    (item: T): boolean
+}
+
+export interface ItemMapTransform<T extends UniqueItem, U> {
+    (item: T): U
+}
+
 export class ItemMap<T extends UniqueItem> implements Iterable<T> {
     constructor(items?: T[]) {
         if (!items)
@@ -44,5 +52,55 @@ export class ItemMap<T extends UniqueItem> implements Iterable<T> {
             : item.code;
 
         return this.items.delete(code)
+    }
+
+    some(p: ItemMapPredicate<T>): boolean {
+        for (const kv of this.items) {
+            if (p(kv[1])) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    all(p: ItemMapPredicate<T>): boolean {
+        for (const kv of this.items) {
+            if (!p(kv[1])) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    map<U>(p: ItemMapTransform<T, U>): U[] {
+        const items: U[] = [ ]
+        for (const kv of this.items) {
+            items.push(p(kv[1]))
+        }
+
+        return items
+    }
+
+    find(predicate: ItemMapPredicate<T>) {
+        for (const kv of this.items) {
+            if (predicate(kv[1])) {
+                return kv[1]
+            }
+        }
+
+        return null
+    }
+
+    filter(predicate: ItemMapPredicate<T>) {
+        const items: T[] = [ ]
+        for (const kv of this.items) {
+            if (predicate(kv[1])) {
+                items.push(kv[1])
+            }
+        }
+
+        return items
     }
 }

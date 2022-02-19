@@ -125,6 +125,10 @@ export class GameStore {
                 variables: { skip, turnId, pageSize: 1000 },
             })
 
+            if (response.data.node.__typename !== 'Turn') {
+                return items
+            }
+
             const data = response.data.node
             data.regions.items.forEach(x => items.push(x))
 
@@ -146,6 +150,10 @@ export class GameStore {
                 query: GetUnits,
                 variables: { skip, turnId, pageSize: 1000 }
             })
+
+            if (response.data.node.__typename !== 'Turn') {
+                return items
+            }
 
             const data = response.data.node
             data.units.items.forEach(x => items.push(x))
@@ -173,6 +181,10 @@ export class GameStore {
             }
         })
 
+        if (response.data.node.__typename !== 'Game') {
+            return
+        }
+
         const { me, ...game } = response.data.node
 
         runInAction(() => {
@@ -191,6 +203,10 @@ export class GameStore {
                 turnId: me.lastTurnId
             }
         })
+
+        if (turnDetails.data.node.__typename !== 'Turn') {
+            return
+        }
 
         this.turn = turnDetails.data.node
 
@@ -235,9 +251,7 @@ export class GameStore {
 
     @observable region: Region = null
 
-    @action selectRegion = (col: number, row: number) => {
-        const reg = this.world.getRegion(col, row, 1)
-
+    @action selectRegion = (reg: Region) => {
         if (reg.id !== this.region?.id) {
             this.region = reg && !reg.covered ? observable(reg) : null
             this.unit = null
@@ -315,11 +329,11 @@ export class GameStore {
         function toBattleSimUnit(unit: Unit) {
             const u: BattleSimUnit = {
                 name: `${unit.name} - ${unit.num}`,
-                skills: unit.skills.all.map(s => ({
+                skills: unit.skills.map(s => ({
                     abbr: s.code,
                     level: s.level
                 })),
-                items: unit.inventory.items.all
+                items: unit.inventory.items
                     .map(i => ({
                         abbr: i.code,
                         amount: i.amount
