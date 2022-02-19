@@ -3,7 +3,7 @@ import { ICoords } from './coords'
 
 export class Level implements Iterable<Region> {
     constructor(public readonly width: number, public readonly height: number, public readonly index: number, public readonly label: string) {
-        this.regions = new Array(Math.floor(this.width * this.height / 2) + 1)
+        this.regions = new Array(this.width * this.height)
     }
 
     private readonly regions: Region[]
@@ -46,6 +46,6 @@ export class Level implements Iterable<Region> {
     }
 
     toArray() {
-        return this.regions
+        return Array.from(this.getRegions())
     }
 }

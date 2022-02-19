@@ -120,18 +120,18 @@ export class Tile implements TileState {
     }
 
     update() {
-        this.terrain.update(this, this.layers, this.res)
-        this.settlement.update(this, this.layers, this.res)
-        this.roads.update(this, this.layers, this.res)
-        this.active.update(this, this.layers, this.res)
-        this.forifications.update(this, this.layers, this.res)
-        this.trade.update(this, this.layers, this.res)
-        this.ship.update(this, this.layers, this.res)
-        this.baloon.update(this, this.layers, this.res)
-        this.lair.update(this, this.layers, this.res)
-        this.troops.update(this, this.layers, this.res)
-        this.onGuard.update(this, this.layers, this.res)
-        this.gate.update(this, this.layers, this.res)
+        this.terrain.update(this, this.layers, this.res);
+        this.settlement.update(this, this.layers, this.res);
+        this.roads.update(this, this.layers, this.res);
+        this.active.update(this, this.layers, this.res);
+        this.forifications.update(this, this.layers, this.res);
+        this.trade.update(this, this.layers, this.res);
+        this.ship.update(this, this.layers, this.res);
+        this.baloon.update(this, this.layers, this.res);
+        this.lair.update(this, this.layers, this.res);
+        this.troops.update(this, this.layers, this.res);
+        this.onGuard.update(this, this.layers, this.res);
+        this.gate.update(this, this.layers, this.res);
     }
 
     destroy() {

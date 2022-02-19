@@ -1,4 +1,5 @@
-namespace advisor.Features {
+namespace advisor.Features
+{
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;

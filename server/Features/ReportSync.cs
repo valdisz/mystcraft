@@ -704,6 +704,7 @@ namespace advisor.Features {
             exit.Z = target.Z;
             exit.Label = target.Label;
             exit.Terrain = target.Terrain;
+            exit.Province = target.Province;
             exit.Settlement = target.Settlement != null
                 ? new  DbSettlement {
                     Name = target.Settlement.Name,

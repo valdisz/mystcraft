@@ -19,6 +19,8 @@ namespace advisor {
 
     public record MutationResult<T>(bool IsSuccess, T data, string Error) : IMutationResult;
 
+    public record GameCreateRemoteResult(DbGame Game, bool IsSuccess, string Error) : IMutationResult;
+
     [Authorize]
     public class MutationType {
         [Authorize(Policy = Policies.UserManagers)]
@@ -40,6 +42,17 @@ namespace advisor {
             var result = await mediator.Send(new CreateLocalGame(name, engineStream, options, playersDataStream, gameDataStream));
 
             return result;
+        }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public async Task<GameCreateRemoteResult> GameCreateRemote(IMediator mediator,
+            string name, string engineVersion, string rulesetName, string rulesetVersion, GameOptions options
+        ) {
+            var result = await mediator.Send(new GameCreateRemote(name, engineVersion, rulesetName, rulesetVersion, options));
+
+            return new GameCreateRemoteResult(
+                result, true, null
+            );
         }
 
         public Task<DbPlayer> JoinGame(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {

@@ -199,7 +199,7 @@ function CopyRegionDetails({ region }: RegionSummaryProps) {
 
     lines.push(`Products`)
     lines.push(`Name\tAmount\tMax`)
-    for (const p of region.products.all) {
+    for (const p of region.products) {
         lines.push(`${p.name}\t${p.amount}\t${getMaxAmount(p.amount)}`)
     }
 
@@ -207,7 +207,7 @@ function CopyRegionDetails({ region }: RegionSummaryProps) {
 
     lines.push(`For Sale`)
     lines.push(`Name\tAmount\tPrice`)
-    for (const p of region.forSale.all) {
+    for (const p of region.forSale) {
         lines.push(`${p.name}\t${p.amount}\t${p.price}`)
     }
 
@@ -258,7 +258,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                     <strong>Products</strong>
                     <ItemTable>
                         <ItemTableBody>
-                            { region.products.all
+                            { region.products.toArray()
                                 .sort((a, b) => b.amount - a.amount)
                                 .map(item => <TableItem key={item.code} item={item} />) }
                         </ItemTableBody>
@@ -268,7 +268,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                     <strong>For sale</strong>
                     <ItemTable>
                         <ItemTableBody>
-                            { region.forSale.all
+                            { region.forSale.toArray()
                                 .sort((a, b) => a.price - b.price)
                                 .map(item => <TableItem key={item.code} item={item} />) }
                         </ItemTableBody>
@@ -278,7 +278,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                     <strong>Wanted</strong>
                     <ItemTable>
                         <ItemTableBody>
-                            { region.wanted.all
+                            { region.wanted.toArray()
                                 .sort((a, b) => a.price - b.price)
                                 .map(item => <TableItem key={item.code} item={item} />) }
                         </ItemTableBody>

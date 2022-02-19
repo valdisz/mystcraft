@@ -41,9 +41,14 @@ export class HexMap2 {
         const wh = this.toPixel({ x: mapWidth - 1, y: mapHeight - 1, z: 0 })
 
         this.viewport = new Viewport(this.canvas, origin, wh.x + 48 / 3, wh.y,
-            vp => { this.render() },
+            vp => {
+                this.renderer.resize(vp.width, vp.height)
+                this.render()
+            },
             (e, vp) => {
-                const tile = this.getTileAtPixel(e.clientX, e.clientY)
+                e.preventDefault()
+                e.stopPropagation()
+                const tile = this.getTileAtPixel(e.offsetX, e.offsetY)
                 if (tile) {
                     if (options?.onClick) {
                         options.onClick(tile.reg)
@@ -116,7 +121,10 @@ export class HexMap2 {
     }
 
     private onDblClick = (e: MouseEvent) => {
-        const tile = this.getTileAtPixel(e.clientX, e.clientY)
+        e.preventDefault()
+        e.stopPropagation()
+
+        const tile = this.getTileAtPixel(e.offsetX, e.offsetY)
         if (tile) {
             if (this.options?.onDblClick) {
                 this.options.onDblClick(tile.reg)
@@ -193,11 +201,11 @@ export class HexMap2 {
 
         for (const reg of regions) {
             const p = this.toPixel(reg.coords)
-
             const t = new Tile(p, reg, this.layers, this.resources)
 
             this.index[this.getTileIndex(reg.coords.x, reg.coords.y)] = this.tiles.length
             this.tiles.push(t)
+
             t.update()
         }
 

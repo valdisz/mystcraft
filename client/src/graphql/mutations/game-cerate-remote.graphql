@@ -1,0 +1,9 @@
+mutation GameCreateRemote($name: String!, $engineVersion: String!, $rulesetName: String!, $rulesetVersion: String!, $options: GameOptionsInput!) {
+  gameCreateRemote(name: $name, engineVersion: $engineVersion, rulesetName: $rulesetName, rulesetVersion: $rulesetVersion, options: $options) {
+    isSuccess
+    error
+    game {
+        ...GameHeader
+    }
+  }
+}

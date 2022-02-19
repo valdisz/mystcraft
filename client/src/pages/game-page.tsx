@@ -217,7 +217,11 @@ const OrdersTitle = styled(Typography)`
     padding: 0.5rem;
 `
 
-const Orders = observer(() => {
+interface OrdersProps {
+    readOnly: boolean
+}
+
+const Orders = observer(({ readOnly }: OrdersProps) => {
     const store = useStore()
     const game = store.game
     const ruleset = game.world.ruleset
@@ -225,7 +229,7 @@ const Orders = observer(() => {
     return <OrdersContainer>
         <OrdersTitle variant='subtitle1'>Orders</OrdersTitle>
         <OrdersEditorBox>
-            <OrdersEditor value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
+            <OrdersEditor readOnly={readOnly} value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
         </OrdersEditorBox>
         <OrdersStatus state={game.ordersState} />
     </OrdersContainer>
@@ -264,20 +268,22 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
         const map = new HexMap2(canvasRef, level.width, level.height, {
             onClick: onRegionSelected
         })
+        console.log('new HexMap')
 
-        map
-            .load()
+        map.load()
             .then(() => {
-                gameMap.setRegions(level.toArray())
+                const regions = level.toArray()
+                map.setRegions(regions)
 
                 const { player } = game.world.factions
                 const coords: Coords = game.region?.coords
                     ?? JSON.parse(window.localStorage.getItem('coords'))
                     ?? player.troops.all[0].region.coords
 
-                gameMap.centerAt(coords)
+                map.centerAt(coords)
 
                 setGameMap(map)
+                map.render()
             })
 
         return (() => map.destroy())
@@ -678,7 +684,7 @@ const MapTab = observer(() => {
         <UnitsComponent />
         <StructuresComponent />
         { game.region && <RegionComponent /> }
-        { game.isOrdersVisible && <Orders /> }
+        { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} /> }
     </GameGrid>
 })
 

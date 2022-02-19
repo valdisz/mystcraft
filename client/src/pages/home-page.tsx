@@ -215,7 +215,9 @@ export function HomePage() {
         </TopRightCorner>
         <Container>
             <Card>
-                <CardHeader title='Games' action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>} />
+                <CardHeader title='Games'
+                    // action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>}
+                />
                 <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
                 <List component='nav' dense>
                     <Observer>

@@ -192,7 +192,7 @@ export function UnitSummary({ unit }: UnitSummaryProps) {
                 <strong>Skills</strong>
                 <ItemTable>
                     <ItemTableBody>
-                        { unit.skills.all
+                        { unit.skills.toArray()
                             .sort((a, b) => a.days - b.days)
                             .map(item => <TableSkill key={item.code} skill={item} />) }
                     </ItemTableBody>
@@ -202,7 +202,7 @@ export function UnitSummary({ unit }: UnitSummaryProps) {
                 <strong>Items</strong>
                 <ItemTable>
                     <ItemTableBody>
-                        { unit.inventory.items.all
+                        { unit.inventory.items.toArray()
                             .sort((a, b) => {
                                 if (a.isMan === b.isMan) {
                                     return a.name.localeCompare(b.name, 'en-US')
