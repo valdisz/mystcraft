@@ -706,10 +706,8 @@ const GameComponent = observer(() => {
                     <GameInfo>
                         <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
                     </GameInfo>
-                    <Tabs value={url}>
-                        <Tab label='Map' component={Link} value={url} to={url} />
-                        <Tab label='Statistics' component={Link} value={`${url}/stats`} to={`${url}/stats`} />
-                    </Tabs>
+                    <Button color='inherit' variant='outlined' component={Link as any} value={url} to={url}>Map</Button>
+                    <Button color='inherit' variant='outlined' component={Link as any} value={`${url}/stats`} to={`${url}/stats`}>Statistics</Button>
                     <Box flex={1} />
                     <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
                 </Toolbar>

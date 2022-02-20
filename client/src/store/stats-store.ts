@@ -149,6 +149,7 @@ export class StatsStore {
                         code: item.code,
                         amount: null
                     })
+                    console.log('missing', item.code)
                 }
             }
 

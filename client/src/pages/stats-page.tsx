@@ -11,6 +11,7 @@ import {
     Tabs,
     Tab,
     Tooltip,
+    TableFooter,
 } from '@mui/material';
 import { styled } from '@mui/material/styles'
 import { useStore } from '../store'
@@ -48,14 +49,14 @@ function SkillsTab() {
     return <Table size='small' stickyHeader={true}>
         <TableHead>
             <TableRow>
-                <TableCell>Skill</TableCell>
-                <TableCell>0</TableCell>
-                <TableCell>1</TableCell>
-                <TableCell>2</TableCell>
-                <TableCell>3</TableCell>
-                <TableCell>4</TableCell>
-                <TableCell>5</TableCell>
-                <TableCell>Total</TableCell>
+                <HeadingCell>Skill</HeadingCell>
+                <HeadingCell>0</HeadingCell>
+                <HeadingCell>1</HeadingCell>
+                <HeadingCell>2</HeadingCell>
+                <HeadingCell>3</HeadingCell>
+                <HeadingCell>4</HeadingCell>
+                <HeadingCell>5</HeadingCell>
+                <HeadingCell>Total</HeadingCell>
             </TableRow>
         </TableHead>
         <Observer>
@@ -82,73 +83,80 @@ const TurnCell = styled(TableCell)`
     font-weight: bold;
 `
 
+const HeadingCell = styled(TableCell)`
+    font-weight: bold;
+`
+
 function IncomeTab() {
     const { stats } = useStore()
 
-    return <Table size='small' stickyHeader={true}>
+    return <Table size='small'>
         <TableHead>
-            <TableRow>
-                <TableCell></TableCell>
-                { stats.stats.map(x => <TableCell key={x.number}>{x.number}</TableCell>) }
+            <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
+                <HeadingCell>Turn</HeadingCell>
+                { stats.stats.map(x => <HeadingCell key={x.number}>{x.number}</HeadingCell>) }
             </TableRow>
         </TableHead>
         <Observer>
-            {() => <TableBody>
-                <TableRow>
-                    <TableCell>Work</TableCell>
-                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.work}</TableCell>) }
-                </TableRow>
-                <TableRow>
-                    <TableCell>Trade</TableCell>
-                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.trade}</TableCell>) }
-                </TableRow>
-                <TableRow>
-                    <TableCell>Pillage</TableCell>
-                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.pillage}</TableCell>) }
-                </TableRow>
-                <TableRow>
-                    <TableCell>Tax</TableCell>
-                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.tax}</TableCell>) }
-                </TableRow>
-                <TableRow>
-                    <TableCell>Total</TableCell>
-                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.total}</TableCell>) }
-                </TableRow>
-            </TableBody> }
+            {() => <>
+                <TableBody>
+                    <TableRow>
+                        <HeadingCell>Work</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.work}</TableCell>) }
+                    </TableRow>
+                    <TableRow>
+                        <HeadingCell>Trade</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.trade}</TableCell>) }
+                    </TableRow>
+                    <TableRow>
+                        <HeadingCell>Pillage</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.pillage}</TableCell>) }
+                    </TableRow>
+                    <TableRow>
+                        <HeadingCell>Tax</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.tax}</TableCell>) }
+                    </TableRow>
+                </TableBody>
+                <TableFooter>
+                    <TableRow>
+                        <HeadingCell>Total</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.total}</TableCell>) }
+                    </TableRow>
+                </TableFooter>
+            </> }
         </Observer>
     </Table>
 }
 
-// function ProductionTab() {
-//     const { stats } = useStore()
+function ProductionTab() {
+    const { stats } = useStore()
 
-//     return <Table size='small' stickyHeader={true}>
-//         <Observer>
-//             {() => <>
-//             <TableHead>
-//                 <TableRow>
-//                     <TableCell>Faction</TableCell>
-//                     { stats.allianceProducts.map(p => <TableCell key={p}>{p}</TableCell>) }
-//                 </TableRow>
-//             </TableHead>
-//                 { stats.stats.map(turn => <TableBody key={turn.turn}>
-//                     <TableRow>
-//                         <TurnCell colSpan={stats.allianceProducts.length + 1}>Turn {turn.turn}</TurnCell>
-//                     </TableRow>
-//                     { turn.factions.map(f => <TableRow hover key={f.factionNumber}>
-//                         <TableCell>{f.factionName} ({f.factionNumber})</TableCell>
-
-//                         { f.production.map(p => <TableCell key={p.code}>{p.amount || ' '}</TableCell>) }
-//                     </TableRow>)}
-//                 </TableBody>)}
-//             </> }
-//         </Observer>
-//     </Table>
-// }
+    return <Table size='small' stickyHeader={true}>
+        <Observer>
+            {() => <>
+                <TableHead>
+                    <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
+                        <HeadingCell>Turn</HeadingCell>
+                        { stats.stats.map(x => <HeadingCell key={x.number}>{x.number}</HeadingCell>) }
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    { stats.products.map((p, i) => <TableRow key={p.code}>
+                        <HeadingCell>{p.getName(2)}</HeadingCell>
+                        { stats.stats.map(turn => <TableCell key={turn.number}>{turn.stats.production[i].amount}</TableCell>) }
+                    </TableRow> )}
+                </TableBody>
+            </> }
+        </Observer>
+    </Table>
+}
 
 export function StatsPage() {
     const { stats } = useStore()
-    const { path, url } = useRouteMatch()
+    const urm = useRouteMatch()
+    const { path, url } = urm
+
+    console.log('route match', urm)
 
     React.useEffect(() => { stats.loadStats() }, [ ])
 
@@ -160,7 +168,7 @@ export function StatsPage() {
                     {() => <Tabs value={url}>
                         <Tab label='Skills' component={Link} value={url} to={url} />
                         <Tab label='Income' component={Link} value={`${url}/income`} to={`${url}/income`} />
-                        {/* <Tab label='Production' component={Link} value={`${url}/production`} to={`${url}/production`} /> */}
+                        <Tab label='Production' component={Link} value={`${url}/production`} to={`${url}/production`} />
                     </Tabs> }
                 </Observer>
             </Grid>
@@ -170,11 +178,11 @@ export function StatsPage() {
                         <IncomeTab />
                     </Grid>
                 </Route>
-                {/* <Route path={`${path}/production`}>
+                <Route path={`${path}/production`}>
                     <Grid item xs={12}>
                         <ProductionTab />
                     </Grid>
-                </Route> */}
+                </Route>
                 <Route path={path}>
                     <Grid item xs={4}>
                         <SkillsTab />
