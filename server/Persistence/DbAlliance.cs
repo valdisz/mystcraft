@@ -5,6 +5,7 @@ namespace advisor.Persistence {
 
     [GraphQLName("Alliance")]
     public class DbAlliance : InGameContext {
+        [GraphQLIgnore]
         [Key]
         public long Id { get; set; }
 
@@ -15,7 +16,6 @@ namespace advisor.Persistence {
         [MaxLength(256)]
         public string Name { get; set; }
 
-        [GraphQLIgnore]
         public List<DbAllianceMember> Members { get; set; } = new ();
 
         [GraphQLIgnore]

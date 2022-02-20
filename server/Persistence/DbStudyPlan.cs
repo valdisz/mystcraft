@@ -5,7 +5,6 @@ namespace advisor.Persistence {
 
     [GraphQLName("StudyPlan")]
     public class DbStudyPlan : InTurnContext {
-        [GraphQLIgnore]
         public int UnitNumber { get; set; }
 
         [GraphQLIgnore]
@@ -24,6 +23,7 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
 
+        [GraphQLIgnore]
         public DbUnit Unit { get; set; }
     }
 }

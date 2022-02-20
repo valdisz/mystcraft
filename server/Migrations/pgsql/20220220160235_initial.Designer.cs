@@ -10,7 +10,7 @@ using advisor.Persistence;
 namespace advisor.Migrations.pgsql
 {
     [DbContext(typeof(PgSqlDatabase))]
-    [Migration("20211026103034_initial")]
+    [Migration("20220220160235_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -180,6 +180,30 @@ namespace advisor.Migrations.pgsql
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Terrain")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("X")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("integer");
+
                     b.HasKey("PlayerId", "TurnNumber", "OriginRegionId", "TargetRegionId");
 
                     b.HasIndex("PlayerId", "TurnNumber", "TargetRegionId");
@@ -218,7 +242,11 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<byte[]>("Engine")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("EngineVersion")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
@@ -228,16 +256,20 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("character varying(256)");
 
                     b.Property<string>("Options")
-                        .HasColumnType("text");
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Ruleset")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("RulesetName")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
                     b.Property<string>("RulesetVersion")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
 
@@ -248,6 +280,54 @@ namespace advisor.Migrations.pgsql
                     b.HasKey("Id");
 
                     b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameArticle", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId", "TurnNumber");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
+                {
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
+                    b.Property<byte[]>("GameData")
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("PlayerData")
+                        .HasColumnType("bytea");
+
+                    b.HasKey("GameId", "Number");
+
+                    b.ToTable("GameTurns");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
@@ -445,16 +525,11 @@ namespace advisor.Migrations.pgsql
                     b.Property<int>("TurnNumber")
                         .HasColumnType("integer");
 
-                    b.Property<int>("FactionNumber")
-                        .HasColumnType("integer");
-
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
                         .HasColumnType("character varying(14)");
 
-                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "RegionId");
-
-                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId");
 
                     b.ToTable("Stats");
                 });
@@ -465,9 +540,6 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("FactionNumber")
                         .HasColumnType("integer");
 
                     b.Property<string>("RegionId")
@@ -481,29 +553,7 @@ namespace advisor.Migrations.pgsql
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("FactionNumber1")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("FactionPlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("FactionTurnNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RegionId1")
-                        .HasColumnType("character varying(14)");
-
-                    b.Property<long?>("RegionPlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int?>("RegionTurnNumber")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "RegionId", "Code");
-
-                    b.HasIndex("FactionPlayerId", "FactionTurnNumber", "FactionNumber1");
-
-                    b.HasIndex("RegionPlayerId", "RegionTurnNumber", "RegionId1");
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Code");
 
                     b.ToTable("StatItems");
                 });
@@ -559,6 +609,15 @@ namespace advisor.Migrations.pgsql
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<int>("X")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("integer");
+
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
                     b.HasIndex("PlayerId", "TurnNumber", "RegionId");
@@ -599,6 +658,9 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<int>("Month")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Ready")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("Year")
                         .HasColumnType("integer");
@@ -665,10 +727,19 @@ namespace advisor.Migrations.pgsql
                         .HasMaxLength(24)
                         .HasColumnType("character varying(24)");
 
-                    b.Property<int?>("StrcutureNumber")
+                    b.Property<int?>("StructureNumber")
                         .HasColumnType("integer");
 
                     b.Property<int?>("Weight")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("X")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Z")
                         .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
@@ -842,7 +913,39 @@ namespace advisor.Migrations.pgsql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                        {
+                            b1.Property<long>("DbExitPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbExitTurnNumber")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("DbExitOriginRegionId")
+                                .HasColumnType("character varying(14)");
+
+                            b1.Property<string>("DbExitTargetRegionId")
+                                .HasColumnType("character varying(14)");
+
+                            b1.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)");
+
+                            b1.Property<string>("Size")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
+
+                            b1.ToTable("Exits");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
+                        });
+
                     b.Navigation("Origin");
+
+                    b.Navigation("Settlement");
 
                     b.Navigation("Target");
 
@@ -858,6 +961,36 @@ namespace advisor.Migrations.pgsql
                         .IsRequired();
 
                     b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameArticle", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany("Articles")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "Turn")
+                        .WithMany("Articles")
+                        .HasForeignKey("GameId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany("Turns")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
@@ -980,12 +1113,6 @@ namespace advisor.Migrations.pgsql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithMany("Stats")
-                        .HasForeignKey("PlayerId", "TurnNumber", "FactionNumber")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany("Stats")
                         .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
@@ -998,9 +1125,6 @@ namespace advisor.Migrations.pgsql
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbStatTurnNumber")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("DbStatFactionNumber")
                                 .HasColumnType("integer");
 
                             b1.Property<string>("DbStatRegionId")
@@ -1018,15 +1142,13 @@ namespace advisor.Migrations.pgsql
                             b1.Property<int>("Work")
                                 .HasColumnType("integer");
 
-                            b1.HasKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatFactionNumber", "DbStatRegionId");
+                            b1.HasKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatRegionId");
 
                             b1.ToTable("Stats");
 
                             b1.WithOwner()
-                                .HasForeignKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatFactionNumber", "DbStatRegionId");
+                                .HasForeignKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatRegionId");
                         });
-
-                    b.Navigation("Faction");
 
                     b.Navigation("Income");
 
@@ -1037,21 +1159,17 @@ namespace advisor.Migrations.pgsql
 
             modelBuilder.Entity("advisor.Persistence.DbStatItem", b =>
                 {
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithMany()
-                        .HasForeignKey("FactionPlayerId", "FactionTurnNumber", "FactionNumber1");
-
                     b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany()
-                        .HasForeignKey("RegionPlayerId", "RegionTurnNumber", "RegionId1");
-
-                    b.HasOne("advisor.Persistence.DbStat", "Stat")
-                        .WithMany("Production")
-                        .HasForeignKey("PlayerId", "TurnNumber", "FactionNumber", "RegionId")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Faction");
+                    b.HasOne("advisor.Persistence.DbStat", "Stat")
+                        .WithMany("Production")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Region");
 
@@ -1138,7 +1256,7 @@ namespace advisor.Migrations.pgsql
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbUnit", "Unit")
-                        .WithOne("Plan")
+                        .WithOne("StudyPlan")
                         .HasForeignKey("advisor.Persistence.DbStudyPlan", "PlayerId", "TurnNumber", "UnitNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1277,8 +1395,6 @@ namespace advisor.Migrations.pgsql
 
                     b.Navigation("Events");
 
-                    b.Navigation("Stats");
-
                     b.Navigation("Units");
                 });
 
@@ -1286,7 +1402,16 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Navigation("Alliances");
 
+                    b.Navigation("Articles");
+
                     b.Navigation("Players");
+
+                    b.Navigation("Turns");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
+                {
+                    b.Navigation("Articles");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
@@ -1360,7 +1485,7 @@ namespace advisor.Migrations.pgsql
 
                     b.Navigation("Items");
 
-                    b.Navigation("Plan");
+                    b.Navigation("StudyPlan");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbUser", b =>

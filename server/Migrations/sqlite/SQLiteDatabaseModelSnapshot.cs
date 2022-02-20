@@ -515,16 +515,11 @@ namespace advisor.Migrations.sqlite
                     b.Property<int>("TurnNumber")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("FactionNumber")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "RegionId");
-
-                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId");
 
                     b.ToTable("Stats");
                 });
@@ -535,9 +530,6 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("FactionNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("RegionId")
@@ -551,29 +543,7 @@ namespace advisor.Migrations.sqlite
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("FactionNumber1")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("FactionPlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("FactionTurnNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RegionId1")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("RegionPlayerId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("RegionTurnNumber")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "RegionId", "Code");
-
-                    b.HasIndex("FactionPlayerId", "FactionTurnNumber", "FactionNumber1");
-
-                    b.HasIndex("RegionPlayerId", "RegionTurnNumber", "RegionId1");
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Code");
 
                     b.ToTable("StatItems");
                 });
@@ -1132,12 +1102,6 @@ namespace advisor.Migrations.sqlite
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithMany("Stats")
-                        .HasForeignKey("PlayerId", "TurnNumber", "FactionNumber")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany("Stats")
                         .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
@@ -1150,9 +1114,6 @@ namespace advisor.Migrations.sqlite
                                 .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbStatTurnNumber")
-                                .HasColumnType("INTEGER");
-
-                            b1.Property<int>("DbStatFactionNumber")
                                 .HasColumnType("INTEGER");
 
                             b1.Property<string>("DbStatRegionId")
@@ -1170,15 +1131,13 @@ namespace advisor.Migrations.sqlite
                             b1.Property<int>("Work")
                                 .HasColumnType("INTEGER");
 
-                            b1.HasKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatFactionNumber", "DbStatRegionId");
+                            b1.HasKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatRegionId");
 
                             b1.ToTable("Stats");
 
                             b1.WithOwner()
-                                .HasForeignKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatFactionNumber", "DbStatRegionId");
+                                .HasForeignKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatRegionId");
                         });
-
-                    b.Navigation("Faction");
 
                     b.Navigation("Income");
 
@@ -1189,21 +1148,17 @@ namespace advisor.Migrations.sqlite
 
             modelBuilder.Entity("advisor.Persistence.DbStatItem", b =>
                 {
-                    b.HasOne("advisor.Persistence.DbFaction", "Faction")
-                        .WithMany()
-                        .HasForeignKey("FactionPlayerId", "FactionTurnNumber", "FactionNumber1");
-
                     b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany()
-                        .HasForeignKey("RegionPlayerId", "RegionTurnNumber", "RegionId1");
-
-                    b.HasOne("advisor.Persistence.DbStat", "Stat")
-                        .WithMany("Production")
-                        .HasForeignKey("PlayerId", "TurnNumber", "FactionNumber", "RegionId")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Faction");
+                    b.HasOne("advisor.Persistence.DbStat", "Stat")
+                        .WithMany("Production")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Region");
 
@@ -1290,7 +1245,7 @@ namespace advisor.Migrations.sqlite
                         .IsRequired();
 
                     b.HasOne("advisor.Persistence.DbUnit", "Unit")
-                        .WithOne("Plan")
+                        .WithOne("StudyPlan")
                         .HasForeignKey("advisor.Persistence.DbStudyPlan", "PlayerId", "TurnNumber", "UnitNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1429,8 +1384,6 @@ namespace advisor.Migrations.sqlite
 
                     b.Navigation("Events");
 
-                    b.Navigation("Stats");
-
                     b.Navigation("Units");
                 });
 
@@ -1521,7 +1474,7 @@ namespace advisor.Migrations.sqlite
 
                     b.Navigation("Items");
 
-                    b.Navigation("Plan");
+                    b.Navigation("StudyPlan");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbUser", b =>

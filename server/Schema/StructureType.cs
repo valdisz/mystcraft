@@ -1,8 +1,5 @@
 namespace advisor {
-    using System.Linq;
-    using HotChocolate;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 

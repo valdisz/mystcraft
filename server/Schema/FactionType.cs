@@ -27,35 +27,5 @@ namespace advisor {
                 .FilterByFaction(faction)
                 .ToListAsync();
         }
-
-        public async Task<FactionStats> Stats(Database db, [Parent] DbFaction faction) {
-            var stats = await db.Stats
-                .AsNoTracking()
-                .FilterByFaction(faction)
-                .ToListAsync();
-
-            DbIncomeStats income = new DbIncomeStats();
-            Dictionary<string, int> production = new Dictionary<string, int>();
-
-            foreach (var stat in stats) {
-                income.Pillage += stat.Income.Pillage;
-                income.Tax += stat.Income.Tax;
-                income.Trade += stat.Income.Trade;
-                income.Work += stat.Income.Work;
-
-                foreach (var item in stat.Production) {
-                    production[item.Code] = production.TryGetValue(item.Code, out var value)
-                        ? value + item.Amount
-                        : item.Amount;
-                }
-            }
-
-            return new FactionStats {
-                FactionNumber = faction.Number,
-                FactionName = faction.Name,
-                Income = income,
-                Production = production.Select(x => new Item { Code = x.Key, Amount = x.Value }).ToList()
-            };
-        }
     }
 }

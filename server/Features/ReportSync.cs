@@ -87,7 +87,6 @@ namespace advisor.Features {
             foreach (var fac in turn.Factions.Select(mapper.Map<DbFaction>)) {
                 fac.Events.Clear();
                 fac.Units.Clear();
-                fac.Stats.Clear();
 
                 var attitudes = fac.Attitudes.Select(x => new DbAttitude {
                     FactionNumber = x.FactionNumber,
@@ -130,10 +129,6 @@ namespace advisor.Features {
 
                 foreach (var ev in faction.Events) {
                     ApplyTurnContext(ev);
-                }
-
-                foreach (var stat in faction.Stats) {
-                    ApplyTurnContext(stat);
                 }
 
                 foreach (var attitude in faction.Attitudes) {
@@ -370,7 +365,9 @@ namespace advisor.Features {
             // remove ships that are not present anymore
             for (int i = region.Structures.Count - 1; i >= 0 ; i--) {
                 var str = region.Structures[i];
-                if (DbStructure.IsBuilding(str.Number)) continue;
+                if (DbStructure.IsBuilding(str.Number)) {
+                    continue;
+                }
 
                 if (!ships.Contains(str.Id)) {
                     PendingShips.Add(str.Id, str);

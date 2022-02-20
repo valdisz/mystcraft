@@ -3,6 +3,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using HotChocolate;
+    using HotChocolate.Resolvers;
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
@@ -16,7 +17,9 @@
                 .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
                     var parsedId = DbTurn.ParseId(id);
-                    return DbTurn.FilterById(db.Turns.AsNoTracking(), parsedId).SingleOrDefaultAsync();
+                    return DbTurn.FilterById(db.Turns.AsNoTracking(), parsedId)
+                        .Include(x => x.Player)
+                        .SingleOrDefaultAsync();
                 });
         }
     }
@@ -58,12 +61,38 @@
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public IQueryable<DbUnit> Units(Database db, [Parent] DbTurn turn) {
-            return db.Units
+        public async Task<IQueryable<DbUnit>> Units(IResolverContext context, Database db, [Parent] DbTurn turn, UnitsFilter filter = null) {
+            var fields = context.CollectSelectedFields<DbUnit>();
+
+            var query = db.Units
                 .AsNoTrackingWithIdentityResolution()
-                .Include(x => x.Items)
-                .FilterByTurn(turn)
-                .OrderBy(x => x.Number);
+                .FilterByTurn(turn);
+
+            if (fields.Contains(nameof(DbUnit.Items))) {
+                query = query.Include(x => x.Items);
+            }
+
+            if (fields.Contains(nameof(DbUnit.StudyPlan))) {
+                query = query.Include(x => x.StudyPlan);
+            }
+
+            if (filter != null) {
+                if (filter.Own != null) {
+                    var factionNumber = turn.Player.Number;
+
+                    query = filter.Own.Value
+                        ? query.Where(x => x.FactionNumber == factionNumber)
+                        : query.Where(x => x.FactionNumber != factionNumber);
+                }
+
+                if (filter.Mages != null) {
+                    query = (await query.ToListAsync())
+                        .Where(x => x.Skills.Any(s => s.Code == "FORC" || s.Code == "PATT" || s.Code == "SPIR"))
+                        .AsQueryable();
+                }
+            }
+
+            return query.OrderBy(x => x.Number);
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
@@ -83,22 +112,41 @@
                 .ToListAsync();
         }
 
-        // public Task<List<DbEvent>> GetEvents([Parent] DbTurn turn) {
-        //     return db.Events
-        //         .Include(x => x.Faction)
-        //         .Where(x => x.TurnId == turn.Id)
-        //         .ToListAsync();
-        // }
+        public async Task<Statistics> Stats(Database db, [Parent] DbTurn turn) {
+            var factionNumber = turn.Player.Number;
+            var stats = await db.Stats
+                .AsNoTracking()
+                .FilterByTurn(turn)
+                .Include(x => x.Production)
+                .ToListAsync();
 
-        // public Task<DbUnit> UnitByNumber([Parent] DbTurn turn, int number) {
-        //     return db.Units
-        //         .Include(x => x.Faction)
-        //         .SingleOrDefaultAsync(x => x.TurnId == turn.Id && x.Number == number);
-        // }
+            DbIncomeStats income = new DbIncomeStats();
+            Dictionary<string, int> production = new Dictionary<string, int>();
 
-        // public Task<DbRegion> RegionByCoords([Parent] DbTurn turn, int x, int y, int z) {
-        //     return db.Regions
-        //         .SingleOrDefaultAsync(r => r.TurnId == turn.Id && r.X == x && r.Y == y && r.Z == z);
-        // }
+            foreach (var stat in stats) {
+                income.Pillage += stat.Income.Pillage;
+                income.Tax += stat.Income.Tax;
+                income.Trade += stat.Income.Trade;
+                income.Work += stat.Income.Work;
+
+                foreach (var item in stat.Production) {
+                    production[item.Code] = production.TryGetValue(item.Code, out var value)
+                        ? value + item.Amount
+                        : item.Amount;
+                }
+            }
+
+            return new Statistics {
+                Income = income,
+                Production = production.Select(x => new Item { Code = x.Key, Amount = x.Value }).ToList()
+            };
+        }
+
+        public Task<List<DbStudyPlan>> StudyPlans(Database db, [Parent] DbTurn turn) {
+            return db.StudyPlans
+                .AsNoTrackingWithIdentityResolution()
+                .FilterByTurn(turn)
+                .ToListAsync();
+        }
     }
 }

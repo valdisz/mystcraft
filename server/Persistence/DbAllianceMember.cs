@@ -18,6 +18,7 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public DbAlliance Alliance { get; set; }
 
+        [GraphQLIgnore]
         public DbPlayer Player { get; set; }
     }
 }

@@ -129,7 +129,7 @@ namespace advisor.Persistence
         public DbRegion Region { get; set; }
     }
 
-    public class DbStatItem : AnItem, InFactionContext {
+    public class DbStatItem : AnItem, InTurnContext {
         public DbStatItem() {
 
         }
@@ -139,12 +139,6 @@ namespace advisor.Persistence
             this.Amount = other.Amount;
         }
 
-        [Required]
-        [MaxLength(8)]
-        public string Code { get; set; }
-
-        public int Amount { get; set; }
-
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
@@ -152,17 +146,18 @@ namespace advisor.Persistence
         public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public int FactionNumber { get; set; }
-
-        [GraphQLIgnore]
+        [Required]
         [MaxLength(14)]
         public string RegionId { get; set; }
 
-        [GraphQLIgnore]
-        public DbRegion Region { get; set; }
+        [Required]
+        [MaxLength(8)]
+        public string Code { get; set; }
+
+        public int Amount { get; set; }
 
         [GraphQLIgnore]
-        public DbFaction Faction { get; set; }
+        public DbRegion Region { get; set; }
 
         [GraphQLIgnore]
         public DbStat Stat { get; set; }

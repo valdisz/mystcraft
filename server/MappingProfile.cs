@@ -20,7 +20,6 @@ namespace advisor
 
             CreateMap<DbStatItem, DbStatItem>()
                 .ForMember(x => x.TurnNumber, opt => opt.Ignore())
-                .ForMember(x => x.Faction, opt => opt.Ignore())
                 .ForMember(x => x.Region, opt => opt.Ignore())
                 .ForMember(x => x.Stat, opt => opt.Ignore())
             ;

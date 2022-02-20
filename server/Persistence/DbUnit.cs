@@ -101,8 +101,7 @@ namespace advisor.Persistence {
         [GraphQLIgnore]
         public DbStructure Structure { get; set; }
 
-        [GraphQLIgnore]
-        public DbStudyPlan Plan { get; set; }
+        public DbStudyPlan StudyPlan { get; set; }
 
         [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new ();

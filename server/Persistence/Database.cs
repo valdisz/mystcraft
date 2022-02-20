@@ -323,10 +323,6 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
 
-                t.HasMany(x => x.Stats)
-                    .WithOne(x => x.Faction)
-                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
-
                 t.HasMany(x => x.Attitudes)
                     .WithOne(x => x.Faction)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
@@ -344,18 +340,22 @@ namespace advisor.Persistence {
             });
 
             model.Entity<DbStat>(t => {
-                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.RegionId });
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
                 t.OwnsOne(x => x.Income);
 
                 t.HasMany(p => p.Production)
                     .WithOne(x => x.Stat)
-                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.RegionId });
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
             });
 
             model.Entity<DbStatItem>(t => {
-                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber, x.RegionId, x.Code });
+                t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
                 t.Property(x => x.Amount).IsRequired();
+
+                t.HasOne(x => x.Region)
+                    .WithMany()
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
             });
 
             model.Entity<DbStructure>(t => {
@@ -416,7 +416,7 @@ namespace advisor.Persistence {
                 });
 
                 t.HasOne(p => p.Unit)
-                    .WithOne(p => p.Plan)
+                    .WithOne(p => p.StudyPlan)
                     .HasForeignKey<DbStudyPlan>(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
             });
 

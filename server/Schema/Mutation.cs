@@ -117,21 +117,25 @@ namespace advisor {
         //     ));
         // }
 
-        // public Task<DbAlliance> OpenUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string playerId, string name) {
-        //     return mediator.Send(new OpenUniversity(
-        //         currentUserId,
-        //         ParseRelayId<long>("Player", playerId),
-        //         name
-        //     ));
-        // }
+        // todo: this is temp till player rights can be checked
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<AllianceCreateResult> AllianceCreate(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, string name) {
+            return mediator.Send(new AllianceCreate(
+                currentUserId,
+                playerId,
+                name
+            ));
+        }
 
-        // public Task<DbAlliance> JoinUniversity([GlobalState] long currentUserId, [GraphQLType(typeof(RelayIdType))] string universityId, [GraphQLType(typeof(RelayIdType))] string playerId) {
-        //     return mediator.Send(new JoinUniversity(
-        //         currentUserId,
-        //         ParseRelayId<long>("Player", playerId),
-        //         ParseRelayId<long>("University", universityId)
-        //     ));
-        // }
+        // todo: this is temp till player rights can be checked
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<AllianceJoinResult> AllianceJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, [ID("Alliance")] long allianceId) {
+            return mediator.Send(new AllianceJoin(
+                currentUserId,
+                playerId,
+                allianceId
+            ));
+        }
 
         // public Task<DbStudyPlan> SetStudyPlanTarget(
         //     [GlobalState] long currentUserId,

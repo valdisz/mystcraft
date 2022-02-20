@@ -1,4 +1,10 @@
 namespace advisor {
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using GreenDonut;
+    using HotChocolate;
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
@@ -11,7 +17,16 @@ namespace advisor {
                 .ResolveNode((ctx, id) => {
                     var parsedId = DbUnit.ParseId(id);
                     var db = ctx.Service<Database>();
-                    return DbUnit.FilterById(db.Units.AsNoTracking(), parsedId).SingleOrDefaultAsync();
+
+                    var requestedFields = ctx.GetSelections(this);
+                    bool includePlan = requestedFields.Any(x => x.Field.Name == nameof(DbUnit.StudyPlan));
+
+                    var query = DbUnit.FilterById(db.Units.AsNoTracking(), parsedId);
+                    if (includePlan) {
+                        query = query.Include(x => x.StudyPlan);
+                    }
+
+                    return query.SingleOrDefaultAsync();
                 });
         }
     }
@@ -19,4 +34,12 @@ namespace advisor {
     [ExtendObjectType("Unit")]
     public class UnitResolvers {
     }
+
+    // public class UnitBatchDataLoader : BatchDataLoader<string, DbUnit>
+    // {
+    //     protected override Task<IReadOnlyDictionary<string, DbUnit>> LoadBatchAsync(IReadOnlyList<string> keys, CancellationToken cancellationToken)
+    //     {
+    //         throw new System.NotImplementedException();
+    //     }
+    // }
 }

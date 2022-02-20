@@ -33,13 +33,11 @@
                 .SingleOrDefaultAsync(x => x.GameId == game.Id && x.UserId == currentUserId);
         }
 
-        // public Task<DbAlliance> MyUniversity([Parent] DbGame game, [GlobalState] long currentUserId) {
-            // return db.Players
-            //     .Include(x => x.UniversityMembership)
-            //     .ThenInclude(x => x.University)
-            //     .Where(x => x.GameId == game.Id && x.UserId == currentUserId && x.UniversityMembership != null)
-            //     .Select(x => x.UniversityMembership.University)
-            //     .SingleOrDefaultAsync();
+        // public Task<DbAlliance> Alliance(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
+        //     return db.Alliances
+        //         .Include(x => x.Members)
+        //         .Where(x => x.GameId == game.Id))
+        //         .SingleOrDefaultAsync();
         // }
 
         [Authorize(Policy = Policies.GameMasters)]

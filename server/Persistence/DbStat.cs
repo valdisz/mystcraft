@@ -4,17 +4,15 @@ namespace advisor.Persistence {
     using HotChocolate;
 
     [GraphQLName("Stat")]
-    public class DbStat : InFactionContext {
-        [GraphQLIgnore]
-        public int TurnNumber { get; set; }
-
+    public class DbStat : InTurnContext {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        public int FactionNumber { get; set; }
+        public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
+        [Required]
         [MaxLength(14)]
         public string RegionId { get; set; }
 
@@ -24,9 +22,6 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public DbTurn Turn { get; set; }
-
-        [GraphQLIgnore]
-        public DbFaction Faction { get; set; }
 
         [GraphQLIgnore]
         public DbRegion Region { get; set; }
