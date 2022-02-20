@@ -1,0 +1,13 @@
+fragment Staistics on Statistics {
+  income {
+    work
+    tax
+    pillage
+    trade
+    total
+  }
+  production {
+    code
+    amount
+  }
+}

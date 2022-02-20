@@ -1,0 +1,12 @@
+query GetTurnStats($playerId: ID!) {
+  node(id: $playerId) {
+    ... on Player {
+      turns {
+        number
+        stats {
+          ...Staistics
+        }
+      }
+    }
+  }
+}
