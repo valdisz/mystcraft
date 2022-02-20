@@ -112,7 +112,9 @@ export class GameStore {
     @observable turn: TurnFragment = null
 
     @observable world: World = null
+
     gameId: string = null
+    playerId: string = null
 
     async loadRegions(turnId: string, onProgress: ProgressCallback) {
         const items: RegionFragment[] = []
@@ -186,6 +188,7 @@ export class GameStore {
         }
 
         const { me, ...game } = response.data.node
+        this.playerId = me.id
 
         runInAction(() => {
             this.name = game.name
