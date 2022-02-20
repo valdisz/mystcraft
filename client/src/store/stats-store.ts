@@ -1,9 +1,9 @@
 import { makeObservable, computed, action, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
-import { TurnStatsFragment } from '../schema'
 import { GameStore } from './game-store'
 import { SkillInfo } from '../game/skill-info'
-import { GetAllianceStats, GetAllianceStatsQuery, GetAllianceStatsQueryVariables } from '../schema'
+import { StaisticsFragment } from '../schema'
+import { GetTurnStats, GetTurnStatsQuery, GetTurnStatsQueryVariables } from '../schema'
 import { ItemCategory } from '../game/item-category'
 import { ItemInfo } from '../game/item-info'
 
@@ -17,6 +17,11 @@ export interface SkillStats {
     skill: SkillInfo
     levels: number[]
     total: number
+}
+
+interface TurnStats {
+    number: number
+    stats: StaisticsFragment
 }
 
 export type StatTabs = 'skills'
@@ -51,12 +56,12 @@ export class StatsStore {
         const faction = world.factions.get(factionNumber)
 
         const skills: { [code: string]: SkillStats } = { }
-        faction.troops.units
-            .filter(x => x.skills.length)
-            .flatMap(x => x.skills.all.map(s => ({
+        faction.troops
+            .filter(x => !!x.skills.size)
+            .flatMap(x => x.skills.map(s => ({
                 skill: s.info,
                 level: s.level,
-                men: x.inventory.items.all.filter(x => x.isMan).reduce((p, c) => p + c.amount, 0)
+                men: x.inventory.items.filter(x => x.isMan).reduce((p, c) => p + c.amount, 0)
             } as KnownSkill) ))
             .forEach(({ skill, level, men }) => {
                 const key = skill.code
@@ -84,74 +89,79 @@ export class StatsStore {
         return skillStats
     }
 
-    readonly allianceStats = observable<TurnStatsFragment>([])
+    readonly stats = observable<TurnStats>([])
 
-    loadAllianceStats = async () => {
-        if (this.allianceStats.length) return
+    loadStats = async () => {
+        if (this.stats.length) {
+            return
+        }
 
-        const response = await CLIENT.query<GetAllianceStatsQuery, GetAllianceStatsQueryVariables>({
-            query: GetAllianceStats,
+        const response = await CLIENT.query<GetTurnStatsQuery, GetTurnStatsQueryVariables>({
+            query: GetTurnStats,
             variables: {
-                gameId: this.game.gameId
+                playerId: this.game.playerId
             }
         })
 
-        const stats = response.data?.node?.myUniversity?.stats ?? []
+        if (response.data.node.__typename !== 'Player') {
+            return
+        }
 
+        const turns = response.data.node.turns as TurnStats[]
+
+        // all items produced during all turns
         const items: string[] = []
+        for (const turn of turns) {
+            for (const prod of turn.stats.production) {
+                if (items.includes(prod.code)) continue
 
-        for (const turn of stats) {
-            for (const fac of turn.factions) {
-                for (const prod of fac.production) {
-                    if (items.includes(prod.code)) continue
-
-                    items.push(prod.code)
-                }
+                items.push(prod.code)
             }
         }
 
         const producedItems = items
-        .map(x => this.game.world.ruleset.getItem(x))
-        .sort((a, b) => {
-            if (a.category === b.category) {
-                const aAdv = a.hasTrait('advanced') ? 1 : 0
-                const bAdv = b.hasTrait('advanced') ? 1 : 0
+            .map(x => this.game.world.ruleset.getItem(x))
+            .sort((a, b) => {
+                if (a.category === b.category) {
+                    const aAdv = a.hasTrait('advanced') ? 1 : 0
+                    const bAdv = b.hasTrait('advanced') ? 1 : 0
 
-                return aAdv === bAdv
-                ? a.code.localeCompare(b.code)
-                : aAdv - bAdv
-            }
+                    return aAdv === bAdv
+                    ? a.code.localeCompare(b.code)
+                    : aAdv - bAdv
+                }
 
-            return CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category]
-        })
+                return CATEGORY_ORDER[a.category] - CATEGORY_ORDER[b.category]
+            })
 
         const index = {}
         for (let i = 0; i < producedItems.length; i++) {
             index[producedItems[i].code] = i
         }
 
-        for (const turn of stats) {
-            for (const fac of turn.factions) {
+        for (const turn of turns) {
+            const { production } = turn.stats
 
-                for (const prod of producedItems) {
-                    if (fac.production.some(x => x.code === prod.code)) continue
-
-                    fac.production.push({
-                        code: prod.code
+            for (const item of producedItems) {
+                if (!production.some(x => x.code === item.code)) {
+                    // item was not produced
+                    production.push({
+                        code: item.code,
+                        amount: null
                     })
                 }
-
-                fac.production.sort((a, b) => index[a.code] - index[b.code])
             }
+
+            production.sort((a, b) => index[a.code] - index[b.code])
         }
 
-        stats.reverse()
+        turns.reverse()
 
         runInAction(() => {
-            this.allianceStats.replace(stats)
-            this.allianceProducts.replace(producedItems.map(x => x.code))
+            this.stats.replace(turns)
+            this.products.replace(producedItems)
         })
     }
 
-    readonly allianceProducts = observable<string>([])
+    readonly products = observable<ItemInfo>([])
 }

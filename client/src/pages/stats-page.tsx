@@ -82,72 +82,75 @@ const TurnCell = styled(TableCell)`
     font-weight: bold;
 `
 
-function AllianceIncome() {
+function IncomeTab() {
     const { stats } = useStore()
 
     return <Table size='small' stickyHeader={true}>
         <TableHead>
             <TableRow>
-                <TableCell>Faction</TableCell>
-                <TableCell>Work</TableCell>
-                <TableCell>Trade</TableCell>
-                <TableCell>Pillage</TableCell>
-                <TableCell>Tax</TableCell>
-                <TableCell>Total</TableCell>
+                <TableCell></TableCell>
+                { stats.stats.map(x => <TableCell key={x.number}>{x.number}</TableCell>) }
             </TableRow>
         </TableHead>
         <Observer>
-            {() => <>
-                { stats.allianceStats.map(turn => <TableBody key={turn.turn}>
-                    <TableRow>
-                        <TurnCell colSpan={6}>Turn {turn.turn}</TurnCell>
-                    </TableRow>
-                    { turn.factions.map(f => <TableRow hover key={f.factionNumber}>
-                        <TableCell>{f.factionName} ({f.factionNumber})</TableCell>
-                        <TableCell>{f.income?.work}</TableCell>
-                        <TableCell>{f.income?.trade}</TableCell>
-                        <TableCell>{f.income?.pillage}</TableCell>
-                        <TableCell>{f.income?.tax}</TableCell>
-                        <TableCell>{f.income?.total}</TableCell>
-                    </TableRow>)}
-                </TableBody>)}
-            </> }
-        </Observer>
-    </Table>
-}
-
-function AllianceProduction() {
-    const { stats } = useStore()
-
-    return <Table size='small' stickyHeader={true}>
-        <Observer>
-            {() => <>
-            <TableHead>
+            {() => <TableBody>
                 <TableRow>
-                    <TableCell>Faction</TableCell>
-                    { stats.allianceProducts.map(p => <TableCell key={p}>{p}</TableCell>) }
+                    <TableCell>Work</TableCell>
+                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.work}</TableCell>) }
                 </TableRow>
-            </TableHead>
-                { stats.allianceStats.map(turn => <TableBody key={turn.turn}>
-                    <TableRow>
-                        <TurnCell colSpan={stats.allianceProducts.length + 1}>Turn {turn.turn}</TurnCell>
-                    </TableRow>
-                    { turn.factions.map(f => <TableRow hover key={f.factionNumber}>
-                        <TableCell>{f.factionName} ({f.factionNumber})</TableCell>
-
-                        { f.production.map(p => <TableCell key={p.code}>{p.amount || ' '}</TableCell>) }
-                    </TableRow>)}
-                </TableBody>)}
-            </> }
+                <TableRow>
+                    <TableCell>Trade</TableCell>
+                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.trade}</TableCell>) }
+                </TableRow>
+                <TableRow>
+                    <TableCell>Pillage</TableCell>
+                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.pillage}</TableCell>) }
+                </TableRow>
+                <TableRow>
+                    <TableCell>Tax</TableCell>
+                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.tax}</TableCell>) }
+                </TableRow>
+                <TableRow>
+                    <TableCell>Total</TableCell>
+                    { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.total}</TableCell>) }
+                </TableRow>
+            </TableBody> }
         </Observer>
     </Table>
 }
+
+// function ProductionTab() {
+//     const { stats } = useStore()
+
+//     return <Table size='small' stickyHeader={true}>
+//         <Observer>
+//             {() => <>
+//             <TableHead>
+//                 <TableRow>
+//                     <TableCell>Faction</TableCell>
+//                     { stats.allianceProducts.map(p => <TableCell key={p}>{p}</TableCell>) }
+//                 </TableRow>
+//             </TableHead>
+//                 { stats.stats.map(turn => <TableBody key={turn.turn}>
+//                     <TableRow>
+//                         <TurnCell colSpan={stats.allianceProducts.length + 1}>Turn {turn.turn}</TurnCell>
+//                     </TableRow>
+//                     { turn.factions.map(f => <TableRow hover key={f.factionNumber}>
+//                         <TableCell>{f.factionName} ({f.factionNumber})</TableCell>
+
+//                         { f.production.map(p => <TableCell key={p.code}>{p.amount || ' '}</TableCell>) }
+//                     </TableRow>)}
+//                 </TableBody>)}
+//             </> }
+//         </Observer>
+//     </Table>
+// }
 
 export function StatsPage() {
     const { stats } = useStore()
     const { path, url } = useRouteMatch()
 
-    React.useEffect(() => { stats.loadAllianceStats() }, [ ])
+    React.useEffect(() => { stats.loadStats() }, [ ])
 
     return <Container component='main' maxWidth={false}>
         <Typography variant='h4'>Statistics</Typography>
@@ -156,22 +159,22 @@ export function StatsPage() {
                 <Observer>
                     {() => <Tabs value={url}>
                         <Tab label='Skills' component={Link} value={url} to={url} />
-                        <Tab label='Alliance income' component={Link} value={`${url}/alliance-income`} to={`${url}/alliance-income`} />
-                        <Tab label='Alliance production' component={Link} value={`${url}/alliance-production`} to={`${url}/alliance-production`} />
+                        <Tab label='Income' component={Link} value={`${url}/income`} to={`${url}/income`} />
+                        {/* <Tab label='Production' component={Link} value={`${url}/production`} to={`${url}/production`} /> */}
                     </Tabs> }
                 </Observer>
             </Grid>
             <Switch>
-                <Route path={`${path}/alliance-income`}>
+                <Route path={`${path}/income`}>
                     <Grid item xs={4}>
-                        <AllianceIncome />
+                        <IncomeTab />
                     </Grid>
                 </Route>
-                <Route path={`${path}/alliance-production`}>
+                {/* <Route path={`${path}/production`}>
                     <Grid item xs={12}>
-                        <AllianceProduction />
+                        <ProductionTab />
                     </Grid>
-                </Route>
+                </Route> */}
                 <Route path={path}>
                     <Grid item xs={4}>
                         <SkillsTab />
