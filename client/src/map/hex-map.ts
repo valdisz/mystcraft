@@ -212,19 +212,20 @@ export class HexMap2 {
         this.layers.sort()
     }
 
+    // todo: fix issue with wraparound map edges
     render() {
         requestAnimationFrame(() => {
             const { x, y } = this.viewport.origin
 
-            this.scene.position.set(x, y)
+            this.scene.position.set(x - this.viewport.mapWidth, y)
             this.updateVisibility()
             this.renderer.render(this.scene)
 
-            this.scene.position.set(x + this.viewport.mapWidth, y)
+            this.scene.position.set(x, y)
             this.updateVisibility()
             this.renderer.render(this.scene, { clear: false })
 
-            this.scene.position.set(x - this.viewport.mapWidth, y)
+            this.scene.position.set(x + this.viewport.mapWidth, y)
             this.updateVisibility()
             this.renderer.render(this.scene, { clear: false })
         })
