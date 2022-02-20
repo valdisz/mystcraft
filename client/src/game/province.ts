@@ -1,6 +1,4 @@
-import { TypedMap } from './typed-map';
 import { Region } from './types';
-
 
 export class Province {
     constructor(public readonly name: string) {

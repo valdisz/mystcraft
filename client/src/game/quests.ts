@@ -1,4 +1,4 @@
-function getProvinceNameFromQuest(text: string) {
+export function getProvinceNameFromQuest(text: string) {
     const province = (
         text.match(/^In the \w+ of (\w+)/)
         || text.match(/^Seek a token .+ of (.+)\.$/)

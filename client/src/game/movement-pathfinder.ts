@@ -39,7 +39,7 @@ export interface PathStep {
 
 export class RegionPathfinder extends Pathfinder<Region, Link, PathStep> {
     neighbors(node: Region): Link[] {
-        return node.neighbors.all()
+        return node.neighbors.toArray()
     }
 
     getNode(edge: Link): Region {
