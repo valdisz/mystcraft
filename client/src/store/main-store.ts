@@ -6,7 +6,6 @@ import { StatsStore } from './stats-store'
 export class MainStore {
     readonly home = new HomeStore()
     readonly game = new GameStore()
-    readonly university: UniversityStore = null //new UniversityStore()
     readonly stats = new StatsStore(this.game)
 }
 

@@ -2,7 +2,7 @@ import { ExtendedMap } from './extended-map';
 import { Faction, Unit } from './types'
 
 export class Troops extends ExtendedMap<number, Unit> {
-    constructor(public readonly faction: Faction | null) {
+    constructor() {
         super(unit => unit.num)
     }
 

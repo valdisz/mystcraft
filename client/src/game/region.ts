@@ -55,7 +55,7 @@ export class Region {
         const faction = unit.faction
 
         if (!this.troops.has(faction.num)) {
-            this.troops.set(faction.num, new Troops(faction))
+            this.troops.set(faction.num, new Troops())
         }
 
         this.troops.get(faction.num).add(unit)

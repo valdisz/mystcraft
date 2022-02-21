@@ -46,7 +46,8 @@ import { UnitSummary } from '../components'
 import { Capacity } from '../game/move-capacity'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move';
-import { Coords, ICoords } from '../game/coords';
+import { Coords, ICoords } from '../game/coords'
+import { UniversityPage } from './university-page'
 
 const GameContainer = styled('div')`
     width: 100%;
@@ -708,6 +709,7 @@ const GameComponent = observer(() => {
                     </GameInfo>
                     <Button color='inherit' variant='outlined' component={Link as any} value={url} to={url}>Map</Button>
                     <Button color='inherit' variant='outlined' component={Link as any} value={`${url}/stats`} to={`${url}/stats`}>Statistics</Button>
+                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} value={`${url}/university`} to={`${url}/university`}>University</Button> }
                     <Box flex={1} />
                     <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
                 </Toolbar>
@@ -715,6 +717,9 @@ const GameComponent = observer(() => {
             <Switch>
                 <Route path={`${path}/stats`}>
                     <StatsPage />
+                </Route>
+                <Route path={`${path}/university`}>
+                    <UniversityPage />
                 </Route>
                 <Route path={path}>
                     <MapTab />

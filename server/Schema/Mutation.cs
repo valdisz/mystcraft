@@ -120,56 +120,25 @@ namespace advisor {
         // todo: this is temp till player rights can be checked
         [Authorize(Policy = Policies.GameMasters)]
         public Task<AllianceCreateResult> AllianceCreate(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, string name) {
-            return mediator.Send(new AllianceCreate(
-                currentUserId,
-                playerId,
-                name
-            ));
+            return mediator.Send(new AllianceCreate(currentUserId, playerId, name));
         }
 
         // todo: this is temp till player rights can be checked
         [Authorize(Policy = Policies.GameMasters)]
         public Task<AllianceJoinResult> AllianceJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, [ID("Alliance")] long allianceId) {
-            return mediator.Send(new AllianceJoin(
-                currentUserId,
-                playerId,
-                allianceId
-            ));
+            return mediator.Send(new AllianceJoin(currentUserId, playerId, allianceId));
         }
 
-        // public Task<DbStudyPlan> SetStudyPlanTarget(
-        //     [GlobalState] long currentUserId,
-        //     [GraphQLType(typeof(RelayIdType))] string studyPlanId,
-        //     string skill,
-        //     int level) {
-        //         return mediator.Send(new SetStudyPlanTarget(
-        //             currentUserId,
-        //             ParseRelayId<long>("StudyPlan", studyPlanId),
-        //             skill,
-        //             level
-        //         ));
-        //     }
+        public Task<StudyPlanResult> StudyPlanTarget(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, string skill, int level) {
+            return mediator.Send(new StudyPlanTarget(currentUserId, unitId, skill, level));
+        }
 
-        // public Task<DbStudyPlan> SetStudPlanyStudy(
-        //     [GlobalState] long currentUserId,
-        //     [GraphQLType(typeof(RelayIdType))] string studyPlanId,
-        //     string skill) {
-        //         return mediator.Send(new SetStudPlanyStudy(
-        //             currentUserId,
-        //             ParseRelayId<long>("StudyPlan", studyPlanId),
-        //             skill
-        //         ));
-        //     }
+        public Task<StudyPlanResult> StudyPlanStudy(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, string skill) {
+            return mediator.Send(new StudPlanyStudy(currentUserId, unitId, skill));
+        }
 
-        // public Task<DbStudyPlan> SetStudyPlanTeach(
-        //     [GlobalState] long currentUserId,
-        //     [GraphQLType(typeof(RelayIdType))] string studyPlanId,
-        //     long[] units) {
-        //         return mediator.Send(new SetStudyPlanTeach(
-        //             currentUserId,
-        //             ParseRelayId<long>("StudyPlan", studyPlanId),
-        //             units
-        //         ));
-        //     }
+        public Task<StudyPlanResult> StudyPlanTeach(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, int[] units) {
+            return mediator.Send(new StudyPlanTeach(currentUserId, unitId, units));
+        }
     }
 }

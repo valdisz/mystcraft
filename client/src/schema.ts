@@ -1,5 +1,6 @@
 import gql from 'graphql-tag';
 export type Maybe<T> = T | null;
+export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -64,9 +65,9 @@ export type AllianceMemberTurn = {
 
 
 export type AllianceMemberTurnUnitsArgs = {
-  filter?: Maybe<UnitsFilterInput>;
-  skip?: Maybe<Scalars['Int']>;
-  take?: Maybe<Scalars['Int']>;
+  filter?: InputMaybe<UnitsFilterInput>;
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 export enum ApplyPolicy {
@@ -212,9 +213,9 @@ export type GameOptions = {
 };
 
 export type GameOptionsInput = {
-  map?: Maybe<Array<Maybe<MapLevelInput>>>;
-  schedule?: Maybe<Scalars['String']>;
-  serverAddress?: Maybe<Scalars['String']>;
+  map?: InputMaybe<Array<InputMaybe<MapLevelInput>>>;
+  schedule?: InputMaybe<Scalars['String']>;
+  serverAddress?: InputMaybe<Scalars['String']>;
 };
 
 export enum GameType {
@@ -247,7 +248,7 @@ export type MapLevel = {
 
 export type MapLevelInput = {
   height: Scalars['Int'];
-  label?: Maybe<Scalars['String']>;
+  label?: InputMaybe<Scalars['String']>;
   level: Scalars['Int'];
   width: Scalars['Int'];
 };
@@ -274,12 +275,15 @@ export type MutationType = {
   gameCreateRemote?: Maybe<GameCreateRemoteResult>;
   joinGame?: Maybe<Player>;
   setOrders?: Maybe<MutationResultOfString>;
+  studyPlanStudy?: Maybe<StudyPlanResult>;
+  studyPlanTarget?: Maybe<StudyPlanResult>;
+  studyPlanTeach?: Maybe<StudyPlanResult>;
   updateUserRoles?: Maybe<User>;
 };
 
 
 export type MutationTypeAllianceCreateArgs = {
-  name?: Maybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
   playerId: Scalars['ID'];
 };
 
@@ -291,17 +295,17 @@ export type MutationTypeAllianceJoinArgs = {
 
 
 export type MutationTypeCreateLocalGameArgs = {
-  engine?: Maybe<Scalars['Upload']>;
-  gameData?: Maybe<Scalars['Upload']>;
-  name?: Maybe<Scalars['String']>;
-  options?: Maybe<GameOptionsInput>;
-  playerData?: Maybe<Scalars['Upload']>;
+  engine?: InputMaybe<Scalars['Upload']>;
+  gameData?: InputMaybe<Scalars['Upload']>;
+  name?: InputMaybe<Scalars['String']>;
+  options?: InputMaybe<GameOptionsInput>;
+  playerData?: InputMaybe<Scalars['Upload']>;
 };
 
 
 export type MutationTypeCreateUserArgs = {
-  email?: Maybe<Scalars['String']>;
-  password?: Maybe<Scalars['String']>;
+  email?: InputMaybe<Scalars['String']>;
+  password?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -311,11 +315,11 @@ export type MutationTypeDeleteGameArgs = {
 
 
 export type MutationTypeGameCreateRemoteArgs = {
-  engineVersion?: Maybe<Scalars['String']>;
-  name?: Maybe<Scalars['String']>;
-  options?: Maybe<GameOptionsInput>;
-  rulesetName?: Maybe<Scalars['String']>;
-  rulesetVersion?: Maybe<Scalars['String']>;
+  engineVersion?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  options?: InputMaybe<GameOptionsInput>;
+  rulesetName?: InputMaybe<Scalars['String']>;
+  rulesetVersion?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -325,14 +329,33 @@ export type MutationTypeJoinGameArgs = {
 
 
 export type MutationTypeSetOrdersArgs = {
-  orders?: Maybe<Scalars['String']>;
-  unitId?: Maybe<Scalars['ID']>;
+  orders?: InputMaybe<Scalars['String']>;
+  unitId?: InputMaybe<Scalars['ID']>;
+};
+
+
+export type MutationTypeStudyPlanStudyArgs = {
+  skill?: InputMaybe<Scalars['String']>;
+  unitId?: InputMaybe<Scalars['ID']>;
+};
+
+
+export type MutationTypeStudyPlanTargetArgs = {
+  level: Scalars['Int'];
+  skill?: InputMaybe<Scalars['String']>;
+  unitId?: InputMaybe<Scalars['ID']>;
+};
+
+
+export type MutationTypeStudyPlanTeachArgs = {
+  unitId?: InputMaybe<Scalars['ID']>;
+  units?: InputMaybe<Array<Scalars['Int']>>;
 };
 
 
 export type MutationTypeUpdateUserRolesArgs = {
-  add?: Maybe<Array<Maybe<Scalars['String']>>>;
-  remove?: Maybe<Array<Maybe<Scalars['String']>>>;
+  add?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
+  remove?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   userId: Scalars['ID'];
 };
 
@@ -359,7 +382,7 @@ export type Player = Node & {
 
 
 export type PlayerReportsArgs = {
-  turn?: Maybe<Scalars['Int']>;
+  turn?: InputMaybe<Scalars['Int']>;
 };
 
 
@@ -390,8 +413,8 @@ export type QueryNodesArgs = {
 
 
 export type QueryUsersArgs = {
-  skip?: Maybe<Scalars['Int']>;
-  take?: Maybe<Scalars['Int']>;
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 export type Region = Node & {
@@ -511,6 +534,13 @@ export type StudyPlan = {
   unitNumber: Scalars['Int'];
 };
 
+export type StudyPlanResult = {
+  __typename?: 'StudyPlanResult';
+  error?: Maybe<Scalars['String']>;
+  isSuccess: Scalars['Boolean'];
+  studyPlan?: Maybe<StudyPlan>;
+};
+
 export type TradableItem = {
   __typename?: 'TradableItem';
   amount: Scalars['Int'];
@@ -544,28 +574,28 @@ export type Turn = Node & {
 
 
 export type TurnEventsArgs = {
-  skip?: Maybe<Scalars['Int']>;
-  take?: Maybe<Scalars['Int']>;
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 
 export type TurnRegionsArgs = {
-  skip?: Maybe<Scalars['Int']>;
-  take?: Maybe<Scalars['Int']>;
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
   withStructures?: Scalars['Boolean'];
 };
 
 
 export type TurnStructuresArgs = {
-  skip?: Maybe<Scalars['Int']>;
-  take?: Maybe<Scalars['Int']>;
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 
 export type TurnUnitsArgs = {
-  filter?: Maybe<UnitsFilterInput>;
-  skip?: Maybe<Scalars['Int']>;
-  take?: Maybe<Scalars['Int']>;
+  filter?: InputMaybe<UnitsFilterInput>;
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 export type Unit = Node & {
@@ -602,8 +632,8 @@ export type UnitCollectionSegment = {
 };
 
 export type UnitsFilterInput = {
-  mages?: Maybe<Scalars['Boolean']>;
-  own?: Maybe<Scalars['Boolean']>;
+  mages?: InputMaybe<Scalars['Boolean']>;
+  own?: InputMaybe<Scalars['Boolean']>;
 };
 
 export type User = Node & {
@@ -626,45 +656,49 @@ export type AttitudeFragment = { __typename?: 'Attitude', factionNumber: number,
 
 export type CapacityFragment = { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number };
 
-export type EventFragment = { __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined };
+export type EventFragment = { __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null };
 
-export type ExitFragment = { __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null | undefined, size: SettlementSize } | null | undefined };
+export type ExitFragment = { __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null };
 
-export type FactionFragment = { __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null | undefined, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null | undefined> | null | undefined, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined } | null | undefined> | null | undefined };
+export type FactionFragment = { __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null };
 
-export type FleetContentFragment = { __typename?: 'FleetContent', type?: string | null | undefined, count: number };
+export type FleetContentFragment = { __typename?: 'FleetContent', type?: string | null, count: number };
 
-export type GameDetailsFragment = { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, ruleset: string, options: { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null | undefined, level: number, width: number, height: number } | null | undefined> | null | undefined }, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined };
+export type GameDetailsFragment = { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, ruleset: string, options: { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
 
-export type GameHeaderFragment = { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined };
+export type GameHeaderFragment = { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
 
-export type GameOptionsFragment = { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null | undefined, level: number, width: number, height: number } | null | undefined> | null | undefined };
+export type GameOptionsFragment = { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null };
 
-export type ItemFragment = { __typename?: 'Item', code?: string | null | undefined, amount: number };
+export type ItemFragment = { __typename?: 'Item', code?: string | null, amount: number };
 
 export type LoadFragment = { __typename?: 'TransportationLoad', used: number, max: number };
 
-export type PlayerHeaderFragment = { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined };
+export type MageFragment = { __typename?: 'Unit', id: string, x: number, y: number, z: number, number: number, name: string, factionNumber?: number | null, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null };
 
-export type RegionFragment = { __typename?: 'Region', id: string, lastVisitedAt?: number | null | undefined, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null | undefined, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null | undefined, size: SettlementSize } | null | undefined, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null | undefined> | null | undefined, produces?: Array<{ __typename?: 'Item', code?: string | null | undefined, amount: number } | null | undefined> | null | undefined, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null | undefined> | null | undefined, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null | undefined, size: SettlementSize } | null | undefined } | null | undefined> | null | undefined, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null | undefined, sailors?: { __typename?: 'Sailors', current: number, required: number } | null | undefined } | null | undefined> | null | undefined };
+export type PlayerHeaderFragment = { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null };
+
+export type RegionFragment = { __typename?: 'Region', id: string, lastVisitedAt?: number | null, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, produces?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null } | null> | null, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null } | null> | null };
 
 export type SailorsFragment = { __typename?: 'Sailors', current: number, required: number };
 
-export type SetOrderResultFragment = { __typename?: 'MutationResultOfString', isSuccess: boolean, error?: string | null | undefined };
+export type SetOrderResultFragment = { __typename?: 'MutationResultOfString', isSuccess: boolean, error?: string | null };
 
-export type SettlementFragment = { __typename?: 'Settlement', name?: string | null | undefined, size: SettlementSize };
+export type SettlementFragment = { __typename?: 'Settlement', name?: string | null, size: SettlementSize };
 
-export type SkillFragment = { __typename?: 'Skill', code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined };
+export type SkillFragment = { __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null };
 
-export type StaisticsFragment = { __typename?: 'Statistics', income?: { __typename?: 'IncomeStats', work: number, tax: number, pillage: number, trade: number, total: number } | null | undefined, production?: Array<{ __typename?: 'Item', code?: string | null | undefined, amount: number } | null | undefined> | null | undefined };
+export type StaisticsFragment = { __typename?: 'Statistics', income?: { __typename?: 'IncomeStats', work: number, tax: number, pillage: number, trade: number, total: number } | null, production?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null };
 
-export type StructureFragment = { __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null | undefined, sailors?: { __typename?: 'Sailors', current: number, required: number } | null | undefined };
+export type StructureFragment = { __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null };
+
+export type StudyPlanFragment = { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null };
 
 export type TradableItemFragment = { __typename?: 'TradableItem', code: string, price: number, amount: number };
 
-export type TurnFragment = { __typename?: 'Turn', id: string, number: number, month: number, year: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null | undefined, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null | undefined> | null | undefined, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined };
+export type TurnFragment = { __typename?: 'Turn', id: string, number: number, month: number, year: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null } | null> | null };
 
-export type UnitFragment = { __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null | undefined, sequence: number, canStudy?: Array<string | null | undefined> | null | undefined, combatSpell?: string | null | undefined, description?: string | null | undefined, factionNumber?: number | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, number: number, onGuard: boolean, readyItem?: string | null | undefined, weight?: number | null | undefined, orders?: string | null | undefined, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null | undefined, items: Array<{ __typename?: 'Item', code?: string | null | undefined, amount: number } | null | undefined>, skills?: Array<{ __typename?: 'Skill', code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined } | null | undefined> | null | undefined };
+export type UnitFragment = { __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null };
 
 export type CreateLocalGameMutationVariables = Exact<{
   name: Scalars['String'];
@@ -675,14 +709,14 @@ export type CreateLocalGameMutationVariables = Exact<{
 }>;
 
 
-export type CreateLocalGameMutation = { __typename?: 'MutationType', createLocalGame?: { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined } | null | undefined };
+export type CreateLocalGameMutation = { __typename?: 'MutationType', createLocalGame?: { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null };
 
 export type DeleteGameMutationVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
 
 
-export type DeleteGameMutation = { __typename?: 'MutationType', deleteGame?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined } | null | undefined> | null | undefined };
+export type DeleteGameMutation = { __typename?: 'MutationType', deleteGame?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null };
 
 export type GameCreateRemoteMutationVariables = Exact<{
   name: Scalars['String'];
@@ -693,34 +727,67 @@ export type GameCreateRemoteMutationVariables = Exact<{
 }>;
 
 
-export type GameCreateRemoteMutation = { __typename?: 'MutationType', gameCreateRemote?: { __typename?: 'GameCreateRemoteResult', isSuccess: boolean, error?: string | null | undefined, game?: { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined } | null | undefined } | null | undefined };
+export type GameCreateRemoteMutation = { __typename?: 'MutationType', gameCreateRemote?: { __typename?: 'GameCreateRemoteResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null } | null };
 
 export type JoinGameMutationVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
 
 
-export type JoinGameMutation = { __typename?: 'MutationType', joinGame?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined };
+export type JoinGameMutation = { __typename?: 'MutationType', joinGame?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
 
 export type SetOrderMutationVariables = Exact<{
   unitId: Scalars['ID'];
-  orders?: Maybe<Scalars['String']>;
+  orders?: InputMaybe<Scalars['String']>;
 }>;
 
 
-export type SetOrderMutation = { __typename?: 'MutationType', setOrders?: { __typename?: 'MutationResultOfString', isSuccess: boolean, error?: string | null | undefined } | null | undefined };
+export type SetOrderMutation = { __typename?: 'MutationType', setOrders?: { __typename?: 'MutationResultOfString', isSuccess: boolean, error?: string | null } | null };
+
+export type StudyPlanStudyMutationVariables = Exact<{
+  unitId: Scalars['ID'];
+  skill: Scalars['String'];
+}>;
+
+
+export type StudyPlanStudyMutation = { __typename?: 'MutationType', studyPlanStudy?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
+
+export type StudyPlanTargetMutationVariables = Exact<{
+  unitId: Scalars['ID'];
+  skill: Scalars['String'];
+  level: Scalars['Int'];
+}>;
+
+
+export type StudyPlanTargetMutation = { __typename?: 'MutationType', studyPlanTarget?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
+
+export type StudyPlanTeachMutationVariables = Exact<{
+  unitId: Scalars['ID'];
+  units: Array<Scalars['Int']> | Scalars['Int'];
+}>;
+
+
+export type StudyPlanTeachMutation = { __typename?: 'MutationType', studyPlanTeach?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
+
+export type GetAllianceMagesQueryVariables = Exact<{
+  gameId: Scalars['ID'];
+  turn: Scalars['Int'];
+}>;
+
+
+export type GetAllianceMagesQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', me?: { __typename?: 'Player', alliance?: { __typename?: 'Alliance', id: string, name: string, members?: Array<{ __typename?: 'AllianceMember', number?: number | null, name?: string | null, turn?: { __typename?: 'AllianceMemberTurn', number: number, units?: { __typename?: 'UnitCollectionSegment', items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, number: number, name: string, factionNumber?: number | null, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null> | null } | null } | null } | null> | null } | null } | null } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetGameQueryVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
 
 
-export type GetGameQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, ruleset: string, options: { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null | undefined, level: number, width: number, height: number } | null | undefined> | null | undefined }, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null | undefined };
+export type GetGameQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, ruleset: string, options: { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetGamesQuery = { __typename?: 'Query', games?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null | undefined, name?: string | null | undefined, lastTurnNumber: number, lastTurnId?: string | null | undefined } | null | undefined } | null | undefined> | null | undefined };
+export type GetGamesQuery = { __typename?: 'Query', games?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null };
 
 export type GetRegionsQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -729,21 +796,21 @@ export type GetRegionsQueryVariables = Exact<{
 }>;
 
 
-export type GetRegionsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn', regions?: { __typename?: 'RegionCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Region', id: string, lastVisitedAt?: number | null | undefined, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null | undefined, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null | undefined, size: SettlementSize } | null | undefined, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null | undefined> | null | undefined, produces?: Array<{ __typename?: 'Item', code?: string | null | undefined, amount: number } | null | undefined> | null | undefined, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null | undefined> | null | undefined, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null | undefined, size: SettlementSize } | null | undefined } | null | undefined> | null | undefined, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, needs?: number | null | undefined, number: number, sailDirections?: Array<Direction> | null | undefined, speed?: number | null | undefined, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null | undefined, count: number } | null | undefined> | null | undefined, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null | undefined, sailors?: { __typename?: 'Sailors', current: number, required: number } | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | null | undefined } | { __typename?: 'Unit' } | { __typename?: 'User' } | null | undefined };
+export type GetRegionsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn', regions?: { __typename?: 'RegionCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Region', id: string, lastVisitedAt?: number | null, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null, population: number, tax: number, wages: number, totalWages: number, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, produces?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null } | null> | null, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null } | null> | null } | null> | null } | null } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetTurnStatsQueryVariables = Exact<{
   playerId: Scalars['ID'];
 }>;
 
 
-export type GetTurnStatsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player', turns?: Array<{ __typename?: 'Turn', number: number, stats?: { __typename?: 'Statistics', income?: { __typename?: 'IncomeStats', work: number, tax: number, pillage: number, trade: number, total: number } | null | undefined, production?: Array<{ __typename?: 'Item', code?: string | null | undefined, amount: number } | null | undefined> | null | undefined } | null | undefined } | null | undefined> | null | undefined } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null | undefined };
+export type GetTurnStatsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player', turns?: Array<{ __typename?: 'Turn', number: number, stats?: { __typename?: 'Statistics', income?: { __typename?: 'IncomeStats', work: number, tax: number, pillage: number, trade: number, total: number } | null, production?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null } | null } | null> | null } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetTurnQueryVariables = Exact<{
   turnId: Scalars['ID'];
 }>;
 
 
-export type GetTurnQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn', id: string, number: number, month: number, year: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null | undefined, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null | undefined> | null | undefined, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null | undefined, unitNumber?: number | null | undefined, unitName?: string | null | undefined, itemCode?: string | null | undefined, itemName?: string | null | undefined, itemPrice?: number | null | undefined, amount?: number | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | { __typename?: 'Unit' } | { __typename?: 'User' } | null | undefined };
+export type GetTurnQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn', id: string, number: number, month: number, year: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null } | null> | null } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetUnitsQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -752,7 +819,7 @@ export type GetUnitsQueryVariables = Exact<{
 }>;
 
 
-export type GetUnitsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn', units?: { __typename?: 'UnitCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null | undefined, sequence: number, canStudy?: Array<string | null | undefined> | null | undefined, combatSpell?: string | null | undefined, description?: string | null | undefined, factionNumber?: number | null | undefined, flags?: Array<string | null | undefined> | null | undefined, name: string, number: number, onGuard: boolean, readyItem?: string | null | undefined, weight?: number | null | undefined, orders?: string | null | undefined, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null | undefined, items: Array<{ __typename?: 'Item', code?: string | null | undefined, amount: number } | null | undefined>, skills?: Array<{ __typename?: 'Skill', code?: string | null | undefined, level?: number | null | undefined, days?: number | null | undefined } | null | undefined> | null | undefined } | null | undefined> | null | undefined } | null | undefined } | { __typename?: 'Unit' } | { __typename?: 'User' } | null | undefined };
+export type GetUnitsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn', units?: { __typename?: 'UnitCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null } | null> | null } | null } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export const GameOptions = gql`
     fragment GameOptions on GameOptions {
@@ -800,6 +867,41 @@ export const GameHeader = gql`
   }
 }
     ${PlayerHeader}`;
+export const Skill = gql`
+    fragment Skill on Skill {
+  code
+  level
+  days
+}
+    `;
+export const StudyPlan = gql`
+    fragment StudyPlan on StudyPlan {
+  target {
+    code
+    level
+  }
+  study
+  teach
+}
+    `;
+export const Mage = gql`
+    fragment Mage on Unit {
+  id
+  x
+  y
+  z
+  number
+  name
+  factionNumber
+  skills {
+    ...Skill
+  }
+  studyPlan {
+    ...StudyPlan
+  }
+}
+    ${Skill}
+${StudyPlan}`;
 export const Settlement = gql`
     fragment Settlement on Settlement {
   name
@@ -995,13 +1097,6 @@ export const Capacity = gql`
   swimming
 }
     `;
-export const Skill = gql`
-    fragment Skill on Skill {
-  code
-  level
-  days
-}
-    `;
 export const Unit = gql`
     fragment Unit on Unit {
   id
@@ -1085,6 +1180,65 @@ export const SetOrder = gql`
   }
 }
     ${SetOrderResult}`;
+export const StudyPlanStudy = gql`
+    mutation StudyPlanStudy($unitId: ID!, $skill: String!) {
+  studyPlanStudy(unitId: $unitId, skill: $skill) {
+    isSuccess
+    error
+    studyPlan {
+      ...StudyPlan
+    }
+  }
+}
+    ${StudyPlan}`;
+export const StudyPlanTarget = gql`
+    mutation StudyPlanTarget($unitId: ID!, $skill: String!, $level: Int!) {
+  studyPlanTarget(unitId: $unitId, skill: $skill, level: $level) {
+    isSuccess
+    error
+    studyPlan {
+      ...StudyPlan
+    }
+  }
+}
+    ${StudyPlan}`;
+export const StudyPlanTeach = gql`
+    mutation StudyPlanTeach($unitId: ID!, $units: [Int!]!) {
+  studyPlanTeach(unitId: $unitId, units: $units) {
+    isSuccess
+    error
+    studyPlan {
+      ...StudyPlan
+    }
+  }
+}
+    ${StudyPlan}`;
+export const GetAllianceMages = gql`
+    query GetAllianceMages($gameId: ID!, $turn: Int!) {
+  node(id: $gameId) {
+    ... on Game {
+      me {
+        alliance {
+          id
+          name
+          members {
+            number
+            name
+            turn(number: $turn) {
+              number
+              units(skip: 0, take: 100, filter: {own: true, mages: true}) {
+                items {
+                  ...Mage
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    ${Mage}`;
 export const GetGame = gql`
     query GetGame($gameId: ID!) {
   node(id: $gameId) {

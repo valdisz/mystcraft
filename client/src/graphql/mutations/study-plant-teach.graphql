@@ -1,0 +1,9 @@
+mutation StudyPlanTeach($unitId: ID!, $units: [Int!]!) {
+  studyPlanTeach(unitId: $unitId, units: $units) {
+    isSuccess
+    error
+    studyPlan {
+      ...StudyPlan
+    }
+  }
+}

@@ -1,0 +1,9 @@
+mutation StudyPlanTarget($unitId: ID!, $skill: String!, $level: Int!) {
+  studyPlanTarget(unitId: $unitId, skill: $skill, level: $level) {
+    isSuccess
+    error
+    studyPlan {
+      ...StudyPlan
+    }
+  }
+}

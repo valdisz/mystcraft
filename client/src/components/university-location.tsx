@@ -14,15 +14,18 @@ export interface UniversityLocationProps {
 }
 
 export const UniversityLocation = observer(({ location }: UniversityLocationProps) => {
-    const { university } = useStore()
+    const { game } = useStore()
+    const { university } = game
+
+    const region = location.region
 
     return <tbody>
         <tr>
             <LocationCell colSpan={20}>
-                {location.terrain}
-                ({location.x},{location.y},{location.z} {location.label})
-                in {location.province}
-                { location.settlement ? `, contains ${location.settlement} [${location.settlementSize.toLowerCase()}]` : '' }
+                {region.terrain.name}
+                ({region.coords.x},{region.coords.y},{region.coords.z} {region.coords.label})
+                in {region.province.name}
+                { region.settlement ? `, contains ${region.settlement.name} [${region.settlement.size.toLowerCase()}]` : '' }
             </LocationCell>
         </tr>
         <tr>

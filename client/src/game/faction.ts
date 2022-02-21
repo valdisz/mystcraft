@@ -9,7 +9,7 @@ export class Faction {
             this.known = num > 0
         }
 
-    readonly troops: Troops = new Troops(this)
+    readonly troops: Troops = new Troops()
 
     readonly known: boolean
 

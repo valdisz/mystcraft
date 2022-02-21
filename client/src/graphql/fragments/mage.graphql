@@ -1,0 +1,15 @@
+fragment Mage on Unit {
+  id
+  x
+  y
+  z
+  number
+  name
+  factionNumber
+  skills {
+    ...Skill
+  }
+  studyPlan {
+    ...StudyPlan
+  }
+}

@@ -1,0 +1,24 @@
+query GetAllianceMages($gameId: ID!, $turn: Int!) {
+  node(id: $gameId) {
+    ... on Game {
+      me {
+        alliance {
+          id
+          name
+          members {
+            number
+            name
+            turn(number: $turn) {
+              number
+              units(skip: 0, take: 100, filter: { own: true, mages: true}) {
+                items {
+                  ...Mage
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

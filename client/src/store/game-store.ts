@@ -14,6 +14,7 @@ import { WorldInfo, WorldLevel } from '../game/world-info'
 import { Unit } from '../game/types'
 import { saveAs } from 'file-saver'
 import { InterfaceCommand, MoveCommand } from './commands/move'
+import { UniversityStore } from './university-store'
 
 export class TurnsStore {
     constructor() {
@@ -115,6 +116,8 @@ export class GameStore {
 
     gameId: string = null
     playerId: string = null
+
+    university: UniversityStore = null
 
     async loadRegions(turnId: string, onProgress: ProgressCallback) {
         const items: RegionFragment[] = []
@@ -243,6 +246,9 @@ export class GameStore {
                 region.sort()
             }
         }
+
+        this.university = new UniversityStore(world)
+        await this.university.load(this.gameId, this.turn.number)
 
         runInAction(() =>{
             console.log(`Turn ${this.turn.number} loaded`)

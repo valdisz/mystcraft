@@ -1,7 +1,6 @@
 import { UniqueItem } from './unique-item';
 import { Skill } from "./skill";
 
-
 export class SkillInfo implements UniqueItem {
     constructor(public readonly code: string) {
     }
@@ -13,25 +12,20 @@ export class SkillInfo implements UniqueItem {
     create(days: number, level?: number): Skill {
         const skill = new Skill(this);
         skill.days = days
-        skill.level = level ? level : SkillInfo.daysToLevel(days)
+        skill.level = level ? level : SkillInfo.level(days)
 
         return skill
     }
 
-    static levelToDays(level: number) {
-        if (level == 1) return 30;
-
-        return SkillInfo.levelToDays(level - 1) + 30 * level
+    static days(level: number) {
+        return 15 * (level * level + level)
     }
 
-    static daysToLevel(days: number) {
-        let level = 1
-        let levelDays = 30
-        while (days > levelDays) {
-            level++
-            levelDays += 30 * level
+    static level(days: number) {
+        if (days === 0) {
+            return 0
         }
 
-        return level - 1
+        return Math.trunc((Math.sqrt(60 * days + 225) - 15) / 30)
     }
 }

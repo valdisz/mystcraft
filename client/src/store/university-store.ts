@@ -1,43 +1,14 @@
 import * as React from 'react'
 import { makeObservable, observable, IObservableArray, runInAction, action, computed } from 'mobx'
 import { CLIENT } from '../client'
-import { GetUniversity, GetUniversityQuery, GetUniversityQueryVariables, SettlementSize, StudyPlanFragment, UniversityMemberFragment,  } from '../schema'
-import { OpenUniversity, OpenUniversityMutation, OpenUniversityMutationVariables } from '../schema'
-import { GetUniversityClass, GetUniversityClassQuery, GetUniversityClassQueryVariables } from '../schema'
-import { SetStudPlanyTarget, SetStudPlanyTargetMutation, SetStudPlanyTargetMutationVariables } from '../schema'
-import { SetStudPlanyStudy, SetStudPlanyStudyMutation, SetStudPlanyStudyMutationVariables } from '../schema'
-import { SetStudPlanyTeach, SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables } from '../schema'
-import { ClassSummaryFragment, UniveristyMemberRole } from '../schema'
 import { getSkillDeps, getSkillRequirements, ISkill, SKILL_TREE } from './skill-tree'
-
-class NewUniversity {
-    constructor(private readonly parent: UniversityStore) {
-        makeObservable(this)
-    }
-
-    @observable name = ''
-    @action setName = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.name = event.target.value
-    }
-
-    @action clear = () => {
-        this.name = ''
-    }
-
-    open = async () => {
-        this.parent.setLoading(true)
-
-        const response = await CLIENT.mutate<OpenUniversityMutation, OpenUniversityMutationVariables>({
-            mutation: OpenUniversity,
-            variables: {
-                name: this.name,
-                playerId: this.parent.playerId
-            }
-        })
-
-        this.parent.load(this.parent.gameId)
-    }
-}
+import { GetAllianceMages, GetAllianceMagesQuery, GetAllianceMagesQueryVariables } from '../schema'
+import { StudyPlanTarget, StudyPlanTargetMutation, StudyPlanTargetMutationVariables } from '../schema'
+import { StudyPlanTeach, StudyPlanTeachMutation, StudyPlanTeachMutationVariables } from '../schema'
+import { StudyPlanStudy, StudyPlanStudyMutation, StudyPlanStudyMutationVariables } from '../schema'
+import { MageFragment, SkillFragment, StudyPlanFragment } from '../schema'
+import { World } from '../game/world'
+import { Region } from '../game/region'
 
 export class Skill implements ISkill {
     constructor(data?: ISkill) {
@@ -355,16 +326,17 @@ export class Student {
 
         units.push(student.number)
 
-        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
-            mutation: SetStudPlanyTeach,
+        const result = await CLIENT.mutate<StudyPlanTeachMutation, StudyPlanTeachMutationVariables>({
+            mutation: StudyPlanTeach,
             variables: {
-                studyPlanId: this.id,
-                units
+                unitId: this.id,
+                units: units
             }
         })
 
-        this.setPlan(result.data.setStudyPlanTeach)
-        this.setStudents(result.data.setStudyPlanTeach)
+        const plan = result.data.studyPlanTeach.studyPlan
+        this.setPlan(plan)
+        this.setStudents(plan)
 
         if (this.teach.length >= this.maxStudents) {
             this.resetMode()
@@ -378,29 +350,31 @@ export class Student {
     removeStudent = async (student: Student) => {
         if (!this.teach.includes(student)) return
 
-        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
-            mutation: SetStudPlanyTeach,
+        const result = await CLIENT.mutate<StudyPlanTeachMutation, StudyPlanTeachMutationVariables>({
+            mutation: StudyPlanTeach,
             variables: {
-                studyPlanId: this.id,
+                unitId: this.id,
                 units: this.teach.filter(x => x !== student).map(x => x.number)
             }
         })
 
-        this.setPlan(result.data.setStudyPlanTeach)
-        this.setStudents(result.data.setStudyPlanTeach)
+        const plan = result.data.studyPlanTeach.studyPlan
+        this.setPlan(plan)
+        this.setStudents(plan)
     }
 
     clearStudents = async () => {
-        const result = await CLIENT.mutate<SetStudPlanyTeachMutation, SetStudPlanyTeachMutationVariables>({
-            mutation: SetStudPlanyTeach,
+        const result = await CLIENT.mutate<StudyPlanTeachMutation, StudyPlanTeachMutationVariables>({
+            mutation: StudyPlanTeach,
             variables: {
-                studyPlanId: this.id,
+                unitId: this.id,
                 units: []
             }
         })
 
-        this.setPlan(result.data.setStudyPlanTeach)
-        this.setStudents(result.data.setStudyPlanTeach)
+        const plan = result.data.studyPlanTeach.studyPlan
+        this.setPlan(plan)
+        this.setStudents(plan)
     }
 
     canTeach = (student: Student, skill: string) => {
@@ -490,17 +464,18 @@ export class Student {
     }
 
     setTarget = async (skill: string, level: number) => {
-        const result = await CLIENT.mutate<SetStudPlanyTargetMutation, SetStudPlanyTargetMutationVariables>({
-            mutation: SetStudPlanyTarget,
+        const result = await CLIENT.mutate<StudyPlanTargetMutation, StudyPlanTargetMutationVariables>({
+            mutation: StudyPlanTarget,
             variables: {
-                studyPlanId: this.id,
+                unitId: this.id,
                 skill,
                 level
             }
         })
 
-        this.setPlan(result.data.setStudyPlanTarget)
-        this.setStudents(result.data.setStudyPlanTarget)
+        const plan = result.data.studyPlanTarget.studyPlan
+        this.setPlan(plan)
+        this.setStudents(plan)
     }
 
     incTargetLevel = (e: React.MouseEvent) => {
@@ -516,16 +491,17 @@ export class Student {
     }
 
     setStudy = async (skill: string) => {
-        const result = await CLIENT.mutate<SetStudPlanyStudyMutation, SetStudPlanyStudyMutationVariables>({
-            mutation: SetStudPlanyStudy,
+        const result = await CLIENT.mutate<StudyPlanStudyMutation, StudyPlanStudyMutationVariables>({
+            mutation: StudyPlanStudy,
             variables: {
-                studyPlanId: this.id,
+                unitId: this.id,
                 skill
             }
         })
 
-        this.setPlan(result.data.setStudPlanyStudy)
-        this.setStudents(result.data.setStudPlanyStudy)
+        const plan = result.data.studyPlanStudy.studyPlan
+        this.setPlan(plan)
+        this.setStudents(plan)
     }
 
     clearOrders = async () => {
@@ -583,28 +559,17 @@ export class Student {
         }
     }
 
-    @action setPlan(plan: StudyPlanFragment) {
-        const unit = plan.unit
-
-        this.name = unit.name
-        this.number = unit.number,
-        this.factionName = unit.faction.name,
-        this.factionNumber = unit.faction.number,
-        this.target = plan.target
-            ? new Skill({ code: plan.target.code, level: plan.target.level })
-            : null
-        this.study = plan.study
-
-        const skills = Array.from(getSkillGroups())
+    setSkills(skills: SkillFragment[]) {
+        const grous = Array.from(getSkillGroups())
         const skillIndex: { [ code: string ]: Skill } = {}
 
-        for (const g of skills) {
+        for (const g of grous) {
             for (const s of g.skills) {
                 skillIndex[s.code] = s
             }
         }
 
-        for (const { code, level, days } of unit.skills) {
+        for (const { code, level, days } of skills) {
             const s = skillIndex[code]
             if (!s) continue
 
@@ -612,7 +577,21 @@ export class Student {
             s.days = days
         }
 
-        this.skillsGroups.replace(skills)
+        this.skillsGroups.replace(grous)
+
+    }
+
+    @action setPlan(plan: StudyPlanFragment) {
+        if (plan) {
+            this.target = plan.target
+            ? new Skill({ code: plan.target.code, level: plan.target.level })
+            : null
+            this.study = plan.study
+        }
+        else {
+            this.target = null
+            this.study = null
+        }
     }
 
     @action setStudents = (plan: StudyPlanFragment) => {
@@ -632,18 +611,9 @@ export class Student {
 }
 
 export class StudyLocation {
-    constructor(public readonly id: string) {
+    constructor(public readonly region: Region) {
         makeObservable(this)
     }
-
-    @observable x = 0
-    @observable y = 0
-    @observable z = 0
-    @observable label = ''
-    @observable terrain = ''
-    @observable province = ''
-    @observable settlement?: string = null
-    @observable settlementSize?: SettlementSize = null
 
     readonly students: IObservableArray<Student> = observable([])
 
@@ -660,147 +630,96 @@ export class StudyLocation {
 }
 
 export class UniversityStore {
-    constructor() {
+    constructor(private readonly world: World) {
         makeObservable(this)
     }
-
-    readonly newUniversity = new NewUniversity(this)
-
-    gameId: string = null
-    playerId: string = null
 
     @observable loading = true
     @action setLoading = (isLoading: boolean) => this.loading = isLoading
 
-    @observable role: UniveristyMemberRole = UniveristyMemberRole.Member
     @observable id: string = null
     @observable name: string = null
-
-    readonly classes: IObservableArray<ClassSummaryFragment> = observable([])
-    readonly members: IObservableArray<UniversityMemberFragment> = observable([])
-
-    @observable selectedClassId: string = null
 
     @observable locations: IObservableArray<StudyLocation> = observable([])
 
     readonly skills = Array.from(getSkillGroups())
 
-    async load(gameId: string) {
-        this.gameId = gameId
-
+    async load(gameId: string, turn: number) {
         runInAction(() => {
             this.loading = true
-            this.role = UniveristyMemberRole.Member
             this.id = null
             this.name = null
-            this.classes.clear()
-            this.members.clear()
-            this.selectedClassId = null
             this.locations.clear()
         })
 
-        const response = await CLIENT.query<GetUniversityQuery, GetUniversityQueryVariables>({
-            query: GetUniversity,
-            variables: {
-                gameId
-            }
+        const response = await CLIENT.query<GetAllianceMagesQuery, GetAllianceMagesQueryVariables>({
+            query: GetAllianceMages,
+            variables: { gameId, turn }
         })
 
-        const player = response.data.node?.myPlayer
-        const university = player?.university
-        const classes = university?.university?.classes ?? []
-
-        if (classes.length) {
-            classes.sort((a, b) => a.turnNumber - b.turnNumber)
+        if (response.data.node.__typename !== 'Game') {
+            return
         }
 
-        const members = university?.university.members ?? []
-        members.sort((a, b) => a.player.factionNumber - b.player.factionNumber)
+        const alliance = response.data.node.me.alliance
+        if (!alliance) {
+            return
+        }
 
-        if (player) this.playerId = player.id
+        this.loadMages(alliance.members.flatMap(x => x.turn.units.items))
 
         runInAction(() => {
-            if (player.university) {
-                const { role, university: { id, name } } = university
-
-                this.role = role
-                this.id = id
-                this.name = name
-                this.classes.replace(classes)
-                this.members.replace(members)
-
-                if (classes.length) {
-                    this.selectClass(classes[classes.length - 1].id)
-                    return
-                }
-            }
-
             this.loading = false
         })
     }
 
-    selectClass = async (classId: string) => {
-        // runInAction(() => this.loading = true)
+    loadMages(mages: MageFragment[]) {
+        const locations = new Map<string, StudyLocation>()
+        const students = new Map<number, Student>()
 
-        const response = await CLIENT.query<GetUniversityClassQuery, GetUniversityClassQueryVariables>({
-            query: GetUniversityClass,
-            variables: {
-                classId
-            }
-        })
-
-        const locations: { [ id: string]: {
-            location: StudyLocation
-            data: { [id: string]: StudyPlanFragment }
-        } } = { }
-
-        for (const item of response.data.node.students) {
-            const { terrain, x, y, z, label, province, settlement } = item.unit.region
-            const locationId = `${x} ${y} ${z}`
-
-            let loc = locations[locationId]
-            if (!loc) {
-                const location = new StudyLocation(locationId);
-                location.terrain = terrain
-                location.x = x
-                location.y = y
-                location.z = z
-                location.label = label
-                location.province = province
-                location.settlement = settlement?.name
-                location.settlementSize = settlement?.size
-
-                loc = { location, data: { } }
-                locations[locationId] = loc
+        const getLocation = (x: number, y: number, z: number) => {
+            const region = this.world.getRegion(x, y, z)
+            if (!locations.has(region.id)) {
+                locations.set(region.id, new StudyLocation(region))
             }
 
-            const student = new Student(item.id, loc.location)
-            loc.location.addStudent(student)
-            loc.data[item.id] = item
+            return locations.get(region.id)
         }
 
-        for (const key in locations) {
-            const { location, data } = locations[key]
+        for (const { id, x, y, z, number, name, factionNumber, skills, studyPlan } of mages) {
+            let loc = getLocation(x, y, z)
 
-            for (const student of location.students) {
-                student.setPlan(data[student.id])
-            }
+            const student = new Student(id, loc)
+            student.name = name
+            student.number = number
+            student.factionNumber = factionNumber
+            student.factionName = this.world.factions.get(factionNumber).name
 
-            for (const student of location.students) {
-                student.setStudents(data[student.id])
-            }
+            student.setSkills(skills)
+            student.setPlan(studyPlan)
+            loc.addStudent(student)
 
-            location.students.sort((a, b) => {
+            students.set(number, student)
+        }
+
+        for (const loc of locations.values()) {
+            loc.students.sort((a, b) => {
                 if (a.factionNumber === b.factionNumber) return a.number - b.number
 
                 return a.factionNumber - b.factionNumber
             })
         }
 
+        for (const { number, studyPlan } of mages) {
+            if (!studyPlan) {
+                continue
+            }
+
+            students.get(number).setStudents(studyPlan)
+        }
+
         runInAction(() => {
-            this.selectedClassId = classId
-            this.locations.replace(Object.values(locations).map(x => x.location))
-            this.loading = false
+            this.locations.replace(Array.from(locations.values()))
         })
     }
 }

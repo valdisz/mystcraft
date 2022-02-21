@@ -1,0 +1,8 @@
+fragment StudyPlan on StudyPlan {
+  target {
+    code
+    level
+  }
+  study
+  teach
+}

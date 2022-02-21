@@ -30,6 +30,8 @@ export class Ruleset {
         return skill
     }
 
+    
+
     getItem(nameOrCode: string) {
         let item = this.items.get(nameOrCode);
 
