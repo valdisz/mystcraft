@@ -24,8 +24,9 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
 
 EXPOSE 8080
+EXPOSE 8081
 
-ENV ASPNETCORE_URLS="http://*:8080"
+ENV ASPNETCORE_URLS="http://*:8080;https://*:8081"
 ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
 
