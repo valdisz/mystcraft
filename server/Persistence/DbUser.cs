@@ -18,16 +18,13 @@ namespace advisor.Persistence
         public string Email { get; set; }
 
         [GraphQLIgnore]
-        [Required]
         [MaxLength(32)]
         public string Salt { get; set; }
 
         [GraphQLIgnore]
-        [Required]
         public DigestAlgorithm Algorithm { get; set; }
 
         [GraphQLIgnore]
-        [Required]
         [MaxLength(128)]
         public string Digest { get; set; }
 

@@ -40,15 +40,33 @@ namespace advisor
         public string HangfireConnectionString => Configuration.GetConnectionString("hangfire");
 
         public void ConfigureServices(IServiceCollection services) {
+            var discord = Configuration.GetSection("Discord");
+            var discordOAuth = discord.GetSection("OAuth");
+            services.Configure<DiscordOptions>(discord);
+
             services
                 .AddSingleton<IApiKeyStore, ConfigurationApiKeyStore>()
                 .ConfigureApiKeys(Configuration)
                 .ConfigureApplicationCookie(options => Configuration.Bind("CookieSettings", options));
 
             services
-                .AddAuthentication()
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, opt => {
+                    opt.SlidingExpiration = true;
+                    opt.ExpireTimeSpan = TimeSpan.FromDays(30);
+                    opt.Cookie.MaxAge = TimeSpan.FromDays(30);
+                })
+                .AddCookie(ExternalAuthentication.AuthenticationScheme, opt => {
+                    opt.Cookie.MaxAge = null;
+                    opt.SlidingExpiration = false;
+                })
                 .AddApiKeys()
-                .AddCookie();
+                .AddOAuth(DiscordDefaults.AuthenticationScheme, opt => {
+                    discordOAuth.Bind(opt);
+
+                    opt.SignInScheme = ExternalAuthentication.AuthenticationScheme;
+                    opt.SaveTokens = true;
+                });
 
             services.AddHttpsRedirection(options => {
                 options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
@@ -183,25 +201,11 @@ namespace advisor
                 .AddType<AllianceType>()
                 .AddType<AllianceMemberType>()
                     .AddType<AllianceMemberResolvers>()
-                //     .AddType<UniversityResolvers>()
-                // .AddType<StudyPlanType>()
-                // .AddType<UniversityClassType>()
                 .BindRuntimeType<Item, ItemType>()
                 .BindRuntimeType<DbUnitItem, ItemType>()
                 .BindRuntimeType<DbProductionItem, ItemType>()
                 .BindRuntimeType<DbStatItem, ItemType>()
                 ;
-
-                // .AddDataLoaderRegistry()
-                // .AddGraphQL(SchemaBuilder.New()
-                //     .EnableRelaySupport()
-                //     .Create(),
-                //     new QueryExecutionOptions() {
-                //         IncludeExceptionDetails = true,
-                //         ForceSerialExecution = true
-                //     }
-                // )
-                // .AddSingleton<IIdSerializer, IdSerializer>()
 
             services
                 .AddSingleton<AccessControl>()

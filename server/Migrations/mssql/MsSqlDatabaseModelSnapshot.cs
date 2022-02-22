@@ -786,7 +786,6 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Digest")
-                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
@@ -799,7 +798,6 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Salt")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("nvarchar(32)");
 

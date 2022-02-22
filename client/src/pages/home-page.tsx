@@ -211,7 +211,7 @@ export function HomePage() {
 
     return <CenterLayout>
         <TopRightCorner>
-            <Button component={'a'} startIcon={<ExitToAppIcon />} href='/logout' >Sign out</Button>
+            <Button component={'a'} startIcon={<ExitToAppIcon />} href='/account/logout' >Sign out</Button>
         </TopRightCorner>
         <Container>
             <Card>

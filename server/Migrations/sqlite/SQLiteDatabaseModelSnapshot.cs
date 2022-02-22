@@ -777,7 +777,6 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Digest")
-                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
@@ -790,7 +789,6 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Salt")
-                        .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("TEXT");
 

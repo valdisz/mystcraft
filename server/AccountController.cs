@@ -7,28 +7,57 @@ namespace advisor {
     using advisor.Persistence;
     using Microsoft.EntityFrameworkCore;
     using System.Security.Claims;
-    using System;
     using System.Linq;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using MediatR;
     using advisor.Features;
+    using System.Net.Http;
+    using Newtonsoft.Json.Linq;
+    using System.Collections.Generic;
+    using Microsoft.Extensions.Options;
 
     [AllowAnonymous]
     [Route("account")]
     public class AccountController : ControllerBase {
-        public AccountController(Database db, AccessControl accessControl, IMediator mediator) {
+        public AccountController(Database db, AccessControl accessControl, IMediator mediator, IHttpClientFactory httpFactory,
+            IOptionsSnapshot<DiscordOptions> discordOptions
+        ) {
             this.db = db;
             this.accessControl = accessControl;
             this.mediator = mediator;
+            this.httpFactory = httpFactory;
+            this.discordOptions = discordOptions.Value;
         }
 
         private readonly Database db;
         private readonly AccessControl accessControl;
         private readonly IMediator mediator;
+        private readonly IHttpClientFactory httpFactory;
+        private readonly DiscordOptions discordOptions;
+
+        private ClaimsIdentity MapIdentity(string schema, DbUser user) {
+            var claims = new List<Claim> {
+                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
+                new Claim(WellKnownClaimTypes.Email, user.Email)
+            };
+
+            claims.AddRange(user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role)));
+
+            var identity = new ClaimsIdentity(claims, schema, null, WellKnownClaimTypes.Role);
+            return identity;
+        }
+
+        private async Task SignInIdentity(ClaimsIdentity identity) {
+            await HttpContext.SignOutAsync(identity.AuthenticationType);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(identity.AuthenticationType, principal);
+        }
 
         [HttpPost("login-as")]
         [Authorize(Policy = Policies.Root)]
-        public async Task<IActionResult> LoginAsync([FromForm, Required, EmailAddress] string email) {
+        public async Task<IActionResult> LoginAsAsync([FromForm, Required, EmailAddress] string email) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
@@ -38,17 +67,8 @@ namespace advisor {
                 return NotFound();
             }
 
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
-
-            var identity = new ClaimsIdentity(new[] {
-                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-                new Claim(WellKnownClaimTypes.Email, user.Email),
-            }.Concat(roles), CookieAuthenticationDefaults.AuthenticationScheme, null, WellKnownClaimTypes.Role);
-
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
+            await SignInIdentity(identity);
 
             return NoContent();
         }
@@ -63,7 +83,7 @@ namespace advisor {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == model.Email);
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == model.Email && x.Digest != null);
             if (user == null) {
                 return Unauthorized();
             }
@@ -72,24 +92,58 @@ namespace advisor {
                 return Unauthorized();
             }
 
-            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
-
-            var identity = new ClaimsIdentity(new[] {
-                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-                new Claim(WellKnownClaimTypes.Email, user.Email),
-            }.Concat(roles), CookieAuthenticationDefaults.AuthenticationScheme, null, WellKnownClaimTypes.Role);
-
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
+            await SignInIdentity(identity);
 
             return NoContent();
+        }
+
+        [HttpGet("login/{provider}")]
+        public IActionResult LoginExternal([FromRoute, Required] string provider) {
+            if (!ModelState.IsValid) {
+                return BadRequest(ModelState);
+            }
+
+            var auth = new AuthenticationProperties {
+                RedirectUri = Url.Action("ExternalCallback", "Account", new { provider })// $"/accounts/external/{provider}"
+            };
+
+            return Challenge(auth, DiscordDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet("external/{provider}")]
+        public async Task<IActionResult> ExternalCallbackAsync([FromRoute, Required] string provider) {
+            AuthenticateResult result = await HttpContext.AuthenticateAsync(ExternalAuthentication.AuthenticationScheme);
+
+            if (result?.Succeeded != true) {
+                return this.Unauthorized();
+            }
+
+            var accessToken = await HttpContext.GetTokenAsync(result.Ticket.AuthenticationScheme, "access_token");
+
+            using var http = httpFactory.CreateClient();
+            http.DefaultRequestHeaders.Authorization = new ("Bearer", accessToken);
+
+            var response = await http.GetStringAsync($"{discordOptions.Address}/v{discordOptions.ApiVersion}/users/@me");
+            var json = JObject.Parse(response);
+
+            var email = json.Value<string>("email");
+
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email);
+            if (user == null) {
+                user = await mediator.Send(new CreateUser(email, null));
+            }
+
+            var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
+            await SignInIdentity(identity);
+
+            return Redirect("/");
         }
 
         [HttpGet("logout")]
         public async Task<IActionResult> LogoutAsync() {
             if (User.Identity.IsAuthenticated) {
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignOutAsync(User.Identity.AuthenticationType);
             }
 
             return Redirect("/");
@@ -102,7 +156,7 @@ namespace advisor {
             }
 
             if (User.Identity.IsAuthenticated) {
-                await HttpContext.SignOutAsync();
+                await HttpContext.SignOutAsync(User.Identity.AuthenticationType);
             }
 
             var user = await mediator.Send(new CreateUser(model.Email, model.Password));

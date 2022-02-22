@@ -167,10 +167,7 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                     { store.message && <Box mt={2}>
                         <Alert severity={ store.severity }>{store.message}</Alert>
                     </Box> }
-                    {/* <FormControlLabel
-                        control={<Checkbox value='remember' color='primary' />}
-                        label='Remember me'
-                    /> */}
+
                     <Button fullWidth
                         variant='contained'
                         color='primary'
@@ -178,10 +175,13 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                         sx={{
                             margin: [3, 0, 2]
                         }}
-                        /* className={classes.submit} */
-                        >
-                            { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
-                        </Button>
+                    >
+                        { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
+                    </Button>
+
+                    <Box mt={1}>
+                        <Button component={'a'} fullWidth variant='contained' color='primary' sx={{ margin: [3, 0, 2] }} href='/account/login/discord'>Use DISCORD</Button>
+                    </Box>
 
                     <Box mt={1}>
                         <Button fullWidth size='small' variant='text' onClick={store.toggleMode}>

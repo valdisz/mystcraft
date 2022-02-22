@@ -21,17 +21,19 @@ namespace advisor.Features {
 
         public async Task<DbUser> Handle(CreateUser request, CancellationToken cancellationToken) {
             var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);
-            if (user != null) return null;
-
-            var salt = accessControl.GetSalt();
-            var digest = accessControl.ComputeDigest(salt, request.Password);
+            if (user != null) {
+                return user;
+            }
 
             user = new DbUser {
-                Email = request.Email,
-                Algorithm = DigestAlgorithm.SHA256,
-                Salt = salt,
-                Digest = digest
+                Email = request.Email
             };
+
+            if (!string.IsNullOrWhiteSpace(request.Password)) {
+                user.Algorithm = DigestAlgorithm.SHA256;
+                user.Salt = accessControl.GetSalt();
+                user.Digest = accessControl.ComputeDigest(user.Salt, request.Password);
+            }
 
             var resultingRoles = new HashSet<string>(user.Roles);
             resultingRoles.UnionWith(request.Roles);
