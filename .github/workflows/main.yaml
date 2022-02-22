@@ -16,7 +16,7 @@ jobs:
 # echo ::set-output name=docker_image::ghcr.io/${{ github.repository }}/master:$(git rev-parse --short=7 ${{ github.sha }})
       - name: Build docker image
         run: |
-          docker build . --file Dockerfile --tag ${{ steps.vars.outputs.docker_image }}
+          docker build . --file Dockerfile --tag ${{ steps.vars.outputs.docker_image }} --no-cache --progress=plain
       - name: Login to registry
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
