@@ -1,5 +1,5 @@
 import { DisplayObject, IPointData, Text, Container } from 'pixi.js'
-import { Unit } from '../game/unit'
+import { Unit } from '../game'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'

@@ -1,17 +1,8 @@
-import { UnitFragment } from '../schema';
-import { ItemInfo } from "./item-info";
-import { ItemMap } from './item-map';
-import { Ruleset } from './ruleset';
-import { Capacity, MoveType } from './move-capacity';
-import { Faction, Factions } from "./faction";
-import { Flag } from "./flag";
-import { Skill } from "./skill";
-import { SkillInfo } from "./skill-info";
-import { Event } from "./event";
-import { Inventory } from "./inventory";
-import { Region, Structure } from './types';
-import { OrderParser, ORDER_PARSER, UnitOrder, Order } from './orders/parser';
-import { Link } from './link';
+import { UnitFragment } from '../schema'
+import {
+    ItemInfo, ItemMap, Ruleset, Capacity, Faction, Flag, Skill, SkillInfo, Event, Inventory, Link, Region, Structure, MoveType, Factions
+} from './internal';
+import { OrderParser, ORDER_PARSER, UnitOrder, Order } from './orders'
 
 export class Unit {
     constructor(

@@ -20,8 +20,8 @@ namespace advisor.Features
             logger.LogInformation($"Parsing report");
             await mediator.Send(new ParseReports(request.PlayerId, request.EarliestTurn));
 
-            // logger.LogInformation($"Setting up study plans");
-            // await mediator.Send(new SetupStudyPlans(request.PlayerId));
+            logger.LogInformation($"Setting up study plans");
+            await mediator.Send(new StudyPlansSetup(request.PlayerId));
 
             logger.LogInformation($"Calculating statistics");
             await mediator.Send(new CalculateFactionStats(request.PlayerId, request.EarliestTurn));

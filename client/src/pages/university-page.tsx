@@ -2,7 +2,7 @@ import * as React from 'react'
 import { styled } from '@mui/material/styles'
 import { Link } from 'react-router-dom'
 import { useStore } from '../store'
-import { observer, Observer } from 'mobx-react-lite'
+import { observer, Observer } from 'mobx-react'
 import {
     Box,
     AppBar,

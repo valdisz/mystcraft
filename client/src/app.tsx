@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { StoreProvider } from './store'
-import { Routes } from './routes'
+import { AppRoutes } from './routes'
 import { CssBaseline, GlobalStyles } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
@@ -33,7 +33,7 @@ export function App() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             {globalStyles}
-            <Routes />
+            <AppRoutes />
         </ThemeProvider>
     </StoreProvider>
 }

@@ -1,8 +1,8 @@
 import * as React from 'react'
-import gql from 'graphql-tag'
 import { CLIENT } from './client'
 import { SignIn } from './components'
 import { ApolloError } from 'apollo-client'
+import { GetMe, GetMeQuery, GetMeQueryVariables } from './schema'
 
 export interface AuthenticateProps {
 }
@@ -12,8 +12,8 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
     const [ needsSignIn, setNeedsSignIn ] = React.useState(true)
 
     React.useEffect(() => {
-        CLIENT.query({
-            query: gql`query { me { id } }`,
+        CLIENT.query<GetMeQuery, GetMeQueryVariables>({
+            query: GetMe,
             errorPolicy: 'none'
         })
             .then(result => {

@@ -1,6 +1,4 @@
-import { SkillInfo } from './skill-info';
-import { UniqueItem } from './unique-item';
-
+import { SkillInfo, UniqueItem } from './internal';
 
 export class Skill implements UniqueItem {
     constructor(public readonly info: SkillInfo) {

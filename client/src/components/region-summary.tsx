@@ -4,14 +4,14 @@ import { Box, Typography, Button, Grid, Theme,
     Table, TableHead, TableRow, TableCell, TableBody,
     Tooltip,
 } from '@mui/material'
-import { observer } from 'mobx-react-lite'
-import { Region } from '../game/types'
-import { Coords } from '../game/coords'
+import { observer } from 'mobx-react'
+import { Region } from '../game'
+import { Coords } from '../game'
 import { useCopy } from '../lib'
-import { Province } from '../game/province'
-import { TerrainInfo } from '../game/terrain-info'
-import { Item } from '../game/item'
-import { ItemInfo } from '../game/item-info'
+import { Province } from '../game'
+import { TerrainInfo } from '../game'
+import { Item } from '../game'
+import { ItemInfo } from '../game'
 
 
 const WideTooltip = styled(Tooltip)`

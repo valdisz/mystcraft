@@ -1,6 +1,5 @@
 import { StructureFragment } from "../schema";
-import { Ruleset } from "./ruleset";
-import { Region, Unit } from "./types";
+import { Ruleset, Region, Unit } from "./internal";
 
 export class Structure {
     constructor() {

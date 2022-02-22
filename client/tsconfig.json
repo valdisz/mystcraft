@@ -5,9 +5,9 @@
     "exclude": [
         "src/.advisor",
         "node_modules",
-        ".cache",
-        ".parcel-cache",
-        "dist",
+        "build",
+        "public",
+        "static",
     ],
     "compilerOptions": {
         "target": "es6",

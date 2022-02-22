@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { styled } from '@mui/material/styles'
-import { Link, useParams, Switch, Route, useRouteMatch } from 'react-router-dom'
+import { Link, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import {
     AppBar,
@@ -26,14 +26,14 @@ import {
     Tooltip,
 } from '@mui/material';
 import { useStore } from '../store'
-import { Observer, observer } from 'mobx-react-lite'
+import { Observer, observer } from 'mobx-react'
 import { HexMap2 } from '../map'
-import { Region } from "../game/types"
+import { Region } from "../game"
 import { GameRouteParams } from './game-route-params'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { ItemMap } from '../game/item-map'
-import { Item } from '../game/item'
-import { Unit } from '../game/unit'
+import { ItemMap } from '../game'
+import { Item } from '../game'
+import { Unit } from '../game'
 import { RegionSummary } from '../components/region-summary'
 import { StatsPage } from './stats-page'
 import Editor from 'react-simple-code-editor'
@@ -41,13 +41,13 @@ import Prism from 'prismjs'
 import { Dialog } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { GameStore, OrdersState } from '../store/game-store'
-import { Ruleset } from '../game/ruleset'
+import { Ruleset } from '../game'
 import { UnitSummary } from '../components'
-import { Capacity } from '../game/move-capacity'
+import { Capacity } from '../game'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move';
-import { Coords, ICoords } from '../game/coords'
-import { UniversityPage } from './university-page'
+import { Coords, ICoords } from '../game'
+// import { UniversityPage } from './university-page'
 
 const GameContainer = styled('div')`
     width: 100%;
@@ -269,7 +269,6 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
         const map = new HexMap2(canvasRef, level.width, level.height, {
             onClick: onRegionSelected
         })
-        console.log('new HexMap')
 
         map.load()
             .then(() => {
@@ -277,11 +276,25 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
                 map.setRegions(regions)
 
                 const { player } = game.world.factions
-                const coords: Coords = game.region?.coords
-                    ?? JSON.parse(window.localStorage.getItem('coords'))
-                    ?? player.troops.all[0].region.coords
+                let coords: Coords = game.region?.coords
 
-                map.centerAt(coords)
+                if (!coords) {
+                    const lastLocation = window.localStorage.getItem('coords')
+                    if (lastLocation) {
+                        coords = JSON.parse(lastLocation)
+                    }
+                }
+
+                if (!coords) {
+                    const unit = player.troops.first()
+                    if (unit) {
+                        coords = unit.region.coords
+                    }
+                }
+
+                if (coords) {
+                    map.centerAt(coords)
+                }
 
                 setGameMap(map)
                 map.render()
@@ -677,7 +690,7 @@ const RegionComponent = observer(() => {
     </RegionContainer>
 })
 
-const MapTab = observer(() => {
+export const MapTab = observer(() => {
     const { game } = useStore()
 
     return <GameGrid>
@@ -691,7 +704,6 @@ const MapTab = observer(() => {
 
 const GameComponent = observer(() => {
     const { game } = useStore()
-    const { path, url } = useRouteMatch()
 
     return (
         <GameContainer>
@@ -707,31 +719,21 @@ const GameComponent = observer(() => {
                     <GameInfo>
                         <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
                     </GameInfo>
-                    <Button color='inherit' variant='outlined' component={Link as any} value={url} to={url}>Map</Button>
-                    <Button color='inherit' variant='outlined' component={Link as any} value={`${url}/stats`} to={`${url}/stats`}>Statistics</Button>
-                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} value={`${url}/university`} to={`${url}/university`}>University</Button> }
+                    <Button color='inherit' variant='outlined' component={Link as any} to={``}>Map</Button>
+                    <Button color='inherit' variant='outlined' component={Link as any} to={`stats`}>Statistics</Button>
+                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} to={`university`}>University</Button> }
                     <Box flex={1} />
                     <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
                 </Toolbar>
             </AppBar>
-            <Switch>
-                <Route path={`${path}/stats`}>
-                    <StatsPage />
-                </Route>
-                <Route path={`${path}/university`}>
-                    <UniversityPage />
-                </Route>
-                <Route path={path}>
-                    <MapTab />
-                </Route>
-            </Switch>
+            <Outlet />
         </GameContainer>
     );
 })
 
 export function GamePage() {
-    const { gameId } = useParams<GameRouteParams>()
     const { game } = useStore()
+    const { gameId } = useParams()
 
     React.useEffect(() => {
         game.load(gameId)

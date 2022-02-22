@@ -1,14 +1,8 @@
 import { RegionFragment, StructureFragment, UnitFragment } from '../schema'
-import { Ruleset } from './ruleset'
-import { Region } from './region'
-import { Level } from './level'
-import { WorldInfo, WorldLevel } from './world-info'
-import { Provinces } from './province'
-import { Factions, Unit } from './types'
-import { Structure } from './structure'
-import { MovementPathfinder } from './movement-pathfinder'
-import { Coords, ICoords } from './coords'
-import { oppositeDirection } from './link'
+import {
+    Ruleset, Region, Level, WorldInfo, Provinces, Structure, MovementPathfinder, ICoords, oppositeDirection, Factions, Unit,
+    WorldLevel
+} from './internal'
 
 export class World {
     constructor(public readonly info: WorldInfo, public readonly ruleset: Ruleset) {

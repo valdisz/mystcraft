@@ -1,4 +1,4 @@
-import { Region } from '../game/region'
+import { Region } from '../game'
 
 export interface TileState {
     reg: Region

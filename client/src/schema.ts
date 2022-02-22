@@ -789,6 +789,11 @@ export type GetGamesQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetGamesQuery = { __typename?: 'Query', games?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null };
 
+export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetMeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string } | null };
+
 export type GetRegionsQueryVariables = Exact<{
   turnId: Scalars['ID'];
   skip?: Scalars['Int'];
@@ -1255,6 +1260,13 @@ export const GetGames = gql`
   }
 }
     ${GameHeader}`;
+export const GetMe = gql`
+    query GetMe {
+  me {
+    id
+  }
+}
+    `;
 export const GetRegions = gql`
     query GetRegions($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
   node(id: $turnId) {

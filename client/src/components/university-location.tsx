@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { observer } from 'mobx-react-lite'
+import { observer } from 'mobx-react'
 import { StudyLocation, useStore } from '../store'
 import { UniversityStudent } from './university-student'
 

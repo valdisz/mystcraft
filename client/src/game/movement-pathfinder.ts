@@ -1,9 +1,6 @@
-import { Pathfinder } from './algo/pathfinder'
-import { MoveType } from './move-capacity'
-import { Link } from './link'
-import { Region } from './region'
+import { Pathfinder } from './algo'
+import { MoveType, Link, Region, Level } from './internal'
 import { Coord } from '../geometry'
-import { Level } from './level'
 
 export function distanceHeuristic(mapWidth: number, start: Region, goal: Region) {
     const s = start.coords

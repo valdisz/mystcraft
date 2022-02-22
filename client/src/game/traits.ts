@@ -1,6 +1,4 @@
-import { ItemInfo } from './item-info'
-import { Capacity } from './move-capacity'
-import { SkillInfo } from './skill-info'
+import { ItemInfo, Capacity, SkillInfo } from './internal'
 
 export type Traits = keyof TraitsMap
 

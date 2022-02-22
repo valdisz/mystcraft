@@ -1,15 +1,7 @@
 import { Direction, ExitFragment, RegionFragment } from '../schema'
-import { Item } from './item'
-import { ItemMap } from './item-map'
-import { Province } from './province'
-import { Coords } from "./coords"
-import { TerrainInfo } from "./terrain-info"
-import { Settlement } from "./settlement"
-import { Ruleset } from "./ruleset"
-import { Wages } from "./wages"
-import { Structure, Unit, Troops } from './types'
-import { SettlementSize } from './settlement-size'
-import { Links } from './link'
+import {
+    Item, ItemMap, Province, Coords, TerrainInfo, Settlement, Ruleset, Wages, Structure, SettlementSize, Links, Unit, Troops
+} from './internal'
 
 export class Region {
     constructor(public readonly id: string, public readonly coords: Coords) {

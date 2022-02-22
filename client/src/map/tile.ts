@@ -1,5 +1,5 @@
 import { Graphics, IPointData, Point } from 'pixi.js'
-import { Region } from '../game/region'
+import { Region } from '../game'
 import { Feature } from './feature'
 import { Layers } from './layers'
 import { Resources } from './resources'

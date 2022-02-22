@@ -1,5 +1,0 @@
-export * from './faction'
-export * from './troops'
-export * from './unit'
-export * from './region'
-export * from './structure'

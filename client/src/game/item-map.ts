@@ -1,4 +1,4 @@
-import { UniqueItem } from './unique-item'
+import { UniqueItem } from './internal'
 
 export interface ItemMapPredicate<T extends UniqueItem> {
     (item: T): boolean

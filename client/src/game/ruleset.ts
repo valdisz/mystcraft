@@ -1,14 +1,9 @@
 import YAML from 'yaml'
-import { ItemMap } from './item-map'
-import { ItemInfo } from './item-info'
-import { ItemCategory } from './item-category'
-import { TerrainInfo } from './terrain-info'
 import {
+    ItemMap, ItemInfo, ItemCategory, TerrainInfo, Capacity, MoveType, SkillInfo,
     AdvancedTrait, CanLearnTrait, CanMoveTrait, CanProduceTrait, CanSailTrait, CanTeachTrait, ConsumeTrait, FoodTrait,
     FreeMovingItemTrait, NoGiveTrait, NoTransportTrait, ProductionBonus
-} from './traits'
-import { SkillInfo } from './skill-info'
-import { Capacity, MoveType } from './move-capacity'
+} from './internal'
 
 export class Ruleset {
     readonly skills: ItemMap<Readonly<SkillInfo>> = new ItemMap();
@@ -30,7 +25,7 @@ export class Ruleset {
         return skill
     }
 
-    
+
 
     getItem(nameOrCode: string) {
         let item = this.items.get(nameOrCode);

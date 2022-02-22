@@ -1,12 +1,12 @@
 import { autoDetectRenderer, Container, Loader, AbstractRenderer, Point, Rectangle, IPointData } from 'pixi.js'
-import { Region } from "../game/region"
+import { Region } from "../game"
 import { Layers } from './layers'
 import { Resources } from './resources'
 import { Tile, TILE_H, TILE_W } from './tile'
 import { Viewport } from './viewport'
 import { overlapping } from './utils'
 import { Layout } from '../geometry'
-import { ICoords } from '../game/coords'
+import { ICoords } from '../game'
 
 export interface GetRegionCallback {
     (x: number, y: number): Region

@@ -1,5 +1,4 @@
-import { UniqueItem } from "./unique-item";
-import { ItemInfo } from "./item-info";
+import { UniqueItem, ItemInfo } from "./internal";
 
 export class Item implements UniqueItem {
     constructor(public readonly info: ItemInfo) {

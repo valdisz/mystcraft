@@ -3,7 +3,7 @@ import { Avatar, Button, TextField, Link, Box, Alert, Typography, Container } fr
 import { LockOutlined } from '@mui/icons-material'
 import { styled } from '@mui/material/styles'
 
-import { observer, useLocalStore } from 'mobx-react-lite';
+import { observer, useLocalStore } from 'mobx-react';
 import { runInAction } from 'mobx';
 
 function Copyright() {

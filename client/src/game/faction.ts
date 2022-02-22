@@ -1,5 +1,5 @@
 import { Stance } from '../schema'
-import { Troops } from './troops'
+import { Troops } from './internal'
 
 export class Faction {
     constructor(

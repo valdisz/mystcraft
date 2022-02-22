@@ -1,6 +1,4 @@
-import { ItemInfo } from './item-info';
-import { Capacity, MoveType } from './move-capacity';
-import { UniqueItem } from './unique-item';
+import { ItemInfo, Capacity, MoveType, UniqueItem } from './internal';
 
 export interface Resource {
     item: ItemInfo

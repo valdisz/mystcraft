@@ -1,4 +1,4 @@
-import { SettlementSize } from "./settlement-size";
+import { SettlementSize } from "./internal";
 
 
 export interface Settlement {

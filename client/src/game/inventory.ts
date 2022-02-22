@@ -1,9 +1,4 @@
-import { Item } from './item';
-import { ItemInfo } from './item-info';
-import { ItemMap } from './item-map';
-import { Unit } from './unit';
-import { Income } from './income';
-
+import { Item, ItemInfo, ItemMap, Unit, Income } from './internal'
 
 export enum TransferOutcome {
     Ok,

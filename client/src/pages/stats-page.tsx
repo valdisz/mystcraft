@@ -15,9 +15,9 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles'
 import { useStore } from '../store'
-import { Observer } from 'mobx-react-lite'
-import { SkillInfo } from '../game/skill-info'
-import { Link, useParams, Switch, Route, useLocation, useRouteMatch } from 'react-router-dom'
+import { Observer } from 'mobx-react'
+import { SkillInfo } from '../game'
+import { Link, Outlet } from 'react-router-dom'
 
 interface SkillInfoTooltipProps {
     info: SkillInfo
@@ -43,7 +43,7 @@ const WideTooltip = styled(Tooltip)`
     max-width: 500px;
 `
 
-function SkillsTab() {
+export function SkillsTab() {
     const { stats } = useStore()
 
     return <Table size='small' stickyHeader={true}>
@@ -87,7 +87,7 @@ const HeadingCell = styled(TableCell)`
     font-weight: bold;
 `
 
-function IncomeTab() {
+export function IncomeTab() {
     const { stats } = useStore()
 
     return <Table size='small'>
@@ -128,7 +128,7 @@ function IncomeTab() {
     </Table>
 }
 
-function ProductionTab() {
+export function ProductionTab() {
     const { stats } = useStore()
 
     return <Table size='small' stickyHeader={true}>
@@ -153,10 +153,6 @@ function ProductionTab() {
 
 export function StatsPage() {
     const { stats } = useStore()
-    const urm = useRouteMatch()
-    const { path, url } = urm
-
-    console.log('route match', urm)
 
     React.useEffect(() => { stats.loadStats() }, [ ])
 
@@ -164,31 +160,15 @@ export function StatsPage() {
         <Typography variant='h4'>Statistics</Typography>
         <Grid container>
             <Grid item xs={12}>
-                <Observer>
-                    {() => <Tabs value={url}>
-                        <Tab label='Skills' component={Link} value={url} to={url} />
-                        <Tab label='Income' component={Link} value={`${url}/income`} to={`${url}/income`} />
-                        <Tab label='Production' component={Link} value={`${url}/production`} to={`${url}/production`} />
-                    </Tabs> }
-                </Observer>
+                <Tabs>
+                    <Tab label='Skills' component={Link} to='' />
+                    <Tab label='Income' component={Link} to='income' />
+                    <Tab label='Production' component={Link} to='production' />
+                </Tabs>
             </Grid>
-            <Switch>
-                <Route path={`${path}/income`}>
-                    <Grid item xs={4}>
-                        <IncomeTab />
-                    </Grid>
-                </Route>
-                <Route path={`${path}/production`}>
-                    <Grid item xs={12}>
-                        <ProductionTab />
-                    </Grid>
-                </Route>
-                <Route path={path}>
-                    <Grid item xs={4}>
-                        <SkillsTab />
-                    </Grid>
-                </Route>
-            </Switch>
+            <Grid item xs={4}>
+                <Outlet />
+            </Grid>
         </Grid>
     </Container>
 }

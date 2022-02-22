@@ -1,5 +1,4 @@
-import { ExtendedMap } from './extended-map';
-import { Faction, Unit } from './types'
+import { ExtendedMap, Unit } from './internal'
 
 export class Troops extends ExtendedMap<number, Unit> {
     constructor() {

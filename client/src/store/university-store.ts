@@ -7,8 +7,8 @@ import { StudyPlanTarget, StudyPlanTargetMutation, StudyPlanTargetMutationVariab
 import { StudyPlanTeach, StudyPlanTeachMutation, StudyPlanTeachMutationVariables } from '../schema'
 import { StudyPlanStudy, StudyPlanStudyMutation, StudyPlanStudyMutationVariables } from '../schema'
 import { MageFragment, SkillFragment, StudyPlanFragment } from '../schema'
-import { World } from '../game/world'
-import { Region } from '../game/region'
+import { World } from '../game'
+import { Region } from '../game'
 
 export class Skill implements ISkill {
     constructor(data?: ISkill) {

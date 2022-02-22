@@ -1,5 +1,4 @@
-import { Region } from './region'
-import { ICoords } from './coords'
+import { Region, ICoords } from './internal'
 
 export class Level implements Iterable<Region> {
     constructor(public readonly width: number, public readonly height: number, public readonly index: number, public readonly label: string) {

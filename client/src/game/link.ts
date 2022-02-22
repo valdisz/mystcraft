@@ -1,5 +1,5 @@
 import { Direction } from "../schema";
-import { Region } from "./types";
+import { Region } from "./internal";
 
 export class Link {
     constructor(public readonly source: Region, public readonly direction: Direction, public readonly target: Region) {

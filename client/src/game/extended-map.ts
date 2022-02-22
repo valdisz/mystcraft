@@ -45,6 +45,11 @@ export class ExtendedMap<K, V> implements Iterable<V> {
         return this.items.delete(key)
     }
 
+    first() {
+        const r = this.items.entries().next()
+        return !r.done ? r.value : null
+    }
+
     some(predicate: ExtendedMapPredicate<K, V>): boolean {
         for (const [ k, v ] of this.items) {
             if (predicate(v, k)) {

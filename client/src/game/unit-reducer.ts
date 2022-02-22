@@ -1,7 +1,4 @@
-import { Link } from "./link"
-import { Order } from "./orders/parser"
-import { Region } from "./region"
-import { Unit } from "./unit"
+import { Link, Region, Unit } from "./internal"
 
 export class UnitChanges {
     path: Link[]
@@ -18,12 +15,12 @@ function unitAsOn(unit: Unit, stage: 'initial' | 'give'): Unit {
 }
 
 
-function reduceUnit(unit: Unit, order: Order): UnitChanges {
-    switch (order.order) {
-        case 'move':
-        case 'advance': {
+// function reduceUnit(unit: Unit, order: Order): UnitChanges {
+//     switch (order.order) {
+//         case 'move':
+//         case 'advance': {
 
-            break
-        }
-    }
-}
+//             break
+//         }
+//     }
+// }

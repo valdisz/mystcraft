@@ -1,7 +1,4 @@
-import { UniqueItem } from './unique-item'
-import { Traits, TraitsMap } from './traits'
-import { Item } from "./item"
-import { ItemCategory } from "./item-category"
+import { UniqueItem, Traits, TraitsMap, Item, ItemCategory } from './internal'
 
 export class ItemInfo implements UniqueItem {
     constructor(public readonly code: string, public readonly category: ItemCategory, singular: string, plural: string) {

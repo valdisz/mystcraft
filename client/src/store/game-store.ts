@@ -7,11 +7,11 @@ import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
 import { GetUnits, GetUnitsQuery, GetUnitsQueryVariables } from '../schema'
 import { SetOrder, SetOrderMutation, SetOrderMutationVariables } from '../schema'
-import { Ruleset } from "../game/ruleset"
-import { Region } from "../game/region"
-import { World } from "../game/world"
-import { WorldInfo, WorldLevel } from '../game/world-info'
-import { Unit } from '../game/types'
+import { Ruleset } from "../game"
+import { Region } from "../game"
+import { World } from "../game"
+import { WorldInfo, WorldLevel } from '../game'
+import { Unit } from '../game'
 import { saveAs } from 'file-saver'
 import { InterfaceCommand, MoveCommand } from './commands/move'
 import { UniversityStore } from './university-store'

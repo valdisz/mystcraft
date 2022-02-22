@@ -1,4 +1,4 @@
-import { Region } from './types';
+import { Region } from './internal';
 
 export class Province {
     constructor(public readonly name: string) {

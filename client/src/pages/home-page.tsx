@@ -3,7 +3,7 @@ import { styled } from '@mui/system'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
     ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
 } from '@mui/material'
-import { Observer, observer } from 'mobx-react-lite'
+import { Observer, observer } from 'mobx-react'
 import { Link } from 'react-router-dom'
 import GrainIcon from '@mui/icons-material/Grain';
 import { useStore } from '../store'
