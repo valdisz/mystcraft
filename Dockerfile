@@ -36,6 +36,7 @@ WORKDIR /app
 
 COPY --from=net-build /server/out .
 COPY --from=node-build /client/dist ./wwwroot
+COPY --from=node-build /client/static ./wwwroot
 
 RUN mkdir -p /usr/var/advisor \
     && chown app /usr/var/advisor \
