@@ -35,8 +35,8 @@ ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
 ENV ADVISOR_DataProtection__Path="/usr/var/advisor"
 
-RUN addgroup -g ${GID} --system app \
-    && adduser -G app --system -d /app -s /bin/sh -u ${UID} app \
+RUN addgroup --gid ${GID} --system app \
+    && adduser -G app --system -d /app -s /bin/sh --uid ${UID} app \
     && chmod u-w /app
 
 WORKDIR /app
