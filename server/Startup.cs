@@ -72,7 +72,7 @@ namespace advisor {
                 });
 
             services.AddDataProtection()
-                .PersistKeysToFileSystem(new System.IO.DirectoryInfo("data"));
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo(Configuration.GetValue<string>("DataProtection:Path")));
 
             services.AddHttpsRedirection(options => {
                 options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;

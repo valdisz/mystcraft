@@ -42,8 +42,7 @@ RUN mkdir -p /usr/var/advisor \
     && chown app /usr/var/advisor \
     && chmod u+w /usr/var/advisor \
     && chown app /app \
-    && chmod u+r /app \
-    && chmod u+w /app/data
+    && chmod u+r /app
 
 USER app
 ENTRYPOINT ["dotnet", "advisor.dll"]
