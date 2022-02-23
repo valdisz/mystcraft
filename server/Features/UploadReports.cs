@@ -43,13 +43,10 @@ namespace advisor.Features {
                 earliestTurn = Math.Min(earliestTurn, turnNumber);
             }
 
-            await db.SaveChangesAsync();
-
             return earliestTurn;
         }
 
-        private async Task SaveReportAsync(DbPlayer player, int year, int month, int turnNumber, int factionNumber, string factionName, string source, bool overwrite) {
-            DbReport dbReport = null;
+        private async Task SaveReportAsync(DbPlayer player, int year, int month, int turnNumber, int factionNumber, string factionName, string source) {
             var turn = await db.Turns
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turnNumber);
@@ -62,30 +59,26 @@ namespace advisor.Features {
                     Number = turnNumber
                 };
 
-                player.Turns.Add(turn);
-            }
-            else {
-                dbReport = await db.Reports
-                    .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnNumber == turn.Number);
+                await db.AddAsync(turn);
             }
 
-            bool reportExists = dbReport != null;
+            DbReport dbReport = await db.Reports
+                .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.FactionNumber == factionNumber && x.TurnNumber == turn.Number);
 
-            if (!reportExists) {
+            if (dbReport != null) {
                 dbReport = new DbReport {
                     PlayerId = player.Id,
-                    TurnNumber = turn.Number
+                    TurnNumber = turn.Number,
+                    FactionNumber = factionNumber,
+                    FactionName = factionName
                 };
 
-                player.Reports.Add(dbReport);
-                turn.Reports.Add(dbReport);
+                await db.AddAsync(dbReport);
             }
 
-            if (!reportExists || overwrite) {
-                dbReport.FactionNumber = factionNumber;
-                dbReport.FactionName = factionName;
-                dbReport.Source = source;
-            }
+            dbReport.Source = source;
+
+            await db.SaveChangesAsync();
         }
 
         private async Task<int> LoadReportAsync(string source, DbPlayer player, List<DbPlayer> allies) {
@@ -108,9 +101,9 @@ namespace advisor.Features {
             int month = date.Month;
             int turnNumber = month + (year - 1) * 12;
 
-            await SaveReportAsync(player, year, month, turnNumber, factionNumber, factionName, source, true);
+            await SaveReportAsync(player, year, month, turnNumber, factionNumber, factionName, source);
             foreach (var ally in allies) {
-                await SaveReportAsync(ally, year, month, turnNumber, factionNumber, factionName, source, true);
+                await SaveReportAsync(ally, year, month, turnNumber, factionNumber, factionName, source);
             }
 
             player.Number ??= factionNumber;
@@ -122,6 +115,8 @@ namespace advisor.Features {
             player.Game.EngineVersion ??= engine?.Version;
             player.Game.RulesetName ??= engine?.Ruleset?.Name;
             player.Game.RulesetVersion ??= engine?.Ruleset?.Version;
+
+            await db.SaveChangesAsync();
 
             return turnNumber;
         }
