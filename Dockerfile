@@ -30,7 +30,7 @@ ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
 ENV ADVISOR_DataProtection__Path="/usr/var/advisor"
 
-RUN useradd --create-home app
+RUN groupadd app && useradd --home /app -g app -m app
 
 VOLUME /usr/var/advisor
 WORKDIR /app
@@ -40,10 +40,10 @@ COPY --from=node-build /client/build ./wwwroot
 COPY --from=node-build /client/static ./wwwroot
 
 RUN mkdir -p /usr/var/advisor \
-    && chown app /usr/var/advisor \
-    && chmod u+w /usr/var/advisor \
-    && chown app /app \
-    && chmod u+r /app
+    && chown app:app /usr/var/advisor \
+    && chmod ug+w /usr/var/advisor \
+    && chmod ug+r /usr/var/advisor \
+    && chmod u-w /app
 
 USER app
 ENTRYPOINT ["dotnet", "advisor.dll"]
