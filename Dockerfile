@@ -31,7 +31,7 @@ ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db
 ENV ADVISOR_DataProtection__Path="/usr/var/advisor"
 
 RUN groupadd --gid 1001 app \
-    && useradd --gid 1001 --home /app --shell /bin/sh --uid 1001 app \
+    && useradd --gid 1001 --create-home --home /app --shell /bin/sh --uid 1001 app \
     && chmod u-w /app
 
 WORKDIR /app
