@@ -1,6 +1,3 @@
-ARG UID=1001
-ARG GID=1001
-
 FROM node:14 as node-build
 
 WORKDIR /client
@@ -29,14 +26,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0
 EXPOSE 5000
 EXPOSE 5001
 
-ENV UID=${UID}
-ENV GID=${GID}
 ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
 ENV ADVISOR_DataProtection__Path="/usr/var/advisor"
 
-RUN addgroup --gid ${GID} --system app \
-    && adduser -G app --system -d /app -s /bin/sh --uid ${UID} app \
+RUN addgroup --gid 1001 --system app \
+    && adduser -G app --system -d /app -s /bin/sh --uid 1001 app \
     && chmod u-w /app
 
 WORKDIR /app
