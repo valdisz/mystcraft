@@ -42,7 +42,7 @@ COPY --from=node-build /client/static ./wwwroot
 
 RUN mkdir -p /usr/var/advisor \
     && chown app:app /usr/var/advisor \
-    && chown -r app:app /app \
+    && chown app:app -r /app \
     && chmod u+w /usr/var/advisor \
     && chmod u+r /usr/var/advisor
 
