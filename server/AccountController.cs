@@ -57,7 +57,7 @@ namespace advisor {
 
         [HttpGet("login-as")]
         [Authorize(Policy = Policies.Root)]
-        public async Task<IActionResult> LoginAsAsync([FromForm, Required, EmailAddress] string email) {
+        public async Task<IActionResult> LoginAsAsync([FromQuery, Required, EmailAddress] string email) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
