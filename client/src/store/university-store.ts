@@ -610,8 +610,19 @@ export class Student {
     }
 }
 
+export interface StudyRegion {
+    x: number
+    y: number
+    z: number
+    label: string
+    terrain: string
+    province: string
+    settlement: string
+    size: string
+}
+
 export class StudyLocation {
-    constructor(public readonly region: Region) {
+    constructor(public readonly region: StudyRegion) {
         makeObservable(this)
     }
 
@@ -680,7 +691,14 @@ export class UniversityStore {
         const getLocation = (x: number, y: number, z: number) => {
             const region = this.world.getRegion(x, y, z)
             if (!locations.has(region.id)) {
-                locations.set(region.id, new StudyLocation(region))
+                locations.set(region.id, new StudyLocation({
+                    x, y, z,
+                    label: region?.coords?.label,
+                    terrain: region?.terrain?.name,
+                    province: region?.province?.name,
+                    settlement: region?.settlement?.name,
+                    size: region?.settlement?.size?.toLowerCase()
+                }))
             }
 
             return locations.get(region.id)

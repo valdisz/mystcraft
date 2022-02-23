@@ -22,10 +22,10 @@ export const UniversityLocation = observer(({ location }: UniversityLocationProp
     return <tbody>
         <tr>
             <LocationCell colSpan={20}>
-                {region.terrain.name}
-                ({region.coords.x},{region.coords.y},{region.coords.z} {region.coords.label})
-                in {region.province.name}
-                { region.settlement ? `, contains ${region.settlement.name} [${region.settlement.size.toLowerCase()}]` : '' }
+                {region.terrain ?? 'unknown'}
+                ({region.x},{region.y},{region.z} {region.label})
+                in {region.province ?? 'unknown'}
+                { region.settlement ? `, contains ${region.settlement} [${region.size}]` : '' }
             </LocationCell>
         </tr>
         <tr>
