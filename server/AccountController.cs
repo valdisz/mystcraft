@@ -60,7 +60,7 @@ namespace advisor {
 
         [HttpGet("login-as/{userId}")]
         [Authorize(Policy = Policies.Root)]
-        public async Task<IActionResult> LoginAsAsync([FromRoute, Required, EmailAddress] string userId) {
+        public async Task<IActionResult> LoginAsAsync([FromRoute, Required] string userId) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
