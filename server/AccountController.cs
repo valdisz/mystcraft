@@ -55,7 +55,7 @@ namespace advisor {
             await HttpContext.SignInAsync(identity.AuthenticationType, principal);
         }
 
-        [HttpPost("login-as")]
+        [HttpGet("login-as")]
         [Authorize(Policy = Policies.Root)]
         public async Task<IActionResult> LoginAsAsync([FromForm, Required, EmailAddress] string email) {
             if (!ModelState.IsValid) {
@@ -70,7 +70,7 @@ namespace advisor {
             var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
             await SignInIdentity(identity);
 
-            return NoContent();
+            return Redirect("/");
         }
 
         [HttpPost("login")]
