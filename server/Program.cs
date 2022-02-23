@@ -46,10 +46,10 @@
                     logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
                 })
                 .UseStartup<Startup>()
-                .ConfigureKestrel(conf => {
+                .UseKestrel((hostingContext, conf) => {
+                    conf.Configure(hostingContext.Configuration.GetSection("Kestrel"));
                     conf.AllowSynchronousIO = true;
                 })
-                .UseKestrel()
                 .UseWebRoot(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"));
 
             return builder;
