@@ -1,14 +1,16 @@
-namespace advisor
-{
+namespace advisor {
     using System;
     using advisor.Authorization;
     using advisor.Persistence;
     using Hangfire;
     using Hangfire.Console;
+    using Hangfire.Console.Extensions;
     using Hangfire.Heartbeat;
+    using Hangfire.Heartbeat.Server;
     using Hangfire.PostgreSql;
     using Hangfire.RecurringJobAdmin;
     using Hangfire.RecurringJobExtensions;
+    using Hangfire.Server;
     using Hangfire.States;
     using Hangfire.Storage.SQLite;
     using HotChocolate;
@@ -18,6 +20,7 @@ namespace advisor
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
@@ -67,6 +70,9 @@ namespace advisor
                     opt.SignInScheme = ExternalAuthentication.AuthenticationScheme;
                     opt.SaveTokens = true;
                 });
+
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new System.IO.DirectoryInfo("data"));
 
             services.AddHttpsRedirection(options => {
                 options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
@@ -146,16 +152,17 @@ namespace advisor
                 conf.UseRecurringJobAdmin(typeof(Startup).Assembly);
                 conf.UseHeartbeatPage(TimeSpan.FromSeconds(5));
 
-                conf.UseRecurringJob(typeof(RemoteGameServerJobs));
+                // conf.UseRecurringJob(typeof(RemoteGameServerJobs));
+                conf.UseRecurringJob(typeof(MaintenanceJobs));
             });
 
-            GlobalJobFilters.Filters.Add(new JoiningSupportAttribute(new BackgroundJobStateChanger()));
-            GlobalStateHandlers.Handlers.Add(new JoiningState.Handler());
+            // GlobalJobFilters.Filters.Add(new JoiningSupportAttribute(new BackgroundJobStateChanger()));
+            // GlobalStateHandlers.Handlers.Add(new JoiningState.Handler());
 
-            // services
-            //     .AddHangfireServer()
-            //     .AddHangfireConsoleExtensions()
-            //     .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
+            services
+                .AddHangfireServer()
+                .AddHangfireConsoleExtensions()
+                .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
 
             services
                 .AddAutoMapper(typeof(MappingProfile));
@@ -240,11 +247,11 @@ namespace advisor
                     endpoints.MapControllers();
                     endpoints
                         .MapGraphQL();
-                    // endpoints.MapHangfireDashboard(new DashboardOptions {
-                    //     Authorization = new[] {
-                    //         new RoleBasedDashboardAuthorizationFilter(Roles.Root)
-                    //     }
-                    // });
+                    endpoints.MapHangfireDashboard(new DashboardOptions {
+                        Authorization = new[] {
+                            new RoleBasedDashboardAuthorizationFilter(Roles.Root)
+                        }
+                    });
                 });
         }
     }

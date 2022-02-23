@@ -9,7 +9,7 @@ namespace advisor
     using Microsoft.Extensions.Logging;
 
     public class MaintenanceJobs {
-        public MaintenanceJobs(Database db, IMediator mediator, ILogger<RemoteGameServerJobs> logger) {
+        public MaintenanceJobs(Database db, IMediator mediator, ILogger<MaintenanceJobs> logger) {
             this.db = db;
             this.mediator = mediator;
             this.logger = logger;
@@ -19,8 +19,8 @@ namespace advisor
         private readonly IMediator mediator;
         private readonly ILogger logger;
 
-
-        [RecurringJob("0 0 * * *", TimeZone = "America/Los_Angeles")]
+        // every hour
+        [RecurringJob("0 * * * *", TimeZone = "America/Los_Angeles")]
         public async Task ReconcileRports() {
             logger.LogInformation($"Looking for unparsed reports");
 

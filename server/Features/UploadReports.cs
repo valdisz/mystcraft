@@ -2,6 +2,7 @@ namespace advisor.Features {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using advisor.Model;
@@ -21,13 +22,24 @@ namespace advisor.Features {
         public async Task<int> Handle(UploadReports request, CancellationToken cancellationToken) {
             DbPlayer player = await db.Players
                 .Include(x => x.Game)
+                .Include(x => x.AllianceMembererships)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 
             if (player == null) return -1;
 
+            var playerAlliances = player.AllianceMembererships.Select(x => x.AllianceId).ToList();
+
+            var allies = await db.Alliances
+                .Where(x => playerAlliances.Contains(x.Id))
+                .Include(x => x.Members.Where(m => m.PlayerId != player.Id))
+                .ThenInclude(x => x.Player)
+                .SelectMany(x => x.Members)
+                .Select(x => x.Player)
+                .ToListAsync();
+
             int earliestTurn = int.MaxValue;
             foreach (var report in request.Reports) {
-                var turnNumber = await LoadReportAsync(db, report, player);
+                var turnNumber = await LoadReportAsync(report, player, allies);
                 earliestTurn = Math.Min(earliestTurn, turnNumber);
             }
 
@@ -36,7 +48,47 @@ namespace advisor.Features {
             return earliestTurn;
         }
 
-        private static async Task<int> LoadReportAsync(Database db, string source, DbPlayer player) {
+        private async Task SaveReportAsync(DbPlayer player, int year, int month, int turnNumber, int factionNumber, string factionName, string source, bool overwrite) {
+            DbReport dbReport = null;
+            var turn = await db.Turns
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turnNumber);
+
+            if (turn == null) {
+                turn = new DbTurn {
+                    PlayerId = player.Id,
+                    Month = month,
+                    Year = year,
+                    Number = turnNumber
+                };
+
+                player.Turns.Add(turn);
+            }
+            else {
+                dbReport = await db.Reports
+                    .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnNumber == turn.Number);
+            }
+
+            bool reportExists = dbReport != null;
+
+            if (!reportExists) {
+                dbReport = new DbReport {
+                    PlayerId = player.Id,
+                    TurnNumber = turn.Number
+                };
+
+                player.Reports.Add(dbReport);
+                turn.Reports.Add(dbReport);
+            }
+
+            if (!reportExists || overwrite) {
+                dbReport.FactionNumber = factionNumber;
+                dbReport.FactionName = factionName;
+                dbReport.Source = source;
+            }
+        }
+
+        private async Task<int> LoadReportAsync(string source, DbPlayer player, List<DbPlayer> allies) {
             using var textReader = new StringReader(source);
 
             using var atlantisReader = new AtlantisReportJsonConverter(textReader,
@@ -56,42 +108,13 @@ namespace advisor.Features {
             int month = date.Month;
             int turnNumber = month + (year - 1) * 12;
 
-            var turn = await db.Turns
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turnNumber);
-            DbReport dbReport = null;
-
-            if (turn == null) {
-                turn = new DbTurn {
-                    PlayerId = player.Id,
-                    Month = month,
-                    Year = year,
-                    Number = turnNumber
-                };
-
-                player.Turns.Add(turn);
-            }
-            else {
-                dbReport = await db.Reports
-                    .FirstOrDefaultAsync(x => x.FactionNumber == factionNumber && x.TurnNumber == turn.Number);
+            await SaveReportAsync(player, year, month, turnNumber, factionNumber, factionName, source, true);
+            foreach (var ally in allies) {
+                await SaveReportAsync(ally, year, month, turnNumber, factionNumber, factionName, source, false);
             }
 
-            if (dbReport == null) {
-                dbReport = new DbReport {
-                    PlayerId = player.Id,
-                    TurnNumber = turn.Number
-                };
-
-                player.Reports.Add(dbReport);
-                turn.Reports.Add(dbReport);
-            }
-
-            dbReport.FactionNumber = factionNumber;
-            dbReport.FactionName = factionName;
-            dbReport.Source = source;
-
-            player.Number ??= dbReport.FactionNumber;
-            if (dbReport.FactionNumber == player.Number && turnNumber >= player.LastTurnNumber) {
+            player.Number ??= factionNumber;
+            if (factionNumber == player.Number && turnNumber >= player.LastTurnNumber) {
                 player.Name = factionName;
                 player.LastTurnNumber = turnNumber;
             }

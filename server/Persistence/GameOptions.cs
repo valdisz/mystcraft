@@ -6,6 +6,7 @@ namespace advisor.Persistence {
     public class GameOptions {
         public List<MapLevel> Map { get; set; } = new ();
         public string Schedule { get; set; }
+        public string TimeZone { get; set; }
         public string ServerAddress { get; set; }
     }
 }
