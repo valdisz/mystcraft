@@ -110,7 +110,7 @@ namespace advisor.Features {
 
             await SaveReportAsync(player, year, month, turnNumber, factionNumber, factionName, source, true);
             foreach (var ally in allies) {
-                await SaveReportAsync(ally, year, month, turnNumber, factionNumber, factionName, source, false);
+                await SaveReportAsync(ally, year, month, turnNumber, factionNumber, factionName, source, true);
             }
 
             player.Number ??= factionNumber;

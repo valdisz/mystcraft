@@ -1,9 +1,11 @@
 ﻿namespace advisor {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using advisor.Features;
     using advisor.Persistence;
+    using Hangfire;
     using MediatR;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
@@ -59,8 +61,31 @@
             var host = CreateHostBuilder(args).Build();
 
             await RunDatabaseMigrationsAsync(host);
+            await ConfigureRecurringJobsTasks(host);
 
             await host.RunAsync();
+        }
+
+        private static async Task ConfigureRecurringJobsTasks(IWebHost host) {
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+
+            var conf = services.GetRequiredService<IConfiguration>();
+            var db = services.GetRequiredService<Database>();
+            var jobs = services.GetRequiredService<IRecurringJobManager>();
+
+            var games = await db.Games
+                .Where(x => x.Type == Persistence.GameType.Remote)
+                .ToListAsync();
+
+            foreach (var game in games) {
+                jobs.AddOrUpdate<RemoteGameServerJobs>(
+                    $"game-{game.Id}",
+                    x => x.NewOrigins(game.Id),
+                    game.Options.Schedule,
+                    TimeZoneInfo.FindSystemTimeZoneById(game.Options.TimeZone ?? "America/Los_Angeles")
+                );
+            }
         }
 
         private static async Task RunDatabaseMigrationsAsync(IWebHost host) {
