@@ -15,17 +15,19 @@ namespace advisor {
     using Newtonsoft.Json.Linq;
     using System.Collections.Generic;
     using Microsoft.Extensions.Options;
+    using HotChocolate.Types.Relay;
 
     [AllowAnonymous]
     [Route("account")]
     public class AccountController : ControllerBase {
         public AccountController(Database db, AccessControl accessControl, IMediator mediator, IHttpClientFactory httpFactory,
-            IOptionsSnapshot<DiscordOptions> discordOptions
+            IOptionsSnapshot<DiscordOptions> discordOptions, IIdSerializer idSerializer
         ) {
             this.db = db;
             this.accessControl = accessControl;
             this.mediator = mediator;
             this.httpFactory = httpFactory;
+            this.idSerializer = idSerializer;
             this.discordOptions = discordOptions.Value;
         }
 
@@ -33,6 +35,7 @@ namespace advisor {
         private readonly AccessControl accessControl;
         private readonly IMediator mediator;
         private readonly IHttpClientFactory httpFactory;
+        private readonly IIdSerializer idSerializer;
         private readonly DiscordOptions discordOptions;
 
         private ClaimsIdentity MapIdentity(string schema, DbUser user) {
@@ -55,14 +58,17 @@ namespace advisor {
             await HttpContext.SignInAsync(identity.AuthenticationType, principal);
         }
 
-        [HttpGet("login-as")]
+        [HttpGet("login-as/{userId}")]
         [Authorize(Policy = Policies.Root)]
-        public async Task<IActionResult> LoginAsAsync([FromQuery, Required, EmailAddress] string email) {
+        public async Task<IActionResult> LoginAsAsync([FromRoute, Required, EmailAddress] string userId) {
             if (!ModelState.IsValid) {
                 return BadRequest(ModelState);
             }
 
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email);
+            var id = idSerializer.Deserialize(userId);
+            var idValue = (long) id.Value;
+
+            var user = await db.Users.SingleOrDefaultAsync(x => x.Id == idValue);
             if (user == null) {
                 return NotFound();
             }
