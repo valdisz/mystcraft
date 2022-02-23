@@ -107,7 +107,7 @@ export function UniversityPage() {
             <Grid container>
                 <Grid item xs={12}>
                     <StudySchedule>
-                        { university.locations.map(location => <UniversityLocation key={location.region.id} location={location} />) }
+                        { university.locations.map(location => <UniversityLocation key={`${location.region.x},${location.region.y},${location.region.z}`} location={location} />) }
                     </StudySchedule>
                 </Grid>
             </Grid>
