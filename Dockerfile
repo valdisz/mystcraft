@@ -28,6 +28,7 @@ EXPOSE 5001
 
 ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
+ENV ADVISOR_DataProtection__Path="/usr/var/advisor"
 
 RUN useradd --create-home app
 
