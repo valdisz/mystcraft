@@ -27,7 +27,6 @@ namespace advisor.Features {
         public async Task<Unit> Handle(ParseReports request, CancellationToken cancellationToken) {
             var playerId = request.PlayerId;
             var player = await db.Players
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == playerId);
 
             // load all turn numbers of the player so that we can properly transfer history
@@ -97,7 +96,9 @@ namespace advisor.Features {
 
                 // update player password if latest turn
                 if (currentTurn.TurnNumber == player.LastTurnNumber) {
-                    if (report.OrdersTemplate?.Password != null) player.Password = report.OrdersTemplate.Password;
+                    if (report.OrdersTemplate?.Password != null) {
+                        player.Password = report.OrdersTemplate.Password;
+                    }
                 }
 
                 // save changes to database
