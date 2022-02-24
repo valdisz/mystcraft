@@ -161,7 +161,7 @@ namespace advisor.Features {
             var reportsQuery = db.Reports
                 .AsNoTracking()
                 .FilterByTurn(playerId, turnNumber)
-                .Select(x => new { x.FactionNumber, x.Json });
+                .Select(x => new { x.FactionNumber });
 
             if (playerFactionNumber != null) {
                 reportsQuery = reportsQuery.Where(x => x.FactionNumber != playerFactionNumber);
@@ -186,10 +186,18 @@ namespace advisor.Features {
                 }
             }
 
-            var reports = reportsQuery.AsAsyncEnumerable();
-            await foreach (var rep in reports) {
+            var reports = await reportsQuery.ToListAsync();
+            foreach (var rep in reports) {
                 JReport next;
-                if (rep.Json == null) {
+
+                var json = await db.Reports
+                    .AsNoTracking()
+                    .FilterByTurn(playerId, turnNumber)
+                    .Where(x => x.FactionNumber == rep.FactionNumber)
+                    .Select(x => x.Json)
+                    .SingleOrDefaultAsync();
+
+                if (json == null) {
                     var unprasedReport = await db.Reports
                         .FilterByTurn(playerId, turnNumber)
                         .Where(x => x.FactionNumber == rep.FactionNumber)
@@ -197,7 +205,7 @@ namespace advisor.Features {
                     next = await ParseJsonReportAsync(unprasedReport);
                 }
                 else {
-                    next = JsonConvert.DeserializeObject<JReport>(rep.Json);
+                    next = JsonConvert.DeserializeObject<JReport>(json);
                 }
 
                 if (report == null) {
