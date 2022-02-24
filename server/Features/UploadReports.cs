@@ -29,13 +29,15 @@ namespace advisor.Features {
 
             var playerAlliances = player.AllianceMembererships.Select(x => x.AllianceId).ToList();
 
-            var allies = await db.Alliances
+            var allies = (await db.Alliances
                 .Where(x => playerAlliances.Contains(x.Id))
                 .Include(x => x.Members.Where(m => m.PlayerId != player.Id))
                 .ThenInclude(x => x.Player)
                 .SelectMany(x => x.Members)
                 .Select(x => x.Player)
-                .ToListAsync();
+                .ToListAsync())
+                .Where(x => x.Id != player.Id)
+                .ToList();
 
             int earliestTurn = int.MaxValue;
             foreach (var report in request.Reports) {
@@ -62,21 +64,22 @@ namespace advisor.Features {
                 await db.AddAsync(turn);
             }
 
-            DbReport dbReport = await db.Reports
+            DbReport report = await db.Reports
                 .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.FactionNumber == factionNumber && x.TurnNumber == turn.Number);
 
-            if (dbReport != null) {
-                dbReport = new DbReport {
+            if (report == null) {
+                report = new DbReport {
                     PlayerId = player.Id,
                     TurnNumber = turn.Number,
                     FactionNumber = factionNumber,
                     FactionName = factionName
                 };
 
-                await db.AddAsync(dbReport);
+                turn.Reports.Add(report);
+                await db.AddAsync(report);
             }
 
-            dbReport.Source = source;
+            report.Source = source;
 
             await db.SaveChangesAsync();
         }

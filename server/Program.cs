@@ -78,7 +78,7 @@
                 .Where(x => x.Type == Persistence.GameType.Remote)
                 .ToListAsync();
 
-            foreach (var game in games) {
+            foreach (var game in games.Where(x => x.Options.Schedule != null)) {
                 jobs.AddOrUpdate<RemoteGameServerJobs>(
                     $"game-{game.Id}",
                     x => x.NewOrigins(game.Id),
