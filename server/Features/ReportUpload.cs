@@ -10,16 +10,16 @@ namespace advisor.Features {
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record UploadReports(long PlayerId, IEnumerable<string> Reports) : IRequest<int>;
+    public record ReportUpload(long PlayerId, IEnumerable<string> Reports) : IRequest<int>;
 
-    public class UploadReportsHandler : IRequestHandler<UploadReports, int> {
-        public UploadReportsHandler(Database db) {
+    public class ReportUploadHandler : IRequestHandler<ReportUpload, int> {
+        public ReportUploadHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<int> Handle(UploadReports request, CancellationToken cancellationToken) {
+        public async Task<int> Handle(ReportUpload request, CancellationToken cancellationToken) {
             DbPlayer player = await db.Players
                 .Include(x => x.Game)
                 .Include(x => x.AllianceMembererships)

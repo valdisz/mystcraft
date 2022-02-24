@@ -35,7 +35,7 @@ namespace advisor.Features {
 
             int earliestTurn = player.LastTurnNumber;
 
-            await mediator.Send(new ParseReports(player.Id, earliestTurn, report));
+            await mediator.Send(new ReportParse(player.Id, earliestTurn, report));
 
             return Unit.Value;
         }

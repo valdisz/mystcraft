@@ -64,6 +64,11 @@ namespace advisor {
             return mediator.Send(new DeleteGame(gameId));
         }
 
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<TurnReProcessResult> TurnReProcess(IMediator mediator, [ID("Game")] long gameId, int turn) {
+            return mediator.Send(new TurnReProcess(gameId, turn));
+        }
+
         public async Task<MutationResult<string>> SetOrders(
             IResolverContext context,
             IMediator mediator,

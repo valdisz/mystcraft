@@ -109,7 +109,7 @@ namespace advisor {
                 var report = await DownloadReportForFactionAsync(player.Number.Value, player.Password);
 
                 logger.LogInformation($"{player.Name} ({player.Number}): Saving report to database");
-                var turn = await mediator.Send(new UploadReports(player.Id, new[] { report }));
+                var turn = await mediator.Send(new ReportUpload(player.Id, new[] { report }));
             }
         }
 
@@ -134,7 +134,7 @@ namespace advisor {
         public async Task ProcessTurns(List<DbPlayer> players, int turnNumber) {
             foreach (var player in players) {
                 logger.LogInformation($"{player.Name} ({player.Number}): Processing turn");
-                await mediator.Send(new ProcessTurn(player.Id, turnNumber));
+                await mediator.Send(new TurnProcess(player.Id, turnNumber));
             }
         }
     }

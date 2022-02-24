@@ -11,10 +11,10 @@ namespace advisor.Features {
     using advisor.Model;
     using advisor.Persistence;
 
-    public record ParseReports(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
+    public record ReportParse(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
 
-    public class ParseReportsHandler : IRequestHandler<ParseReports> {
-        public ParseReportsHandler(Database db, IMapper mapper, IMediator mediator) {
+    public class ReportParseHandler : IRequestHandler<ReportParse> {
+        public ReportParseHandler(Database db, IMapper mapper, IMediator mediator) {
             this.db = db;
             this.mapper = mapper;
             this.mediator = mediator;
@@ -24,10 +24,10 @@ namespace advisor.Features {
         private readonly IMapper mapper;
         private readonly IMediator mediator;
 
-        public async Task<Unit> Handle(ParseReports request, CancellationToken cancellationToken) {
+        public async Task<Unit> Handle(ReportParse request, CancellationToken cancellationToken) {
             var playerId = request.PlayerId;
             var player = await db.Players
-                .FirstOrDefaultAsync(x => x.Id == playerId);
+                .SingleOrDefaultAsync(x => x.Id == playerId);
 
             // load all turn numbers of the player so that we can properly transfer history
             List<TurnContext> turns = new List<TurnContext>((await db.Turns
@@ -94,11 +94,14 @@ namespace advisor.Features {
                 // synchornize report with database
                 await sync.SyncReportAsync();
 
-                // update player password if latest turn
-                if (currentTurn.TurnNumber == player.LastTurnNumber) {
-                    if (report.OrdersTemplate?.Password != null) {
-                        player.Password = report.OrdersTemplate.Password;
-                    }
+                // update player password if latest turn or it is empty
+                bool updatePassword = player.Password == null || currentTurn.TurnNumber == player.LastTurnNumber;
+
+                // and report contains password
+                updatePassword = updatePassword && !string.IsNullOrWhiteSpace(report.OrdersTemplate.Password);
+
+                if (updatePassword) {
+                    player.Password = report.OrdersTemplate.Password;
                 }
 
                 // save changes to database

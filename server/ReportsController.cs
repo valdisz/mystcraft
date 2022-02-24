@@ -48,8 +48,8 @@ namespace advisor {
                 reports.Add(await textReader.ReadToEndAsync());
             }
 
-            var earliestTurn = await mediator.Send(new UploadReports(playerIdValue, reports));
-            await mediator.Send(new ProcessTurn(playerIdValue, earliestTurn));
+            var earliestTurn = await mediator.Send(new ReportUpload(playerIdValue, reports));
+            await mediator.Send(new TurnProcess(playerIdValue, earliestTurn));
 
             return Ok();
         }
