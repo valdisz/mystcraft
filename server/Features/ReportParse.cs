@@ -51,6 +51,10 @@ namespace advisor.Features {
 
                 // load and merge
                 var report = await MergeReportsAsync(db, request.PlayerId, currentTurn.TurnNumber, player.Number);
+                if (report == null) {
+                    // no own report, break
+                    break;
+                }
 
                 //import map if this is last turn in the list
                 if (isLastIteration && request.Map != null) {
@@ -178,6 +182,11 @@ namespace advisor.Features {
                         .FilterByTurn(playerId, turnNumber)
                         .Where(x => x.FactionNumber == playerFactionNumber)
                         .SingleOrDefaultAsync();
+
+                    if (ownReport == null) {
+                        // own report is not loaded for this turn
+                        return null;
+                    }
 
                     report = await ParseJsonReportAsync(ownReport);
                 }

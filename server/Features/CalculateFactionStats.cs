@@ -66,7 +66,7 @@ namespace advisor.Features {
             var playerIdColumn = entity.FindProperty(nameof(DbStatItem.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
             var turnNumberColumn = entity.FindProperty(nameof(DbStatItem.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
 
-            return db.Database.ExecuteSqlRawAsync($@"delete from {table} where {playerIdColumn} = {playerId} and {turnNumberColumn} >= {turnNumber}");
+            return db.Database.ExecuteSqlRawAsync($@"delete from {table} where {playerIdColumn} = {playerId} and {turnNumberColumn} = {turnNumber}");
         }
 
         private Task DeleteStats(long playerId, int turnNumber) {

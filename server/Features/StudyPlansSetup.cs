@@ -34,32 +34,38 @@ namespace advisor.Features {
                 return Unit.Value;
             }
 
-            var lastTurn = turnNumbers[0];
-            var prevTurn = turnNumbers[1];
+            var turnNumber = turnNumbers[0];
+            var prevTurnNumber = turnNumbers[1];
 
             var prevPlans = (await db.StudyPlans
-                .FilterByTurn(request.PlayerId, prevTurn)
+                .AsNoTracking()
+                .FilterByTurn(request.PlayerId, prevTurnNumber)
                 .ToListAsync())
                 .ToDictionary(x => x.UnitNumber);
 
             var currentPlans = (await db.StudyPlans
-                .FilterByTurn(request.PlayerId, lastTurn)
+                .AsNoTracking()
+                .FilterByTurn(request.PlayerId, turnNumber)
                 .ToListAsync())
                 .ToDictionary(x => x.UnitNumber);
 
-            foreach (var kv in prevPlans) {
-                if (currentPlans.ContainsKey(kv.Key)) {
+            foreach (var ( unitNumber, oldPlan ) in prevPlans) {
+                if (currentPlans.ContainsKey(unitNumber)) {
                     continue;
                 }
 
                 var unitExist = await db.Units
                     .AsNoTracking()
-                    .FilterByTurn(request.PlayerId, lastTurn)
-                    .AnyAsync(x => x.Number == kv.Key);
+                    .FilterByTurn(request.PlayerId, turnNumber)
+                    .AnyAsync(x => x.Number == unitNumber);
 
                 if (unitExist) {
-                    var plan = mapper.Map<DbStudyPlan>(kv.Value);
-                    plan.TurnNumber = lastTurn;
+                    var plan = new DbStudyPlan {
+                        PlayerId = request.PlayerId,
+                        TurnNumber = turnNumber,
+                        UnitNumber = unitNumber,
+                        Target = oldPlan.Target
+                    };
 
                     await db.AddAsync(plan);
                 }
