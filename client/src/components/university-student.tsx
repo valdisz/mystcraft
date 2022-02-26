@@ -67,9 +67,13 @@ export const UniversityStudent = observer(({ student, location }: UniversityStud
     return <tr>
         <td className='faction'>{student.factionName} ({student.factionNumber})</td>
         <td className='unit'>
-            { (student.criticalMessage || student.warningMessage) && <UnitMessages student={student} /> }
-            <Unit student={student} />
-            <UnitActions student={student} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box sx={{ displaye:  'flex', justifyContent: 'flex-start' }}>
+                    { (student.criticalMessage || student.warningMessage) && <UnitMessages student={student} /> }
+                    <Unit student={student} />
+                </Box>
+                <UnitActions student={student} />
+            </Box>
         </td>
         <td className='target'>
             { student.target
