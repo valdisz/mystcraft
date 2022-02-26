@@ -66,7 +66,17 @@ namespace advisor.Features {
             var playerIdColumn = entity.FindProperty(nameof(DbStatItem.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
             var turnNumberColumn = entity.FindProperty(nameof(DbStatItem.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
 
-            return db.Database.ExecuteSqlRawAsync($@"delete from {table} where {playerIdColumn} = {playerId} and {turnNumberColumn} = {turnNumber}");
+            string sql;
+            switch (db.Provider) {
+                case DatabaseProvider.PgSQL:
+                    sql = $"delete from \"{table}\" where \"{playerIdColumn}\" = {playerId} and \"{turnNumberColumn}\" = {turnNumber}";
+                    break;
+                default:
+                    sql = $"delete from {table} where {playerIdColumn} = {playerId} and {turnNumberColumn} = {turnNumber}";
+                    break;
+            }
+
+            return db.Database.ExecuteSqlRawAsync(sql);
         }
 
         private Task DeleteStats(long playerId, int turnNumber) {
@@ -78,7 +88,17 @@ namespace advisor.Features {
             var playerIdColumn = entity.FindProperty(nameof(DbStat.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
             var turnNumberColumn = entity.FindProperty(nameof(DbStat.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
 
-            return db.Database.ExecuteSqlRawAsync($@"delete from {table} where {playerIdColumn} = {playerId} and {turnNumberColumn} >= {turnNumber}");
+            string sql;
+            switch (db.Provider) {
+                case DatabaseProvider.PgSQL:
+                    sql = $"delete from \"{table}\" where \"{playerIdColumn}\" = {playerId} and \"{turnNumberColumn}\" = {turnNumber}";
+                    break;
+                default:
+                    sql = $"delete from {table} where {playerIdColumn} = {playerId} and {turnNumberColumn} = {turnNumber}";
+                    break;
+            }
+
+            return db.Database.ExecuteSqlRawAsync(sql);
         }
 
         public static void SyncProduction(ICollection<DbStatItem> production, IEnumerable<DbStatItem> update) {

@@ -41,7 +41,11 @@ namespace advisor.Persistence {
         protected Database(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory) {
             this.options = options.Value;
             this.loggerFactory = loggerFactory;
+
+            this.Provider = this.options.Provider;
         }
+
+        public DatabaseProvider Provider { get; }
 
         protected DatabaseOptions options;
         private readonly ILoggerFactory loggerFactory;
