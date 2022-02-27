@@ -7,6 +7,7 @@ import { UniversityStudent } from './university-student'
 const LocationCell = styled.th`
     padding-top: 2rem !important;
     border: none;
+    font-size: 125%;
 `
 
 export interface UniversityLocationProps {
@@ -19,6 +20,32 @@ export const UniversityLocation = observer(({ location }: UniversityLocationProp
 
     const region = location.region
 
+    const rows = []
+    let lastFaction = null
+    for (const student of location.students) {
+        const currentFaction = `${student.factionName} (${student.factionNumber})`
+        if (lastFaction !== currentFaction) {
+            lastFaction = currentFaction
+            rows.push(<tr key={currentFaction}>
+                <td className='faction'>{currentFaction}</td>
+            </tr>)
+
+            rows.push(<tr key={`${currentFaction}-2`}>
+                <th className='unit'>Unit</th>
+                <th className='target'>Target</th>
+                <th className='orders'>Orders</th>
+
+                { university.skills.map((group, i) => <React.Fragment key={i}>
+                    <th className='empty'></th>
+                    { group.skills.map(({ code, title }) => <th key={code} title={title}>{code}</th> ) }
+                </React.Fragment> ) }
+            </tr>)
+        }
+
+        rows.push(<UniversityStudent key={student.id} student={student} location={location} />)
+    }
+
+
     return <tbody>
         <tr>
             <LocationCell colSpan={20}>
@@ -28,7 +55,8 @@ export const UniversityLocation = observer(({ location }: UniversityLocationProp
                 { region.settlement ? `, contains ${region.settlement} [${region.size}]` : '' }
             </LocationCell>
         </tr>
-        <tr>
+        {rows}
+        {/* <tr>
             <th className='faction'>Faction</th>
             <th className='unit'>Unit</th>
             <th className='target'>Target</th>
@@ -39,6 +67,6 @@ export const UniversityLocation = observer(({ location }: UniversityLocationProp
                 { group.skills.map(({ code, title }) => <th key={code} title={title}>{code}</th> ) }
             </React.Fragment> ) }
         </tr>
-        { location.students.map(student => <UniversityStudent key={student.id} student={student} location={location} />)}
+        { location.students.map(student => <UniversityStudent key={student.id} student={student} location={location} />)} */}
     </tbody>
 })

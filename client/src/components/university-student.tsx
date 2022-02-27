@@ -65,7 +65,7 @@ const UnitActions = observer(({ student }: StudentProps) => {
 
 export const UniversityStudent = observer(({ student, location }: UniversityStudentProps) => {
     return <tr>
-        <td className='faction'>{student.factionName} ({student.factionNumber})</td>
+        {/* <td className='faction'>{student.factionName} ({student.factionNumber})</td> */}
         <td className='unit'>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Box sx={{ displaye:  'flex', justifyContent: 'flex-start' }}>

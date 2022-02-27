@@ -68,9 +68,13 @@ const StudySchedule = styled('table')`
     }
 
     .faction {
-        min-width: 100px;
         padding: 4px;
+        padding-top: 16px;
         background-color: white;
+        font-family: ${p => p.theme.typography.h3.fontFamily};
+        font-size: 150%;
+        border: none;
+        text-align: left;
     }
 
     .unit {

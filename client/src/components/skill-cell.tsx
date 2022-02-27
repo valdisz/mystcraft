@@ -26,6 +26,8 @@ const CellBody = styled.div<Partial<SkillCellProps>>`
 
     width: 100%;
     height: 100%;
+    min-width: 48px;
+    min-height: 48px;
     display: flex;
     flex-direction: row;
 
