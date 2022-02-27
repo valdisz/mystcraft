@@ -1,7 +1,7 @@
 import { ApolloQueryResult } from 'apollo-client'
 import { makeObservable, observable, IObservableArray, runInAction, action, computed, reaction, comparer } from 'mobx'
 import { CLIENT } from '../client'
-import { RegionFragment, UnitFragment, TurnFragment } from '../schema'
+import { RegionFragment, UnitFragment, TurnFragment, Stance } from '../schema'
 import { GetGame, GetGameQuery, GetGameQueryVariables } from '../schema'
 import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
@@ -103,14 +103,7 @@ export class GameStore {
     @action updateLoadingMessage = (message: string) => this.loadingMessage = message
 
     @observable name: string = null
-    @observable rulesetName: string = null
-    @observable rulesetVersion: string = null
-
-    @observable lastTurnNumber: number = null
-    @observable factionName: string = null
-    @observable factionNumber: number = null
-
-    @observable turn: TurnFragment = null
+    factionNumber: number = null
 
     @observable world: World = null
 
@@ -192,15 +185,10 @@ export class GameStore {
 
         const { me, ...game } = response.data.node
         this.playerId = me.id
+        this.factionNumber = me.number
 
         runInAction(() => {
             this.name = game.name
-            this.rulesetName = game.rulesetName
-            this.rulesetVersion = game.rulesetVersion
-
-            this.factionName = me.name
-            this.factionNumber = me.number
-            this.lastTurnNumber = me.lastTurnNumber
         })
 
         const turnDetails = await CLIENT.query<GetTurnQuery, GetTurnQueryVariables>({
@@ -214,7 +202,7 @@ export class GameStore {
             return
         }
 
-        this.turn = turnDetails.data.node
+        const turn = turnDetails.data.node
 
         game.options.map.sort((a, b) => a.level - b.level)
         const map: WorldLevel[] = game.options.map.map(level => ({
@@ -228,15 +216,31 @@ export class GameStore {
         ruleset.parse(game.ruleset)
 
         const world = new World(worldInfo, ruleset)
-        for (const faction of this.turn.factions) {
-            world.addFaction(faction.number, faction.name, faction.number === this.factionNumber)
+        world.turnNumber = turn.number
+        world.month = turn.month
+        world.year = turn.year
+
+        const attitudes = new Map<number, Stance>()
+        let defaultAttitude = Stance.Neutral
+        for (const faction of turn.factions) {
+            const isPlayer = faction.number === this.factionNumber
+            world.addFaction(faction.number, faction.name, isPlayer)
+
+            if (isPlayer) {
+                defaultAttitude = faction.defaultAttitude
+                for (const att of faction.attitudes) {
+                    attitudes.set(att.factionNumber, att.stance)
+                }
+            }
         }
 
+        world.setAttitudes(defaultAttitude, attitudes)
+
         this.updateLoadingMessage('Loading Regions...')
-        const regions = await this.loadRegions(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Regions: ${position} of ${total}`))
+        const regions = await this.loadRegions(turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Regions: ${position} of ${total}`))
 
         this.updateLoadingMessage('Loading Units...')
-        const units = await this.loadUnits(this.turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Units: ${position} of ${total}`))
+        const units = await this.loadUnits(turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Units: ${position} of ${total}`))
 
         world.addRegions(regions)
         world.addUnits(units)
@@ -248,10 +252,10 @@ export class GameStore {
         }
 
         this.university = new UniversityStore(world)
-        await this.university.load(this.gameId, this.turn.number)
+        await this.university.load(this.gameId, turn.number)
 
         runInAction(() =>{
-            console.log(`Turn ${this.turn.number} loaded`)
+            console.log(`Turn ${turn.number} loaded`)
 
             this.world = world
             this.stopLoading()
@@ -395,7 +399,7 @@ export class GameStore {
 
         const orders = lines.join('\n')
         const blob = new Blob([ orders ], { type: 'text/plain' })
-        saveAs(blob, `orders-${this.turn.number}.ord`)
+        saveAs(blob, `orders-${this.world.turnNumber}.ord`)
     }
 }
 

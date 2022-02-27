@@ -704,6 +704,8 @@ export const MapTab = observer(() => {
 
 const GameComponent = observer(() => {
     const { game } = useStore()
+    const { world } = game
+    const { player } = world.factions
 
     return (
         <GameContainer>
@@ -714,10 +716,10 @@ const GameComponent = observer(() => {
                     </IconButton>
                     <Typography variant='h6'>{ game.name }</Typography>
                     <GameInfo>
-                        <Typography variant='subtitle2'>{ game.factionName } [{ game.factionNumber }]</Typography>
+                        <Typography variant='subtitle2'>{ player.name } ({ player.num })</Typography>
                     </GameInfo>
                     <GameInfo>
-                        <Typography variant='subtitle2'>Turn: { game.turn.number }</Typography>
+                        <Typography variant='subtitle2'>Turn: { world.turnNumber }</Typography>
                     </GameInfo>
                     <Button color='inherit' variant='outlined' component={Link as any} to={``}>Map</Button>
                     <Button color='inherit' variant='outlined' component={Link as any} to={`stats`}>Statistics</Button>

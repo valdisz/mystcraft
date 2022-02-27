@@ -1,4 +1,4 @@
-import { DisplayObject, IPointData, Text, Container } from 'pixi.js'
+import { DisplayObject, IPointData, Text, Container, Point } from 'pixi.js'
 import { Unit } from '../game'
 import { Feature } from './feature'
 import { LayerName } from './layers'
@@ -14,6 +14,14 @@ interface MenCount {
     ally: number
 }
 
+const PALETTE = [
+    ['red', 'white'],
+    ['yellow', 'black'],
+    ['white', 'black'],
+    ['aqua', 'black'],
+    ['lime', 'black']
+]
+
 export class TroopsFeature extends Feature<TileState> {
     constructor(layer: LayerName, position: IPointData) {
         super(layer, position)
@@ -22,7 +30,7 @@ export class TroopsFeature extends Feature<TileState> {
     static attitudeCount(value: MenCount, unit: Unit): MenCount {
         const next = { ...value }
 
-        const key = unit.isPlayer ? 'own' : unit.faction.stance.toLowerCase()
+        const key = unit.isPlayer ? 'own' : unit.faction.attitude.toLowerCase()
         next[key] += unit.inventory.menCount
 
         return next
@@ -46,7 +54,7 @@ export class TroopsFeature extends Feature<TileState> {
     }
 
     static formatOther(count: number) {
-        if (count === 0) return '  '
+        if (count === 0) return '..'
         if (count < 100) return count.toString()
         if (count < 1000) return `${Math.trunc(count / 100).toFixed(0)}h`
 
@@ -63,7 +71,7 @@ export class TroopsFeature extends Feature<TileState> {
 
         if (own) {
             const ownCountText = new Text(TroopsFeature.formatOwn(own), {
-                fontSize: '12px',
+                fontSize: '13px',
                 fontFamily: 'Fira Code',
                 fill: 'lime',
                 fontWeight: 'bold',
@@ -78,22 +86,32 @@ export class TroopsFeature extends Feature<TileState> {
             group.addChild(ownCountText)
         }
 
-        if (other.some(x => x !== 0)) {
-            const s = other.map(x => TroopsFeature.formatOther(x)).join(' ')
-            const otherCountText = new Text(s, {
-                fontSize: '9px',
-                fontFamily: 'Fira Code',
-                fill: 'yellow',
-                fontWeight: 'bold',
-                dropShadow: true,
-                dropShadowColor: 'black',
-                dropShadowBlur: 4,
-                dropShadowDistance: 2
-            })
-            otherCountText.anchor.set(0.5, 0.5)
-            otherCountText.position.set(0, 6)
+        const dp = { x: 14, y: 0}
+        const p = new Point(-(dp.x * 2), 8);
+        for (let i = 0; i < other.length; i++) {
+            const count = other[i]
+            if (count > 0) {
+                const s = TroopsFeature.formatOther(count)
 
-            group.addChild(otherCountText)
+                const [ fill, dropShadowColor ] = PALETTE[i]
+
+                const otherCountText = new Text(s, {
+                    fontSize: '11px',
+                    fontFamily: 'Fira Code',
+                    fill,
+                    fontWeight: 'bold',
+                    dropShadow: true,
+                    dropShadowColor,
+                    dropShadowBlur: 4,
+                    dropShadowDistance: 2
+                })
+                otherCountText.anchor.set(0.5, 0.5)
+                otherCountText.position.copyFrom(p)
+
+                group.addChild(otherCountText)
+            }
+
+            p.set(p.x + dp.x, p.y + dp.y)
         }
 
         return group

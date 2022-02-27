@@ -1,4 +1,4 @@
-import { RegionFragment, StructureFragment, UnitFragment } from '../schema'
+import { RegionFragment, Stance, StructureFragment, UnitFragment } from '../schema'
 import {
     Ruleset, Region, Level, WorldInfo, Provinces, Structure, MovementPathfinder, ICoords, oppositeDirection, Factions, Unit,
     WorldLevel
@@ -14,8 +14,12 @@ export class World {
     readonly levels: Level[] = []
     readonly provinces = new Provinces()
     readonly factions = new Factions()
-
     readonly pathfinder = new MovementPathfinder()
+
+    defaultStance: Stance = Stance.Neutral
+    month: number
+    year: number
+    turnNumber: number
 
     private addLevel(z: number, { width, height, label }: WorldLevel) {
         const level = new Level(width, height, z, label)
@@ -102,6 +106,15 @@ export class World {
 
     addFaction(num: number, name: string, isPlayer: boolean) {
         this.factions.create(num, name, isPlayer)
+    }
+
+    setAttitudes(defaultAttitude: Stance, attitudes: Map<number, Stance>) {
+        this.factions.unknown.attitude = defaultAttitude
+        for (const faction of this.factions) {
+            faction.attitude = attitudes.has(faction.num)
+                ? attitudes.get(faction.num)
+                : defaultAttitude
+        }
     }
 
     addRegions(regions: RegionFragment[]) {

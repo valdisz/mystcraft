@@ -1,5 +1,5 @@
 import { Stance } from '../schema'
-import { Troops } from './internal'
+import { ExtendedMap, Troops } from './internal'
 
 export class Faction {
     constructor(
@@ -13,34 +13,26 @@ export class Faction {
 
     readonly known: boolean
 
-    stance: Stance = Stance.Neutral
+    attitude: Stance = Stance.Neutral
 }
 
-export class Factions {
+export class Factions extends ExtendedMap<number, Faction> {
     constructor() {
+        super(x => x.num)
+
         this.unknown = this.create(0, '', false)
     }
-
-    private readonly factions: Map<number,Faction> = new Map()
 
     readonly unknown: Faction
     player: Faction
 
-    all() {
-        return this.factions.values()
-    }
-
-    get(num: number) {
-        return this.factions.get(num)
-    }
-
     create(num: number, name: string, isPlayer: boolean) {
-        if (this.factions.has(num)) {
+        if (this.has(num)) {
             return this.get(num)
         }
 
         const faction = new Faction(num, name, isPlayer)
-        this.factions.set(num, faction)
+        this.set(num, faction)
 
         if (isPlayer) {
             this.player = faction
