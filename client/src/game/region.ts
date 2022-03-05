@@ -26,7 +26,7 @@ export class Region {
     tax: number
     wages: Wages
     entertainment: number
-    gate: number
+    gate: number | null
     readonly wanted: ItemMap<Item> = new ItemMap()
     readonly forSale: ItemMap<Item> = new ItemMap()
     readonly products: ItemMap<Item> = new ItemMap()
@@ -101,6 +101,8 @@ export class Region {
             total: src.totalWages
         };
         reg.entertainment = src.entertainment;
+
+        reg.gate = src.gate
 
         for (const prod of src.produces) {
             const item = ruleset.getItem(prod.code).create();

@@ -321,6 +321,7 @@ namespace advisor.Features {
             region.Label = source.Coords.Label;
             region.Province = source.Province;
             region.Terrain = source.Terrain;
+            region.Gate ??= source.Gate;
 
             if (source.Settlement != null) {
                 region.Settlement ??= new DbSettlement();

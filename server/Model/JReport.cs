@@ -108,6 +108,8 @@ namespace advisor.Model {
             if (other.ForSale.Count > reg.ForSale.Count) reg.ForSale = other.ForSale;
             if (other.Wanted.Count > reg.Wanted.Count) reg.Wanted = other.Wanted;
 
+            reg.Gate ??= other.Gate;
+
             var units = reg.Units
                 .Concat(reg.Structures.SelectMany(x => x.Units))
                 .ToDictionary(x => x.Number);

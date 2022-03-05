@@ -12,6 +12,7 @@ namespace advisor.Model {
         public double Wages { get; set; } = 0;
         public int TotalWages { get; set; } = 0;
         public int Entertainment { get; set; } = 0;
+        public int? Gate { get; set; }
         public List<JTradableItem> Wanted { get; set; } = new ();
         public List<JTradableItem> ForSale { get; set; } = new ();
         public List<JItem> Products { get; set; } = new ();

@@ -439,6 +439,9 @@ namespace advisor.Migrations.pgsql
                     b.Property<bool>("Explored")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("Gate")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)

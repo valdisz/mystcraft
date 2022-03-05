@@ -431,6 +431,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<bool>("Explored")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("Gate")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)

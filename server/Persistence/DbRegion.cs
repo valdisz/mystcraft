@@ -79,6 +79,8 @@ namespace advisor.Persistence {
         [Required]
         public int TotalWages { get; set; }
 
+        public int? Gate { get; set; }
+
         [GraphQLIgnore]
         public List<DbMarketItem> Markets { get; set; } = new List<DbMarketItem>();
 

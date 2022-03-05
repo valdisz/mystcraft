@@ -16,6 +16,7 @@ fragment Region on Region {
   tax
   wages
   totalWages
+  gate
   wanted {
     ...TradableItem
   }
