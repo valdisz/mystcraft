@@ -12,15 +12,13 @@ import {
     TableRow,
     TableCell,
     TableBody,
-    Tabs,
-    Tab,
     Paper,
     Button,
     DialogContent,
     DialogContentText,
     Theme,
-    Chip,
     ButtonGroup,
+    Chip,
     Avatar,
     Box,
     Tooltip,
@@ -47,7 +45,8 @@ import { Capacity } from '../game'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move';
 import { Coords, ICoords } from '../game'
-// import { UniversityPage } from './university-page'
+import AddIcon from '@mui/icons-material/Add'
+import RemoveIcon from '@mui/icons-material/Remove'
 
 const GameContainer = styled('div')`
     width: 100%;
@@ -240,6 +239,7 @@ const MapContainer = styled('div')`
     grid-area: map;
     background-color: #000;
     min-height: 0;
+    position: relative;
 `
 
 const MapCanvas = styled('canvas')`
@@ -282,6 +282,9 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
                     const lastLocation = window.localStorage.getItem('coords')
                     if (lastLocation) {
                         coords = JSON.parse(lastLocation)
+                        if (coords?.x == null || coords?.y == null) {
+                            coords = null
+                        }
                     }
                 }
 
@@ -313,6 +316,18 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
 
     return <MapContainer>
         <MapCanvas ref={setCanvasRef} />
+        { (false && !!gameMap) && <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
+            <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
+                    <Button variant='contained' onClick={() => gameMap.zoomIn()}>
+                        <AddIcon />
+                    </Button>
+                    <Button variant='contained' onClick={() => gameMap.zoomOut()}>
+                        <RemoveIcon />
+                    </Button>
+                </ButtonGroup>
+            </Box>
+        </Box> }
     </MapContainer>
 }
 

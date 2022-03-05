@@ -12096,10 +12096,9 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-spritesheet-js@^1.2.6:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/spritesheet-js/-/spritesheet-js-1.2.6.tgz#0709cdd32204d5b8f503cef108e15b36e31b0818"
-  integrity sha1-BwnN0yIE1bj1A87xCOFbNuMbCBg=
+"spritesheet-js@github:valdisz/spritesheet.js.git":
+  version "1.2.7"
+  resolved "https://codeload.github.com/valdisz/spritesheet.js/tar.gz/3b465bb544a23ca77c80dde7a505e920c25bb30f"
   dependencies:
     async "~0.2.9"
     binpacking "~0.0.1"
@@ -12107,7 +12106,7 @@ spritesheet-js@^1.2.6:
     mustache "~0.7.2"
     optimist "~0.6.0"
     platform-command "git+https://gitlab.com/gitlabdev/platform-command.git"
-    underscore "~1.5.2"
+    underscore "1.9.2"
 
 sshpk@^1.7.0:
   version "1.17.0"
@@ -12920,10 +12919,10 @@ undefsafe@^2.0.5:
   resolved "https://registry.yarnpkg.com/undefsafe/-/undefsafe-2.0.5.tgz#38733b9327bdcd226db889fb723a6efd162e6e2c"
   integrity sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==
 
-underscore@~1.5.2:
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.5.2.tgz#1335c5e4f5e6d33bbb4b006ba8c86a00f556de08"
-  integrity sha1-EzXF5PXm0zu7SwBrqMhqAPVW3gg=
+underscore@1.9.2:
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.2.tgz#0c8d6f536d6f378a5af264a72f7bec50feb7cf2f"
+  integrity sha512-D39qtimx0c1fI3ya1Lnhk3E9nONswSKhnffBI0gME9C99fYOkNi04xs8K6pePLhvl1frbDemkaBQ5ikWllR2HQ==
 
 undici@^4.9.3:
   version "4.14.1"

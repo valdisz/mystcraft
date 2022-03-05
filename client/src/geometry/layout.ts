@@ -4,9 +4,9 @@ import { Hex } from './hex'
 import { Orientation } from './orientation'
 
 export class Layout {
-    constructor(size: IPointData, origin: IPointData) {
-        this.size = new Point(size.x, size.y)
-        this.origin = new Point(origin.x, origin.y)
+    constructor(size?: IPointData, origin?: IPointData) {
+        this.size = new Point(size?.x ?? 0, size?.y ?? 0)
+        this.origin = new Point(origin?.x ?? 0, origin?.y ?? 0)
     }
 
     public readonly orientation = Orientation.FLAT

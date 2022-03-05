@@ -7,6 +7,7 @@ import { Viewport } from './viewport'
 import { overlapping } from './utils'
 import { Layout } from '../geometry'
 import { ICoords } from '../game'
+import { MapState } from './state'
 
 export interface GetRegionCallback {
     (x: number, y: number): Region
@@ -32,15 +33,18 @@ export interface HexMapOptions {
     onDblClick?: (reg: Region) => void
 }
 
-export class HexMap2 {
+export class HexMap2 implements MapState {
     constructor(private canvas: HTMLCanvasElement, private readonly mapWidth: number, private readonly mapHeight: number,
         private readonly options?: HexMapOptions
     ) {
         const origin = { x: 50, y: 50 }
-        this.layout = new Layout({ x: 48, y: 48 }, origin)
+
+        this.layout = new Layout(null, origin)
+        this.updateLayout(this.zoom, this.zoom)
+
         const wh = this.toPixel({ x: mapWidth - 1, y: mapHeight - 1, z: 0 })
 
-        this.viewport = new Viewport(this.canvas, origin, wh.x + 48 / 3, wh.y,
+        this.viewport = new Viewport(this.canvas, origin, wh.x + 48 * Math.sin(30 * Math.PI / 180) - 2, wh.y,
             vp => {
                 this.renderer.resize(vp.width, vp.height)
                 this.render()
@@ -56,6 +60,7 @@ export class HexMap2 {
                 }
             }
         )
+        this.updateViewport(this.zoom, this.zoom)
 
         this.canvas.addEventListener('dblclick', this.onDblClick)
 
@@ -75,6 +80,7 @@ export class HexMap2 {
         this.scene.addChild(this.layers.terrain)
         this.scene.addChild(this.layers.roads)
         this.scene.addChild(this.layers.path)
+        this.scene.addChild(this.layers.features)
         this.scene.addChild(this.layers.highlight)
         this.scene.addChild(this.layers.settlements)
         this.scene.addChild(this.layers.text)
@@ -92,6 +98,46 @@ export class HexMap2 {
     readonly tiles: Tile[] = []
 
     selectedTile: Tile
+    zoom: number = 1
+
+    zoomIn() {
+        this.setZoom(this.zoom / 2)
+    }
+
+    zoomOut() {
+        this.setZoom(this.zoom * 2)
+    }
+
+    private updateViewport(oldZoom: number, newZoom: number) {
+        const scale = oldZoom / newZoom
+
+        this.viewport.mapWidth = this.viewport.mapWidth * scale
+        this.viewport.mapHeight = this.viewport.mapHeight * scale
+
+        const { x, y } = this.viewport.origin
+        this.viewport.origin.set(x * scale, y * scale)
+        this.layout.origin.copyFrom(this.viewport.origin)
+    }
+
+    private updateLayout(oldZoom: number, newZoom: number) {
+        const scale = oldZoom / newZoom
+
+        const size = 48 / this.zoom
+        this.layout.size.set(size, size)
+    }
+
+    private setZoom(zoom: number) {
+        const oldZoom = this.zoom
+        const newZoom = Math.max(1, Math.min(zoom, 4))
+        if (this.zoom != newZoom) {
+            this.zoom = newZoom
+
+            this.updateViewport(oldZoom, newZoom)
+            this.updateLayout(oldZoom, newZoom)
+            this.udateTiles()
+            this.render()
+        }
+    }
 
     select(coords?: ICoords) {
         if (this.selectedTile) {
@@ -201,7 +247,7 @@ export class HexMap2 {
 
         for (const reg of regions) {
             const p = this.toPixel(reg.coords)
-            const t = new Tile(p, reg, this.layers, this.resources)
+            const t = new Tile(p, reg, this.layers, this.resources, this)
 
             this.index[this.getTileIndex(reg.coords.x, reg.coords.y)] = this.tiles.length
             this.tiles.push(t)
@@ -233,6 +279,7 @@ export class HexMap2 {
 
     updateVisibility() {
         const p = new Point()
+        const scale = 1 / this.zoom
 
         const viewRect = this.viewport.rect
         const r = new Rectangle()
@@ -241,10 +288,10 @@ export class HexMap2 {
             for (const o of layer.children as Container[]) {
                 o.toGlobal(this.viewport.origin, p)
 
-                r.x = p.x - TILE_W
-                r.y = p.y - TILE_H
-                r.width = o.width + TILE_W
-                r.height = o.height + TILE_H
+                r.x = p.x - TILE_W * scale
+                r.y = p.y - TILE_H * scale
+                r.width = o.width + TILE_W * scale
+                r.height = o.height + TILE_H * scale
 
                 o.visible = overlapping(viewRect, r)
             }
@@ -253,6 +300,13 @@ export class HexMap2 {
 
     resize(width: number, height: number) {
         this.renderer.resize(width, height)
+    }
+
+    udateTiles() {
+        for (const tile of this.tiles) {
+            tile.position.copyFrom(this.toPixel(tile.reg.coords))
+            tile.update()
+        }
     }
 
     destroy() {

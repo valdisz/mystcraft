@@ -4,8 +4,7 @@ import { Resources } from './resources'
 import { arrayEquals } from './utils'
 
 export abstract class Feature<T = any> {
-    constructor(protected readonly layer: LayerName, position: IPointData) {
-        this.position.copyFrom(position)
+    constructor(protected readonly layer: LayerName) {
     }
 
     private _key: any[] = []
@@ -16,9 +15,14 @@ export abstract class Feature<T = any> {
 
     readonly position = new Point()
 
-    update(value: T, layers: Layers, res: Resources) {
+    update(value: T, layers: Layers, res: Resources, { x, y }: IPointData) {
+        const posUpdated = this.position.x != x || this.position.y != y
+        if (posUpdated) {
+            this.position.set(x, y)
+        }
+
         const key = this.getKey(value)
-        if (arrayEquals(this._key, key)) {
+        if (!posUpdated && arrayEquals(this._key, key)) {
             return
         }
 

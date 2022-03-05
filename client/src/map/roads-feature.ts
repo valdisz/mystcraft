@@ -1,12 +1,12 @@
-import { DisplayObject, IPointData } from 'pixi.js'
+import { DisplayObject } from 'pixi.js'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
-import { TileState } from './tile-state'
+import { TileState } from './state'
 
 export class RoadsFeature extends Feature<TileState> {
-    constructor(layer: LayerName, position: IPointData) {
-        super(layer, position)
+    constructor(layer: LayerName) {
+        super(layer)
     }
 
     protected getKey({ reg }: TileState): any[] {
@@ -17,6 +17,8 @@ export class RoadsFeature extends Feature<TileState> {
         if (!this.key.length) {
             return
         }
+
+        const scale = 1 / value.map.zoom
 
         const roads: string[] = []
         if (this.key.includes('Road N')) roads.push('n')
@@ -33,6 +35,7 @@ export class RoadsFeature extends Feature<TileState> {
         const spriteName = `sprites/road-${roads.join('-')}`
         const sprite = res.sprite(spriteName)
         sprite.tint = 0x666666
+        sprite.scale.set(scale, scale)
 
         return sprite
     }

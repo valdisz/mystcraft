@@ -35,6 +35,10 @@ export class Region {
     readonly troops = new Map<number, Troops>()
     readonly structures: Structure[] = []
 
+    get onGuard() {
+        return this.units.filter(x => x.onGuard)
+    }
+
     addUnit(unit: Unit, structure?: Structure) {
         unit.region = this
         this.units.push(unit)

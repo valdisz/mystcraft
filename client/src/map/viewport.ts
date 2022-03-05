@@ -9,8 +9,8 @@ export class Viewport {
     constructor(
         private element: HTMLElement,
         origin: IPointData,
-        public readonly mapWidth: number,
-        public readonly mapHeight: number,
+        public mapWidth: number,
+        public mapHeight: number,
         private onUpdate: (event: Viewport) => void,
         private onClick: (e: MouseEvent, vp: Viewport) => void,
     ) {

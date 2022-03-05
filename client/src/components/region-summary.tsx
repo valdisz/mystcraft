@@ -218,7 +218,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
     return <Box m={1}>
         <Grid container spacing={1}>
             <SpaceBetween item xs={12}>
-                <ProvinceName province={region.province} />
+                { region?.province && <ProvinceName province={region.province} /> }
                 <Geography terrain={region.terrain} coords={region.coords} />
             </SpaceBetween>
 

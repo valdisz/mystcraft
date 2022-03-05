@@ -18,9 +18,12 @@ import {
     Toolbar,
     Typography,
     Grid,
+    Alert,
+    AlertTitle
 } from '@mui/material'
 import { UniversityLocation } from '../components'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import legendImage from './legend.png'
 
 const StudySchedule = styled('table')`
     border-collapse: collapse;
@@ -109,6 +112,12 @@ export function UniversityPage() {
         <Container component='main' maxWidth={false}>
             <Typography variant='h4'>University</Typography>
             <Grid container>
+                <Grid item xs={12}>
+                    <Alert severity='info'>
+                        <AlertTitle>Legend</AlertTitle>
+                        <Box sx={{ width: '100%', maxHeight: 128 }} component={'img'} src={legendImage} />
+                    </Alert>
+                </Grid>
                 <Grid item xs={12}>
                     <StudySchedule>
                         { university.locations.map(location => <UniversityLocation key={`${location.region.x},${location.region.y},${location.region.z}`} location={location} />) }

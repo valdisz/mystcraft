@@ -1,12 +1,12 @@
-import { DisplayObject, IPointData } from 'pixi.js'
+import { DisplayObject } from 'pixi.js'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
-import { TileState } from './tile-state'
+import { TileState } from './state'
 
 export class GateFeature extends Feature<TileState> {
-    constructor(layer: LayerName, position: IPointData) {
-        super(layer, position)
+    constructor(layer: LayerName) {
+        super(layer)
     }
 
     protected getKey({ reg }: TileState): any[] {

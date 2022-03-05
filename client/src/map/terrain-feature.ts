@@ -1,34 +1,32 @@
-import { Container, DisplayObject, Graphics, IPointData, Point, Sprite } from 'pixi.js'
-import { Hex, Layout } from '../geometry'
+import { DisplayObject, Sprite } from 'pixi.js'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
-import { TILE_H, TILE_W } from './tile'
-import { TileState } from './tile-state'
+import { TileState } from './state'
 import { pointHash } from './utils'
 
 export class TerrainFeature extends Feature<TileState> {
-    constructor(layer: LayerName, position: IPointData) {
-        super(layer, position)
+    constructor(layer: LayerName) {
+        super(layer)
 
-        this.hash = Math.abs(pointHash(position))
     }
-
-    readonly hash: number
 
     protected getKey({ reg }: TileState): any[] {
         return [ reg.covered, reg.terrain?.code ]
     }
 
-    protected getGraphics({ reg }: TileState, res: Resources): DisplayObject {
+    protected getGraphics(value: TileState, res: Resources): DisplayObject {
+        const reg = value.reg
+
         let sprite: Sprite
+        const hash = Math.abs(pointHash(reg.coords))
 
         if (reg.covered) {
-            sprite = res.tile('unexplored', this.hash)
+            sprite = res.tile('unexplored', hash)
             sprite.zIndex = -1
         }
         else {
-            sprite = res.tile(reg.terrain.code, this.hash)
+            sprite = res.tile(reg.terrain.code, hash)
 
             if (!reg.isVisible) {
                 if (reg.explored) {
@@ -41,6 +39,9 @@ export class TerrainFeature extends Feature<TileState> {
                 }
             }
         }
+
+        const scale = 1 / value.map.zoom
+        sprite.scale.set(scale, scale)
 
         return sprite
     }

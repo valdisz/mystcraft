@@ -265,12 +265,20 @@ export class GameStore {
     @observable region: Region = null
 
     @action selectRegion = (reg: Region) => {
-        if (reg.id !== this.region?.id) {
-            this.region = reg && !reg.covered ? observable(reg) : null
+        if (!this.region) {
+            this.region = observable(reg)
+            return
+        }
+
+        const { x: x1, y: y1, z: z1 } = reg.coords
+        const { x: x2, y: y2, z: z2 } = this.region.coords
+
+        if (x1 !== x2 || y1 !== y2 || z1 !== z2) {
+            this.region = observable(reg)
             this.unit = null
         }
 
-        if (reg) {
+        if (!(reg?.covered ?? true)) {
             window.localStorage.setItem('coords', JSON.stringify(reg.coords))
         }
     }

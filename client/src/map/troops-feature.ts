@@ -1,9 +1,9 @@
-import { DisplayObject, IPointData, Text, Container, Point } from 'pixi.js'
+import { DisplayObject, Text, Container, Point, Graphics } from 'pixi.js'
 import { Unit } from '../game'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
-import { TileState } from './tile-state'
+import { TileState } from './state'
 
 interface MenCount {
     own: number
@@ -14,17 +14,23 @@ interface MenCount {
     ally: number
 }
 
-const PALETTE = [
-    ['red', 'white'],
-    ['yellow', 'black'],
-    ['white', 'black'],
-    ['aqua', 'black'],
-    ['lime', 'black']
+interface PaletteColor {
+    color: number
+    shadow: number
+    size: number
+}
+
+const PALETTE: PaletteColor[] = [
+    { color: 0xff0000, shadow: 0x000000, size: 2 }, // red
+    { color: 0xffff00, shadow: 0x000000, size: 1 }, // yellow
+    { color: 0xffffff, shadow: 0x000000, size: 1 }, // white
+    { color: 0x00ffff, shadow: 0x000000, size: 1 }, // aqua
+    { color: 0x00ff00, shadow: 0x000000, size: 1 }, // lime
 ]
 
 export class TroopsFeature extends Feature<TileState> {
-    constructor(layer: LayerName, position: IPointData) {
-        super(layer, position)
+    constructor(layer: LayerName) {
+        super(layer)
     }
 
     static attitudeCount(value: MenCount, unit: Unit): MenCount {
@@ -62,11 +68,22 @@ export class TroopsFeature extends Feature<TileState> {
     }
 
     protected getGraphics(value: TileState, res: Resources): DisplayObject {
+        const { zoom } = value.map
+        if (zoom > 2) {
+            return
+        }
+
         const [ own, ...other ] = this.key as number[]
         if (!own && other.every(x => x === 0)) {
             return
         }
 
+        return zoom == 1
+            ? this.zoom1(own, other)
+            : this.zoom2(own, other)
+    }
+
+    private zoom1(own: number, other: number[]) {
         const group = new Container()
 
         if (own) {
@@ -91,9 +108,8 @@ export class TroopsFeature extends Feature<TileState> {
         for (let i = 0; i < other.length; i++) {
             const count = other[i]
             if (count > 0) {
+                const { color: fill, shadow: dropShadowColor } = PALETTE[i]
                 const s = TroopsFeature.formatOther(count)
-
-                const [ fill, dropShadowColor ] = PALETTE[i]
 
                 const otherCountText = new Text(s, {
                     fontSize: '11px',
@@ -109,6 +125,55 @@ export class TroopsFeature extends Feature<TileState> {
                 otherCountText.position.copyFrom(p)
 
                 group.addChild(otherCountText)
+            }
+
+            p.set(p.x + dp.x, p.y + dp.y)
+        }
+
+        return group
+    }
+
+    private zoom2(own: number, other: number[]) {
+        const group = new Container()
+
+        if (own) {
+            const icon = new Graphics()
+
+            // icon.beginFill(0x000000)
+            // icon.drawCircle(0, 0, 3)
+            // icon.endFill()
+
+            icon.beginFill(0x00ff00)
+            icon.lineStyle(1, 0x000000)
+            icon.drawCircle(0, 0, 2.5)
+            icon.endFill()
+
+            icon.position.set(0, -4)
+
+            group.addChild(icon)
+        }
+
+        const dp = { x: 7, y: 0}
+        const p = new Point(-(dp.x * 2), 2);
+        for (let i = 0; i < other.length; i++) {
+            const count = other[i]
+            if (count > 0) {
+                const { color, shadow, size } = PALETTE[i]
+
+                const icon = new Graphics()
+
+                // icon.beginFill(shadow)
+                // icon.drawCircle(0, 0, 2.5)
+                // icon.endFill()
+
+                icon.beginFill(color)
+                icon.lineStyle(1, shadow)
+                icon.drawCircle(0, 0, 2 * size)
+                icon.endFill()
+
+                icon.position.copyFrom(p)
+
+                group.addChild(icon)
             }
 
             p.set(p.x + dp.x, p.y + dp.y)

@@ -5,6 +5,7 @@ export interface ILayers {
     readonly roads: Container
     readonly highlight: Container
     readonly path: Container
+    readonly features: Container
     readonly settlements: Container
     readonly text: Container
 }
@@ -15,6 +16,7 @@ export class Layers implements ILayers {
     readonly highlight = new Container()
     readonly path = new Container()
     readonly settlements = new Container()
+    readonly features = new Container()
     readonly text = new Container()
 
     add(layer: LayerName, o: DisplayObject) {

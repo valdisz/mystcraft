@@ -1,9 +1,9 @@
-import { DisplayObject, IPointData, Text, Container } from 'pixi.js'
+import { DisplayObject, Text, Container } from 'pixi.js'
 import { Structure } from '../game'
 import { Feature } from './feature'
 import { LayerName } from './layers'
 import { Resources } from './resources'
-import { TileState } from './tile-state'
+import { TileState } from './state'
 
 export interface StructuresFeatureOptions {
     spriteName: string
@@ -13,8 +13,8 @@ export interface StructuresFeatureOptions {
 }
 
 export class StructuresFeature extends Feature<TileState> {
-    constructor(layer: LayerName, position: IPointData, private readonly options: StructuresFeatureOptions) {
-        super(layer, position)
+    constructor(layer: LayerName, private readonly options: StructuresFeatureOptions) {
+        super(layer)
     }
 
     protected getKey({ reg }: TileState): any[] {
@@ -27,6 +27,8 @@ export class StructuresFeature extends Feature<TileState> {
         if (!this.key.length) {
             return
         }
+
+        const zoom = value.map.zoom
 
         const group = new Container()
         const icon = res.sprite(this.options.spriteName)
@@ -47,12 +49,12 @@ export class StructuresFeature extends Feature<TileState> {
             count.anchor.set(0.5, 0.5)
 
             if (this.options.countPosition === 'top') {
-                icon.position.set(0, -6)
+                icon.position.set(0, -6 / zoom)
                 count.position.set(0, -16)
             }
             else {
-                count.position.set(0, -6)
-                icon.position.set(0, -16)
+                count.position.set(0, -6 / zoom)
+                icon.position.set(0, -16 / zoom)
             }
 
             const bg = res.sprite('sprites/map-bg-1')
@@ -60,7 +62,9 @@ export class StructuresFeature extends Feature<TileState> {
             bg.position.copyFrom(count)
 
             group.addChild(bg)
-            group.addChild(count)
+            if (zoom === 1) {
+                group.addChild(count)
+            }
             group.sortChildren()
         }
 
