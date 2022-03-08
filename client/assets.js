@@ -9,7 +9,7 @@ const fs = require('fs')
 const path = require('path')
 const glob = require('glob')
 
-const spritesheet = require('../lib/spritesheet.js')
+const spritesheet = require('spritesheet-js')
 
 const options = {
     format: 'pixi.js',
@@ -48,6 +48,14 @@ function listFolders(p) {
 
 const manifest = { }
 let index = 0
+function makeSprite(path, name, extension) {
+    return {
+        index: index++,
+        path,
+        name,
+        extension
+    }
+}
 
 function addTerrainTiles(sourcePath) {
     const sprites = []
@@ -62,12 +70,7 @@ function addTerrainTiles(sourcePath) {
 
         let i = 0
         for (const frame of frames) {
-            sprites.push({
-                index: index++,
-                path: frame,
-                name: `${tileName}-main-${i++}`,
-                extension: ''
-            })
+            sprites.push(makeSprite(frame, `${tileName}-main-${i++}`, ''))
         }
     }
 
@@ -79,29 +82,28 @@ function addTiles(prefix, sourcePath) {
 
     const frames = glob.sync('*.png', { cwd: sourcePath, absolute: true })
     for (const frame of frames) {
-        sprites.push({
-            index: index++,
-            path: frame,
-            name: `${prefix}-${path.basename(frame, path.extname(frame))}`,
-            extension: ''
-        })
+        sprites.push(makeSprite(frame, `${prefix}-${path.basename(frame, path.extname(frame))}`, ''))
     }
 
     return sprites
 }
 
-let sprites = [ ]
+let sprites = [
+    makeSprite('src/assets/silhouette.png', 'silhouette', '')
+]
+
 sprites = sprites.concat(addTerrainTiles('src/assets/terrain'))
 sprites = sprites.concat(addTiles('map', 'src/assets/map'))
 sprites = sprites.concat(addTiles('road', 'src/assets/road'))
+sprites = sprites.concat(addTiles('border', 'src/assets/border'))
 
+console.log(`Packing ${sprites.length} sprites...`)
 spritesheet(sprites, {
     name: 'sprites',
     format: 'pixi.js',
     padding: 4,
     path: 'static',
-    trim: false,
-    manual: true
+    trim: false
 },
 function (err) {
     if (err) throw err;
@@ -109,64 +111,3 @@ function (err) {
     const textureManifest = JSON.parse(fs.readFileSync(`static/sprites.json`))
     fs.writeFileSync(`static/sprites.json`, JSON.stringify({ ...textureManifest, tiles: manifest }, null, 4), { encoding: 'utf-8' })
 })
-
-// processTileset('road', { trim: false, padding: 10 }, 'src/assets/road', 'static')
-
-// spritesheet('./src/assets/terrain/*.png', { ...options, trim: false, name: 'terrain' }, function (err) {
-//     if (err) throw err;
-
-//     console.log('Terrain spritesheet... DONE');
-// })
-
-// spritesheet('./src/assets/items/*.png', { ...options, name: 'items' }, function (err) {
-//     if (err) throw err;
-
-//     console.log('Items spritesheet... DONE');
-// })
-
-// spritesheet('./src/assets/objects/*.png', { ...options, name: 'objects' }, function (err) {
-//     if (err) throw err;
-
-//     console.log('Objects spritesheet... DONE');
-// })
-
-// spritesheet('./src/assets/map/*.png', { ...options, name: 'map' }, function (err) {
-//     if (err) throw err;
-
-//     console.log('Map features spritesheet... DONE');
-// })
-
-// spritesheet('./src/assets/items/*.png', { ...optionsCss, prefix: 'item-', name: 'items-css' }, function (err) {
-//     if (err) throw err;
-
-//     console.log('Items CSS spritesheet... DONE');
-// })
-
-// spritesheet('./src/assets/objects/*.png', { ...optionsCss, prefix: 'object-', name: 'objects-css' }, function (err) {
-//     if (err) throw err;
-
-//     const fname = 'static/objects-css.css'
-
-//     const f = fs.readFileSync(fname, 'UTF-8')
-//     const lines = f.split(/\n/)
-
-//     const outf = fs.openSync(fname, 'w+')
-//     for (const l of lines) {
-//         if (l.startsWith('.')) {
-//             const rule = l.match(/^(.+) {$/i)[1]
-//             if (rule) {
-//                 const fixedRule = rule.replace(/(\s|')+/gi, '-').toLowerCase()
-//                 console.log(`${rule} -> ${fixedRule}`)
-
-//                 fs.writeFileSync(outf, `${fixedRule} {\n`)
-//                 continue
-//             }
-//         }
-
-//         fs.writeFileSync(outf, `${l}\n`)
-//     }
-//     fs.closeSync(outf)
-
-
-//     console.log('Objects CSS spritesheet... DONE');
-// })

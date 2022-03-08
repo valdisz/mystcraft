@@ -72,7 +72,12 @@ export class Region {
     }
 
     toString() {
-        return `${this.terrain.name} (${this.coords}) in ${this.province.name}`;
+        let s = `${this.terrain.name} (${this.coords}) in ${this.province.name}`;
+        if (this.settlement) {
+            s += ` contains ${this.settlement.name} ${this.settlement.size.toLowerCase()}`
+        }
+
+        return s
     }
 
     static from(src: RegionFragment, ruleset: Ruleset) {

@@ -1,7 +1,10 @@
 import { RegionFragment, Stance, StructureFragment, UnitFragment } from '../schema'
 import {
     Ruleset, Region, Level, WorldInfo, Provinces, Structure, MovementPathfinder, ICoords, oppositeDirection, Factions, Unit,
-    WorldLevel
+    WorldLevel,
+    Trade,
+    Item,
+    TradeRoute
 } from './internal'
 
 export class World {
@@ -189,5 +192,58 @@ export class World {
 
     getLevel(z: number): Level {
         return this.levels[z]
+    }
+
+    getTradeRoutes() {
+        const level = this.getLevel(1)
+        const pf = new MovementPathfinder()
+        const markets = new Map<string, Trade>()
+
+        const getTrade = (item: Item) => {
+            if (!markets.has(item.code)) {
+                markets.set(item.code, new Trade(item.info, level, pf))
+            }
+
+            return markets.get(item.code)
+        }
+
+        for (const region of level) {
+            if (!region.settlement) {
+                continue
+            }
+
+            for (const sale of region.forSale) {
+                if (sale.info.category !== 'trade') {
+                    continue
+                }
+
+                const trade = getTrade(sale)
+                trade.supply(region, sale.price, sale.amount)
+            }
+
+            for (const buy of region.wanted) {
+                if (buy.info.category !== 'trade') {
+                    continue
+                }
+
+                const trade = getTrade(buy)
+                trade.demand(region, buy.price, buy.amount)
+            }
+        }
+
+        const routes: TradeRoute[] = []
+        for (const trade of markets.values()) {
+            for (const route of trade.getRoutes()) {
+                routes.push(route)
+            }
+        }
+
+        routes.sort((a, b) => b.profit - a.profit)
+        for (const route of routes.filter(x => x.distance < 16)) {
+            console.log(`${route.amount} ${route.item.getName(2)} [${route.item.code}] for ${route.profit} silver\n
+            from ${route.buy.region.toString()}\n
+            to ${route.sell.region.toString()}\n
+            distance ${route.distance} regions (cost: ${route.cost})`)
+        }
     }
 }

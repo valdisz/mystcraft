@@ -16,39 +16,35 @@ import {
     Button,
     DialogContent,
     DialogContentText,
-    Theme,
     ButtonGroup,
     Chip,
     Avatar,
     Box,
     Tooltip,
-} from '@mui/material';
-import { useStore } from '../store'
+    Card,
+    CardContent,
+    Stack,
+    CircularProgress,
+    Container,
+    Grid
+} from '@mui/material'
+import { useStore, GameStore } from '../store'
 import { Observer, observer } from 'mobx-react'
 import { HexMap2 } from '../map'
-import { Region } from "../game"
-import { GameRouteParams } from './game-route-params'
-import ArrowBackIcon from '@mui/icons-material/ArrowBack'
-import { ItemMap } from '../game'
-import { Item } from '../game'
-import { Unit } from '../game'
+import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity } from '../game'
 import { RegionSummary } from '../components/region-summary'
-import { StatsPage } from './stats-page'
-import Editor from 'react-simple-code-editor'
-import Prism from 'prismjs'
 import { Dialog } from '@mui/material'
-import CloseIcon from '@mui/icons-material/Close'
-import { GameStore, OrdersState } from '../store/game-store'
-import { Ruleset } from '../game'
-import { UnitSummary } from '../components'
-import { Capacity } from '../game'
+import { UnitSummary, Orders } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move';
-import { Coords, ICoords } from '../game'
+
+import CloseIcon from '@mui/icons-material/Close'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
+import DoneIcon from '@mui/icons-material/Done'
 
-const GameContainer = styled('div')`
+const GameContainer = styled(Box)`
     width: 100%;
     height: 100%;
 
@@ -62,7 +58,7 @@ const GameGrid = styled('div')`
     min-height: 0;
     display: grid;
 
-    grid-template-columns: minmax(200px, 1fr) 5fr minmax(300px, 1fr);
+    grid-template-columns: minmax(200px, 1fr) 5fr minmax(400px, 1fr);
     grid-template-rows: 2fr 1fr;
     grid-template-areas:
         "structures map details"
@@ -78,173 +74,11 @@ const GameGrid = styled('div')`
     }
 `
 
-const OrdersContainer = styled('div')`
-    grid-area: orders;
-    min-height: 0;
-    overflow-y: auto;
-    border: 1px solid ${({ theme }) => theme.palette.divider};
-
-    display: flex;
-    align-items: stretch;
-    flex-direction: column;
-
-    @media (max-width: 640px) {
-        display: none;
-    }
-`
-
-const OrdersEditor = styled(Editor)`
-    min-height: 100%;
-
-    textarea {
-        min-height: 100%;
-
-        &:focus-visible {
-            outline: none;
-        }
-    }
-
-    .comment {
-        font-style: italic;
-    }
-
-    .string {
-        color: blue;
-    }
-
-    .directive {
-        font-weight: bold;
-        color: purple;
-    }
-
-    .number {
-        color: green;
-    }
-
-    .repeat {
-        color: #333;
-    }
-
-    .order {
-        font-weight: bold;
-    }
-
-    .error {
-        text-decoration: red wavy underline;
-    }
-`
-
-const language = {
-    directive: /^@;(needs|route|tag)/mi,
-    comment: /^@?;.*/m,
-    repeat: /^@/m,
-    string: /"(?:""|[^"\r\f\n])*"/i,
-    number: /\d+/,
-    order: {
-        pattern: /^(@?)(\w+)/m,
-        lookbehind: true
-    }
-}
-
-const ORDER_VALIDATOR = {
-    isValidOrder: (order: string) => true
-}
-
-Prism.hooks.add('wrap', env => {
-    if (env.type !== 'order') {
-        return
-    }
-
-    if (!ORDER_VALIDATOR.isValidOrder(env.content)) {
-        env.classes.push('error')
-    }
-})
-
-function highlight(ruleset: Ruleset, s: string) {
-    ORDER_VALIDATOR.isValidOrder = order => {
-        return ruleset.orders.includes(order.toUpperCase())
-    }
-
-    const result = Prism.highlight(s, language, null)
-
-    return result
-}
-
-const OrdersEditorBox = styled('div')`
-    flex: 1;
-    padding: 0.5rem;
-    background-color: ${x => x.theme.palette.common.white};
-`
-
-const OrdersStatusBox = styled('div')`
-    padding: 0.25rem;
-    text-align: center;
-
-    &.order-state--saved {
-        color: ${x => x.theme.palette.success.main};
-    }
-
-    &.order-state--saving, &.order-state--unsaved {
-        background-color: ${x => x.theme.palette.info.light};
-        color: ${x => x.theme.palette.info.contrastText};
-    }
-
-    &.order-state--error {
-        background-color: ${x => x.theme.palette.error.main};
-        color: ${x => x.theme.palette.error.contrastText};
-    }
-`
-
-function renderOrderState(state: OrdersState) {
-    switch (state) {
-        case 'ERROR': return 'Error'
-        case 'SAVED': return 'Saved'
-        default: return 'Saving...'
-    }
-}
-
-interface OrdersStatusProps {
-    state: OrdersState
-}
-
-function OrdersStatus({ state }: OrdersStatusProps) {
-    return <OrdersStatusBox className={`order-state--${state.toLowerCase()}`}>
-        <Typography variant='caption'>{renderOrderState(state)}</Typography>
-    </OrdersStatusBox>
-}
-
-const OrdersTitle = styled(Typography)`
-    padding: 0.5rem;
-`
-
-interface OrdersProps {
-    readOnly: boolean
-}
-
-const Orders = observer(({ readOnly }: OrdersProps) => {
-    const store = useStore()
-    const game = store.game
-    const ruleset = game.world.ruleset
-
-    return <OrdersContainer>
-        <OrdersTitle variant='subtitle1'>Orders</OrdersTitle>
-        <OrdersEditorBox>
-            <OrdersEditor readOnly={readOnly} value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
-        </OrdersEditorBox>
-        <OrdersStatus state={game.ordersState} />
-    </OrdersContainer>
-})
-
 const MapContainer = styled('div')`
     grid-area: map;
     background-color: #000;
     min-height: 0;
     position: relative;
-`
-
-const MapCanvas = styled('canvas')`
-    width: 100%;
-    height: 100%;
 `
 
 const GameInfo = styled('div')`
@@ -315,7 +149,7 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
     }, [ selectedRegion, gameMap ])
 
     return <MapContainer>
-        <MapCanvas ref={setCanvasRef} />
+        <Box component={'canvas'} sx={{ width: '100%', height: '100%' }} ref={setCanvasRef} />
         { (false && !!gameMap) && <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
             <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
@@ -496,11 +330,6 @@ const UnitCapacityItem = styled('span')`
     white-space: pre;
 `
 
-function renderCapacity(value: number) {
-    const s = (value || 0).toString()
-    return s.padStart(5, ' ')
-}
-
 interface UnitCapacityProps {
     weight: number
     capacity: Capacity
@@ -645,7 +474,7 @@ const UnitsComponent = observer(() => {
     );
 })
 
-const StructuresContainer = styled('div')`
+const StructuresContainer = styled(Box)`
     grid-area: structures;
 
     display: flex;
@@ -689,13 +518,6 @@ const RegionContainer = styled('div')`
     min-height: 0;
     overflow: auto;
 `
-
-const RegionBody = styled('div')`
-    min-height: 0;
-    margin: 1rem;
-    font-family: Fira Code, monospace;
-`
-
 const RegionComponent = observer(() => {
     const { game: { region, unit } } = useStore()
 
@@ -748,6 +570,49 @@ const GameComponent = observer(() => {
     );
 })
 
+interface ProgressItemProps {
+    text: string
+    progress: number
+}
+
+function ProgressItem({ text, progress }: ProgressItemProps) {
+    return <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+    }}>
+        <Typography>{text}</Typography>
+        { progress === 100
+            ? <DoneIcon sx={{ fontSize: '1rem' }} />
+            : <CircularProgress
+                size='1rem'
+                variant={ progress === 0 ? 'indeterminate' : 'determinate' }
+                value={progress}
+            /> }
+    </Box>
+}
+
+const Loading = observer(() => {
+    const store = useStore()
+    const { loading } = store.game
+
+    return <Container sx={{ height: '100%' }}>
+        <Grid sx={{ height: '100%' }} container justifyContent='center' alignItems='center'>
+            <Grid item xs={12} md={6} lg={3}>
+                <Card variant='outlined'>
+                    <CardContent>
+                        <Typography variant='h5'>Loading</Typography>
+                        <Stack spacing={1}>
+                            { loading.done.map((x, i) => <ProgressItem key={i} text={x} progress={100} />) }
+                            { loading.isLoading && <ProgressItem text={loading.phase} progress={loading.progress} /> }
+                        </Stack>
+                    </CardContent>
+                </Card>
+            </Grid>
+        </Grid>
+    </Container>
+})
+
 export function GamePage() {
     const { game } = useStore()
     const { gameId } = useParams()
@@ -757,8 +622,8 @@ export function GamePage() {
     }, [ gameId ])
 
     return <Observer>
-        {() => game.loading
-            ? <div>{ game.loadingMessage }</div>
+        {() => game.loading.isLoading
+            ? <Loading />
             : <GameComponent />
         }
     </Observer>

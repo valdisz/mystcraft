@@ -33,6 +33,54 @@ interface ProgressCallback {
 
 export type OrdersState = 'SAVED' | 'UNSAVED' | 'SAVING' | 'ERROR'
 
+export class GameLoadingStore {
+    constructor() {
+        makeObservable(this)
+    }
+
+    @observable isLoading = true
+
+    readonly done: IObservableArray<string> = observable([])
+
+    @observable phase: string = null
+
+    @computed get indeterminate() {
+        return this.total === 0
+    }
+
+    @observable value = 0
+    @observable total = 0
+
+    @computed get progress() {
+        return this.total === 0
+            ? 0
+            : this.value / this.total * 100
+    }
+
+    @action begin(name: string) {
+        this.end()
+
+        this.phase = name
+        this.total = 0
+        this.isLoading = true
+    }
+
+    @action end() {
+        if (!this.phase) {
+            return
+        }
+
+        this.done.push(this.phase)
+        this.phase = null
+        this.isLoading = false
+    }
+
+    @action update(value: number, total: number) {
+        this.value = Math.min(value, total)
+        this.total = total
+    }
+}
+
 export class GameStore {
     constructor() {
         makeObservable(this)
@@ -91,16 +139,18 @@ export class GameStore {
 
     private ordersSaveAbortController: AbortController
 
-    @observable loading = true
-    @action startLoading = () => {
-        this.loading = true
-        this.loadingMessage = 'Loading...'
-    }
+    // @observable loading = true
+    // @action startLoading = () => {
+    //     this.loading = true
+    //     this.loadingMessage = 'Loading...'
+    // }
 
-    @action stopLoading = () => this.loading = false
+    // @action stopLoading = () => this.loading = false
 
-    @observable loadingMessage = 'Loading...'
-    @action updateLoadingMessage = (message: string) => this.loadingMessage = message
+    // @observable loadingMessage = 'Loading...'
+    // @action updateLoadingMessage = (message: string) => this.loadingMessage = message
+
+    readonly loading = new GameLoadingStore()
 
     @observable name: string = null
     factionNumber: number = null
@@ -170,7 +220,7 @@ export class GameStore {
         }
         this.gameId = gameId
 
-        this.startLoading()
+        this.loading.begin('Game information')
 
         const response = await CLIENT.query<GetGameQuery, GetGameQueryVariables>({
             query: GetGame,
@@ -190,6 +240,8 @@ export class GameStore {
         runInAction(() => {
             this.name = game.name
         })
+
+        this.loading.begin(`Turn ${me.lastTurnNumber} information`)
 
         const turnDetails = await CLIENT.query<GetTurnQuery, GetTurnQueryVariables>({
             query: GetTurn,
@@ -236,11 +288,11 @@ export class GameStore {
 
         world.setAttitudes(defaultAttitude, attitudes)
 
-        this.updateLoadingMessage('Loading Regions...')
-        const regions = await this.loadRegions(turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Regions: ${position} of ${total}`))
+        this.loading.begin(`Regions`)
+        const regions = await this.loadRegions(turn.id, ({ position, total }) => this.loading.update(position, total))
 
-        this.updateLoadingMessage('Loading Units...')
-        const units = await this.loadUnits(turn.id, ({ position, total }) => this.updateLoadingMessage(`Loading Units: ${position} of ${total}`))
+        this.loading.begin(`Units`)
+        const units = await this.loadUnits(turn.id, ({ position, total }) => this.loading.update(position, total))
 
         world.addRegions(regions)
         world.addUnits(units)
@@ -254,11 +306,13 @@ export class GameStore {
         this.university = new UniversityStore(world)
         await this.university.load(this.gameId, turn.number)
 
+        // world.getTradeRoutes()
+
         runInAction(() =>{
             console.log(`Turn ${turn.number} loaded`)
 
             this.world = world
-            this.stopLoading()
+            this.loading.end()
         })
     }
 

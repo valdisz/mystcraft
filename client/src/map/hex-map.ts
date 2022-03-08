@@ -44,7 +44,8 @@ export class HexMap2 implements MapState {
 
         const wh = this.toPixel({ x: mapWidth - 1, y: mapHeight - 1, z: 0 })
 
-        this.viewport = new Viewport(this.canvas, origin, wh.x + 48 * Math.sin(30 * Math.PI / 180) - 2, wh.y,
+        // todo: get rid of magic number in the map width
+        this.viewport = new Viewport(this.canvas, origin, wh.x + 22, wh.y,
             vp => {
                 this.renderer.resize(vp.width, vp.height)
                 this.render()
@@ -263,11 +264,11 @@ export class HexMap2 implements MapState {
         requestAnimationFrame(() => {
             const { x, y } = this.viewport.origin
 
-            this.scene.position.set(x - this.viewport.mapWidth, y)
+            this.scene.position.set(x, y)
             this.updateVisibility()
             this.renderer.render(this.scene)
 
-            this.scene.position.set(x, y)
+            this.scene.position.set(x - this.viewport.mapWidth, y)
             this.updateVisibility()
             this.renderer.render(this.scene, { clear: false })
 

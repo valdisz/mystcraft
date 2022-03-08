@@ -35,4 +35,5 @@ export * from './traits' // ItemInfo, Capacity, SkillInfo
 export * from './unit' // ItemInfo, ItemMap, Ruleset, Capacity, Faction, Flag, Skill, SkillInfo, Event, Inventory, Link, Region, Structure, MoveType, Factions
 export * from './unit-reducer' // Link, Region, Unit
 export * from './ruleset' // all
+export * from './trade'
 export * from './world' // even more
