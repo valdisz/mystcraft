@@ -150,8 +150,6 @@ export class GameStore {
     // @observable loadingMessage = 'Loading...'
     // @action updateLoadingMessage = (message: string) => this.loadingMessage = message
 
-    readonly loading = new GameLoadingStore()
-
     @observable name: string = null
     factionNumber: number = null
 
@@ -214,13 +212,13 @@ export class GameStore {
         return items
     }
 
-    async load(gameId: string) {
+    async load(gameId: string, loading: GameLoadingStore) {
         if (this.gameId === gameId) {
             return
         }
         this.gameId = gameId
 
-        this.loading.begin('Game information')
+        loading.begin('Game information')
 
         const response = await CLIENT.query<GetGameQuery, GetGameQueryVariables>({
             query: GetGame,
@@ -241,7 +239,7 @@ export class GameStore {
             this.name = game.name
         })
 
-        this.loading.begin(`Turn ${me.lastTurnNumber} information`)
+        loading.begin(`Turn ${me.lastTurnNumber} information`)
 
         const turnDetails = await CLIENT.query<GetTurnQuery, GetTurnQueryVariables>({
             query: GetTurn,
@@ -288,11 +286,11 @@ export class GameStore {
 
         world.setAttitudes(defaultAttitude, attitudes)
 
-        this.loading.begin(`Regions`)
-        const regions = await this.loadRegions(turn.id, ({ position, total }) => this.loading.update(position, total))
+        loading.begin(`Regions`)
+        const regions = await this.loadRegions(turn.id, ({ position, total }) => loading.update(position, total))
 
-        this.loading.begin(`Units`)
-        const units = await this.loadUnits(turn.id, ({ position, total }) => this.loading.update(position, total))
+        loading.begin(`Units`)
+        const units = await this.loadUnits(turn.id, ({ position, total }) => loading.update(position, total))
 
         world.addRegions(regions)
         world.addUnits(units)
@@ -309,10 +307,7 @@ export class GameStore {
         // world.getTradeRoutes()
 
         runInAction(() =>{
-            console.log(`Turn ${turn.number} loaded`)
-
             this.world = world
-            this.loading.end()
         })
     }
 

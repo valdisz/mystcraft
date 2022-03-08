@@ -28,9 +28,9 @@ import {
     Container,
     Grid
 } from '@mui/material'
-import { useStore, GameStore } from '../store'
+import { useStore, GameStore, GameLoadingStore } from '../store'
 import { Observer, observer } from 'mobx-react'
-import { HexMap2 } from '../map'
+import { HexMap2, Resources } from '../map'
 import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity } from '../game'
 import { RegionSummary } from '../components/region-summary'
 import { Dialog } from '@mui/material'
@@ -43,6 +43,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
+import { Loader } from 'pixi.js'
 
 const GameContainer = styled(Box)`
     width: 100%;
@@ -85,6 +86,37 @@ const GameInfo = styled('div')`
     margin-left: 1rem;
 `
 
+class MapContext {
+    constructor() {
+        this.resources = new Resources(new Loader())
+    }
+
+    readonly resources: Resources
+    map: HexMap2
+
+    load() {
+        return this.resources.load()
+    }
+}
+
+const mapContext = React.createContext<MapContext>(null)
+
+interface MapProviderProps {
+    children: React.ReactNode
+}
+
+function MapProvider({ children }: MapProviderProps) {
+    const [ map ] = React.useState(() => new MapContext())
+
+    return <mapContext.Provider value={map}>
+        {children}
+    </mapContext.Provider>
+}
+
+function useMapContext() {
+    return React.useContext(mapContext)
+}
+
 interface GameMapProps {
     selectedRegion: ICoords | null
     onRegionSelected: (reg: Region) => void
@@ -92,71 +124,68 @@ interface GameMapProps {
 
 function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
     const { game } = useStore()
+    const context = useMapContext()
 
     const [ canvasRef, setCanvasRef ] = useCallbackRef<HTMLCanvasElement>()
-    const [ gameMap, setGameMap ] = React.useState<HexMap2>(null)
 
     React.useEffect(() => {
         if (!canvasRef) return
 
         const level = game.world.getLevel(1)
-        const map = new HexMap2(canvasRef, level.width, level.height, {
+        context.map = new HexMap2(canvasRef, context.resources, level.width, level.height, {
             onClick: onRegionSelected
         })
+        const { map } = context
 
-        map.load()
-            .then(() => {
-                const regions = level.toArray()
-                map.setRegions(regions)
+        const regions = level.toArray()
+        map.setRegions(regions)
 
-                const { player } = game.world.factions
-                let coords: Coords = game.region?.coords
+        const { player } = game.world.factions
+        let coords: Coords = game.region?.coords
 
-                if (!coords) {
-                    const lastLocation = window.localStorage.getItem('coords')
-                    if (lastLocation) {
-                        coords = JSON.parse(lastLocation)
-                        if (coords?.x == null || coords?.y == null) {
-                            coords = null
-                        }
-                    }
+        if (!coords) {
+            const lastLocation = window.localStorage.getItem('coords')
+            if (lastLocation) {
+                coords = JSON.parse(lastLocation)
+                if (coords?.x == null || coords?.y == null) {
+                    coords = null
                 }
+            }
+        }
 
-                if (!coords) {
-                    const unit = player.troops.first()
-                    if (unit) {
-                        coords = unit.region.coords
-                    }
-                }
+        if (!coords) {
+            const unit = player.troops.first()
+            if (unit) {
+                coords = unit.region.coords
+            }
+        }
 
-                if (coords) {
-                    map.centerAt(coords)
-                }
+        if (coords) {
+            map.centerAt(coords)
+        }
 
-                setGameMap(map)
-                map.render()
-            })
+        map.render()
 
         return (() => map.destroy())
     }, [ canvasRef ])
 
     React.useEffect(() => {
-        if (!gameMap) {
+        if (!context.map) {
             return
         }
 
-        gameMap.select(selectedRegion)
-    }, [ selectedRegion, gameMap ])
+        context.map.select(selectedRegion)
+    }, [ selectedRegion ])
 
     return <MapContainer>
         <Box component={'canvas'} sx={{ width: '100%', height: '100%' }} ref={setCanvasRef} />
-        { (false && !!gameMap) && <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
+        { (false && !!context.map) && <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
             <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
-                    <Button variant='contained' onClick={() => gameMap.zoomIn()}>
+                    <Button variant='contained' onClick={() => context.map.zoomIn()}>
                         <AddIcon />
                     </Button>
-                    <Button variant='contained' onClick={() => gameMap.zoomOut()}>
+                    <Button variant='contained' onClick={() => context.map.zoomOut()}>
                         <RemoveIcon />
                     </Button>
                 </ButtonGroup>
@@ -592,9 +621,11 @@ function ProgressItem({ text, progress }: ProgressItemProps) {
     </Box>
 }
 
-const Loading = observer(() => {
-    const store = useStore()
-    const { loading } = store.game
+interface LoadingProps {
+    loading: GameLoadingStore
+}
+
+const Loading = observer(({ loading }: LoadingProps) => {
 
     return <Container sx={{ height: '100%' }}>
         <Grid sx={{ height: '100%' }} container justifyContent='center' alignItems='center'>
@@ -613,19 +644,29 @@ const Loading = observer(() => {
     </Container>
 })
 
-export function GamePage() {
-    const { game } = useStore()
+const GameInner = observer(() => {
+    const [ loading ] = React.useState(() => new GameLoadingStore())
     const { gameId } = useParams()
+    const { game } = useStore()
+    const mapContext = useMapContext()
 
     React.useEffect(() => {
-        game.load(gameId)
+        game.load(gameId, loading)
+            .then(() => {
+                loading.begin('Map graphics')
+                return mapContext.load()
+            })
+            .then(() => loading.end())
     }, [ gameId ])
 
-    return <Observer>
-        {() => game.loading.isLoading
-            ? <Loading />
-            : <GameComponent />
-        }
-    </Observer>
+    return loading.isLoading
+        ? <Loading loading={loading} />
+        : <GameComponent />
+})
+
+export function GamePage() {
+    return <MapProvider>
+        <GameInner />
+    </MapProvider>
 }
 

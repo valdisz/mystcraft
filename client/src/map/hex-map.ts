@@ -34,7 +34,7 @@ export interface HexMapOptions {
 }
 
 export class HexMap2 implements MapState {
-    constructor(private canvas: HTMLCanvasElement, private readonly mapWidth: number, private readonly mapHeight: number,
+    constructor(private canvas: HTMLCanvasElement, private readonly resources: Resources, private readonly mapWidth: number, private readonly mapHeight: number,
         private readonly options?: HexMapOptions
     ) {
         const origin = { x: 50, y: 50 }
@@ -73,8 +73,6 @@ export class HexMap2 implements MapState {
             resolution: window.devicePixelRatio || 1
         })
 
-        this.resources = new Resources(new Loader())
-
         this.scene = new Container()
 
         this.layers = new Layers()
@@ -90,7 +88,6 @@ export class HexMap2 implements MapState {
     readonly viewport: Viewport
     readonly layout: Layout
     readonly renderer: AbstractRenderer
-    readonly resources: Resources
 
     readonly scene: Container
     readonly layers: Layers
@@ -215,10 +212,6 @@ export class HexMap2 implements MapState {
     fromPixel(x: number, y: number) {
         const origin = this.viewport.origin
         return this.layout.toCoord({ x: x - origin.x, y: y - origin.y })
-    }
-
-    load() {
-        return this.resources.load()
     }
 
     clearAll() {
