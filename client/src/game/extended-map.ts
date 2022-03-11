@@ -47,7 +47,7 @@ export class ExtendedMap<K, V> implements Iterable<V> {
 
     first() {
         const r = this.items.entries().next()
-        return !r.done ? r.value : null
+        return !r.done ? r.value[1] : null
     }
 
     some(predicate: ExtendedMapPredicate<K, V>): boolean {
