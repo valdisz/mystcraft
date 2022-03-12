@@ -23,7 +23,7 @@ When server runs for the first time, it needs to create initial user. For this p
 * `ADVISOR_SEED__PASSWORD` - password of the first user
 
 
-To run server for development needs `ASPNETCORE_ENVIRONMENT` env variable must set with value `Development`.
+To run server for development needs `ASPNETCORE_ENVIRONMENT` env variable must be set with value `Development`.
 
 ```
 ASPNETCORE_ENVIRONMENT=Development ADVISOR_SEED__EMAIL=valdis@zobela.eu ADVISOR_SEED__PASSWORD=valdis dotnet watch run
@@ -47,3 +47,31 @@ To run for production the best is to use Docker. For this sake project includes 
 ```
 docker build .
 ```
+
+## How to create new game
+
+There are no UI to create game right now, and the only way is to use GraphQL dev tool. Here are steps:
+
+1. Open http://localhost:1234/graphql (UI development proxy must be running)
+2. Then execute following query to create new game:
+
+```
+mutation {
+  gameCreateRemote(
+    name: "Test"
+    engineVersion: "5.0.0",
+    rulesetName: "Test",
+    rulesetVersion: "1.0.0",
+    options: {
+      map: [
+        { level: 0, label: "nexus", width: 1, height: 1 },
+        { level: 1, label: "surface", width: 64, height: 64 }
+      ]
+    }
+  ) {
+    isSuccess
+  }
+}
+```
+
+3. Open or refresh http://localhost:1234 and there should appear a test game which you can join, upload reports, etc.
