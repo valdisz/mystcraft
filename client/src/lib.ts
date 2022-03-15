@@ -21,7 +21,13 @@ export function useCallbackRef<T>(initialValue: null | T | (() => T) = null): [ 
     return [ ref, callback ]
 }
 
-export function useCopy(content: boolean = false, options: ClipboardJS.Options = {}) {
+export interface UseCopyOptions extends ClipboardJS.Options {
+    onSuccess?: () => void
+    onError?: () => void
+}
+
+// data-clipboard-text
+export function useCopy(content: boolean = false, { onError, onSuccess, ...options }: UseCopyOptions = { }) {
     const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
 
     React.useEffect(() => {
@@ -34,9 +40,20 @@ export function useCopy(content: boolean = false, options: ClipboardJS.Options =
             })
             : new ClipboardJS(ref, options)
 
+        if (onSuccess) clip.on('success', onSuccess)
+        if (onError) clip.on('error', onError)
 
         return () => clip.destroy()
     }, [ ref ])
 
     return setRef
+}
+
+export async function copy(text: string) {
+    const perm = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName })
+    if (perm.state === 'denied') {
+        return
+    }
+
+    const result = await navigator.clipboard.writeText(text)
 }

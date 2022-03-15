@@ -31,7 +31,7 @@ import {
 import { useStore, GameStore, GameLoadingStore } from '../store'
 import { Observer, observer } from 'mobx-react'
 import { HexMap2, Resources } from '../map'
-import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity } from '../game'
+import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity, World, Level, Faction, Troops } from '../game'
 import { RegionSummary } from '../components/region-summary'
 import { Dialog } from '@mui/material'
 import { UnitSummary, Orders } from '../components'
@@ -97,6 +97,40 @@ class MapContext {
     load() {
         return this.resources.load()
     }
+
+    initialize(canvas: HTMLCanvasElement, level: Level, onRegionSelected: (reg: Region) => void) {
+        this.map = new HexMap2(canvas, this.resources, level.width, level.height, {
+            onClick: onRegionSelected
+        })
+
+        const regions = level.toArray()
+        this.map.setRegions(regions)
+
+        return (() => this.map.destroy())
+    }
+
+    findCoordsToCenterAt(troops: Troops, region?: Region) {
+        let coords: Coords = region?.coords
+
+        if (!coords) {
+            const lastLocation = window.localStorage.getItem('coords')
+            if (lastLocation) {
+                coords = JSON.parse(lastLocation)
+                if (coords?.x == null || coords?.y == null) {
+                    coords = null
+                }
+            }
+        }
+
+        if (!coords) {
+            const unit = troops.first()
+            if (unit) {
+                coords = unit.region.coords
+            }
+        }
+
+        return coords
+    }
 }
 
 const mapContext = React.createContext<MapContext>(null)
@@ -132,41 +166,16 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
         if (!canvasRef) return
 
         const level = game.world.getLevel(1)
-        context.map = new HexMap2(canvasRef, context.resources, level.width, level.height, {
-            onClick: onRegionSelected
-        })
-        const { map } = context
+        const finalizer = context.initialize(canvasRef, level, onRegionSelected)
 
-        const regions = level.toArray()
-        map.setRegions(regions)
-
-        const { player } = game.world.factions
-        let coords: Coords = game.region?.coords
-
-        if (!coords) {
-            const lastLocation = window.localStorage.getItem('coords')
-            if (lastLocation) {
-                coords = JSON.parse(lastLocation)
-                if (coords?.x == null || coords?.y == null) {
-                    coords = null
-                }
-            }
-        }
-
-        if (!coords) {
-            const unit = player.troops.first()
-            if (unit) {
-                coords = unit.region.coords
-            }
-        }
-
+        const coords = context.findCoordsToCenterAt(game.world.factions.player.troops, game.region)
         if (coords) {
-            map.centerAt(coords)
+            context.map.centerAt(coords)
         }
 
-        map.render()
+        context.map.render()
 
-        return (() => map.destroy())
+        return finalizer
     }, [ canvasRef ])
 
     React.useEffect(() => {

@@ -1,18 +1,11 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { Box, Typography, Button, Grid, Theme,
-    Table, TableHead, TableRow, TableCell, TableBody,
-    Tooltip,
-} from '@mui/material'
+import { Box, Typography, Button, IconButton, Grid, Theme, Tooltip, Menu, MenuItem, ClickAwayListener } from '@mui/material'
 import { observer } from 'mobx-react'
-import { Region } from '../game'
-import { Coords } from '../game'
-import { useCopy } from '../lib'
-import { Province } from '../game'
-import { TerrainInfo } from '../game'
-import { Item } from '../game'
-import { ItemInfo } from '../game'
-
+import { Region, Coords, TerrainInfo, Item, ItemInfo } from '../game'
+import { copy } from '../lib'
+import { Item as ItemComponent2 } from '../components'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 const WideTooltip = styled(Tooltip)`
     max-width: 500px;
@@ -22,14 +15,6 @@ const SpaceBetween = styled(Grid)`
     display: flex;
     justify-content: space-between;
     align-items: center;
-`
-
-const Terrain = styled.div`
-    font-size: 80%;
-`
-
-const Level = styled.div`
-    font-size: 70%;
 `
 
 const Prefix = styled.div`
@@ -58,28 +43,18 @@ const GeographyButton = styled(Button)`
     }
 `
 
-interface ProvinceNameProps {
-    province: Province
-}
-
-function ProvinceName({ province }: ProvinceNameProps) {
-    return <Typography variant='h5'>{province.name}</Typography>
-}
-
 interface GeographyProps {
     coords: Coords
     terrain: TerrainInfo
 }
 
 function Geography({ coords, terrain }: GeographyProps) {
-    const copy = useCopy(false)
-
     const text = coords.toString()
 
-    return <GeographyButton size='small' variant='outlined' ref={copy} data-clipboard-text={text}>
+    return <GeographyButton size='small' variant='outlined' onClick={() => copy(`(${text})`)}>
         <Prefix>
-            <Level>{coords.label}</Level>
-            <Terrain>{terrain.name}</Terrain>
+            <Typography sx={{ fontSize: '50%' }}>{coords.label}</Typography>
+            <Typography sx={{ fontSize: '75%' }}>{terrain.name}</Typography>
         </Prefix>
         <Coordinates>{text}</Coordinates>
     </GeographyButton>
@@ -138,41 +113,6 @@ function ItemComponent({ item, className }: ItemComponentProps) {
     </ItemMain>
 }
 
-const ItemTable = styled.div`
-    display: table;
-    width: 100%;
-`
-
-const ItemTableBody = styled.div`
-    display: table-row-group;
-`
-
-const TableItem = styled(ItemComponent)`
-    display: table-row;
-
-    .amount, .name, .price {
-        display: table-cell;
-    }
-
-    .amount {
-        width: 40px;
-    }
-
-    .name {
-        margin-left: 0;
-    }
-
-    .price {
-        width: 50px;
-        margin-left: .5rem;
-        text-align: right;
-    }
-`
-
-export interface RegionSummaryProps {
-    region: Region
-}
-
 function getMaxAmount(amount: number) {
     let total = amount
 
@@ -189,42 +129,143 @@ function getMaxAmount(amount: number) {
     return total
 }
 
-function CopyRegionDetails({ region }: RegionSummaryProps) {
-    const copy = useCopy(false)
+export interface RegionSummaryProps {
+    region: Region
+}
 
+interface CopyRegionDetailsMenuItemProps {
+    region: Region
+}
+
+function formatRegionInfo(region: Region) {
     const lines = []
 
-    lines.push(`${region.province.name}\t${region.terrain.name}\t${region.coords.toString()}`)
-    lines.push('')
+    if (region?.terrain) lines.push(region.terrain.name)
+    if (region?.coords) lines.push(region.coords.toString())
+    if (region?.province) lines.push(region.province.name)
 
-    lines.push(`Products`)
-    lines.push(`Name\tAmount\tMax`)
-    for (const p of region.products) {
-        lines.push(`${p.name}\t${p.amount}\t${getMaxAmount(p.amount)}`)
+    if (region.products.size > 0) {
+        lines.push('')
+
+        lines.push(`Products`)
+        lines.push(`Name\tAmount\tMax`)
+        for (const p of region.products) {
+            lines.push(`${p.name}\t${p.amount}\t${getMaxAmount(p.amount)}`)
+        }
     }
 
-    lines.push('')
+    if (region.forSale.size > 0) {
+        lines.push('')
 
-    lines.push(`For Sale`)
-    lines.push(`Name\tAmount\tPrice`)
-    for (const p of region.forSale) {
-        lines.push(`${p.name}\t${p.amount}\t${p.price}`)
+        lines.push(`For Sale`)
+        lines.push(`Name\tAmount\tPrice`)
+        for (const p of region.forSale) {
+            lines.push(`${p.name}\t${p.amount}\t${p.price}`)
+        }
     }
 
-    return <Button ref={copy} data-clipboard-text={lines.join("\n")}>Copy region details</Button>
+    if (region.wanted.size > 0) {
+        lines.push('')
+
+        lines.push(`Wanted`)
+        lines.push(`Name\tAmount\tPrice`)
+        for (const p of region.wanted) {
+            lines.push(`${p.name}\t${p.amount}\t${p.price}`)
+        }
+    }
+
+    const text = lines.join("\n")
+    return text
+}
+
+function CopyRegionDetailsMenuItem({ region }: CopyRegionDetailsMenuItemProps) {
+    return <MenuItem onClick={() => copy(formatRegionInfo(region)) }>Copy region details</MenuItem>
+}
+
+type RegionEconomicsProps = Pick<Region, 'entertainment' | 'wages' | 'tax'>
+
+function RegionEconomics({ entertainment, tax, wages }: RegionEconomicsProps) {
+    return <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <strong>Ente.</strong>
+            {entertainment}
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
+            <strong>Wages</strong>
+            {wages.amount} ({wages.total})
+        </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', textAlign: 'right' }}>
+            <strong>Tax</strong>
+            {tax}
+        </Box>
+    </Box>
+}
+
+function getItemCategoryValue(item: Item) {
+    const { category } = item.info
+    if (category === 'food') return -1;
+    if (category === 'trade') return 1;
+
+    return 0
+}
+
+function itemSort(a: Item, b: Item) {
+    const aV = getItemCategoryValue(a)
+    const bV = getItemCategoryValue(b)
+
+    if (aV === bV) {
+        if (a.price > 0) {
+            return a.price - b.price
+        }
+
+        return a.amount - b.amount
+    }
+
+    return aV - bV
+}
+
+interface ResourcesColumnProps {
+    title: string
+    items: Iterable<Item>
+}
+
+function ResourcesColumn({ title, items }: ResourcesColumnProps) {
+    return <>
+        <Box sx={{ textAlign: 'center', mb: 1 }}>
+            <Typography variant='body2'>{title}</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+            { Array.from(items).sort(itemSort) .map(item => <ItemComponent2 key={item.code} value={item} used={5} />) }
+        </Box>
+    </>
 }
 
 export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
+    const [ open, setOpen ] = React.useState(false)
+    const anchorRef = React.useRef(null)
+
+    const hideMenu = React.useCallback(() => setOpen(false), [ ])
+
     return <Box m={1}>
         <Grid container spacing={1}>
-            <SpaceBetween item xs={12}>
-                { region?.province && <ProvinceName province={region.province} /> }
-                <Geography terrain={region.terrain} coords={region.coords} />
-            </SpaceBetween>
+            <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <ClickAwayListener onClickAway={hideMenu}>
+                    <IconButton size='small' onClick={() => setOpen(true)} ref={anchorRef}>
+                        <MoreVertIcon />
+                    </IconButton>
+                </ClickAwayListener>
+                <Menu open={open} anchorEl={anchorRef.current}>
+                    <CopyRegionDetailsMenuItem region={region} />
+                </Menu>
 
-            {/* <SpaceBetween item xs={12}>
-                <CopyRegionDetails region={region} />
-            </SpaceBetween> */}
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant='h5' title={region?.province?.name} sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{region?.province?.name}</Typography>
+                    </Box>
+                </Box>
+
+                <Geography terrain={region.terrain} coords={region.coords} />
+            </Grid>
 
             { (region.population || region.settlement) && <SpaceBetween item xs={12}>
                 { region.settlement && <span>
@@ -234,56 +275,18 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
             </SpaceBetween> }
 
             { region.explored && <>
-                <SpaceBetween item xs={12}>
-                    <div>
-                        <div>
-                            <strong>Ente.</strong>
-                        </div>
-                        {region.entertainment}
-                    </div>
-                    <div>
-                        <div>
-                            <strong>Wages</strong>
-                        </div>
-                        {region.wages.amount} ({region.wages.total})
-                    </div>
-                    <div>
-                        <div>
-                            <strong>Tax</strong>
-                        </div>
-                        {region.tax}
-                    </div>
-                </SpaceBetween>
-                { region.products.size ? <Grid item xs={12}>
-                    <strong>Products</strong>
-                    <ItemTable>
-                        <ItemTableBody>
-                            { region.products.toArray()
-                                .sort((a, b) => b.amount - a.amount)
-                                .map(item => <TableItem key={item.code} item={item} />) }
-                        </ItemTableBody>
-                    </ItemTable>
-                </Grid> : null }
-                { region.forSale.size ? <Grid item xs={12}>
-                    <strong>For sale</strong>
-                    <ItemTable>
-                        <ItemTableBody>
-                            { region.forSale.toArray()
-                                .sort((a, b) => a.price - b.price)
-                                .map(item => <TableItem key={item.code} item={item} />) }
-                        </ItemTableBody>
-                    </ItemTable>
-                </Grid> : null }
-                { region.wanted.size ? <Grid item xs={12}>
-                    <strong>Wanted</strong>
-                    <ItemTable>
-                        <ItemTableBody>
-                            { region.wanted.toArray()
-                                .sort((a, b) => a.price - b.price)
-                                .map(item => <TableItem key={item.code} item={item} />) }
-                        </ItemTableBody>
-                    </ItemTable>
-                </Grid> : null }
+                <Grid item xs={12}>
+                    <RegionEconomics entertainment={region.entertainment} tax={region.tax} wages={region.wages} />
+                </Grid>
+                { region.products.size > 0 && <Grid item xs={4}>
+                    <ResourcesColumn title='Products' items={region.products} />
+                </Grid> }
+                { region.forSale.size > 0 && <Grid item xs={4}>
+                    <ResourcesColumn title='For sale' items={region.forSale} />
+                </Grid> }
+                { region.wanted.size > 0 && <Grid item xs={4}>
+                    <ResourcesColumn title='Wanted' items={region.wanted} />
+                </Grid> }
             </> }
         </Grid>
     </Box>
