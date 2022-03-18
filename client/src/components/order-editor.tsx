@@ -3,7 +3,7 @@ import { styled } from '@mui/material/styles'
 import { observer } from 'mobx-react'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
-import { Typography, Button, Box } from '@mui/material'
+import { Typography, Box, BoxProps } from '@mui/material'
 import { Ruleset } from '../game'
 import { OrdersState, useStore } from '../store'
 
@@ -121,25 +121,28 @@ export function OrdersStatus({ state }: OrdersStatusProps) {
     </OrdersStatusBox>
 }
 
-interface OrdersProps {
+interface OrdersProps extends BoxProps {
     readOnly: boolean
 }
 
-export const Orders = observer(({ readOnly }: OrdersProps) => {
+export const Orders = observer(({ readOnly, sx, ...props }: OrdersProps) => {
     const store = useStore()
     const game = store.game
     const ruleset = game.world.ruleset
 
-    return <Box sx={{
+    return <Box {...props} sx={{
         display: 'flex',
         alignItems: 'stretch',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        ...(sx || { })
     }}>
-        <Typography sx={{ p: 0.5 }} variant='subtitle1'>Orders</Typography>
+        <Typography sx={{ fontSize: '80%', fontWeight: 'bold' }}>Orders</Typography>
         <Box sx={{
             flex: 1,
             padding: 0.5,
-            bgcolor: 'white'
+            borderColor: 'divider',
+            borderLeft: 1,
+            borderTop: 1,
         }}>
             <OrdersEditor readOnly={readOnly} value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
         </Box>

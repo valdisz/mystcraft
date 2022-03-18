@@ -26,24 +26,31 @@ import {
     Stack,
     CircularProgress,
     Container,
-    Grid
+    Grid,
+    CardHeader,
+    Collapse,
+    CardActions,
+    CardProps,
+    BoxProps
 } from '@mui/material'
 import { useStore, GameStore, GameLoadingStore } from '../store'
-import { Observer, observer } from 'mobx-react'
+import { observer } from 'mobx-react'
 import { HexMap2, Resources } from '../map'
 import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity, World, Level, Faction, Troops } from '../game'
-import { RegionSummary } from '../components/region-summary'
 import { Dialog } from '@mui/material'
-import { UnitSummary, Orders } from '../components'
+import { UnitSummary, Orders, ExpandMore, RegionSummary, RegionHeader } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
-import { InterfaceCommand } from '../store/commands/move';
+import { InterfaceCommand } from '../store/commands/move'
+import { Loader } from 'pixi.js'
+import SimpleBar from 'simplebar-react'
+import 'simplebar/dist/simplebar.min.css'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
-import { Loader } from 'pixi.js'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 const GameContainer = styled(Box)`
     width: 100%;
@@ -51,35 +58,6 @@ const GameContainer = styled(Box)`
 
     display: flex;
     flex-direction: column;
-`
-
-const GameGrid = styled('div')`
-    flex: 1;
-
-    min-height: 0;
-    display: grid;
-
-    grid-template-columns: minmax(200px, 1fr) 5fr minmax(400px, 1fr);
-    grid-template-rows: 2fr 1fr;
-    grid-template-areas:
-        "structures map details"
-        "units units orders";
-
-    @media (max-width: 640px) {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr 2fr 1fr;
-        grid-template-areas:
-            "details"
-            "map"
-            "units";
-    }
-`
-
-const MapContainer = styled('div')`
-    grid-area: map;
-    background-color: #000;
-    min-height: 0;
-    position: relative;
 `
 
 const GameInfo = styled('div')`
@@ -186,7 +164,7 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
         context.map.select(selectedRegion)
     }, [ selectedRegion ])
 
-    return <MapContainer>
+    return <Box sx={{ bgcolor: 'black', width: '100%', height: '100%' }}>
         <Box component={'canvas'} sx={{ width: '100%', height: '100%' }} ref={setCanvasRef} />
         { (false && !!context.map) && <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
             <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -200,17 +178,8 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
                 </ButtonGroup>
             </Box>
         </Box> }
-    </MapContainer>
+    </Box>
 }
-
-const UnitsContainer = styled('div')`
-    grid-area: units;
-
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: auto;
-`
 
 const UnitsTable = styled(Table)`
     min-height: 0;
@@ -400,54 +369,55 @@ const CommandButton = observer(({ command: { title, tooltip, canExecute, error, 
         : btn
 })
 
-const UnitsComponent = observer(() => {
+const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
     const { game } = useStore()
 
     return (
-        <UnitsContainer>
-            <Paper>
-                <Box p={1}>
-                    <Button onClick={game.openBattleSim}>Battle Sim</Button>
-                    {game.commands.filter(x => x.visible).map(x => { console.log(x); return <CommandButton key={x.title} command={x} /> })}
-                </Box>
+        <Box {...props} sx={{ display: 'flex', flexDirection: 'column', ...(sx || { }) }}>
+            {/* <Box sx={{ p: 1 }}>
+                <Button onClick={game.openBattleSim}>Battle Sim</Button>
+                {game.commands.filter(x => x.visible).map(x => { console.log(x); return <CommandButton key={x.title} command={x} /> })}
+            </Box> */}
 
-                <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
-                    <AppBar sx={{ position: 'relative' }}>
-                        <Toolbar>
-                            <IconButton edge="start" color="inherit" onClick={game.closeBattleSim} size="large"><CloseIcon /></IconButton>
-                            <Typography variant="h6" sx={{
-                                marginLeft: 2,
-                                flex: 1
-                            }}>Battle Sim</Typography>
-                            <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
-                            <Button color="inherit" onClick={game.toBattleSim}>Get BattleSim JSON</Button>
-                        </Toolbar>
-                    </AppBar>
-                    <DialogContent>
-                        <DialogContentText>Select battle sim sides</DialogContentText>
-                        <UnitsTable size='small' stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell></TableCell>
-                                    <TableCell className='structure-nr'></TableCell>
-                                    <TableCell className='structure-name'>Structure</TableCell>
-                                    <TableCell className='faction'>Faction</TableCell>
-                                    <TableCell className='unit-nr'>Unit Nr.</TableCell>
-                                    <TableCell className='unit-name'>Name</TableCell>
-                                    <TableCell className='men'>Men</TableCell>
-                                    <TableCell className='mounts'>Mounts</TableCell>
-                                    <TableCell className='items'>Items</TableCell>
-                                    <TableCell className='skills'>Skills</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
-                            </TableBody>
-                        </UnitsTable>
-                    </DialogContent>
-                </Dialog>
-            </Paper>
-            <UnitsTable size='small' stickyHeader>
+            <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
+                <AppBar sx={{ position: 'relative' }}>
+                    <Toolbar>
+                        <IconButton edge="start" color="inherit" onClick={game.closeBattleSim} size="large"><CloseIcon /></IconButton>
+                        <Typography variant="h6" sx={{
+                            marginLeft: 2,
+                            flex: 1
+                        }}>Battle Sim</Typography>
+                        <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
+                        <Button color="inherit" onClick={game.toBattleSim}>Get BattleSim JSON</Button>
+                    </Toolbar>
+                </AppBar>
+                <DialogContent>
+                    <DialogContentText>Select battle sim sides</DialogContentText>
+                    <UnitsTable size='small' stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell></TableCell>
+                                <TableCell className='structure-nr'></TableCell>
+                                <TableCell className='structure-name'>Structure</TableCell>
+                                <TableCell className='faction'>Faction</TableCell>
+                                <TableCell className='unit-nr'>Unit Nr.</TableCell>
+                                <TableCell className='unit-name'>Name</TableCell>
+                                <TableCell className='men'>Men</TableCell>
+                                <TableCell className='mounts'>Mounts</TableCell>
+                                <TableCell className='items'>Items</TableCell>
+                                <TableCell className='skills'>Skills</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
+                        </TableBody>
+                    </UnitsTable>
+                </DialogContent>
+            </Dialog>
+
+            <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+
+            <UnitsTable size='small' stickyHeader >
                 <TableHead>
                     <TableRow>
                         <TableCell className='structure-nr'></TableCell>
@@ -508,7 +478,8 @@ const UnitsComponent = observer(() => {
                 })}
                 </TableBody>
             </UnitsTable>
-        </UnitsContainer>
+            </Box>
+        </Box>
     );
 })
 
@@ -561,20 +532,92 @@ const RegionComponent = observer(() => {
 
     return <RegionContainer>
         <RegionSummary region={region} />
-        { unit && <UnitSummary unit={unit} /> }
     </RegionContainer>
 })
+
+interface MapPanelProps extends CardProps {
+    header: React.ReactNode
+    children?: React.ReactNode
+}
+
+function MapPanel({ header, children, sx, ...props }: MapPanelProps) {
+    const [ expanded, setExpanded ] = React.useState(true)
+
+    const onExpandClick = () => {
+        setExpanded(!expanded)
+    }
+
+    return <Card {...props} sx={{ opacity: 0.92, ...(sx || { }) }}>
+        <CardActions disableSpacing sx={{ gap: 1 }}>
+            { typeof header === 'string' ? <Typography variant='h6'>{header}</Typography> : header }
+            <ExpandMore expand={expanded} onClick={onExpandClick}>
+                <ExpandMoreIcon />
+            </ExpandMore>
+        </CardActions>
+        <Collapse in={expanded}>
+            {children}
+        </Collapse>
+    </Card>
+}
 
 export const MapTab = observer(() => {
     const { game } = useStore()
 
-    return <GameGrid>
+    return <Box sx={{
+        flex: 1,
+        minHeight: 0,
+        position: 'relative'
+    }}>
         <GameMapComponent selectedRegion={game.region?.coords} onRegionSelected={game.selectRegion} />
-        <UnitsComponent />
-        <StructuresComponent />
-        { game.region && <RegionComponent /> }
-        { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} /> }
-    </GameGrid>
+
+        <Box sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            pointerEvents: 'none',
+            '& > *': {
+                pointerEvents: 'all'
+            },
+            display: 'grid',
+            gap: 2,
+            m: 2,
+            gridTemplateColumns: 'minmax(min-content, 400px) 1fr minmax(min-content, 400px)',
+            gridTemplateRows: 'minmax(0, 33vh) 1fr minmax(min-content, 0)'
+        }}>
+            <MapPanel header='Units' sx={{ gridColumnStart: 1, gridColumnEnd: 4, gridRow: 3, alignSelf: 'flex-end', minHeight: 0 }}>
+                <Box sx={{ height: '30vh', display: 'flex' }}>
+                    <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+                        <UnitsComponent sx={{ width: '100%', height: '100%' }} />
+                    </Box>
+                    { game.unit && <UnitSummary unit={game.unit} sx={{ width: '400px' }} /> }
+                    { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '400px' }} /> }
+                </Box>
+            </MapPanel>
+
+            <Box component={SimpleBar}
+                autoHide={false}
+                sx={{
+                    gridColumnStart: 3, gridColumnEnd: 4,
+                    gridRowStart: 1, gridRowEnd: 3,
+                    height: '100%',
+                    overflow: 'auto',
+                    pointerEvents: 'none',
+                    '& > *': {
+                        pointerEvents: 'all'
+                    }
+                }}
+            >
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    { game.region && <MapPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />}>
+                        <RegionComponent />
+                    </MapPanel> }
+                    { game.structures?.length > 0 && <MapPanel header='Structures'><StructuresComponent /></MapPanel> }
+                </Box>
+            </Box>
+        </Box>
+    </Box>
 })
 
 const GameComponent = observer(() => {
@@ -678,4 +721,3 @@ export function GamePage() {
         <GameInner />
     </MapProvider>
 }
-

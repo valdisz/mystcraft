@@ -56,7 +56,7 @@ export class Viewport {
         }
 
         let y = Math.min(100, y0)
-        y = Math.max(y, this.height - this.mapHeight - 100)
+        y = Math.max(y, this.height - this.mapHeight - 100 - this.height / 3)
 
         // const y = Math.max(-this.mapHeight + this.height, Math.min(y0, 100))
 

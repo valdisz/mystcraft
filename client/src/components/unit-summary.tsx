@@ -1,9 +1,8 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { Typography, Button, Grid, Box, Tooltip, Chip } from '@mui/material'
+import { Typography, Button, Grid, Box, BoxProps, Tooltip, Chip } from '@mui/material'
 import { Unit } from '../game'
 import { useCopy } from '../lib'
-import { Province } from '../game'
 import { Item } from '../game'
 import { ItemInfo } from '../game'
 import { Skill } from '../game'
@@ -173,15 +172,14 @@ function UnitNumber({ num }: UnitNumberProps) {
     </Button>
 }
 
-export interface UnitSummaryProps {
+export interface UnitSummaryProps extends BoxProps {
     unit: Unit
 }
 
-export function UnitSummary({ unit }: UnitSummaryProps) {
-    return <Box sx={{
+export function UnitSummary({ unit, sx, ...props }: UnitSummaryProps) {
+    return <Box {...props} sx={{
         padding: 1,
-        borderTop: 1,
-        borderColor: 'divider'
+        ...(sx || { })
     }}>
         <Grid container spacing={1}>
             <SpaceBetween item xs={12}>

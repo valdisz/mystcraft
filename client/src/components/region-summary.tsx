@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { Box, Typography, Button, IconButton, Grid, Theme, Tooltip, Menu, MenuItem, ClickAwayListener } from '@mui/material'
+import { Box, BoxProps, Typography, Button, IconButton, Grid, Theme, Tooltip, Menu, MenuItem, ClickAwayListener } from '@mui/material'
 import { observer } from 'mobx-react'
 import { Region, Coords, TerrainInfo, Item, ItemInfo } from '../game'
 import { copy } from '../lib'
@@ -138,11 +138,28 @@ interface CopyRegionDetailsMenuItemProps {
 }
 
 function formatRegionInfo(region: Region) {
+    if (!region) {
+        return null
+    }
+
     const lines = []
 
-    if (region?.terrain) lines.push(region.terrain.name)
-    if (region?.coords) lines.push(region.coords.toString())
-    if (region?.province) lines.push(region.province.name)
+    if (region.terrain) lines.push(region.terrain.name)
+    if (region.coords) lines.push(region.coords.toString())
+    if (region.province) lines.push(region.province.name)
+
+    lines.push('')
+    lines.push(`Tax\t${region.tax}`)
+    lines.push(`Pillage\t${region.tax * 2}`)
+    lines.push(`Wages\t${region.wages.amount}`)
+    lines.push(`Total Wages\t${region.wages.total}`)
+    lines.push(`Entertainment\t${region.entertainment}`)
+
+    lines.push('')
+    lines.push(`Taxers\t${Math.ceil(region.tax / 50)}`)
+    lines.push(`Pillagers\t${Math.ceil(region.tax / 100)}`)
+    lines.push(`Workers\t${Math.ceil(region.wages.total / region.wages.amount)}`)
+    lines.push(`Entertainers\t${Math.ceil(region.entertainment / 30)}`)
 
     if (region.products.size > 0) {
         lines.push('')
@@ -235,38 +252,45 @@ function ResourcesColumn({ title, items }: ResourcesColumnProps) {
             <Typography variant='body2'>{title}</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-            { Array.from(items).sort(itemSort) .map(item => <ItemComponent2 key={item.code} value={item} used={5} />) }
+            { Array.from(items).sort(itemSort).map(item => <ItemComponent2 key={item.code} value={item} />) }
         </Box>
     </>
 }
 
-export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
+export interface RegionHeaderProps extends BoxProps {
+    region: Region
+}
+
+export function RegionHeader({ region, sx, ...props }: RegionHeaderProps) {
     const [ open, setOpen ] = React.useState(false)
     const anchorRef = React.useRef(null)
 
     const hideMenu = React.useCallback(() => setOpen(false), [ ])
 
+    return <Box {...props} sx={{ display: 'flex', gap: 1, ...(sx || { }) }}>
+        <ClickAwayListener onClickAway={hideMenu}>
+            <IconButton size='small' onClick={() => setOpen(true)} ref={anchorRef}>
+                <MoreVertIcon />
+            </IconButton>
+        </ClickAwayListener>
+        <Menu open={open} anchorEl={anchorRef.current}>
+            <CopyRegionDetailsMenuItem region={region} />
+        </Menu>
+
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box sx={{ minWidth: 0 }}>
+                <Typography variant='h5' title={region?.province?.name} sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{region?.province?.name}</Typography>
+            </Box>
+        </Box>
+
+        <Geography terrain={region.terrain} coords={region.coords} />
+    </Box>
+}
+
+export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
+
     return <Box m={1}>
         <Grid container spacing={1}>
-            <Grid item xs={12} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <ClickAwayListener onClickAway={hideMenu}>
-                    <IconButton size='small' onClick={() => setOpen(true)} ref={anchorRef}>
-                        <MoreVertIcon />
-                    </IconButton>
-                </ClickAwayListener>
-                <Menu open={open} anchorEl={anchorRef.current}>
-                    <CopyRegionDetailsMenuItem region={region} />
-                </Menu>
-
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Box sx={{ minWidth: 0 }}>
-                        <Typography variant='h5' title={region?.province?.name} sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{region?.province?.name}</Typography>
-                    </Box>
-                </Box>
-
-                <Geography terrain={region.terrain} coords={region.coords} />
-            </Grid>
-
             { (region.population || region.settlement) && <SpaceBetween item xs={12}>
                 { region.settlement && <span>
                     { region.settlement && <>{region.settlement.name} {region.settlement.size}</> }
