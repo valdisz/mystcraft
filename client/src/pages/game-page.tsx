@@ -467,9 +467,9 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                             <TableCell className='faction-name'>Faction</TableCell>
                             <TableCell className='unit-nr'></TableCell>
                             <TableCell className='unit-name'>Unit</TableCell>
+                            <TableCell className='money'>Money</TableCell>
                             <TableCell className='men-count'></TableCell>
                             <TableCell className='men'>Men</TableCell>
-                            <TableCell className='money'>Money</TableCell>
                             <TableCell className='mounts-count'></TableCell>
                             <TableCell className='mounts'>Mounts</TableCell>
                             <TableCell className='movement'>Movement</TableCell>
@@ -498,13 +498,13 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                                     { ' ' }
                                     { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
                                 </TableCell>
+                                <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
                                 <TableCell className='men-count'>
                                     { unitMenCount(unit.inventory.items)}
                                 </TableCell>
                                 <TableCell className='men'>
                                     { unitMen(unit.inventory.items) }
                                 </TableCell>
-                                <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
                                 <TableCell className='mounts-count'>
                                     { unitMountsCount(unit.inventory.items) }
                                 </TableCell>
