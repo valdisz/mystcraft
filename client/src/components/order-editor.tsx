@@ -6,6 +6,7 @@ import Prism from 'prismjs'
 import { Typography, Box, BoxProps } from '@mui/material'
 import { Ruleset } from '../game'
 import { OrdersState, useStore } from '../store'
+import SimpleBar from 'simplebar-react'
 
 const OrdersEditor = styled(Editor)`
     min-height: 100%;
@@ -85,7 +86,7 @@ function highlight(ruleset: Ruleset, s: string) {
 }
 
 const OrdersStatusBox = styled(Box)`
-    padding: 0.25rem;
+    p: 1;
     text-align: center;
 
     &.order-state--saved {
@@ -134,17 +135,16 @@ export const Orders = observer(({ readOnly, sx, ...props }: OrdersProps) => {
         display: 'flex',
         alignItems: 'stretch',
         flexDirection: 'column',
+        minHeight: 0,
         ...(sx || { })
     }}>
-        <Typography sx={{ fontSize: '80%', fontWeight: 'bold' }}>Orders</Typography>
-        <Box sx={{
-            flex: 1,
-            padding: 0.5,
-            borderColor: 'divider',
-            borderLeft: 1,
-            borderTop: 1,
-        }}>
-            <OrdersEditor readOnly={readOnly} value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <Typography variant='subtitle1'>Orders</Typography>
+            <Box sx={{ flex: 1, border: 1, borderColor: 'divider', p: 1, mr: 1, minHeight: 0 }}>
+                <Box component={SimpleBar} sx={{ height: '100%' }} autoHide={false}>
+                    <OrdersEditor readOnly={readOnly} value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
+                </Box>
+            </Box>
         </Box>
         <OrdersStatus state={game.ordersState} />
     </Box>

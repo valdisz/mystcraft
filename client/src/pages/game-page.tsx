@@ -43,7 +43,6 @@ import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move'
 import { Loader } from 'pixi.js'
 import SimpleBar from 'simplebar-react'
-import 'simplebar/dist/simplebar.min.css'
 
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -417,69 +416,71 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
 
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
 
-            <UnitsTable size='small' stickyHeader >
-                <TableHead>
-                    <TableRow>
-                        <TableCell className='structure-nr'></TableCell>
-                        <TableCell className='structure-name'>Structure</TableCell>
-                        <TableCell className='faction-nr'></TableCell>
-                        <TableCell className='faction-name'>Faction</TableCell>
-                        <TableCell className='unit-nr'></TableCell>
-                        <TableCell className='unit-name'>Unit</TableCell>
-                        <TableCell className='men'>Men</TableCell>
-                        <TableCell className='money'>Money</TableCell>
-                        <TableCell className='mounts'>Mounts</TableCell>
-                        <TableCell className='movement'>Movement</TableCell>
-                        <TableCell className='weight'>Weight</TableCell>
-                        <TableCell className='capacity'>Capacity</TableCell>
-                        <TableCell className='flags'>Flags</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                {game.units.map((unit) => {
-                    const rows = unit.description ? 2 : 1
-                    const noBorder = rows > 1 ? 'no-border' : ''
-                    const ownUnit = unit.isPlayer ? 'own' : ''
-
-                    const unitClasses = [ownUnit, noBorder].join(' ')
-
-                    return <React.Fragment key={unit.id}>
-                        <TableRow className={unitClasses} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
-                            <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
-                            <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-                            <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
-                            <TableCell component='th' rowSpan={rows} className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
-                            <TableCell className='unit-nr'>{unit.num}</TableCell>
-                            <TableCell component='th' className={`unit-name ${noBorder}`}>
-                                {unit.name}
-                                { ' ' }
-                                { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
-                            </TableCell>
-                            <TableCell className='men'>
-                                <UnitMen items={unit.inventory.items} />
-                            </TableCell>
-                            <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
-                            <TableCell className='mounts'>
-                                <UnitMounts items={unit.inventory.items} />
-                            </TableCell>
-                            <TableCell className='movement'>{renderUnitMovement(unit)}</TableCell>
-                            <TableCell className='weight'>{unit.weight}</TableCell>
-                            <TableCell className='capacity'>
-                                <UnitCapacity weight={unit.weight} capacity={unit.capacity} />
-                            </TableCell>
-                            <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
+            <Box component={SimpleBar} sx={{ height: '100%' }} autoHide={false}>
+                <UnitsTable size='small' stickyHeader >
+                    <TableHead>
+                        <TableRow>
+                            <TableCell className='structure-nr'></TableCell>
+                            <TableCell className='structure-name'>Structure</TableCell>
+                            <TableCell className='faction-nr'></TableCell>
+                            <TableCell className='faction-name'>Faction</TableCell>
+                            <TableCell className='unit-nr'></TableCell>
+                            <TableCell className='unit-name'>Unit</TableCell>
+                            <TableCell className='men'>Men</TableCell>
+                            <TableCell className='money'>Money</TableCell>
+                            <TableCell className='mounts'>Mounts</TableCell>
+                            <TableCell className='movement'>Movement</TableCell>
+                            <TableCell className='weight'>Weight</TableCell>
+                            <TableCell className='capacity'>Capacity</TableCell>
+                            <TableCell className='flags'>Flags</TableCell>
                         </TableRow>
-                        { rows > 1 && <TableRow className={ownUnit} selected={unit.num === game.unit?.num}>
-                            <TableCell colSpan={9} className='description'>
-                                {unit.description}
-                            </TableCell>
-                        </TableRow> }
-                    </React.Fragment>
-                })}
-                </TableBody>
-            </UnitsTable>
+                    </TableHead>
+                    <TableBody>
+                    {game.units.map((unit) => {
+                        const rows = unit.description ? 2 : 1
+                        const noBorder = rows > 1 ? 'no-border' : ''
+                        const ownUnit = unit.isPlayer ? 'own' : ''
+
+                        const unitClasses = [ownUnit, noBorder].join(' ')
+
+                        return <React.Fragment key={unit.id}>
+                            <TableRow className={unitClasses} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+                                <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+                                <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+                                <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
+                                <TableCell component='th' rowSpan={rows} className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
+                                <TableCell className='unit-nr'>{unit.num}</TableCell>
+                                <TableCell component='th' className={`unit-name ${noBorder}`}>
+                                    {unit.name}
+                                    { ' ' }
+                                    { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
+                                </TableCell>
+                                <TableCell className='men'>
+                                    <UnitMen items={unit.inventory.items} />
+                                </TableCell>
+                                <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
+                                <TableCell className='mounts'>
+                                    <UnitMounts items={unit.inventory.items} />
+                                </TableCell>
+                                <TableCell className='movement'>{renderUnitMovement(unit)}</TableCell>
+                                <TableCell className='weight'>{unit.weight}</TableCell>
+                                <TableCell className='capacity'>
+                                    <UnitCapacity weight={unit.weight} capacity={unit.capacity} />
+                                </TableCell>
+                                <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
+                            </TableRow>
+                            { rows > 1 && <TableRow className={ownUnit} selected={unit.num === game.unit?.num}>
+                                <TableCell colSpan={9} className='description'>
+                                    {unit.description}
+                                </TableCell>
+                            </TableRow> }
+                        </React.Fragment>
+                    })}
+                    </TableBody>
+                </UnitsTable>
             </Box>
         </Box>
+    </Box>
     );
 })
 
@@ -560,6 +561,10 @@ function MapPanel({ header, children, sx, ...props }: MapPanelProps) {
     </Card>
 }
 
+function noop(e: any) {
+    e.preventDefault()
+}
+
 export const MapTab = observer(() => {
     const { game } = useStore()
 
@@ -577,45 +582,46 @@ export const MapTab = observer(() => {
             bottom: 0,
             left: 0,
             pointerEvents: 'none',
-            '& > *': {
-                pointerEvents: 'all'
-            },
             display: 'grid',
             gap: 2,
             m: 2,
             gridTemplateColumns: 'minmax(min-content, 400px) 1fr minmax(min-content, 400px)',
             gridTemplateRows: 'minmax(0, 33vh) 1fr minmax(min-content, 0)'
         }}>
-            <MapPanel header='Units' sx={{ gridColumnStart: 1, gridColumnEnd: 4, gridRow: 3, alignSelf: 'flex-end', minHeight: 0 }}>
+            {/* Right Panel */}
+            <Box sx={{
+                gridColumnStart: 3, gridColumnEnd: 4,
+                gridRowStart: 1, gridRowEnd: 3,
+                height: '100%'
+            }}>
+                <Box component={SimpleBar} autoHide={false} sx={{
+                    pointerEvents: 'all'
+                }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        { game.region && <MapPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />}>
+                            <RegionComponent />
+                        </MapPanel> }
+                        { game.structures?.length > 0 && <MapPanel header='Structures'><StructuresComponent /></MapPanel> }
+                    </Box>
+                </Box>
+            </Box>
+
+            {/* Bottom Panel */}
+            <MapPanel header='Units' sx={{
+                gridColumnStart: 1, gridColumnEnd: 4,
+                gridRow: 3,
+                alignSelf: 'flex-end',
+                minHeight: 0,
+                pointerEvents: 'all'
+            }}>
                 <Box sx={{ height: '30vh', display: 'flex' }}>
                     <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
                         <UnitsComponent sx={{ width: '100%', height: '100%' }} />
                     </Box>
-                    { game.unit && <UnitSummary unit={game.unit} sx={{ width: '400px' }} /> }
-                    { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '400px' }} /> }
+                    { game.unit && <UnitSummary unit={game.unit} sx={{ width: '25vw', maxWidth: '400px' }} /> }
+                    { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '25vw', maxWidth: '400px' }} /> }
                 </Box>
             </MapPanel>
-
-            <Box component={SimpleBar}
-                autoHide={false}
-                sx={{
-                    gridColumnStart: 3, gridColumnEnd: 4,
-                    gridRowStart: 1, gridRowEnd: 3,
-                    height: '100%',
-                    overflow: 'auto',
-                    pointerEvents: 'none',
-                    '& > *': {
-                        pointerEvents: 'all'
-                    }
-                }}
-            >
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    { game.region && <MapPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />}>
-                        <RegionComponent />
-                    </MapPanel> }
-                    { game.structures?.length > 0 && <MapPanel header='Structures'><StructuresComponent /></MapPanel> }
-                </Box>
-            </Box>
         </Box>
     </Box>
 })

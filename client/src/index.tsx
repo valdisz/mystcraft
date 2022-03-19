@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import { BrowserRouter} from 'react-router-dom'
 import 'regenerator-runtime/runtime.js'
+import 'simplebar/dist/simplebar.min.css'
 
 import { App } from './app'
 import { Authenticate } from './auth'

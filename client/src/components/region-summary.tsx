@@ -17,32 +17,6 @@ const SpaceBetween = styled(Grid)`
     align-items: center;
 `
 
-const Prefix = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    flex-direction: column;
-
-    padding: ${({ theme }) => (theme as Theme).spacing(0, .5)};
-    border-right: 1px solid ${({ theme }) => (theme as Theme).palette.divider};
-`
-
-const Coordinates = styled.div`
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    padding: ${({ theme }) => (theme as Theme).spacing(0, .5)};
-`
-
-const GeographyButton = styled(Button)`
-    padding: 0 !important;
-
-    .MuiButton-label {
-        height: 100%;
-        align-items: stretch;
-    }
-`
-
 interface GeographyProps {
     coords: Coords
     terrain: TerrainInfo
@@ -51,13 +25,27 @@ interface GeographyProps {
 function Geography({ coords, terrain }: GeographyProps) {
     const text = coords.toString()
 
-    return <GeographyButton size='small' variant='outlined' onClick={() => copy(`(${text})`)}>
-        <Prefix>
-            <Typography sx={{ fontSize: '50%' }}>{coords.label}</Typography>
-            <Typography sx={{ fontSize: '75%' }}>{terrain.name}</Typography>
-        </Prefix>
-        <Coordinates>{text}</Coordinates>
-    </GeographyButton>
+    return <Button variant='outlined' color='inherit' onClick={() => copy(`(${text})`)} sx={{ p: 0 }}>
+        <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+            flexDirection: 'column',
+            px: 1, py: 0,
+            borderRight: 1,
+            borderColor: 'divider'
+        }}>
+            <Typography variant='caption'>{coords.label}</Typography>
+            <Typography variant='body2'>{terrain.name}</Typography>
+        </Box>
+        <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            px: 1, py: 0,
+        }}>
+            <Typography sx={{ fontWeight: 'bold' }}>{text}</Typography>
+        </Box>
+    </Button>
 }
 
 const ItemMain = styled.div`
@@ -277,10 +265,8 @@ export function RegionHeader({ region, sx, ...props }: RegionHeaderProps) {
             <CopyRegionDetailsMenuItem region={region} />
         </Menu>
 
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Box sx={{ minWidth: 0 }}>
-                <Typography variant='h5' title={region?.province?.name} sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{region?.province?.name}</Typography>
-            </Box>
+        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+            <Typography variant='h6' title={region?.province?.name} sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{region?.province?.name}</Typography>
         </Box>
 
         <Geography terrain={region.terrain} coords={region.coords} />

@@ -348,7 +348,7 @@ export class GameStore {
     ordersChanged = false
 
     @computed get isOrdersVisible() {
-        return this.unit?.isPlayer || !!this.unit?.orders
+        return this.unit?.isPlayer || this.unit?.orders?.length > 0
     }
 
     @computed get isOrdersReadonly() {
