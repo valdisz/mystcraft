@@ -107,7 +107,7 @@
 
                 var games = db.Games.ToList();
                 foreach (var g in games) {
-                    g.Ruleset = File.ReadAllText("/home/valdis/projects/advisor/server/data/ruleset.yaml");
+                    g.Ruleset = File.ReadAllText("data/ruleset.yaml");
                 }
                 db.SaveChanges();
             }
