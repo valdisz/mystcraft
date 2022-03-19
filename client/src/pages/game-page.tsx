@@ -194,19 +194,23 @@ const UnitsTable = styled(Table)`
         font-weight: bold;
     }
 
-    .faction-nr, .structure-nr, .unit-nr {
+    .faction-nr, .structure-nr, .unit-nr, .men-count, .mounts-count {
         width: 1px;
         text-align: right;
         padding-right: 4px;
     }
 
-    .faction-name, .structure-name, .unit-name {
+    .faction-name, .structure-name, .unit-name, .men, .mounts {
         width: 1px;
         padding-left: 4px;
     }
 
-    .men, .money, .mounts, .movement, .weight, .capacity {
+    .money, .movement, .weight, .capacity {
         width: 1px;
+    }
+
+    .weight {
+        text-align: right;
     }
 
     .skills {
@@ -249,82 +253,119 @@ const UnitsTable = styled(Table)`
     }
 `
 
-function UnitMen({ items }: { items: ItemMap<Item> }) {
+function unitMenCount(items: ItemMap<Item>) {
     const men = items.filter(x => x.isManLike)
-    men.sort((a, b) => b.amount - a.amount)
+
     const total = men.map(x => x.amount).reduce((value, next) => value + next, 0)
+
+    return total
+}
+
+
+function unitMen(items: ItemMap<Item>) {
+    const men = items.filter(x => x.isManLike)
+
+    men.sort((a, b) => b.amount - a.amount)
     const names = men.map(x => x.name).join(', ')
 
-    return <>{total} {names}</>
+    return names
 }
 
-function UnitMounts({ items }: { items: ItemMap<Item> }) {
+function unitMountsCount(items: ItemMap<Item>) {
     const mounts = items.filter(x => x.isMount)
-    mounts.sort((a, b) => b.amount - a.amount)
+    if (mounts.length === 0) {
+        return null
+    }
 
     const total = mounts.map(x => x.amount).reduce((value, next) => value + next, 0)
-    if (!total) return null
 
+    return total
+}
+
+function unitMounts(items: ItemMap<Item>) {
+    const mounts = items.filter(x => x.isMount)
+    if (mounts.length === 0) {
+        return null
+    }
+
+    mounts.sort((a, b) => b.amount - a.amount)
+    const total = mounts.map(x => x.amount).reduce((value, next) => value + next, 0)
     const names = mounts.map(x => x.name).join(', ')
 
-    return <>{total} {names}</>
+    return names
 }
 
-function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
-    const rows = unit.description ? 2 : 1
-    const noBorder = rows > 1 ? 'no-border' : ''
+// function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
+//     const rows = unit.description ? 2 : 1
+//     const noBorder = rows > 1 ? 'no-border' : ''
 
-    return <React.Fragment>
-        <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
-            <TableCell rowSpan={rows}>
-                { game.isAttacker(unit)
-                    ? <Chip label='Attacker' color='primary' />
-                    : game.isDefender(unit)
-                        ? <Chip label='Defender' color='secondary' />
-                        : <ButtonGroup>
-                            <Button variant='outlined' onClick={() => game.addAttacker(unit)}>Attacker</Button>
-                            <Button variant='outlined' onClick={() => game.addDefender(unit)}>Defender</Button>
-                        </ButtonGroup>
-                }
-            </TableCell>
-            <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
-            <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-            <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : ''}</TableCell>
-            <TableCell className='unit-nr'>{unit.num}</TableCell>
-            <TableCell component='th' className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
-            <TableCell className='men'>
-                <UnitMen items={unit.inventory.items} />
-            </TableCell>
-            <TableCell className='mounts'>
-                <UnitMounts items={unit.inventory.items} />
-            </TableCell>
-            <TableCell className='items'>{unit.inventory.items.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
-            <TableCell className='skills'>{unit.skills.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
-        </TableRow>
-        { rows > 1 && <TableRow>
-            <TableCell className='unit-nr'></TableCell>
-            <TableCell colSpan={5} className='description'>
-                {unit.description}
-            </TableCell>
-        </TableRow> }
-    </React.Fragment>
-}
+//     return <React.Fragment>
+//         <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+//             <TableCell rowSpan={rows}>
+//                 { game.isAttacker(unit)
+//                     ? <Chip label='Attacker' color='primary' />
+//                     : game.isDefender(unit)
+//                         ? <Chip label='Defender' color='secondary' />
+//                         : <ButtonGroup>
+//                             <Button variant='outlined' onClick={() => game.addAttacker(unit)}>Attacker</Button>
+//                             <Button variant='outlined' onClick={() => game.addDefender(unit)}>Defender</Button>
+//                         </ButtonGroup>
+//                 }
+//             </TableCell>
+//             <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+//             <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+//             <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : ''}</TableCell>
+//             <TableCell className='unit-nr'>{unit.num}</TableCell>
+//             <TableCell component='th' className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
+//             <TableCell className='men'>
+//                 <UnitMen items={unit.inventory.items} />
+//             </TableCell>
+//             <TableCell className='mounts'>
+//                 <UnitMounts items={unit.inventory.items} />
+//             </TableCell>
+//             <TableCell className='items'>{unit.inventory.items.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+//             <TableCell className='skills'>{unit.skills.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+//         </TableRow>
+//         { rows > 1 && <TableRow>
+//             <TableCell className='unit-nr'></TableCell>
+//             <TableCell colSpan={5} className='description'>
+//                 {unit.description}
+//             </TableCell>
+//         </TableRow> }
+//     </React.Fragment>
+// }
 
 function renderUnitMovement(unit: Unit) {
     if (!unit) return null
 
+    let moveType = ''
+    switch (unit.moveType) {
+        case 'walk':
+            moveType = '🚶'
+            break
+
+        case 'ride':
+            moveType = '🐎'
+            break
+
+        case 'fly':
+            moveType = '💨'
+            break
+    }
+
     const move = unit.isOverweight
-        ? <Chip size='small' color='error' label='overweight' />
-        : <Chip size='small' label={unit.moveType} />
+        ? <Chip size='small' color='error' label='Weight!' title='Overweight' />
+        : <Typography sx={{ fontSize: '150%' }} title={unit.moveType}>{moveType}</Typography>
+        // : <Chip size='small' label={unit.moveType} />
 
     const swim = unit.canSwim
-        ? <Chip size='small' color='info' label='swim' />
+        ? <Typography sx={{ fontSize: '150%' }} title='Can swim'>🏊🏽</Typography>
         : null
 
-    return <>
+    return <Box sx={{ display: 'flex', gap: 1 }}>
         {move}
         {swim}
-    </>
+    </Box>
 }
 
 const UnitCapacityContainer = styled('div')`
@@ -378,7 +419,7 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                 {game.commands.filter(x => x.visible).map(x => { console.log(x); return <CommandButton key={x.title} command={x} /> })}
             </Box> */}
 
-            <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
+            {/* <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
                 <AppBar sx={{ position: 'relative' }}>
                     <Toolbar>
                         <IconButton edge="start" color="inherit" onClick={game.closeBattleSim} size="large"><CloseIcon /></IconButton>
@@ -412,7 +453,7 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                         </TableBody>
                     </UnitsTable>
                 </DialogContent>
-            </Dialog>
+            </Dialog> */}
 
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
 
@@ -426,8 +467,10 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                             <TableCell className='faction-name'>Faction</TableCell>
                             <TableCell className='unit-nr'></TableCell>
                             <TableCell className='unit-name'>Unit</TableCell>
+                            <TableCell className='men-count'></TableCell>
                             <TableCell className='men'>Men</TableCell>
                             <TableCell className='money'>Money</TableCell>
+                            <TableCell className='mounts-count'></TableCell>
                             <TableCell className='mounts'>Mounts</TableCell>
                             <TableCell className='movement'>Movement</TableCell>
                             <TableCell className='weight'>Weight</TableCell>
@@ -455,12 +498,18 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                                     { ' ' }
                                     { unit.onGuard && <Chip size='small' color='primary' label='G' /> }
                                 </TableCell>
+                                <TableCell className='men-count'>
+                                    { unitMenCount(unit.inventory.items)}
+                                </TableCell>
                                 <TableCell className='men'>
-                                    <UnitMen items={unit.inventory.items} />
+                                    { unitMen(unit.inventory.items) }
                                 </TableCell>
                                 <TableCell className='money'>{unit.money ? unit.money : null}</TableCell>
+                                <TableCell className='mounts-count'>
+                                    { unitMountsCount(unit.inventory.items) }
+                                </TableCell>
                                 <TableCell className='mounts'>
-                                    <UnitMounts items={unit.inventory.items} />
+                                    { unitMounts(unit.inventory.items) }
                                 </TableCell>
                                 <TableCell className='movement'>{renderUnitMovement(unit)}</TableCell>
                                 <TableCell className='weight'>{unit.weight}</TableCell>
