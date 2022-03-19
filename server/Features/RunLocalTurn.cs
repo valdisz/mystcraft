@@ -93,7 +93,7 @@ namespace advisor.Features {
                         using var reader = new StreamReader(report.ReportStream);
                         var reportText = await reader.ReadToEndAsync();
 
-                        earliestTurn = await mediator.Send(new ReportUpload(player.Id, new [] { reportText }));
+                        earliestTurn = await mediator.Send(new PlayerReportUpload(player.Id, new [] { reportText }));
                     }
 
                     await mediator.Send(new TurnProcess(player.Id, earliestTurn));

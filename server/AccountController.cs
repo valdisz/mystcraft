@@ -137,7 +137,7 @@ namespace advisor {
 
             var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email);
             if (user == null) {
-                user = await mediator.Send(new CreateUser(email, null));
+                user = await mediator.Send(new UserCreate(email, null));
             }
 
             var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
@@ -165,7 +165,7 @@ namespace advisor {
                 await HttpContext.SignOutAsync(User.Identity.AuthenticationType);
             }
 
-            var user = await mediator.Send(new CreateUser(model.Email, model.Password));
+            var user = await mediator.Send(new UserCreate(model.Email, model.Password));
             if (user == null) {
                 return BadRequest(new {
                     General = "User with such email already exists."

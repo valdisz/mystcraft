@@ -25,12 +25,12 @@ namespace advisor {
     public class MutationType {
         [Authorize(Policy = Policies.UserManagers)]
         public Task<DbUser> CreateUser(IMediator mediator, string email, string password) {
-            return mediator.Send(new CreateUser(email, password));
+            return mediator.Send(new UserCreate(email, password));
         }
 
         [Authorize(Policy = Policies.UserManagers)]
         public Task<DbUser> UpdateUserRoles(IMediator mediator, [ID("User")] long userId, string[] add, string[] remove) {
-            return mediator.Send(new UpdateUserRoles(userId, add, remove));
+            return mediator.Send(new UserRolesUpdate(userId, add, remove));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
@@ -39,7 +39,7 @@ namespace advisor {
             using var playersDataStream = playerData.OpenReadStream();
             using var gameDataStream = gameData.OpenReadStream();
 
-            var result = await mediator.Send(new CreateLocalGame(name, engineStream, options, playersDataStream, gameDataStream));
+            var result = await mediator.Send(new GameCreateLocal(name, engineStream, options, playersDataStream, gameDataStream));
 
             return result;
         }
@@ -56,12 +56,12 @@ namespace advisor {
         }
 
         public Task<DbPlayer> JoinGame(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {
-            return mediator.Send(new JoinGame(currentUserId, gameId));
+            return mediator.Send(new GameJoin(currentUserId, gameId));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
         public Task<List<DbGame>> DeleteGame(IMediator mediator, [ID("Game")] long gameId) {
-            return mediator.Send(new DeleteGame(gameId));
+            return mediator.Send(new GameDelete(gameId));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
@@ -89,7 +89,7 @@ namespace advisor {
                 }
 
                 try {
-                    var result = await mediator.Send(new SetOrders(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));
+                    var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));
                     return result == "Ok"
                         ? new MutationResult<string>(true, null, null)
                         : new MutationResult<string>(false, null, result);

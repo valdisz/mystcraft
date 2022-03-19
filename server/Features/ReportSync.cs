@@ -22,6 +22,7 @@ namespace advisor.Features {
         }
 
         int InTurnContext.TurnNumber { get => this.TurnNumber; set { } }
+
         long InPlayerContext.PlayerId { get => this.PlayerId; set { } }
 
         public UnitOrders Orders { get; } = new ();

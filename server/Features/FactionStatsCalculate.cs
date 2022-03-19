@@ -8,17 +8,17 @@ namespace advisor.Features {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata;
 
-    public record CalculateFactionStats(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame>;
+    public record FactionStatsCalculate(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame>;
 
-    public class CalculateFactionStatsHandler : IRequestHandler<CalculateFactionStats, DbGame> {
-        public CalculateFactionStatsHandler(Database db)
+    public class FactionStatsCalculateHandler : IRequestHandler<FactionStatsCalculate, DbGame> {
+        public FactionStatsCalculateHandler(Database db)
         {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<DbGame> Handle(CalculateFactionStats request, CancellationToken cancellationToken) {
+        public async Task<DbGame> Handle(FactionStatsCalculate request, CancellationToken cancellationToken) {
             var player = await db.Players.SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 
             var data = await db.Events

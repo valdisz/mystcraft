@@ -10,12 +10,12 @@ namespace advisor.Features
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.EntityFrameworkCore;
 
-    public record DeleteGame(long GameId) : IRequest<List<DbGame>>;
+    public record GameDelete(long GameId) : IRequest<List<DbGame>>;
 
-    public record DeleteTurn(ClaimsPrincipal User, long PlayerId, int TurnNumber) : IRequest<int>;
+    public record TurnDelete(ClaimsPrincipal User, long PlayerId, int TurnNumber) : IRequest<int>;
 
-    public class DeleteGameHandler : IRequestHandler<DeleteGame, List<DbGame>>, IRequestHandler<DeleteTurn, int> {
-        public DeleteGameHandler(Database db, IAuthorizationService auth) {
+    public class GameDeleteHandler : IRequestHandler<GameDelete, List<DbGame>>, IRequestHandler<TurnDelete, int> {
+        public GameDeleteHandler(Database db, IAuthorizationService auth) {
             this.db = db;
             this.auth = auth;
         }
@@ -23,7 +23,7 @@ namespace advisor.Features
         private readonly Database db;
         private readonly IAuthorizationService auth;
 
-        public async Task<List<DbGame>> Handle(DeleteGame request, CancellationToken cancellationToken) {
+        public async Task<List<DbGame>> Handle(GameDelete request, CancellationToken cancellationToken) {
             var gameId = request.GameId;
             var game = await db.Games.FindAsync(gameId);
 
@@ -46,7 +46,7 @@ namespace advisor.Features
             return games;
         }
 
-        public async Task<int> Handle(DeleteTurn request, CancellationToken cancellationToken) {
+        public async Task<int> Handle(TurnDelete request, CancellationToken cancellationToken) {
             var isGM = (await auth.AuthorizeAsync(request.User, Roles.GameMaster)).Succeeded;
             var playerId = request.PlayerId;
 

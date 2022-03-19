@@ -6,17 +6,17 @@ namespace advisor.Features {
     using advisor.Persistence;
     using MediatR;
 
-    public record UpdateUserRoles(long UserId, string[] Add, string[] Remove) : IRequest<DbUser> {
+    public record UserRolesUpdate(long UserId, string[] Add, string[] Remove) : IRequest<DbUser> {
     }
 
-    public class UpdateUserRolesHandler : IRequestHandler<UpdateUserRoles, DbUser> {
-        public UpdateUserRolesHandler(Database db) {
+    public class UserRolesUpdateHandler : IRequestHandler<UserRolesUpdate, DbUser> {
+        public UserRolesUpdateHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<DbUser> Handle(UpdateUserRoles request, CancellationToken cancellationToken) {
+        public async Task<DbUser> Handle(UserRolesUpdate request, CancellationToken cancellationToken) {
             var user = await db.Users.FindAsync(request.UserId);
             if (user == null) return null;
 

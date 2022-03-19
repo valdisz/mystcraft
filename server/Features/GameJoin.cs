@@ -6,17 +6,17 @@ namespace advisor.Features {
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record JoinGame(long UserId, long GameId) : IRequest<DbPlayer> {
+    public record GameJoin(long UserId, long GameId) : IRequest<DbPlayer> {
     }
 
-    public class JoinGameHandler : IRequestHandler<JoinGame, DbPlayer> {
-        public JoinGameHandler(Database db) {
+    public class GameJoinHandler : IRequestHandler<GameJoin, DbPlayer> {
+        public GameJoinHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<DbPlayer> Handle(JoinGame request, CancellationToken cancellationToken) {
+        public async Task<DbPlayer> Handle(GameJoin request, CancellationToken cancellationToken) {
             var game = await db.Games.FindAsync(request.GameId);
             if (game == null) return null;
 

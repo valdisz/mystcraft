@@ -109,7 +109,7 @@ namespace advisor {
                 var report = await DownloadReportForFactionAsync(player.Number.Value, player.Password);
 
                 logger.LogInformation($"{player.Name} ({player.Number}): Saving report to database");
-                var turn = await mediator.Send(new ReportUpload(player.Id, new[] { report }));
+                var turn = await mediator.Send(new PlayerReportUpload(player.Id, new[] { report }));
             }
         }
 

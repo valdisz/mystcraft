@@ -48,7 +48,7 @@ namespace advisor {
                 reports.Add(await textReader.ReadToEndAsync());
             }
 
-            var earliestTurn = await mediator.Send(new ReportUpload(playerIdValue, reports));
+            var earliestTurn = await mediator.Send(new PlayerReportUpload(playerIdValue, reports));
             await mediator.Send(new TurnProcess(playerIdValue, earliestTurn));
 
             return Ok();
@@ -91,7 +91,7 @@ namespace advisor {
             using var textReader = new StreamReader(stream);
             string map = await textReader.ReadToEndAsync();
 
-            await mediator.Send(new ImportMap(playerIdValue, map));
+            await mediator.Send(new TurnMapImport(playerIdValue, map));
 
             return Ok();
         }

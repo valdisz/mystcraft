@@ -11,10 +11,10 @@ namespace advisor.Features {
     using advisor.Model;
     using advisor.Persistence;
 
-    public record ReportParse(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
+    public record PlayerReportParse(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
 
-    public class ReportParseHandler : IRequestHandler<ReportParse> {
-        public ReportParseHandler(Database db, IMapper mapper, IMediator mediator) {
+    public class PlayerReportParseHandler : IRequestHandler<PlayerReportParse> {
+        public PlayerReportParseHandler(Database db, IMapper mapper, IMediator mediator) {
             this.db = db;
             this.mapper = mapper;
             this.mediator = mediator;
@@ -24,7 +24,7 @@ namespace advisor.Features {
         private readonly IMapper mapper;
         private readonly IMediator mediator;
 
-        public async Task<Unit> Handle(ReportParse request, CancellationToken cancellationToken) {
+        public async Task<Unit> Handle(PlayerReportParse request, CancellationToken cancellationToken) {
             var playerId = request.PlayerId;
             var player = await db.Players
                 .SingleOrDefaultAsync(x => x.Id == playerId);
@@ -36,7 +36,7 @@ namespace advisor.Features {
                 .OrderBy(x => x.Number)
                 .Select(x => x.Number)
                 .ToListAsync())
-                .Select(x => new TurnContext(playerId, x))
+                .Select(x => new TurnContext(player.GameId, playerId, x))
             );
 
             // if historical reports are added then we need to reload old turns and start from the earliest turn

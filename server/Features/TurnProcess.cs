@@ -18,13 +18,13 @@ namespace advisor.Features
 
         public async Task<Unit> Handle(TurnProcess request, CancellationToken cancellationToken) {
             logger.LogInformation($"Parsing report");
-            await mediator.Send(new ReportParse(request.PlayerId, request.EarliestTurn));
+            await mediator.Send(new PlayerReportParse(request.PlayerId, request.EarliestTurn));
 
             logger.LogInformation($"Setting up study plans");
             await mediator.Send(new StudyPlansSetup(request.PlayerId));
 
             logger.LogInformation($"Calculating statistics");
-            await mediator.Send(new CalculateFactionStats(request.PlayerId, request.EarliestTurn));
+            await mediator.Send(new FactionStatsCalculate(request.PlayerId, request.EarliestTurn));
 
             return Unit.Value;
         }

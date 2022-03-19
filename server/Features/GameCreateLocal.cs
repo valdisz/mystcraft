@@ -6,16 +6,16 @@ namespace advisor.Features
     using advisor.Persistence;
     using MediatR;
 
-    public record CreateLocalGame(string Name, Stream Engine, GameOptions Options, Stream PlayerData, Stream GameData) : IRequest<DbGame>;
+    public record GameCreateLocal(string Name, Stream Engine, GameOptions Options, Stream PlayerData, Stream GameData) : IRequest<DbGame>;
 
-    public class CreateLocalGameHandler : IRequestHandler<CreateLocalGame, DbGame> {
-        public CreateLocalGameHandler(Database db) {
+    public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, DbGame> {
+        public GameCreateLocalHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<DbGame> Handle(CreateLocalGame request, CancellationToken cancellationToken) {
+        public async Task<DbGame> Handle(GameCreateLocal request, CancellationToken cancellationToken) {
             var newGame = new DbGame {
                 Name = request.Name,
                 Type = GameType.Local,

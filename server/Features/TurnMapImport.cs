@@ -7,10 +7,10 @@ namespace advisor.Features {
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record ImportMap(long PlayerId, string Source) : IRequest;
+    public record TurnMapImport(long PlayerId, string Source) : IRequest;
 
-    public class ImportMapHandler : IRequestHandler<ImportMap> {
-        public ImportMapHandler(Database db, IMediator mediator) {
+    public class TurnMapImportHandler : IRequestHandler<TurnMapImport> {
+        public TurnMapImportHandler(Database db, IMediator mediator) {
             this.db = db;
             this.mediator = mediator;
         }
@@ -18,7 +18,7 @@ namespace advisor.Features {
         private readonly Database db;
         private readonly IMediator mediator;
 
-        public async Task<MediatR.Unit> Handle(ImportMap request, CancellationToken cancellationToken) {
+        public async Task<MediatR.Unit> Handle(TurnMapImport request, CancellationToken cancellationToken) {
             DbPlayer player = await db.Players
                 .AsNoTracking()
                 .Include(x => x.Game)
@@ -35,7 +35,7 @@ namespace advisor.Features {
 
             int earliestTurn = player.LastTurnNumber;
 
-            await mediator.Send(new ReportParse(player.Id, earliestTurn, report));
+            await mediator.Send(new PlayerReportParse(player.Id, earliestTurn, report));
 
             return Unit.Value;
         }

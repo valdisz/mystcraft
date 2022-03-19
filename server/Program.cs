@@ -102,7 +102,7 @@
                     var email = conf.GetValue<string>("Seed:Email");
                     var password = conf.GetValue<string>("Seed:Password");
 
-                    await mediator.Send(new CreateUser(email, password, Policies.Root));
+                    await mediator.Send(new UserCreate(email, password, Policies.Root));
                 }
             }
         }

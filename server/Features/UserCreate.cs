@@ -1,17 +1,16 @@
 namespace advisor.Features {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using advisor.Persistence;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public record CreateUser(string Email, string Password, params string[] Roles) : IRequest<DbUser> {
+    public record UserCreate(string Email, string Password, params string[] Roles) : IRequest<DbUser> {
     }
 
-    public class CreateUserHandler : IRequestHandler<CreateUser, DbUser> {
-        public CreateUserHandler(Database db, AccessControl accessControl) {
+    public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
+        public UserCreateHandler(Database db, AccessControl accessControl) {
             this.db = db;
             this.accessControl = accessControl;
         }
@@ -19,7 +18,7 @@ namespace advisor.Features {
         private readonly Database db;
         private readonly AccessControl accessControl;
 
-        public async Task<DbUser> Handle(CreateUser request, CancellationToken cancellationToken) {
+        public async Task<DbUser> Handle(UserCreate request, CancellationToken cancellationToken) {
             var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);
             if (user != null) {
                 return user;
