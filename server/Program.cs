@@ -104,6 +104,12 @@
 
                     await mediator.Send(new UserCreate(email, password, Policies.Root));
                 }
+
+                var games = db.Games.ToList();
+                foreach (var g in games) {
+                    g.Ruleset = File.ReadAllText("/home/valdis/projects/advisor/server/data/ruleset.yaml");
+                }
+                db.SaveChanges();
             }
         }
 

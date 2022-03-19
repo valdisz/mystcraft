@@ -36,7 +36,7 @@ import {
 import { useStore, GameStore, GameLoadingStore } from '../store'
 import { observer } from 'mobx-react'
 import { HexMap2, Resources } from '../map'
-import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity, World, Level, Faction, Troops } from '../game'
+import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity, World, Level, Faction, Troops, MoveType } from '../game'
 import { Dialog } from '@mui/material'
 import { UnitSummary, Orders, ExpandMore, RegionSummary, RegionHeader } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
@@ -335,36 +335,52 @@ function unitMounts(items: ItemMap<Item>) {
 //     </React.Fragment>
 // }
 
+interface MoveIconProps {
+    moveType: MoveType
+}
+
+const MoveAvatar = styled(Avatar)(() => ({
+    width: '1.5rem',
+    height: '1.5rem',
+    fontSize: '1rem',
+    background: 'transparent'
+}))
+
+function MoveIcon({ moveType }: MoveIconProps) {
+    switch (moveType) {
+        case 'walk': return <MoveAvatar>🚶</MoveAvatar>
+        case 'swim': return <MoveAvatar>🏊🏽</MoveAvatar>
+        case 'ride': return <MoveAvatar>🐎</MoveAvatar>
+        case 'fly': return <MoveAvatar>💨</MoveAvatar>
+    }
+}
+
 function renderUnitMovement(unit: Unit) {
     if (!unit) return null
 
-    let moveType = ''
+    if (unit.isOverweight) {
+        return <Chip size='small' color='error' label='Weight!' title='Overweight' />
+    }
+
+    let move: React.ReactNode = null
+    const icon = <MoveIcon moveType={unit.moveType} />
     switch (unit.moveType) {
         case 'walk':
-            moveType = '🚶'
+            move = icon
             break
 
         case 'ride':
-            moveType = '🐎'
-            break
-
         case 'fly':
-            moveType = '💨'
+            const evasion = unit.evasion
+            move = evasion
+                ? <Chip size='small' avatar={icon} title={unit.moveType} label={evasion} />
+                : icon
             break
     }
 
-    const move = unit.isOverweight
-        ? <Chip size='small' color='error' label='Weight!' title='Overweight' />
-        : <Typography sx={{ fontSize: '150%' }} title={unit.moveType}>{moveType}</Typography>
-        // : <Chip size='small' label={unit.moveType} />
-
-    const swim = unit.canSwim
-        ? <Typography sx={{ fontSize: '150%' }} title='Can swim'>🏊🏽</Typography>
-        : null
-
     return <Box sx={{ display: 'flex', gap: 1 }}>
         {move}
-        {swim}
+        { unit.canSwim && <MoveIcon moveType='swim' /> }
     </Box>
 }
 

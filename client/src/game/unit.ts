@@ -79,6 +79,32 @@ export class Unit {
         this.ruleset.getMovePoints(mt)
     }
 
+    get evasion() {
+        let effectiveEvasion = 5
+
+        const ridingSkill = this.skills.find(x => x.code === 'RIDI')
+        if (this.isPlayer && !ridingSkill) {
+            return 0
+        }
+
+        if (ridingSkill) {
+            effectiveEvasion = ridingSkill.level
+        }
+
+        const speed = this.moveType
+        const canMove = this.inventory.items.filter(x => x.info.hasTrait('canMove'))
+
+        for (const item of canMove) {
+            const trait = item.info.traits.canMove
+            if (!trait.capacity[speed]) {
+                continue
+            }
+
+            effectiveEvasion = Math.min(effectiveEvasion, trait.evasion[speed])
+        }
+
+        return effectiveEvasion
+    }
 
     get isOverweight() {
         return this.weight > 0 && this.moveType === null

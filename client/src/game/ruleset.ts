@@ -159,10 +159,17 @@ export class Ruleset {
                 }
 
                 if (data.traits.canMove) {
-                    const { capacity, speed, requires: _requires } = data.traits.canMove
+                    const { capacity, speed, evasion, requires: _requires } = data.traits.canMove
                     const requires = _requires ? this.getItem(_requires) : null
 
-                    item.traits.canMove = new CanMoveTrait(capacity, speed, requires)
+                    const ev: Capacity = {
+                        walk: 0,
+                        swim: 0,
+                        ride: 0,
+                        fly: 0,
+                        ...(evasion || { })
+                    }
+                    item.traits.canMove = new CanMoveTrait(capacity, speed, ev, requires)
                 }
 
                 if (data.traits.canSail) {
@@ -321,6 +328,7 @@ interface TraitsData {
     canMove?: {
         capacity: Capacity
         speed: number
+        evasion?: Capacity
         requires?: string
     }
     canSail?: {

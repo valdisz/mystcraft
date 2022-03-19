@@ -57,7 +57,7 @@ export class CanTeachTrait extends Trait {
 export class CanMoveTrait extends Trait {
     readonly type: Traits = 'canMove'
 
-    constructor(public readonly capacity: Capacity, public readonly speed: number, public readonly requires?: ItemInfo) {
+    constructor(public readonly capacity: Capacity, public readonly speed: number, public readonly evasion: Capacity, public readonly requires?: ItemInfo) {
         super()
     }
 }

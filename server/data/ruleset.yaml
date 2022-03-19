@@ -650,7 +650,7 @@ objects:
         - STON: 20
 
   Castle:
-    type: building
+    type: fort
     canEnter: true
     canModify: true
     protect: 300
@@ -683,7 +683,7 @@ objects:
       - MERF
 
   Citadel:
-    type: building
+    type: fort
     canEnter: true
     canModify: true
     protect: 1000
@@ -1099,7 +1099,7 @@ objects:
     aidsInProduction: HORS
 
   Stockade:
-    type: building
+    type: fort
     canEnter: true
     canModify: true
     protect: 50
@@ -1141,7 +1141,7 @@ objects:
     aidsInProduction: WOOD
 
   Tower:
-    type: building
+    type: fort
     canEnter: true
     canModify: true
     protect: 10
@@ -1188,6 +1188,254 @@ objects:
     monsters:
       - ELEM
 
+  Longship:
+    type: ship
+    name: [ Longship, Longships ]
+    canEnter: true
+    canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 4
+        capacity:
+          swim:
+      canBuild:
+        skill: SHIP
+        level: 1
+        input:
+          - WOOD: 10
+    item:
+      code: LONG
+      weight: 200
+      traits:
+        noTransport:
+    description: |
+      Longship [LONG]. This is a ship with a capacity of 150 and a speed of 4 hexes per month. This ship requires a total of 4 levels of sailing skill to sail.
+
+  Raft:
+    type: ship
+    canEnter: true
+    canModify: true
+    item:
+      code: RAFT
+      spec:
+        name: [ Raft, Rafts ]
+        weight: 100
+        category: ship
+        traits:
+          canSail:
+            speed: 2
+            sailors: 2
+            capacity:
+              swim: 450
+          canProduce:
+            skill: SHIP
+            level: 1
+            effort: 10
+            amount: 1
+            input:
+              WOOD: 10
+          noTransport:
+        description: |
+          Raft [RAFT]. This is a ship with a capacity of 450 and a speed of 2 hexes per month. This ship requires a total of 2 levels of sailing skill to sail.
+
+  Cog:
+    type: ship
+    canEnter: true
+    canModify: true
+    item:
+      code: COG
+      spec:
+        name: [ Cog, Cogs ]
+        weight: 300
+        category: ship
+        traits:
+          canSail:
+            speed: 4
+            sailors: 6
+            capacity:
+              swim: 750
+          canProduce:
+            skill: SHIP
+            level: 2
+            effort: 25
+            amount: 1
+            input:
+              WOOD: 25
+          noTransport:
+        description: |
+          Cog [COG]. This is a ship with a capacity of 750 and a speed of 4 hexes per month. This ship requires a total of 6 levels of sailing skill to sail.
+
+  Galleon:
+    type: ship
+    canEnter: true
+    canModify: true
+    item:
+      code: GALL
+      spec:
+        name: [ Galleon, Galleons ]
+        weight: 750
+        category: ship
+        traits:
+          canSail:
+            speed: 4
+            sailors: 15
+            capacity:
+              swim: 2700
+          canProduce:
+            skill: SHIP
+            level: 3
+            effort: 75
+            amount: 1
+            input:
+              WOOD: 75
+          noTransport:
+        description: |
+          Galleon [GALL]. This is a ship with a capacity of 2700 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
+
+  Galley:
+    type: ship
+    canEnter: true
+    canModify: true
+    item:
+      code: GLLY
+      spec:
+        name: [ Galley, Galleys ]
+        weight: 600
+        category: ship
+        traits:
+          canSail:
+            speed: 4
+            sailors: 12
+            capacity:
+              swim: 1200
+          defense:
+            combat: 2
+            energy: 2
+            spirit: 2
+            weather: 2
+            riding: 2
+            ranged: 2
+          canProduce:
+            skill: SHIP
+            level: 3
+            effort: 50
+            amount: 1
+            input:
+              IRWD: 50
+          noTransport:
+        description: |
+          Galley [GLLY]. This is a ship with a capacity of 1200 and a speed of 4 hexes per month. This ship requires a total of 12 levels of sailing skill to sail. This ship provides defense to the first 120 men inside it, giving a defensive bonus of 2 against melee attacks, 2 against energy attacks, 2 against spirit attacks, 2 against weather attacks, 2 against riding attacks and 2 against ranged attacks. This ship will allow up to 2 mages to study above level 2.
+
+  Corsair:
+    type: ship
+    canEnter: true
+    canModify: true
+    item:
+      code: CORS
+      spec:
+        name: [ Corsair, Corsairs ]
+        weight: 750
+        category: ship
+        traits:
+          canSail:
+            speed: 5
+            sailors: 15
+            capacity:
+              swim: 1500
+          canProduce:
+            skill: SHIP
+            level: 4
+            effort: 50
+            amount: 1
+            input:
+              WOOD: 50
+          noTransport:
+        description: |
+          Corsair [CORS]. This is a ship with a capacity of 1500 and a speed of 5 hexes per month. This ship requires a total of 15 levels of sailing skill to sail.
+
+  Balloon:
+    type: flying-ship
+    canEnter: true
+    canModify: true
+    item:
+      code: BALL
+      spec:
+        name: [ Balloon, Balloons ]
+        weight: 150
+        category: ship
+        traits:
+          canSail:
+            speed: 4
+            sailors: 3
+            capacity:
+              fly: 100
+          canProduce:
+            skill: SHIP
+            level: 4
+            effort: 20
+            amount: 1
+            input:
+              FLOA: 20
+          noTransport:
+        description: |
+          Balloon [BALL]. This is a flying 'ship' with a capacity of 100 and a speed of 4 hexes per month. This ship requires a total of 3 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
+
+  Airship:
+    type: flying-ship
+    canEnter: true
+    canModify: true
+    item:
+      code: AIRS
+      spec:
+        name: [ Airship, Airships ]
+        weight: 500
+        category: ship
+        traits:
+          canSail:
+            speed: 4
+            sailors: 10
+            capacity:
+              fly: 800
+          canProduce:
+            skill: SHIP
+            level: 5
+            effort: 60
+            amount: 1
+            input:
+              FLOA: 60
+              WOOD: 60
+          noTransport:
+        description: |
+          Airship [AIRS]. This is a flying 'ship' with a capacity of 800 and a speed of 4 hexes per month. This ship requires a total of 10 levels of sailing skill to sail. This ship will allow up to 2 mages to study above level 2.
+
+  Cloudship:
+    type: flying-ship
+    canEnter: true
+    canModify: true
+    item:
+      code: CLOU
+      spec:
+        name: [ Cloudship, Cloudships ]
+        weight: 750
+        category: ship
+        traits:
+          canSail:
+            speed: 4
+            sailors: 15
+            capacity:
+              fly: 1500
+          defense:
+            combat: 3
+            energy: 3
+            spirit: 3
+            weather: 3
+            riding: 3
+            ranged: 3
+          noTransport:
+        description: |
+          Cloudship [CLOU]. This is a flying 'ship' with a capacity of 1500 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship provides defense to the first 140 men inside it, giving a defensive bonus of 3 against melee attacks, 3 against energy attacks, 3 against spirit attacks, 3 against weather attacks, 3 against riding attacks and 3 against ranged attacks. This ship will allow up to 5 mages to study above level 2.
+
 items:
   LEAD:
     name: [ leader, leaders ]
@@ -1200,6 +1448,8 @@ items:
         defaultLevel: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1224,6 +1474,8 @@ items:
           FISH: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1247,6 +1499,8 @@ items:
           SAIL: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1270,6 +1524,8 @@ items:
           ARMO: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1293,6 +1549,8 @@ items:
           BUIL: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1315,6 +1573,8 @@ items:
           ARMO: 3
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1338,6 +1598,8 @@ items:
           SHIP: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -1361,6 +1623,8 @@ items:
           HEAL: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 2
       noTransport:
@@ -1384,6 +1648,9 @@ items:
           FARM: 5
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
         capacity:
           walk: 20
           ride: 20
@@ -1426,6 +1693,8 @@ items:
         value: 30
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 0
       canProduce:
@@ -1545,6 +1814,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
         capacity:
           walk: 20
           ride: 20
@@ -1560,203 +1832,6 @@ items:
     description: |
       horse [HORS], weight 50, walking capacity 20, riding capacity 20, moves 4 hexes per month, costs 75 silver to withdraw. This is a mount. This mount requires riding [RIDI] of at least level 1 to ride in combat. This mount gives a minimum bonus of +1 when ridden into combat. This mount gives a maximum bonus of +3 when ridden into combat.
 
-  LONG:
-    name: [ Longship, Longships ]
-    weight: 200
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 4
-        capacity:
-          swim: 150
-      canProduce:
-        skill: SHIP
-        level: 1
-        effort: 10
-        amount: 1
-        input:
-          WOOD: 10
-      noTransport:
-    description: |
-      Longship [LONG]. This is a ship with a capacity of 150 and a speed of 4 hexes per month. This ship requires a total of 4 levels of sailing skill to sail.
-
-  RAFT:
-    name: [ Raft, Rafts ]
-    weight: 100
-    category: ship
-    traits:
-      canSail:
-        speed: 2
-        sailors: 2
-        capacity:
-          swim: 450
-      canProduce:
-        skill: SHIP
-        level: 1
-        effort: 10
-        amount: 1
-        input:
-          WOOD: 10
-      noTransport:
-    description: |
-      Raft [RAFT]. This is a ship with a capacity of 450 and a speed of 2 hexes per month. This ship requires a total of 2 levels of sailing skill to sail.
-
-  COG:
-    name: [ Cog, Cogs ]
-    weight: 300
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 6
-        capacity:
-          swim: 750
-      canProduce:
-        skill: SHIP
-        level: 2
-        effort: 25
-        amount: 1
-        input:
-          WOOD: 25
-      noTransport:
-    description: |
-      Cog [COG]. This is a ship with a capacity of 750 and a speed of 4 hexes per month. This ship requires a total of 6 levels of sailing skill to sail.
-
-  GALL:
-    name: [ Galleon, Galleons ]
-    weight: 750
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 15
-        capacity:
-          swim: 2700
-      canProduce:
-        skill: SHIP
-        level: 3
-        effort: 75
-        amount: 1
-        input:
-          WOOD: 75
-      noTransport:
-    description: |
-      Galleon [GALL]. This is a ship with a capacity of 2700 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
-
-  GLLY:
-    name: [ Galley, Galleys ]
-    weight: 600
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 12
-        capacity:
-          swim: 1200
-      defense:
-        combat: 2
-        energy: 2
-        spirit: 2
-        weather: 2
-        riding: 2
-        ranged: 2
-      canProduce:
-        skill: SHIP
-        level: 3
-        effort: 50
-        amount: 1
-        input:
-          IRWD: 50
-      noTransport:
-    description: |
-      Galley [GLLY]. This is a ship with a capacity of 1200 and a speed of 4 hexes per month. This ship requires a total of 12 levels of sailing skill to sail. This ship provides defense to the first 120 men inside it, giving a defensive bonus of 2 against melee attacks, 2 against energy attacks, 2 against spirit attacks, 2 against weather attacks, 2 against riding attacks and 2 against ranged attacks. This ship will allow up to 2 mages to study above level 2.
-
-  CORS:
-    name: [ Corsair, Corsairs ]
-    weight: 750
-    category: ship
-    traits:
-      canSail:
-        speed: 5
-        sailors: 15
-        capacity:
-          swim: 1500
-      canProduce:
-        skill: SHIP
-        level: 4
-        effort: 50
-        amount: 1
-        input:
-          WOOD: 50
-      noTransport:
-    description: |
-      Corsair [CORS]. This is a ship with a capacity of 1500 and a speed of 5 hexes per month. This ship requires a total of 15 levels of sailing skill to sail.
-
-  BALL:
-    name: [ Balloon, Balloons ]
-    weight: 150
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 3
-        capacity:
-          fly: 100
-      canProduce:
-        skill: SHIP
-        level: 4
-        effort: 20
-        amount: 1
-        input:
-          FLOA: 20
-      noTransport:
-    description: |
-      Balloon [BALL]. This is a flying 'ship' with a capacity of 100 and a speed of 4 hexes per month. This ship requires a total of 3 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
-
-  AIRS:
-    name: [ Airship, Airships ]
-    weight: 500
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 10
-        capacity:
-          fly: 800
-      canProduce:
-        skill: SHIP
-        level: 5
-        effort: 60
-        amount: 1
-        input:
-          FLOA: 60
-          WOOD: 60
-      noTransport:
-    description: |
-      Airship [AIRS]. This is a flying 'ship' with a capacity of 800 and a speed of 4 hexes per month. This ship requires a total of 10 levels of sailing skill to sail. This ship will allow up to 2 mages to study above level 2.
-
-  CLOU:
-    name: [ Cloudship, Cloudships ]
-    weight: 750
-    category: ship
-    traits:
-      canSail:
-        speed: 4
-        sailors: 15
-        capacity:
-          fly: 1500
-      defense:
-        combat: 3
-        energy: 3
-        spirit: 3
-        weather: 3
-        riding: 3
-        ranged: 3
-      noTransport:
-    description: |
-      Cloudship [CLOU]. This is a flying 'ship' with a capacity of 1500 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship provides defense to the first 140 men inside it, giving a defensive bonus of 3 against melee attacks, 3 against energy attacks, 3 against spirit attacks, 3 against weather attacks, 3 against riding attacks and 3 against ranged attacks. This ship will allow up to 5 mages to study above level 2.
-
   SWOR:
     name: [ sword, swords ]
     weight: 1
@@ -1768,7 +1843,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRON: 1
+          - IRON: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -1786,7 +1861,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -1804,7 +1879,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -1822,7 +1897,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRON: 1
+          - IRON: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -1840,7 +1915,7 @@ items:
         effort: 3
         amount: 1
         input:
-          IRON: 9
+          - IRON: 3
         productionBonus:
           item: HAMM
           amount: 1
@@ -1854,6 +1929,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 200
         requires: HORS
@@ -1863,7 +1940,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -1911,6 +1988,10 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
+          fly: 5
         capacity:
           walk: 20
           ride: 20
@@ -1990,7 +2071,7 @@ items:
         effort: 1
         amount: 1
         input:
-          MITH: 1
+          - MITH: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -2009,7 +2090,7 @@ items:
         effort: 1
         amount: 1
         input:
-          MITH: 1
+          - MITH: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -2028,7 +2109,7 @@ items:
         effort: 1
         amount: 1
         input:
-          YEW: 1
+          - YEW: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -2155,6 +2236,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2169,6 +2252,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
         capacity:
           walk: 5
           ride: 5
@@ -2184,6 +2270,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2212,6 +2300,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2226,6 +2316,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2240,6 +2332,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2254,6 +2348,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2268,6 +2364,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2282,6 +2380,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2296,6 +2396,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
       noGive:
@@ -2309,7 +2411,11 @@ items:
     category: monster
     traits:
       canMove:
-        speed: 6
+        speed: 4
+        evasion:
+          walk: 0
+          ride: 3
+          fly: 5
         capacity:
           walk: 50
           ride: 50
@@ -2326,6 +2432,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2340,6 +2448,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
       noGive:
@@ -2354,6 +2464,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
         capacity:
           walk: 50
           ride: 50
@@ -2369,6 +2482,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
       noGive:
@@ -2383,6 +2498,10 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
+          fly: 5
         capacity:
           walk: 50
           ride: 50
@@ -2399,6 +2518,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
         capacity:
           walk: 10
           ride: 10
@@ -2414,6 +2536,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2428,6 +2552,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2442,6 +2568,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2456,6 +2584,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2470,6 +2600,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2484,6 +2616,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2498,6 +2632,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -2512,6 +2648,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2526,6 +2664,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 10
       noGive:
@@ -2540,6 +2680,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -2553,6 +2695,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -2566,6 +2710,8 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -2579,6 +2725,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -2592,6 +2740,8 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 10
           ride: 10
@@ -2606,6 +2756,10 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
+          fly: 5
         capacity:
           walk: 50
           ride: 50
@@ -2621,6 +2775,10 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
+          fly: 5
         capacity:
           walk: 5
           ride: 5
@@ -2709,6 +2867,8 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 15
           swim: 15
@@ -2721,10 +2881,12 @@ items:
   IWOLF:
     name: [ wolf, wolves ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2737,10 +2899,12 @@ items:
   IEAGL:
     name: [ eagle, eagles ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2753,10 +2917,12 @@ items:
   IDRAG:
     name: [ dragon, dragons ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2769,10 +2935,12 @@ items:
   ISKEL:
     name: [ skeleton, skeletons ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2785,10 +2953,12 @@ items:
   IUNDE:
     name: [ undead, undead ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2801,10 +2971,12 @@ items:
   ILICH:
     name: [ lich, liches ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2817,10 +2989,12 @@ items:
   IIMP:
     name: [ imp, imps ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2833,10 +3007,12 @@ items:
   IDEMO:
     name: [ demon, demons ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2849,10 +3025,12 @@ items:
   IBALR:
     name: [ balrog, balrogs ]
     weight: 1
-    category: monster
+    category: illusion
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 0
           ride: 0
@@ -2881,7 +3059,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRON: 1
+          - IRON: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -2899,7 +3077,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -2917,7 +3095,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -2935,7 +3113,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRON: 1
+          - IRON: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -2953,7 +3131,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRWD: 1
+          - IRWD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -2968,6 +3146,8 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           walk: 200
           ride: 200
@@ -2977,7 +3157,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRWD: 1
+          - IRWD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -2992,6 +3172,8 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
         capacity:
           fly: 10
       canProduce:
@@ -3000,7 +3182,7 @@ items:
         effort: 1
         amount: 1
         input:
-          FLOA: 2
+          - FLOA: 2
         productionBonus:
           item: AXE
           amount: 1
@@ -3019,7 +3201,7 @@ items:
         effort: 1
         amount: 1
         input:
-          HERB: 1
+          - HERB: 1
         productionBonus:
           item: SPIN
           amount: 2
@@ -3037,7 +3219,7 @@ items:
         effort: 1
         amount: 1
         input:
-          HERB: 1
+          - HERB: 1
         productionBonus:
           item: SPIN
           amount: 2
@@ -3055,7 +3237,7 @@ items:
         effort: 1
         amount: 1
         input:
-          HERB: 1
+          - HERB: 1
         productionBonus:
           item: SPIN
           amount: 2
@@ -3073,7 +3255,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -3091,7 +3273,7 @@ items:
         effort: 1
         amount: 1
         input:
-          FUR: 1
+          - FUR: 1
         productionBonus:
           item: SPIN
           amount: 2
@@ -3105,6 +3287,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
           swim: 5
@@ -3120,6 +3304,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           swim: 290
       noGive:
@@ -3134,6 +3320,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           swim: 5
       noGive:
@@ -3148,6 +3336,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
           swim: 50
@@ -3173,6 +3363,8 @@ items:
           FARM: 4
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -3196,6 +3388,8 @@ items:
           HEAL: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
           swim: 5
@@ -3220,6 +3414,8 @@ items:
           ENTE: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 2
       noTransport:
@@ -3243,6 +3439,8 @@ items:
           CARP: 5
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noTransport:
@@ -3294,7 +3492,7 @@ items:
         effort: 2
         amount: 1
         input:
-          ADMT: 2
+          - ADMT: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -3313,7 +3511,7 @@ items:
         effort: 2
         amount: 1
         input:
-          ADMT: 2
+          - ADMT: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -3332,7 +3530,7 @@ items:
         effort: 4
         amount: 1
         input:
-          ADMT: 12
+          - ADMT: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -3347,6 +3545,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 2
         capacity:
           walk: 20
           ride: 20
@@ -3369,6 +3570,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -3383,6 +3586,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
       noGive:
@@ -3397,6 +3602,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
       noGive:
@@ -3411,6 +3618,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 50
       noGive:
@@ -3425,6 +3634,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 25
       noGive:
@@ -3439,6 +3650,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -3453,6 +3666,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -3467,6 +3682,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 5
       noGive:
@@ -3481,6 +3698,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 30
       noGive:
@@ -3495,6 +3714,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
         capacity:
           walk: 50
           ride: 50
@@ -3514,8 +3736,8 @@ items:
         effort: 1
         amount: 1
         input:
-          HERB: 1
-          MUSH: 1
+          - HERB: 1
+            MUSH: 1
       advanced:
     description: |
       healing potion [HPOT], weight 1. This item allows its possessor to heal wounded units after battle. No skill is necessary to use this item; it will be used automatically when the possessor is involved in a battle. It can heal up to 1 casualties, with a 70 percent success rate. Healing consumes an item.
@@ -3544,7 +3766,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -3562,7 +3784,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -3588,7 +3810,7 @@ items:
         effort: 1
         amount: 1
         input:
-          MITH: 1
+          - MITH: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -3607,7 +3829,7 @@ items:
         effort: 1
         amount: 1
         input:
-          IRON: 1
+          - IRON: 1
         productionBonus:
           item: HAMM
           amount: 1
@@ -3625,7 +3847,7 @@ items:
         effort: 1
         amount: 1
         input:
-          WOOD: 1
+          - WOOD: 1
         productionBonus:
           item: AXE
           amount: 1
@@ -3720,6 +3942,9 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 1
         capacity:
           walk: 20
           swim: 20
@@ -3744,6 +3969,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 0
       canProduce:
@@ -3752,9 +3979,9 @@ items:
         effort: 4
         amount: 1
         input:
-          WOOD: 1000
-          IRWD: 120
-          FUR: 320
+          - WOOD: 1000
+            IRWD: 120
+            FUR: 320
       freeMovingItem:
     description: |
       catapult [CATP], weight 800, can walk, moves 2 hexes per month. This is a free-moving-item (FMI). This FMI attacks with a combat skill of 0. This FMI has a resistance of 3 to melee attacks. This FMI has a resistance of 0 to energy attacks. This FMI has a resistance of 0 to spirit attacks. This FMI has a resistance of 0 to weather attacks. This FMI has a resistance of 3 to riding attacks. This FMI has a resistance of 3 to ranged attacks. FMI can cast a catapult strike in battle at a skill level of 8. The bonus given to units inside buildings is not effective against this ability. This ability does between 1 and 64 ranged attacks and each attack deals 1 damage. This FMI has 1 melee attack per round and takes 30 hits to kill and each attack deals no damage. This FMI has a tactics score of 0, a stealth score of 0, and an observation score of 0.
@@ -3766,6 +3993,8 @@ items:
     traits:
       canMove:
         speed: 2
+        evasion:
+          walk: 0
         capacity:
           walk: 0
       canProduce:
@@ -3774,9 +4003,9 @@ items:
         effort: 4
         amount: 1
         input:
-          ROOT: 120
-          IRON: 1000
-          FUR: 200
+          - ROOT: 120
+            IRON: 1000
+            FUR: 200
       freeMovingItem:
     description: |
       steel defender [STED], weight 1000, can walk, moves 2 hexes per month. This is a free-moving-item (FMI). This FMI attacks with a combat skill of 0. This FMI has a resistance of 4 to melee attacks. This FMI has a resistance of 1 to energy attacks. This FMI has a resistance of 1 to spirit attacks. This FMI has a resistance of 1 to weather attacks. This FMI has a resistance of 0 to riding attacks. This FMI has a resistance of 4 to ranged attacks. This FMI has 1 melee attack per round and takes 100 hits to kill and each attack deals no damage. This FMI has a tactics score of 0, a stealth score of 0, and an observation score of 0.
@@ -3788,6 +4017,10 @@ items:
     traits:
       canMove:
         speed: 4
+        evasion:
+          walk: 0
+          ride: 3
+          fly: 5
         capacity:
           walk: 50
           ride: 50
@@ -4917,16 +5150,3 @@ skills:
       - "transmutation [TRNS] 4: At this level the mage may transmute 2 wood [WOOD] times the skill level into yew [YEW]."
       - "transmutation [TRNS] 5: At this level the mage may transmute 2 horses [HORS] times the skill level into winged horses [WING]. At this level the mage may transmute 2 iron [IRON] times the skill level into admantium [ADMT]."
 
-  BRTL:
-    name: blasphemous ritual
-    magic: true
-    requires:
-      PATT: 4
-      FORC: 4
-      SPIR: 4
-    description:
-      - "blasphemous ritual [BRTL] 1: A mage with the Blasphemous Ritual skill may perform a blasphemous ritual to sever the world of Atlantis from the Eternal City. This ritual requires rootstone [ROOT] and the sacrifice of a randomly selected leader belonging to the mage's faction. This skill requires pattern [PATT] 4, force [FORC] 4 and spirit [SPIR] 4 to begin to study. This skill costs 1000000 silver per month of study."
-      - "blasphemous ritual [BRTL] 2: No skill report."
-      - "blasphemous ritual [BRTL] 3: No skill report."
-      - "blasphemous ritual [BRTL] 4: No skill report."
-      - "blasphemous ritual [BRTL] 5: No skill report."
