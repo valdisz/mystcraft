@@ -1,7 +1,7 @@
 import { UnitFragment } from '../schema'
 import {
     ItemInfo, ItemMap, Ruleset, Capacity, Faction, Flag, Skill, SkillInfo, Event, Inventory, Link, Region, Structure, MoveType, Factions
-} from './internal';
+} from './internal'
 import { OrderParser, ORDER_PARSER, UnitOrder, Order } from './orders'
 
 export class Unit {
