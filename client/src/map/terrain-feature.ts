@@ -29,13 +29,12 @@ export class TerrainFeature extends Feature<TileState> {
             sprite = res.tile(reg.terrain.code, hash)
 
             if (!reg.isVisible) {
-                if (reg.explored) {
-                    // darken region when no region report
-                    sprite.tint = 0xb0b0b0
-                }
-                else {
+                // darken region when no region report
+                sprite.tint = 0xb0b0b0
+
+                if (!reg.explored) {
                     // darken region more when not explored
-                    sprite.tint = 0xb0b0b0 * 0.75
+                    sprite.tint = 0x585858
                 }
             }
         }
