@@ -80,30 +80,32 @@ export class Unit {
     }
 
     get evasion() {
-        let effectiveEvasion = 5
+        let monsterEvasion = 0
+        let menEvasion = this.skills.find(x => x.code === 'RIDI')?.level
 
-        const ridingSkill = this.skills.find(x => x.code === 'RIDI')
-        if (this.isPlayer && !ridingSkill) {
-            return 0
-        }
-
-        if (ridingSkill) {
-            effectiveEvasion = ridingSkill.level
+        if (!menEvasion) {
+            menEvasion = this.isPlayer
+                ? 0
+                : Math.min(...this.inventory.men.map(({ info }) => info.maxSkillLevel('RIDI'))) ?? 0
         }
 
         const speed = this.moveType
-        const canMove = this.inventory.items.filter(x => x.info.hasTrait('canMove'))
-
-        for (const item of canMove) {
-            const trait = item.info.traits.canMove
-            if (!trait.capacity[speed]) {
+        for (const item of this.inventory.items) {
+            const { info } = item
+            if (!info.hasTrait('canMove')) {
                 continue
             }
 
-            effectiveEvasion = Math.min(effectiveEvasion, trait.evasion[speed])
+            const { canMove } = info.traits
+            if (info.category === 'monster') {
+                monsterEvasion = Math.max(monsterEvasion, canMove.evasion[speed] ?? 0)
+                continue
+            }
+
+            menEvasion = Math.min(menEvasion, canMove.evasion[speed] || menEvasion)
         }
 
-        return effectiveEvasion
+        return Math.max(menEvasion, monsterEvasion)
     }
 
     get isOverweight() {

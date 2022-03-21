@@ -1,4 +1,4 @@
-import { UniqueItem, Traits, TraitsMap, Item, ItemCategory } from './internal'
+import { UniqueItem, Traits, TraitsMap, Item, ItemCategory, SkillInfo } from './internal'
 
 export class ItemInfo implements UniqueItem {
     constructor(public readonly code: string, public readonly category: ItemCategory, singular: string, plural: string) {
@@ -20,6 +20,17 @@ export class ItemInfo implements UniqueItem {
      */
     get isManLike() {
         return this.category === 'man' || this.category === 'monster'
+    }
+
+    maxSkillLevel(skill: string | SkillInfo) {
+        if (!this.hasTrait('canLearn')) {
+            return 0
+        }
+
+        const code = typeof skill === 'string' ? skill : skill.code
+        const { canLearn } = this.traits
+
+        return canLearn.skills.find(x => x.skill.code === code)?.level ?? canLearn.defaultLevel
     }
 
     create(amount: number = 1): Item {
