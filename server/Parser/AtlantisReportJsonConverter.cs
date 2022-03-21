@@ -16,6 +16,7 @@
                 new RulesetSection(),
                 new FactionStatusSection(),
                 new ErrorsSection(),
+                new BattlesSection(),
                 new EventsSection(),
                 new SkillReportsSection(),
                 new ItemReportsSection(),

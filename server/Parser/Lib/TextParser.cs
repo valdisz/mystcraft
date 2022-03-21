@@ -1,8 +1,6 @@
-namespace advisor
-{
+namespace advisor {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
 
     public class TextParser {
@@ -237,7 +235,7 @@ namespace advisor
             return Seek(i);
         }
 
-        public Maybe<TextParser> Skip(ReadOnlySpan<char> s) {
+        public Maybe<TextParser> Then(ReadOnlySpan<char> s) {
             if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
             var span = GetSpan();
@@ -417,6 +415,14 @@ namespace advisor
             return span.EndsWith(s, StringComparison.OrdinalIgnoreCase);
         }
 
+        public bool Contains(ReadOnlySpan<char> s, StringComparison? comparison = null) {
+            if (EOF) return false;
+
+            var span = GetSpan();
+
+            return span.Contains(s, comparison ?? StringComparison.OrdinalIgnoreCase);
+        }
+
         public Maybe<TextParser> Match(ReadOnlySpan<char> s) {
             if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
 
@@ -427,10 +433,20 @@ namespace advisor
             return Slice(s.Length);
         }
 
-        public Maybe<TextParser> Between(ReadOnlySpan<char> left, ReadOnlySpan<char> right) {
+        public Maybe<TextParser> MatchEnd(ReadOnlySpan<char> s) {
+            if (EOF) return new Maybe<TextParser>("EOF", Ln, Pos + 1);
+
+            var span = GetSpan();
+            if (span.Length < s.Length || !span.EndsWith(s, StringComparison.OrdinalIgnoreCase))
+                return new Maybe<TextParser>("does not match", Ln, Pos + 1);
+
+            return Slice(span.Length - s.Length);
+        }
+
+        public Maybe<TextParser> Between(ReadOnlySpan<char> left, ReadOnlySpan<char> right, bool useSkip = false) {
             PushBookmark();
 
-            var result = After(left);
+            var result = useSkip ? Then(left) : After(left);
             if (!result) {
                 PopBookmark();
                 return result;
@@ -448,7 +464,7 @@ namespace advisor
             return result;
         }
 
-        public Maybe<TextParser> Between(ReadOnlySpan<char> s) => Between(s, s);
+        public Maybe<TextParser> Between(ReadOnlySpan<char> s, bool useSkip = false) => Between(s, s, useSkip);
 
         public override string ToString() => GetSpan().ToString();
 
@@ -489,11 +505,12 @@ namespace advisor
 
         public static Maybe<TextParser> Word(this Maybe<TextParser> p) => p ? p.Value.Word() : p;
         public static Maybe<TextParser> Match(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Match(s) : p;
+        public static Maybe<TextParser> MatchEnd(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.MatchEnd(s) : p;
         public static bool StartsWith(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.StartsWith(s) : false;
         public static Maybe<int> Integer(this Maybe<TextParser> p) => p ? p.Value.Integer() : p.Convert<int>();
         public static Maybe<double> Real(this Maybe<TextParser> p) => p ? p.Value.Real() : p.Convert<double>();
-        public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> left, ReadOnlySpan<char> right) => p ? p.Value.Between(left, right) : p;
-        public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Between(s) : p;
+        public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> left, ReadOnlySpan<char> right, bool useThen = false) => p ? p.Value.Between(left, right, useThen) : p;
+        public static Maybe<TextParser> Between(this Maybe<TextParser> p, ReadOnlySpan<char> s, bool useThen = false) => p ? p.Value.Between(s, useThen) : p;
         public static Maybe<string> AsString(this Maybe<TextParser> p) => p ? new Maybe<string>(p.Value) : p.Convert<string>();
 
         public static Maybe<T> Try<T>(this Maybe<TextParser> p, Func<TextParser, Maybe<T>> parser)
@@ -591,6 +608,8 @@ namespace advisor
 
         public static Maybe<P> Map<T, P>(this Maybe<T> p, Func<T, P> mapping) => p ? new Maybe<P>(mapping(p.Value)) : p.Convert<P>();
 
-        public static Maybe<TextParser> Skip(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Skip(s) : p;
+        public static Maybe<TextParser> Then(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Then(s) : p;
+
+        public static bool Contains(this Maybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.Contains(s) : false;
     }
 }

@@ -7,18 +7,19 @@ namespace advisor
         readonly IReportParser locationParser = new LocationParser(new CoordsParser());
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
-            p = p.BeforeBackwards("!");
+            var h = p.BeforeBackwards("!");
+            if (!h) return Error(h);
 
-            var attacker = unitName.Parse(p);
+            var attacker = unitName.Parse(h);
             if (!attacker) return Error(attacker);
 
-            var defender = unitName.Parse(p.OneOf(
-                _ => _.Skip(" attacks "),
-                _ => _.Skip(" attempts to assassinate ")
+            var defender = unitName.Parse(h.OneOf(
+                _ => _.Then(" attacks "),
+                _ => _.Then(" attempts to assassinate ")
             ).SkipWhitespaces());
             if (!defender) return Error(defender);
 
-            var location = locationParser.Parse(p.SkipWhitespaces(minTimes: 1).After("in").SkipWhitespaces(minTimes: 1));
+            var location = locationParser.Parse(h.SkipWhitespaces(minTimes: 1).After("in").SkipWhitespaces(minTimes: 1));
             if (!location) return Error(location);
 
             return Ok(ReportNode.Bag(

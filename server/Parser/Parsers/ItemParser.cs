@@ -19,14 +19,13 @@ namespace advisor
             var name = p.Words().Map(words => string.Join(" ", words));
             if (!name) return Error(name);
 
-            var code = p.Skip(" ").SkipWhitespaces().Between("[", "]").AsString();
+            var code = p.Then(" ").SkipWhitespaces().Between("[", "]").AsString();
             if (!code) return Error(code);
 
             var propOrPrice = p.Try(_ => _.OneOf(
                 pp => pp
-                    .Skip(" ")
-                    .SkipWhitespaces()
-                    .Between("(", ")")
+                    .SkipWhitespaces(minTimes: 1)
+                    .Between("(", ")", useThen: true)
                     .AsString()
                     .Map(props => ReportNode.Str("props", props)),
                 pp => pp
