@@ -105,7 +105,14 @@ export class Unit {
             menEvasion = Math.min(menEvasion, canMove.evasion[speed] || menEvasion)
         }
 
-        return Math.max(menEvasion, monsterEvasion)
+        const evasion = Math.max(menEvasion, monsterEvasion)
+        if (evasion === 0) {
+            return null
+        }
+
+        return this.structure
+            ? `0/${evasion}`
+            : evasion.toString()
     }
 
     get isOverweight() {
