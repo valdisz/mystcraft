@@ -1,0 +1,6 @@
+fragment Coords on Coords {
+  x
+  y
+  z
+  label
+}

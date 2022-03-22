@@ -3,7 +3,7 @@ namespace advisor.Model {
     using System.Collections.Generic;
     using System.Linq;
 
-    public class JOtherReport {
+    public class JBaseReport {
         public JFaction Faction { get; set; }
         public List<JFactionStatus> FactionStatus { get; set; } = new ();
         public List<string> Errors { get; set; } = new ();
@@ -14,21 +14,14 @@ namespace advisor.Model {
         public int UnclaimedSilver { get; set; } = 0;
     }
 
-    public class JReport {
-        public JFaction Faction { get; set; }
+    public class JReport : JBaseReport {
         public JDate Date { get; set; }
         public JGameEngine Engine { get; set; }
-        public List<JFactionStatus> FactionStatus { get; set; } = new ();
-        public List<string> Errors { get; set; } = new ();
-        public List<JEvent> Events { get; set; } = new ();
-        public List<JSkillReport> SkillReports { get; set; } = new ();
-        public List<JItemReport> ItemReports { get; set; } = new ();
-        public JAttitudes Attitudes { get; set; } = new JAttitudes();
-        public int UnclaimedSilver { get; set; } = 0;
+        public List<JBattle> Battles { get; set; } = new ();
         public List<JRegion> Regions { get; set; } = new ();
         public JOrdersTemplate OrdersTemplate { get; set; }
 
-        public List<JOtherReport> OtherReports { get; set; } = new ();
+        public List<JBaseReport> OtherReports { get; set; } = new ();
 
         /// Merge and update current report with other report data
         public void MergeMap(JReport report) {
@@ -44,7 +37,7 @@ namespace advisor.Model {
                     throw new InvalidOperationException();
                 }
 
-                var other = new JOtherReport {
+                var other = new JBaseReport {
                     Faction = report.Faction,
                     FactionStatus = report.FactionStatus,
                     Errors = report.Errors,
@@ -101,6 +94,19 @@ namespace advisor.Model {
             }
 
             OrdersTemplate.Units.AddRange(report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>());
+
+            MergeBattles(report.Battles);
+        }
+
+        private void MergeBattles(List<JBattle> battles) {
+            string getKey(JBattle b) => $"{b.Attacker.Number}-{b.Defender.Number}-{b.Location.Coords.X}-{b.Location.Coords.Y}-{b.Location.Coords.Z}";
+
+            var dest = Battles.ToDictionary(getKey);
+            var src = battles.ToDictionary(getKey);
+
+            foreach (var key in src.Keys.Except(dest.Keys)) {
+                Battles.Add(src[key]);
+            }
         }
 
         private void MergeRegion(JRegion reg, JRegion other, bool addStructures, bool addUnits) {
@@ -170,6 +176,30 @@ namespace advisor.Model {
             if (other.CanStudy.Count > unit.CanStudy.Count) unit.CanStudy = other.CanStudy;
             if (other.ReadyItem != null) unit.ReadyItem = other.ReadyItem;
             if (other.CombatSpell != null) unit.CombatSpell = other.CombatSpell;
+
+            MergeItems(unit, other);
+        }
+
+        private static void MergeItems(JUnit unit, JUnit other) {
+            var destItems = unit.Items.ToDictionary(x => x.Code);
+            var srcItems = other.Items.ToDictionary(x => x.Code);
+
+            foreach (var code in destItems.Keys) {
+                if (!srcItems.ContainsKey(code)) {
+                    continue;
+                }
+
+                var di = destItems[code];
+                var si = srcItems[code];
+
+                if ((di.Props ?? "") != (si.Props ?? "") && si.Props?.Length > di.Props?.Length) {
+                    di.Props = si.Props;
+                }
+            }
+
+            foreach (var code in srcItems.Keys.Except(destItems.Keys)) {
+                unit.Items.Add(srcItems[code]);
+            }
         }
     }
 }

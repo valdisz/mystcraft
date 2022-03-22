@@ -12,6 +12,7 @@ namespace advisor.Features {
     using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
     using UnitOrders = System.Collections.Generic.Dictionary<int, string>;
     using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
+    using Microsoft.EntityFrameworkCore;
 
     public class ReportSync : InTurnContext {
         public ReportSync(Database db, long playerId, int turnNumber, JReport report) {
@@ -119,6 +120,7 @@ namespace advisor.Features {
             SyncAttitudes();
             SyncRegions();
             SyncEvents();
+            await SyncBattles();
 
             await ApplyFactionsAsync();
             await ApplyRegionsAsync();
@@ -277,6 +279,42 @@ namespace advisor.Features {
 
             foreach (var othetReport in Report.OtherReports) {
                 SyncEvents(othetReport.Faction.Number, othetReport.Errors, othetReport.Events);
+            }
+        }
+
+        private async Task SyncBattles() {
+            var knownBattles = (await Db.Battles
+                .FilterByTurn(this)
+                .Select(x => $"{x.X}-{x.Y}-{x.Z}-{x.Attacker.Number}-{x.Defender.Number}")
+                .ToListAsync())
+                .ToHashSet();
+
+            foreach (var battle in Report.Battles) {
+                var loc = battle.Location;
+                var key = $"{loc.Coords.X}-{loc.Coords.Y}-{loc.Coords.Z}-{battle.Attacker.Number}-{battle.Defender.Number}";
+                if (knownBattles.Contains(key)) {
+                    continue;
+                }
+
+                await Db.Battles.AddAsync(new DbBattle {
+                    TurnNumber = TurnNumber,
+                    PlayerId = PlayerId,
+                    X = loc.Coords.X,
+                    Y = loc.Coords.Y,
+                    Z = loc.Coords.Z,
+                    Terrain = loc.Terrain,
+                    Province = loc.Province,
+                    Label = loc.Coords.Label,
+                    Attacker = new DbArmy {
+                        Number = battle.Attacker.Number,
+                        Name = battle.Attacker.Name
+                    },
+                    Defender = new DbArmy {
+                        Number = battle.Defender.Number,
+                        Name = battle.Defender.Name
+                    },
+                    Battle = battle
+                });
             }
         }
 
@@ -517,6 +555,7 @@ namespace advisor.Features {
             return unit;
         }
 
+        // todo: event sync must take inot account new report data
         private void SyncEvents(int factionNumber, IEnumerable<string> errors, IEnumerable<JEvent> events) {
             var faction = GetFaction(Report.Faction.Number);
 
@@ -568,8 +607,7 @@ namespace advisor.Features {
             IEnumerable<JItem> items,
             Func<T> factory,
             Action<JItem, T> mapper)
-        where T: AnItem
-        {
+        where T: AnItem {
             var dest = dbItems.ToDictionary(x => x.Code);
 
             foreach (var item in items) {
@@ -585,14 +623,17 @@ namespace advisor.Features {
         public static void SetItems(ICollection<DbUnitItem> dbItems, IEnumerable<JItem> items) {
             SetItems(dbItems, items, () => new DbUnitItem(), (src, dest) => {
                 dest.Code = src.Code;
-                dest.Amount = src.Amount ?? 1;
+                dest.Amount = src.Amount;
+                dest.Illusion = src.Props?.Contains("illusion") ?? false;
+                dest.Unfinished = src.Props?.Contains("unfinished") ?? false;
+                dest.Props = src.Props;
             });
         }
 
         public static void SetItems(ICollection<DbProductionItem> dbItems, IEnumerable<JItem> items) {
             SetItems(dbItems, items, () => new DbProductionItem(), (src, dest) => {
                 dest.Code = src.Code;
-                dest.Amount = src.Amount ?? 1;
+                dest.Amount = src.Amount;
             });
         }
 
@@ -609,7 +650,7 @@ namespace advisor.Features {
 
                 d.Market = market;
                 d.Code = item.Code;
-                d.Amount = item.Amount ?? 1;
+                d.Amount = item.Amount;
                 d.Price = item.Price;
             }
 

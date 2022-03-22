@@ -301,6 +301,10 @@ export class GameStore {
             }
         }
 
+        for (const battle of turn.battles) {
+            world.addBattle(battle)
+        }
+
         this.university = new UniversityStore(world)
         await this.university.load(this.gameId, turn.number)
 

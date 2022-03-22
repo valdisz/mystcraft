@@ -1,5 +1,7 @@
-namespace advisor.Model
-{
+namespace advisor.Model {
+    using HotChocolate;
+
+    [GraphQLName("Coords")]
     public class JCoords {
         public int X { get; set; }
         public int Y { get; set; }

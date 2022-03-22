@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using advisor.Persistence;
 
 namespace advisor.Migrations.mssql
 {
     [DbContext(typeof(MsSqlDatabase))]
-    partial class MsSqlDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20220322074115_battles")]
+    partial class battles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,22 +95,23 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbBattle", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("Battle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Province")
                         .IsRequired()
@@ -120,9 +123,6 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
-
                     b.Property<int>("X")
                         .HasColumnType("int");
 
@@ -132,9 +132,7 @@ namespace advisor.Migrations.mssql
                     b.Property<int>("Z")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId", "TurnNumber");
+                    b.HasKey("PlayerId", "TurnNumber");
 
                     b.ToTable("Battles");
                 });
@@ -928,10 +926,11 @@ namespace advisor.Migrations.mssql
 
                     b.OwnsOne("advisor.Persistence.DbArmy", "Attacker", b1 =>
                         {
-                            b1.Property<long>("DbBattleId")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("bigint")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                            b1.Property<long>("DbBattlePlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbBattleTurnNumber")
+                                .HasColumnType("int");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
@@ -941,20 +940,21 @@ namespace advisor.Migrations.mssql
                             b1.Property<int>("Number")
                                 .HasColumnType("int");
 
-                            b1.HasKey("DbBattleId");
+                            b1.HasKey("DbBattlePlayerId", "DbBattleTurnNumber");
 
                             b1.ToTable("Battles");
 
                             b1.WithOwner()
-                                .HasForeignKey("DbBattleId");
+                                .HasForeignKey("DbBattlePlayerId", "DbBattleTurnNumber");
                         });
 
                     b.OwnsOne("advisor.Persistence.DbArmy", "Defender", b1 =>
                         {
-                            b1.Property<long>("DbBattleId")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("bigint")
-                                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                            b1.Property<long>("DbBattlePlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbBattleTurnNumber")
+                                .HasColumnType("int");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
@@ -964,12 +964,12 @@ namespace advisor.Migrations.mssql
                             b1.Property<int>("Number")
                                 .HasColumnType("int");
 
-                            b1.HasKey("DbBattleId");
+                            b1.HasKey("DbBattlePlayerId", "DbBattleTurnNumber");
 
                             b1.ToTable("Battles");
 
                             b1.WithOwner()
-                                .HasForeignKey("DbBattleId");
+                                .HasForeignKey("DbBattlePlayerId", "DbBattleTurnNumber");
                         });
 
                     b.Navigation("Attacker")

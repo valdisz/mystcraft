@@ -1,5 +1,4 @@
-namespace advisor.Features
-{
+namespace advisor.Features {
     using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
@@ -83,6 +82,7 @@ namespace advisor.Features
             await DeleteFromTableAsync<DbRegion>(field, id);
             await DeleteFromTableAsync<DbFaction>(field, id);
             await DeleteFromTableAsync<DbReport>(field, id);
+            await DeleteFromTableAsync<DbBattle>(field, id);
             await DeleteFromTableAsync<DbTurn>(field, id);
         }
 
@@ -95,6 +95,7 @@ namespace advisor.Features
             await DeleteFromTableAsync<DbRegion>("PlayerId", playerId, "TurnNumber", turnNumber);
             await DeleteFromTableAsync<DbFaction>("PlayerId", playerId, "TurnNumber", turnNumber);
             await DeleteFromTableAsync<DbReport>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbBattle>("PlayerId", playerId, "TurnNumber", turnNumber);
             await DeleteFromTableAsync<DbTurn>("PlayerId", playerId, "TurnNumber", turnNumber);
         }
 

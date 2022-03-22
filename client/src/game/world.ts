@@ -1,10 +1,7 @@
-import { RegionFragment, Stance, StructureFragment, UnitFragment } from '../schema'
+import { RegionFragment, Stance, StructureFragment, UnitFragment, BattleFragment } from '../schema'
 import {
     Ruleset, Region, Level, WorldInfo, Provinces, Structure, MovementPathfinder, ICoords, oppositeDirection, Factions, Unit,
-    WorldLevel,
-    Trade,
-    Item,
-    TradeRoute
+    WorldLevel, Trade, Item, TradeRoute, Battle, Faction
 } from './internal'
 
 export class World {
@@ -18,6 +15,7 @@ export class World {
     readonly provinces = new Provinces()
     readonly factions = new Factions()
     readonly pathfinder = new MovementPathfinder()
+    readonly battles: Battle[] = [ ]
 
     defaultStance: Stance = Stance.Neutral
     month: number
@@ -108,7 +106,7 @@ export class World {
     }
 
     addFaction(num: number, name: string, isPlayer: boolean) {
-        this.factions.create(num, name, isPlayer)
+        return this.factions.create(num, name, isPlayer)
     }
 
     setAttitudes(defaultAttitude: Stance, attitudes: Map<number, Stance>) {
@@ -168,6 +166,15 @@ export class World {
         region.addUnit(u, structure)
     }
 
+    addBattle(battle: BattleFragment) {
+        const b = Battle.from(battle, this)
+
+        const region = b.region
+        region.battles.push(b)
+
+        this.battles.push(b)
+    }
+
 
     getRegion(id: string): Region
     getRegion(coords: ICoords): Region
@@ -192,6 +199,22 @@ export class World {
 
     getLevel(z: number): Level {
         return this.levels[z]
+    }
+
+    getFaction(num: number): Faction | null {
+        return this.factions.get(num)
+    }
+
+    // todo: have global index of all units
+    getUnit(num: number): Unit | null {
+        for (const f of this.factions) {
+            const unit = f.troops.get(num)
+            if (unit) {
+                return unit
+            }
+        }
+
+        return null
     }
 
     getTradeRoutes() {

@@ -1,0 +1,4 @@
+fragment BattleFaction on BattleFaction {
+  number
+  name
+}

@@ -2,6 +2,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using advisor.Model;
     using HotChocolate;
     using HotChocolate.Resolvers;
     using HotChocolate.Types;
@@ -32,6 +33,17 @@
                 .FilterByTurn(turn)
                 .OrderBy(x => x.FactionNumber)
                 .ToListAsync();
+        }
+        public async Task<List<JBattle>> Battles(Database db, [Parent] DbTurn turn) {
+            var battles = (await db.Battles
+                .AsNoTracking()
+                .FilterByTurn(turn)
+                .OrderBy(x => x.X).ThenBy(x => x.Y).ThenBy(x => x.Z).ThenBy(x => x.Attacker.Number)
+                .ToListAsync())
+                .Select(x => x.Battle)
+                .ToList();
+
+            return battles;
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]

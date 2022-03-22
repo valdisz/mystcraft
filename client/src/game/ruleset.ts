@@ -18,6 +18,15 @@ export class Ruleset {
         let skill = this.skills.get(nameOrCode)
 
         if (!skill) {
+            for (const s of this.skills) {
+                if (s.name === nameOrCode) {
+                    skill = s
+                    break
+                }
+            }
+        }
+
+        if (!skill) {
             skill = Object.freeze(new SkillInfo(nameOrCode))
             this.skills.set(skill)
         }
@@ -34,8 +43,8 @@ export class Ruleset {
             for (const i of this.items) {
                 for (const name of i.name) {
                     if (nameOrCode === name) {
-                        item = i;
-                        break;
+                        item = i
+                        break
                     }
                 }
             }

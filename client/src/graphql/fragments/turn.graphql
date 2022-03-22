@@ -6,4 +6,7 @@ fragment Turn on Turn {
   factions {
     ...Faction
   }
+  battles {
+    ...Battle
+  }
 }

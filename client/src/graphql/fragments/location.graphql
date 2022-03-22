@@ -1,0 +1,7 @@
+fragment Location on Location {
+  terrain
+  province
+  coords {
+    ...Coords
+  }
+}

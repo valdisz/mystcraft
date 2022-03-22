@@ -1,0 +1,30 @@
+fragment Battle on Battle {
+  location {
+    ...Location
+  }
+  attacker {
+    ...Participant
+  }
+  defender {
+    ...Participant
+  }
+  attackers {
+    ...BattleUnit
+  }
+  defenders {
+    ...BattleUnit
+  }
+  rounds {
+    ...BattleRound
+  }
+  casualties {
+    ...Casualties
+  }
+  spoils {
+    ...Item
+  }
+  rose {
+    ...Item
+  }
+  statistics
+}

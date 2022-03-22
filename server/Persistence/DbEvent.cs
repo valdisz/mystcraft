@@ -1,9 +1,7 @@
-namespace advisor.Persistence
-{
+namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using advisor.Model;
     using HotChocolate;
-    using Microsoft.EntityFrameworkCore;
 
     [GraphQLName("Event")]
     public class DbEvent : InFactionContext {

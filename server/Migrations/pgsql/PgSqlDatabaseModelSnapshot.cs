@@ -91,6 +91,54 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("Attitudes");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbBattle", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Battle")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("Terrain")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("X")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber");
+
+                    b.ToTable("Battles");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
                 {
                     b.Property<long>("Id")
@@ -772,6 +820,15 @@ namespace advisor.Migrations.pgsql
                     b.Property<int>("Amount")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("Illusion")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Props")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Unfinished")
+                        .HasColumnType("boolean");
+
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber", "Code");
 
                     b.ToTable("Items");
@@ -857,6 +914,69 @@ namespace advisor.Migrations.pgsql
                         .IsRequired();
 
                     b.Navigation("Faction");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbBattle", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
+                        .WithMany("Battles")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("advisor.Persistence.DbArmy", "Attacker", b1 =>
+                        {
+                            b1.Property<long>("DbBattleId")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint")
+                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)");
+
+                            b1.Property<int>("Number")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("DbBattleId");
+
+                            b1.ToTable("Battles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbBattleId");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbArmy", "Defender", b1 =>
+                        {
+                            b1.Property<long>("DbBattleId")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("bigint")
+                                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)");
+
+                            b1.Property<int>("Number")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("DbBattleId");
+
+                            b1.ToTable("Battles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbBattleId");
+                        });
+
+                    b.Navigation("Attacker")
+                        .IsRequired();
+
+                    b.Navigation("Defender")
+                        .IsRequired();
 
                     b.Navigation("Turn");
                 });
@@ -1452,6 +1572,8 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.Navigation("Attitudes");
+
+                    b.Navigation("Battles");
 
                     b.Navigation("Events");
 

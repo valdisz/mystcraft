@@ -1,6 +1,7 @@
 namespace advisor {
     using System;
     using advisor.Authorization;
+    using advisor.Model;
     using advisor.Persistence;
     using Hangfire;
     using Hangfire.Console;
@@ -212,6 +213,9 @@ namespace advisor {
                 .BindRuntimeType<DbUnitItem, ItemType>()
                 .BindRuntimeType<DbProductionItem, ItemType>()
                 .BindRuntimeType<DbStatItem, ItemType>()
+                .BindRuntimeType<JItem, ItemType>()
+                .BindRuntimeType<DbSkill, SkillType>()
+                .BindRuntimeType<JSkill, SkillType>()
                 ;
 
             services

@@ -1,20 +1,9 @@
 namespace advisor.Persistence
 {
     using System.ComponentModel.DataAnnotations;
+    using advisor.Model;
     using HotChocolate;
     using HotChocolate.Types;
-
-    public class ItemType : ObjectType<AnItem> {
-        protected override void Configure(IObjectTypeDescriptor<AnItem> descriptor) {
-            descriptor.Name("Item");
-        }
-    }
-
-    public interface AnItem {
-        string Code { get; set; }
-
-        int Amount { get; set; }
-    }
 
     public class Item : AnItem {
         public Item() {
@@ -47,6 +36,14 @@ namespace advisor.Persistence
         public string Code { get; set; }
 
         public int Amount { get; set; }
+
+        [DefaultValue(false)]
+        public bool Illusion { get; set; }
+
+        [DefaultValue(false)]
+        public bool Unfinished { get; set; }
+
+        public string Props { get; set; }
 
         [GraphQLIgnore]
         public int TurnNumber { get; set; }

@@ -1,9 +1,8 @@
 namespace advisor.Persistence {
-    using HotChocolate;
+    using advisor.Model;
     using System.ComponentModel.DataAnnotations;
 
-    [GraphQLName("Skill")]
-    public class DbSkill {
+    public class DbSkill : AnSkill {
         [MaxLength(8)]
         public string Code { get; set; }
         public int? Level { get; set; }

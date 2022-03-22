@@ -12,6 +12,7 @@ import { TerrainFeature } from './terrain-feature'
 import { TroopsFeature } from './troops-feature'
 import { MapState, TileState } from './state'
 import { ActiveFeature } from './active-feature'
+import { BattleFeature } from './battle-feature'
 
 export const TILE_W = 94;
 export const TILE_H = 82;
@@ -49,6 +50,7 @@ export class Tile implements TileState {
         this.position.copyFrom(position)
 
         this.terrain = new TerrainFeature('terrain')   // need to offest terrain tile
+        this.battle = new BattleFeature('terrain')
         this.roads = new RoadsFeature('roads')
         this.active = new ActiveFeature('highlight')
         this.settlement = new SettlementFeature('settlements')
@@ -97,6 +99,7 @@ export class Tile implements TileState {
     }
 
     readonly terrain: Feature<TileState>
+    readonly battle: Feature<TileState>
     readonly settlement: Feature<TileState>
     readonly roads: Feature<TileState>
     readonly active: Feature<TileState>
@@ -121,6 +124,7 @@ export class Tile implements TileState {
 
     update() {
         this.terrain.update(this, this.layers, this.res, this.getPos(0, -12))
+        this.battle.update(this, this.layers, this.res, this.getPos(0, 2))
         this.settlement.update(this, this.layers, this.res, this.getPos(0, 0))
         this.roads.update(this, this.layers, this.res, this.getPos(0, 0))
         this.active.update(this, this.layers, this.res, this.getPos(0, 2))
@@ -130,13 +134,13 @@ export class Tile implements TileState {
         this.forifications.update(this, this.layers, this.res, this.getPos(18, TILE_H / 2))
         this.lair.update(this, this.layers, this.res, this.getPos(0, 0))
         this.troops.update(this, this.layers, this.res, this.getPos(0, 20 - TILE_H / 2))
-        // this.onGuard.update(this, this.layers, this.res, this.getPos(-14, 0))
         this.onGuard.update(this, this.layers, this.res, this.getPos(0, 2))
         this.gate.update(this, this.layers, this.res, this.getPos(-TILE_W / 2 + 24, 0))
     }
 
     destroy() {
         this.terrain.destroy()
+        this.battle.destroy()
         this.settlement.destroy()
         this.roads.destroy()
         this.active.destroy()

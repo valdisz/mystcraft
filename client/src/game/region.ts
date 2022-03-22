@@ -1,6 +1,6 @@
 import { Direction, ExitFragment, RegionFragment } from '../schema'
 import {
-    Item, ItemMap, Province, Coords, TerrainInfo, Settlement, Ruleset, Wages, Structure, SettlementSize, Links, Unit, Troops
+    Item, ItemMap, Province, Coords, TerrainInfo, Settlement, Ruleset, Wages, Structure, SettlementSize, Links, Unit, Troops, Battle
 } from './internal'
 
 export class Region {
@@ -34,6 +34,7 @@ export class Region {
     readonly units: Unit[] = []
     readonly troops = new Map<number, Troops>()
     readonly structures: Structure[] = []
+    readonly battles: Battle[] = []
 
     get onGuard() {
         return this.units.filter(x => x.onGuard)

@@ -76,6 +76,7 @@ namespace advisor.Persistence {
         public DbSet<DbAlliance> Alliances { get; set; }
         public DbSet<DbAllianceMember> AllianceMembers { get; set; }
         public DbSet<DbStudyPlan> StudyPlans { get; set; }
+        public DbSet<DbBattle> Battles { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
@@ -237,6 +238,11 @@ namespace advisor.Persistence {
                     .OnDelete(DeleteBehavior.Restrict);
 
                 t.HasMany(x => x.Stats)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                t.HasMany(x => x.Battles)
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Restrict);
@@ -432,6 +438,16 @@ namespace advisor.Persistence {
 
             model.Entity<DbAllianceMember>(t => {
                 t.HasKey(x => new { x.PlayerId, x.AllianceId });
+            });
+
+            model.Entity<DbBattle>(t => {
+                t.HasKey(x => x.Id);
+
+                t.Property(x => x.Battle)
+                    .HasJsonConversion(options.Provider);
+
+                t.OwnsOne(x => x.Attacker);
+                t.OwnsOne(x => x.Defender);
             });
         }
     }

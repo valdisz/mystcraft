@@ -78,5 +78,8 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public List<DbStat> Stats { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbBattle> Battles { get; set; } = new ();
     }
 }

@@ -1,0 +1,4 @@
+fragment BattleSkill on BattleSkill {
+  name
+  level
+}

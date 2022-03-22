@@ -36,4 +36,5 @@ export * from './unit' // ItemInfo, ItemMap, Ruleset, Capacity, Faction, Flag, S
 export * from './unit-reducer' // Link, Region, Unit
 export * from './ruleset' // all
 export * from './trade'
+export * from './battle'
 export * from './world' // even more

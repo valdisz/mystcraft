@@ -1,0 +1,4 @@
+fragment Participant on Participant {
+  number
+  name
+}

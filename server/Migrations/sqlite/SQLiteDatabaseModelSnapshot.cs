@@ -87,6 +87,53 @@ namespace advisor.Migrations.sqlite
                     b.ToTable("Attitudes");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbBattle", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Battle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Terrain")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("X")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Y")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Z")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber");
+
+                    b.ToTable("Battles");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbEvent", b =>
                 {
                     b.Property<long>("Id")
@@ -764,6 +811,15 @@ namespace advisor.Migrations.sqlite
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Illusion")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Props")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Unfinished")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber", "Code");
 
                     b.ToTable("Items");
@@ -848,6 +904,65 @@ namespace advisor.Migrations.sqlite
                         .IsRequired();
 
                     b.Navigation("Faction");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbBattle", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbTurn", "Turn")
+                        .WithMany("Battles")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("advisor.Persistence.DbArmy", "Attacker", b1 =>
+                        {
+                            b1.Property<long>("DbBattleId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("Number")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbBattleId");
+
+                            b1.ToTable("Battles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbBattleId");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbArmy", "Defender", b1 =>
+                        {
+                            b1.Property<long>("DbBattleId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("Number")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbBattleId");
+
+                            b1.ToTable("Battles");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbBattleId");
+                        });
+
+                    b.Navigation("Attacker")
+                        .IsRequired();
+
+                    b.Navigation("Defender")
+                        .IsRequired();
 
                     b.Navigation("Turn");
                 });
@@ -1443,6 +1558,8 @@ namespace advisor.Migrations.sqlite
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.Navigation("Attitudes");
+
+                    b.Navigation("Battles");
 
                     b.Navigation("Events");
 

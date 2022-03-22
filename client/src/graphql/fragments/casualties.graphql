@@ -1,0 +1,7 @@
+fragment Casualties on Casualties {
+  army {
+    ...Participant
+  }
+  lost
+  damagedUnits
+}

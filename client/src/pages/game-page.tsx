@@ -31,7 +31,9 @@ import {
     Collapse,
     CardActions,
     CardProps,
-    BoxProps
+    BoxProps,
+    Fab,
+    Badge
 } from '@mui/material'
 import { useStore, GameStore, GameLoadingStore } from '../store'
 import { observer } from 'mobx-react'
@@ -633,6 +635,8 @@ function noop(e: any) {
 export const MapTab = observer(() => {
     const { game } = useStore()
 
+    const { battles } = game.world
+
     return <Box sx={{
         flex: 1,
         minHeight: 0,
@@ -653,6 +657,26 @@ export const MapTab = observer(() => {
             gridTemplateColumns: 'minmax(min-content, 400px) 1fr minmax(min-content, 400px)',
             gridTemplateRows: 'minmax(0, 33vh) 1fr minmax(min-content, 0)'
         }}>
+            {/* Top Panel */}
+            <Box sx={{
+                gridColumnStart: 2, gridColumnEnd: 3,
+                gridRowStart: 1, gridRowEnd: 2,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                gap: 2,
+                mt: 2
+            }}>
+                { battles.length > 0 && <Badge badgeContent={battles.length} color='error'>
+                    <Fab sx={{
+                        pointerEvents: 'all',
+                        zIndex: 0
+                    }}>
+                        <Box component='span' sx={{ fontSize: '24px' }}>⚔</Box>
+                    </Fab>
+                </Badge> }
+            </Box>
+
             {/* Right Panel */}
             <Box sx={{
                 gridColumnStart: 3, gridColumnEnd: 4,

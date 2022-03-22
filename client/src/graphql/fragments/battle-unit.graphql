@@ -1,0 +1,15 @@
+fragment BattleUnit on BattleUnit {
+  number
+  name
+  faction {
+    ...BattleFaction
+  }
+  description
+  flags
+  items {
+    ...Item
+  }
+  skills {
+    ...BattleSkill
+  }
+}
