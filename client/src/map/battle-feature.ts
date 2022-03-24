@@ -26,7 +26,7 @@ export class BattleFeature extends Feature<TileState> {
         sprite.scale.set(scale, scale)
         sprite.filters = [
             // good for showing battles or assasinations
-            new GlowFilter({ distance: 32, outerStrength: 0, innerStrength: 2, quality: 0.1, color: 0xff0000, knockout: true })
+            new GlowFilter({ distance: 32, outerStrength: 0, innerStrength: 1, quality: 0.1, color: 0xff0000, knockout: true })
         ]
 
         return sprite

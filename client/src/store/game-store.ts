@@ -462,6 +462,20 @@ export class GameStore {
         const blob = new Blob([ orders ], { type: 'text/plain' })
         saveAs(blob, `orders-${this.world.turnNumber}.ord`)
     }
+
+    @observable unitsPanel: boolean = true
+    @observable regionPanel: boolean = true
+    @observable structuresPanel: boolean = true
+    @observable battlesPanel: boolean = true
+    @observable battlesVisible: boolean = false
+
+    @action exapandUnits = (expand: boolean) => this.unitsPanel = expand
+    @action exapandRegion = (expand: boolean) => this.regionPanel = expand
+    @action exapandStructures = (expand: boolean) => this.structuresPanel = expand
+
+    @action exapandBattles = (expand: boolean) => this.battlesPanel = expand
+    @action showBattles = () => this.battlesVisible = true
+    @action hideBattles = () => this.battlesVisible = false
 }
 
 export interface BattleSimItem {

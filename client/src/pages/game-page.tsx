@@ -2,56 +2,23 @@ import * as React from 'react'
 import { styled } from '@mui/material/styles'
 import { Link, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
-import {
-    AppBar,
-    Typography,
-    Toolbar,
-    IconButton,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-    Paper,
-    Button,
-    DialogContent,
-    DialogContentText,
-    ButtonGroup,
-    Chip,
-    Avatar,
-    Box,
-    Tooltip,
-    Card,
-    CardContent,
-    Stack,
-    CircularProgress,
-    Container,
-    Grid,
-    CardHeader,
-    Collapse,
-    CardActions,
-    CardProps,
-    BoxProps,
-    Fab,
-    Badge
+import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Button,
+    ButtonGroup, Chip, Avatar, Box, Tooltip, Card, CardContent, Stack, CircularProgress, Container, Grid,
+    BoxProps, Fab, Badge
 } from '@mui/material'
-import { useStore, GameStore, GameLoadingStore } from '../store'
+import { useStore, GameLoadingStore } from '../store'
 import { observer } from 'mobx-react'
-import { HexMap2, Resources } from '../map'
-import { Region, ItemMap, Item, Unit, Coords, ICoords, Capacity, World, Level, Faction, Troops, MoveType } from '../game'
-import { Dialog } from '@mui/material'
-import { UnitSummary, Orders, ExpandMore, RegionSummary, RegionHeader } from '../components'
+import { MapProvider, useMapContext } from '../map'
+import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType } from '../game'
+import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move'
-import { Loader } from 'pixi.js'
 import SimpleBar from 'simplebar-react'
 
-import CloseIcon from '@mui/icons-material/Close'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 const GameContainer = styled(Box)`
     width: 100%;
@@ -64,71 +31,6 @@ const GameContainer = styled(Box)`
 const GameInfo = styled('div')`
     margin-left: 1rem;
 `
-
-class MapContext {
-    constructor() {
-        this.resources = new Resources(new Loader())
-    }
-
-    readonly resources: Resources
-    map: HexMap2
-
-    load() {
-        return this.resources.load()
-    }
-
-    initialize(canvas: HTMLCanvasElement, level: Level, onRegionSelected: (reg: Region) => void) {
-        this.map = new HexMap2(canvas, this.resources, level.width, level.height, {
-            onClick: onRegionSelected
-        })
-
-        const regions = level.toArray()
-        this.map.setRegions(regions)
-
-        return (() => this.map.destroy())
-    }
-
-    findCoordsToCenterAt(troops: Troops, region?: Region) {
-        let coords: Coords = region?.coords
-
-        if (!coords) {
-            const lastLocation = window.localStorage.getItem('coords')
-            if (lastLocation) {
-                coords = JSON.parse(lastLocation)
-                if (coords?.x == null || coords?.y == null) {
-                    coords = null
-                }
-            }
-        }
-
-        if (!coords) {
-            const unit = troops.first()
-            if (unit) {
-                coords = unit.region.coords
-            }
-        }
-
-        return coords
-    }
-}
-
-const mapContext = React.createContext<MapContext>(null)
-
-interface MapProviderProps {
-    children: React.ReactNode
-}
-
-function MapProvider({ children }: MapProviderProps) {
-    const [ map ] = React.useState(() => new MapContext())
-
-    return <mapContext.Provider value={map}>
-        {children}
-    </mapContext.Provider>
-}
-
-function useMapContext() {
-    return React.useContext(mapContext)
-}
 
 interface GameMapProps {
     selectedRegion: ICoords | null
@@ -500,7 +402,8 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                     {game.units.map((unit) => {
                         const rows = unit.description ? 2 : 1
                         const noBorder = rows > 1 ? 'no-border' : ''
-                        const ownUnit = unit.isPlayer ? 'own' : ''
+                        // const ownUnit = unit.isPlayer ? 'own' : ''
+                        const ownUnit = ''
 
                         const unitClasses = [ownUnit, noBorder].join(' ')
 
@@ -603,31 +506,6 @@ const RegionComponent = observer(() => {
     </RegionContainer>
 })
 
-interface MapPanelProps extends CardProps {
-    header: React.ReactNode
-    children?: React.ReactNode
-}
-
-function MapPanel({ header, children, sx, ...props }: MapPanelProps) {
-    const [ expanded, setExpanded ] = React.useState(true)
-
-    const onExpandClick = () => {
-        setExpanded(!expanded)
-    }
-
-    return <Card {...props} sx={{ opacity: 0.92, ...(sx || { }) }}>
-        <CardActions disableSpacing sx={{ gap: 1 }}>
-            { typeof header === 'string' ? <Typography variant='h6'>{header}</Typography> : header }
-            <ExpandMore expand={expanded} onClick={onExpandClick}>
-                <ExpandMoreIcon />
-            </ExpandMore>
-        </CardActions>
-        <Collapse in={expanded}>
-            {children}
-        </Collapse>
-    </Card>
-}
-
 function noop(e: any) {
     e.preventDefault()
 }
@@ -671,38 +549,55 @@ export const MapTab = observer(() => {
                     <Fab sx={{
                         pointerEvents: 'all',
                         zIndex: 0
-                    }}>
+                    }} onClick={game.showBattles}>
                         <Box component='span' sx={{ fontSize: '24px' }}>⚔</Box>
                     </Fab>
                 </Badge> }
             </Box>
 
+            {/* Left Panel */}
+            <Box sx={{
+                gridColumnStart: 1, gridColumnEnd: 2,
+                gridRowStart: 1, gridRowEnd: 3
+            }}>
+                <Box component={SimpleBar} autoHide={false} sx={{
+                    pointerEvents: 'all',
+                    maxHeight: '100%'
+                }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
+                    { game.battlesVisible && <FloatingPanel header='Battles' expanded={game.battlesPanel} onExpand={game.exapandBattles} onClose={game.hideBattles}>
+                        <BattleList battles={battles} />
+                    </FloatingPanel> }
+                </Box>
+            </Box>
+
             {/* Right Panel */}
             <Box sx={{
                 gridColumnStart: 3, gridColumnEnd: 4,
-                gridRowStart: 1, gridRowEnd: 3,
-                height: '100%'
+                gridRowStart: 1, gridRowEnd: 3
             }}>
                 <Box component={SimpleBar} autoHide={false} sx={{
-                    pointerEvents: 'all'
+                    pointerEvents: 'all',
+                    maxHeight: '100%'
                 }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        { game.region && <MapPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />}>
+                        { game.region && <FloatingPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />} expanded={game.regionPanel} onExpand={game.exapandRegion}>
                             <RegionComponent />
-                        </MapPanel> }
-                        { game.structures?.length > 0 && <MapPanel header='Structures'><StructuresComponent /></MapPanel> }
+                        </FloatingPanel> }
+                        { game.structures?.length > 0 && <FloatingPanel header='Structures' expanded={game.structuresPanel} onExpand={game.exapandStructures}>
+                            <StructuresComponent />
+                        </FloatingPanel> }
                     </Box>
                 </Box>
             </Box>
 
             {/* Bottom Panel */}
-            <MapPanel header='Units' sx={{
+            <FloatingPanel header='Units' sx={{
                 gridColumnStart: 1, gridColumnEnd: 4,
                 gridRow: 3,
                 alignSelf: 'flex-end',
                 minHeight: 0,
                 pointerEvents: 'all'
-            }}>
+            }} expanded={game.unitsPanel} onExpand={game.exapandUnits}>
                 <Box sx={{ height: '30vh', display: 'flex' }}>
                     <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
                         <UnitsComponent sx={{ width: '100%', height: '100%' }} />
@@ -710,7 +605,7 @@ export const MapTab = observer(() => {
                     { game.unit && <UnitSummary unit={game.unit} sx={{ width: '25vw', maxWidth: '400px' }} /> }
                     { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '25vw', maxWidth: '400px' }} /> }
                 </Box>
-            </MapPanel>
+            </FloatingPanel>
         </Box>
     </Box>
 })

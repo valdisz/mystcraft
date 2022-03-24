@@ -17,6 +17,9 @@ const heading = {
 }
 
 const theme = createTheme({
+    palette: {
+        // mode: 'dark'
+    },
     typography: {
         fontFamily: 'Fira Code, monospace',
         fontSize: 11,

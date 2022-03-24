@@ -101,6 +101,10 @@ export class Battle {
             }
         }
 
+        for (const { log, statistics } of src.rounds) {
+            battle.rounds.push({ log, statistics })
+        }
+
         return battle
     }
 }
