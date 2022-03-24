@@ -606,151 +606,166 @@ objects:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: MINI
-      level: 5
-      materials:
-        - ADMT: 10
-    aidsInProduction: ADMT
+    traits:
+      canBuild:
+        skill: MINI
+        level: 5
+        materials:
+          - ADMT: 10
+      aidsInProduction: ADMT
 
   Arcane Mine:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: MINI
-      level: 3
-      materials:
-        - MITH: 20
-    aidsInProduction: MITH
+    traits:
+      canBuild:
+        skill: MINI
+        level: 3
+        materials:
+          - MITH: 20
+      aidsInProduction: MITH
 
   Black Keep:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - DEVL
+    traits:
+      monsters:
+        - DEVL
 
   Bog:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - HYDR
+    traits:
+      monsters:
+        - HYDR
 
   Caravanserai:
     type: transport
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - WOOD: 20
-        - STON: 20
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - WOOD: 20
+          - STON: 20
 
   Castle:
     type: fort
     canEnter: true
     canModify: true
-    protect: 300
-    maxMages: 2
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 300
-    defense:
-      combat: 3
-      energy: 2
-      spirit: 2
-      weather: 2
-      riding: 3
-      ranged: 3
+    traits:
+      protect: 300
+      safeStudy: 2
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 300
+      defense:
+        combat: 3
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 3
+        ranged: 3
 
   Cave:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - DRAG
+    traits:
+      monsters:
+        - DRAG
 
   Cavern:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - MERF
+    traits:
+      monsters:
+        - MERF
 
   Citadel:
     type: fort
     canEnter: true
     canModify: true
-    protect: 1000
-    maxMages: 3
-    construction:
-      skill: BUIL
-      level: 3
-      materials:
-        - STON: 800
-    defense:
-      combat: 3
-      energy: 2
-      spirit: 2
-      weather: 2
-      riding: 3
-      ranged: 3
+    traits:
+      protect: 1000
+      safeStudy: 3
+      canBuild:
+        skill: BUIL
+        level: 3
+        materials:
+          - STON: 800
+      defense:
+        combat: 3
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 3
+        ranged: 3
 
   Crypt:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - SKEL
+    traits:
+      monsters:
+        - SKEL
 
   Dark Mage Tower:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - DMAG
+    traits:
+      monsters:
+        - DMAG
 
   Demon Pit:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - IMP
+    traits:
+      monsters:
+        - IMP
 
   Derelict Ship:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - KRAK
+    traits:
+      monsters:
+        - KRAK
 
   Faerie Ring:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: HERB
-      level: 3
-      materials:
-        - MUSH: 10
-    aidsInProduction: MUSH
+    traits:
+      canBuild:
+        skill: HERB
+        level: 3
+        materials:
+          - MUSH: 10
+      aidsInProduction: MUSH
 
   Farm:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: FARM
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: GRAI
+    traits:
+      canBuild:
+        skill: FARM
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: GRAI
 
   Fleet:
     type: fleet
@@ -761,31 +776,33 @@ objects:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: LUMB
-      level: 3
-      materials:
-        - IRWD: 20
-    aidsInProduction: IRWD
+    traits:
+      canBuild:
+        skill: LUMB
+        level: 3
+        materials:
+          - IRWD: 20
+      aidsInProduction: IRWD
 
   Fort:
     type: fort
     canEnter: true
     canModify: true
-    protect: 50
-    maxMages: 1
-    construction:
-      skill: BUIL
-      level: 1
-      materials:
-        - STON: 40
-    defense:
-      combat: 2
-      energy: 2
-      spirit: 2
-      weather: 2
-      riding: 2
-      ranged: 2
+    traits:
+      protect: 50
+      safeStudy: 1
+      canBuild:
+        skill: BUIL
+        level: 1
+        materials:
+          - STON: 40
+      defense:
+        combat: 2
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 2
+        ranged: 2
 
   Gateway:
     type: shaft
@@ -796,290 +813,310 @@ objects:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - STGI
+    traits:
+      monsters:
+        - STGI
 
   Hermits hut:
     type: building
     canEnter: true
     canModify: true
-    protect: 1
-    maxMages: 1
-    construction:
-      skill: BUIL
-      level: 3
-      materials:
-        - IRWD: 5
+    traits:
+      protect: 1
+      safeStudy: 1
+      canBuild:
+        skill: BUIL
+        level: 3
+        materials:
+          - IRWD: 5
 
   Ice Cave:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - IDRA
+    traits:
+      monsters:
+        - IDRA
 
   Inn:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: SILV
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: SILV
 
   Island:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - PIRA
+    traits:
+      monsters:
+        - PIRA
 
   Lair:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - TREN
-      - ILLY
+    traits:
+      monsters:
+        - TREN
+        - ILLY
 
   Magical Castle:
     type: fort
     canEnter: true
     canModify: true
-    protect: 300
-    maxMages: 30
-    construction:
-      skill: BUIL
-      level: 4
-      materials:
-        - ROOT: 300
-    defense:
-      combat: 3
-      energy: 3
-      spirit: 3
-      weather: 3
-      riding: 3
-      ranged: 3
+    traits:
+      protect: 300
+      safeStudy: 30
+      canBuild:
+        skill: BUIL
+        level: 4
+        materials:
+          - ROOT: 300
+      defense:
+        combat: 3
+        energy: 3
+        spirit: 3
+        weather: 3
+        riding: 3
+        ranged: 3
 
   Magical Citadel:
     type: fort
     canEnter: true
     canModify: true
-    protect: 1000
-    maxMages: 50
-    construction:
-      skill: BUIL
-      level: 5
-      materials:
-        - ROOT: 800
-    defense:
-      combat: 3
-      energy: 3
-      spirit: 3
-      weather: 3
-      riding: 3
-      ranged: 3
+    traits:
+      protect: 1000
+      safeStudy: 50
+      canBuild:
+        skill: BUIL
+        level: 5
+        materials:
+          - ROOT: 800
+      defense:
+        combat: 3
+        energy: 3
+        spirit: 3
+        weather: 3
+        riding: 3
+        ranged: 3
 
   Magical Fortress:
     type: fort
     canEnter: true
     canModify: true
-    protect: 50
-    maxMages: 10
-    construction:
-      skill: BUIL
-      level: 3
-      materials:
-        - ROOT: 40
-    defense:
-      combat: 2
-      energy: 2
-      spirit: 2
-      weather: 2
-      riding: 2
-      ranged: 2
+    traits:
+      protect: 50
+      safeStudy: 10
+      canBuild:
+        skill: BUIL
+        level: 3
+        materials:
+          - ROOT: 40
+      defense:
+        combat: 2
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 2
+        ranged: 2
 
   Magical Tower:
     type: fort
     canEnter: true
     canModify: true
-    protect: 10
-    maxMages: 3
-    construction:
-      skill: BUIL
-      level: 3
-      materials:
-        - ROOT: 10
-    defense:
-      combat: 2
-      energy: 2
-      spirit: 2
-      weather: 2
-      riding: 2
-      ranged: 2
+    traits:
+      protect: 10
+      safeStudy: 3
+      canBuild:
+        skill: BUIL
+        level: 3
+        materials:
+          - ROOT: 10
+      defense:
+        combat: 2
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 2
+        ranged: 2
 
   Magician's Tower:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - MAGI
+    traits:
+      monsters:
+        - MAGI
 
   Mine:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: MINI
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: IRON
+    traits:
+      canBuild:
+        skill: MINI
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: IRON
 
   Mystic Quarry:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: QUAR
-      level: 3
-      materials:
-        - ROOT: 20
-    aidsInProduction: ROOT
+    traits:
+      canBuild:
+        skill: QUAR
+        level: 3
+        materials:
+          - ROOT: 20
+      aidsInProduction: ROOT
 
   Mythic Stables:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: HORS
-      level: 5
-      materials:
-        - IRWD: 10
-    aidsInProduction: WING
-
-  None:
-    type: other
-    canEnter: false
-    canModify: false
+    traits:
+      canBuild:
+        skill: HORS
+        level: 5
+        materials:
+          - IRWD: 10
+      aidsInProduction: WING
 
   Oasis:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: HORS
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: CAME
+    traits:
+      canBuild:
+        skill: HORS
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: CAME
 
   Quarry:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: QUAR
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: STON
+    traits:
+      canBuild:
+        skill: QUAR
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: STON
 
   Ranch:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: FARM
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: LIVE
+    traits:
+      canBuild:
+        skill: FARM
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: LIVE
 
   Road N:
     type: road
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 30
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 30
 
   Road NE:
     type: road
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 30
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 30
 
   Road NW:
     type: road
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 30
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 30
 
   Road S:
     type: road
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 30
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 30
 
   Road SE:
     type: road
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 30
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 30
 
   Road SW:
     type: road
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 2
-      materials:
-        - STON: 30
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 2
+        materials:
+          - STON: 30
 
   Ruin:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - CENT
+    traits:
+      monsters:
+        - CENT
 
   Sacred Grove:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: LUMB
-      level: 5
-      materials:
-        - YEW: 30
-    aidsInProduction: YEW
+    traits:
+      canBuild:
+        skill: LUMB
+        level: 5
+        materials:
+          - YEW: 30
+      aidsInProduction: YEW
 
   Shaft:
     type: shaft
@@ -1090,103 +1127,111 @@ objects:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: HORS
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: HORS
+    traits:
+      canBuild:
+        skill: HORS
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: HORS
 
   Stockade:
     type: fort
     canEnter: true
     canModify: true
-    protect: 50
-    maxMages: 1
-    construction:
-      skill: BUIL
-      level: 1
-      materials:
-        - WOOD: 60
-    defense:
-      combat: 1
-      energy: 1
-      spirit: 1
-      weather: 1
-      riding: 1
-      ranged: 1
+    traits:
+      protect: 50
+      safeStudy: 1
+      canBuild:
+        skill: BUIL
+        level: 1
+        materials:
+          - WOOD: 60
+      defense:
+        combat: 1
+        energy: 1
+        spirit: 1
+        weather: 1
+        riding: 1
+        ranged: 1
 
   Temple:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: BUIL
-      level: 3
-      materials:
-        - STON: 10
-    aidsInProduction: HERB
+    traits:
+      canBuild:
+        skill: BUIL
+        level: 3
+        materials:
+          - STON: 10
+      aidsInProduction: HERB
 
   Timber Yard:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: LUMB
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: WOOD
+    traits:
+      canBuild:
+        skill: LUMB
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: WOOD
 
   Tower:
     type: fort
     canEnter: true
     canModify: true
-    protect: 10
-    construction:
-      skill: BUIL
-      level: 1
-      materials:
-        - STON: 10
-    defense:
-      combat: 2
-      energy: 2
-      spirit: 2
-      weather: 2
-      riding: 2
-      ranged: 2
+    traits:
+      protect: 10
+      canBuild:
+        skill: BUIL
+        level: 1
+        materials:
+          - STON: 10
+      defense:
+        combat: 2
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 2
+        ranged: 2
 
   Trapping Hut:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: HUNT
-      level: 3
-      materials:
-        - WOOD: 10
-        - STON: 10
-    aidsInProduction: FUR
+    traits:
+      canBuild:
+        skill: HUNT
+        level: 3
+        materials:
+          - WOOD: 10
+          - STON: 10
+      aidsInProduction: FUR
 
   Trapping Lodge:
     type: trade
     canEnter: true
     canModify: true
-    construction:
-      skill: HUNT
-      level: 5
-      materials:
-        - IRWD: 10
-    aidsInProduction: FLOA
+    traits:
+      canBuild:
+        skill: HUNT
+        level: 5
+        materials:
+          - IRWD: 10
+      aidsInProduction: FLOA
 
   Whirlpool:
     type: lair
     canEnter: false
     canModify: false
-    monsters:
-      - ELEM
+    traits:
+      monsters:
+        - ELEM
 
   Longship:
     type: ship
@@ -1198,243 +1243,242 @@ objects:
         speed: 4
         sailors: 4
         capacity:
-          swim:
+          swim: 150
       canBuild:
         skill: SHIP
         level: 1
         input:
           - WOOD: 10
+      noTransport:
     item:
       code: LONG
       weight: 200
-      traits:
-        noTransport:
     description: |
       Longship [LONG]. This is a ship with a capacity of 150 and a speed of 4 hexes per month. This ship requires a total of 4 levels of sailing skill to sail.
 
   Raft:
     type: ship
+    name: [ Raft, Rafts ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 2
+        sailors: 2
+        capacity:
+          swim: 450
+      canBuild:
+        skill: SHIP
+        level: 1
+        materials:
+          - WOOD: 10
+      noTransport:
     item:
       code: RAFT
-      spec:
-        name: [ Raft, Rafts ]
-        weight: 100
-        category: ship
-        traits:
-          canSail:
-            speed: 2
-            sailors: 2
-            capacity:
-              swim: 450
-          canProduce:
-            skill: SHIP
-            level: 1
-            effort: 10
-            amount: 1
-            input:
-              WOOD: 10
-          noTransport:
-        description: |
-          Raft [RAFT]. This is a ship with a capacity of 450 and a speed of 2 hexes per month. This ship requires a total of 2 levels of sailing skill to sail.
+      weight: 100
+    description: |
+      Raft [RAFT]. This is a ship with a capacity of 450 and a speed of 2 hexes per month. This ship requires a total of 2 levels of sailing skill to sail.
 
   Cog:
     type: ship
+    name: [ Cog, Cogs ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 6
+        capacity:
+          swim: 750
+      canBuild:
+        skill: SHIP
+        level: 2
+        materials:
+          - WOOD: 25
+      noTransport:
     item:
       code: COG
-      spec:
-        name: [ Cog, Cogs ]
-        weight: 300
-        category: ship
-        traits:
-          canSail:
-            speed: 4
-            sailors: 6
-            capacity:
-              swim: 750
-          canProduce:
-            skill: SHIP
-            level: 2
-            effort: 25
-            amount: 1
-            input:
-              WOOD: 25
-          noTransport:
-        description: |
-          Cog [COG]. This is a ship with a capacity of 750 and a speed of 4 hexes per month. This ship requires a total of 6 levels of sailing skill to sail.
+      weight: 300
+    description: |
+      Cog [COG]. This is a ship with a capacity of 750 and a speed of 4 hexes per month. This ship requires a total of 6 levels of sailing skill to sail.
 
   Galleon:
     type: ship
+    name: [ Galleon, Galleons ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 15
+        capacity:
+          swim: 2700
+      canBuild:
+        skill: SHIP
+        level: 3
+        materials:
+          - WOOD: 75
+      safeStudy: 1
+      noTransport:
     item:
       code: GALL
-      spec:
-        name: [ Galleon, Galleons ]
-        weight: 750
-        category: ship
-        traits:
-          canSail:
-            speed: 4
-            sailors: 15
-            capacity:
-              swim: 2700
-          canProduce:
-            skill: SHIP
-            level: 3
-            effort: 75
-            amount: 1
-            input:
-              WOOD: 75
-          noTransport:
-        description: |
-          Galleon [GALL]. This is a ship with a capacity of 2700 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
+      weight: 750
+    description: |
+      Galleon [GALL]. This is a ship with a capacity of 2700 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
 
   Galley:
     type: ship
+    name: [ Galley, Galleys ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 12
+        capacity:
+          swim: 1200
+      canBuild:
+        skill: SHIP
+        level: 3
+        materials:
+          - IRWD: 50
+      protect: 120
+      safeStudy: 2
+      defense:
+        combat: 2
+        energy: 2
+        spirit: 2
+        weather: 2
+        riding: 2
+        ranged: 2
+      noTransport:
     item:
       code: GLLY
-      spec:
-        name: [ Galley, Galleys ]
-        weight: 600
-        category: ship
-        traits:
-          canSail:
-            speed: 4
-            sailors: 12
-            capacity:
-              swim: 1200
-          defense:
-            combat: 2
-            energy: 2
-            spirit: 2
-            weather: 2
-            riding: 2
-            ranged: 2
-          canProduce:
-            skill: SHIP
-            level: 3
-            effort: 50
-            amount: 1
-            input:
-              IRWD: 50
-          noTransport:
-        description: |
-          Galley [GLLY]. This is a ship with a capacity of 1200 and a speed of 4 hexes per month. This ship requires a total of 12 levels of sailing skill to sail. This ship provides defense to the first 120 men inside it, giving a defensive bonus of 2 against melee attacks, 2 against energy attacks, 2 against spirit attacks, 2 against weather attacks, 2 against riding attacks and 2 against ranged attacks. This ship will allow up to 2 mages to study above level 2.
+      weight: 600
+    description: |
+      Galley [GLLY]. This is a ship with a capacity of 1200 and a speed of 4 hexes per month. This ship requires a total of 12 levels of sailing skill to sail. This ship provides defense to the first 120 men inside it, giving a defensive bonus of 2 against melee attacks, 2 against energy attacks, 2 against spirit attacks, 2 against weather attacks, 2 against riding attacks and 2 against ranged attacks. This ship will allow up to 2 mages to study above level 2.
 
   Corsair:
     type: ship
+    name: [ Corsair, Corsairs ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 5
+        sailors: 15
+        capacity:
+          swim: 1500
+      canBuild:
+        skill: SHIP
+        level: 4
+        materials:
+          - WOOD: 50
+      noTransport:
     item:
       code: CORS
-      spec:
-        name: [ Corsair, Corsairs ]
-        weight: 750
-        category: ship
-        traits:
-          canSail:
-            speed: 5
-            sailors: 15
-            capacity:
-              swim: 1500
-          canProduce:
-            skill: SHIP
-            level: 4
-            effort: 50
-            amount: 1
-            input:
-              WOOD: 50
-          noTransport:
-        description: |
-          Corsair [CORS]. This is a ship with a capacity of 1500 and a speed of 5 hexes per month. This ship requires a total of 15 levels of sailing skill to sail.
+      weight: 750
+    description: |
+      Corsair [CORS]. This is a ship with a capacity of 1500 and a speed of 5 hexes per month. This ship requires a total of 15 levels of sailing skill to sail.
 
   Balloon:
-    type: flying-ship
+    type: ship
+    name: [ Balloon, Balloons ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 3
+        capacity:
+          swim: 100
+          fly: 100
+      canBuild:
+        skill: SHIP
+        level: 4
+        materials:
+          - FLOA: 20
+      noTransport:
     item:
       code: BALL
-      spec:
-        name: [ Balloon, Balloons ]
-        weight: 150
-        category: ship
-        traits:
-          canSail:
-            speed: 4
-            sailors: 3
-            capacity:
-              fly: 100
-          canProduce:
-            skill: SHIP
-            level: 4
-            effort: 20
-            amount: 1
-            input:
-              FLOA: 20
-          noTransport:
-        description: |
-          Balloon [BALL]. This is a flying 'ship' with a capacity of 100 and a speed of 4 hexes per month. This ship requires a total of 3 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
+      weight: 150
+    description: |
+      Balloon [BALL]. This is a flying 'ship' with a capacity of 100 and a speed of 4 hexes per month. This ship requires a total of 3 levels of sailing skill to sail. This ship will allow one mage to study above level 2.
 
   Airship:
-    type: flying-ship
+    type: ship
+    name: [ Airship, Airships ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 10
+        capacity:
+          swim: 800
+          fly: 800
+      canBuild:
+        skill: SHIP
+        level: 5
+        materials:
+          - FLOA: 60
+            WOOD: 60
+      safeStudy: 2
+      noTransport:
     item:
       code: AIRS
-      spec:
-        name: [ Airship, Airships ]
-        weight: 500
-        category: ship
-        traits:
-          canSail:
-            speed: 4
-            sailors: 10
-            capacity:
-              fly: 800
-          canProduce:
-            skill: SHIP
-            level: 5
-            effort: 60
-            amount: 1
-            input:
-              FLOA: 60
-              WOOD: 60
-          noTransport:
-        description: |
-          Airship [AIRS]. This is a flying 'ship' with a capacity of 800 and a speed of 4 hexes per month. This ship requires a total of 10 levels of sailing skill to sail. This ship will allow up to 2 mages to study above level 2.
+      weight: 500
+    description: |
+      Airship [AIRS]. This is a flying 'ship' with a capacity of 800 and a speed of 4 hexes per month. This ship requires a total of 10 levels of sailing skill to sail. This ship will allow up to 2 mages to study above level 2.
 
   Cloudship:
-    type: flying-ship
+    type: ship
+    name: [ Cloudship, Cloudships ]
     canEnter: true
     canModify: true
+    traits:
+      canSail:
+        speed: 4
+        sailors: 15
+        capacity:
+          swim: 1500
+          fly: 1500
+      canMagicProduce:
+        skill: SWIN
+        level:
+          - level: 3
+            chance: 60
+            amount: 1
+            materials:
+              - FLOA: 75
+                IRWD: 75
+          - level: 4
+            chance: 80
+            amount: 1
+            materials:
+              - FLOA: 75
+                IRWD: 75
+          - level: 5
+            chance: 100
+            amount: 1
+            materials:
+              - FLOA: 75
+                IRWD: 75
+      protect: 140
+      safeStudy: 5
+      defense:
+        combat: 3
+        energy: 3
+        spirit: 3
+        weather: 3
+        riding: 3
+        ranged: 3
+      noTransport:
     item:
       code: CLOU
-      spec:
-        name: [ Cloudship, Cloudships ]
-        weight: 750
-        category: ship
-        traits:
-          canSail:
-            speed: 4
-            sailors: 15
-            capacity:
-              fly: 1500
-          defense:
-            combat: 3
-            energy: 3
-            spirit: 3
-            weather: 3
-            riding: 3
-            ranged: 3
-          noTransport:
-        description: |
-          Cloudship [CLOU]. This is a flying 'ship' with a capacity of 1500 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship provides defense to the first 140 men inside it, giving a defensive bonus of 3 against melee attacks, 3 against energy attacks, 3 against spirit attacks, 3 against weather attacks, 3 against riding attacks and 3 against ranged attacks. This ship will allow up to 5 mages to study above level 2.
+      weight: 750
+    description: |
+      Cloudship [CLOU]. This is a flying 'ship' with a capacity of 1500 and a speed of 4 hexes per month. This ship requires a total of 15 levels of sailing skill to sail. This ship provides defense to the first 140 men inside it, giving a defensive bonus of 3 against melee attacks, 3 against energy attacks, 3 against spirit attacks, 3 against weather attacks, 3 against riding attacks and 3 against ranged attacks. This ship will allow up to 5 mages to study above level 2.
 
 items:
   LEAD:
