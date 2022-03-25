@@ -580,7 +580,7 @@ export const MapTab = observer(() => {
                     maxHeight: '100%'
                 }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        { game.region && <FloatingPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />} expanded={game.regionPanel} onExpand={game.exapandRegion}>
+                        { game.region && <FloatingPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />} expanded={game.regionPanel && game.region.explored} onExpand={game.exapandRegion}>
                             <RegionComponent />
                         </FloatingPanel> }
                         { game.structures?.length > 0 && <FloatingPanel header='Structures' expanded={game.structuresPanel} onExpand={game.exapandStructures}>

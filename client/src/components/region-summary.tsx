@@ -1,10 +1,10 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { Box, BoxProps, Typography, Button, IconButton, Grid, Theme, Tooltip, Menu, MenuItem, ClickAwayListener } from '@mui/material'
+import { Box, BoxProps, Typography, Button, IconButton, Grid, Stack, Tooltip, Menu, MenuItem, ClickAwayListener } from '@mui/material'
 import { observer } from 'mobx-react'
 import { Region, Coords, TerrainInfo, Item, ItemInfo } from '../game'
 import { copy } from '../lib'
-import { Item as ItemComponent2 } from '../components'
+import { Item as ItemComponent2, FixedTypography } from '../components'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 const WideTooltip = styled(Tooltip)`
@@ -35,7 +35,7 @@ function Geography({ coords, terrain }: GeographyProps) {
             borderRight: 1,
             borderColor: 'divider'
         }}>
-            <Typography variant='caption'>{coords.label}</Typography>
+            <Typography variant='caption' sx={{ color: 'text.secondary' }}>{coords.label}</Typography>
             <Typography variant='body2'>{terrain.name}</Typography>
         </Box>
         <Box sx={{
@@ -255,32 +255,44 @@ export function RegionHeader({ region, sx, ...props }: RegionHeaderProps) {
 
     const hideMenu = React.useCallback(() => setOpen(false), [ ])
 
+    const locationType = region.covered
+        ? null
+        : region.settlement
+            ? region.settlement.size
+            : 'wilderness'
+
+    const locationName = region?.settlement?.name ?? region?.province?.name
+
     return <Box {...props} sx={{ display: 'flex', gap: 1, ...(sx || { }) }}>
         <ClickAwayListener onClickAway={hideMenu}>
-            <IconButton size='small' onClick={() => setOpen(true)} ref={anchorRef}>
-                <MoreVertIcon />
-            </IconButton>
+            <Box sx={{ display: 'flex', minWidth: 0, justifyContent: 'center', alignItems: 'center' }}>
+                <IconButton size='small' onClick={() => setOpen(true)} ref={anchorRef}>
+                    <MoreVertIcon />
+                </IconButton>
+            </Box>
         </ClickAwayListener>
         <Menu open={open} anchorEl={anchorRef.current}>
             <CopyRegionDetailsMenuItem region={region} />
         </Menu>
 
-        <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
-            <Typography variant='h6' title={region?.province?.name} sx={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' }}>{region?.province?.name}</Typography>
-        </Box>
+        <Stack justifyContent='center' alignItems='flex-start' sx={{ flex: 1, minWidth: 0 }}>
+            <FixedTypography variant='caption' title={locationType} sx={{ color: 'text.secondary' }}>{locationType}</FixedTypography>
+            <Box sx={{ width: '100%' }}>
+                <FixedTypography variant='h6' title={locationName}>{locationName}</FixedTypography>
+            </Box>
+        </Stack>
 
-        <Geography terrain={region.terrain} coords={region.coords} />
+        <Box sx={{ display: 'flex', minWidth: 0, justifyContent: 'center', alignItems: 'center' }}>
+            <Geography terrain={region.terrain} coords={region.coords} />
+        </Box>
     </Box>
 }
 
 export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
-
     return <Box m={1}>
         <Grid container spacing={1}>
             { (region.population || region.settlement) && <SpaceBetween item xs={12}>
-                { region.settlement && <span>
-                    { region.settlement && <>{region.settlement.name} {region.settlement.size}</> }
-                </span> }
+                <FixedTypography>{ region?.province?.name }</FixedTypography>
                 { region.population && <ItemComponent item={region.population} /> }
             </SpaceBetween> }
 
