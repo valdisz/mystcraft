@@ -558,10 +558,12 @@ export const MapTab = observer(() => {
             {/* Left Panel */}
             <Box sx={{
                 gridColumnStart: 1, gridColumnEnd: 2,
-                gridRowStart: 1, gridRowEnd: 3
+                gridRowStart: 1, gridRowEnd: 3,
+                overflow: 'hidden'
             }}>
                 <Box component={SimpleBar} autoHide={false} sx={{
                     pointerEvents: 'all',
+                    minHeight: 0,
                     maxHeight: '100%'
                 }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
                     { game.battlesVisible && <FloatingPanel header='Battles' expanded={game.battlesPanel} onExpand={game.exapandBattles} onClose={game.hideBattles}>
@@ -573,10 +575,12 @@ export const MapTab = observer(() => {
             {/* Right Panel */}
             <Box sx={{
                 gridColumnStart: 3, gridColumnEnd: 4,
-                gridRowStart: 1, gridRowEnd: 3
+                gridRowStart: 1, gridRowEnd: 3,
+                overflow: 'hidden'
             }}>
                 <Box component={SimpleBar} autoHide={false} sx={{
                     pointerEvents: 'all',
+                    minHeight: 0,
                     maxHeight: '100%'
                 }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
