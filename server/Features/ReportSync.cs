@@ -120,6 +120,7 @@ namespace advisor.Features {
             SyncAttitudes();
             SyncRegions();
             SyncEvents();
+
             await SyncBattles();
 
             await ApplyFactionsAsync();
@@ -284,6 +285,7 @@ namespace advisor.Features {
 
         private async Task SyncBattles() {
             var knownBattles = (await Db.Battles
+                .AsNoTracking()
                 .FilterByTurn(this)
                 .Select(x => $"{x.X}-{x.Y}-{x.Z}-{x.Attacker.Number}-{x.Defender.Number}")
                 .ToListAsync())
@@ -292,6 +294,9 @@ namespace advisor.Features {
             foreach (var battle in Report.Battles) {
                 var loc = battle.Location;
                 var key = $"{loc.Coords.X}-{loc.Coords.Y}-{loc.Coords.Z}-{battle.Attacker.Number}-{battle.Defender.Number}";
+
+                RegionFromBattle(battle);
+
                 if (knownBattles.Contains(key)) {
                     continue;
                 }
@@ -724,6 +729,29 @@ namespace advisor.Features {
                         Size = exit.Settlement.Size
                     };
                 }
+
+                Regions.Add(regionId, region);
+                NewRegions.Add(regionId);
+            }
+
+            return region;
+        }
+
+        private DbRegion RegionFromBattle(JBattle battle) {
+            var location = battle.Location;
+            var regionId = DbRegion.MakeId(location.Coords.X, location.Coords.Y, location.Coords.Z);
+
+            if (!Regions.TryGetValue(regionId, out var region)) {
+                region = new DbRegion {
+                    Id = regionId,
+                    X = location.Coords.X,
+                    Y = location.Coords.Y,
+                    Z = location.Coords.Z,
+                    Terrain = location.Terrain,
+                    Explored = false,
+                    Label = location.Coords.Label,
+                    Province = location.Province
+                };
 
                 Regions.Add(regionId, region);
                 NewRegions.Add(regionId);

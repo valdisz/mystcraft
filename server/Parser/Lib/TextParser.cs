@@ -240,7 +240,7 @@ namespace advisor {
 
             var span = GetSpan();
             if (span.Length < s.Length || !span.StartsWith(s, StringComparison.OrdinalIgnoreCase))
-                return new Maybe<TextParser>("does not match", Ln, Pos + 1);
+                return new Maybe<TextParser>($"'{span.ToString()}' does not match '{s.ToString()}'", Ln, Pos + 1);
 
             return Seek(s.Length);
         }
@@ -428,7 +428,7 @@ namespace advisor {
 
             var span = GetSpan();
             if (span.Length < s.Length || !span.StartsWith(s, StringComparison.OrdinalIgnoreCase))
-                return new Maybe<TextParser>("does not match", Ln, Pos + 1);
+                return new Maybe<TextParser>($"'{span.ToString()}' does not match '{s.ToString()}'", Ln, Pos + 1);
 
             return Slice(s.Length);
         }
@@ -438,7 +438,7 @@ namespace advisor {
 
             var span = GetSpan();
             if (span.Length < s.Length || !span.EndsWith(s, StringComparison.OrdinalIgnoreCase))
-                return new Maybe<TextParser>("does not match", Ln, Pos + 1);
+                return new Maybe<TextParser>($"'{span.ToString()}' does not match '{s.ToString()}'", Ln, Pos + 1);
 
             return Slice(span.Length - s.Length);
         }

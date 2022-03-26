@@ -40,6 +40,7 @@ namespace advisor {
         readonly IReportParser unitName = new UnitNameParser();
         readonly IReportParser itemList = new ItemListParser();
         readonly IReportParser item = new ItemParser();
+        readonly IReportParser healingAttempt = new HealingAttemptParser(new UnitNameParser());
 
         private bool CanParseAsBattle(Cursor<TextParser> cursor) {
             var result = headlineParser.Parse(cursor.Value);
@@ -130,8 +131,7 @@ namespace advisor {
             await writer.WritePropertyNameAsync("casualties");
             await writer.WriteStartArrayAsync();
 
-            if (!cursor.Value.Match("Total Casualties:"))
-            {
+            if (!cursor.Value.Match("Total Casualties:")) {
                 throw new ReportParserException();
             }
 
@@ -145,6 +145,15 @@ namespace advisor {
             await writer.WriteStartObjectAsync();
 
             await cursor.NextAsync();
+
+            await writer.WritePropertyNameAsync("heals");
+            await writer.WriteStartArrayAsync();
+            Maybe<IReportNode> heal;
+            while ((heal = healingAttempt.Parse(cursor.Value)) == true) {
+                await heal.Value.WriteJson(writer);
+                await cursor.NextAsync();
+            }
+            await writer.WriteEndArrayAsync();
 
             await writer.WritePropertyNameAsync("army");
             var army = unitName.Parse(cursor.Value);
@@ -163,13 +172,9 @@ namespace advisor {
             await writer.WriteStartArrayAsync();
             if (cursor.Value.Try(_ => _.Then("Damaged units:"))) {
                 Maybe<int> p;
-                do {
-                    p = cursor.Value.SkipWhitespaces().Integer();
-                    if (p) {
-                        await writer.WriteValueAsync(p.Value);
-                    }
+                while ((p = cursor.Value.Skip(c => char.IsWhiteSpace(c) || c == ',').Integer()) == true) {
+                    await writer.WriteValueAsync(p.Value);
                 }
-                while (p);
             }
             else {
                 cursor.Back();
@@ -212,11 +217,12 @@ namespace advisor {
                 }
 
                 // round battle log
-                if (p.Try(x => x.OneOf(
+                Maybe<TextParser> roundHeader;
+                if ((roundHeader = p.Try(x => x.OneOf(
                     _ => _.Then("Round ").MatchEnd(":"),
                     _ => _.MatchEnd(" is routed!"),
                     _ => _.MatchEnd(" gets a free round of attacks.")
-                ))) {
+                ))) == true) {
                     await buffer.FlushAsync();
 
                     if (round++ > 0) {
@@ -261,6 +267,32 @@ namespace advisor {
                 await item.WriteJson(writer);
             }
             await writer.WriteEndArrayAsync();
+        }
+    }
+
+    // Peacekeeper (1541) heals 1 with 40% chance.
+    public class HealingAttemptParser : BaseParser {
+        public HealingAttemptParser(IReportParser unitName) {
+            this.unitName = unitName;
+        }
+
+        private readonly IReportParser unitName;
+
+        protected override Maybe<IReportNode> Execute(TextParser p) {
+            var unit = unitName.Parse(p);
+            if (!unit) return Error(unit);
+
+            var amount = p.After("heals").SkipWhitespaces(minTimes: 1).Integer();
+            if (!amount) return Error(amount);
+
+            var chance = p.After("with").SkipWhitespaces(minTimes: 1).Integer();
+            if (!chance) return Error(chance);
+
+            return Ok(ReportNode.Object(
+                unit.Value,
+                ReportNode.Int("amount", amount),
+                ReportNode.Int("chance", chance)
+            ));
         }
     }
 }
