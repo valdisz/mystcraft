@@ -184,17 +184,22 @@ namespace advisor {
 
             await writer.WritePropertyNameAsync("rounds");
             await writer.WriteStartArrayAsync();
-            bool battleStats = false;
 
             var buffer = new WriteBuffer(cursor, writer);
 
             cursor.Back();
+            int round = 0;
             while (await cursor.NextAsync() && !cursor.Value.StartsWith("Total Casualties:")) {
                 var p = cursor.Value;
 
                 if (p.Try(_ => _.Match("Battle statistics:"))) {
                     await buffer.FlushAsync();
-                    battleStats = true;
+
+                    await writer.WriteEndObjectAsync();
+                    await writer.WriteEndArrayAsync();
+
+                    await writer.WritePropertyNameAsync("statistics");
+
                     continue;
                 }
 
@@ -214,7 +219,7 @@ namespace advisor {
                 ))) {
                     await buffer.FlushAsync();
 
-                    if (writer.WriteState == WriteState.Object) {
+                    if (round++ > 0) {
                         await writer.WriteEndObjectAsync();
                     }
 
@@ -226,19 +231,7 @@ namespace advisor {
                 buffer.Append();
             }
 
-            if (!battleStats) {
-                await buffer.FlushAsync();
-            }
-
-            if (writer.WriteState == WriteState.Object) {
-                await writer.WriteEndObjectAsync();
-            }
-            await writer.WriteEndArrayAsync();
-
-            if (battleStats) {
-                await writer.WritePropertyNameAsync("statistics");
-                await buffer.FlushAsync();
-            }
+            await buffer.FlushAsync();
         }
 
         public async Task ParseAsync(Cursor<TextParser> cursor, JsonWriter writer) {
