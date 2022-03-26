@@ -48,6 +48,10 @@ namespace advisor {
             var discordOAuth = discord.GetSection("OAuth");
             services.Configure<DiscordOptions>(discord);
 
+            services.AddResponseCompression(opt => {
+                opt.EnableForHttps = true;
+            });
+
             services
                 .AddSingleton<IApiKeyStore, ConfigurationApiKeyStore>()
                 .ConfigureApiKeys(Configuration)
@@ -231,6 +235,8 @@ namespace advisor {
         }
 
         public void Configure(IApplicationBuilder app) {
+            app.UseResponseCompression();
+
             if (!Env.IsProduction()) {
                 app.UseDeveloperExceptionPage();
             }
