@@ -45,7 +45,7 @@ namespace advisor {
         public async Task NewOrigins(long gameId) {
             var players = await db.Players
                 .AsNoTracking()
-                .Where(x => x.GameId == gameId && x.Number != null && x.Password != null)
+                .Where(x => x.GameId == gameId && x.Number != null && x.Password != null && !x.IsQuit)
                 .ToListAsync();
 
             if (players.Count == 0) {

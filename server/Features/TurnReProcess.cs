@@ -25,7 +25,7 @@ namespace advisor.Features
 
         public async Task<TurnReProcessResult> Handle(TurnReProcess request, CancellationToken cancellationToken) {
             var players = await db.Players
-                .Where(x => x.GameId == request.GameId)
+                .Where(x => x.GameId == request.GameId && !x.IsQuit)
                 .Select(x => x.Id)
                 .ToListAsync();
 
