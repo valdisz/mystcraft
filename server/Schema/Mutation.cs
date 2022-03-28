@@ -55,13 +55,18 @@ namespace advisor {
             );
         }
 
-        public Task<DbPlayer> JoinGame(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {
+        public Task<DbPlayer> GameJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {
             return mediator.Send(new GameJoin(currentUserId, gameId));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<List<DbGame>> DeleteGame(IMediator mediator, [ID("Game")] long gameId) {
+        public Task<List<DbGame>> GameDelete(IMediator mediator, [ID("Game")] long gameId) {
             return mediator.Send(new GameDelete(gameId));
+        }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<DbGame> GameOptionsSet(IMediator mediator, [ID("Game")] long gameId, GameOptions options) {
+            return mediator.Send(new GameOptionsSet(gameId, options));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
@@ -103,14 +108,6 @@ namespace advisor {
         //     return mediator.Send(new DeleteTurn(
         //         currentUser,
         //         ParseRelayId<long>("Turn", turnId)
-        //     ));
-        // }
-
-        // [Authorize(Policy = Policies.GameMasters)]
-        // public Task<DbGame> SetGameOptions([GraphQLType(typeof(RelayIdType))] string gameId, GameOptions options) {
-        //     return mediator.Send(new SetGameOptions(
-        //         ParseRelayId<long>("Game", gameId),
-        //         options
         //     ));
         // }
 

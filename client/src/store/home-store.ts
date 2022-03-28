@@ -121,6 +121,6 @@ export class HomeStore {
             variables: { gameId }
         });
 
-        this.load(response.data.deleteGame);
+        this.load(response.data.gameDelete);
     }
 }

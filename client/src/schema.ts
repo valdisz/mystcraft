@@ -338,9 +338,10 @@ export type MutationType = {
   allianceJoin?: Maybe<AllianceJoinResult>;
   createLocalGame?: Maybe<Game>;
   createUser?: Maybe<User>;
-  deleteGame?: Maybe<Array<Maybe<Game>>>;
   gameCreateRemote?: Maybe<GameCreateRemoteResult>;
-  joinGame?: Maybe<Player>;
+  gameDelete?: Maybe<Array<Maybe<Game>>>;
+  gameJoin?: Maybe<Player>;
+  gameOptionsSet?: Maybe<Game>;
   setOrders?: Maybe<MutationResultOfString>;
   studyPlanStudy?: Maybe<StudyPlanResult>;
   studyPlanTarget?: Maybe<StudyPlanResult>;
@@ -377,11 +378,6 @@ export type MutationTypeCreateUserArgs = {
 };
 
 
-export type MutationTypeDeleteGameArgs = {
-  gameId: Scalars['ID'];
-};
-
-
 export type MutationTypeGameCreateRemoteArgs = {
   engineVersion?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
@@ -391,8 +387,19 @@ export type MutationTypeGameCreateRemoteArgs = {
 };
 
 
-export type MutationTypeJoinGameArgs = {
+export type MutationTypeGameDeleteArgs = {
   gameId: Scalars['ID'];
+};
+
+
+export type MutationTypeGameJoinArgs = {
+  gameId: Scalars['ID'];
+};
+
+
+export type MutationTypeGameOptionsSetArgs = {
+  gameId: Scalars['ID'];
+  options?: InputMaybe<GameOptionsInput>;
 };
 
 
@@ -822,7 +829,7 @@ export type DeleteGameMutationVariables = Exact<{
 }>;
 
 
-export type DeleteGameMutation = { __typename?: 'MutationType', deleteGame?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null };
+export type DeleteGameMutation = { __typename?: 'MutationType', gameDelete?: Array<{ __typename?: 'Game', id: string, name: string, rulesetName: string, rulesetVersion: string, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null };
 
 export type GameCreateRemoteMutationVariables = Exact<{
   name: Scalars['String'];
@@ -840,7 +847,7 @@ export type JoinGameMutationVariables = Exact<{
 }>;
 
 
-export type JoinGameMutation = { __typename?: 'MutationType', joinGame?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
+export type JoinGameMutation = { __typename?: 'MutationType', gameJoin?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
 
 export type SetOrderMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -1366,7 +1373,7 @@ export const CreateLocalGame = gql`
     ${GameHeader}`;
 export const DeleteGame = gql`
     mutation DeleteGame($gameId: ID!) {
-  deleteGame(gameId: $gameId) {
+  gameDelete(gameId: $gameId) {
     ...GameHeader
   }
 }
@@ -1390,7 +1397,7 @@ export const GameCreateRemote = gql`
     ${GameHeader}`;
 export const JoinGame = gql`
     mutation JoinGame($gameId: ID!) {
-  joinGame(gameId: $gameId) {
+  gameJoin(gameId: $gameId) {
     ...PlayerHeader
   }
 }

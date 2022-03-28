@@ -1,5 +1,5 @@
 mutation DeleteGame($gameId: ID!) {
-    deleteGame(gameId: $gameId) {
+    gameDelete(gameId: $gameId) {
         ...GameHeader
     }
 }

@@ -1,5 +1,5 @@
 mutation JoinGame($gameId: ID!) {
-  joinGame(gameId: $gameId) {
+  gameJoin(gameId: $gameId) {
     ...PlayerHeader
   }
 }
