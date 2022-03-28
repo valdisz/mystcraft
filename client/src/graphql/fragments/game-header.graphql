@@ -3,6 +3,10 @@ fragment GameHeader on Game {
   name
   rulesetName
   rulesetVersion
+  options {
+    schedule
+    timeZone
+  }
   me {
     ...PlayerHeader
   }

@@ -23,6 +23,7 @@
     "apollo-client": "^2.6.10",
     "apollo-link-http": "^1.5.17",
     "clipboard": "^2.0.8",
+    "cronstrue": "^2.2.0",
     "file-saver": "^2.0.5",
     "lodash.throttle": "^4.1.1",
     "mobx": "^6.4.1",

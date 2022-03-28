@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { styled } from '@mui/system'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, Box, Grid
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react'
 import { Link } from 'react-router-dom'
@@ -10,6 +10,7 @@ import { useStore } from '../store'
 import { SplitButton } from '../components'
 import { GameHeaderFragment, PlayerHeaderFragment } from '../schema'
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
+import cronstrue from 'cronstrue'
 
 function NoGames() {
     return <ListItem>
@@ -107,12 +108,19 @@ function GameItem({ game }: GameItemProps) {
         <ListItemIcon>
             <GrainIcon />
         </ListItemIcon>
-        <ListItemText
-            primary={<Game name={game.name} />}
-            secondary={<Ruleset name={game.rulesetName} version={game.rulesetVersion} />} />
-
-        { game.me && <GamePlayer {...game.me} />}
-
+        <Grid container>
+            <Grid item xs={12} md={6}>
+                <ListItemText
+                    primary={<Game name={game.name} />}
+                    secondary={<Ruleset name={game.rulesetName} version={game.rulesetVersion} />} />
+            </Grid>
+            <Grid item xs={12} md={6}>
+                { game.me && <GamePlayer {...game.me} />}
+            </Grid>
+            { game.options.schedule && <Grid item xs={12}>
+                Turn schedule: {cronstrue.toString(game.options.schedule)} ({game.options.timeZone ?? 'UTC'})
+            </Grid> }
+        </Grid>
         <ListItemSecondaryAction>
             <Observer>
                 {() => playerJoind
@@ -127,7 +135,7 @@ function GameItem({ game }: GameItemProps) {
                     : <Button color='primary' size='small' variant='outlined' onClick={() => home.joinGame(game.id)}>Join</Button> }
             </Observer>
         </ListItemSecondaryAction>
-    </ListItem>
+            </ListItem>
 }
 
 const NewGameDialog = observer(() => {
