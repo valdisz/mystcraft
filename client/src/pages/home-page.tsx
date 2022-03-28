@@ -104,6 +104,10 @@ function GameItem({ game }: GameItemProps) {
         props.replace = true
     }
 
+    const cron = game.options.schedule
+        ? `${cronstrue.toString(game.options.schedule, { use24HourTimeFormat: true })} (${game.options.timeZone ?? 'UTC'})`
+        : null
+
     return <ListItem {...props}>
         <ListItemIcon>
             <GrainIcon />
@@ -117,8 +121,8 @@ function GameItem({ game }: GameItemProps) {
             <Grid item xs={12} md={6}>
                 { game.me && <GamePlayer {...game.me} />}
             </Grid>
-            { game.options.schedule && <Grid item xs={12}>
-                Turn schedule: {cronstrue.toString(game.options.schedule)} ({game.options.timeZone ?? 'UTC'})
+            { cron && <Grid item xs={12}>
+                { cron }
             </Grid> }
         </Grid>
         <ListItemSecondaryAction>
