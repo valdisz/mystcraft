@@ -133,8 +133,14 @@ namespace advisor {
 
         public async Task ProcessTurns(List<DbPlayer> players, int turnNumber) {
             foreach (var player in players) {
-                logger.LogInformation($"{player.Name} ({player.Number}): Processing turn");
-                await mediator.Send(new TurnProcess(player.Id, turnNumber));
+                try {
+                    logger.LogInformation($"{player.Name} ({player.Number}): Processing turn");
+                    await mediator.Send(new TurnProcess(player.Id, turnNumber));
+                }
+                catch (Exception ex) {
+                    logger.LogError(ex, $"{player.Name} ({player.Number}): {ex.Message}");
+                    throw;
+                }
             }
         }
     }

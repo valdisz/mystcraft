@@ -1,5 +1,6 @@
 namespace advisor.Features
 {
+    using System;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -30,7 +31,12 @@ namespace advisor.Features
                 .ToListAsync();
 
             foreach (var player in players) {
-                await mediator.Send(new TurnProcess(player, request.Turn));
+                try {
+                    await mediator.Send(new TurnProcess(player, request.Turn));
+                }
+                catch (Exception ex) {
+                    return new TurnReProcessResult(false, ex.ToString());
+                }
             }
 
             return new TurnReProcessResult(true, null);
