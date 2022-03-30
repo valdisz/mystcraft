@@ -385,6 +385,7 @@ export class GameStore {
 
     @action addAttacker = (unit: Unit) => this.attackers.push(unit)
     @action addDefender = (unit: Unit) => this.defenders.push(unit)
+    @action removeFromBattleSim = (unit: Unit) => this.defenders.remove(unit) || this.attackers.remove(unit)
     @action resetBattleSim = () => {
         this.attackers.clear()
         this.defenders.clear()

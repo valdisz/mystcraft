@@ -4,9 +4,9 @@ import { Link, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Button,
     ButtonGroup, Chip, Avatar, Box, Tooltip, Card, CardContent, Stack, CircularProgress, Container, Grid,
-    BoxProps, Fab, Badge
+    BoxProps, Fab, Badge, Dialog, DialogContent, DialogContentText
 } from '@mui/material'
-import { useStore, GameLoadingStore } from '../store'
+import { useStore, GameLoadingStore, GameStore } from '../store'
 import { observer } from 'mobx-react'
 import { MapProvider, useMapContext } from '../map'
 import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType } from '../game'
@@ -19,6 +19,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
+import CloseIcon from '@mui/icons-material/Close'
 
 const GameContainer = styled(Box)`
     width: 100%;
@@ -199,46 +200,6 @@ function unitMounts(items: ItemMap<Item>) {
     return names
 }
 
-// function UnitRow({ unit, game }: { unit: Unit, game: GameStore }) {
-//     const rows = unit.description ? 2 : 1
-//     const noBorder = rows > 1 ? 'no-border' : ''
-
-//     return <React.Fragment>
-//         <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
-//             <TableCell rowSpan={rows}>
-//                 { game.isAttacker(unit)
-//                     ? <Chip label='Attacker' color='primary' />
-//                     : game.isDefender(unit)
-//                         ? <Chip label='Defender' color='secondary' />
-//                         : <ButtonGroup>
-//                             <Button variant='outlined' onClick={() => game.addAttacker(unit)}>Attacker</Button>
-//                             <Button variant='outlined' onClick={() => game.addDefender(unit)}>Defender</Button>
-//                         </ButtonGroup>
-//                 }
-//             </TableCell>
-//             <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
-//             <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-//             <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : ''}</TableCell>
-//             <TableCell className='unit-nr'>{unit.num}</TableCell>
-//             <TableCell component='th' className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
-//             <TableCell className='men'>
-//                 <UnitMen items={unit.inventory.items} />
-//             </TableCell>
-//             <TableCell className='mounts'>
-//                 <UnitMounts items={unit.inventory.items} />
-//             </TableCell>
-//             <TableCell className='items'>{unit.inventory.items.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
-//             <TableCell className='skills'>{unit.skills.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
-//         </TableRow>
-//         { rows > 1 && <TableRow>
-//             <TableCell className='unit-nr'></TableCell>
-//             <TableCell colSpan={5} className='description'>
-//                 {unit.description}
-//             </TableCell>
-//         </TableRow> }
-//     </React.Fragment>
-// }
-
 interface MoveIconProps {
     moveType: MoveType
 }
@@ -329,51 +290,100 @@ const CommandButton = observer(({ command: { title, tooltip, canExecute, error, 
         : btn
 })
 
+const UnitRow = observer(({ unit, game }: { unit: Unit, game: GameStore }) => {
+    const rows = unit.description ? 2 : 1
+    const noBorder = rows > 1 ? 'no-border' : ''
+
+    return <React.Fragment>
+        <TableRow className={noBorder} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
+            <TableCell rowSpan={rows}>
+                { game.isAttacker(unit)
+                    ? <Chip label='Attacker' color='primary' onClick={() => game.removeFromBattleSim(unit)} />
+                    : game.isDefender(unit)
+                        ? <Chip label='Defender' color='secondary' onClick={() => game.removeFromBattleSim(unit)} />
+                        : <ButtonGroup>
+                            <Button variant='outlined' onClick={() => game.addAttacker(unit)}>Attacker</Button>
+                            <Button variant='outlined' onClick={() => game.addDefender(unit)}>Defender</Button>
+                        </ButtonGroup>
+                }
+            </TableCell>
+            <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+            <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+            <TableCell rowSpan={rows} className='faction'>{unit.faction.known ? `${unit.faction.name} (${unit.faction.num})` : ''}</TableCell>
+            <TableCell className='unit-nr'>{unit.num}</TableCell>
+            <TableCell component='th' className={`unit-name ${noBorder}`}>{unit.name}</TableCell>
+            <TableCell className='men-count'>
+                { unitMenCount(unit.inventory.items)}
+            </TableCell>
+            <TableCell className='men'>
+                { unitMen(unit.inventory.items) }
+            </TableCell>
+            <TableCell className='mounts-count'>
+                { unitMountsCount(unit.inventory.items) }
+            </TableCell>
+            <TableCell className='mounts'>
+                { unitMounts(unit.inventory.items) }
+            </TableCell>
+            <TableCell className='items'>{unit.inventory.items.filter(x => !x.isManLike && !x.isMoney && !x.isMount).map(x => `${x.amount} ${x.name}`).join(', ')}</TableCell>
+            <TableCell className='skills'>{unit.skills.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
+        </TableRow>
+        { rows > 1 && <TableRow>
+            <TableCell className='unit-nr'></TableCell>
+            <TableCell colSpan={5} className='description'>
+                {unit.description}
+            </TableCell>
+        </TableRow> }
+    </React.Fragment>
+})
+
+const BattleSim = observer(() => {
+    const { game } = useStore()
+    return <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
+        <AppBar sx={{ position: 'relative' }}>
+            <Toolbar>
+                <IconButton edge="start" color="inherit" onClick={game.closeBattleSim} size="large"><CloseIcon /></IconButton>
+                <Typography variant="h6" sx={{
+                    marginLeft: 2,
+                    flex: 1
+                }}>Battle Sim</Typography>
+                <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
+                <Button color="inherit" onClick={game.toBattleSim}>Get BattleSim JSON</Button>
+            </Toolbar>
+        </AppBar>
+        <DialogContent>
+            <DialogContentText>Select battle sim sides</DialogContentText>
+            <UnitsTable size='small' stickyHeader>
+                <TableHead>
+                    <TableRow>
+                        <TableCell></TableCell>
+                        <TableCell className='structure-nr'></TableCell>
+                        <TableCell className='structure-name'>Structure</TableCell>
+                        <TableCell className='faction'>Faction</TableCell>
+                        <TableCell className='unit-nr'></TableCell>
+                        <TableCell className='unit-name'>Unit</TableCell>
+                        <TableCell className='men-count'></TableCell>
+                        <TableCell className='men'>Men</TableCell>
+                        <TableCell className='mounts-count'></TableCell>
+                        <TableCell className='mounts'>Mounts</TableCell>
+                        <TableCell className='items'>Items</TableCell>
+                        <TableCell className='skills'>Skills</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
+                </TableBody>
+            </UnitsTable>
+        </DialogContent>
+    </Dialog>
+})
+
 const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
     const { game } = useStore()
 
     return (
         <Box {...props} sx={{ display: 'flex', flexDirection: 'column', ...(sx || { }) }}>
-            {/* <Box sx={{ p: 1 }}>
-                <Button onClick={game.openBattleSim}>Battle Sim</Button>
-                {game.commands.filter(x => x.visible).map(x => { console.log(x); return <CommandButton key={x.title} command={x} /> })}
-            </Box> */}
 
-            {/* <Dialog fullScreen  open={game.battleSimOpen} onClose={game.closeBattleSim}>
-                <AppBar sx={{ position: 'relative' }}>
-                    <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={game.closeBattleSim} size="large"><CloseIcon /></IconButton>
-                        <Typography variant="h6" sx={{
-                            marginLeft: 2,
-                            flex: 1
-                        }}>Battle Sim</Typography>
-                        <Button onClick={game.resetBattleSim} color="inherit">Reset</Button>
-                        <Button color="inherit" onClick={game.toBattleSim}>Get BattleSim JSON</Button>
-                    </Toolbar>
-                </AppBar>
-                <DialogContent>
-                    <DialogContentText>Select battle sim sides</DialogContentText>
-                    <UnitsTable size='small' stickyHeader>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell></TableCell>
-                                <TableCell className='structure-nr'></TableCell>
-                                <TableCell className='structure-name'>Structure</TableCell>
-                                <TableCell className='faction'>Faction</TableCell>
-                                <TableCell className='unit-nr'>Unit Nr.</TableCell>
-                                <TableCell className='unit-name'>Name</TableCell>
-                                <TableCell className='men'>Men</TableCell>
-                                <TableCell className='mounts'>Mounts</TableCell>
-                                <TableCell className='items'>Items</TableCell>
-                                <TableCell className='skills'>Skills</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {game.units.map(unit => <UnitRow key={unit.num} unit={unit} game={game} />)}
-                        </TableBody>
-                    </UnitsTable>
-                </DialogContent>
-            </Dialog> */}
+
 
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
 
@@ -595,7 +605,11 @@ export const MapTab = observer(() => {
             </Box>
 
             {/* Bottom Panel */}
-            <FloatingPanel header='Units' sx={{
+            <FloatingPanel header={<Stack direction='row' spacing={2}>
+                    <Typography variant='h6'>Units</Typography>
+                    <Button variant='outlined' onClick={game.openBattleSim}>Battle Sim</Button>
+                </Stack>}
+            sx={{
                 gridColumnStart: 1, gridColumnEnd: 4,
                 gridRow: 3,
                 alignSelf: 'flex-end',
@@ -609,6 +623,7 @@ export const MapTab = observer(() => {
                     { game.unit && <UnitSummary unit={game.unit} sx={{ width: '25vw', maxWidth: '400px' }} /> }
                     { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '25vw', maxWidth: '400px' }} /> }
                 </Box>
+                <BattleSim />
             </FloatingPanel>
         </Box>
     </Box>
