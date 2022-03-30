@@ -1,6 +1,7 @@
 namespace advisor {
     using System;
     using advisor.Authorization;
+    using advisor.Features;
     using advisor.Model;
     using advisor.Persistence;
     using Hangfire;
@@ -232,6 +233,8 @@ namespace advisor {
 
             services
                 .AddMemoryCache();
+
+            services.AddTransient<TurnReProcessJob>();
         }
 
         public void Configure(IApplicationBuilder app) {
