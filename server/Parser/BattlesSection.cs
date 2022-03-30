@@ -250,13 +250,16 @@ namespace advisor {
             while (cursor.HasValue) {
                 if (CanParseAsBattle(cursor)) {
                     await ParseBattleAsync(cursor, writer);
+                    continue;
                 }
-                else if (CanParseAsAssassination(cursor)) {
+
+                if (CanParseAsAssassination(cursor)) {
                     assassinations.Add(assassinationParser.Parse(cursor.Value).Value);
+                    await cursor.NextAsync();
+                    continue;
                 }
-                else {
-                    break;
-                }
+
+                break;
             }
 
             await writer.WriteEndArrayAsync();

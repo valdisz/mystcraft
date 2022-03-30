@@ -21,7 +21,7 @@ namespace advisor
             );
             if (!location) return Error(location);
 
-            return Ok(ReportNode.Bag(
+            return Ok(ReportNode.Object(
                 ReportNode.Key("victim", ReportNode.Object(victim.Value)),
                 ReportNode.Key("location", ReportNode.Object(location.Value))
             ));

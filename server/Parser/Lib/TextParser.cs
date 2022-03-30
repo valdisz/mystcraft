@@ -490,7 +490,7 @@ namespace advisor {
                 if (match) return match;
             }
 
-            return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
+            return new Maybe<TextParser>($"all options does ({string.Join(", ", list)}) not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<TextParser> SkipWhitespaces(this Maybe<TextParser> p, int minTimes = 0) {
@@ -545,7 +545,7 @@ namespace advisor {
                 if (result) return result;
             }
 
-            return new Maybe<T>("all options does not fit", p.Ln, p.Pos + 1);
+            return new Maybe<T>("OneOf: all options does not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<IReportNode> OneOf(this Maybe<TextParser> p, params IReportParser[] parsers)
@@ -557,7 +557,7 @@ namespace advisor {
                 if (result) return result;
             }
 
-            return new Maybe<TextParser>("all options does not fit", p.Ln, p.Pos + 1);
+            return new Maybe<TextParser>($"OneOf: all options ({string.Join(", ", str)}) does not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<TextParser> OneOf(this Maybe<TextParser> p, params string[] str)
@@ -569,7 +569,7 @@ namespace advisor {
                 if (result) return result;
             }
 
-            return new Maybe<IReportNode>("all options does not fit", p.Ln, p.Pos + 1);
+            return new Maybe<IReportNode>("OneOf: all options does not fit", p.Ln, p.Pos + 1);
         }
 
         public static Maybe<T[]> List<T>(this TextParser p, ReadOnlySpan<char> separator, Func<TextParser, Maybe<T>> itemParser) {

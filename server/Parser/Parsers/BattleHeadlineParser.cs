@@ -13,10 +13,13 @@ namespace advisor
             var attacker = unitName.Parse(h);
             if (!attacker) return Error(attacker);
 
-            var defender = unitName.Parse(h.OneOf(
+            Mem(h.OneOf(
                 _ => _.Then(" attacks "),
                 _ => _.Then(" attempts to assassinate ")
-            ).SkipWhitespaces());
+            ));
+            if (!LastResult) return Error(LastResult);
+
+            var defender = unitName.Parse(h.SkipWhitespaces());
             if (!defender) return Error(defender);
 
             var location = locationParser.Parse(h.SkipWhitespaces(minTimes: 1).After("in").SkipWhitespaces(minTimes: 1));
