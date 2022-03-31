@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Typography, IconButton, Card, Collapse, CardActions, CardProps, Stack } from '@mui/material'
+import { Box, Typography, IconButton, Card, Collapse, CardActions, CardProps, Stack } from '@mui/material'
 import { ExpandMore } from './expand-more'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CloseIcon from '@mui/icons-material/Close'
@@ -19,9 +19,11 @@ export function FloatingPanel({ header, expanded, onClose, onExpand, sx, childre
     }
 
     return <Card {...props} sx={{ opacity: 0.92, ...(sx || { }) }}>
-        <CardActions disableSpacing sx={{ gap: 1 }}>
-            { typeof header === 'string' ? <Typography variant='h6'>{header}</Typography> : header }
-            <Stack flex={1} spacing={1} alignItems='flex-end' justifyContent='center'>
+        <CardActions disableSpacing sx={{ gap: 1, minWidth: 0 }}>
+            <Stack flex={1} spacing={1} direction='row' alignItems='center' justifyContent='flex-start' minWidth={0}>
+                { typeof header === 'string' ? <Typography variant='h6'>{header}</Typography> : header }
+            </Stack>
+            <Stack spacing={1} direction='row' alignItems='center' justifyContent='flex-end' minWidth={0}>
                 {  onExpand && <ExpandMore expand={expanded} onClick={onExpandClick}>
                     <ExpandMoreIcon />
                 </ExpandMore> }
