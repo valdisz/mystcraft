@@ -4,13 +4,13 @@ import { Link, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Button,
     ButtonGroup, Chip, Avatar, Box, Tooltip, Card, CardContent, Stack, CircularProgress, Container, Grid,
-    BoxProps, Fab, Badge, Dialog, DialogContent, DialogContentText
+    BoxProps, Badge, Dialog, DialogContent, DialogContentText
 } from '@mui/material'
 import { useStore, GameLoadingStore, GameStore } from '../store'
 import { observer } from 'mobx-react'
 import { MapProvider, useMapContext } from '../map'
 import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType } from '../game'
-import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList } from '../components'
+import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList, FluidFab } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move'
 import SimpleBar from 'simplebar-react'
@@ -542,44 +542,60 @@ export const MapTab = observer(() => {
             display: 'grid',
             gap: 2,
             m: 2,
-            gridTemplateColumns: 'minmax(min-content, 400px) 1fr minmax(min-content, 400px)',
+            gridTemplateColumns: 'minmax(min-content, 50vw) 1fr minmax(min-content, 400px)',
             gridTemplateRows: 'minmax(0, 33vh) 1fr minmax(min-content, 0)'
         }}>
-            {/* Top Panel */}
-            <Box sx={{
-                gridColumnStart: 2, gridColumnEnd: 3,
-                gridRowStart: 1, gridRowEnd: 2,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                gap: 2,
-                mt: 2
-            }}>
-                { battles.length > 0 && <Badge badgeContent={battles.length} color='error'>
-                    <Fab sx={{
-                        pointerEvents: 'all',
-                        zIndex: 0
-                    }} onClick={game.showBattles}>
-                        <Box component='span' sx={{ fontSize: '24px' }}>⚔</Box>
-                    </Fab>
-                </Badge> }
-            </Box>
 
             {/* Left Panel */}
             <Box sx={{
                 gridColumnStart: 1, gridColumnEnd: 2,
                 gridRowStart: 1, gridRowEnd: 3,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                position: 'relative',
+                minHeight: 0
             }}>
-                <Box component={SimpleBar} autoHide={false} sx={{
+                {/* Game Screens */}
+                { !game.battlesVisible && <Box sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-start',
+                    alignItems: 'center',
+                    gap: 2,
+                    mt: 4,
+                    pointerEvents: 'all'
+                }}>
+                    { battles.length > 0 && <Badge badgeContent={battles.length} color='error'>
+                        <FluidFab icon={<Box component='span' sx={{ fontSize: '24px' }}>⚔</Box>} sx={{ zIndex: 0 }} onClick={game.toggleBattles}>
+                            Battles
+                        </FluidFab>
+                    </Badge> }
+                </Box> }
+
+                { game.battlesVisible && <FloatingPanel header='Battles' onClose={game.hideBattles} sx={{
+                    maxWidth: '400px',
+                    height: '100%',
+                    minHeight: 0,
+                    pointerEvents: 'all',
+                    display: 'flex',
+                    flexDirection: 'column'
+                }}>
+                    <Box sx={{ flex: 1, minHeight: 0 }}>
+                        <Box component={SimpleBar} autoHide={false} sx={{ height: '100%' }}>
+                            <BattleList battles={battles} />
+                        </Box>
+                    </Box>
+                </FloatingPanel> }
+
+                {/* <Box component={SimpleBar} autoHide={false} sx={{
                     pointerEvents: 'all',
                     minHeight: 0,
-                    maxHeight: '100%'
-                }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
-                    { game.battlesVisible && <FloatingPanel header='Battles' expanded={game.battlesPanel} onExpand={game.exapandBattles} onClose={game.hideBattles}>
-                        <BattleList battles={battles} />
-                    </FloatingPanel> }
-                </Box>
+                    height: '100%',
+                    zIndex: 'drawer'
+                }} onMouseDown={noop} onMouseUp={noop} onClick={noop}> */}
+                {/* </Box> */}
             </Box>
 
             {/* Right Panel */}
@@ -605,7 +621,7 @@ export const MapTab = observer(() => {
             </Box>
 
             {/* Bottom Panel */}
-            <FloatingPanel header={<Stack direction='row' spacing={2}>
+            { game.region && <FloatingPanel header={<Stack direction='row' spacing={2}>
                     <Typography variant='h6'>Units</Typography>
                     <Button variant='outlined' onClick={game.openBattleSim}>Battle Sim</Button>
                 </Stack>}
@@ -624,7 +640,7 @@ export const MapTab = observer(() => {
                     { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '25vw', maxWidth: '400px' }} /> }
                 </Box>
                 <BattleSim />
-            </FloatingPanel>
+            </FloatingPanel> }
         </Box>
     </Box>
 })

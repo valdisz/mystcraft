@@ -467,16 +467,22 @@ export class GameStore {
     @observable unitsPanel: boolean = true
     @observable regionPanel: boolean = true
     @observable structuresPanel: boolean = true
-    @observable battlesPanel: boolean = true
     @observable battlesVisible: boolean = false
 
     @action exapandUnits = (expand: boolean) => this.unitsPanel = expand
     @action exapandRegion = (expand: boolean) => this.regionPanel = expand
     @action exapandStructures = (expand: boolean) => this.structuresPanel = expand
 
-    @action exapandBattles = (expand: boolean) => this.battlesPanel = expand
     @action showBattles = () => this.battlesVisible = true
     @action hideBattles = () => this.battlesVisible = false
+    toggleBattles = () => {
+        if (this.battlesVisible) {
+            this.hideBattles()
+        }
+        else {
+            this.showBattles()
+        }
+    }
 }
 
 export interface BattleSimItem {

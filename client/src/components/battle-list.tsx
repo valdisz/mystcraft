@@ -1,7 +1,9 @@
 import * as React from 'react'
 import { Box, BoxProps, Stack, StackProps, Typography, List, ListSubheader, ListItem, ListItemButton, Chip, Dialog,
-    DialogTitle, DialogContent, DialogActions, Button, IconButton, Divider, Tabs, Tab, Grid
+    DialogContent, DialogActions, Button, IconButton, Divider, Grid
 } from '@mui/material'
+import { autorun } from 'mobx'
+import { observer } from 'mobx-react'
 import { Battle, BattleUnit, Faction as GameFaction, Region, Casualties } from '../game'
 import { FixedTypography } from './fixed-typography'
 import CloseIcon from '@mui/icons-material/Close'
@@ -157,11 +159,6 @@ function Army({ side, leader, troops, lost, victory, sx, ...props }: ArmyProps) 
         </Stack>
 }
 
-interface BattleItemProps {
-    battle: Battle
-    onClick: () => void
-}
-
 function countSoldiers(units: Iterable<BattleUnit>) {
     let count = 0
     for (const unit of units) {
@@ -177,13 +174,30 @@ function countSoldiers(units: Iterable<BattleUnit>) {
     return count
 }
 
-function BattleItem({ battle, onClick }: BattleItemProps) {
+interface BattleItemProps {
+    battle: Battle
+    active?: boolean
+    scrollOnActive?: boolean
+    onClick: () => void
+}
+
+function BattleItem({ battle, active, scrollOnActive, onClick }: BattleItemProps) {
+    const ref = React.useRef<HTMLDivElement>()
     const { attacker, defender, attackers, defenders, attackerCasualties, defenderCasualties } = battle
+
+    React.useEffect(() => autorun(() => {
+        if (ref.current && active && scrollOnActive) {
+            ref.current.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            })
+        }
+    }), [ active, scrollOnActive ])
 
     const attackingTroops = countSoldiers(attackers)
     const defendungTroops = countSoldiers(defenders)
 
-    return <ListItemButton divider onClick={onClick}>
+    return <ListItemButton ref={ref} selected={active} divider onClick={onClick}>
             <Box sx={{
                 flex: 1,
                 display: 'flex',
@@ -334,11 +348,45 @@ function BattleView({ battle, open, onClose }: BattleViewProps) {
     </Dialog>
 }
 
+export interface BattleLocationProps {
+    region: Region
+    active?: boolean
+}
+
+const BattleLocation = observer(({ region, active }: BattleLocationProps) => {
+    const mapContext = useMapContext()
+    const { game } = useStore()
+
+    function centerAt(region: Region) {
+        mapContext.map.centerAt(region.coords)
+        game.selectRegion(region)
+    }
+
+    const s = region.toString()
+
+    return <ListSubheader color={ active ? 'primary' : 'default' } sx={{
+        pt: 4, pb: 1,
+        borderBottom: 1,
+        borderColor: 'divider',
+        minWidth: 0,
+        '&:first-of-type': {
+            pt: 0
+        }
+    }}>
+        <Stack direction='row' spacing={2} alignItems='center' sx={{ minWidth: 0 }}>
+            <FixedTypography variant='subtitle1' title={s} sx={{ flex: 1, minWidth: 0, fontWeight: active ? 'bold' : null }}>{s}</FixedTypography>
+            <IconButton onClick={() => centerAt(region)}>
+                <LocationSearchingIcon />
+            </IconButton>
+        </Stack>
+    </ListSubheader>
+})
+
 export interface BattleListProps {
     battles: Battle[]
 }
 
-export function BattleList({ battles }: BattleListProps) {
+export const BattleList = observer(({ battles }: BattleListProps) => {
     const mapContext = useMapContext()
     const { game } = useStore()
     const [ open, setOpen ] = React.useState<Battle>(null)
@@ -358,7 +406,6 @@ export function BattleList({ battles }: BattleListProps) {
         return items
     }, [ battles ])
 
-
     function openDialog(battle: Battle) {
         setOpen(battle)
     }
@@ -369,34 +416,16 @@ export function BattleList({ battles }: BattleListProps) {
 
     const isOpen = open !== null
 
-    function centerAt(region: Region) {
-        mapContext.map.centerAt(region.coords)
-        game.selectRegion(region)
-    }
-
     return <>
         <List disablePadding>
-            { Array.from(groups.keys()).map((region, i) => <React.Fragment key={i}>
-                <ListSubheader sx={{
-                    pt: 4, pb: 1,
-                    borderBottom: 1,
-                    borderColor: 'divider',
-                    minWidth: 0,
-                    '&:first-of-type': {
-                        pt: 0
-                    }
-                }}>
-                    <Stack direction='row' spacing={2} alignItems='center' sx={{ minWidth: 0 }}>
-                        <FixedTypography variant='subtitle1' title={region.toString()} sx={{ flex: 1, minWidth: 0 }}>{region.toString()}</FixedTypography>
-                        <IconButton onClick={() => centerAt(region)}>
-                            <LocationSearchingIcon />
-                        </IconButton>
-                    </Stack>
-                </ListSubheader>
-                { groups.get(region).map((b, i) => <BattleItem key={i} battle={b} onClick={() => openDialog(b)} />) }
-            </React.Fragment>) }
+            { Array.from(groups.keys()).map((region, i) => {
+                const active = region === game.region
+                return <React.Fragment key={i}>
+                    <BattleLocation active={active} region={region} />
+                    { groups.get(region).map((b, i) => <BattleItem key={i} active={active} scrollOnActive={i === 0} battle={b} onClick={() => openDialog(b)} />) }
+                </React.Fragment>
+            }) }
         </List>
         <BattleView battle={open} open={isOpen} onClose={closeDialog} />
     </>
-}
-
+})
