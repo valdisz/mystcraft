@@ -1,5 +1,5 @@
 import { autoDetectRenderer, Container, Loader, AbstractRenderer, Point, Rectangle, IPointData } from 'pixi.js'
-import { Region } from "../game"
+import { Link, Region } from "../game"
 import { Layers } from './layers'
 import { Resources } from './resources'
 import { Tile, TILE_H, TILE_W } from './tile'
@@ -8,6 +8,7 @@ import { overlapping } from './utils'
 import { Layout } from '../geometry'
 import { ICoords } from '../game'
 import { MapState } from './state'
+import { Path } from './path';
 
 export interface GetRegionCallback {
     (x: number, y: number): Region
@@ -17,6 +18,8 @@ export interface MapSize {
     width: number
     height: number
 }
+
+export type Paths = Link[][];
 
 /*
 
@@ -90,11 +93,11 @@ export class HexMap2 implements MapState {
         this.layers = new Layers()
         this.scene.addChild(this.layers.terrain)
         this.scene.addChild(this.layers.roads)
-        this.scene.addChild(this.layers.path)
         this.scene.addChild(this.layers.features)
         this.scene.addChild(this.layers.highlight)
         this.scene.addChild(this.layers.settlements)
         this.scene.addChild(this.layers.text)
+        this.scene.addChild(this.layers.path)
     }
 
     readonly viewport: Viewport
@@ -106,6 +109,7 @@ export class HexMap2 implements MapState {
 
     private readonly index: number[] = []
     readonly tiles: Tile[] = []
+    readonly paths: Path[] = []
 
     selectedTile: Tile
     zoom: number = 1
@@ -146,6 +150,7 @@ export class HexMap2 implements MapState {
             this.updateLayout(oldZoom, newZoom)
             this.udateTiles()
             this.centerAt(centerTile.reg.coords)
+            this.updatePath()
             this.render()
         }
     }
@@ -165,7 +170,9 @@ export class HexMap2 implements MapState {
             }
         }
 
+        this.layers.sort();
         this.render()
+
     }
 
     centerAt(coords: ICoords) {
@@ -235,8 +242,33 @@ export class HexMap2 implements MapState {
             tile.destroy()
         }
 
+        this.paths.splice(0)
         this.tiles.splice(0)
         this.index.splice(0)
+    }
+
+    setPaths(paths: Paths) {
+        if (this.paths) {
+            for (const path of this.paths) {
+                path.destroy();
+            }
+        }
+
+        this.paths.splice(0);
+
+        for (const path of paths) {
+            const positions = [];
+            for (const link of path) {
+                positions.push(this.toPixel(link.source.coords));
+            }
+            const drawPath = new Path(positions, path, this.layers, this.resources, this);
+            this.paths.push(drawPath);
+
+            drawPath.update();
+        }
+
+        this.layers.sort();
+        this.render();
     }
 
     setRegions(regions: Region[]) {
@@ -292,6 +324,19 @@ export class HexMap2 implements MapState {
 
     resize(width: number, height: number) {
         this.renderer.resize(width, height)
+    }
+
+    updatePath() {
+        for (const path of this.paths) {
+            const positions = [];
+            for (const index in path) {
+                const link = path[index];
+
+                positions[index] = this.toPixel(link.source.coords);
+            }
+            path.setPositions(positions);
+            path.update()
+        }
     }
 
     udateTiles() {

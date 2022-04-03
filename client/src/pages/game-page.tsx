@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { styled } from '@mui/material/styles'
-import { Link, useParams, Outlet } from 'react-router-dom'
+import { Link as RouterLink, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Button,
     ButtonGroup, Chip, Avatar, Box, Tooltip, Card, CardContent, Stack, CircularProgress, Container, Grid,
@@ -8,7 +8,7 @@ import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, Ta
 } from '@mui/material'
 import { useStore, GameLoadingStore, GameStore } from '../store'
 import { observer } from 'mobx-react'
-import { MapProvider, useMapContext } from '../map'
+import {MapProvider, Paths, useMapContext} from '../map'
 import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType } from '../game'
 import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList, FluidFab } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
@@ -36,9 +36,10 @@ const GameInfo = styled('div')`
 interface GameMapProps {
     selectedRegion: ICoords | null
     onRegionSelected: (reg: Region) => void
+    paths: Paths
 }
 
-function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
+function GameMapComponent({ selectedRegion, onRegionSelected, paths }: GameMapProps) {
     const { game } = useStore()
     const context = useMapContext()
 
@@ -48,7 +49,8 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
         if (!canvasRef) return
 
         const level = game.world.getLevel(1)
-        const finalizer = context.initialize(canvasRef, level, onRegionSelected)
+
+        const finalizer = context.initialize(canvasRef, level, onRegionSelected);
 
         const coords = context.findCoordsToCenterAt(game.world.factions.player.troops, game.region)
         if (coords) {
@@ -67,6 +69,14 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
 
         context.map.select(selectedRegion)
     }, [ selectedRegion ])
+
+    React.useEffect(() => {
+        if (!context.map) {
+            return
+        }
+
+        context.map.setPaths(paths);
+    }, [ paths ])
 
     return <Box sx={{ bgcolor: 'black', width: '100%', height: '100%' }}>
         <Box component={'canvas'} sx={{ width: '100%', height: '100%' }} ref={setCanvasRef} />
@@ -519,7 +529,11 @@ export const MapTab = observer(() => {
         minHeight: 0,
         position: 'relative'
     }}>
-        <GameMapComponent selectedRegion={game.region?.coords} onRegionSelected={game.selectRegion} />
+        <GameMapComponent
+            selectedRegion={game.region?.coords}
+            onRegionSelected={game.selectRegion}
+            paths={game.paths}
+        />
 
         <Box sx={{
             position: 'absolute',
@@ -655,7 +669,7 @@ const GameComponent = observer(() => {
         <GameContainer>
             <AppBar position='static' color='primary'>
                 <Toolbar>
-                    <IconButton component={Link} to='/' edge='start' color='inherit' size="large">
+                    <IconButton component={RouterLink} to='/' edge='start' color='inherit' size="large">
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant='h6'>{ game.name }</Typography>
@@ -665,9 +679,9 @@ const GameComponent = observer(() => {
                     <GameInfo>
                         <Typography variant='subtitle2'>Turn: { world.turnNumber }</Typography>
                     </GameInfo>
-                    <Button color='inherit' variant='outlined' component={Link as any} to={``}>Map</Button>
-                    <Button color='inherit' variant='outlined' component={Link as any} to={`stats`}>Statistics</Button>
-                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} to={`university`}>University</Button> }
+                    <Button color='inherit' variant='outlined' component={RouterLink as any} to={``}>Map</Button>
+                    <Button color='inherit' variant='outlined' component={RouterLink as any} to={`stats`}>Statistics</Button>
+                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={RouterLink as any} to={`university`}>University</Button> }
                     <Box flex={1} />
                     <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
                 </Toolbar>

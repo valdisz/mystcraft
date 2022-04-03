@@ -30,9 +30,9 @@ export class Level implements Iterable<Region> {
         }
     }
 
-    get(coords: ICoords)
-    get(x: number, y: number)
-    get(coordsOrX: number | ICoords, y?: number) {
+    get(coords: ICoords): Region | null
+    get(x: number, y: number): Region | null
+    get(coordsOrX: number | ICoords, y?: number): Region | null {
         const index = typeof coordsOrX === 'number'
             ? this.getIndex(coordsOrX, y)
             : this.getIndex(coordsOrX.x, coordsOrX.y)
