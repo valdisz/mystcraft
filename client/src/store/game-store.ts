@@ -115,7 +115,7 @@ export class GameStore {
                     const result = response.data?.setOrders
                     if (!response.errors && result?.isSuccess) {
                         unit.setOrders(orders)
-                        this.paths = [unit.path];
+                        this.setPaths([unit.path])
                     }
                     else {
                         this.setOrders(prevOrders)
@@ -332,7 +332,7 @@ export class GameStore {
         if (x1 !== x2 || y1 !== y2 || z1 !== z2) {
             this.region = observable(reg)
             this.unit = null
-            this.paths = [];
+            this.setPaths([]);
         }
 
         if (!(reg?.covered ?? true)) {
@@ -367,7 +367,7 @@ export class GameStore {
         this.unit = unit
         this.unitOrders = unit?.ordersSrc
         this.ordersState = 'SAVED'
-        this.paths = [this.unit.path];
+        this.setPaths([this.unit.path]);
     }
 
     @action setOrders = (orders: string) => {
@@ -378,6 +378,10 @@ export class GameStore {
             this.ordersState = 'UNSAVED'
             this.ordersChanged = true
         }
+    }
+
+    @action setPaths = (paths: Paths) => {
+        this.paths = paths;
     }
 
     @action startOrdersSaving = () => this.ordersState = 'SAVING'
