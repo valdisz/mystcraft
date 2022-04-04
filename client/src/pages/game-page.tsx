@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { styled } from '@mui/material/styles'
-import { Link as RouterLink, useParams, Outlet } from 'react-router-dom'
+import { Link, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Button,
     ButtonGroup, Chip, Avatar, Box, Tooltip, Card, CardContent, Stack, CircularProgress, Container, Grid,
@@ -669,7 +669,7 @@ const GameComponent = observer(() => {
         <GameContainer>
             <AppBar position='static' color='primary'>
                 <Toolbar>
-                    <IconButton component={RouterLink} to='/' edge='start' color='inherit' size="large">
+                    <IconButton component={Link} to='/' edge='start' color='inherit' size="large">
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant='h6'>{ game.name }</Typography>
@@ -679,9 +679,9 @@ const GameComponent = observer(() => {
                     <GameInfo>
                         <Typography variant='subtitle2'>Turn: { world.turnNumber }</Typography>
                     </GameInfo>
-                    <Button color='inherit' variant='outlined' component={RouterLink as any} to={``}>Map</Button>
-                    <Button color='inherit' variant='outlined' component={RouterLink as any} to={`stats`}>Statistics</Button>
-                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={RouterLink as any} to={`university`}>University</Button> }
+                    <Button color='inherit' variant='outlined' component={Link as any} to={``}>Map</Button>
+                    <Button color='inherit' variant='outlined' component={Link as any} to={`stats`}>Statistics</Button>
+                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} to={`university`}>University</Button> }
                     <Box flex={1} />
                     <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
                 </Toolbar>
