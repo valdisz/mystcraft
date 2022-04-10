@@ -117,7 +117,7 @@ namespace advisor {
             return Challenge(auth, DiscordDefaults.AuthenticationScheme);
         }
 
-        [HttpGet("external/{provider}")]
+        [HttpGet("external/{provider}", Name = "ExternalCallback")]
         public async Task<IActionResult> ExternalCallbackAsync([FromRoute, Required] string provider) {
             AuthenticateResult result = await HttpContext.AuthenticateAsync(ExternalAuthentication.AuthenticationScheme);
 
