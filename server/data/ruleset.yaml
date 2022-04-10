@@ -62,7 +62,7 @@ movePoints:
   walk: 2
   swim: 2
   ride: 4
-  fly: 6
+  fly: 4
 
 terrain:
   ocean:
@@ -3846,7 +3846,7 @@ items:
   MSHD:
     name: [ mithril shield, mithril shields ]
     weight: 1
-    category: battle
+    category: shield
     traits:
       canProduce:
         skill: ARMO
@@ -3865,7 +3865,7 @@ items:
   ISHD:
     name: [ iron shield, iron shields ]
     weight: 1
-    category: battle
+    category: shield
     traits:
       canProduce:
         skill: ARMO
@@ -3883,7 +3883,7 @@ items:
   WSHD:
     name: [ wooden shield, wooden shields ]
     weight: 1
-    category: battle
+    category: shield
     traits:
       canProduce:
         skill: ARMO
