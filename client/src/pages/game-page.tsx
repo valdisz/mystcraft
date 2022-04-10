@@ -70,18 +70,6 @@ function GameMapComponent({ selectedRegion, onRegionSelected }: GameMapProps) {
 
     return <Box sx={{ bgcolor: 'black', width: '100%', height: '100%' }}>
         <Box component={'canvas'} sx={{ width: '100%', height: '100%' }} ref={setCanvasRef} />
-        { (false && !!context.map) && <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
-            <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
-                    <Button variant='contained' onClick={() => context.map.zoomIn()}>
-                        <AddIcon />
-                    </Button>
-                    <Button variant='contained' onClick={() => context.map.zoomOut()}>
-                        <RemoveIcon />
-                    </Button>
-                </ButtonGroup>
-            </Box>
-        </Box> }
     </Box>
 }
 
@@ -524,6 +512,7 @@ export const MapTab = observer(() => {
     const { game } = useStore()
 
     const { battles } = game.world
+    const context = useMapContext()
 
     return <Box sx={{
         flex: 1,
@@ -555,10 +544,22 @@ export const MapTab = observer(() => {
                 minHeight: 0
             }}>
                 {/* Game Screens */}
+                <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
+                    <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
+                            <Button variant='contained' onClick={() => context.map.zoomIn()}>
+                                <AddIcon />
+                            </Button>
+                            <Button variant='contained' onClick={() => context.map.zoomOut()}>
+                                <RemoveIcon />
+                            </Button>
+                        </ButtonGroup>
+                    </Box>
+                </Box>
                 { !game.battlesVisible && <Box sx={{
                     position: 'absolute',
                     top: 0,
-                    left: 0,
+                    left: 70,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'flex-start',

@@ -13,6 +13,7 @@ export class Viewport {
         public mapHeight: number,
         private onUpdate: (event: Viewport) => void,
         private onClick: (e: MouseEvent, vp: Viewport) => void,
+        private onWheel: (e: WheelEvent) => void,
     ) {
         this.origin.copyFrom(origin)
 
@@ -28,7 +29,7 @@ export class Viewport {
         element.addEventListener('pointerleave', this.onPanEnd)
         element.addEventListener('pointerout', this.onPanEnd)
         element.addEventListener('contextmenu', this.onContextMenu)
-        element.addEventListener('wheel', this.onWheel)
+        element.addEventListener('wheel', this._onWheel)
     }
 
     private readonly observer;
@@ -41,7 +42,7 @@ export class Viewport {
         this.element.removeEventListener('pointerleave', this.onPanEnd)
         this.element.removeEventListener('pointerout', this.onPanEnd)
         this.element.removeEventListener('contextmenu', this.onContextMenu)
-        this.element.removeEventListener('wheel', this.onWheel)
+        this.element.removeEventListener('wheel', this._onWheel)
         this.observer.unobserve(this.element)
     }
 
@@ -67,9 +68,11 @@ export class Viewport {
         this.raiseOnUpdate()
     }
 
-    private onWheel = (e: MouseEvent) => {
+    private _onWheel = (e: WheelEvent) => {
         e.preventDefault()
         e.stopPropagation()
+
+        this.onWheel && this.onWheel(e);
     }
 
     private onContextMenu = (e: MouseEvent) => {

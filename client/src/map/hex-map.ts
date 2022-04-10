@@ -59,6 +59,18 @@ export class HexMap2 implements MapState {
                         options.onClick(tile.reg)
                     }
                 }
+            },
+            (event) => {
+                const tile = this.getTileAtPixel(event.offsetX, event.offsetY)
+
+                if (event.deltaY < 0) {
+                    this.zoomIn();
+                } else {
+                    this.zoomOut();
+                }
+                if (tile) {
+                    this.centerAt(tile.reg.coords);
+                }
             }
         )
         this.updateViewport(this.zoom, this.zoom)
@@ -114,7 +126,6 @@ export class HexMap2 implements MapState {
 
         const { x, y } = this.viewport.origin
         this.viewport.origin.set(x * scale, y * scale)
-        this.layout.origin.copyFrom(this.viewport.origin)
     }
 
     private updateLayout(oldZoom: number, newZoom: number) {
@@ -130,9 +141,11 @@ export class HexMap2 implements MapState {
         if (this.zoom != newZoom) {
             this.zoom = newZoom
 
+            const centerTile = this.getTileAtPixel(this.viewport.width / 2, this.viewport.height / 2);
             this.updateViewport(oldZoom, newZoom)
             this.updateLayout(oldZoom, newZoom)
             this.udateTiles()
+            this.centerAt(centerTile.reg.coords)
             this.render()
         }
     }
@@ -257,39 +270,24 @@ export class HexMap2 implements MapState {
         requestAnimationFrame(() => {
             const { x, y } = this.viewport.origin
 
+            const clientWidth = document.body.clientWidth;
+
+            // for the map wrapping to work we need clientWidth space filled with maps in both directions
+            const additionalMapsNeeded = Math.max(Math.floor(clientWidth / this.viewport.mapWidth), 1);
+
             this.scene.position.set(x, y)
-            this.updateVisibility()
             this.renderer.render(this.scene)
 
-            this.scene.position.set(x - this.viewport.mapWidth, y)
-            this.updateVisibility()
-            this.renderer.render(this.scene, { clear: false })
+            for (let i = 0; i < additionalMapsNeeded; i++) {
+                const mapSizeOffset = this.viewport.mapWidth * (i + 1);
 
-            this.scene.position.set(x + this.viewport.mapWidth, y)
-            this.updateVisibility()
-            this.renderer.render(this.scene, { clear: false })
-        })
-    }
+                this.scene.position.set(x - mapSizeOffset, y)
+                this.renderer.render(this.scene, { clear: false })
 
-    updateVisibility() {
-        const p = new Point()
-        const scale = 1 / this.zoom
-
-        const viewRect = this.viewport.rect
-        const r = new Rectangle()
-
-        for (const layer of this.scene.children as Container[]) {
-            for (const o of layer.children as Container[]) {
-                o.toGlobal(this.viewport.origin, p)
-
-                r.x = p.x - TILE_W * scale
-                r.y = p.y - TILE_H * scale
-                r.width = o.width + TILE_W * scale
-                r.height = o.height + TILE_H * scale
-
-                o.visible = overlapping(viewRect, r)
+                this.scene.position.set(x + mapSizeOffset, y)
+                this.renderer.render(this.scene, { clear: false })
             }
-        }
+        })
     }
 
     resize(width: number, height: number) {
