@@ -4,12 +4,12 @@ import { Box, BoxProps, Stack, StackProps, Typography, List, ListSubheader, List
 } from '@mui/material'
 import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import { Battle, BattleUnit, Faction as GameFaction, Region, Casualties } from '../game'
+import { Battle, BattleUnit, Army as BattleArmy, Faction as GameFaction, Region, Casualties, Squad } from '../game'
 import { FixedTypography } from './fixed-typography'
-import CloseIcon from '@mui/icons-material/Close'
-import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
 import { useStore } from '../store'
 import { useMapContext } from '../map'
+import CloseIcon from '@mui/icons-material/Close'
+import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
 
 type Size = 'normal' | 'small'
 
@@ -63,44 +63,10 @@ function Faction({ faction: { num, name, known } }: FactionProps) {
 
 interface UnitProps {
     unit: BattleUnit
-    items?: boolean
-    skills?: boolean
 }
 
-function Unit({ items, skills, unit: { number, name, items: inventory, skills: unitSkills } }: UnitProps) {
-    return !items
-        ? <AnEntity size='normal' num={number} name={name} />
-        : <Stack sx={{ flex: 1, minWidth: 0 }}>
-            <AnEntity size='normal' num={number} name={name} />
-            {items && <Box sx={{ flex: 1, maxWidth: 0, pl: 4 }}>
-                <Stack direction='row' spacing={2}>
-                    <Typography>Men</Typography>
-                    138 (111 orcs, 15 goblins)
-                </Stack>
-                <Stack direction='row' spacing={2}>
-                    <Typography>Mounts</Typography>
-                    128 (138 horses)
-                </Stack>
-                <Stack direction='row' spacing={2}>
-                    <Typography>Weapons</Typography>
-                    128 swords
-                </Stack>
-                <Stack direction='row' spacing={2}>
-                    <Typography>Armour</Typography>
-                    128 plate armors
-                </Stack>
-                <Stack direction='row' spacing={2}>
-                    <Typography>Other</Typography>
-                    none
-                </Stack>
-                {/* { items && <Stack direction='row' spacing={2} flexWrap='wrap'>
-                    { inventory.toArray().map(x => <Box key={x.code}>{x.amount} {x.name} [{x.code}]</Box>) }
-                </Stack> }
-                { (skills && unitSkills.size > 0) && <Stack direction='row' spacing={2} flexWrap='wrap'>
-                    { unitSkills.toArray().map(x => <Box key={x.code}>{x.name} [{x.code}] {x.level} ({x.days})</Box>) }
-                </Stack> } */}
-            </Box> }
-        </Stack>
+function Unit({ unit: { number, name } }: UnitProps) {
+    return <AnEntity size='normal' num={number} name={name} />
 }
 
 interface InfoCardProps {
@@ -183,7 +149,7 @@ interface BattleItemProps {
 
 function BattleItem({ battle, active, scrollOnActive, onClick }: BattleItemProps) {
     const ref = React.useRef<HTMLDivElement>()
-    const { attacker, defender, attackers, defenders, attackerCasualties, defenderCasualties } = battle
+    const { attacker, defender } = battle
 
     React.useEffect(() => autorun(() => {
         if (ref.current && active && scrollOnActive) {
@@ -194,8 +160,8 @@ function BattleItem({ battle, active, scrollOnActive, onClick }: BattleItemProps
         }
     }), [ active, scrollOnActive ])
 
-    const attackingTroops = countSoldiers(attackers)
-    const defendungTroops = countSoldiers(defenders)
+    const attackingTroops = countSoldiers(attacker.units)
+    const defendungTroops = countSoldiers(defender.units)
 
     return <ListItemButton ref={ref} selected={active} divider onClick={onClick}>
             <Box sx={{
@@ -207,9 +173,9 @@ function BattleItem({ battle, active, scrollOnActive, onClick }: BattleItemProps
                 gap: 2,
                 minWidth: 0
             }}>
-                <Army side='Attacker' leader={attacker} victory={true} troops={attackingTroops} lost={attackerCasualties.lost} />
+                <Army side='Attacker' leader={attacker.leader} victory={true} troops={attackingTroops} lost={attacker.casualties.lost} />
                 <Divider orientation='vertical' flexItem />
-                <Army side='Defender' leader={defender} victory={false} troops={defendungTroops} lost={defenderCasualties.lost} />
+                <Army side='Defender' leader={defender.leader} victory={false} troops={defendungTroops} lost={defender.casualties.lost} />
             </Box>
     </ListItemButton>
 }
@@ -251,20 +217,56 @@ function groupByFaction(units: Iterable<BattleUnit>) {
 }
 
 interface ParticipantsProps {
-    items: Map<GameFaction, BattleUnit[]>
+    items: Squad[]
 }
 
 function Participants({ items }: ParticipantsProps) {
-    return <List>
-        { Array.from(items.keys()).map(f => <React.Fragment key={f.num}>
-            <ListSubheader disableGutters sx={{ lineHeight: 1 }}>
-                <Faction faction={f} />
-            </ListSubheader>
-            { items.get(f).map(u => <ListItem key={u.number}>
-                <Unit unit={u} items skills />
-            </ListItem>) }
-        </React.Fragment>) }
-    </List>
+    return <Box sx={{
+        display: 'flex',
+        gap: 4
+    }}>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexWrap: 'wrap',
+            gap: 1,
+            maxHeight: '100%'
+        }}>
+            { items.filter(x => x.behind).map((f, i) => <React.Fragment key={i}>
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 128,
+                    height: 32,
+                    backgroundColor: 'silver'
+                }}>
+                    {f.size} {f.men.map(x => x.name).join(', ')} ({f.attackLevel})
+                </Box>
+            </React.Fragment>) }
+        </Box>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexWrap: 'wrap',
+            gap: 1,
+            maxHeight: '100%'
+        }}>
+            { items.filter(x => !x.behind).map((f, i) => <React.Fragment key={i}>
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 128,
+                    height: 32,
+                    backgroundColor: 'silver'
+                }}>
+                    {f.size} {f.men.map(x => x.name).join(', ')} ({f.attackLevel})
+                </Box>
+            </React.Fragment>) }
+        </Box>
+
+    </Box>
 }
 
 interface BattleViewProps {
@@ -275,24 +277,22 @@ interface BattleViewProps {
 }
 
 function BattleView({ battle, open, onClose }: BattleViewProps) {
-    const attackers = React.useMemo(() => battle ? groupByFaction(battle.attackers) : null, [ battle ])
-    const defenders = React.useMemo(() => battle ? groupByFaction(battle.defenders) : null, [ battle ])
+    const attackers = React.useMemo(() => battle ? groupByFaction(battle.attacker.units) : null, [ battle ])
+    const defenders = React.useMemo(() => battle ? groupByFaction(battle.defender.units) : null, [ battle ])
 
     if (!battle) return null
 
     return <Dialog maxWidth='md' fullWidth scroll='paper' open={open} onClose={onClose}>
         <Box sx={{ py: 3, px: 6, position: 'relative' }}>
             <Stack direction='row' spacing={2} alignItems='center'>
-                <Unit unit={battle.attacker} />
+                <Unit unit={battle.attacker.leader} />
                 <Typography>attacks</Typography>
-                <Unit unit={battle.defender} />
+                <Unit unit={battle.defender.leader} />
                 <Typography>in {battle.region.toString()}</Typography>
             </Stack>
             <Box sx={{
                 position: 'absolute',
-                top: 0,
-                right: 0,
-                bottom: 0,
+                top: 0, right: 0, bottom: 0,
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -305,17 +305,16 @@ function BattleView({ battle, open, onClose }: BattleViewProps) {
         </Box>
         <DialogContent dividers>
             <Grid container>
-                <Grid item xs={6}>
+                <Grid item xs={6} sx={{ maxHeight: '33vh' }}>
                     <Typography variant='h6'>Attackers</Typography>
-                    <Participants items={attackers} />
+                    <Participants items={battle.attacker.squads} />
                 </Grid>
 
-                <Grid item xs={6}>
+                <Grid item xs={6} sx={{ maxHeight: '33vh' }}>
                     <Typography variant='h6'>Defenders</Typography>
-                    <Participants items={defenders} />
+                    <Participants items={battle.defender.squads} />
                 </Grid>
             </Grid>
-
 
             {battle.rounds.map((x, i) => <React.Fragment key={i}>
                 <Typography variant='h6'>Round {i + 1}</Typography>
@@ -325,12 +324,12 @@ function BattleView({ battle, open, onClose }: BattleViewProps) {
             <Grid container>
                 <Grid item xs={6}>
                     <Typography variant='h6'>Attacker Casulaties</Typography>
-                    <ArmyCasulaties casulaties={battle.attackerCasualties} />
+                    <ArmyCasulaties casulaties={battle.attacker.casualties} />
                 </Grid>
 
                 <Grid item xs={6}>
                     <Typography variant='h6'>Defender Casulaties</Typography>
-                    <ArmyCasulaties casulaties={battle.defenderCasualties} />
+                    <ArmyCasulaties casulaties={battle.defender.casualties} />
                 </Grid>
             </Grid>
 

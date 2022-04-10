@@ -7,6 +7,9 @@ export class ItemInfo implements UniqueItem {
 
     readonly traits: TraitsMap = { }
 
+    /** Internal 'cost' of the item, higher cost means more important, or just better item. */
+    value: number
+
     weight: number
     name: [string, string]
     description: string

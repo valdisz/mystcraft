@@ -1,7 +1,7 @@
 import { DisplayObject, IPointData, Point } from 'pixi.js'
+import { arrayEquals } from '../lib'
 import { LayerName, Layers } from './layers'
 import { Resources } from './resources'
-import { arrayEquals } from './utils'
 
 export abstract class Feature<T = any> {
     constructor(protected readonly layer: LayerName) {

@@ -57,3 +57,15 @@ export async function copy(text: string) {
 
     const result = await navigator.clipboard.writeText(text)
 }
+
+export function arrayEquals(a: any[], b: any[]) {
+    return a.length === b.length && a.every((v, i) => v === b[i])
+}
+
+export function numhash(value: number) {
+    value = ((value >> 16) ^ value) * 0x45d9f3b
+    value = ((value >> 16) ^ value) * 0x45d9f3b
+    value = (value >> 16) ^ value
+
+    return value
+}

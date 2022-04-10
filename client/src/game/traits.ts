@@ -19,6 +19,8 @@ export interface TraitsMap {
     noTransport?: NoTransportTrait
     freeMovingItem?: FreeMovingItemTrait
     advanced?: AdvancedTrait
+    weapon?: WeaponTrait
+    needsSkill?: NeedsSkillTrait
 }
 
 export class ConsumeTrait extends Trait {
@@ -117,4 +119,24 @@ export class FreeMovingItemTrait extends Trait {
 
 export class AdvancedTrait extends Trait {
     readonly type: Traits = 'advanced'
+}
+
+export class WeaponTrait extends Trait {
+    readonly type: Traits = 'weapon'
+
+    constructor(
+        public readonly attackType: 'ranged' | 'slashing' | 'riding'
+    ) {
+        super()
+    }
+}
+
+export class NeedsSkillTrait extends Trait {
+    readonly type: Traits = 'needsSkill'
+
+    constructor(
+        public readonly skill: SkillInfo
+    ) {
+        super()
+    }
 }

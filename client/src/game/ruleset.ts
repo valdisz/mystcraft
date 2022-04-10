@@ -5,6 +5,11 @@ import {
     FreeMovingItemTrait, NoGiveTrait, NoTransportTrait, ProductionBonus
 } from './internal'
 
+interface ItemInfoData {
+    item: ItemInfo,
+    data: ItemData
+}
+
 export class Ruleset {
     readonly skills: ItemMap<Readonly<SkillInfo>> = new ItemMap();
     readonly items: ItemMap<Readonly<ItemInfo>> = new ItemMap();
@@ -117,29 +122,24 @@ export class Ruleset {
     }
 
     private loadItems(items: ItemDataMap) {
-        const itemMap: {
-            [ code: string ]: {
-                item: ItemInfo,
-                data: ItemData
-            }
-        } = { };
+        const itemMap = new Map<string, ItemInfoData>()
 
         function populateDict() {
             for (const code in items) {
                 const data: ItemData = items[code]
                 const item = new ItemInfo(code, data.category, data.name[0], data.name[1])
+
                 item.description = data.description
                 item.weight = data.weight
+                item.value = data.value ?? 0
 
-                itemMap[code] = ({ item, data })
+                itemMap.set(code, { item, data })
             }
         }
 
         populateDict()
 
-        for (const code in itemMap) {
-            const { item, data } = itemMap[code]
-
+        for (const [ code, { item, data }] of itemMap) {
             if (data.traits) {
                 if (data.traits.advanced !== undefined) item.traits.advanced = new AdvancedTrait()
                 if (data.traits.noGive !== undefined) item.traits.noGive = new NoGiveTrait()
@@ -364,6 +364,7 @@ interface TraitsData {
 interface ItemData {
     name: [ string, string ]
     weight: number
+    value?: number
     category: ItemCategory
     traits: TraitsData
     description: string

@@ -2554,6 +2554,11 @@
   resolved "https://registry.yarnpkg.com/@pixi/filter-color-matrix/-/filter-color-matrix-6.2.2.tgz#9eb4c55ae37b2d6e221ef7bb1781c58fb33890ad"
   integrity sha512-fQWbtKFWV29jKkq4d6TknEfQ5sF5OxcbJeZo0HJmgoV3FLZ0t21XE991CFI/TqDBo8U3wzUPZVbXxiFoDKmJ8w==
 
+"@pixi/filter-color-overlay@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@pixi/filter-color-overlay/-/filter-color-overlay-4.1.5.tgz#db9bc841228c41f469267d09e566006496dfe3f1"
+  integrity sha512-hT29sEBkcEzRdNFKlzHvzOJ0nJh2XKuuyiQkgr9IwA6x6GZ5UCX5ybJl7cfr/NKpujvxGIXknQNdPU7MWonJOQ==
+
 "@pixi/filter-displacement@6.2.2":
   version "6.2.2"
   resolved "https://registry.yarnpkg.com/@pixi/filter-displacement/-/filter-displacement-6.2.2.tgz#6eaa737b1c055c5daff77e384f6d2f728f2a93f3"

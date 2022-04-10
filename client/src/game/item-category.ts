@@ -5,6 +5,7 @@ export type ItemCategory =
     | 'monster'
     | 'weapon'
     | 'armor'
+    | 'shield'
     | 'special'
     | 'money'
     | 'ship'
