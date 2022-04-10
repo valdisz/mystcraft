@@ -24,13 +24,25 @@ namespace advisor
         public async Task ReconcileRports() {
             logger.LogInformation($"Looking for unparsed reports");
 
-            var reportsWithoutJson = await db.Reports
+            var unparsed = (await db.Reports
                 .Include(x => x.Turn)
-                .ThenInclude(x => x.Player)
                 .Where(x => x.Json == null)
-                .ToListAsync();
+                .ToListAsync())
+                .GroupBy(x => new { x.PlayerId, x.TurnNumber })
+                .Select(kv => new { kv.Key.PlayerId, kv.Key.TurnNumber, Reports = kv.ToList() })
+                .OrderBy(x => x.PlayerId)
+                    .ThenBy(x => x.TurnNumber)
+                .ToList();
 
-            logger.LogInformation($"Found {reportsWithoutJson.Count} unparsed reports");
+            logger.LogInformation($"Found {unparsed.Count()} Turns with unparsed reports");
+
+            foreach (var g in unparsed) {
+                var playerId = g.PlayerId;
+                var turnNumber = g.TurnNumber;
+                var reports = g.Reports;
+
+                
+            }
         }
     }
 }
