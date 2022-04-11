@@ -261,10 +261,10 @@ export class HexMap2 implements MapState {
             for (const link of path) {
                 positions.push(this.toPixel(link.source.coords));
             }
-            const drawPath = new Path(positions, path, this.layers, this.resources, this);
+            const drawPath = new Path(path, this.layers, this.resources, this);
             this.paths.push(drawPath);
 
-            drawPath.update();
+            drawPath.update(positions);
         }
 
         this.layers.sort();
@@ -329,13 +329,12 @@ export class HexMap2 implements MapState {
     updatePath() {
         for (const path of this.paths) {
             const positions = [];
-            for (const index in path) {
-                const link = path[index];
+            for (const index in path.path) {
+                const link = path.path[index];
 
                 positions[index] = this.toPixel(link.source.coords);
             }
-            path.setPositions(positions);
-            path.update()
+            path.update(positions)
         }
     }
 

@@ -9,22 +9,27 @@ import {corners} from './tile';
 export class Path {
 
     private _graphics: DisplayObject[] = [];
+    private _positions: IPointData[] = [];
 
-    public constructor(private positions: IPointData[], public readonly path: Link[], private layers: Layers, private res: Resources, readonly map: MapState) {
+    public constructor(public readonly path: Link[], private layers: Layers, private res: Resources, readonly map: MapState) {
     }
 
-    setPositions(positions: IPointData[]) {
-        this.positions = positions;
-    }
-
-    update() {
+    update(positions: IPointData[]) {
         const cornerCoords = corners(this.map.zoom);
 
         for (const index in this.path) {
             const link = this.path[index];
 
+            if (this._positions.length && this._positions[index] === positions[index]) {
+                continue;
+            }
+
+            if (this._graphics[index]) {
+                this._graphics[index].destroy();
+            }
+
             const asset = this.res.sprite(`sprites/map-arrow-${link.direction.toLowerCase()}`);
-            asset.position.copyFrom(this.positions[index]);
+            asset.position.copyFrom(positions[index]);
             const scale = 1 / this.map.zoom;
             asset.scale.set(scale, scale);
 
@@ -47,8 +52,10 @@ export class Path {
             }
 
             this.layers.add('path', asset);
-            this._graphics.push(asset);
+            this._graphics[index] = asset;
         }
+
+        this._positions = positions;
     }
 
     destroy() {
@@ -56,6 +63,8 @@ export class Path {
             for (const graphic of this._graphics) {
                 graphic.destroy();
             }
+
+            this._graphics = [];
         }
     }
 }
