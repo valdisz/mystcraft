@@ -67,7 +67,7 @@ export class Links implements Iterable<Link> {
         return items
     }
 
-    get(direction: Direction) {
+    get(direction: Direction): Link {
         return this.links.get(direction)
     }
 
@@ -99,5 +99,16 @@ export function oppositeDirection(dir: Direction) {
         case Direction.South: return Direction.North
         case Direction.Southwest: return Direction.Northeast
         case Direction.Southeast: return Direction.Northwest
+    }
+}
+
+export function fromShorthandToDirection(shorthand: string) {
+    switch (shorthand) {
+        case 's': return Direction.South
+        case 'se': return Direction.Southeast
+        case 'sw': return Direction.Southwest
+        case 'n': return Direction.North
+        case 'ne': return Direction.Northeast
+        case 'nw': return Direction.Northwest
     }
 }

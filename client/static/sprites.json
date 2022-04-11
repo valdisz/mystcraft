@@ -2608,10 +2608,130 @@
                 "h": 84
             }
         },
-        "map-bg-2": {
+        "map-arrow-north": {
             "frame": {
                 "x": 1356,
                 "y": 1236,
+                "w": 19,
+                "h": 30
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 19,
+                "h": 30
+            },
+            "sourceSize": {
+                "w": 19,
+                "h": 30
+            }
+        },
+        "map-arrow-south": {
+            "frame": {
+                "x": 1383,
+                "y": 1236,
+                "w": 19,
+                "h": 30
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 19,
+                "h": 30
+            },
+            "sourceSize": {
+                "w": 19,
+                "h": 30
+            }
+        },
+        "map-arrow-northeast": {
+            "frame": {
+                "x": 1410,
+                "y": 1236,
+                "w": 25,
+                "h": 25
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 25,
+                "h": 25
+            },
+            "sourceSize": {
+                "w": 25,
+                "h": 25
+            }
+        },
+        "map-arrow-northwest": {
+            "frame": {
+                "x": 316,
+                "y": 1300,
+                "w": 25,
+                "h": 25
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 25,
+                "h": 25
+            },
+            "sourceSize": {
+                "w": 25,
+                "h": 25
+            }
+        },
+        "map-arrow-southeast": {
+            "frame": {
+                "x": 349,
+                "y": 1300,
+                "w": 25,
+                "h": 25
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 25,
+                "h": 25
+            },
+            "sourceSize": {
+                "w": 25,
+                "h": 25
+            }
+        },
+        "map-arrow-southwest": {
+            "frame": {
+                "x": 382,
+                "y": 1300,
+                "w": 25,
+                "h": 25
+            },
+            "rotated": false,
+            "trimmed": false,
+            "spriteSourceSize": {
+                "x": 0,
+                "y": 0,
+                "w": 25,
+                "h": 25
+            },
+            "sourceSize": {
+                "w": 25,
+                "h": 25
+            }
+        },
+        "map-bg-2": {
+            "frame": {
+                "x": 415,
+                "y": 1300,
                 "w": 12,
                 "h": 24
             },
@@ -2630,8 +2750,8 @@
         },
         "map-city": {
             "frame": {
-                "x": 1376,
-                "y": 1236,
+                "x": 435,
+                "y": 1300,
                 "w": 19,
                 "h": 19
             },
@@ -2650,8 +2770,8 @@
         },
         "map-town": {
             "frame": {
-                "x": 1403,
-                "y": 1236,
+                "x": 462,
+                "y": 1300,
                 "w": 19,
                 "h": 19
             },
@@ -2670,8 +2790,8 @@
         },
         "map-village": {
             "frame": {
-                "x": 1430,
-                "y": 1236,
+                "x": 489,
+                "y": 1300,
                 "w": 19,
                 "h": 19
             },
@@ -2691,7 +2811,7 @@
         "map-lair": {
             "frame": {
                 "x": 1356,
-                "y": 1268,
+                "y": 1274,
                 "w": 16,
                 "h": 16
             },
@@ -2711,7 +2831,7 @@
         "map-bg-1": {
             "frame": {
                 "x": 1380,
-                "y": 1268,
+                "y": 1274,
                 "w": 12,
                 "h": 12
             },
@@ -2731,7 +2851,7 @@
         "map-building-mask": {
             "frame": {
                 "x": 1400,
-                "y": 1268,
+                "y": 1274,
                 "w": 10,
                 "h": 10
             },
@@ -2751,7 +2871,7 @@
         "map-building": {
             "frame": {
                 "x": 1418,
-                "y": 1268,
+                "y": 1274,
                 "w": 10,
                 "h": 10
             },
@@ -2771,7 +2891,7 @@
         "map-flag-mask": {
             "frame": {
                 "x": 1436,
-                "y": 1268,
+                "y": 1274,
                 "w": 10,
                 "h": 10
             },
@@ -2790,7 +2910,7 @@
         },
         "map-flag": {
             "frame": {
-                "x": 316,
+                "x": 516,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2810,7 +2930,7 @@
         },
         "map-flying-ship-mask": {
             "frame": {
-                "x": 334,
+                "x": 534,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2830,7 +2950,7 @@
         },
         "map-flying-ship": {
             "frame": {
-                "x": 352,
+                "x": 552,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2850,7 +2970,7 @@
         },
         "map-fort-mask": {
             "frame": {
-                "x": 370,
+                "x": 570,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2870,7 +2990,7 @@
         },
         "map-gate": {
             "frame": {
-                "x": 388,
+                "x": 588,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2890,7 +3010,7 @@
         },
         "map-guard-mask": {
             "frame": {
-                "x": 406,
+                "x": 606,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2910,7 +3030,7 @@
         },
         "map-guard": {
             "frame": {
-                "x": 424,
+                "x": 624,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2930,7 +3050,7 @@
         },
         "map-shaft-mask": {
             "frame": {
-                "x": 442,
+                "x": 642,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2950,7 +3070,7 @@
         },
         "map-shaft": {
             "frame": {
-                "x": 460,
+                "x": 660,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2970,7 +3090,7 @@
         },
         "map-ship-maks": {
             "frame": {
-                "x": 478,
+                "x": 678,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -2990,7 +3110,7 @@
         },
         "map-ship": {
             "frame": {
-                "x": 496,
+                "x": 696,
                 "y": 1300,
                 "w": 10,
                 "h": 10
@@ -3010,8 +3130,8 @@
         },
         "map-fort": {
             "frame": {
-                "x": 514,
-                "y": 1300,
+                "x": 1443,
+                "y": 1236,
                 "w": 9,
                 "h": 9
             },

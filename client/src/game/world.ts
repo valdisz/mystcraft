@@ -1,4 +1,4 @@
-import { RegionFragment, Stance, StructureFragment, UnitFragment, BattleFragment } from '../schema'
+import { RegionFragment, Stance, StructureFragment, UnitFragment, BattleFragment, Direction } from '../schema'
 import {
     Ruleset, Region, Level, WorldInfo, Provinces, Structure, MovementPathfinder, ICoords, oppositeDirection, Factions, Unit,
     WorldLevel, Trade, Item, TradeRoute, Battle, Faction
@@ -78,11 +78,58 @@ export class World {
     private linkCoveredRegions() {
         for (const level of this.levels) {
             for (const reg of level) {
-                if (!reg || !reg.covered) {
+                if (!reg || reg.explored) {
                     continue
                 }
 
-                //
+                let neighborsNeeded = [
+                    {direction: Direction.North, x: 0, y: -2},
+                    {direction: Direction.Northwest, x: -1, y: -1},
+                    {direction: Direction.Northeast, x: 1, y: -1},
+
+                    {direction: Direction.South, x: 0, y: 2},
+                    {direction: Direction.Southwest, x: -0, y: 1},
+                    {direction: Direction.Southeast, x: 1, y: 1},
+                ]
+
+                for (const neighbor of neighborsNeeded) {
+                    if (reg.neighbors.has(neighbor.direction)) {
+                        continue
+                    }
+
+                    let neighborX = reg.coords.x + neighbor.x;
+                    let neighborY = reg.coords.y + neighbor.y;
+
+                    if ((neighborX + neighborY) % 2) {
+                        continue
+                    }
+
+                    if (neighborX > level.width - 1) {
+                        neighborX = 0;
+                    }
+
+                    if (neighborX < 0) {
+                        neighborX = level.width - 1;
+                    }
+
+                    if (neighborY < 0) {
+                        continue;
+                    }
+
+                    if (neighborY > level.height - 1) {
+                        continue;
+                    }
+
+                    const target = this.getRegion(neighborX, neighborY, level.index);
+
+                    if (!target) {
+                        console.error(`Can't find connecting region ${neighborX}, ${neighborY} for ${reg.coords}`);
+                        continue;
+                    }
+
+                    reg.neighbors.set(reg, neighbor.direction, target)
+                    target.neighbors.set(target, oppositeDirection(neighbor.direction), reg);
+                }
             }
         }
     }
@@ -130,7 +177,7 @@ export class World {
         this.linkRegions(regions)
         this.linkProvinces()
         this.addCoveredRegions()
-        // this.linkCoveredRegions()
+        this.linkCoveredRegions()
     }
 
     addUnits(units: UnitFragment[]) {
@@ -159,8 +206,8 @@ export class World {
     }
 
     addUnit(unit: UnitFragment) {
-        const u = Unit.from(unit, this.factions, this.ruleset)
         const region = this.getRegion(unit)
+        const u = Unit.from(unit, region, this.factions, this.ruleset)
         const structure = unit.structureNumber ? region.structures.find(x => x.num === unit.structureNumber) : null
 
         region.addUnit(u, structure)

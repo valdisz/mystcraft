@@ -1,8 +1,8 @@
 import { UnitFragment } from '../schema'
 import {
-    ItemInfo, ItemMap, Ruleset, Capacity, Faction, Flag, Skill, SkillInfo, Event, Inventory, Link, Region, Structure, MoveType, Factions
+    ItemInfo, ItemMap, Ruleset, Capacity, Faction, Flag, Skill, SkillInfo, Event, Inventory, Link, Region, Structure, MoveType, Factions, fromShorthandToDirection
 } from './internal'
-import { OrderParser, ORDER_PARSER, UnitOrder, Order } from './orders'
+import { OrderParser, ORDER_PARSER, UnitOrder, OrderMove } from './orders'
 
 export class Unit {
     constructor(
@@ -38,7 +38,7 @@ export class Unit {
     orders: UnitOrder[] = []
 
     // order simulation
-    path: Link[]
+    path: Link[] = []
 
     setOrders(orders: string, parser: OrderParser = null) {
         this.ordersSrc = orders
@@ -48,10 +48,43 @@ export class Unit {
     parseOrders(parser: OrderParser = null) {
         if (this.ordersSrc) {
             this.orders = (parser ?? ORDER_PARSER).parse(this.ordersSrc)
+            this.updatePath();
         }
         else {
             this.orders = []
         }
+    }
+
+    updatePath() {
+        const path = [];
+
+        for (const order of this.orders) {
+            if (order instanceof OrderMove) {
+                let currentRegion = this.region;
+
+                for (const moveItem of order.path) {
+                    if (typeof moveItem === 'number') {
+                        continue;
+                    }
+
+                    if (moveItem === 'in') {
+                        break;
+                    }
+
+                    const direction = fromShorthandToDirection(moveItem.toLowerCase());
+                    const targetLink = currentRegion.neighbors.get(direction);
+                    if (targetLink) {
+                        path.push(targetLink);
+                        currentRegion = targetLink.target;
+                    } else {
+                        console.error(`cant find link from ${currentRegion.toString()} to ${direction}`);
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.path = path;
     }
 
     get money() {
@@ -119,7 +152,7 @@ export class Unit {
         return this.weight > 0 && this.moveType === null
     }
 
-    static from(src: UnitFragment, factions: Factions, ruleset: Ruleset) {
+    static from(src: UnitFragment, region: Region, factions: Factions, ruleset: Ruleset) {
         const unit = new Unit(src.id, src.number, src.name, ruleset)
         unit.seq = src.sequence
 
@@ -169,6 +202,7 @@ export class Unit {
             ? src.weight
             : unit.inventory.items.toArray().map(x => x.weight).reduce((w, v) => w + v)
 
+        unit.region = region;
         unit.setOrders(src.orders)
 
         if (src.capacity) {
