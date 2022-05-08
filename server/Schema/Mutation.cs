@@ -142,5 +142,10 @@ namespace advisor {
         public Task<StudyPlanResult> StudyPlanTeach(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, int[] units) {
             return mediator.Send(new StudyPlanTeach(currentUserId, unitId, units));
         }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<PlayerQuitResult> PlayerQuit(IMediator mediator, [ID("Player")] long playerId) {
+            return mediator.Send(new PlayerQuit(playerId));
+        }
     }
 }
