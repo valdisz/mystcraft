@@ -108,6 +108,6 @@ spritesheet(sprites, {
 function (err) {
     if (err) throw err;
 
-    const textureManifest = JSON.parse(fs.readFileSync(`static/sprites.json`))
-    fs.writeFileSync(`static/sprites.json`, JSON.stringify({ ...textureManifest, tiles: manifest }, null, 4), { encoding: 'utf-8' })
+    const textureManifest = JSON.parse(fs.readFileSync(`public/sprites.json`))
+    fs.writeFileSync(`public/sprites.json`, JSON.stringify({ ...textureManifest, tiles: manifest }, null, 4), { encoding: 'utf-8' })
 })
