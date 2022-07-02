@@ -1,4 +1,5 @@
 namespace advisor {
+    using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Hosting;
@@ -14,16 +15,21 @@ namespace advisor {
         private readonly IWebHostEnvironment hostingEnv;
 
         private readonly Regex filePattern = new Regex(@"\.\w+$");
+        private readonly PathString[] apiSegments = new PathString[] {
+            "/graphql",
+            "/api",
+            "/account",
+            "/hangfire"
+        };
 
         public Task Invoke(HttpContext context) {
             var method = context.Request.Method.ToLowerInvariant();
             if (method != "get" && method != "head") return next(context);
 
             var path = context.Request.Path;
-            if (path.StartsWithSegments("/graphql")) return next(context);
-            if (path.StartsWithSegments("/api")) return next(context);
-            if (path.StartsWithSegments("/account")) return next(context);
-            if (path.StartsWithSegments("/hangfire")) return next(context);
+            if (apiSegments.Any(x => path.StartsWithSegments(x))) {
+                return next(context);
+            }
 
             if (!path.HasValue || !IsFile(path)) {
                 context.Request.Path = new PathString("/index.html");
@@ -35,9 +41,7 @@ namespace advisor {
 
         public bool IsFile(string path) {
             var lastSlash = path.LastIndexOf("/");
-            var match = lastSlash >= 0
-                ? filePattern.IsMatch(path.Substring(lastSlash))
-                : filePattern.IsMatch(path);
+            var match = filePattern.IsMatch(lastSlash >= 0 ? path.Substring(lastSlash) : path);
 
             return match;
         }

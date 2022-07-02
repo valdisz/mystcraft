@@ -21,25 +21,13 @@ import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
 import CloseIcon from '@mui/icons-material/Close'
 
-const GameContainer = styled(Box)`
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-`
-
-const GameInfo = styled('div')`
-    margin-left: 1rem;
-`
-
-interface GameMapProps {
+export interface GameMapProps {
     selectedRegion: ICoords | null
     onRegionSelected: (reg: Region) => void
     paths: Paths
 }
 
-function GameMapComponent({ selectedRegion, onRegionSelected, paths }: GameMapProps) {
+export function GameMapComponent({ selectedRegion, onRegionSelected, paths }: GameMapProps) {
     const { game } = useStore()
     const context = useMapContext()
 
@@ -660,25 +648,34 @@ export const MapTab = observer(() => {
     </Box>
 })
 
+const GameInfoItem = styled(Box)({
+    mr: 1
+})
+
 const GameComponent = observer(() => {
     const { game } = useStore()
     const { world } = game
     const { player } = world.factions
 
     return (
-        <GameContainer>
+        <Box sx={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+        }}>
             <AppBar position='static' color='primary'>
                 <Toolbar>
                     <IconButton component={Link} to='/' edge='start' color='inherit' size="large">
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant='h6'>{ game.name }</Typography>
-                    <GameInfo>
+                    <GameInfoItem>
                         <Typography variant='subtitle2'>{ player.name } ({ player.num })</Typography>
-                    </GameInfo>
-                    <GameInfo>
+                    </GameInfoItem>
+                    <GameInfoItem>
                         <Typography variant='subtitle2'>Turn: { world.turnNumber }</Typography>
-                    </GameInfo>
+                    </GameInfoItem>
                     <Button color='inherit' variant='outlined' component={Link as any} to={``}>Map</Button>
                     <Button color='inherit' variant='outlined' component={Link as any} to={`stats`}>Statistics</Button>
                     { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} to={`university`}>University</Button> }
@@ -687,16 +684,16 @@ const GameComponent = observer(() => {
                 </Toolbar>
             </AppBar>
             <Outlet />
-        </GameContainer>
+        </Box>
     );
 })
 
-interface ProgressItemProps {
+export interface ProgressItemProps {
     text: string
     progress: number
 }
 
-function ProgressItem({ text, progress }: ProgressItemProps) {
+export function ProgressItem({ text, progress }: ProgressItemProps) {
     return <Box sx={{
         display: 'flex',
         alignItems: 'center',
@@ -713,11 +710,11 @@ function ProgressItem({ text, progress }: ProgressItemProps) {
     </Box>
 }
 
-interface LoadingProps {
+export interface LoadingProps {
     loading: GameLoadingStore
 }
 
-const Loading = observer(({ loading }: LoadingProps) => {
+export const Loading = observer(({ loading }: LoadingProps) => {
 
     return <Container sx={{ height: '100%' }}>
         <Grid sx={{ height: '100%' }} container justifyContent='center' alignItems='center'>
@@ -736,17 +733,17 @@ const Loading = observer(({ loading }: LoadingProps) => {
     </Container>
 })
 
-const GameInner = observer(() => {
+const GameObserver = observer(() => {
     const [ loading ] = React.useState(() => new GameLoadingStore())
     const { gameId } = useParams()
     const { game } = useStore()
-    const mapContext = useMapContext()
+    const map = useMapContext()
 
     React.useEffect(() => {
         game.load(gameId, loading)
             .then(() => {
                 loading.begin('Map graphics')
-                return mapContext.load()
+                return map.load()
             })
             .then(() => loading.end())
     }, [ gameId ])
@@ -758,6 +755,6 @@ const GameInner = observer(() => {
 
 export function GamePage() {
     return <MapProvider>
-        <GameInner />
+        <GameObserver />
     </MapProvider>
 }
