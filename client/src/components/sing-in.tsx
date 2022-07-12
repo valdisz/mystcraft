@@ -174,9 +174,11 @@ function SignIn({ onSuccess }: SignInProps) {
                         { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
                     </Button>
 
-                    <Box sx={{ height: spacing(2) }} />
+                    { store.mode === 'sign-in' && <>
+                        <Box sx={{ height: spacing(2) }} />
 
-                    <Button component={'a'} fullWidth variant='contained' color='primary' href='/account/login/discord'>Use DISCORD</Button>
+                        <Button component={'a'} fullWidth variant='contained' color='primary' href='/account/login/discord'>Use DISCORD</Button>
+                    </> }
 
                     <Box sx={{ height: spacing(4) }} />
 
