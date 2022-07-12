@@ -19,7 +19,8 @@ namespace advisor {
             "/graphql",
             "/api",
             "/account",
-            "/hangfire"
+            "/hangfire",
+            "/system",
         };
 
         public Task Invoke(HttpContext context) {

@@ -24,11 +24,15 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
 
 EXPOSE 5000
-EXPOSE 5001
+
+HEALTHCHECK --start-period=1m --interval=1m --timeout=30s CMD curl -f http://localhost:5000/system/ping || exit 1
 
 ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
+ENV ADVISOR_ConnectionStrings__hangfire="/usr/var/advisor/advisor-hangfire.db"
 ENV ADVISOR_DataProtection__Path="/usr/var/advisor"
+ENV ADVISOR_SEED__EMAIL="gm@advisor"
+ENV ADVISOR_SEED__PASSWORD="1234"
 
 RUN groupadd --gid 1001 app \
     && useradd --gid 1001 --create-home --home /app --shell /bin/sh --uid 1001 app \

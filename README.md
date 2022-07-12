@@ -45,7 +45,7 @@ backend.
 To run for production the best is to use Docker. For this sake project includes `Dockerfile` that you must build in the project root folder:
 
 ```
-docker build .
+docker build -t advisor .
 ```
 
 ## How to create new game
