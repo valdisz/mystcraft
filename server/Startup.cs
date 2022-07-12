@@ -254,7 +254,6 @@ namespace advisor {
 
             if (Env.IsProduction()) {
                 app.UseHsts();
-                app.UseHttpsRedirection();
             }
 
             app
