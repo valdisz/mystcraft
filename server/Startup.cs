@@ -51,10 +51,6 @@ namespace advisor {
 
             services.Configure<DiscordOptions>(discord);
 
-            services.Configure<ForwardedHeadersOptions>(options => {
-                options.ForwardedHeaders = ForwardedHeaders.All;
-            });
-
             services.AddResponseCompression(opt => {
                 opt.EnableForHttps = true;
             });
@@ -244,7 +240,9 @@ namespace advisor {
         }
 
         public void Configure(IApplicationBuilder app) {
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders(new ForwardedHeadersOptions {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
 
             app.UseResponseCompression();
 
