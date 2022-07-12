@@ -25,7 +25,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0
 
 EXPOSE 5000
 
-HEALTHCHECK --start-period=10s --interval=1m --timeout=30s CMD curl -f http://localhost:5000/system/ping || exit 1
+RUN apt-get update && apt-get --yes install curl
+HEALTHCHECK --start-period=10s --interval=5s --timeout=30s CMD curl --silent --fail http://localhost:5000/system/ping || exit 1
 
 ENV ASPNETCORE_ENVIRONMENT="Production"
 ENV ADVISOR_ConnectionStrings__database="Data Source=/usr/var/advisor/advisor.db"
