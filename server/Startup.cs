@@ -1,5 +1,7 @@
 namespace advisor {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using advisor.Authorization;
     using advisor.Features;
@@ -53,7 +55,45 @@ namespace advisor {
             var proxy = Configuration.GetSection("Proxy");
 
             services.Configure<DiscordOptions>(discord);
-            services.Configure<ForwardedHeadersOptions>(proxy);
+            services.Configure<ForwardedHeadersOptions>(opt => {
+                opt.ForwardedHeaders = proxy.GetValue<ForwardedHeaders>("ForwardedHeaders");
+
+                opt.AllowedHosts.Clear();
+                var allowedHosts = proxy.GetSection("AllowedHosts").Get<string[]>();
+                foreach (var h in (allowedHosts ?? Enumerable.Empty<string>())) {
+                    opt.AllowedHosts.Add(h);
+                }
+
+                IPAddress resolveProxy(string ipOrDomain) {
+                    if (IPAddress.TryParse(ipOrDomain, out var ip)) {
+                        return ip;
+                    }
+
+                    var rec = Dns.GetHostEntry(ipOrDomain);
+                    return rec.AddressList[0];
+                }
+
+                opt.KnownProxies.Clear();
+                var knownProxies = proxy.GetSection("KnownProxies").Get<string[]>();
+                foreach (var ip in (knownProxies ?? Enumerable.Empty<string>()).Select(resolveProxy)) {
+                    opt.KnownProxies.Add(ip);
+                }
+
+                IPNetwork parseNetwork(string s) {
+                    var parts = s.Split("/");
+
+                    var ip = IPAddress.Parse(parts[0]);
+                    var len = int.Parse(parts[1]);
+
+                    return new IPNetwork(ip, len);
+                }
+
+                opt.KnownNetworks.Clear();
+                var knownNetworks = proxy.GetSection("KnownNetworks").Get<string[]>();
+                foreach (var network in (knownNetworks ?? Enumerable.Empty<string>()).Select(parseNetwork)) {
+                    opt.KnownNetworks.Add(network);
+                }
+            });
 
             services.AddResponseCompression(opt => {
                 opt.EnableForHttps = true;
