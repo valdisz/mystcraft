@@ -52,7 +52,7 @@ namespace advisor {
             services.Configure<DiscordOptions>(discord);
 
             services.Configure<ForwardedHeadersOptions>(options => {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+                options.ForwardedHeaders = ForwardedHeaders.All;
             });
 
             services.AddResponseCompression(opt => {
@@ -244,6 +244,10 @@ namespace advisor {
         }
 
         public void Configure(IApplicationBuilder app) {
+            app.UseForwardedHeaders(new ForwardedHeadersOptions{
+                ForwardedHeaders = ForwardedHeaders.All
+            });
+
             app.UseResponseCompression();
 
             if (!Env.IsProduction()) {
@@ -256,7 +260,6 @@ namespace advisor {
             // }
 
             app
-                .UseForwardedHeaders()
                 .UseMiddleware<DefaultFilesMiddleware>()
                 .UseStaticFiles()
                 .UseRouting()
