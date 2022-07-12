@@ -244,9 +244,7 @@ namespace advisor {
         }
 
         public void Configure(IApplicationBuilder app) {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions{
-                ForwardedHeaders = ForwardedHeaders.All
-            });
+            app.UseForwardedHeaders();
 
             app.UseResponseCompression();
 

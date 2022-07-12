@@ -111,7 +111,7 @@ namespace advisor {
             }
 
             var auth = new AuthenticationProperties {
-                RedirectUri = Url.Action("ExternalCallback", "Account", new { provider })// $"/accounts/external/{provider}"
+                RedirectUri = Url.Action("ExternalCallback", "Account", new { provider }, Request.Scheme)// $"/accounts/external/{provider}"
             };
 
             return Challenge(auth, DiscordDefaults.AuthenticationScheme);
