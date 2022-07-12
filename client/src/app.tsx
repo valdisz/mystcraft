@@ -1,130 +1,21 @@
 import * as React from 'react'
+import { Routes, Route } from 'react-router-dom'
 import { StoreProvider } from './store'
-import { AppRoutes } from './routes'
-import { CssBaseline, GlobalStyles } from '@mui/material'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-
-const globalStyles = <GlobalStyles styles={`
-    html, body, #app-host {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-`} />
-
-const heading = {
-    fontFamily: 'Almendra, serif'
-}
-
-const theme = createTheme({
-    palette: {
-        // mode: 'dark'
-    },
-    typography: {
-        fontFamily: 'Fira Code, monospace',
-        fontSize: 11,
-        h1: heading,
-        h2: heading,
-        h3: heading,
-        h4: heading,
-    },
-    shape: {
-        borderRadius: 2
-    },
-    spacing: 4,
-    components: {
-        MuiList: {
-            defaultProps: {
-                dense: true,
-            }
-        },
-        MuiMenuItem: {
-            defaultProps: {
-                dense: true,
-            }
-        },
-        MuiTable: {
-            defaultProps: {
-                size: 'small',
-                stickyHeader: true
-            }
-        },
-        MuiButton: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiButtonGroup: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiCheckbox: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiFab: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiFormControl: {
-            defaultProps: {
-                margin: 'dense',
-                size: 'small',
-            }
-        },
-        MuiFormHelperText: {
-            defaultProps: {
-                margin: 'dense',
-            }
-        },
-        MuiIconButton: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiInputBase: {
-            defaultProps: {
-                margin: 'dense',
-            }
-        },
-        MuiInputLabel: {
-            defaultProps: {
-                margin: 'dense',
-            }
-        },
-        MuiRadio: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiSwitch: {
-            defaultProps: {
-                size: 'small',
-            }
-        },
-        MuiTextField: {
-            defaultProps: {
-                margin: 'dense',
-                size: 'small',
-            }
-        },
-        MuiAppBar: {
-            defaultProps: {
-                color: 'default',
-            }
-        },
-    }
-})
+import * as Pages from './pages'
 
 export function App() {
     return <StoreProvider>
-        <ThemeProvider theme={theme}>
-            <CssBaseline />
-            {globalStyles}
-            <AppRoutes />
-        </ThemeProvider>
+        <Routes>
+            <Route path='/game/:gameId' element={<Pages.GamePage />}>
+                <Route path='stats' element={<Pages.StatsPage />}>
+                    <Route path={`income`} element={<Pages.IncomeTab />} />
+                    <Route path={`production`} element={<Pages.ProductionTab />} />
+                    <Route index element={<Pages.SkillsTab />} />
+                </Route>
+                <Route path='university' element={<Pages.UniversityPage />} />
+                <Route index element={<Pages.MapTab />} />
+            </Route>
+            <Route path='/' element={<Pages.HomePage />} />
+        </Routes>
     </StoreProvider>
 }

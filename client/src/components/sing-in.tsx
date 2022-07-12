@@ -1,30 +1,12 @@
 import React from 'react'
-import { Avatar, Button, TextField, Link, Box, Alert, Typography, Container } from '@mui/material'
-import { LockOutlined } from '@mui/icons-material'
-import { styled } from '@mui/material/styles'
+import { Avatar, Button, TextField, Box, Alert, Typography, Container } from '@mui/material'
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
+import { observer, useLocalStore } from 'mobx-react'
+import { runInAction } from 'mobx'
+import { Copyright } from './copyright'
+import { useTheme } from '@emotion/react'
 
-import { observer, useLocalStore } from 'mobx-react';
-import { runInAction } from 'mobx';
-
-function Copyright() {
-    return (
-        <Typography variant='body2' color='textSecondary' align='center'>
-            { `Copyright ©  ${new Date().getFullYear()} ` }
-            <Link color='inherit' href='https://advisor.azurewebsites.net'>Valdis Zobēla</Link>
-        </Typography>
-    );
-}
-
-const Form = styled('form')`
-    width: 100%;
-    margin-top: ${p => p.theme.spacing(1)};
-`
-
-export interface SignInProps {
-    onSuccess: () => void
-}
-
-export const SignIn = observer(({ onSuccess }: SignInProps) => {
+function useSignInStore(onSuccess: () => void) {
     const store = useLocalStore(() => ({
         message: '',
         severity: 'error' as ('error' | 'success'),
@@ -116,27 +98,47 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
         }
     }))
 
+    return store
+}
+
+export interface SignInProps {
+    onSuccess: () => void
+}
+
+function SignIn({ onSuccess }: SignInProps) {
+    const { spacing } = useTheme()
+    const store = useSignInStore(onSuccess)
+
     return (
-        <Container component='main' maxWidth='xs'>
+        <Container component='main' maxWidth='xs' sx={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'stretch',
+            justifyContent: 'center',
+            gap: spacing(8)
+        }}>
             <Box sx={{
-                marginTop: 8,
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
+                alignItems: 'center'
             }}>
                 <Avatar sx={{
                     margin: 1,
                     backgroundColor: 'secondary.main',
                 }}>
-                    <LockOutlined />
+                    <LockOutlinedIcon />
                 </Avatar>
                 <Typography component='h1' variant='h5'>
                     { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
                 </Typography>
-                <Form noValidate onSubmit={store.proceed}>
+                <Box component='form' noValidate onSubmit={store.proceed} sx={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: spacing(2)
+                }}>
                     <TextField
-                        variant='outlined'
-                        margin='normal'
                         required
                         fullWidth
                         id='email'
@@ -149,9 +151,8 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                         value={store.email}
                         onChange={store.setEmail}
                     />
+
                     <TextField
-                        variant='outlined'
-                        margin='normal'
                         required
                         fullWidth
                         name='password'
@@ -164,35 +165,31 @@ export const SignIn = observer(({ onSuccess }: SignInProps) => {
                         value={store.password}
                         onChange={store.setPassword}
                     />
-                    { store.message && <Box mt={2}>
-                        <Alert severity={ store.severity }>{store.message}</Alert>
-                    </Box> }
 
-                    <Button fullWidth
-                        variant='contained'
-                        color='primary'
-                        type='submit'
-                        sx={{
-                            margin: [3, 0, 2]
-                        }}
-                    >
+                    { store.message && <Alert severity={ store.severity }>{store.message}</Alert> }
+
+                    <Box sx={{ height: spacing(4) }} />
+
+                    <Button fullWidth variant='contained' color='primary' type='submit'>
                         { store.mode === 'sign-in' ? 'Sign in' : 'Sign up' }
                     </Button>
 
-                    <Box mt={1}>
-                        <Button component={'a'} fullWidth variant='contained' color='primary' sx={{ margin: [3, 0, 2] }} href='/account/login/discord'>Use DISCORD</Button>
-                    </Box>
+                    <Box sx={{ height: spacing(2) }} />
 
-                    <Box mt={1}>
-                        <Button fullWidth size='small' variant='text' onClick={store.toggleMode}>
-                            { store.mode === 'sign-in' ? `Don't have an account? Sign Up` : `Already have an account? Sign in` }
-                        </Button>
-                    </Box>
-                </Form>
+                    <Button component={'a'} fullWidth variant='contained' color='primary' href='/account/login/discord'>Use DISCORD</Button>
+
+                    <Box sx={{ height: spacing(4) }} />
+
+                    <Button fullWidth size='small' variant='text' onClick={store.toggleMode}>
+                        { store.mode === 'sign-in' ? `Don't have an account? Sign Up` : `Already have an account? Sign in` }
+                    </Button>
+                </Box>
             </Box>
-            <Box mt={8}>
+            <Box>
                 <Copyright />
             </Box>
         </Container>
-    );
-})
+    )
+}
+
+export default observer(SignIn)
