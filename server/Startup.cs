@@ -1,5 +1,6 @@
 namespace advisor {
     using System;
+    using System.Net;
     using advisor.Authorization;
     using advisor.Features;
     using advisor.Model;
@@ -49,7 +50,10 @@ namespace advisor {
             var discord = Configuration.GetSection("Discord");
             var discordOAuth = discord.GetSection("OAuth");
 
+            var proxy = Configuration.GetSection("Proxy");
+
             services.Configure<DiscordOptions>(discord);
+            services.Configure<ForwardedHeadersOptions>(proxy);
 
             services.AddResponseCompression(opt => {
                 opt.EnableForHttps = true;
@@ -240,9 +244,7 @@ namespace advisor {
         }
 
         public void Configure(IApplicationBuilder app) {
-            app.UseForwardedHeaders(new ForwardedHeadersOptions {
-                ForwardedHeaders = ForwardedHeaders.All
-            });
+            app.UseForwardedHeaders();
 
             app.UseResponseCompression();
 
@@ -250,10 +252,10 @@ namespace advisor {
                 app.UseDeveloperExceptionPage();
             }
 
-            // if (Env.IsProduction()) {
-            //     app.UseHsts();
-            //     app.UseHttpsRedirection();
-            // }
+            if (Env.IsProduction()) {
+                app.UseHsts();
+                app.UseHttpsRedirection();
+            }
 
             app
                 .UseMiddleware<DefaultFilesMiddleware>()
@@ -264,8 +266,9 @@ namespace advisor {
                 .UseAuthorization()
                 .UseEndpoints(endpoints => {
                     endpoints.MapControllers();
-                    endpoints
-                        .MapGraphQL();
+
+                    endpoints.MapGraphQL();
+
                     endpoints.MapHangfireDashboard(new DashboardOptions {
                         Authorization = new[] {
                             new RoleBasedDashboardAuthorizationFilter(Roles.Root)
