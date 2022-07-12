@@ -250,6 +250,7 @@ namespace advisor {
             // }
 
             app
+                .UseForwardedHeaders()
                 .UseMiddleware<DefaultFilesMiddleware>()
                 .UseStaticFiles()
                 .UseRouting()
