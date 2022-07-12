@@ -15,5 +15,13 @@ namespace advisor
         public IActionResult Headers() {
             return new JsonResult(Request.Headers);
         }
+
+        [HttpGet("info")]
+        public IActionResult Info() {
+            return new JsonResult(new {
+                host = Request.Host,
+                scheme = Request.Scheme
+            });
+        }
     }
 }
