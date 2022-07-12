@@ -25,6 +25,7 @@ namespace advisor {
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.HttpOverrides;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -47,7 +48,12 @@ namespace advisor {
         public void ConfigureServices(IServiceCollection services) {
             var discord = Configuration.GetSection("Discord");
             var discordOAuth = discord.GetSection("OAuth");
+
             services.Configure<DiscordOptions>(discord);
+
+            services.Configure<ForwardedHeadersOptions>(options => {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            });
 
             services.AddResponseCompression(opt => {
                 opt.EnableForHttps = true;
