@@ -47,9 +47,10 @@ namespace advisor.Features {
 
             var playersIn = ComposePlayersIn(players, lastTurn.PlayerData);
 
-            var executor = new TurnExecutor();
-            executor.CreateWorkDirectory();
+            var opt = TurnExecutorOptions.UseTempDirectory();
+            var executor = new TurnExecutor(opt);
 
+            await executor.WriteEngineAsync(game.Engine);
             await executor.WritePlayersInAsync(playersIn);
             await executor.WriteGameInAsync(lastTurn.GameData);
 
@@ -68,7 +69,8 @@ namespace advisor.Features {
             }
 
             DbGameTurn newTurn = null;
-            if (await executor.RunAsync(game.Engine, TimeSpan.FromMinutes(10))) {
+            var run = await executor.RunAsync(TimeSpan.FromMinutes(10));
+            if (run.Success) {
                 newTurn = await ReadNewTurn(request.GameId, lastTurn.Number + 1, executor);
 
                 var newFactions = AcceptNewFactions(players, executor);
@@ -81,7 +83,7 @@ namespace advisor.Features {
                     await db.SaveChangesAsync();
                 }
 
-                foreach (var report in executor.ReadReports()) {
+                foreach (var report in executor.ListReports()) {
                     var player = players.Find(x => x.Number == report.Number);
                     if (player == null) {
                         report.ReportStream.Dispose();
@@ -154,7 +156,7 @@ namespace advisor.Features {
                 GameData = gameOut
             };
 
-            foreach (var article in executor.ReadTimesAsync()) {
+            foreach (var article in executor.ListTimes()) {
                 using var reader = new StreamReader(article);
                 newTurn.Articles.Add(new DbGameArticle {
                     Type = "times",
@@ -165,7 +167,7 @@ namespace advisor.Features {
             await db.GameTurns.AddAsync(newTurn);
             await db.SaveChangesAsync();
 
-            foreach (var report in executor.ReadReports()) {
+            foreach (var report in executor.ListReports()) {
             }
 
             return newTurn;
