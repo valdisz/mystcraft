@@ -1,7 +1,7 @@
 import React from 'react'
 import { CLIENT } from './client'
 import { SignIn } from './components'
-import { ApolloError } from 'apollo-client'
+import { ApolloError } from '@apollo/client'
 import { GetMe, GetMeQuery, GetMeQueryVariables } from './schema'
 
 export enum Role {

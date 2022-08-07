@@ -1,10 +1,12 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
-import { Button, Card, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material'
+import { Button, Card, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography, Box, Stack } from '@mui/material'
 import { PageTitle, EmptyListItem, Forbidden } from '../components'
 import { NewGameEngineStore, useStore } from '../store'
 import { GameEngineFragment } from '../schema'
 import { Role, ForRole, forRole } from '../auth'
+
+import AttachFileIcon from '@mui/icons-material/AttachFile'
 
 function GameEnginesPage() {
     const { gameEngines } = useStore()
@@ -40,15 +42,62 @@ function GameEngineItem({ engine }: GameEngineItemProps) {
     </ListItem>
 }
 
+interface FileInputProps {
+    trigger: React.ReactElement
+    onChange?: React.ChangeEventHandler<HTMLInputElement>
+}
+
+function FileInput({ trigger, onChange }: FileInputProps) {
+    const inputRef = React.useRef<HTMLInputElement>(null)
+
+    const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(event)
+        event.target.value = null
+    }
+
+    return <Box>
+        { trigger
+            ? React.cloneElement(trigger, {
+                onClick: () => {
+                    inputRef.current.click()
+                }
+            } )
+            : null
+        }
+        <input style={{ display: 'none' }}
+            ref={inputRef}
+            type='file'
+            onChange={onFileChange}
+        />
+    </Box>
+}
+
 
 interface NewGameEngineDialogProps {
     store: NewGameEngineStore
 }
 
 function NewGameEngineDialog({ store }: NewGameEngineDialogProps) {
-    return <Dialog open={store.isOpen} onClose={store.cancel}>
+    return <Dialog fullWidth maxWidth='sm' open={store.isOpen} onClose={store.cancel}>
         <DialogTitle>New game engine</DialogTitle>
         <DialogContent>
+            <Stack gap={2}>
+                <TextField label='Name' value={store.name} onChange={store.setName} />
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                }}>
+                    <Typography>
+                        <span>File:{' '}</span>
+                        <strong>{store.fileName}</strong>
+                    </Typography>
+                    <FileInput trigger={<Button variant='outlined' startIcon={<AttachFileIcon />}>
+                        Select Game Engine
+                    </Button>} onChange={store.setFile} />
+                </Box>
+            </Stack>
+
         </DialogContent>
         <DialogActions>
             <Button onClick={store.cancel}>Cancel</Button>

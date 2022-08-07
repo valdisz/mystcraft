@@ -1,0 +1,9 @@
+mutation GameEngineCreate($name: String!, $file: Upload!) {
+  gameEngineCreate(name: $name, file: $file) {
+    isSuccess
+    error
+    engine {
+      ...GameEngine
+    }
+  }
+}

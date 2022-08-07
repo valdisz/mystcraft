@@ -1,9 +1,8 @@
-import { ApolloClient } from 'apollo-client'
-import { InMemoryCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
-import { createHttpLink } from 'apollo-link-http'
+import { ApolloClient, InMemoryCache, NormalizedCacheObject } from '@apollo/client'
+import { createUploadLink } from 'apollo-upload-client'
 
 const cache = new InMemoryCache()
-const link = createHttpLink({
+const link = createUploadLink({
     uri: `/graphql`,
     credentials: 'include'
 })

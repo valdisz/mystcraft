@@ -326,6 +326,13 @@ export type GameEngineCollectionSegment = {
   totalCount: Scalars['Int'];
 };
 
+export type GameEngineCreateResult = {
+  __typename?: 'GameEngineCreateResult';
+  engine?: Maybe<GameEngine>;
+  error?: Maybe<Scalars['String']>;
+  isSuccess: Scalars['Boolean'];
+};
+
 export type GameOptions = {
   __typename?: 'GameOptions';
   map?: Maybe<Array<Maybe<MapLevel>>>;
@@ -409,6 +416,7 @@ export type MutationType = {
   createUser?: Maybe<User>;
   gameCreateRemote?: Maybe<GameCreateRemoteResult>;
   gameDelete?: Maybe<Array<Maybe<Game>>>;
+  gameEngineCreate?: Maybe<GameEngineCreateResult>;
   gameJoin?: Maybe<Player>;
   gameOptionsSet?: Maybe<Game>;
   gameTurnRun?: Maybe<GameTurnRunResult>;
@@ -457,6 +465,12 @@ export type MutationTypeGameCreateRemoteArgs = {
 
 export type MutationTypeGameDeleteArgs = {
   gameId: Scalars['ID'];
+};
+
+
+export type MutationTypeGameEngineCreateArgs = {
+  file?: InputMaybe<Scalars['Upload']>;
+  name?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -937,6 +951,14 @@ export type GameCreateRemoteMutationVariables = Exact<{
 
 
 export type GameCreateRemoteMutation = { __typename?: 'MutationType', gameCreateRemote?: { __typename?: 'GameCreateRemoteResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null } | null };
+
+export type GameEngineCreateMutationVariables = Exact<{
+  name: Scalars['String'];
+  file: Scalars['Upload'];
+}>;
+
+
+export type GameEngineCreateMutation = { __typename?: 'MutationType', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null } | null };
 
 export type JoinGameMutationVariables = Exact<{
   gameId: Scalars['ID'];
@@ -1507,6 +1529,17 @@ export const GameCreateRemote = gql`
   }
 }
     ${GameHeader}`;
+export const GameEngineCreate = gql`
+    mutation GameEngineCreate($name: String!, $file: Upload!) {
+  gameEngineCreate(name: $name, file: $file) {
+    isSuccess
+    error
+    engine {
+      ...GameEngine
+    }
+  }
+}
+    ${GameEngine}`;
 export const JoinGame = gql`
     mutation JoinGame($gameId: ID!) {
   gameJoin(gameId: $gameId) {

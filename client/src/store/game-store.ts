@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from 'apollo-client'
+import { ApolloQueryResult } from '@apollo/client'
 import { makeObservable, observable, IObservableArray, runInAction, action, computed, reaction, comparer } from 'mobx'
 import { CLIENT } from '../client'
 import { RegionFragment, UnitFragment, TurnFragment, Stance } from '../schema'

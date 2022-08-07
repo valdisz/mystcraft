@@ -24,6 +24,13 @@ namespace advisor
             return mediator.Send(new UserRolesUpdate(userId, add, remove));
         }
 
+        public async Task<GameEngineCreateResult> GameEngineCreate(IMediator mediator, string name, IFile file) {
+            using var stream = file.OpenReadStream();
+            var result = await mediator.Send(new GameEngineCreate(name, stream));
+
+            return result;
+        }
+
         [Authorize(Policy = Policies.GameMasters)]
         public Task<GameCreateLocalResult> CreateLocalGame(
             IMediator mediator,
