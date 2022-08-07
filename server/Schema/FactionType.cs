@@ -24,7 +24,7 @@ namespace advisor {
         public Task<List<DbEvent>> Events(Database db, [Parent] DbFaction faction) {
             return db.Events
                 .AsNoTracking()
-                .FilterByFaction(faction)
+                .OnlyFaction(faction)
                 .ToListAsync();
         }
     }

@@ -286,7 +286,7 @@ namespace advisor.Features {
         private async Task SyncBattles() {
             var knownBattles = (await Db.Battles
                 .AsNoTracking()
-                .FilterByTurn(this)
+                .InTurn(this)
                 .Select(x => $"{x.X}-{x.Y}-{x.Z}-{x.Attacker.Number}-{x.Defender.Number}")
                 .ToListAsync())
                 .ToHashSet();

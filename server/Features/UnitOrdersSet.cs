@@ -16,7 +16,7 @@ namespace advisor.Features {
 
         public async Task<string> Handle(UnitOrdersSet request, CancellationToken cancellationToken) {
             var unit = await db.Units
-                .FilterByTurn(request.PlayerId, request.TurnNumber)
+                .InTurn(request.PlayerId, request.TurnNumber)
                 .FirstOrDefaultAsync(x => x.Number == request.UnitNumber);
 
             if (unit == null) return "Unit not found";

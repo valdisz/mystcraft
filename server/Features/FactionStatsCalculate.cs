@@ -23,7 +23,7 @@ namespace advisor.Features {
 
             var data = await db.Events
                 .AsNoTrackingWithIdentityResolution()
-                .FilterByPlayer(player)
+                .OnlyPlayer(player)
                 .Where(x => x.TurnNumber >= request.EarliestTurnNumber && x.FactionNumber == player.Number && x.RegionId != null)
                 .ToListAsync();
 

@@ -55,7 +55,7 @@ namespace advisor
         public Task<List<DbReport>> Reports(Database db, [Parent] DbPlayer player, int? turn = null) {
             var q = db.Reports
                 .AsNoTracking()
-                .FilterByPlayer(player);
+                .OnlyPlayer(player);
 
             if (turn != null) {
                 q = q.Where(x => x.TurnNumber == turn);
@@ -68,7 +68,7 @@ namespace advisor
             return db.Turns
                 .AsNoTracking()
                 .Include(x => x.Player)
-                .FilterByPlayer(player)
+                .OnlyPlayer(player)
                 .OrderBy(x => x.Number)
                 .ToListAsync();
         }
@@ -77,7 +77,7 @@ namespace advisor
             return db.Turns
                 .AsNoTracking()
                 .Include(x => x.Player)
-                .FilterByPlayer(player)
+                .OnlyPlayer(player)
                 .SingleOrDefaultAsync(x => x.Number == number);
         }
     }

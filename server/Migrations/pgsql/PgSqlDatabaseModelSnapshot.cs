@@ -285,21 +285,21 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    b.Property<byte[]>("Engine")
-                        .HasColumnType("bytea");
+                    b.Property<long?>("EngineId")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("EngineVersion")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                    b.Property<int?>("LastTurnNumber")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
+
+                    b.Property<int?>("NextTurnNumber")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Options")
                         .IsRequired()
@@ -309,21 +309,19 @@ namespace advisor.Migrations.pgsql
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RulesetName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<string>("RulesetVersion")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EngineId");
+
+                    b.HasIndex("Id", "LastTurnNumber")
+                        .IsUnique();
+
+                    b.HasIndex("Id", "NextTurnNumber")
+                        .IsUnique();
 
                     b.ToTable("Games");
                 });
@@ -336,6 +334,9 @@ namespace advisor.Migrations.pgsql
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Text")
@@ -357,6 +358,53 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGameEngine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<byte[]>("Contents")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("GameEngines");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameReport", b =>
+                {
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("FactionNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.HasKey("GameId", "TurnNumber", "FactionNumber");
+
+                    b.ToTable("GameReports");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
                 {
                     b.Property<long>("GameId")
@@ -367,6 +415,9 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<byte[]>("GameData")
                         .HasColumnType("bytea");
+
+                    b.Property<bool>("IsRemote")
+                        .HasColumnType("boolean");
 
                     b.Property<byte[]>("PlayerData")
                         .HasColumnType("bytea");
@@ -1082,6 +1133,29 @@ namespace advisor.Migrations.pgsql
                     b.Navigation("Turn");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGame", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGameEngine", "Engine")
+                        .WithMany("Games")
+                        .HasForeignKey("EngineId");
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "LastTurn")
+                        .WithOne()
+                        .HasForeignKey("advisor.Persistence.DbGame", "Id", "LastTurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "NextTurn")
+                        .WithOne()
+                        .HasForeignKey("advisor.Persistence.DbGame", "Id", "NextTurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Engine");
+
+                    b.Navigation("LastTurn");
+
+                    b.Navigation("NextTurn");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbGameArticle", b =>
                 {
                     b.HasOne("advisor.Persistence.DbGame", "Game")
@@ -1092,6 +1166,25 @@ namespace advisor.Migrations.pgsql
 
                     b.HasOne("advisor.Persistence.DbGameTurn", "Turn")
                         .WithMany("Articles")
+                        .HasForeignKey("GameId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameReport", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "Turn")
+                        .WithMany("Reports")
                         .HasForeignKey("GameId", "TurnNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1528,9 +1621,16 @@ namespace advisor.Migrations.pgsql
                     b.Navigation("Turns");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGameEngine", b =>
+                {
+                    b.Navigation("Games");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>

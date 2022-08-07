@@ -25,7 +25,7 @@ export class HomeStore {
             query: GetGames
         }).then(response => {
             runInAction(() => {
-                this.games.replace(response.data.games);
+                this.games.replace(response.data.games.items);
             });
         });
     };
@@ -33,27 +33,27 @@ export class HomeStore {
     readonly newGame = new NewGameStore()
 
     confirmNewGame = async () => {
-        const response = await CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({
-            mutation: CreateLocalGame,
-            variables: {
-                name: this.newGame.name,
-                options: {
-                    schedule: '',
-                    map: [
-                        { level: 0, label: 'nexus', width: 1, height: 1 },
-                        { level: 1, label: 'surface', width: 32, height: 32 }
-                    ]
-                },
-                engine: this.newGame.engineFile,
-                playerData: this.newGame.playersFile,
-                gameData: this.newGame.gameFile
-            }
-        });
+        // const response = await CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({
+        //     mutation: CreateLocalGame,
+        //     variables: {
+        //         name: this.newGame.name,
+        //         options: {
+        //             schedule: '',
+        //             map: [
+        //                 { level: 0, label: 'nexus', width: 1, height: 1 },
+        //                 { level: 1, label: 'surface', width: 32, height: 32 }
+        //             ]
+        //         },
+        //         engine: this.newGame.engineFile,
+        //         playerData: this.newGame.playersFile,
+        //         gameData: this.newGame.gameFile
+        //     }
+        // });
 
-        runInAction(() => {
-            this.games.push(response.data.createLocalGame);
-            this.newGame.cancel();
-        });
+        // runInAction(() => {
+        //     this.games.push(response.data.createLocalGame);
+        //     this.newGame.cancel();
+        // });
     };
 
     private fileUpload: HTMLInputElement = null

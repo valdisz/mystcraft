@@ -24,7 +24,7 @@ namespace advisor.Features {
 
         public async Task<Unit> Handle(StudyPlansSetup request, CancellationToken cancellationToken) {
             var turnNumbers = await db.Turns
-                .FilterByPlayer(request.PlayerId)
+                .OnlyPlayer(request.PlayerId)
                 .OrderByDescending(x => x.Number)
                 .Select(x => x.Number)
                 .Take(2)
@@ -39,13 +39,13 @@ namespace advisor.Features {
 
             var prevPlans = (await db.StudyPlans
                 .AsNoTracking()
-                .FilterByTurn(request.PlayerId, prevTurnNumber)
+                .InTurn(request.PlayerId, prevTurnNumber)
                 .ToListAsync())
                 .ToDictionary(x => x.UnitNumber);
 
             var currentPlans = (await db.StudyPlans
                 .AsNoTracking()
-                .FilterByTurn(request.PlayerId, turnNumber)
+                .InTurn(request.PlayerId, turnNumber)
                 .ToListAsync())
                 .ToDictionary(x => x.UnitNumber);
 
@@ -56,7 +56,7 @@ namespace advisor.Features {
 
                 var unitExist = await db.Units
                     .AsNoTracking()
-                    .FilterByTurn(request.PlayerId, turnNumber)
+                    .InTurn(request.PlayerId, turnNumber)
                     .AnyAsync(x => x.Number == unitNumber);
 
                 if (unitExist) {

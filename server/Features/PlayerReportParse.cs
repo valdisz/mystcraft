@@ -65,7 +65,7 @@ namespace advisor.Features {
                 if (isFirstIteration) {
                     // fist iteration
                     // check if current turn was processed before
-                    var isLoaded = (await db.Regions.FilterByTurn(currentTurn).CountAsync()) > 0;
+                    var isLoaded = (await db.Regions.InTurn(currentTurn).CountAsync()) > 0;
                     if (isLoaded) {
                         // current turn already exists in database so we can just load it and start updating
                         var turn = await GetTurnAsync(currentTurn);
@@ -121,7 +121,7 @@ namespace advisor.Features {
             bool addStructures = true, bool addFactions = true) {
             IQueryable<DbTurn> turns = db.Turns
                 .AsSplitQuery()
-                .FilterByPlayer(context);
+                .OnlyPlayer(context);
 
             if (!track) {
                 turns = turns.AsNoTrackingWithIdentityResolution();
@@ -164,7 +164,7 @@ namespace advisor.Features {
 
             var reportsQuery = db.Reports
                 .AsNoTracking()
-                .FilterByTurn(playerId, turnNumber)
+                .InTurn(playerId, turnNumber)
                 .Select(x => new { x.FactionNumber });
 
             if (playerFactionNumber != null) {
@@ -172,14 +172,14 @@ namespace advisor.Features {
 
                 var ownJson = await db.Reports
                     .AsNoTracking()
-                    .FilterByTurn(playerId, turnNumber)
+                    .InTurn(playerId, turnNumber)
                     .Where(x => x.FactionNumber == playerFactionNumber)
                     .Select(x => x.Json)
                     .SingleOrDefaultAsync();
 
                 if (ownJson == null) {
                     var ownReport = await db.Reports
-                        .FilterByTurn(playerId, turnNumber)
+                        .InTurn(playerId, turnNumber)
                         .Where(x => x.FactionNumber == playerFactionNumber)
                         .SingleOrDefaultAsync();
 
@@ -201,14 +201,14 @@ namespace advisor.Features {
 
                 var json = await db.Reports
                     .AsNoTracking()
-                    .FilterByTurn(playerId, turnNumber)
+                    .InTurn(playerId, turnNumber)
                     .Where(x => x.FactionNumber == rep.FactionNumber)
                     .Select(x => x.Json)
                     .SingleOrDefaultAsync();
 
                 if (json == null) {
                     var unprasedReport = await db.Reports
-                        .FilterByTurn(playerId, turnNumber)
+                        .InTurn(playerId, turnNumber)
                         .Where(x => x.FactionNumber == rep.FactionNumber)
                         .SingleOrDefaultAsync();
                     next = await ParseJsonReportAsync(unprasedReport);

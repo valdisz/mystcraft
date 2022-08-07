@@ -260,6 +260,7 @@ namespace advisor {
                 .AddType<AllianceType>()
                 .AddType<AllianceMemberType>()
                     .AddType<AllianceMemberResolvers>()
+                .AddType<GameEngineType>()
                 .BindRuntimeType<Item, ItemType>()
                 .BindRuntimeType<DbUnitItem, ItemType>()
                 .BindRuntimeType<DbProductionItem, ItemType>()

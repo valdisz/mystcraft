@@ -15,7 +15,7 @@ namespace advisor.Persistence {
         public GameType Type { get; set; }
 
         [GraphQLIgnore]
-        public byte[] Engine { get; set; }
+        public long? EngineId { get; set; }
 
         [Required]
         public GameOptions Options { get; set; }
@@ -23,17 +23,15 @@ namespace advisor.Persistence {
         [Required]
         public string Ruleset { get; set; }
 
-        [Required]
-        [MaxLength(128)]
-        public string EngineVersion { get; set; }
 
-        [Required]
-        [MaxLength(128)]
-        public string RulesetName { get; set; }
+        public int? LastTurnNumber { get; set; }
 
-        [Required]
-        [MaxLength(128)]
-        public string RulesetVersion { get; set; }
+        public int? NextTurnNumber { get; set; }
+
+        public DbGameTurn LastTurn { get; set; }
+
+        public DbGameTurn NextTurn { get; set; }
+
 
         [GraphQLIgnore]
         public List<DbPlayer> Players { get; set; } = new ();
@@ -46,5 +44,8 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public List<DbGameArticle> Articles { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public DbGameEngine Engine { get; set; }
     }
 }

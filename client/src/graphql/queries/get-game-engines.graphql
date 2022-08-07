@@ -1,0 +1,12 @@
+query GetGameEngines($skip: Int = 0, $take: Int = 100) {
+  gameEngines(skip: $skip, take: $take) {
+    items {
+      ...GameEngine
+    }
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
+  }
+}

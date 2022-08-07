@@ -1,5 +1,12 @@
-query GetGames {
-  games {
-    ...GameHeader
+query GetGames($skip: Int = 0, $take: Int = 100) {
+  games(skip: $skip, take: $take) {
+    items {
+      ...GameHeader
+    }
+    totalCount
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+    }
   }
 }

@@ -5,6 +5,7 @@
 
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\server\advisor.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="data/**/*">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
   </ItemGroup>
 
 </Project>

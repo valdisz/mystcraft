@@ -39,7 +39,7 @@ namespace advisor
         public async Task<List<AllianceMemberTurn>> Turns(Database db, [Parent] DbAllianceMember member) {
             return (await db.Turns
                 .AsNoTracking()
-                .FilterByPlayer(member)
+                .OnlyPlayer(member)
                 .Include(x => x.Player)
                 .OrderBy(x => x.Number)
                 .Where(x => x.Player.Number != null)
@@ -52,7 +52,7 @@ namespace advisor
         public async Task<AllianceMemberTurn> Turn(Database db, [Parent] DbAllianceMember member, int number) {
             var data = await db.Turns
                 .AsNoTracking()
-                .FilterByPlayer(member)
+                .OnlyPlayer(member)
                 .Include(x => x.Player)
                 .OrderBy(x => x.Number)
                 .Where(x => x.Player.Number != null && x.Number == number)
@@ -80,7 +80,7 @@ namespace advisor
         public async Task<Statistics> Stats(Database db) {
             var stats = await db.Stats
                 .AsNoTracking()
-                .FilterByTurn(playerId, Number)
+                .InTurn(playerId, Number)
                 .Include(x => x.Production)
                 .ToListAsync();
 
@@ -112,7 +112,7 @@ namespace advisor
 
             var query = db.Units
                 .AsNoTrackingWithIdentityResolution()
-                .FilterByTurn(playerId, Number);
+                .InTurn(playerId, Number);
 
             if (fields.Contains(nameof(DbUnit.Items))) {
                 query = query.Include(x => x.Items);

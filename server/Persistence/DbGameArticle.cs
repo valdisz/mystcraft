@@ -7,10 +7,12 @@ namespace advisor.Persistence {
         public long Id { get; set; }
 
         [GraphQLIgnore]
-        public int TurnNumber { get; set; }
+        public long GameId { get; set; }
 
         [GraphQLIgnore]
-        public long GameId { get; set; }
+        public int TurnNumber { get; set; }
+
+        public long? PlayerId { get; set; }
 
         [Required, MaxLength(32)]
         public string Type { get; set; }

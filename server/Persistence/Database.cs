@@ -52,8 +52,10 @@ namespace advisor.Persistence {
 
         public DbSet<DbUser> Users { get; set; }
 
+        public DbSet<DbGameEngine> GameEngines { get; set; }
         public DbSet<DbGame> Games { get; set; }
         public DbSet<DbGameTurn> GameTurns { get; set; }
+        public DbSet<DbGameReport> GameReports { get; set; }
         public DbSet<DbGameArticle> Articles{ get; set; }
 
         public DbSet<DbPlayer> Players { get; set; }
@@ -121,7 +123,20 @@ namespace advisor.Persistence {
                     .IsUnique();
             });
 
+            model.Entity<DbGameEngine>(t => {
+                t.HasMany(x => x.Games)
+                    .WithOne(x => x.Engine)
+                    .HasForeignKey(x => x.EngineId)
+                    .IsRequired(false);
+
+                t.HasIndex(x => x.Name)
+                    .IsUnique();
+            });
+
             model.Entity<DbGame>(t => {
+                t.Property(x => x.Id)
+                    .ValueGeneratedOnAdd();
+
                 t.Property(x => x.Type)
                     .HasConversion<string>();
 
@@ -145,6 +160,18 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Game)
                     .HasForeignKey(x => x.GameId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+                t.HasOne(x => x.LastTurn)
+                    .WithOne()
+                    .HasForeignKey<DbGame>(x => new { x.Id, x.LastTurnNumber })
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                t.HasOne(x => x.NextTurn)
+                    .WithOne()
+                    .HasForeignKey<DbGame>(x => new { x.Id, x.NextTurnNumber })
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             model.Entity<DbGameTurn>(t => {
@@ -154,6 +181,15 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Turn)
                     .HasForeignKey(x => new { x.GameId, x.TurnNumber })
                     .OnDelete(DeleteBehavior.Cascade);
+
+                t.HasMany(x => x.Reports)
+                    .WithOne(x => x.Turn)
+                    .HasForeignKey(x => new { x.GameId, x.TurnNumber })
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            model.Entity<DbGameReport>(t => {
+                t.HasKey(x => new {  x.GameId, x.TurnNumber, x.FactionNumber });
             });
 
             model.Entity<DbGameArticle>(t => {

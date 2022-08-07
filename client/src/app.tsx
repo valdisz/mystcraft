@@ -15,7 +15,11 @@ export function App() {
                 <Route path='university' element={<Pages.UniversityPage />} />
                 <Route index element={<Pages.MapTab />} />
             </Route>
-            <Route path='/' element={<Pages.HomePage />} />
+            <Route path='/' element={<Pages.Layout />}>
+                <Route index element={<Pages.HomePage />} />
+                <Route path='/engines' element={<Pages.GameEnginesPage />} />
+                <Route path='/users' element={<Pages.UsersPage />} />
+            </Route>
         </Routes>
     </StoreProvider>
 }

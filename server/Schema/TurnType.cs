@@ -30,14 +30,14 @@
         public Task<List<DbReport>> GetReports(Database db, [Parent] DbTurn turn) {
             return db.Reports
                 .AsNoTracking()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .OrderBy(x => x.FactionNumber)
                 .ToListAsync();
         }
         public async Task<List<JBattle>> Battles(Database db, [Parent] DbTurn turn) {
             var battles = (await db.Battles
                 .AsNoTracking()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .OrderBy(x => x.X).ThenBy(x => x.Y).ThenBy(x => x.Z).ThenBy(x => x.Attacker.Number)
                 .ToListAsync())
                 .Select(x => x.Battle)
@@ -51,7 +51,7 @@
             IQueryable<DbRegion> query = db.Regions
                 .AsSplitQuery()
                 .AsNoTrackingWithIdentityResolution()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .Include(x => x.Exits)
                 .Include(x => x.Produces)
                 .Include(x => x.Markets);
@@ -67,7 +67,7 @@
         public IQueryable<DbStructure> Structures(Database db, [Parent] DbTurn turn) {
             return db.Structures
                 .AsNoTracking()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .OrderBy(x => x.RegionId)
                 .ThenBy(x => x.Sequence);
         }
@@ -78,7 +78,7 @@
 
             var query = db.Units
                 .AsNoTrackingWithIdentityResolution()
-                .FilterByTurn(turn);
+                .InTurn(turn);
 
             if (fields.Contains(nameof(DbUnit.Items))) {
                 query = query.Include(x => x.Items);
@@ -111,7 +111,7 @@
         public IQueryable<DbEvent> Events(Database db, [Parent] DbTurn turn) {
             return db.Events
                 .AsNoTracking()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .OrderBy(x => x.Id);
         }
 
@@ -120,7 +120,7 @@
                 .AsNoTrackingWithIdentityResolution()
                 .Include(x => x.Attitudes)
                 .OrderBy(x => x.Number)
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .ToListAsync();
         }
 
@@ -128,7 +128,7 @@
             var factionNumber = turn.Player.Number;
             var stats = await db.Stats
                 .AsNoTracking()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .Include(x => x.Production)
                 .ToListAsync();
 
@@ -157,7 +157,7 @@
         public Task<List<DbStudyPlan>> StudyPlans(Database db, [Parent] DbTurn turn) {
             return db.StudyPlans
                 .AsNoTrackingWithIdentityResolution()
-                .FilterByTurn(turn)
+                .InTurn(turn)
                 .ToListAsync();
         }
     }

@@ -1,8 +1,6 @@
 fragment GameDetails on Game {
   id
   name
-  rulesetName
-  rulesetVersion
   options {
     ...GameOptions
   }

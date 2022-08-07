@@ -115,10 +115,6 @@ namespace advisor.Features {
                 player.LastTurnNumber = turnNumber;
             }
 
-            player.Game.EngineVersion ??= engine?.Version;
-            player.Game.RulesetName ??= engine?.Ruleset?.Name;
-            player.Game.RulesetVersion ??= engine?.Ruleset?.Version;
-
             await db.SaveChangesAsync();
 
             return turnNumber;

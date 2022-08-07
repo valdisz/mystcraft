@@ -1,0 +1,5 @@
+fragment GameEngine on GameEngine {
+  id
+  name
+  createdAt
+}

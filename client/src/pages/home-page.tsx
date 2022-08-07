@@ -1,16 +1,18 @@
 import * as React from 'react'
 import { styled } from '@mui/system'
 import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, Box, Grid
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, Box, Grid, Menu, IconButton, MenuItem, IconButtonProps, MenuProps
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react'
 import { Link } from 'react-router-dom'
-import GrainIcon from '@mui/icons-material/Grain';
 import { useStore } from '../store'
 import { SplitButton } from '../components'
 import { GameHeaderFragment, PlayerHeaderFragment } from '../schema'
-import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import cronstrue from 'cronstrue'
+import { ForRole } from '../auth'
+import { Role } from '../roles'
+
+import GrainIcon from '@mui/icons-material/Grain'
 
 function NoGames() {
     return <ListItem>
@@ -56,12 +58,6 @@ const FactionNumber = styled('code')`
     }
 `
 
-const UnstyledList = styled('ul')`
-    list-style: none;
-    margin: 0;
-    padding: 0;
-`
-
 function Faction({ name, number}) {
     return name && number
         ?<>
@@ -70,22 +66,16 @@ function Faction({ name, number}) {
         : <em>Faction not yet determined</em>
 }
 
-function Ruleset({ name, version}) {
-    return <span>
-        {name} {version}
-    </span>
-}
-
 function GamePlayer({ name, number, lastTurnNumber }: PlayerHeaderFragment) {
     return <ListItemText>
-        <UnstyledList>
+        <Box sx={{ listStyle: 'none', m: 0, p: 0 }} component='ul'>
             <li>
                 <strong>Faction</strong> <Faction name={name} number={number} />
             </li>
             <li>
                 <strong>Turn</strong> {lastTurnNumber}
             </li>
-        </UnstyledList>
+        </Box>
     </ListItemText>
 }
 
@@ -115,8 +105,7 @@ function GameItem({ game }: GameItemProps) {
         <Grid container>
             <Grid item xs={12} md={6}>
                 <ListItemText
-                    primary={<Game name={game.name} />}
-                    secondary={<Ruleset name={game.rulesetName} version={game.rulesetVersion} />} />
+                    primary={<Game name={game.name} />} />
             </Grid>
             <Grid item xs={12} md={6}>
                 { game.me && <GamePlayer {...game.me} />}
@@ -198,37 +187,18 @@ const NewGameDialog = observer(() => {
     </Dialog>
 })
 
-const CenterLayout = styled('div')`
-    display: flex;
-    min-height: 0;
-    height: 100%;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-`
-
-const TopRightCorner = styled('div')`
-    top: 1rem;
-    right: 1rem;
-    position: absolute;
-`
-
 export function HomePage() {
     const { home } = useStore()
 
-    React.useEffect(() => {
-        home.load()
-    }, [])
+    React.useEffect(() => { home.load() }, [])
 
-    return <CenterLayout>
-        <TopRightCorner>
-            <Button component={'a'} startIcon={<ExitToAppIcon />} href='/account/logout' >Sign out</Button>
-        </TopRightCorner>
-        <Container>
+    return <>
+        <Container >
             <Card>
                 <CardHeader title='Games'
-                    // action={<Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>}
+                    action={<ForRole role={Role.GameMaster}>
+                        <Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>
+                    </ForRole>}
                 />
                 <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
                 <List component='nav' dense>
@@ -243,5 +213,5 @@ export function HomePage() {
             </Card>
         </Container>
         <NewGameDialog />
-    </CenterLayout>
+    </>
 }

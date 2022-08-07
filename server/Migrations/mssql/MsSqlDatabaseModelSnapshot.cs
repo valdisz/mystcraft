@@ -285,21 +285,21 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("bigint");
 
-                    b.Property<byte[]>("Engine")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<long?>("EngineId")
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("EngineVersion")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                    b.Property<int?>("LastTurnNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<int?>("NextTurnNumber")
+                        .HasColumnType("int");
 
                     b.Property<string>("Options")
                         .IsRequired()
@@ -309,21 +309,21 @@ namespace advisor.Migrations.mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RulesetName")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("RulesetVersion")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EngineId");
+
+                    b.HasIndex("Id", "LastTurnNumber")
+                        .IsUnique()
+                        .HasFilter("[LastTurnNumber] IS NOT NULL");
+
+                    b.HasIndex("Id", "NextTurnNumber")
+                        .IsUnique()
+                        .HasFilter("[NextTurnNumber] IS NOT NULL");
 
                     b.ToTable("Games");
                 });
@@ -336,6 +336,9 @@ namespace advisor.Migrations.mssql
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Text")
@@ -357,6 +360,53 @@ namespace advisor.Migrations.mssql
                     b.ToTable("Articles");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGameEngine", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<byte[]>("Contents")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("GameEngines");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameReport", b =>
+                {
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FactionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("Data")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.HasKey("GameId", "TurnNumber", "FactionNumber");
+
+                    b.ToTable("GameReports");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
                 {
                     b.Property<long>("GameId")
@@ -367,6 +417,9 @@ namespace advisor.Migrations.mssql
 
                     b.Property<byte[]>("GameData")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<bool>("IsRemote")
+                        .HasColumnType("bit");
 
                     b.Property<byte[]>("PlayerData")
                         .HasColumnType("varbinary(max)");
@@ -1082,6 +1135,29 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Turn");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGame", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGameEngine", "Engine")
+                        .WithMany("Games")
+                        .HasForeignKey("EngineId");
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "LastTurn")
+                        .WithOne()
+                        .HasForeignKey("advisor.Persistence.DbGame", "Id", "LastTurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "NextTurn")
+                        .WithOne()
+                        .HasForeignKey("advisor.Persistence.DbGame", "Id", "NextTurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Engine");
+
+                    b.Navigation("LastTurn");
+
+                    b.Navigation("NextTurn");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbGameArticle", b =>
                 {
                     b.HasOne("advisor.Persistence.DbGame", "Game")
@@ -1092,6 +1168,25 @@ namespace advisor.Migrations.mssql
 
                     b.HasOne("advisor.Persistence.DbGameTurn", "Turn")
                         .WithMany("Articles")
+                        .HasForeignKey("GameId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameReport", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbGame", "Game")
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbGameTurn", "Turn")
+                        .WithMany("Reports")
                         .HasForeignKey("GameId", "TurnNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1528,9 +1623,16 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Turns");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbGameEngine", b =>
+                {
+                    b.Navigation("Games");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbGameTurn", b =>
                 {
                     b.Navigation("Articles");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>

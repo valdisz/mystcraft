@@ -1,4 +1,5 @@
-namespace advisor {
+namespace advisor
+{
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
@@ -10,16 +11,6 @@ namespace advisor {
     using HotChocolate.Types.Relay;
     using MediatR;
     using Persistence;
-
-    [InterfaceType("MutationResult")]
-    public interface IMutationResult {
-        bool IsSuccess { get; }
-        string Error { get; }
-    }
-
-    public record MutationResult<T>(bool IsSuccess, T data, string Error) : IMutationResult;
-
-    public record GameCreateRemoteResult(DbGame Game, bool IsSuccess, string Error) : IMutationResult;
 
     [Authorize]
     public class MutationType {
@@ -34,25 +25,23 @@ namespace advisor {
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public async Task<DbGame> CreateLocalGame(IMediator mediator, string name, GameOptions options, IFile engine, IFile playerData, IFile gameData) {
-            using var engineStream = engine.OpenReadStream();
+        public Task<GameCreateLocalResult> CreateLocalGame(
+            IMediator mediator,
+            string name,
+            [ID("GameEngine")] long gameEngineId,
+            GameOptions options,
+            IFile playerData,
+            IFile gameData
+        ) {
             using var playersDataStream = playerData.OpenReadStream();
             using var gameDataStream = gameData.OpenReadStream();
 
-            var result = await mediator.Send(new GameCreateLocal(name, engineStream, options, playersDataStream, gameDataStream));
-
-            return result;
+            return mediator.Send(new GameCreateLocal(name, gameEngineId, options, playersDataStream, gameDataStream));
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public async Task<GameCreateRemoteResult> GameCreateRemote(IMediator mediator,
-            string name, string engineVersion, string rulesetName, string rulesetVersion, GameOptions options
-        ) {
-            var result = await mediator.Send(new GameCreateRemote(name, engineVersion, rulesetName, rulesetVersion, options));
-
-            return new GameCreateRemoteResult(
-                result, true, null
-            );
+        public Task<GameCreateRemoteResult> GameCreateRemote(IMediator mediator, string name, GameOptions options) {
+            return mediator.Send(new GameCreateRemote(name, options));
         }
 
         public Task<DbPlayer> GameJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {
@@ -67,6 +56,10 @@ namespace advisor {
         [Authorize(Policy = Policies.GameMasters)]
         public Task<DbGame> GameOptionsSet(IMediator mediator, [ID("Game")] long gameId, GameOptions options) {
             return mediator.Send(new GameOptionsSet(gameId, options));
+        }
+
+        public Task<GameTurnRunResult> GameTurnRun(IMediator mediator, [ID("Game")] long gameId) {
+            return mediator.Send(new GameTurnRun(gameId));
         }
 
         [Authorize(Policy = Policies.GameMasters)]

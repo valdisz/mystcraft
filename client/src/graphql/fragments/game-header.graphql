@@ -1,8 +1,6 @@
 fragment GameHeader on Game {
   id
   name
-  rulesetName
-  rulesetVersion
   options {
     schedule
     timeZone

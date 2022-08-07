@@ -5,30 +5,29 @@ namespace advisor.Features {
     using advisor.Persistence;
     using MediatR;
 
-    public record GameCreateRemote(string Name, string EngineVersion, string RulesetName, string RulesetVersion, GameOptions Options) : IRequest<DbGame>;
+    public record GameCreateRemote(string Name, GameOptions Options) : IRequest<GameCreateRemoteResult>;
 
-    public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, DbGame> {
+    public record GameCreateRemoteResult(DbGame Game, bool IsSuccess, string Error) : IMutationResult;
+
+    public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCreateRemoteResult> {
         public GameCreateRemoteHandler(Database db) {
             this.db = db;
         }
 
         private readonly Database db;
 
-        public async Task<DbGame> Handle(GameCreateRemote request, CancellationToken cancellationToken) {
+        public async Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) {
             var newGame = new DbGame {
                 Name = request.Name,
                 Type = GameType.Remote,
                 Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
-                Options = request.Options,
-                EngineVersion = request.EngineVersion,
-                RulesetName = request.RulesetName,
-                RulesetVersion = request.RulesetVersion
+                Options = request.Options
             };
 
             await db.Games.AddAsync(newGame);
             await db.SaveChangesAsync();
 
-            return newGame;
+            return new GameCreateRemoteResult(newGame, true, null);
         }
     }
 }
