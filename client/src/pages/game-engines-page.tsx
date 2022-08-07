@@ -1,7 +1,10 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
-import { Button, Card, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography, Box, Stack } from '@mui/material'
-import { PageTitle, EmptyListItem, Forbidden } from '../components'
+import {
+    Button, Card, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography,
+    Box, Stack
+} from '@mui/material'
+import { PageTitle, EmptyListItem, Forbidden, FileInput } from '../components'
 import { NewGameEngineStore, useStore } from '../store'
 import { GameEngineFragment } from '../schema'
 import { Role, ForRole, forRole } from '../auth'
@@ -40,36 +43,6 @@ function GameEngineItem({ engine }: GameEngineItemProps) {
     return <ListItem>
         <ListItemText primary={engine.name} secondary={engine.createdAt} />
     </ListItem>
-}
-
-interface FileInputProps {
-    trigger: React.ReactElement
-    onChange?: React.ChangeEventHandler<HTMLInputElement>
-}
-
-function FileInput({ trigger, onChange }: FileInputProps) {
-    const inputRef = React.useRef<HTMLInputElement>(null)
-
-    const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(event)
-        event.target.value = null
-    }
-
-    return <Box>
-        { trigger
-            ? React.cloneElement(trigger, {
-                onClick: () => {
-                    inputRef.current.click()
-                }
-            } )
-            : null
-        }
-        <input style={{ display: 'none' }}
-            ref={inputRef}
-            type='file'
-            onChange={onFileChange}
-        />
-    </Box>
 }
 
 
