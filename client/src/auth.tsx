@@ -1,9 +1,14 @@
-import * as React from 'react'
+import React from 'react'
 import { CLIENT } from './client'
 import { SignIn } from './components'
 import { ApolloError } from 'apollo-client'
 import { GetMe, GetMeQuery, GetMeQueryVariables } from './schema'
-import { Role } from './roles'
+
+export enum Role {
+    Root = 'root',
+    GameMaster = 'game-master',
+    UserManager = 'user-manager'
+}
 
 export class Auth {
     constructor (private readonly roles: Role[]) {
@@ -58,12 +63,13 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
 export interface ForRoleProps {
     role: Role | Role[]
     children: React.ReactNode
+    forbidden?: React.ReactNode
 }
 
-export function ForRole({ role, children }: ForRoleProps) {
+export function ForRole({ role, children, forbidden }: ForRoleProps) {
     const auth = useAuth()
     if (!auth) {
-        return null
+        return <>{forbidden}</>
     }
 
     const isRoot = auth.hasRole(Role.Root)
@@ -72,7 +78,11 @@ export function ForRole({ role, children }: ForRoleProps) {
         ? auth.hasRole(role)
         : role.every(r => auth.hasRole(r))
 
-    return isRoot || isInRole
-        ? <>{children}</>
-        : null
+    return <>{isRoot || isInRole ? children : (forbidden)}</>
+}
+
+export function forRole<P>(BaseComponent: React.ComponentType<P>, role: Role | Role[], forbidden?: React.ReactNode) {
+    return (props) => <ForRole role={role} forbidden={forbidden}>
+        <BaseComponent {...props} />
+    </ForRole>
 }

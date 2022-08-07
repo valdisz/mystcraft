@@ -16,13 +16,13 @@ export class MoveCommand implements InterfaceCommand {
     }
 
     readonly title = 'Move'
-    readonly tooltip = 'Order unit to move into another region'
+    readonly tooltip = 'Order unit to move into another region or structure'
 
     @computed get error() {
         if (this.game.unit.isOverweight) return 'Cannot move'
     }
 
-    get canExecute() {
+    @computed get canExecute() {
         return this.visible && !this.error
     }
 
@@ -31,6 +31,6 @@ export class MoveCommand implements InterfaceCommand {
     }
 
     @action execute() {
-
+        
     }
 }

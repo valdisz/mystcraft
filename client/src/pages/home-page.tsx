@@ -1,23 +1,44 @@
 import * as React from 'react'
 import { styled } from '@mui/system'
-import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card, CardHeader,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, Box, Grid, Menu, IconButton, MenuItem, IconButtonProps, MenuProps
+import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card,
+    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, Box, Grid
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../store'
-import { SplitButton } from '../components'
+import { SplitButton, PageTitle, EmptyListItem } from '../components'
 import { GameHeaderFragment, PlayerHeaderFragment } from '../schema'
 import cronstrue from 'cronstrue'
-import { ForRole } from '../auth'
-import { Role } from '../roles'
+import { Role, ForRole } from '../auth'
 
 import GrainIcon from '@mui/icons-material/Grain'
 
-function NoGames() {
-    return <ListItem>
-        <ListItemText><i>Empty</i></ListItemText>
-    </ListItem>
+export function HomePage() {
+    const { home } = useStore()
+
+    React.useEffect(() => { home.load() }, [])
+
+    return <Container>
+        <PageTitle title='Games'
+            actions={<ForRole role={Role.GameMaster}>
+                        <Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>
+                    </ForRole>} />
+        <Card>
+            <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
+            <List component='nav' dense>
+                <Observer>
+                    {() => <>{ home.games.length
+                        ? home.games.map(x => <GameItem key={x.id} game={x} />)
+                        : <EmptyListItem>
+                            <Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>Create first game</Button>
+                        </EmptyListItem>
+                        }</>
+                    }
+                </Observer>
+            </List>
+        </Card>
+        <NewGameDialog />
+    </Container>
 }
 
 interface GameItemProps {
@@ -186,32 +207,3 @@ const NewGameDialog = observer(() => {
         </DialogActions>
     </Dialog>
 })
-
-export function HomePage() {
-    const { home } = useStore()
-
-    React.useEffect(() => { home.load() }, [])
-
-    return <>
-        <Container >
-            <Card>
-                <CardHeader title='Games'
-                    action={<ForRole role={Role.GameMaster}>
-                        <Button variant='outlined' color='primary' size='large' onClick={home.newGame.open}>New game</Button>
-                    </ForRole>}
-                />
-                <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
-                <List component='nav' dense>
-                    <Observer>
-                        {() => <>{ home.games.length
-                            ? home.games.map(x => <GameItem key={x.id} game={x} />)
-                            : <NoGames />
-                            }</>
-                        }
-                    </Observer>
-                </List>
-            </Card>
-        </Container>
-        <NewGameDialog />
-    </>
-}

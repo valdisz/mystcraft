@@ -1,35 +1,11 @@
 import React from 'react'
-import { Box, Button, IconButton, IconButtonProps, Menu, MenuProps, MenuItem } from '@mui/material'
+import { Box, Button, MenuItem } from '@mui/material'
 import { Link, Outlet } from 'react-router-dom'
-import { ForRole } from '../auth'
-import { Role } from '../roles'
+import { Role, ForRole } from '../auth'
+import { MenuIconButton } from '../components'
 
 import ExitToAppIcon from '@mui/icons-material/ExitToApp'
 import MenuIcon from '@mui/icons-material/Menu'
-
-interface MenuIconButtonProps {
-    title?: React.ReactNode
-    children?: React.ReactNode
-    ButtonProps?: IconButtonProps
-    MenuProps?: MenuProps
-}
-
-function MenuIconButton({ title, ButtonProps, MenuProps, children }: MenuIconButtonProps) {
-    const anchorRef = React.useRef(null)
-    const [ open, setOpen ] = React.useState(false)
-
-    const toggleMenu = () => setOpen(!open)
-    const closeMenu = () => setOpen(false)
-
-    return <>
-        <IconButton {...ButtonProps || {}} ref={anchorRef} onClick={toggleMenu}>
-            {title}
-        </IconButton>
-        <Menu {...MenuProps || {}} anchorEl={anchorRef.current} open={open} onBackdropClick={closeMenu}>
-            {children}
-        </Menu>
-    </>
-}
 
 export function Layout() {
     return <Box sx={{
@@ -44,7 +20,7 @@ export function Layout() {
             display: 'flex',
             justifyContent: 'space-between'
         }}>
-            <MenuIconButton title={<MenuIcon />}>
+            <MenuIconButton icon={<MenuIcon />}>
                 <MenuItem component={Link} to='/'>Games</MenuItem>
                 <ForRole role={Role.GameMaster}>
                     <MenuItem component={Link} to='/engines'>Game Engines</MenuItem>
@@ -60,9 +36,7 @@ export function Layout() {
             flex: 1,
             display: 'flex',
             minHeight: 0,
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
+            flexDirection: 'column'
         }}>
             <Outlet />
         </Box>
