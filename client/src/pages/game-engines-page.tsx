@@ -14,6 +14,8 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 function GameEnginesPage() {
     const { gameEngines } = useStore()
 
+    React.useEffect(() => gameEngines.load(), [ ])
+
     return <Container>
         <PageTitle title='Game Engines'
                 actions={<ForRole role={Role.GameMaster}>
