@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "PORT=1234 react-scripts start",
+    "prebuild": "npx browserslist@latest --update-db",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
