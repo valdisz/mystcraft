@@ -7,14 +7,13 @@ export interface EmptyListItemProps {
 
 export function EmptyListItem({ children }: EmptyListItemProps) {
     return <ListItem>
-        <ListItemText>
-            <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                { children || <Typography variant='subtitle1'>Empty</Typography> }
-            </Box>
-        </ListItemText>
+        <Box sx={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+        }}>
+            { children || <Typography variant='subtitle1'>Empty</Typography> }
+        </Box>
     </ListItem>
 }

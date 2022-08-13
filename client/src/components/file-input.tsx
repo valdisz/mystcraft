@@ -1,17 +1,20 @@
 import { Box, BoxProps } from '@mui/material'
 import React from 'react'
 
-export interface FileInputProps extends Omit<BoxProps, 'children'> {
+export interface FileInputProps extends Omit<BoxProps, 'children' | 'onChange'> {
     trigger: React.ReactElement
-    onChange?: React.ChangeEventHandler<HTMLInputElement>
+    onChange?: (files: FileList) => void
 }
 
 export function FileInput({ trigger, onChange, ...props }: FileInputProps) {
     const inputRef = React.useRef<HTMLInputElement>(null)
 
     const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        onChange(event)
-        event.target.value = null
+        const { files } = event.target
+        if (files.length) {
+            onChange(files)
+            event.target.value = null
+        }
     }
 
     return <Box {...props}>

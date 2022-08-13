@@ -1,10 +1,8 @@
 import { action, makeObservable, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
 import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
-import { CreateLocalGame, CreateLocalGameMutation, CreateLocalGameMutationVariables } from '../schema'
 import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
 import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
-import { NewGameStore } from './new-game-store'
 
 export class HomeStore {
     constructor() {
@@ -29,8 +27,6 @@ export class HomeStore {
             });
         });
     };
-
-    readonly newGame = new NewGameStore()
 
     confirmNewGame = async () => {
         // const response = await CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({

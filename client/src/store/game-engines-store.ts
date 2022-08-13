@@ -65,17 +65,7 @@ export class NewGameEngineStore {
         this.store.addEngine(this.name, this.file)
     }
 
-    @action setFile = (event: React.ChangeEvent<HTMLInputElement>) => {
-        console.log('set file')
-
-        const { files } = event.target
-        if (!files.length) {
-            this.file = null
-            this.fileName = ''
-
-            return
-        }
-
+    @action setFile = (files: FileList) => {
         this.file = files[0]
         this.fileName = this.file.name
     }

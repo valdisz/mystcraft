@@ -11,8 +11,6 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The `Byte` scalar type represents non-fractional whole numeric values. Byte can represent values between 0 and 255. */
-  Byte: any;
   /** The `DateTime` scalar represents an ISO-8601 compliant date time type. */
   DateTime: any;
   /** The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1. */
@@ -78,14 +76,6 @@ export enum ApplyPolicy {
   AfterResolver = 'AFTER_RESOLVER',
   BeforeResolver = 'BEFORE_RESOLVER'
 }
-
-export type Article = {
-  __typename?: 'Article';
-  id: Scalars['Long'];
-  playerId?: Maybe<Scalars['Long']>;
-  text: Scalars['String'];
-  type: Scalars['String'];
-};
 
 export type Attitude = {
   __typename?: 'Attitude';
@@ -175,26 +165,6 @@ export type Coords = {
   z: Scalars['Int'];
 };
 
-export type DbGameReport = {
-  __typename?: 'DbGameReport';
-  data: Array<Scalars['Byte']>;
-  factionNumber: Scalars['Int'];
-  game?: Maybe<Game>;
-  turn?: Maybe<DbGameTurn>;
-  turnNumber: Scalars['Int'];
-};
-
-export type DbGameTurn = {
-  __typename?: 'DbGameTurn';
-  articles?: Maybe<Array<Maybe<Article>>>;
-  game?: Maybe<Game>;
-  gameData?: Maybe<Array<Scalars['Byte']>>;
-  isRemote: Scalars['Boolean'];
-  number: Scalars['Int'];
-  playerData?: Maybe<Array<Scalars['Byte']>>;
-  reports?: Maybe<Array<Maybe<DbGameReport>>>;
-};
-
 export enum Direction {
   North = 'NORTH',
   Northeast = 'NORTHEAST',
@@ -276,17 +246,23 @@ export type FleetContent = {
 
 export type Game = Node & {
   __typename?: 'Game';
+  createdAt: Scalars['DateTime'];
+  finished: Scalars['Boolean'];
   id: Scalars['ID'];
-  lastTurn?: Maybe<DbGameTurn>;
   lastTurnNumber?: Maybe<Scalars['Int']>;
   me?: Maybe<Player>;
   name: Scalars['String'];
-  nextTurn?: Maybe<DbGameTurn>;
   nextTurnNumber?: Maybe<Scalars['Int']>;
   options: GameOptions;
-  players?: Maybe<Array<Maybe<Player>>>;
+  players?: Maybe<PlayerCollectionSegment>;
   ruleset: Scalars['String'];
   type: GameType;
+};
+
+
+export type GamePlayersArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 export type GameCollectionSegment = {
@@ -335,17 +311,28 @@ export type GameEngineCreateResult = {
 
 export type GameOptions = {
   __typename?: 'GameOptions';
+  finishAt?: Maybe<Scalars['DateTime']>;
   map?: Maybe<Array<Maybe<MapLevel>>>;
   schedule?: Maybe<Scalars['String']>;
   serverAddress?: Maybe<Scalars['String']>;
+  startAt?: Maybe<Scalars['DateTime']>;
   timeZone?: Maybe<Scalars['String']>;
 };
 
 export type GameOptionsInput = {
+  finishAt?: InputMaybe<Scalars['DateTime']>;
   map?: InputMaybe<Array<InputMaybe<MapLevelInput>>>;
   schedule?: InputMaybe<Scalars['String']>;
   serverAddress?: InputMaybe<Scalars['String']>;
+  startAt?: InputMaybe<Scalars['DateTime']>;
   timeZone?: InputMaybe<Scalars['String']>;
+};
+
+export type GameScheduleSetResult = {
+  __typename?: 'GameScheduleSetResult';
+  error?: Maybe<Scalars['String']>;
+  game?: Maybe<Game>;
+  isSuccess: Scalars['Boolean'];
 };
 
 export type GameTurnRunResult = {
@@ -401,15 +388,8 @@ export enum Market {
   Wanted = 'WANTED'
 }
 
-export type MutationResultOfString = {
-  __typename?: 'MutationResultOfString';
-  data?: Maybe<Scalars['String']>;
-  error?: Maybe<Scalars['String']>;
-  isSuccess: Scalars['Boolean'];
-};
-
-export type MutationType = {
-  __typename?: 'MutationType';
+export type Mutation = {
+  __typename?: 'Mutation';
   allianceCreate?: Maybe<AllianceCreateResult>;
   allianceJoin?: Maybe<AllianceJoinResult>;
   createLocalGame?: Maybe<GameCreateLocalResult>;
@@ -419,6 +399,7 @@ export type MutationType = {
   gameEngineCreate?: Maybe<GameEngineCreateResult>;
   gameJoin?: Maybe<Player>;
   gameOptionsSet?: Maybe<Game>;
+  gameScheduleSet?: Maybe<GameScheduleSetResult>;
   gameTurnRun?: Maybe<GameTurnRunResult>;
   playerQuit?: Maybe<PlayerQuitResult>;
   setOrders?: Maybe<MutationResultOfString>;
@@ -430,19 +411,19 @@ export type MutationType = {
 };
 
 
-export type MutationTypeAllianceCreateArgs = {
+export type MutationAllianceCreateArgs = {
   name?: InputMaybe<Scalars['String']>;
   playerId: Scalars['ID'];
 };
 
 
-export type MutationTypeAllianceJoinArgs = {
+export type MutationAllianceJoinArgs = {
   allianceId: Scalars['ID'];
   playerId: Scalars['ID'];
 };
 
 
-export type MutationTypeCreateLocalGameArgs = {
+export type MutationCreateLocalGameArgs = {
   gameData?: InputMaybe<Scalars['Upload']>;
   gameEngineId: Scalars['ID'];
   name?: InputMaybe<Scalars['String']>;
@@ -451,85 +432,98 @@ export type MutationTypeCreateLocalGameArgs = {
 };
 
 
-export type MutationTypeCreateUserArgs = {
+export type MutationCreateUserArgs = {
   email?: InputMaybe<Scalars['String']>;
   password?: InputMaybe<Scalars['String']>;
 };
 
 
-export type MutationTypeGameCreateRemoteArgs = {
+export type MutationGameCreateRemoteArgs = {
   name?: InputMaybe<Scalars['String']>;
   options?: InputMaybe<GameOptionsInput>;
 };
 
 
-export type MutationTypeGameDeleteArgs = {
+export type MutationGameDeleteArgs = {
   gameId: Scalars['ID'];
 };
 
 
-export type MutationTypeGameEngineCreateArgs = {
+export type MutationGameEngineCreateArgs = {
   file?: InputMaybe<Scalars['Upload']>;
   name?: InputMaybe<Scalars['String']>;
 };
 
 
-export type MutationTypeGameJoinArgs = {
+export type MutationGameJoinArgs = {
   gameId: Scalars['ID'];
 };
 
 
-export type MutationTypeGameOptionsSetArgs = {
+export type MutationGameOptionsSetArgs = {
   gameId: Scalars['ID'];
   options?: InputMaybe<GameOptionsInput>;
 };
 
 
-export type MutationTypeGameTurnRunArgs = {
+export type MutationGameScheduleSetArgs = {
+  gameId: Scalars['ID'];
+  schedule?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationGameTurnRunArgs = {
   gameId: Scalars['ID'];
 };
 
 
-export type MutationTypePlayerQuitArgs = {
+export type MutationPlayerQuitArgs = {
   playerId: Scalars['ID'];
 };
 
 
-export type MutationTypeSetOrdersArgs = {
+export type MutationSetOrdersArgs = {
   orders?: InputMaybe<Scalars['String']>;
   unitId?: InputMaybe<Scalars['ID']>;
 };
 
 
-export type MutationTypeStudyPlanStudyArgs = {
+export type MutationStudyPlanStudyArgs = {
   skill?: InputMaybe<Scalars['String']>;
   unitId?: InputMaybe<Scalars['ID']>;
 };
 
 
-export type MutationTypeStudyPlanTargetArgs = {
+export type MutationStudyPlanTargetArgs = {
   level: Scalars['Int'];
   skill?: InputMaybe<Scalars['String']>;
   unitId?: InputMaybe<Scalars['ID']>;
 };
 
 
-export type MutationTypeStudyPlanTeachArgs = {
+export type MutationStudyPlanTeachArgs = {
   unitId?: InputMaybe<Scalars['ID']>;
   units?: InputMaybe<Array<Scalars['Int']>>;
 };
 
 
-export type MutationTypeTurnReProcessArgs = {
+export type MutationTurnReProcessArgs = {
   gameId: Scalars['ID'];
   turn: Scalars['Int'];
 };
 
 
-export type MutationTypeUpdateUserRolesArgs = {
+export type MutationUpdateUserRolesArgs = {
   add?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   remove?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   userId: Scalars['ID'];
+};
+
+export type MutationResultOfString = {
+  __typename?: 'MutationResultOfString';
+  data?: Maybe<Scalars['String']>;
+  error?: Maybe<Scalars['String']>;
+  isSuccess: Scalars['Boolean'];
 };
 
 /** The node interface is implemented by entities that have a global unique identifier. */
@@ -567,6 +561,14 @@ export type PlayerReportsArgs = {
 
 export type PlayerTurnArgs = {
   number: Scalars['Int'];
+};
+
+export type PlayerCollectionSegment = {
+  __typename?: 'PlayerCollectionSegment';
+  items?: Maybe<Array<Maybe<Player>>>;
+  /** Information to aid in pagination. */
+  pageInfo: CollectionSegmentInfo;
+  totalCount: Scalars['Int'];
 };
 
 export type PlayerQuitResult = {
@@ -888,7 +890,7 @@ export type GameDetailsFragment = { __typename?: 'Game', id: string, name: strin
 
 export type GameEngineFragment = { __typename?: 'GameEngine', id: string, name: string, createdAt: any };
 
-export type GameHeaderFragment = { __typename?: 'Game', id: string, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
+export type GameHeaderFragment = { __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null };
 
 export type GameOptionsFragment = { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null };
 
@@ -935,14 +937,14 @@ export type CreateLocalGameMutationVariables = Exact<{
 }>;
 
 
-export type CreateLocalGameMutation = { __typename?: 'MutationType', createLocalGame?: { __typename?: 'GameCreateLocalResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null } | null };
+export type CreateLocalGameMutation = { __typename?: 'Mutation', createLocalGame?: { __typename?: 'GameCreateLocalResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null } | null } | null };
 
 export type DeleteGameMutationVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
 
 
-export type DeleteGameMutation = { __typename?: 'MutationType', gameDelete?: Array<{ __typename?: 'Game', id: string, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null };
+export type DeleteGameMutation = { __typename?: 'Mutation', gameDelete?: Array<{ __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null } | null> | null };
 
 export type GameCreateRemoteMutationVariables = Exact<{
   name: Scalars['String'];
@@ -950,7 +952,7 @@ export type GameCreateRemoteMutationVariables = Exact<{
 }>;
 
 
-export type GameCreateRemoteMutation = { __typename?: 'MutationType', gameCreateRemote?: { __typename?: 'GameCreateRemoteResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null } | null };
+export type GameCreateRemoteMutation = { __typename?: 'Mutation', gameCreateRemote?: { __typename?: 'GameCreateRemoteResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null } | null } | null };
 
 export type GameEngineCreateMutationVariables = Exact<{
   name: Scalars['String'];
@@ -958,14 +960,14 @@ export type GameEngineCreateMutationVariables = Exact<{
 }>;
 
 
-export type GameEngineCreateMutation = { __typename?: 'MutationType', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null } | null };
+export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null } | null };
 
 export type JoinGameMutationVariables = Exact<{
   gameId: Scalars['ID'];
 }>;
 
 
-export type JoinGameMutation = { __typename?: 'MutationType', gameJoin?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
+export type JoinGameMutation = { __typename?: 'Mutation', gameJoin?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
 
 export type SetOrderMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -973,7 +975,7 @@ export type SetOrderMutationVariables = Exact<{
 }>;
 
 
-export type SetOrderMutation = { __typename?: 'MutationType', setOrders?: { __typename?: 'MutationResultOfString', isSuccess: boolean, error?: string | null } | null };
+export type SetOrderMutation = { __typename?: 'Mutation', setOrders?: { __typename?: 'MutationResultOfString', isSuccess: boolean, error?: string | null } | null };
 
 export type StudyPlanStudyMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -981,7 +983,7 @@ export type StudyPlanStudyMutationVariables = Exact<{
 }>;
 
 
-export type StudyPlanStudyMutation = { __typename?: 'MutationType', studyPlanStudy?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
+export type StudyPlanStudyMutation = { __typename?: 'Mutation', studyPlanStudy?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
 
 export type StudyPlanTargetMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -990,7 +992,7 @@ export type StudyPlanTargetMutationVariables = Exact<{
 }>;
 
 
-export type StudyPlanTargetMutation = { __typename?: 'MutationType', studyPlanTarget?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
+export type StudyPlanTargetMutation = { __typename?: 'Mutation', studyPlanTarget?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
 
 export type StudyPlanTeachMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -998,7 +1000,7 @@ export type StudyPlanTeachMutationVariables = Exact<{
 }>;
 
 
-export type StudyPlanTeachMutation = { __typename?: 'MutationType', studyPlanTeach?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
+export type StudyPlanTeachMutation = { __typename?: 'Mutation', studyPlanTeach?: { __typename?: 'StudyPlanResult', isSuccess: boolean, error?: string | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null };
 
 export type GetAllianceMagesQueryVariables = Exact<{
   gameId: Scalars['ID'];
@@ -1029,7 +1031,7 @@ export type GetGamesQueryVariables = Exact<{
 }>;
 
 
-export type GetGamesQuery = { __typename?: 'Query', games?: { __typename?: 'GameCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Game', id: string, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null> | null, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+export type GetGamesQuery = { __typename?: 'Query', games?: { __typename?: 'GameCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null } | null> | null, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean, hasPreviousPage: boolean } } | null };
 
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1111,13 +1113,23 @@ export const GameEngine = gql`
 export const GameHeader = gql`
     fragment GameHeader on Game {
   id
+  finished
+  createdAt
   name
   options {
     schedule
     timeZone
+    startAt
+    finishAt
   }
   me {
     ...PlayerHeader
+  }
+  players {
+    items {
+      ...PlayerHeader
+    }
+    totalCount
   }
 }
     ${PlayerHeader}`;

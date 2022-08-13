@@ -10,7 +10,7 @@ const theme = createTheme({
     },
     typography: {
         fontFamily: 'Fira Code, monospace',
-        fontSize: 11,
+        fontSize: 12,
         h1: heading,
         h2: heading,
         h3: heading,

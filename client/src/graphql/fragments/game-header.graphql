@@ -1,11 +1,21 @@
 fragment GameHeader on Game {
   id
+  finished
+  createdAt
   name
   options {
     schedule
     timeZone
+    startAt
+    finishAt
   }
   me {
     ...PlayerHeader
+  }
+  players {
+    items {
+      ...PlayerHeader
+    }
+    totalCount
   }
 }

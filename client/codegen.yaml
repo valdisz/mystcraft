@@ -15,3 +15,6 @@ generates:
       - typescript
       - typescript-operations
       - typescript-document-nodes
+  ./src/schema.graphql:
+    plugins:
+      - schema-ast

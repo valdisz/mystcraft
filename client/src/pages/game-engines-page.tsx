@@ -1,8 +1,8 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
 import {
-    Button, Card, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography,
-    Box, Stack
+    Button, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography,
+    Box, Stack, Paper
 } from '@mui/material'
 import { PageTitle, EmptyListItem, Forbidden, FileInput } from '../components'
 import { NewGameEngineStore, useStore } from '../store'
@@ -22,14 +22,14 @@ function GameEnginesPage() {
                 <Button variant='outlined' color='primary' size='large' onClick={gameEngines.beginNewEngine}>New Engine</Button>
             </ForRole>} />
 
-        <Card>
+        <Paper elevation={0} variant='outlined'>
             <List dense>
                 { gameEngines.engines.length
                     ? gameEngines.engines.map(x => <GameEngineItem key={x.id} engine={x} />)
                     : <EmptyListItem />
                 }
             </List>
-        </Card>
+        </Paper>
 
         <ObservableNewGameEngineDialog store={gameEngines.newEngine} />
     </Container>
