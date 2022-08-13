@@ -5,7 +5,7 @@ namespace advisor
     using System.Text;
 
     public class AccessControl : IDisposable {
-        readonly RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+        readonly RandomNumberGenerator rng = RandomNumberGenerator.Create();
 
         public string GetSalt() {
             byte[] salt = new byte[18];
@@ -28,9 +28,8 @@ namespace advisor
             return ComputeDigest(salt, password) == digest;
         }
 
-        public void Dispose()
-        {
-            ((IDisposable)rng).Dispose();
+        public void Dispose() {
+            rng.Dispose();
         }
     }
 }

@@ -281,8 +281,7 @@ namespace advisor {
                 .AddScoped<IAuthorizationHandler, OwnPlayerAuthorizationHandler>()
                 .AddMediatR(typeof(Startup))
                 .AddMvcCore()
-                    .AddDataAnnotations()
-                    .SetCompatibilityVersion(CompatibilityVersion.Latest);
+                    .AddDataAnnotations();
 
             services
                 .AddMemoryCache();

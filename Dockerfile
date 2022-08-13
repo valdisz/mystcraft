@@ -9,7 +9,7 @@ RUN yarn build
 
 ####################
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS net-build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS net-build
 WORKDIR /server
 
 COPY server/*.csproj ./
@@ -21,7 +21,7 @@ RUN dotnet publish -c Release -o out
 
 ####################
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 EXPOSE 5000
 

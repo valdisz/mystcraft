@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/server/bin/Debug/net5.0/advisor.dll",
+            "program": "${workspaceFolder}/server/bin/Debug/net6.0/advisor.dll",
             "args": [],
             "cwd": "${workspaceFolder}/server",
             "console": "internalConsole",
@@ -19,12 +19,6 @@
                 "ADVISOR_SEED__EMAIL": "valdis@zobela.eu",
                 "ADVISOR_SEED__PASSWORD": "valdis"
             }
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
         },
         {
             "type": "node",
