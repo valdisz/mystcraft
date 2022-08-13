@@ -6,8 +6,7 @@ namespace advisor.Features {
     using Hangfire;
     using MediatR;
 
-    public record GameOptionsSet(long GameId, GameOptions Options) : IRequest<DbGame> {
-    }
+    public record GameOptionsSet(long GameId, GameOptions Options) : IRequest<DbGame>;
 
     public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, DbGame> {
         public GameOptionsSetHandler(Database db, IRecurringJobManager jobs) {

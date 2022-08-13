@@ -287,8 +287,17 @@ namespace advisor.Migrations.pgsql
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<long?>("EngineId")
                         .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset?>("FinishAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Finished")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("LastTurnNumber")
                         .HasColumnType("integer");
@@ -308,6 +317,9 @@ namespace advisor.Migrations.pgsql
                     b.Property<string>("Ruleset")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("StartAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
                         .IsRequired()

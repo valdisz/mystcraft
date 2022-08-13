@@ -3,12 +3,15 @@ namespace advisor.Persistence;
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
 
+[GraphQLName("GameReport")]
 public class DbGameReport : InGameContext {
     [GraphQLIgnore]
     public long GameId { get; set; }
 
+    [GraphQLIgnore]
     public int TurnNumber { get; set; }
 
+    [GraphQLIgnore]
     public int FactionNumber { get; set; }
 
     [Required]

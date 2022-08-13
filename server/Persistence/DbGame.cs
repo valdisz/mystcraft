@@ -1,4 +1,5 @@
 namespace advisor.Persistence {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
@@ -14,6 +15,11 @@ namespace advisor.Persistence {
 
         public GameType Type { get; set; }
 
+        public bool Finished { get; set; }
+
+        [Required]
+        public DateTimeOffset CreatedAt { get; set; }
+
         [GraphQLIgnore]
         public long? EngineId { get; set; }
 
@@ -28,8 +34,10 @@ namespace advisor.Persistence {
 
         public int? NextTurnNumber { get; set; }
 
+        [GraphQLIgnore]
         public DbGameTurn LastTurn { get; set; }
 
+        [GraphQLIgnore]
         public DbGameTurn NextTurn { get; set; }
 
 

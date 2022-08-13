@@ -1,30 +1,40 @@
-namespace advisor.Features
-{
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using advisor.Persistence;
-    using MediatR;
+namespace advisor.Features;
 
-    public record GameCreateLocal(string Name, long EngineId, GameOptions Options, Stream PlayerData, Stream GameData) : IRequest<GameCreateLocalResult>;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using MediatR;
 
-    public record GameCreateLocalResult(DbGame Game, bool IsSuccess, string Error) : IMutationResult;
+public record GameCreateLocal(string Name, long EngineId, GameOptions Options, Stream PlayerData, Stream GameData) : IRequest<GameCreateLocalResult>;
 
-    public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreateLocalResult> {
-        public GameCreateLocalHandler(Database db) {
-            this.db = db;
-        }
+public record GameCreateLocalResult(DbGame Game, bool IsSuccess, string Error) : IMutationResult;
 
-        private readonly Database db;
+public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreateLocalResult> {
+    public GameCreateLocalHandler(Database db) {
+        this.db = db;
+    }
 
-        public async Task<GameCreateLocalResult> Handle(GameCreateLocal request, CancellationToken cancellationToken) {
-            var newGame = new DbGame {
+    private readonly Database db;
+
+    public async Task<GameCreateLocalResult> Handle(GameCreateLocal request, CancellationToken cancellationToken) {
+        DbGame game;
+        await using (var tx = await db.Database.BeginTransactionAsync()) {
+            game = new DbGame {
                 Name = request.Name,
                 Type = GameType.Local,
+                CreatedAt = DateTimeOffset.UtcNow,
                 Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
                 EngineId = request.EngineId,
                 Options = request.Options
             };
+
+            await db.Games.AddAsync(game);
+
+            await db.SaveChangesAsync();
+
+            /////
 
             using var playerData = new MemoryStream();
             await request.PlayerData.CopyToAsync(playerData);
@@ -35,25 +45,30 @@ namespace advisor.Features
             gameData.Seek(0, SeekOrigin.Begin);
 
             var lastTurn = new DbGameTurn {
+                GameId = game.Id,
                 Number = 0,
                 PlayerData = playerData.ToArray(),
                 GameData = gameData.ToArray()
             };
 
             var nextTurn = new DbGameTurn {
+                GameId = game.Id,
                 Number = 1
             };
 
-            newGame.Turns.Add(lastTurn);
-            newGame.Turns.Add(nextTurn);
+            game.Turns.Add(lastTurn);
+            game.Turns.Add(nextTurn);
 
-            newGame.LastTurn = lastTurn;
-            newGame.NextTurn = nextTurn;
+            game.LastTurn = lastTurn;
+            game.NextTurn = nextTurn;
 
-            await db.Games.AddAsync(newGame);
             await db.SaveChangesAsync();
 
-            return new GameCreateLocalResult(newGame, true, null);
+            /////
+
+            await tx.CommitAsync();
         }
+
+        return new GameCreateLocalResult(game, true, null);
     }
 }

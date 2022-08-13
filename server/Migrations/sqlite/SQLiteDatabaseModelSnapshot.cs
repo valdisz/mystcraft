@@ -281,7 +281,16 @@ namespace advisor.Migrations.sqlite
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("EngineId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("FinishAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Finished")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("LastTurnNumber")
@@ -301,6 +310,9 @@ namespace advisor.Migrations.sqlite
 
                     b.Property<string>("Ruleset")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("StartAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Type")

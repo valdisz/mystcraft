@@ -13,7 +13,7 @@ namespace advisor
     using Persistence;
 
     [Authorize]
-    public class MutationType {
+    public class Mutation {
         [Authorize(Policy = Policies.UserManagers)]
         public Task<DbUser> CreateUser(IMediator mediator, string email, string password) {
             return mediator.Send(new UserCreate(email, password));
@@ -32,7 +32,7 @@ namespace advisor
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<GameCreateLocalResult> CreateLocalGame(
+        public async Task<GameCreateLocalResult> CreateLocalGame(
             IMediator mediator,
             string name,
             [ID("GameEngine")] long gameEngineId,
@@ -43,7 +43,9 @@ namespace advisor
             using var playersDataStream = playerData.OpenReadStream();
             using var gameDataStream = gameData.OpenReadStream();
 
-            return mediator.Send(new GameCreateLocal(name, gameEngineId, options, playersDataStream, gameDataStream));
+            var result = await mediator.Send(new GameCreateLocal(name, gameEngineId, options, playersDataStream, gameDataStream));
+
+            return result;
         }
 
         [Authorize(Policy = Policies.GameMasters)]
@@ -63,6 +65,11 @@ namespace advisor
         [Authorize(Policy = Policies.GameMasters)]
         public Task<DbGame> GameOptionsSet(IMediator mediator, [ID("Game")] long gameId, GameOptions options) {
             return mediator.Send(new GameOptionsSet(gameId, options));
+        }
+
+        [Authorize(Policy = Policies.GameMasters)]
+        public Task<GameScheduleSetResult> GameScheduleSet(IMediator mediator, [ID("Game")] long gameId, string schedule) {
+            return mediator.Send(new GameScheduleSet(gameId, schedule));
         }
 
         public Task<GameTurnRunResult> GameTurnRun(IMediator mediator, [ID("Game")] long gameId) {

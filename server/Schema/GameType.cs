@@ -41,10 +41,12 @@
         // }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<List<DbPlayer>> Players(Database db, [Parent] DbGame game) {
+        [UseOffsetPaging]
+        public IOrderedQueryable<DbPlayer> Players(Database db, [Parent] DbGame game) {
             return db.Players
                 .AsNoTracking()
-                .Where(x => x.GameId == game.Id).ToListAsync();
+                .InGame(game.Id)
+                .OrderBy(x => x.Id);
         }
 
         // [Authorize(Policy = Policies.GameMasters)]

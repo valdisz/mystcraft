@@ -21,6 +21,7 @@ namespace advisor {
     using HotChocolate;
     using HotChocolate.Execution;
     using HotChocolate.Types;
+    using HotChocolate.Types.Pagination;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
@@ -234,8 +235,13 @@ namespace advisor {
                     r.AddService<IAuthorizationService>();
                 })
                 .AddApolloTracing()
+                .SetPagingOptions(new PagingOptions {
+                    DefaultPageSize = 100,
+                    MaxPageSize = 100,
+                    IncludeTotalCount = true
+                })
                 .AddQueryType<QueryType>()
-                .AddMutationType<MutationType>()
+                .AddMutationType<Mutation>()
                 .AddGlobalObjectIdentification()
                 .AddType<UploadType>()
                 .AddType<UserType>()
