@@ -21,6 +21,11 @@
                 return RunServerAsync(args);
             }
             else {
+                Console.WriteLine("Args:");
+                foreach (var a in args) {
+                    Console.WriteLine(a);
+                }
+
                 return RunConverterAsync(args);
             }
         }

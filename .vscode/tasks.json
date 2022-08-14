@@ -9,7 +9,12 @@
                 "build",
                 "${workspaceFolder}/server/advisor.csproj"
             ],
-            "problemMatcher": "$tsc"
+            "problemMatcher": "$msCompile",
+            "isBuildCommand": true,
+            "group": {
+                "isDefault": true,
+                "kind": "build"
+            }
         },
         {
             "label": "publish",
@@ -19,18 +24,51 @@
                 "publish",
                 "${workspaceFolder}/server/advisor.csproj"
             ],
-            "problemMatcher": "$tsc"
+            "problemMatcher": "$msCompile",
+            "isBuildCommand": true,
+            "group": {
+                "isDefault": false,
+                "kind": "build"
+            }
         },
         {
-            "label": "watch",
+            "label": "Server: Run",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/server/advisor.csproj"
+                "--no-hot-reload"
             ],
-            "problemMatcher": "$tsc"
+            "problemMatcher": "$msCompile",
+            "options": {
+                "cwd": "${workspaceFolder}/server",
+                "env": {
+                    "ASPNETCORE_ENVIRONMENT": "Development",
+                    "ADVISOR_SEED__EMAIL": "admin@advisor",
+                    "ADVISOR_SEED__PASSWORD": "admin123"
+                }
+            }
+        },
+        {
+            "label": "Client: Run",
+            "command": "yarn",
+            "args": [
+                "start"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/client"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "Server: Run",
+                "Client: Run"
+            ],
+            "problemMatcher": []
         }
     ]
 }

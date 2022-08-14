@@ -5,7 +5,7 @@ node_modules/
 .cache/
 dist/
 .idea/
-*.db
+*.db*
 .*
 wwwroot/
 !.github/

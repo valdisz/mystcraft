@@ -1,8 +1,6 @@
 namespace advisor.facts {
     using System.Linq;
     using Pidgin;
-    using Xunit;
-    using Xunit.Abstractions;
 
     public static class ParserResultEx {
         public static Result<char, T> AssertParsed<T>(this ITestOutputHelper output, Result<char, T> res) {
@@ -21,7 +19,7 @@ namespace advisor.facts {
                 output.WriteLine($"Error at (Ln {pos.Line}, Col {pos.Col})");
 
                 foreach (var e in res.Error.Expected) {
-                    var tokens = e.Tokens ?? Enumerable.Empty<char>();
+                    var tokens = e.Tokens;
                     var expected = tokens.Any()
                         ? string.Join("", tokens)
                         : e.Label;
