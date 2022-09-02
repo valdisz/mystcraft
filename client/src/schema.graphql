@@ -362,8 +362,8 @@ enum Market {
 type Mutation {
   allianceCreate(name: String, playerId: ID!): AllianceCreateResult
   allianceJoin(allianceId: ID!, playerId: ID!): AllianceJoinResult
-  createLocalGame(gameData: Upload, gameEngineId: ID!, name: String, options: GameOptionsInput, playerData: Upload): GameCreateLocalResult
   createUser(email: String, password: String): User
+  gameCreateLocal(gameData: Upload, gameEngineId: ID!, name: String, options: GameOptionsInput, playerData: Upload): GameCreateLocalResult
   gameCreateRemote(name: String, options: GameOptionsInput): GameCreateRemoteResult
   gameDelete(gameId: ID!): [Game]
   gameEngineCreate(file: Upload, name: String): GameEngineCreateResult

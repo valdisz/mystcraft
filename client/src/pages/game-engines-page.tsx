@@ -14,8 +14,6 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 function GameEnginesPage() {
     const { gameEngines } = useStore()
 
-    React.useEffect(() => gameEngines.load(), [ ])
-
     return <Container>
         <PageTitle title='Game Engines'
                 actions={<ForRole role={Role.GameMaster}>
@@ -24,8 +22,8 @@ function GameEnginesPage() {
 
         <Paper elevation={0} variant='outlined'>
             <List dense>
-                { gameEngines.engines.length
-                    ? gameEngines.engines.map(x => <GameEngineItem key={x.id} engine={x} />)
+                { gameEngines.engines.value.length
+                    ? gameEngines.engines.value.map(x => <GameEngineItem key={x.id} engine={x} />)
                     : <EmptyListItem />
                 }
             </List>

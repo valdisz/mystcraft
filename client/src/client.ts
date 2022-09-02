@@ -10,15 +10,15 @@ const link = createUploadLink({
 export const CLIENT: ApolloClient<NormalizedCacheObject> = new ApolloClient({
     cache,
     link,
-    defaultOptions: {
-        watchQuery: {
-            fetchPolicy: 'no-cache'
-        },
-        query: {
-            fetchPolicy: 'no-cache'
-        },
-        mutate: {
-            fetchPolicy: 'no-cache'
-        }
-    }
+    // defaultOptions: {
+    //     watchQuery: {
+    //         fetchPolicy: 'no-cache'
+    //     },
+    //     query: {
+    //         fetchPolicy: 'no-cache'
+    //     },
+    //     mutate: {
+    //         fetchPolicy: 'no-cache'
+    //     }
+    // }
 })

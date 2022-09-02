@@ -32,7 +32,7 @@ namespace advisor
         }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public async Task<GameCreateLocalResult> CreateLocalGame(
+        public async Task<GameCreateLocalResult> GameCreateLocal(
             IMediator mediator,
             string name,
             [ID("GameEngine")] long gameEngineId,

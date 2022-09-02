@@ -1,12 +1,14 @@
 import * as React from 'react'
-import { List, ListItem, ListItemText, ListItemIcon, TextField, Button, Container, Card,
-    ListItemSecondaryAction, DialogTitle, DialogContent, DialogActions, Dialog, Box, Grid, Typography, Stack, Paper, FormControl, Select, InputLabel, MenuItem, ListItemProps, Accordion, AccordionSummary, CardActions, Chip
+import { List, ListItem, ListItemText, TextField, Button, Container,
+    DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, Paper, FormControl, Select,
+    InputLabel, MenuItem, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent, CardActions,
+    FormGroup, FormControlLabel, Switch
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react'
 import { Link, LinkProps } from 'react-router-dom'
 import { useStore } from '../store'
-import { SplitButton, PageTitle, EmptyListItem, FileInput, ExpandMore } from '../components'
-import { GameHeaderFragment, PlayerHeaderFragment } from '../schema'
+import { SplitButton, PageTitle, EmptyListItem, FileInput } from '../components'
+import { GameHeaderFragment } from '../schema'
 import cronstrue from 'cronstrue'
 import { Role, ForRole } from '../auth'
 
@@ -15,29 +17,32 @@ import AttachFileIcon from '@mui/icons-material/AttachFile'
 export function HomePage() {
     const { home, newGame } = useStore()
 
-    React.useEffect(() => { home.load() }, [])
+    // React.useEffect(() => { home.load() }, [])
 
     return <Container>
         <PageTitle title='Games'
             actions={<ForRole role={Role.GameMaster}>
                         <Button variant='outlined' color='primary' size='large' onClick={newGame.open}>New game</Button>
                     </ForRole>} />
-        <Paper elevation={0} variant='outlined'>
+        <Paper elevation={0}>
             <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
-            <List component='nav' dense disablePadding>
+            <Grid container spacing={2}>
                 <Observer>
-                    {() => <>{ home.games.length
-                        ? home.games.map(x => <GameItem key={x.id} game={x} />)
-                        : <EmptyListItem>
-                            <Stack alignItems='center'>
-                                <Typography variant='h6'>Empty</Typography>
-                                <Button variant='outlined' color='primary' onClick={newGame.open}>Create first game</Button>
-                            </Stack>
-                        </EmptyListItem>
-                        }</>
-                    }
+                    {() => {
+                        const games = home.games.value
+
+                        return games.length
+                            ? <>{games.map(x => <GameItem key={x.id} game={x} />)}</>
+                            : <EmptyListItem>
+                                <Stack alignItems='center'>
+                                    <Typography variant='h6'>Empty</Typography>
+                                    <Button variant='outlined' color='primary' onClick={newGame.open}>Create first game</Button>
+                                </Stack>
+                            </EmptyListItem>
+
+                    }}
                 </Observer>
-            </List>
+            </Grid>
         </Paper>
         <ObservableNewGameDialog />
     </Container>
@@ -59,45 +64,57 @@ function GameItem({ game }: GameItemProps) {
         ? `${cronstrue.toString(game.options.schedule, { use24HourTimeFormat: true })} (${game.options.timeZone ?? 'UTC'})`
         : null
 
-    return <ListItem disablePadding disableGutters>
-        <Stack flex={1} gap={2} sx={{ p: 2}}>
-            <Stack direction='row' alignItems='flex-start' justifyContent='space-between' gap={2}>
-                <Stack>
-                    <Typography variant='h4'>{game.name}</Typography>
+    return <Grid item xs={12} sm={6} md={4}>
+        <Card>
+            <CardActionArea onClick={() => playerJoind ? home.triggerUploadReport(game.me.id) : home.joinGame(game.id)}>
+                <CardContent>
+                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                        <Typography variant='h4' gutterBottom>{game.name}</Typography>
+                        { playerJoind && <Chip label='Joined' size='small' color='success' /> }
+                    </Stack>
                     <Typography variant='caption'>{cron}</Typography>
-                </Stack>
-                <Observer>
-                    {() => playerJoind
-                        ? <SplitButton disabled={home.uploading} color='secondary' size='small' variant='outlined'
+
+                </CardContent>
+            </CardActionArea>
+                {/* <CardActions>
+                    <Observer>
+                        {() => playerJoind
+                            ? <SplitButton disabled={home.uploading} color='secondary' size='small' variant='outlined'
                             onClick={() => home.triggerUploadReport(game.me.id)}
                             actions={[
                                 { content: 'Import map', onAction: () => home.triggerImportMap(game.me.id) },
+                                '---',
+                                { content: 'Update Ruleset', onAction: () => home.triggerRuleset(game.id) },
                                 { content: 'Delete', onAction: () => home.deleteGame(game.id) },
-                                { content: 'Update Ruleset', onAction: () => home.triggerRuleset(game.id) }
                             ]}>
-                                Upload report
-                        </SplitButton>
-                        : <Button color='primary' size='small' variant='outlined' onClick={() => home.joinGame(game.id)}>Join</Button> }
-                </Observer>
-            </Stack>
+                                    Upload report
+                            </SplitButton>
+                            : null }
+                    </Observer>
 
-            <Box>
-                <Stack flex={1} gap={2} direction='row' alignItems='center' justifyContent='space-between' minWidth={0}>
-                    <Stack direction='row' gap={2}>
-                        <Chip label='Pending' size='small' color='warning' />
-                        <Typography variant='overline'>Starting in 35 days</Typography>
+                </CardActions> */}
+                {/* <Stack flex={1} gap={2} sx={{ p: 2}}>
+                    <Stack direction='row' alignItems='flex-start' justifyContent='space-between' gap={2}>
+                        <Stack>
+                        </Stack>
                     </Stack>
-                    <Button>0 Players</Button>
-                </Stack>
-            </Box>
-        </Stack>
-    </ListItem>
+
+                    <Box>
+                        <Stack flex={1} gap={2} direction='row' alignItems='center' justifyContent='space-between' minWidth={0}>
+                            <Stack direction='row' gap={2}>
+                                <Chip label='Pending' size='small' color='warning' />
+                                <Typography variant='overline'>Starting in 35 days</Typography>
+                            </Stack>
+                            <Button>0 Players</Button>
+                        </Stack>
+                    </Box>
+                </Stack> */}
+        </Card>
+    </Grid>
 }
 
 function NewGameDialog() {
     const { newGame, gameEngines } = useStore()
-
-    React.useEffect(() => gameEngines.load(), [ ])
 
     return <Dialog fullWidth maxWidth='sm' open={newGame.isOpen} onClose={newGame.cancel}>
         <DialogTitle>New game</DialogTitle>
@@ -112,39 +129,45 @@ function NewGameDialog() {
                     onChange={newGame.setName}
                     />
 
-                <FormControl fullWidth>
-                    <InputLabel>Engine</InputLabel>
-                    <Select label="Engine" value={newGame.engine} onChange={newGame.setEngine}>
-                        { gameEngines.engines.map(x => <MenuItem key={x.id} value={x.id}>
-                            <ListItemText primary={x.name} />
-                            <Typography variant='caption'>{x.createdAt}</Typography>
-                        </MenuItem>) }
-                    </Select>
-                </FormControl>
+                <FormGroup>
+                    <FormControlLabel control={<Switch checked={newGame.remote} onChange={newGame.remoteChange} />} label="Remote" />
+                </FormGroup>
 
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                }}>
-                    <Typography>
-                        <span>File:{' '}</span>
-                        <strong>{newGame.gameFileName}</strong>
-                    </Typography>
-                    <FileInput trigger={<Button variant='outlined' startIcon={<AttachFileIcon />}>Select game.in</Button>} onChange={files => newGame.setFile('game', files[0])} />
-                </Box>
+                { !newGame.remote && <>
+                    <FormControl fullWidth>
+                        <InputLabel>Engine</InputLabel>
+                        <Select label="Engine" value={newGame.engine} onChange={newGame.setEngine}>
+                            { gameEngines.engines.value.map(x => <MenuItem key={x.id} value={x.id}>
+                                <ListItemText primary={x.name} />
+                                <Typography variant='caption'>{x.createdAt}</Typography>
+                            </MenuItem>) }
+                        </Select>
+                    </FormControl>
 
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                }}>
-                    <Typography>
-                        <span>File:{' '}</span>
-                        <strong>{newGame.playersFileName}</strong>
-                    </Typography>
-                    <FileInput trigger={<Button variant='outlined' startIcon={<AttachFileIcon />}>Select players.in</Button>} onChange={files => newGame.setFile('players', files[0])} />
-                </Box>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                    }}>
+                        <Typography>
+                            <span>File:{' '}</span>
+                            <strong>{newGame.gameFileName}</strong>
+                        </Typography>
+                        <FileInput trigger={<Button variant='outlined' startIcon={<AttachFileIcon />}>Select game.in</Button>} onChange={files => newGame.setFile('game', files[0])} />
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                    }}>
+                        <Typography>
+                            <span>File:{' '}</span>
+                            <strong>{newGame.playersFileName}</strong>
+                        </Typography>
+                        <FileInput trigger={<Button variant='outlined' startIcon={<AttachFileIcon />}>Select players.in</Button>} onChange={files => newGame.setFile('players', files[0])} />
+                    </Box>
+                </> }
 
                 <TextField fullWidth multiline label='Options' rows={8} value={newGame.options} onChange={newGame.setOptions} />
             </Stack>

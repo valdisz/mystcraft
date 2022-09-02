@@ -1,37 +1,23 @@
-import { action, makeObservable, observable, runInAction } from 'mobx'
-import { CLIENT } from '../client'
+import { action, makeObservable, observable } from 'mobx'
 import { GameEngineFragment } from '../schema'
-import { GetGameEngines, GetGameEnginesQuery, GetGameEnginesQueryVariables } from '../schema'
+import { GetGameEngines, GetGameEnginesQuery } from '../schema'
 import { GameEngineCreate, GameEngineCreateMutation, GameEngineCreateMutationVariables } from '../schema'
+import { querySeq, mutate } from './connection'
 
 export class GameEnginesStore {
     constructor() {
         // makeObservable(this)
     }
 
-    readonly engines = observable<GameEngineFragment>([])
+    readonly engines = querySeq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [])
 
     readonly newEngine = new NewGameEngineStore(this)
-
-    load = () => {
-        CLIENT.query<GetGameEnginesQuery, GetGameEnginesQueryVariables>({
-            query: GetGameEngines
-        }).then(response => {
-            runInAction(() => {
-                this.engines.replace(response.data.gameEngines.items)
-            });
-        });
-    }
 
     beginNewEngine = () => this.newEngine.open()
 
     addEngine(name: string, file: File) {
-        CLIENT.mutate<GameEngineCreateMutation, GameEngineCreateMutationVariables>({
-            mutation: GameEngineCreate,
-            variables: { name, file }
-        }).then(result => {
-            const { engine } = result.data.gameEngineCreate
-            runInAction(() => this.engines.push(engine))
+        mutate<GameEngineCreateMutation, GameEngineCreateMutationVariables>(GameEngineCreate, { name, file }, {
+            refetch: [ this.engines ]
         })
     }
 }

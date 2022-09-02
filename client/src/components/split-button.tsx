@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Button, ButtonProps, ButtonGroup, ButtonGroupProps, MenuItem, Menu, PopoverOrigin } from '@mui/material'
+import { Button, ButtonProps, ButtonGroup, ButtonGroupProps, MenuItem, Menu, PopoverOrigin, Divider } from '@mui/material'
 import { MoreVert } from '@mui/icons-material'
 
 export interface SplitButtonAction {
@@ -8,15 +8,17 @@ export interface SplitButtonAction {
     onAction: () => void
 }
 
+export type SplitButtonItem = '---' | SplitButtonAction
+
 export interface SplitButtonProps extends ButtonProps {
-    actions?: SplitButtonAction[]
+    actions?: SplitButtonItem[]
     moreButtonProps?: ButtonProps
     buttonGroupProps?: ButtonGroupProps
 }
 
 interface SplitButtonMenuProps {
     open: boolean
-    actions: SplitButtonAction[]
+    actions: SplitButtonItem[]
     anchor: any
     onClose: (event) => void
 }
@@ -33,11 +35,15 @@ function SplitButtonMenu({ open, actions, anchor, onClose }: SplitButtonMenuProp
         anchorOrigin={BOTTOM_RIGHT}
         transformOrigin={TOP_RIGHT}
         >
-            {actions.map((action, i) => (
-                <MenuItem key={i} disabled={action.disabled} onClick={action.onAction}>
+            {actions.map((action, i) => {
+                if (action === '---') {
+                    return <Divider key={i} />
+                }
+
+                return <MenuItem key={i} disabled={action.disabled} onClick={action.onAction}>
                     {action.content}
                 </MenuItem>
-            ))}
+            })}
     </Menu>
 }
 

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@urql/exchange-multipart-fetch": "^1.0.0"
+  }
+}

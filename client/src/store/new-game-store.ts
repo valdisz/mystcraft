@@ -2,8 +2,10 @@ import React from 'react'
 import { action, makeObservable, observable, runInAction } from 'mobx'
 import { HomeStore } from './home-store'
 import { CLIENT } from '../client'
-import { CreateLocalGame, CreateLocalGameMutation, CreateLocalGameMutationVariables } from '../schema'
+import { GameCreateLocal, GameCreateLocalMutation, GameCreateLocalMutationVariables } from '../schema'
+import { GameCreateRemote, GameCreateRemoteMutation, GameCreateRemoteMutationVariables } from '../schema'
 import { SelectChangeEvent } from '@mui/material'
+import { mutate } from './connection'
 
 const DEFAULT_OPTIONS = `{
     "map": [
@@ -33,8 +35,9 @@ export class NewGameStore {
     gameFile: File | null = null
     playersFile: File | null = null
 
-    @observable isOpen = false;
-    @observable name = '';
+    @observable isOpen = false
+    @observable remote = false
+    @observable name = ''
     @observable gameFileName = ''
     @observable playersFileName = ''
     @observable engine = ''
@@ -52,31 +55,40 @@ export class NewGameStore {
         this.options = String(DEFAULT_OPTIONS)
     }
 
+    @action remoteChange = (ev: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
+        this.remote = checked
+    }
+
     @action cancel = () => {
         this.isOpen = false;
     }
 
-    @action confirm = () => {
-        const variables: CreateLocalGameMutationVariables = {
-            name: this.name,
-            options: JSON.parse(this.options),
-            gameEngineId: this.engine,
-            playerData: this.playersFile,
-            gameData: this.gameFile
-        }
+    confirm = () => {
+        if (this.remote) {
+            const variables: GameCreateRemoteMutationVariables = {
+                name: this.name,
+                options: JSON.parse(this.options)
+            }
 
-        CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({
-            mutation: CreateLocalGame,
-            variables
-        })
-        .then(res => {
-            runInAction(() => {
-                this.store.games.push(res.data.createLocalGame.game);
-                this.cancel();
-            });
-        }, err => {
-            console.error(err)
-        })
+            mutate(GameCreateRemote, variables, {
+                refetch: [ this.store.games ]
+            })
+            .then(this.cancel, console.error)
+        }
+        else {
+            const variables: GameCreateLocalMutationVariables = {
+                name: this.name,
+                options: JSON.parse(this.options),
+                gameEngineId: this.engine,
+                playerData: this.playersFile,
+                gameData: this.gameFile
+            }
+
+            mutate(GameCreateLocal, variables, {
+                refetch: [ this.store.games ]
+            })
+            .then(this.cancel, console.error)
+        }
     }
 
     @action setName = (e: React.ChangeEvent<HTMLInputElement>) => {

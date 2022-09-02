@@ -1,5 +1,6 @@
 import { action, makeObservable, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
+import { querySeq } from './connection'
 import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
 import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
 import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
@@ -9,24 +10,7 @@ export class HomeStore {
         makeObservable(this)
     }
 
-    readonly games = observable<GameHeaderFragment>([]);
-
-    load = (games?: GameHeaderFragment[]) => {
-        if (games) {
-            runInAction(() => {
-                this.games.replace(games);
-            })
-            return
-        }
-
-        CLIENT.query<GetGamesQuery>({
-            query: GetGames
-        }).then(response => {
-            runInAction(() => {
-                this.games.replace(response.data.games.items);
-            });
-        });
-    };
+    readonly games = querySeq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [])
 
     confirmNewGame = async () => {
         // const response = await CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({
@@ -98,25 +82,23 @@ export class HomeStore {
         })
         event.target.value = null;
 
-        this.load()
+        this.games.reload()
         runInAction(() => this.uploading = false)
     }
 
     joinGame = async (gameId: string) => {
         const response = await CLIENT.mutate<JoinGameMutation, JoinGameMutationVariables>({
             mutation: JoinGame,
-            variables: { gameId }
+            variables: { gameId },
+            refetchQueries: [ GetGames ]
         });
-
-        this.load();
     }
 
     deleteGame = async (gameId: string) => {
         const response = await CLIENT.mutate<DeleteGameMutation, DeleteGameMutationVariables>({
             mutation: DeleteGame,
-            variables: { gameId }
+            variables: { gameId },
+            refetchQueries: [ GetGames ]
         });
-
-        this.load(response.data.gameDelete);
     }
 }

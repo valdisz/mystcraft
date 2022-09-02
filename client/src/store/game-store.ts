@@ -1,7 +1,7 @@
 import { ApolloQueryResult } from '@apollo/client'
-import { makeObservable, observable, IObservableArray, runInAction, action, computed, reaction, comparer } from 'mobx'
+import { makeObservable, observable, IObservableArray, runInAction, action, computed, reaction, comparer, transaction, autorun } from 'mobx'
 import { CLIENT } from '../client'
-import { RegionFragment, UnitFragment, TurnFragment, Stance } from '../schema'
+import { RegionFragment, UnitFragment, Stance } from '../schema'
 import { GetGame, GetGameQuery, GetGameQueryVariables } from '../schema'
 import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
@@ -15,7 +15,8 @@ import { Unit } from '../game'
 import { saveAs } from 'file-saver'
 import { InterfaceCommand, MoveCommand } from './commands/move'
 import { UniversityStore } from './university-store'
-import {Paths} from '../map';
+import { Paths } from '../map'
+import { mutate } from './connection'
 
 export class TurnsStore {
     constructor() {
@@ -99,23 +100,11 @@ export class GameStore {
                 this.ordersSaveAbortController = new AbortController()
 
                 try {
-                    const response = await CLIENT.mutate<SetOrderMutation, SetOrderMutationVariables>({
-                        mutation: SetOrder,
-                        variables: {
-                            unitId: unit.id,
-                            orders
-                        },
-                        context: {
-                            fetchOptions: {
-                                signal: this.ordersSaveAbortController.signal
-                            }
-                        }
-                    })
-
+                    const response = await mutate<SetOrderMutation, SetOrderMutationVariables>(SetOrder, { unitId: unit.id, orders })
                     const result = response.data?.setOrders
-                    if (!response.errors && result?.isSuccess) {
+                    if (!response.error && result?.isSuccess) {
                         unit.setOrders(orders)
-                        this.setPaths([unit.path])
+                        this.setPaths([ unit.path ])
                     }
                     else {
                         this.setOrders(prevOrders)

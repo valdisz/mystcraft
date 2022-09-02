@@ -1,5 +1,5 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom'
+import React from 'react'
+import { createRoot } from 'react-dom/client'
 import { BrowserRouter} from 'react-router-dom'
 import { CssBaseline, GlobalStyles } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
@@ -32,7 +32,8 @@ const RoutedApp = () => (
 
 const host = document.getElementById('app-host');
 
-ReactDOM.render(<RoutedApp />, host);
+const root = createRoot(host)
+root.render(<RoutedApp />);
 
 // Hot Module Replacement API
 declare const module: { hot: any };

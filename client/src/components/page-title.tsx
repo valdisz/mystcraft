@@ -17,7 +17,7 @@ export function PageTitle({ title, actions }: PageTitleProps) {
     }}>
         <Box sx={{ minWidth: 0, flex: 1 }}>
             { typeof title === 'string'
-                ? <Typography variant='h4'>{title}</Typography>
+                ? <Typography variant='h3'>{title}</Typography>
                 : title
             }
         </Box>

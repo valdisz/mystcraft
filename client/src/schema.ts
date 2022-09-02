@@ -11,11 +11,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
-  /** The `DateTime` scalar represents an ISO-8601 compliant date time type. */
   DateTime: any;
-  /** The `Long` scalar type represents non-fractional signed whole 64-bit numeric values. Long can represent values between -(2^63) and 2^63 - 1. */
   Long: any;
-  /** The `Upload` scalar type represents a file upload. */
   Upload: any;
 };
 
@@ -392,8 +389,8 @@ export type Mutation = {
   __typename?: 'Mutation';
   allianceCreate?: Maybe<AllianceCreateResult>;
   allianceJoin?: Maybe<AllianceJoinResult>;
-  createLocalGame?: Maybe<GameCreateLocalResult>;
   createUser?: Maybe<User>;
+  gameCreateLocal?: Maybe<GameCreateLocalResult>;
   gameCreateRemote?: Maybe<GameCreateRemoteResult>;
   gameDelete?: Maybe<Array<Maybe<Game>>>;
   gameEngineCreate?: Maybe<GameEngineCreateResult>;
@@ -423,18 +420,18 @@ export type MutationAllianceJoinArgs = {
 };
 
 
-export type MutationCreateLocalGameArgs = {
+export type MutationCreateUserArgs = {
+  email?: InputMaybe<Scalars['String']>;
+  password?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationGameCreateLocalArgs = {
   gameData?: InputMaybe<Scalars['Upload']>;
   gameEngineId: Scalars['ID'];
   name?: InputMaybe<Scalars['String']>;
   options?: InputMaybe<GameOptionsInput>;
   playerData?: InputMaybe<Scalars['Upload']>;
-};
-
-
-export type MutationCreateUserArgs = {
-  email?: InputMaybe<Scalars['String']>;
-  password?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -928,7 +925,7 @@ export type TurnFragment = { __typename?: 'Turn', id: string, number: number, mo
 
 export type UnitFragment = { __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null };
 
-export type CreateLocalGameMutationVariables = Exact<{
+export type GameCreateLocalMutationVariables = Exact<{
   name: Scalars['String'];
   gameEngineId: Scalars['ID'];
   options: GameOptionsInput;
@@ -937,7 +934,7 @@ export type CreateLocalGameMutationVariables = Exact<{
 }>;
 
 
-export type CreateLocalGameMutation = { __typename?: 'Mutation', createLocalGame?: { __typename?: 'GameCreateLocalResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null } | null } | null };
+export type GameCreateLocalMutation = { __typename?: 'Mutation', gameCreateLocal?: { __typename?: 'GameCreateLocalResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, finished: boolean, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null> | null } | null } | null } | null };
 
 export type DeleteGameMutationVariables = Exact<{
   gameId: Scalars['ID'];
@@ -1506,9 +1503,9 @@ export const Unit = gql`
     ${Capacity}
 ${Item}
 ${Skill}`;
-export const CreateLocalGame = gql`
-    mutation CreateLocalGame($name: String!, $gameEngineId: ID!, $options: GameOptionsInput!, $playerData: Upload!, $gameData: Upload!) {
-  createLocalGame(
+export const GameCreateLocal = gql`
+    mutation GameCreateLocal($name: String!, $gameEngineId: ID!, $options: GameOptionsInput!, $playerData: Upload!, $gameData: Upload!) {
+  gameCreateLocal(
     name: $name
     options: $options
     gameEngineId: $gameEngineId
