@@ -3,6 +3,7 @@ namespace advisor {
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using advisor.Authorization;
     using advisor.Features;
     using advisor.Model;
@@ -35,6 +36,7 @@ namespace advisor {
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using Remote;
 
     public class Startup {
         public Startup(IConfiguration configuration, IWebHostEnvironment env) {
@@ -220,6 +222,10 @@ namespace advisor {
             services
                 .AddAutoMapper(typeof(MappingProfile));
 
+            services.AddTransient<NewOriginsClient>(ctx => {
+                return new NewOriginsClient("http://atlantis-pbem.com", ctx.GetRequiredService<IHttpClientFactory>(), null);
+            });
+
             services
                 .AddGraphQLServer()
                 .AddHttpRequestInterceptor<GraphQLHttpRequestInterceptor>()
@@ -291,7 +297,7 @@ namespace advisor {
 
         public void Configure(IApplicationBuilder app) {
             app.UseForwardedHeaders();
-
+            app.UseCors();
             app.UseResponseCompression();
 
             if (!Env.IsProduction()) {
@@ -306,7 +312,6 @@ namespace advisor {
                 .UseMiddleware<DefaultFilesMiddleware>()
                 .UseStaticFiles()
                 .UseRouting()
-                .UseCors()
                 .UseAuthentication()
                 .UseAuthorization()
                 .UseEndpoints(endpoints => {

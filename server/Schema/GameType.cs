@@ -9,6 +9,7 @@
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using Persistence;
+    using Remote;
 
     public class GameType : ObjectType<DbGame> {
         protected override void Configure(IObjectTypeDescriptor<DbGame> descriptor) {
@@ -25,6 +26,8 @@
         }
     }
 
+    public record RemotePlayer(int Number, string Name, bool Orders, bool Times);
+
     [ExtendObjectType("Game")]
     public class GameResolvers {
         public Task<DbPlayer> Me(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
@@ -40,13 +43,28 @@
         //         .SingleOrDefaultAsync();
         // }
 
-        [Authorize(Policy = Policies.GameMasters)]
         [UseOffsetPaging]
-        public IOrderedQueryable<DbPlayer> Players(Database db, [Parent] DbGame game) {
-            return db.Players
+        public IOrderedQueryable<DbPlayer> Players(Database db, [Parent] DbGame game, bool quit = false) {
+            var q = db.Players
                 .AsNoTracking()
-                .InGame(game.Id)
-                .OrderBy(x => x.Id);
+                .InGame(game.Id);
+
+            if (!quit) {
+                q = q.Where(x => !x.IsQuit);
+            }
+
+            return q.OrderBy(x => x.Id);
+        }
+
+        public async Task<IOrderedQueryable<RemotePlayer>> RemotePlayers(Database db, [Service] NewOriginsClient client, [Parent] DbGame game) {
+            if (game.Options == null) {
+                game.Options = await db.Games.Where(x => x.Id == game.Id).Select(x => x.Options).SingleOrDefaultAsync();
+            }
+
+            var factions = (await client.ListFactionsAsync())
+                .Where(x => x.Number.HasValue)
+                .Select(x => new RemotePlayer(x.Number!.Value, x.Name, x.OrdersSubmitted, x.TimesSubmitted));
+            return factions.AsQueryable().OrderBy(x => x.Number);
         }
 
         // [Authorize(Policy = Policies.GameMasters)]
