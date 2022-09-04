@@ -57,18 +57,20 @@ public class NewOriginsClient {
 
         var rows = doc.QuerySelectorAll("table tbody tr");
         foreach (var row in rows) {
-            var numberCol = row.ChildNodes[0];
+            var numberCol = row.QuerySelector("th");
             var numberValue = numberCol.TextContent.Trim().ToLower();
 
-            var nameCol = row.ChildNodes[1];
-            var ordersCol = row.ChildNodes[3];
-            var timesCol = row.ChildNodes[4];
+            var cols = row.QuerySelectorAll("td");
+
+            var nameCol = cols[0];
+            var ordersCol = cols[2];
+            var timesCol = cols[3];
 
             list.Add(new NewOriginsFaction(
                 Number: numberValue == "new" ? null : int.Parse(numberValue),
                 Name: nameCol.TextContent.Trim(),
-                OrdersSubmitted: false,
-                TimesSubmitted: false
+                OrdersSubmitted: ordersCol.QuerySelector("span") != null,
+                TimesSubmitted: timesCol.QuerySelector("span") != null
             ));
         }
 
