@@ -1,15 +1,20 @@
-import { createClient, dedupExchange } from 'urql'
+import { createClient, defaultExchanges, Exchange } from 'urql'
 import { multipartFetchExchange } from '@urql/exchange-multipart-fetch'
+import { devtoolsExchange } from '@urql/devtools'
+import { env } from 'process'
+
+const exchanges: Exchange[] = [ ...defaultExchanges, multipartFetchExchange as any ]
+if (env.NODE_ENV !== 'production') {
+    console.debug('URQL Dev Tools added to the exchanges list')
+    exchanges.unshift(devtoolsExchange)
+}
 
 const client = createClient({
     url: '/graphql',
     fetchOptions: {
         credentials: 'include'
     },
-    exchanges: [
-        dedupExchange,
-        multipartFetchExchange as any
-    ]
+    exchanges
 })
 
 export default client

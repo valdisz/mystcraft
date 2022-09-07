@@ -237,7 +237,8 @@ type Game implements Node {
   name: String!
   nextTurnNumber: Int
   options: GameOptions!
-  players(skip: Int, take: Int): PlayerCollectionSegment
+  players(quit: Boolean! = false, skip: Int, take: Int): PlayerCollectionSegment
+  remotePlayers: [RemotePlayer]
   ruleset: String!
   type: GameType!
 }
@@ -280,6 +281,12 @@ type GameEngineCreateResult {
   engine: GameEngine
   error: String
   isSuccess: Boolean!
+}
+
+type GameJoinLocalResult {
+  error: String
+  isSuccess: Boolean!
+  player: Player
 }
 
 type GameOptions {
@@ -367,7 +374,7 @@ type Mutation {
   gameCreateRemote(name: String, options: GameOptionsInput): GameCreateRemoteResult
   gameDelete(gameId: ID!): [Game]
   gameEngineCreate(file: Upload, name: String): GameEngineCreateResult
-  gameJoin(gameId: ID!): Player
+  gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
   gameOptionsSet(gameId: ID!, options: GameOptionsInput): Game
   gameScheduleSet(gameId: ID!, schedule: String): GameScheduleSetResult
   gameTurnRun(gameId: ID!): GameTurnRunResult
@@ -476,6 +483,13 @@ type RegionCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type RemotePlayer {
+  name: String
+  number: Int!
+  orders: Boolean!
+  times: Boolean!
 }
 
 type Report implements Node {

@@ -1,4 +1,4 @@
-import { Client, TypedDocumentNode, createRequest, OperationResult, CombinedError, RequestPolicy as UrlRequestPolicy } from 'urql'
+import { Client, TypedDocumentNode, createRequest, OperationResult, CombinedError, RequestPolicy as UrlRequestPolicy, makeErrorResult } from 'urql'
 import { DocumentNode } from 'graphql'
 import { pipe, Source, subscribe } from 'wonka'
 import { ResponseHandler } from './data-source'
@@ -26,7 +26,7 @@ export class UrqlConnection<TData, TVariables extends object> implements DataSou
             requestPolicy: mapRequestPolicy(requestPolicy)
         })
 
-        const subscription = pipe(
+        const { unsubscribe } = pipe(
             source,
             subscribe(result => {
                 try {
@@ -37,12 +37,12 @@ export class UrqlConnection<TData, TVariables extends object> implements DataSou
                         onSuccess(result.data, result);
                     }
                 }
-                finally {
-                    subscription.unsubscribe()
+                catch (err) {
+                    onFailure(new CombinedError({ networkError: err as Error }))
                 }
             })
         )
 
-        return new CallbackDisposable(() => subscription.unsubscribe())
+        return new CallbackDisposable(() => unsubscribe())
     }
 }

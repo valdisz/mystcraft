@@ -11,8 +11,6 @@ using advisor.TurnProcessing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public record GameTurnParse(long GameId, int TurnNumber);
-
 public record GameTurnRun(long GameId): IRequest<GameTurnRunResult>;
 
 public record GameTurnRunResult(bool IsSuccess, string Error) : IMutationResult;
@@ -146,8 +144,6 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
 
             nextTurn.Reports.Add(report);
         }
-
-
     }
 
     private string AppendNewFactions(IEnumerable<PlayerProjection> players, byte[] playerData) {

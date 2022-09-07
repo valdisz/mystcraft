@@ -1,4 +1,4 @@
-import { createAtom, IAtom, IReactionDisposer, makeObservable, observable, IObservableValue, autorun, computed } from 'mobx'
+import { createAtom, IAtom, IReactionDisposer, makeObservable, observable, IObservableValue, reaction, computed } from 'mobx'
 import { OperationResult, TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
 import { Disposable } from './disposable'
@@ -40,10 +40,12 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         this._projection = options.projection
         this._variables = options.variables
 
-        this._valueAtom = createAtom(options.name ?? 'DataSource', this.resume.bind(this), this.suspend.bind(this))
+        this._name = options.name ?? 'DataSource'
+        this._valueAtom = createAtom(this._name, this.resume.bind(this), this.suspend.bind(this))
     }
 
     private readonly _valueAtom: IAtom
+    private readonly _name: string
     private _state: IObservableValue<DataSourceState> = observable.box<DataSourceState>('unspecified')
     private _error: IObservableValue<TError | null> = observable.box<TError | null>(null)
     private _document: DocumentNode | TypedDocumentNode<TData, TVariables>
@@ -86,13 +88,16 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         this._error.set(err)
     }
 
-    defaultRequestPolicy: RequestPolicy = RequestPolicy.CacheFirst
+    defaultRequestPolicy: RequestPolicy = RequestPolicy.NetworkOnly
 
     protected resume() {
+        console.debug(`${this._name}::resume`)
+
         if (this._variables) {
-            this._variablesWatch = autorun(() => {
-                this.load(this._variables(), this.defaultRequestPolicy)
-            }, { name: `${this._valueAtom.name_}::variables` })
+            this._variablesWatch = reaction(this._variables, vars => this.load(vars, this.defaultRequestPolicy), {
+                name: `${this._valueAtom.name_}::variables`,
+                fireImmediately: true
+            })
         }
         else {
             this.load(null, this.defaultRequestPolicy)
@@ -100,6 +105,8 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     }
 
     protected suspend() {
+        console.debug(`${this._name}::suspend`)
+
         if (this._variablesWatch) {
             this._variablesWatch()
             this._variablesWatch = null
@@ -112,6 +119,8 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     }
 
     protected load(variables: TVariables, requestPolicy: RequestPolicy) {
+        console.debug(`${this._name}::load`)
+
         return new Promise((resolve, reject) => {
             this.state = 'loading'
 

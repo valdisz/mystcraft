@@ -298,7 +298,7 @@ namespace advisor {
         public void Configure(IApplicationBuilder app) {
             app.UseForwardedHeaders();
             app.UseCors();
-            app.UseResponseCompression();
+            // app.UseResponseCompression();
 
             if (!Env.IsProduction()) {
                 app.UseDeveloperExceptionPage();

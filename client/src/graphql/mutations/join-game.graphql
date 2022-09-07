@@ -1,5 +1,0 @@
-mutation JoinGame($gameId: ID!) {
-  gameJoin(gameId: $gameId) {
-    ...PlayerHeader
-  }
-}

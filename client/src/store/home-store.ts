@@ -1,8 +1,6 @@
 import { action, makeObservable, observable, runInAction } from 'mobx'
-import { CLIENT } from '../client'
-import { querySeq } from './connection'
+import { mutate, querySeq } from './connection'
 import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
-import { JoinGame, JoinGameMutation, JoinGameMutationVariables } from '../schema'
 import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
 
 export class HomeStore {
@@ -11,30 +9,6 @@ export class HomeStore {
     }
 
     readonly games = querySeq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [])
-
-    confirmNewGame = async () => {
-        // const response = await CLIENT.mutate<CreateLocalGameMutation, CreateLocalGameMutationVariables>({
-        //     mutation: CreateLocalGame,
-        //     variables: {
-        //         name: this.newGame.name,
-        //         options: {
-        //             schedule: '',
-        //             map: [
-        //                 { level: 0, label: 'nexus', width: 1, height: 1 },
-        //                 { level: 1, label: 'surface', width: 32, height: 32 }
-        //             ]
-        //         },
-        //         engine: this.newGame.engineFile,
-        //         playerData: this.newGame.playersFile,
-        //         gameData: this.newGame.gameFile
-        //     }
-        // });
-
-        // runInAction(() => {
-        //     this.games.push(response.data.createLocalGame);
-        //     this.newGame.cancel();
-        // });
-    };
 
     private fileUpload: HTMLInputElement = null
     @action setFileUpload = (ref: HTMLInputElement) => {
@@ -86,19 +60,11 @@ export class HomeStore {
         runInAction(() => this.uploading = false)
     }
 
-    joinGame = async (gameId: string) => {
-        const response = await CLIENT.mutate<JoinGameMutation, JoinGameMutationVariables>({
-            mutation: JoinGame,
-            variables: { gameId },
-            refetchQueries: [ GetGames ]
-        });
-    }
-
-    deleteGame = async (gameId: string) => {
-        const response = await CLIENT.mutate<DeleteGameMutation, DeleteGameMutationVariables>({
-            mutation: DeleteGame,
-            variables: { gameId },
-            refetchQueries: [ GetGames ]
-        });
-    }
+    deleteGame = (gameId: string) => mutate<DeleteGameMutation, DeleteGameMutationVariables>(
+        DeleteGame,
+        { gameId },
+        { refetch: [
+            this.games
+        ]}
+    )
 }

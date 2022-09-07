@@ -53,7 +53,7 @@ interface GameItemProps {
 }
 
 function GameItem({ game }: GameItemProps) {
-    const { home } = useStore()
+    const { home, gameDetails } = useStore()
 
     const props: ListItemProps & Partial<LinkProps> = { }
 
@@ -63,10 +63,10 @@ function GameItem({ game }: GameItemProps) {
     const cron = game.options.schedule
         ? `${cronstrue.toString(game.options.schedule, { use24HourTimeFormat: true })} (${game.options.timeZone ?? 'UTC'})`
         : null
-
+// onClick={() => playerJoind ? home.triggerUploadReport(game.me.id) : home.joinGame(game.id)}
     return <Grid item xs={12} sm={6} md={4}>
         <Card>
-            <CardActionArea onClick={() => playerJoind ? home.triggerUploadReport(game.me.id) : home.joinGame(game.id)}>
+            <CardActionArea component={Link} to={`/games/${game.id}`}>
                 <CardContent>
                     <Stack direction='row' justifyContent='space-between' alignItems='center'>
                         <Typography variant='h4' gutterBottom>{game.name}</Typography>

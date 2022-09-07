@@ -22,6 +22,7 @@
     "@pixi/filter-blur": "^6.5.1",
     "@pixi/filter-color-overlay": "^4.2.0",
     "@pixi/filter-glow": "^4.2.0",
+    "@urql/devtools": "^2.0.3",
     "apollo-upload-client": "^17.0.0",
     "clipboard": "^2.0.11",
     "cronstrue": "^2.11.0",

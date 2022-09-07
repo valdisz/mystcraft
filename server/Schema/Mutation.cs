@@ -53,8 +53,12 @@ namespace advisor
             return mediator.Send(new GameCreateRemote(name, options));
         }
 
-        public Task<DbPlayer> GameJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId) {
-            return mediator.Send(new GameJoin(currentUserId, gameId));
+        public Task<GameJoinLocalResult> GameJoinLocal(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId, string name) {
+            return mediator.Send(new GameJoinLocal(currentUserId, gameId, name));
+        }
+
+        public Task<GameJoinRemoteResult> GameJoinRemote(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId, int number, string password) {
+            return mediator.Send(new GameJoinRemote(currentUserId, gameId, number, password));
         }
 
         [Authorize(Policy = Policies.GameMasters)]

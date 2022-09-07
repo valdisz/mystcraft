@@ -1,5 +1,6 @@
 namespace advisor.Remote;
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -24,14 +25,14 @@ public class NewOriginsClient {
         foreach (var h in allHeadings) {
             if (h.TextContent.StartsWith("Turn Number:")) {
                 var turnNumber = int.Parse(h.QuerySelector("span").TextContent);
-                return turnNumber;
+                return turnNumber + 1;  // because New Origins all turns starts from 0, bet we start from 1
             }
         }
 
         return -1;
     }
 
-    public async Task<Stream> DownloadReport(int factionNumber, string password) {
+    public async Task<string> DownloadReportAsync(int factionNumber, string password) {
         using var http = httpClientFactory.CreateClient();
 
         var fields = new Dictionary<string, string> {
@@ -46,8 +47,16 @@ public class NewOriginsClient {
         var response = await http.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
-        var stream = await response.Content.ReadAsStreamAsync();
-        return stream;
+        using var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream);
+
+        var contents = await reader.ReadToEndAsync();
+
+        if (contents.StartsWith("<!doctype html>")) {
+            throw new WrongFactionOrPasswordException();
+        }
+
+        return contents;
     }
 
     public async Task<NewOriginsFaction[]> ListFactionsAsync() {
@@ -76,6 +85,17 @@ public class NewOriginsClient {
 
         return list.ToArray();
     }
+}
+
+[System.Serializable]
+public class WrongFactionOrPasswordException : System.Exception
+{
+    public WrongFactionOrPasswordException() { }
+    public WrongFactionOrPasswordException(string message) : base(message) { }
+    public WrongFactionOrPasswordException(string message, System.Exception inner) : base(message, inner) { }
+    protected WrongFactionOrPasswordException(
+        System.Runtime.Serialization.SerializationInfo info,
+        System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }
 
 public record NewOriginsFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted);

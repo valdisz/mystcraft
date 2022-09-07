@@ -252,12 +252,14 @@ export type Game = Node & {
   nextTurnNumber?: Maybe<Scalars['Int']>;
   options: GameOptions;
   players?: Maybe<PlayerCollectionSegment>;
+  remotePlayers?: Maybe<Array<Maybe<RemotePlayer>>>;
   ruleset: Scalars['String'];
   type: GameType;
 };
 
 
 export type GamePlayersArgs = {
+  quit?: Scalars['Boolean'];
   skip?: InputMaybe<Scalars['Int']>;
   take?: InputMaybe<Scalars['Int']>;
 };
@@ -304,6 +306,13 @@ export type GameEngineCreateResult = {
   engine?: Maybe<GameEngine>;
   error?: Maybe<Scalars['String']>;
   isSuccess: Scalars['Boolean'];
+};
+
+export type GameJoinLocalResult = {
+  __typename?: 'GameJoinLocalResult';
+  error?: Maybe<Scalars['String']>;
+  isSuccess: Scalars['Boolean'];
+  player?: Maybe<Player>;
 };
 
 export type GameOptions = {
@@ -394,7 +403,7 @@ export type Mutation = {
   gameCreateRemote?: Maybe<GameCreateRemoteResult>;
   gameDelete?: Maybe<Array<Maybe<Game>>>;
   gameEngineCreate?: Maybe<GameEngineCreateResult>;
-  gameJoin?: Maybe<Player>;
+  gameJoinLocal?: Maybe<GameJoinLocalResult>;
   gameOptionsSet?: Maybe<Game>;
   gameScheduleSet?: Maybe<GameScheduleSetResult>;
   gameTurnRun?: Maybe<GameTurnRunResult>;
@@ -452,8 +461,9 @@ export type MutationGameEngineCreateArgs = {
 };
 
 
-export type MutationGameJoinArgs = {
+export type MutationGameJoinLocalArgs = {
   gameId: Scalars['ID'];
+  name?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -646,6 +656,14 @@ export type RegionCollectionSegment = {
   /** Information to aid in pagination. */
   pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
+};
+
+export type RemotePlayer = {
+  __typename?: 'RemotePlayer';
+  name?: Maybe<Scalars['String']>;
+  number: Scalars['Int'];
+  orders: Scalars['Boolean'];
+  times: Scalars['Boolean'];
 };
 
 export type Report = Node & {
@@ -959,12 +977,13 @@ export type GameEngineCreateMutationVariables = Exact<{
 
 export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null } | null };
 
-export type JoinGameMutationVariables = Exact<{
+export type GameJoinLocalMutationVariables = Exact<{
   gameId: Scalars['ID'];
+  name: Scalars['String'];
 }>;
 
 
-export type JoinGameMutation = { __typename?: 'Mutation', gameJoin?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null };
+export type GameJoinLocalMutation = { __typename?: 'Mutation', gameJoinLocal?: { __typename?: 'GameJoinLocalResult', isSuccess: boolean, error?: string | null, player?: { __typename?: 'Player', id: string, number?: number | null, name?: string | null, lastTurnNumber: number, lastTurnId?: string | null } | null } | null };
 
 export type SetOrderMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -1006,6 +1025,13 @@ export type GetAllianceMagesQueryVariables = Exact<{
 
 
 export type GetAllianceMagesQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', me?: { __typename?: 'Player', alliance?: { __typename?: 'Alliance', id: string, name: string, members?: Array<{ __typename?: 'AllianceMember', number?: number | null, name?: string | null, turn?: { __typename?: 'AllianceMemberTurn', number: number, units?: { __typename?: 'UnitCollectionSegment', items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, number: number, name: string, factionNumber?: number | null, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null, studyPlan?: { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null } | null } | null> | null } | null } | null } | null> | null } | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+
+export type GetGameDetailsQueryVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number?: number | null } | null> | null } | null, remotePlayers?: Array<{ __typename?: 'RemotePlayer', number: number, name?: string | null, orders: boolean, times: boolean } | null> | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'Region' } | { __typename?: 'Report' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetGameEnginesQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['Int']>;
@@ -1549,10 +1575,14 @@ export const GameEngineCreate = gql`
   }
 }
     ${GameEngine}`;
-export const JoinGame = gql`
-    mutation JoinGame($gameId: ID!) {
-  gameJoin(gameId: $gameId) {
-    ...PlayerHeader
+export const GameJoinLocal = gql`
+    mutation GameJoinLocal($gameId: ID!, $name: String!) {
+  gameJoinLocal(gameId: $gameId, name: $name) {
+    isSuccess
+    error
+    player {
+      ...PlayerHeader
+    }
   }
 }
     ${PlayerHeader}`;
@@ -1622,6 +1652,29 @@ export const GetAllianceMages = gql`
   }
 }
     ${Mage}`;
+export const GetGameDetails = gql`
+    query GetGameDetails($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      id
+      name
+      players(quit: false) {
+        items {
+          id
+          name
+          number
+        }
+      }
+      remotePlayers {
+        number
+        name
+        orders
+        times
+      }
+    }
+  }
+}
+    `;
 export const GetGameEngines = gql`
     query GetGameEngines($skip: Int = 0, $take: Int = 100) {
   gameEngines(skip: $skip, take: $take) {

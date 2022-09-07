@@ -1,0 +1,22 @@
+query GetGameDetails($gameId: ID!) {
+  node(id: $gameId) {
+    ... on Game {
+      id
+      name
+      players(quit: false) {
+        items {
+          id
+          name
+          number
+
+        }
+      }
+      remotePlayers {
+        number
+        name
+        orders
+        times
+      }
+    }
+  }
+}

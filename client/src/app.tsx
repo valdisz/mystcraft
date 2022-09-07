@@ -6,7 +6,7 @@ import * as Pages from './pages'
 export function App() {
     return <StoreProvider>
         <Routes>
-            <Route path='/game/:gameId' element={<Pages.GamePage />}>
+            <Route path='/play/:gameId' element={<Pages.GamePage />}>
                 <Route path='stats' element={<Pages.StatsPage />}>
                     <Route path={`income`} element={<Pages.IncomeTab />} />
                     <Route path={`production`} element={<Pages.ProductionTab />} />
@@ -17,8 +17,9 @@ export function App() {
             </Route>
             <Route path='/' element={<Pages.Layout />}>
                 <Route index element={<Pages.HomePage />} />
-                <Route path='/engines' element={<Pages.GameEnginesPage />} />
-                <Route path='/users' element={<Pages.UsersPage />} />
+                <Route path='engines' element={<Pages.GameEnginesPage />} />
+                <Route path='users' element={<Pages.UsersPage />} />
+                <Route path='games/:gameId' element={<Pages.GameDetailsPage />} />
             </Route>
         </Routes>
     </StoreProvider>

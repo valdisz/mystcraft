@@ -17,4 +17,8 @@ export class ArrayDataSource<T, TData = {}, TVariables extends object = {}, TErr
     protected setValue(value: T[]): void {
         this._value = Array.from(value)
     }
+
+    map<P>(projection: (value: T) => P): P[] {
+        return this._value.map(projection)
+    }
 }

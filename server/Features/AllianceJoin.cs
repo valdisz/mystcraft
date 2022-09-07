@@ -19,6 +19,7 @@ namespace advisor.Features {
 
         public async Task<AllianceJoinResult> Handle(AllianceJoin request, CancellationToken cancellationToken) {
             var player = await db.Players
+                .OnlyActivePlayers()
                 .Include(x => x.AllianceMembererships)
                 .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 
