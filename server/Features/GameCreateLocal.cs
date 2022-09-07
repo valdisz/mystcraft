@@ -23,7 +23,7 @@ public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreat
         await using (var tx = await db.Database.BeginTransactionAsync()) {
             game = new DbGame {
                 Name = request.Name,
-                Type = GameType.Local,
+                Type = GameType.LOCAL,
                 CreatedAt = DateTimeOffset.UtcNow,
                 Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
                 EngineId = request.EngineId,

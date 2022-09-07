@@ -44,6 +44,6 @@ namespace advisor.Persistence {
         public JBattle Battle { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
     }
 }

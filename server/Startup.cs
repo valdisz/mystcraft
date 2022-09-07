@@ -1,4 +1,5 @@
-namespace advisor {
+namespace advisor
+{
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -22,6 +23,7 @@ namespace advisor {
     using HotChocolate;
     using HotChocolate.Execution;
     using HotChocolate.Types;
+    using HotChocolate.Types.Descriptors;
     using HotChocolate.Types.Pagination;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.Cookies;
@@ -228,6 +230,7 @@ namespace advisor {
 
             services
                 .AddGraphQLServer()
+                .AddConvention<INamingConventions>(sp => new CustomNamingConventions())
                 .AddHttpRequestInterceptor<GraphQLHttpRequestInterceptor>()
                 .ModifyRequestOptions(opt => {
                     opt.IncludeExceptionDetails = !Env.IsProduction();

@@ -3,7 +3,7 @@ namespace advisor.Persistence {
     using advisor.Model;
     using HotChocolate;
 
-    [GraphQLName("Event")]
+    // [GraphQLName("Event")]
     public class DbEvent : InFactionContext {
         [Key]
         public long Id { get; set; }
@@ -49,7 +49,7 @@ namespace advisor.Persistence {
         public int? ItemPrice { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public DbFaction Faction { get; set; }

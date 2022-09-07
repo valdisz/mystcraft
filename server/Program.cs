@@ -75,7 +75,7 @@
             var jobs = services.GetRequiredService<IRecurringJobManager>();
 
             var games = await db.Games
-                .Where(x => x.Type == Persistence.GameType.Remote)
+                .Where(x => x.Type == Persistence.GameType.REMOTE)
                 .ToListAsync();
 
             foreach (var game in games.Where(x => x.Options.Schedule != null)) {

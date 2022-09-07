@@ -8,7 +8,6 @@ namespace advisor.Persistence {
 
     using FactionId = System.ValueTuple<long, int, int>;
 
-    [GraphQLName("Faction")]
     public class DbFaction : InTurnContext {
         [GraphQLIgnore]
         [NotMapped]
@@ -44,7 +43,7 @@ namespace advisor.Persistence {
         public List<DbAttitude> Attitudes { get; set; } = new List<DbAttitude>();
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public List<DbEvent> Events { get; set; } = new List<DbEvent>();

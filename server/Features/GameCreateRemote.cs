@@ -19,7 +19,7 @@ namespace advisor.Features {
         public async Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) {
             var newGame = new DbGame {
                 Name = request.Name,
-                Type = GameType.Remote,
+                Type = GameType.REMOTE,
                 Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
                 Options = request.Options
             };

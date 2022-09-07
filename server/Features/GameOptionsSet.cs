@@ -29,7 +29,7 @@ namespace advisor.Features {
                 jobs.RemoveIfExists(jobId);
             }
             else {
-                if (game.Type == GameType.Remote) {
+                if (game.Type == GameType.REMOTE) {
                     jobs.AddOrUpdate<RemoteGameServerJobs>(
                         jobId,
                         x => x.NewOrigins(game.Id),

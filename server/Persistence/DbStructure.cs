@@ -8,7 +8,6 @@ namespace advisor.Persistence {
 
     using StructureId = System.ValueTuple<long, int, string>;
 
-    [GraphQLName("Structure")]
     public class DbStructure : InTurnContext {
         [GraphQLIgnore]
         [NotMapped]
@@ -73,7 +72,7 @@ namespace advisor.Persistence {
         public DbSailors Sailors { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public DbRegion Region { get; set; }

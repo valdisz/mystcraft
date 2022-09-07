@@ -56,11 +56,11 @@ namespace advisor.Persistence {
         public DbSet<DbGame> Games { get; set; }
         public DbSet<DbGameTurn> GameTurns { get; set; }
         public DbSet<DbGameReport> GameReports { get; set; }
-        public DbSet<DbGameArticle> Articles{ get; set; }
+        public DbSet<DbArticle> Articles{ get; set; }
 
         public DbSet<DbPlayer> Players { get; set; }
 
-        public DbSet<DbTurn> Turns { get; set; }
+        public DbSet<DbPlayerTurn> Turns { get; set; }
         public DbSet<DbReport> Reports { get; set; }
         public DbSet<DbFaction> Factions { get; set; }
         public DbSet<DbAttitude> Attitudes { get; set; }
@@ -192,7 +192,7 @@ namespace advisor.Persistence {
                 t.HasKey(x => new {  x.GameId, x.TurnNumber, x.FactionNumber });
             });
 
-            model.Entity<DbGameArticle>(t => {
+            model.Entity<DbArticle>(t => {
                 t.HasKey(x => x.Id);
             });
 
@@ -201,7 +201,7 @@ namespace advisor.Persistence {
                     .WithOne(x => x.Player)
                     .HasForeignKey(x => x.PlayerId);
 
-                t.HasMany<DbTurn>(x => x.Turns)
+                t.HasMany<DbPlayerTurn>(x => x.Turns)
                     .WithOne(x => x.Player)
                     .HasForeignKey(x => x.PlayerId);
 
@@ -210,7 +210,7 @@ namespace advisor.Persistence {
                     .HasForeignKey(x => x.PlayerId);
             });
 
-            model.Entity<DbTurn>(t => {
+            model.Entity<DbPlayerTurn>(t => {
                 t.HasKey(x => new { x.PlayerId, x.Number });
 
                 t.HasMany(x => x.Reports)

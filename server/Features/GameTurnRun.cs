@@ -121,7 +121,7 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
             using var reader = article.OpenText();
 
             var text = await reader.ReadToEndAsync();
-            nextTurn.Articles.Add(new DbGameArticle { Text = text, Type = "engine" });
+            nextTurn.Articles.Add(new DbArticle { Text = text, Type = "engine" });
         }
 
         var tempaltes = runner.ListTemplates().ToDictionary(x => x.Number);

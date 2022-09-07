@@ -8,7 +8,6 @@ namespace advisor.Persistence
         SHA256
     }
 
-    [GraphQLName("User")]
     public class DbUser {
         [Key]
         public long Id { get; set; }

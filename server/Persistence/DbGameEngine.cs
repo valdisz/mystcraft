@@ -5,7 +5,6 @@ namespace advisor.Persistence
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("GameEngine")]
     public class DbGameEngine {
         public long Id { get; set; }
 

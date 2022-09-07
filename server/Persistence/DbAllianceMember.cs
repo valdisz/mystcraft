@@ -2,7 +2,6 @@ namespace advisor.Persistence
 {
     using HotChocolate;
 
-    [GraphQLName("AllianceMember")]
     public class DbAllianceMember : InPlayerContext {
         [GraphQLIgnore]
         public long AllianceId { get; set; }

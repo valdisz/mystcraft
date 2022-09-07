@@ -5,7 +5,6 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
 
     [Owned]
-    [GraphQLName("Settlement")]
     public class DbSettlement {
         [MaxLength(256)]
         public string Name { get; set; }

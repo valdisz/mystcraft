@@ -40,7 +40,7 @@ namespace advisor
         }
 
         public string LastTurnId(IResolverContext context, [Parent] DbPlayer player) {
-            var id = idSerializer.Serialize(null, "Turn", DbTurn.MakeId(player.Id, player.LastTurnNumber));
+            var id = idSerializer.Serialize(null, "Turn", DbPlayerTurn.MakeId(player.Id, player.LastTurnNumber));
             return id;
         }
 
@@ -64,7 +64,7 @@ namespace advisor
             return q.ToListAsync();
         }
 
-        public Task<List<DbTurn>> Turns(Database db, [Parent] DbPlayer player) {
+        public Task<List<DbPlayerTurn>> Turns(Database db, [Parent] DbPlayer player) {
             return db.Turns
                 .AsNoTracking()
                 .Include(x => x.Player)
@@ -73,7 +73,7 @@ namespace advisor
                 .ToListAsync();
         }
 
-        public Task<DbTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
+        public Task<DbPlayerTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
             return db.Turns
                 .AsNoTracking()
                 .Include(x => x.Player)

@@ -54,7 +54,7 @@ namespace advisor.Features {
                 .FirstOrDefaultAsync(x => x.PlayerId == player.Id && x.Number == turnNumber);
 
             if (turn == null) {
-                turn = new DbTurn {
+                turn = new DbPlayerTurn {
                     PlayerId = player.Id,
                     Month = month,
                     Year = year,

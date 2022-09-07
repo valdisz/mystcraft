@@ -4,7 +4,6 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("Game")]
     public class DbGame {
         [Key]
         public long Id { get; set; }
@@ -51,7 +50,7 @@ namespace advisor.Persistence {
         public List<DbGameTurn> Turns { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbGameArticle> Articles { get; set; } = new ();
+        public List<DbArticle> Articles { get; set; } = new ();
 
         [GraphQLIgnore]
         public DbGameEngine Engine { get; set; }

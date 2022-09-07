@@ -117,9 +117,9 @@ namespace advisor.Features {
             return Unit.Value;
         }
 
-        private Task<DbTurn> GetTurnAsync(InTurnContext context, bool track = true, bool addUnits = true, bool addEvents = true,
+        private Task<DbPlayerTurn> GetTurnAsync(InTurnContext context, bool track = true, bool addUnits = true, bool addEvents = true,
             bool addStructures = true, bool addFactions = true) {
-            IQueryable<DbTurn> turns = db.Turns
+            IQueryable<DbPlayerTurn> turns = db.Turns
                 .AsSplitQuery()
                 .OnlyPlayer(context);
 

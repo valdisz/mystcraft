@@ -10,15 +10,15 @@
     using Persistence;
 
 
-    public class TurnType : ObjectType<DbTurn> {
-        protected override void Configure(IObjectTypeDescriptor<DbTurn> descriptor) {
+    public class TurnType : ObjectType<DbPlayerTurn> {
+        protected override void Configure(IObjectTypeDescriptor<DbPlayerTurn> descriptor) {
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.CompsiteId)
                 .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
-                    var parsedId = DbTurn.ParseId(id);
-                    return DbTurn.FilterById(db.Turns.AsNoTracking(), parsedId)
+                    var parsedId = DbPlayerTurn.ParseId(id);
+                    return DbPlayerTurn.FilterById(db.Turns.AsNoTracking(), parsedId)
                         .Include(x => x.Player)
                         .SingleOrDefaultAsync();
                 });
@@ -27,14 +27,14 @@
 
     [ExtendObjectType("Turn")]
     public class TurnResolvers {
-        public Task<List<DbReport>> GetReports(Database db, [Parent] DbTurn turn) {
+        public Task<List<DbReport>> GetReports(Database db, [Parent] DbPlayerTurn turn) {
             return db.Reports
                 .AsNoTracking()
                 .InTurn(turn)
                 .OrderBy(x => x.FactionNumber)
                 .ToListAsync();
         }
-        public async Task<List<JBattle>> Battles(Database db, [Parent] DbTurn turn) {
+        public async Task<List<JBattle>> Battles(Database db, [Parent] DbPlayerTurn turn) {
             var battles = (await db.Battles
                 .AsNoTracking()
                 .InTurn(turn)
@@ -47,7 +47,7 @@
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public IQueryable<DbRegion> GetRegions(Database db, [Parent] DbTurn turn, bool withStructures = false) {
+        public IQueryable<DbRegion> GetRegions(Database db, [Parent] DbPlayerTurn turn, bool withStructures = false) {
             IQueryable<DbRegion> query = db.Regions
                 .AsSplitQuery()
                 .AsNoTrackingWithIdentityResolution()
@@ -64,7 +64,7 @@
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public IQueryable<DbStructure> Structures(Database db, [Parent] DbTurn turn) {
+        public IQueryable<DbStructure> Structures(Database db, [Parent] DbPlayerTurn turn) {
             return db.Structures
                 .AsNoTracking()
                 .InTurn(turn)
@@ -73,7 +73,7 @@
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public async Task<IQueryable<DbUnit>> Units(IResolverContext context, Database db, [Parent] DbTurn turn, UnitsFilter filter = null) {
+        public async Task<IQueryable<DbUnit>> Units(IResolverContext context, Database db, [Parent] DbPlayerTurn turn, UnitsFilter filter = null) {
             var fields = context.CollectSelectedFields<DbUnit>();
 
             var query = db.Units
@@ -108,14 +108,14 @@
         }
 
         [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public IQueryable<DbEvent> Events(Database db, [Parent] DbTurn turn) {
+        public IQueryable<DbEvent> Events(Database db, [Parent] DbPlayerTurn turn) {
             return db.Events
                 .AsNoTracking()
                 .InTurn(turn)
                 .OrderBy(x => x.Id);
         }
 
-        public Task<List<DbFaction>> Factions(Database db, [Parent] DbTurn turn) {
+        public Task<List<DbFaction>> Factions(Database db, [Parent] DbPlayerTurn turn) {
             return db.Factions
                 .AsNoTrackingWithIdentityResolution()
                 .Include(x => x.Attitudes)
@@ -124,7 +124,7 @@
                 .ToListAsync();
         }
 
-        public async Task<Statistics> Stats(Database db, [Parent] DbTurn turn) {
+        public async Task<Statistics> Stats(Database db, [Parent] DbPlayerTurn turn) {
             var factionNumber = turn.Player.Number;
             var stats = await db.Stats
                 .AsNoTracking()
@@ -154,7 +154,7 @@
             };
         }
 
-        public Task<List<DbStudyPlan>> StudyPlans(Database db, [Parent] DbTurn turn) {
+        public Task<List<DbStudyPlan>> StudyPlans(Database db, [Parent] DbPlayerTurn turn) {
             return db.StudyPlans
                 .AsNoTrackingWithIdentityResolution()
                 .InTurn(turn)

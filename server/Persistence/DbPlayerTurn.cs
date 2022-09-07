@@ -7,12 +7,12 @@ namespace advisor.Persistence {
     using TurnId = System.ValueTuple<long, int>;
 
     [GraphQLName("Turn")]
-    public class DbTurn : InPlayerContext {
+    public class DbPlayerTurn : InPlayerContext {
         [GraphQLIgnore]
         [NotMapped]
         public string CompsiteId => MakeId(this);
 
-        public static string MakeId(DbTurn turn) => MakeId(turn.PlayerId, turn.Number);
+        public static string MakeId(DbPlayerTurn turn) => MakeId(turn.PlayerId, turn.Number);
         public static string MakeId(long playerId, int turnNumber) => $"{playerId}/{turnNumber}";
         public static TurnId ParseId(string id) {
             var segments = id.Split("/");
@@ -22,7 +22,7 @@ namespace advisor.Persistence {
             );
         }
 
-        public static IQueryable<DbTurn> FilterById(IQueryable<DbTurn> q, TurnId id) {
+        public static IQueryable<DbPlayerTurn> FilterById(IQueryable<DbPlayerTurn> q, TurnId id) {
             var (playerId, turnNumber) = id;
             return q.Where(x => x.PlayerId == playerId && x.Number == turnNumber);
         }

@@ -3,7 +3,6 @@ namespace advisor.Persistence {
     using HotChocolate;
 
 
-    [GraphQLName("Attitude")]
     public class DbAttitude : InFactionContext {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
@@ -20,7 +19,7 @@ namespace advisor.Persistence {
         public Stance Stance { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn{ get; set; }
+        public DbPlayerTurn Turn{ get; set; }
 
         [GraphQLIgnore]
         public DbFaction Faction { get; set; }

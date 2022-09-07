@@ -3,7 +3,6 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("StudyPlan")]
     public class DbStudyPlan : InTurnContext {
         public int UnitNumber { get; set; }
 
@@ -21,7 +20,7 @@ namespace advisor.Persistence {
         public List<int> Teach { get; set; } = new ();
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public DbUnit Unit { get; set; }

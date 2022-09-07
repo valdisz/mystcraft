@@ -3,7 +3,6 @@ namespace advisor.Persistence
     using System.Collections.Generic;
     using HotChocolate;
 
-    [GraphQLName("GameTurn")]
     public class DbGameTurn : InGameContext {
         public int Number { get; set; }
 
@@ -19,7 +18,7 @@ namespace advisor.Persistence
         public bool IsRemote { get; set; }
 
         public DbGame Game { get; set; }
-        public List<DbGameArticle> Articles { get; set; } = new ();
+        public List<DbArticle> Articles { get; set; } = new ();
         public List<DbGameReport> Reports { get; set; } = new ();
     }
 }

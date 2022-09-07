@@ -2,8 +2,7 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("Article")]
-    public class DbGameArticle {
+    public class DbArticle {
         public long Id { get; set; }
 
         [GraphQLIgnore]

@@ -7,7 +7,6 @@ namespace advisor.Persistence {
 
     public record UnitId(long PlayerId, int TurnNumber, int UnitNumber);
 
-    [GraphQLName("Unit")]
     public class DbUnit : InTurnContext {
         [GraphQLIgnore]
         [NotMapped]
@@ -90,7 +89,7 @@ namespace advisor.Persistence {
         public string Orders { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public DbRegion Region { get; set; }

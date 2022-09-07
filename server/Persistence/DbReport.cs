@@ -6,7 +6,6 @@ namespace advisor.Persistence {
 
     using ReportId = System.ValueTuple<long, int, int>;
 
-    [GraphQLName("Report")]
     public class DbReport : InTurnContext {
         [GraphQLIgnore]
         [NotMapped]
@@ -49,6 +48,6 @@ namespace advisor.Persistence {
         public DbPlayer Player { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
     }
 }

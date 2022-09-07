@@ -5,7 +5,6 @@ namespace advisor.Persistence
     using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 
-    [GraphQLName("Exit")]
     public class DbExit : InTurnContext {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
@@ -51,6 +50,6 @@ namespace advisor.Persistence
         public DbRegion Target { get; set; }
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
     }
 }

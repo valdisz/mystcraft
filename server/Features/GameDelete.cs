@@ -83,7 +83,7 @@ namespace advisor.Features {
             await DeleteFromTableAsync<DbFaction>(field, id);
             await DeleteFromTableAsync<DbReport>(field, id);
             await DeleteFromTableAsync<DbBattle>(field, id);
-            await DeleteFromTableAsync<DbTurn>(field, id);
+            await DeleteFromTableAsync<DbPlayerTurn>(field, id);
         }
 
         private async Task DeleteTurnDependenciesAsync(long playerId, int turnNumber) {
@@ -96,7 +96,7 @@ namespace advisor.Features {
             await DeleteFromTableAsync<DbFaction>("PlayerId", playerId, "TurnNumber", turnNumber);
             await DeleteFromTableAsync<DbReport>("PlayerId", playerId, "TurnNumber", turnNumber);
             await DeleteFromTableAsync<DbBattle>("PlayerId", playerId, "TurnNumber", turnNumber);
-            await DeleteFromTableAsync<DbTurn>("PlayerId", playerId, "TurnNumber", turnNumber);
+            await DeleteFromTableAsync<DbPlayerTurn>("PlayerId", playerId, "TurnNumber", turnNumber);
         }
 
         private Task DeleteFromTableAsync<T>(string field, long id) {

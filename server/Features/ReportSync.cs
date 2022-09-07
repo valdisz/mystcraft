@@ -44,7 +44,7 @@ namespace advisor.Features {
         public HashSet<string> NewStructures { get; } = new ();
         public HashSet<int> NewUnits { get; } = new ();
 
-        public void Load(DbTurn turn) {
+        public void Load(DbPlayerTurn turn) {
 
             foreach (var region in turn.Regions) {
                 Regions.Add(region.Id, region);
@@ -66,7 +66,7 @@ namespace advisor.Features {
             LoadOrdersFromReport();
         }
 
-        public void Copy(DbTurn turn, IMapper mapper) {
+        public void Copy(DbPlayerTurn turn, IMapper mapper) {
             foreach (var region in turn.Regions.Select(mapper.Map<DbRegion>)) {
                 region.Units.Clear();
 

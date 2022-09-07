@@ -7,7 +7,6 @@ namespace advisor.Persistence {
 
     using RegionId = System.ValueTuple<long, int, string>;
 
-    [GraphQLName("Region")]
     public class DbRegion : InTurnContext {
         [GraphQLIgnore]
         [NotMapped]
@@ -92,7 +91,7 @@ namespace advisor.Persistence {
         public List<DbExit> Exits { get; set; } = new List<DbExit>();
 
         [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
+        public DbPlayerTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public List<DbUnit> Units { get; set; } = new List<DbUnit>();

@@ -89,7 +89,7 @@ namespace advisor.Persistence
     }
 
     [GraphQLName("TradableItem")]
-    public class DbMarketItem : AnItem, InTurnContext  {
+    public class DbMarketItem : AnItem, InTurnContext {
         public DbMarketItem() {
 
         }

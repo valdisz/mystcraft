@@ -3,7 +3,6 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    [GraphQLName("Alliance")]
     public class DbAlliance : InGameContext {
         [GraphQLIgnore]
         [Key]
