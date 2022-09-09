@@ -74,17 +74,27 @@
             var db = services.GetRequiredService<Database>();
             var jobs = services.GetRequiredService<IRecurringJobManager>();
 
-            var games = await db.Games
-                .Where(x => x.Type == Persistence.GameType.REMOTE)
-                .ToListAsync();
+            await foreach (var game in db.Games.Where(x => x.Type == Persistence.GameType.REMOTE).AsAsyncEnumerable()) {
+                var jobId = $"game-{game.Id}";
 
-            foreach (var game in games.Where(x => x.Options.Schedule != null)) {
-                jobs.AddOrUpdate<RemoteGameServerJobs>(
-                    $"game-{game.Id}",
-                    x => x.NewOrigins(game.Id),
-                    game.Options.Schedule,
-                    TimeZoneInfo.FindSystemTimeZoneById(game.Options.TimeZone ?? "America/Los_Angeles")
-                );
+                var shouldRun = game.Status == GameStatus.RUNNING && !string.IsNullOrWhiteSpace(game.Options.Schedule);
+                if (!shouldRun) {
+                    jobs.RemoveIfExists(jobId);
+                    continue;
+                }
+
+                TimeZoneInfo timeZone = null;
+                if (!string.IsNullOrWhiteSpace(game.Options.TimeZone)) {
+                    try {
+                        timeZone = TimeZoneInfo.FindSystemTimeZoneById(game.Options.TimeZone);
+                    }
+                    catch (InvalidTimeZoneException) {}
+                    catch  (TimeZoneNotFoundException) { }
+                }
+
+                timeZone ??= TimeZoneInfo.Local;
+
+                jobs.AddOrUpdate<RemoteGameServerJobs>(jobId, x => x.NewOrigins(game.Id), game.Options.Schedule, timeZone);
             }
         }
 
@@ -105,9 +115,8 @@
                     await mediator.Send(new UserCreate(email, password, Policies.Root));
                 }
 
-                var games = db.Games.ToList();
-                foreach (var g in games) {
-                    g.Ruleset = File.ReadAllText("data/ruleset.yaml");
+                await foreach (var game in db.Games.AsAsyncEnumerable()) {
+                    game.Ruleset = File.ReadAllText("data/ruleset.yaml");
                 }
                 db.SaveChanges();
             }
