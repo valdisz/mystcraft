@@ -1,4 +1,4 @@
-namespace advisor
+namespace advisor.Schema
 {
     using System;
     using System.Collections.Generic;
@@ -61,13 +61,13 @@ namespace advisor
             return mediator.Send(new GameJoinRemote(currentUserId, gameId, number, password));
         }
 
-        [Authorize(Policy = Policies.GameMasters)]
-        public Task<List<DbGame>> GameDelete(IMediator mediator, [ID("Game")] long gameId) {
-            return mediator.Send(new GameDelete(gameId));
-        }
+        // [Authorize(Policy = Policies.GameMasters)]
+        // public Task<List<DbGame>> GameDelete(IMediator mediator, [ID("Game")] long gameId) {
+        //     return mediator.Send(new GameDelete(gameId));
+        // }
 
         [Authorize(Policy = Policies.GameMasters)]
-        public Task<DbGame> GameOptionsSet(IMediator mediator, [ID("Game")] long gameId, GameOptions options) {
+        public Task<GameOptionsSetResult> GameOptionsSet(IMediator mediator, [ID("Game")] long gameId, GameOptions options) {
             return mediator.Send(new GameOptionsSet(gameId, options));
         }
 

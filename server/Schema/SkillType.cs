@@ -1,4 +1,4 @@
-namespace advisor {
+namespace advisor.Schema {
     using advisor.Model;
     using HotChocolate.Types;
 

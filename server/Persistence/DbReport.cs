@@ -1,53 +1,23 @@
-namespace advisor.Persistence {
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
-    using HotChocolate;
+namespace advisor.Persistence;
 
-    using ReportId = System.ValueTuple<long, int, int>;
+using System.ComponentModel.DataAnnotations;
+using HotChocolate;
 
-    public class DbReport : InTurnContext {
-        [GraphQLIgnore]
-        [NotMapped]
-        public ReportId CompsiteId => MakeId(this);
+public class DbReport : InGameContext {
+    [GraphQLIgnore]
+    public long GameId { get; set; }
 
-        public static ReportId MakeId(long playerId, int turnNumber, int factionNumber) => (playerId, turnNumber, factionNumber);
-        public static ReportId MakeId(DbReport report) => (report.PlayerId, report.TurnNumber, report.FactionNumber);
+    [GraphQLIgnore]
+    public int TurnNumber { get; set; }
 
-        public static IQueryable<DbReport> FilterById(IQueryable<DbReport> q, ReportId id) {
-            var (playerId, turnNumber, factionNumber) = id;
-            return q.Where(x =>
-                    x.PlayerId == playerId
-                && x.TurnNumber == turnNumber
-                && x.FactionNumber == factionNumber
-            );
-        }
+    [GraphQLIgnore]
+    public int FactionNumber { get; set; }
 
+    [Required]
+    public byte[] Data { get; set; }
 
-        [Required]
-        public int FactionNumber { get; set; }
+    public byte[] Json { get; set; }
 
-        [GraphQLIgnore]
-        public int TurnNumber { get; set; }
-
-        [GraphQLIgnore]
-        public long PlayerId { get; set; }
-
-
-
-        [Required, MaxLength(100)]
-        public string FactionName { get; set; }
-
-        [Required]
-        public string Source { get; set; }
-
-        public string Json { get; set; }
-
-
-        [GraphQLIgnore]
-        public DbPlayer Player { get; set; }
-
-        [GraphQLIgnore]
-        public DbPlayerTurn Turn { get; set; }
-    }
+    public DbGame Game { get; set; }
+    public DbTurn Turn { get; set; }
 }

@@ -1,4 +1,4 @@
-namespace advisor {
+namespace advisor.Schema {
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
     using Persistence;

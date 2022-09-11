@@ -1,6 +1,6 @@
-namespace advisor.Persistence {
-    public enum GameType {
-        LOCAL,
-        REMOTE
-    }
+namespace advisor.Persistence;
+
+public enum GameType {
+    LOCAL,
+    REMOTE
 }

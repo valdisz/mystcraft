@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp;
 
@@ -18,8 +19,8 @@ public class NewOriginsClient {
     private readonly IHttpClientFactory httpClientFactory;
     private readonly BrowsingContext context;
 
-    public async Task<int> GetCurrentTurnNumberAsync() {
-        var doc = await context.OpenAsync(this.url);
+    public async Task<int> GetCurrentTurnNumberAsync(CancellationToken cancellation) {
+        var doc = await context.OpenAsync(this.url, cancellation);
 
         var allHeadings = doc.QuerySelectorAll("h3");
         foreach (var h in allHeadings) {
@@ -59,10 +60,10 @@ public class NewOriginsClient {
         return contents;
     }
 
-    public async Task<NewOriginsFaction[]> ListFactionsAsync() {
+    public async Task<NewOriginsFaction[]> ListFactionsAsync(CancellationToken cancellation) {
         var list = new List<NewOriginsFaction>();
 
-        var doc = await context.OpenAsync($"{this.url}/game");
+        var doc = await context.OpenAsync($"{this.url}/game", cancellation);
 
         var rows = doc.QuerySelectorAll("table tbody tr");
         foreach (var row in rows) {

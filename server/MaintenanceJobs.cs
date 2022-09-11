@@ -24,7 +24,7 @@ namespace advisor
         public async Task ReconcileRports() {
             logger.LogInformation($"Looking for unparsed reports");
 
-            var unparsed = (await db.Reports
+            var unparsed = (await db.AditionalReports
                 .Include(x => x.Turn)
                 .Where(x => x.Json == null)
                 .ToListAsync())
@@ -41,7 +41,7 @@ namespace advisor
                 var turnNumber = g.TurnNumber;
                 var reports = g.Reports;
 
-                
+
             }
         }
     }

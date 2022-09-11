@@ -19,7 +19,11 @@ namespace advisor.Persistence
         [MaxLength(128)]
         public string Name { get; set; }
 
-        public int LastTurnNumber { get; set; }
+        [GraphQLIgnore]
+        public int LastTurnId { get; set; }
+
+        [GraphQLIgnore]
+        public int? NextTurnId { get; set; }
 
         [MaxLength(64)]
         public string Password { get; set; }
@@ -33,10 +37,16 @@ namespace advisor.Persistence
         public DbGame Game { get;set; }
 
         [GraphQLIgnore]
+        public DbPlayerTurn LastTurn { get; set; }
+
+        [GraphQLIgnore]
+        public DbPlayerTurn NextTurn { get; set; }
+
+        [GraphQLIgnore]
         public List<DbPlayerTurn> Turns { get; set; } = new List<DbPlayerTurn>();
 
         [GraphQLIgnore]
-        public List<DbReport> Reports { get; set; } = new List<DbReport>();
+        public List<DbAditionalReport> Reports { get; set; } = new List<DbAditionalReport>();
 
         [GraphQLIgnore]
         public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();

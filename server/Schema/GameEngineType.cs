@@ -1,4 +1,4 @@
-namespace advisor;
+namespace advisor.Schema;
 
 using advisor.Persistence;
 using HotChocolate.Types;

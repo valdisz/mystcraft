@@ -1,4 +1,4 @@
-// namespace advisor
+// namespace advisor.Schema
 // {
 //     using System;
 //     using System.Collections.Generic;

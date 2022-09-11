@@ -1,4 +1,4 @@
-namespace advisor
+namespace advisor.Schema
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -40,7 +40,7 @@ namespace advisor
         }
 
         public string LastTurnId(IResolverContext context, [Parent] DbPlayer player) {
-            var id = idSerializer.Serialize(null, "Turn", DbPlayerTurn.MakeId(player.Id, player.LastTurnNumber));
+            var id = idSerializer.Serialize(null, "PlayerTurn", DbPlayerTurn.MakeId(player.Id, player.LastTurnNumber));
             return id;
         }
 
@@ -52,8 +52,8 @@ namespace advisor
                 .SingleOrDefaultAsync();
         }
 
-        public Task<List<DbReport>> Reports(Database db, [Parent] DbPlayer player, int? turn = null) {
-            var q = db.Reports
+        public Task<List<DbAditionalReport>> Reports(Database db, [Parent] DbPlayer player, int? turn = null) {
+            var q = db.AditionalReports
                 .AsNoTracking()
                 .OnlyPlayer(player);
 
@@ -65,20 +65,20 @@ namespace advisor
         }
 
         public Task<List<DbPlayerTurn>> Turns(Database db, [Parent] DbPlayer player) {
-            return db.Turns
+            return db.PlayerTurns
                 .AsNoTracking()
                 .Include(x => x.Player)
                 .OnlyPlayer(player)
-                .OrderBy(x => x.Number)
+                .OrderBy(x => x.TurnNumber)
                 .ToListAsync();
         }
 
         public Task<DbPlayerTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
-            return db.Turns
+            return db.PlayerTurns
                 .AsNoTracking()
                 .Include(x => x.Player)
                 .OnlyPlayer(player)
-                .SingleOrDefaultAsync(x => x.Number == number);
+                .SingleOrDefaultAsync(x => x.TurnNumber == number);
         }
     }
 }

@@ -70,32 +70,8 @@
             using var scope = host.Services.CreateScope();
             var services = scope.ServiceProvider;
 
-            var conf = services.GetRequiredService<IConfiguration>();
-            var db = services.GetRequiredService<Database>();
-            var jobs = services.GetRequiredService<IRecurringJobManager>();
-
-            await foreach (var game in db.Games.Where(x => x.Type == Persistence.GameType.REMOTE).AsAsyncEnumerable()) {
-                var jobId = $"game-{game.Id}";
-
-                var shouldRun = game.Status == GameStatus.RUNNING && !string.IsNullOrWhiteSpace(game.Options.Schedule);
-                if (!shouldRun) {
-                    jobs.RemoveIfExists(jobId);
-                    continue;
-                }
-
-                TimeZoneInfo timeZone = null;
-                if (!string.IsNullOrWhiteSpace(game.Options.TimeZone)) {
-                    try {
-                        timeZone = TimeZoneInfo.FindSystemTimeZoneById(game.Options.TimeZone);
-                    }
-                    catch (InvalidTimeZoneException) {}
-                    catch  (TimeZoneNotFoundException) { }
-                }
-
-                timeZone ??= TimeZoneInfo.Local;
-
-                jobs.AddOrUpdate<RemoteGameServerJobs>(jobId, x => x.NewOrigins(game.Id), game.Options.Schedule, timeZone);
-            }
+            var mediator = services.GetRequiredService<IMediator>();
+            await mediator.Send(new JobReconcile());
         }
 
         private static async Task RunDatabaseMigrationsAsync(IWebHost host) {
@@ -118,7 +94,8 @@
                 await foreach (var game in db.Games.AsAsyncEnumerable()) {
                     game.Ruleset = File.ReadAllText("data/ruleset.yaml");
                 }
-                db.SaveChanges();
+
+                await db.SaveChangesAsync();
             }
         }
 

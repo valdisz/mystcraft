@@ -19,7 +19,7 @@ public static class Queries {
         => query.InTurn(context.PlayerId, context.TurnNumber);
 
     public static IQueryable<T> InTurn<T>(this IQueryable<T> query, DbPlayerTurn context) where T: InTurnContext
-        => query.InTurn(context.PlayerId, context.Number);
+        => query.InTurn(context.PlayerId, context.TurnNumber);
 
     public static IQueryable<T> OnlyFaction<T>(this IQueryable<T> query, long playerId, int turnNumber, int factionNumber) where T: InFactionContext
         => query.InTurn(playerId, turnNumber).Where(x => x.FactionNumber == factionNumber);

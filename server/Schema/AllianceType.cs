@@ -1,4 +1,4 @@
-namespace advisor
+namespace advisor.Schema
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -37,7 +37,7 @@ namespace advisor
         public int? Number([Parent] DbAllianceMember member) => member.Player.Number;
 
         public async Task<List<AllianceMemberTurn>> Turns(Database db, [Parent] DbAllianceMember member) {
-            return (await db.Turns
+            return (await db.PlayerTurns
                 .AsNoTracking()
                 .OnlyPlayer(member)
                 .Include(x => x.Player)
@@ -50,7 +50,7 @@ namespace advisor
         }
 
         public async Task<AllianceMemberTurn> Turn(Database db, [Parent] DbAllianceMember member, int number) {
-            var data = await db.Turns
+            var data = await db.PlayerTurns
                 .AsNoTracking()
                 .OnlyPlayer(member)
                 .Include(x => x.Player)

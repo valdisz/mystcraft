@@ -1,4 +1,5 @@
-namespace advisor {
+namespace advisor
+{
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -64,7 +65,7 @@ namespace advisor {
 
             var playerIdValue = (long) relayPlayerId.Value;
 
-            var report = await database.Reports
+            var report = await database.AditionalReports
                 .Include(x => x.Turn)
                 .Where(x => x.PlayerId == playerIdValue && x.Turn.Number == turnNumber && x.FactionNumber == factionNumber)
                 .Select(x => x.Source)

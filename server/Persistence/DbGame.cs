@@ -14,7 +14,7 @@ namespace advisor.Persistence {
 
         public GameType Type { get; set; }
 
-        public bool Finished { get; set; }
+        public GameStatus Status { get; set; }
 
         [Required]
         public DateTimeOffset CreatedAt { get; set; }
@@ -33,11 +33,13 @@ namespace advisor.Persistence {
 
         public int? NextTurnNumber { get; set; }
 
+        // The last processed or imported turn
         [GraphQLIgnore]
-        public DbGameTurn LastTurn { get; set; }
+        public DbTurn LastTurn { get; set; }
 
+        // The pending turn, not yet processed
         [GraphQLIgnore]
-        public DbGameTurn NextTurn { get; set; }
+        public DbTurn NextTurn { get; set; }
 
 
         [GraphQLIgnore]
@@ -47,7 +49,7 @@ namespace advisor.Persistence {
         public List<DbAlliance> Alliances { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbGameTurn> Turns { get; set; } = new ();
+        public List<DbTurn> Turns { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbArticle> Articles { get; set; } = new ();

@@ -1,47 +1,43 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
+    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using HotChocolate;
 
-    using TurnId = System.ValueTuple<long, int>;
+    public class DbPlayerTurn : InTurnContext, InGameContext {
+        [Key]
+        public long Id { get; set; }
 
-    [GraphQLName("Turn")]
-    public class DbPlayerTurn : InPlayerContext {
         [GraphQLIgnore]
-        [NotMapped]
-        public string CompsiteId => MakeId(this);
-
-        public static string MakeId(DbPlayerTurn turn) => MakeId(turn.PlayerId, turn.Number);
-        public static string MakeId(long playerId, int turnNumber) => $"{playerId}/{turnNumber}";
-        public static TurnId ParseId(string id) {
-            var segments = id.Split("/");
-            return (
-                long.Parse(segments[0]),
-                int.Parse(segments[1])
-            );
-        }
-
-        public static IQueryable<DbPlayerTurn> FilterById(IQueryable<DbPlayerTurn> q, TurnId id) {
-            var (playerId, turnNumber) = id;
-            return q.Where(x => x.PlayerId == playerId && x.Number == turnNumber);
-        }
-
-        public int Number { get; set; }
+        public long GameId { get; set; }
 
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
+        public int TurnNumber { get; set; }
+
+        [Required]
+        [MaxLength(128)]
+        public string Name { get; set; }
+
+
         public bool Ready { get; set; }
 
-        public int Month { get; set; }
-        public int Year { get; set; }
+        public bool OrdersSubmitted { get; set; }
+        public bool TimesSubmitted { get; set; }
+
+
+        [GraphQLIgnore]
+        public DbGame Game { get; set; }
+
+        [GraphQLIgnore]
+        public DbTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public DbPlayer Player { get; set; }
 
         [GraphQLIgnore]
-        public List<DbReport> Reports { get; set; } = new List<DbReport>();
+        public List<DbAditionalReport> Reports { get; set; } = new List<DbAditionalReport>();
 
         [GraphQLIgnore]
         public List<DbRegion> Regions { get; set; } = new List<DbRegion>();

@@ -1,4 +1,4 @@
-namespace advisor
+namespace advisor.Schema
 {
     public class UnitsFilter {
         public bool? Mages { get; set; }
