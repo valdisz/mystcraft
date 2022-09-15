@@ -60,15 +60,18 @@ public abstract class Database : DbContext {
     // Local and remote games
     public DbSet<DbGame> Games { get; set; }
 
-    //
+    // Game turn data as the engine returns it
     public DbSet<DbTurn> Turns { get; set; }
     public DbSet<DbReport> Reports { get; set; }
     public DbSet<DbArticle> Articles{ get; set; }
 
+    // Player controled factions and data which is modified during the game
     public DbSet<DbPlayer> Players { get; set; }
-
     public DbSet<DbPlayerTurn> PlayerTurns { get; set; }
     public DbSet<DbAditionalReport> AditionalReports { get; set; }
+    public DbSet<DbOrders> Orders { get; set; }
+
+    // Parsed and normalized game state for the each player based on their reports
     public DbSet<DbFaction> Factions { get; set; }
     public DbSet<DbAttitude> Attitudes { get; set; }
     public DbSet<DbStat> Stats { get; set; }
@@ -81,11 +84,12 @@ public abstract class Database : DbContext {
     public DbSet<DbStructure> Structures { get; set; }
     public DbSet<DbUnit> Units { get; set; }
     public DbSet<DbUnitItem> Items { get; set; }
+    public DbSet<DbBattle> Battles { get; set; }
 
+    // Additional features not provided by the game engine
     public DbSet<DbAlliance> Alliances { get; set; }
     public DbSet<DbAllianceMember> AllianceMembers { get; set; }
     public DbSet<DbStudyPlan> StudyPlans { get; set; }
-    public DbSet<DbBattle> Battles { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
@@ -218,7 +222,7 @@ public abstract class Database : DbContext {
         });
 
         model.Entity<DbPlayerTurn>(t => {
-            t.HasKey(x => new { x.PlayerId, x.Number });
+            t.HasKey(x => new { x.PlayerId, x.TurnNumber });
 
             t.HasMany(x => x.Reports)
                 .WithOne(x => x.Turn)

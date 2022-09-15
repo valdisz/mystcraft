@@ -31,7 +31,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
         }
 
         var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
-        var players = await unit.PlayersAsync(game, cancellationToken);
+        var players = unit.Players(game);
 
         var player = await players.GetOneNoTrackingAsync(request.PlayerId, cancellationToken);
         if (player == null) {
@@ -44,7 +44,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
 
         string reportText;
         try {
-            reportText = await remote.DownloadReportAsync(player.Number.Value, request.Password);
+            reportText = await remote.DownloadReportAsync(player.Number.Value, request.Password, cancellationToken);
         }
         catch (WrongFactionOrPasswordException) {
             return new GameJoinRemoteResult(false, "Wrong faction number or password.");

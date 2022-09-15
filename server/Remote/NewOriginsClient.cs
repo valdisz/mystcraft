@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp;
@@ -33,7 +34,7 @@ public class NewOriginsClient {
         return -1;
     }
 
-    public async Task<string> DownloadReportAsync(int factionNumber, string password) {
+    public async Task<string> DownloadReportAsync(int factionNumber, string password, CancellationToken cancellation) {
         using var http = httpClientFactory.CreateClient();
 
         var fields = new Dictionary<string, string> {
@@ -45,10 +46,10 @@ public class NewOriginsClient {
             Content = new FormUrlEncodedContent(fields)
         };
 
-        var response = await http.SendAsync(request);
+        var response = await http.SendAsync(request, cancellation);
         response.EnsureSuccessStatusCode();
 
-        using var stream = await response.Content.ReadAsStreamAsync();
+        using var stream = await response.Content.ReadAsStreamAsync(cancellation);
         using var reader = new StreamReader(stream);
 
         var contents = await reader.ReadToEndAsync();
@@ -60,9 +61,7 @@ public class NewOriginsClient {
         return contents;
     }
 
-    public async Task<NewOriginsFaction[]> ListFactionsAsync(CancellationToken cancellation) {
-        var list = new List<NewOriginsFaction>();
-
+    public async IAsyncEnumerable<NewOriginsFaction> ListFactionsAsync([EnumeratorCancellation] CancellationToken cancellation) {
         var doc = await context.OpenAsync($"{this.url}/game", cancellation);
 
         var rows = doc.QuerySelectorAll("table tbody tr");
@@ -76,15 +75,26 @@ public class NewOriginsClient {
             var ordersCol = cols[2];
             var timesCol = cols[3];
 
-            list.Add(new NewOriginsFaction(
+            var faction = new NewOriginsFaction(
                 Number: numberValue == "new" ? null : int.Parse(numberValue),
                 Name: nameCol.TextContent.Trim(),
                 OrdersSubmitted: ordersCol.QuerySelector("span") != null,
                 TimesSubmitted: timesCol.QuerySelector("span") != null
-            ));
+            );
+
+            yield return faction;
+        }
+    }
+
+    public async IAsyncEnumerable<NewOriginsArticle> ListArticlesAsync([EnumeratorCancellation] CancellationToken cancellation) {
+        var doc = await context.OpenAsync($"{this.url}/times", cancellation);
+
+        var root = doc.QuerySelector(".container.my-5");
+        foreach (var child in root.Children) {
+
         }
 
-        return list.ToArray();
+        yield break;
     }
 }
 
@@ -100,3 +110,4 @@ public class WrongFactionOrPasswordException : System.Exception
 }
 
 public record NewOriginsFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted);
+public record NewOriginsArticle(string Name, string Contents);

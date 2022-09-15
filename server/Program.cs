@@ -1,11 +1,9 @@
 ﻿namespace advisor {
     using System;
     using System.IO;
-    using System.Linq;
     using System.Threading.Tasks;
     using advisor.Features;
     using advisor.Persistence;
-    using Hangfire;
     using MediatR;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
@@ -17,12 +15,11 @@
 
     class Program {
         public static Task Main(string[] args) {
-            if (args == null || args.Length == 0) {
-                return RunServerAsync(args);
+            if (Console.IsInputRedirected) {
+                return RunConverterAsync(Console.In);
             }
-            else {
-                return RunConverterAsync(args);
-            }
+
+            return RunServerAsync(args);
         }
 
         public static IWebHostBuilder CreateHostBuilder(string[] args) {
@@ -91,20 +88,11 @@
                     await mediator.Send(new UserCreate(email, password, Policies.Root));
                 }
 
-                await foreach (var game in db.Games.AsAsyncEnumerable()) {
-                    game.Ruleset = File.ReadAllText("data/ruleset.yaml");
-                }
-
                 await db.SaveChangesAsync();
             }
         }
 
-        public static async Task RunConverterAsync(string[] args) {
-            using var reader = File.OpenText(string.Concat(args));
-            await ConvertAsync(reader);
-        }
-
-        public static async Task ConvertAsync(TextReader reader) {
+        public static async Task RunConverterAsync(TextReader reader) {
             using var converter = new AtlantisReportJsonConverter(reader);
 
             using JsonWriter writer = new JsonTextWriter(Console.Out);

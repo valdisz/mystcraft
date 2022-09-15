@@ -16,6 +16,8 @@ namespace advisor.Persistence
 
         public int? Number { get; set; }
 
+        public bool IsClaimed => UserId.HasValue && !string.IsNullOrWhiteSpace(Password);
+
         [MaxLength(128)]
         public string Name { get; set; }
 

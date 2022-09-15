@@ -1,27 +1,24 @@
-namespace advisor.Persistence
-{
-    using System.Collections.Generic;
-    using HotChocolate;
+namespace advisor.Persistence;
 
-    public class DbTurn : InGameContext {
+using System.Collections.Generic;
+using HotChocolate;
 
-        [GraphQLIgnore]
-        public long GameId { get; set; }
+public class DbTurn : InGameContext {
 
-        public int Number { get; set; }
+    [GraphQLIgnore]
+    public long GameId { get; set; }
 
-        public int Month { get; set; }
+    public int Number { get; set; }
 
-        public int Year { get; set; }
+    public TurnStatus Status { get; set; }
 
-        [GraphQLIgnore]
-        public byte[] PlayerData { get; set; }
+    [GraphQLIgnore]
+    public byte[] PlayerData { get; set; }
 
-        [GraphQLIgnore]
-        public byte[] GameData { get; set; }
+    [GraphQLIgnore]
+    public byte[] GameData { get; set; }
 
-        public DbGame Game { get; set; }
-        public List<DbArticle> Articles { get; set; } = new ();
-        public List<DbReport> Reports { get; set; } = new ();
-    }
+    public DbGame Game { get; set; }
+    public List<DbArticle> Articles { get; set; } = new ();
+    public List<DbReport> Reports { get; set; } = new ();
 }

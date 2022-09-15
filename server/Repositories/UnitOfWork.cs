@@ -15,6 +15,9 @@ public interface IUnitOfWork : IAsyncDisposable, IDisposable {
     ITurnsRepository Turns(DbGame game);
     Task<ITurnsRepository> TurnsAsync(long gameId, CancellationToken cancellation = default);
 
+    IPlayerRepository Player(DbPlayer player);
+    Task<IPlayerRepository> PlayerAsync(long playerId, CancellationToken cancellation = default);
+
     ValueTask BeginTransactionAsync(CancellationToken cancellation = default);
     ValueTask<bool> CommitTransactionAsync(CancellationToken cancellation = default);
     ValueTask RollbackTransactionAsync(CancellationToken cancellation = default);
@@ -47,14 +50,18 @@ public class UnitOfWork : IUnitOfWork {
         return Players(game);
     }
 
-    public ITurnsRepository Turns(DbGame game) {
-        return new TurnsRepository(game, this, db);
-
-    }
+    public ITurnsRepository Turns(DbGame game) => new TurnsRepository(game, this, db);
 
     public async Task<ITurnsRepository> TurnsAsync(long gameId, CancellationToken cancellation) {
         var game = await Games.GetOneNoTrackingAsync(gameId, cancellation);
         return Turns(game);
+    }
+
+    public IPlayerRepository Player(DbPlayer player) => new PlayerRepository(player, this, db);
+
+    public async Task<IPlayerRepository> PlayerAsync(long playerId, CancellationToken cancellation) {
+        var player = await db.Players.FindAsync(playerId);
+        return Player(player);
     }
 
     public async ValueTask<int> SaveChangesAsync(CancellationToken cancellation = default) {

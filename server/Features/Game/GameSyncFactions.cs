@@ -41,9 +41,9 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
         }
 
         var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
-        var players = await unit.PlayersAsync(game, cancellationToken);
+        var players = unit.Players(game);
 
-        var factions = await players.AllActivePlayers
+        var factions = await players.AllPlayers
             .AsNoTracking()
             .Where(x => x.Number.HasValue)
             .Select(x => new PlayerProjection(x.Id, x.Number.Value))
@@ -64,7 +64,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
         await unit.BeginTransactionAsync(cancellationToken);
 
         // new and updated factions
-        foreach (var faction in await remote.ListFactionsAsync(cancellationToken)) {
+        await foreach (var faction in remote.ListFactionsAsync(cancellationToken)) {
             if (!faction.Number.HasValue) {
                 continue;
             }

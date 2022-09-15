@@ -9,13 +9,7 @@ namespace advisor
     using advisor.Persistence;
     using AngleSharp;
     using Hangfire;
-    using Hangfire.Client;
-    using Hangfire.Console;
-    using Hangfire.RecurringJobExtensions;
-    using Hangfire.Server;
     using MediatR;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 

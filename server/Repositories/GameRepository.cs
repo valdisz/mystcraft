@@ -16,38 +16,11 @@ public interface IGameRepository {
     Task<DbGame> CreateRemoteAsync(string name, string serverAddress, int turnNumber, GameOptions options, CancellationToken cancellation = default);
     Task<DbGame> PauseAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> StartAsync(long gameId, CancellationToken cancellation = default);
+    Task<DbGame> LockAsync(long gameId, CancellationToken cancellation = default);
+    Task<DbGame> UnlockAsync(long gameId, CancellationToken cancellation = default);
 
     Task<DbGame> GetOneAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default);
-}
-
-public interface ITurnsRepository {
-    IQueryable<DbTurn> AllTurns { get; }
-
-    Task<DbTurn> GetOneAsync(int number, CancellationToken cancellation = default);
-    Task<DbTurn> GetOneNoTrackingAsync(int number, CancellationToken cancellation = default);
-}
-
-public class TurnsRepository : ITurnsRepository {
-    public TurnsRepository(DbGame game, IUnitOfWork unit, Database db) {
-        this.game = game;
-        this.unit = unit;
-        this.db = db;
-    }
-
-    private readonly DbGame game;
-    private readonly IUnitOfWork unit;
-    private readonly Database db;
-
-    public IQueryable<DbTurn> AllTurns => db.Turns.InGame(game);
-
-    public Task<DbTurn> GetOneAsync(int number, CancellationToken cancellation) {
-        return AllTurns.SingleOrDefaultAsync(x => x.Number == number, cancellation);
-    }
-
-    public Task<DbTurn> GetOneNoTrackingAsync(int number, CancellationToken cancellation) {
-        return AllTurns.AsNoTracking().SingleOrDefaultAsync(x => x.Number == number, cancellation);
-    }
 }
 
 public class GameRepository : IGameRepository {
@@ -82,16 +55,18 @@ public class GameRepository : IGameRepository {
         var seedTurn = new DbTurn
         {
             GameId = game.Id,
-            Number = 0,
+            Number = 1,
+            Status =  TurnStatus.PENDING,
             PlayerData = await playerData.ReadAllBytesAsync(cancellation),
             GameData = await gameData.ReadAllBytesAsync(cancellation)
         };
         await db.Turns.AddAsync(seedTurn, cancellation);
 
-        game.LastTurn = seedTurn;
+        game.NextTurn = seedTurn;
 
         /////
 
+        await unit.SaveChangesAsync(cancellation);
         await unit.CommitTransactionAsync(cancellation);
 
         return game;
@@ -119,7 +94,8 @@ public class GameRepository : IGameRepository {
         var currentTurn = new DbTurn
         {
             GameId = game.Id,
-            Number = turnNumber
+            Number = turnNumber,
+            Status = TurnStatus.READY
         };
 
         await db.Turns.AddAsync(currentTurn, cancellation);
@@ -128,16 +104,16 @@ public class GameRepository : IGameRepository {
         var nextTurn = new DbTurn
         {
             GameId = game.Id,
-            Number = turnNumber + 1
+            Number = turnNumber + 1,
+            Status = TurnStatus.PENDING
         };
 
         await db.Turns.AddAsync(nextTurn, cancellation);
         game.NextTurn = nextTurn;
 
-        // await db.SaveChangesAsync(cancellation);
-
         /////
 
+        await unit.SaveChangesAsync(cancellation);
         await unit.CommitTransactionAsync(cancellation);
 
         return game;
@@ -145,53 +121,50 @@ public class GameRepository : IGameRepository {
 
     public async Task<DbGame> StartAsync(long gameId, CancellationToken cancellation) {
         var game = await db.Games.FindAsync(gameId);
-        if (game == null) {
-            return game;
-        }
 
-        if (game.Status == GameStatus.COMPLEATED) {
-            // todo: cannot start compleated game
-            return game;
+        if (game?.Status == GameStatus.NEW || game?.Status == GameStatus.PAUSED) {
+            game.Status = GameStatus.RUNNING;
         }
-
-        if (game.Status == GameStatus.RUNNING) {
-            return game;
-        }
-
-        game.Status = GameStatus.RUNNING;
 
         return game;
     }
 
     public async Task<DbGame> PauseAsync(long gameId, CancellationToken cancellation) {
         var game = await db.Games.FindAsync(gameId);
-        if (game == null)
-        {
-            return game;
-        }
 
-        if (game.Status != GameStatus.RUNNING)
-        {
-            return game;
+        if (game?.Status == GameStatus.RUNNING) {
+            game.Status = GameStatus.PAUSED;
         }
-
-        game.Status = GameStatus.PAUSED;
-        await db.SaveChangesAsync(cancellation);
 
         return game;
     }
 
     public async Task<DbGame> CompleateAsync(long gameId, CancellationToken cancellation) {
         var game = await db.Games.FindAsync(gameId);
-        if (game == null) {
-            return game;
+
+        if (game != null) {
+            game.Status = GameStatus.COMPLEATED;
         }
 
-        if (game.Status == GameStatus.COMPLEATED) {
-            return game;
+        return game;
+    }
+
+    public async Task<DbGame> LockAsync(long gameId, CancellationToken cancellation) {
+        var game = await db.Games.FindAsync(gameId);
+
+        if (game?.Status == GameStatus.RUNNING) {
+            game.Status = GameStatus.LOCKED;
         }
 
-        game.Status = GameStatus.COMPLEATED;
+        return game;
+    }
+
+    public async Task<DbGame> UnlockAsync(long gameId, CancellationToken cancellation) {
+        var game = await db.Games.FindAsync(gameId);
+
+        if (game?.Status == GameStatus.LOCKED) {
+            game.Status = GameStatus.RUNNING;
+        }
 
         return game;
     }

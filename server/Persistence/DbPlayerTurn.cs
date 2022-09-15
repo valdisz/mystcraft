@@ -4,17 +4,14 @@ namespace advisor.Persistence {
     using System.Linq;
     using HotChocolate;
 
-    public class DbPlayerTurn : InTurnContext, InGameContext {
-        [Key]
-        public long Id { get; set; }
-
-        [GraphQLIgnore]
-        public long GameId { get; set; }
-
+    public class DbPlayerTurn : InTurnContext {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
         public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public long GameId { get; set; }
 
         [Required]
         [MaxLength(128)]
@@ -22,7 +19,6 @@ namespace advisor.Persistence {
 
 
         public bool Ready { get; set; }
-
         public bool OrdersSubmitted { get; set; }
         public bool TimesSubmitted { get; set; }
 
@@ -77,5 +73,8 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public List<DbBattle> Battles { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbOrders> Orders { get; set; } = new ();
     }
 }

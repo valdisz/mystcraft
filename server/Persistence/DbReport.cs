@@ -18,6 +18,8 @@ public class DbReport : InGameContext {
 
     public byte[] Json { get; set; }
 
+    public string Error { get; set; }
+
     public DbGame Game { get; set; }
     public DbTurn Turn { get; set; }
 }

@@ -1,43 +1,43 @@
-namespace advisor.Features {
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using advisor.Model;
-    using advisor.Persistence;
-    using MediatR;
-    using Microsoft.EntityFrameworkCore;
+namespace advisor.Features;
 
-    public record TurnMapImport(long PlayerId, string Source) : IRequest;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Model;
+using advisor.Persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-    public class TurnMapImportHandler : IRequestHandler<TurnMapImport> {
-        public TurnMapImportHandler(Database db, IMediator mediator) {
-            this.db = db;
-            this.mediator = mediator;
-        }
+public record TurnMapImport(long PlayerId, string Source) : IRequest;
 
-        private readonly Database db;
-        private readonly IMediator mediator;
+public class TurnMapImportHandler : IRequestHandler<TurnMapImport> {
+    public TurnMapImportHandler(Database db, IMediator mediator) {
+        this.db = db;
+        this.mediator = mediator;
+    }
 
-        public async Task<MediatR.Unit> Handle(TurnMapImport request, CancellationToken cancellationToken) {
-            DbPlayer player = await db.Players
-                .AsNoTracking()
-                .Include(x => x.Game)
-                .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
+    private readonly Database db;
+    private readonly IMediator mediator;
 
-            if (player == null) return Unit.Value;
+    public async Task<MediatR.Unit> Handle(TurnMapImport request, CancellationToken cancellationToken) {
+        DbPlayer player = await db.Players
+            .AsNoTracking()
+            .Include(x => x.Game)
+            .SingleOrDefaultAsync(x => x.Id == request.PlayerId);
 
-            using var textReader = new StringReader(request.Source);
-            using var atlantisReader = new AtlantisReportJsonConverter(textReader,
-                new RegionsSection()
-            );
-            var json = await atlantisReader.ReadAsJsonAsync();
-            var report  = json.ToObject<JReport>();
+        if (player == null) return Unit.Value;
 
-            int earliestTurn = player.LastTurnNumber;
+        using var textReader = new StringReader(request.Source);
+        using var atlantisReader = new AtlantisReportJsonConverter(textReader,
+            new RegionsSection()
+        );
+        var json = await atlantisReader.ReadAsJsonAsync();
+        var report  = json.ToObject<JReport>();
 
-            await mediator.Send(new PlayerReportParse(player.Id, earliestTurn, report));
+        int earliestTurn = player.LastTurnNumber;
 
-            return Unit.Value;
-        }
+        await mediator.Send(new PlayerReportParse(player.Id, earliestTurn, report));
+
+        return Unit.Value;
     }
 }

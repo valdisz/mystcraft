@@ -70,7 +70,7 @@ public class JobReconcileHandler : IRequestHandler<JobReconcile, JobReconcileRes
             // sync faction status job
 
             if (shouldRun) {
-                jobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *", timeZone);
+                // jobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *", timeZone);
             }
             else {
                 jobs.RemoveIfExists(factionSyncJobId);

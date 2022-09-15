@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using advisor.Persistence;
+using advisor.Schema;
 
 public record GameEngineCreate(string Name, Stream Contents): IRequest<GameEngineCreateResult>;
 

@@ -25,7 +25,7 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
             return new GameJoinLocalResult(false, "Game does not exist.");
         }
 
-        var players = await unit.PlayersAsync(game, cancellationToken);
+        var players = unit.Players(game);
 
         DbPlayer player;
         try {

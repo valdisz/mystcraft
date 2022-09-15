@@ -3,6 +3,7 @@ namespace advisor.Features;
 using System.Threading;
 using System.Threading.Tasks;
 using advisor.Persistence;
+using advisor.Schema;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
