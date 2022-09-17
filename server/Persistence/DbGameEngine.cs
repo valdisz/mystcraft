@@ -6,6 +6,7 @@ namespace advisor.Persistence
     using HotChocolate;
 
     public class DbGameEngine {
+        [Key]
         public long Id { get; set; }
 
         [Required]

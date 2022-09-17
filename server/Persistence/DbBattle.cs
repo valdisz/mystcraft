@@ -14,6 +14,7 @@ namespace advisor.Persistence {
     }
 
     public class DbBattle : InTurnContext {
+        [Key]
         public long Id { get; set; }
         public long PlayerId { get; set; }
         public int TurnNumber { get; set; }

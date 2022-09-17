@@ -3,6 +3,7 @@ namespace advisor.Persistence {
     using HotChocolate;
 
     public class DbArticle {
+        [Key]
         public long Id { get; set; }
 
         [GraphQLIgnore]

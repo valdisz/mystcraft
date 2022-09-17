@@ -32,7 +32,7 @@ public class GameRepository : IGameRepository {
     private readonly IUnitOfWork unit;
     private readonly Database db;
 
-    public IQueryable<DbGame> AllGames => db.Games;
+    public IQueryable<DbGame> AllGames => db.Games.AsQueryable();
 
     public async Task<DbGame> CreateLocalAsync(string name, long engineId, GameOptions options, Stream playerData, Stream gameData, CancellationToken cancellation) {
         await unit.BeginTransactionAsync(cancellation);
@@ -44,7 +44,8 @@ public class GameRepository : IGameRepository {
             CreatedAt = DateTimeOffset.UtcNow,
             Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
             EngineId = engineId,
-            Options = options
+            Options = options,
+            NextTurnNumber = 1
         };
 
         await db.Games.AddAsync(game, cancellation);
@@ -55,14 +56,12 @@ public class GameRepository : IGameRepository {
         var seedTurn = new DbTurn
         {
             GameId = game.Id,
-            Number = 1,
+            Number = game.NextTurnNumber.Value,
             Status =  TurnStatus.PENDING,
             PlayerData = await playerData.ReadAllBytesAsync(cancellation),
             GameData = await gameData.ReadAllBytesAsync(cancellation)
         };
         await db.Turns.AddAsync(seedTurn, cancellation);
-
-        game.NextTurn = seedTurn;
 
         /////
 
@@ -83,7 +82,9 @@ public class GameRepository : IGameRepository {
             Status = GameStatus.NEW,
             CreatedAt = DateTimeOffset.UtcNow,
             Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
-            Options = options
+            Options = options,
+            LastTurnNumber = turnNumber,
+            NextTurnNumber = turnNumber + 1
         };
 
         await db.Games.AddAsync(game, cancellation);
@@ -94,22 +95,19 @@ public class GameRepository : IGameRepository {
         var currentTurn = new DbTurn
         {
             GameId = game.Id,
-            Number = turnNumber,
+            Number = game.LastTurnNumber.Value,
             Status = TurnStatus.READY
         };
-
-        await db.Turns.AddAsync(currentTurn, cancellation);
-        game.LastTurn = currentTurn;
 
         var nextTurn = new DbTurn
         {
             GameId = game.Id,
-            Number = turnNumber + 1,
+            Number = game.NextTurnNumber.Value,
             Status = TurnStatus.PENDING
         };
 
+        await db.Turns.AddAsync(currentTurn, cancellation);
         await db.Turns.AddAsync(nextTurn, cancellation);
-        game.NextTurn = nextTurn;
 
         /////
 
@@ -169,6 +167,9 @@ public class GameRepository : IGameRepository {
         return game;
     }
 
-    public Task<DbGame> GetOneAsync(long gameId, CancellationToken cancellation = default) => AllGames.SingleOrDefaultAsync(x => x.Id == gameId, cancellation);
-    public Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default) => AllGames.AsNoTracking().SingleOrDefaultAsync(x => x.Id == gameId, cancellation);
+    public async Task<DbGame> GetOneAsync(long gameId, CancellationToken cancellation = default)
+        => await db.Games.FindAsync(gameId, cancellation);
+
+    public Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default)
+        => AllGames.AsNoTracking().SingleOrDefaultAsync(x => x.Id == gameId, cancellation);
 }

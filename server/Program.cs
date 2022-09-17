@@ -1,5 +1,6 @@
 ﻿namespace advisor {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
     using advisor.Features;
@@ -15,7 +16,7 @@
 
     class Program {
         public static Task Main(string[] args) {
-            if (Console.IsInputRedirected) {
+            if (!Debugger.IsAttached && Console.IsInputRedirected) {
                 return RunConverterAsync(Console.In);
             }
 

@@ -15,11 +15,12 @@
                 .ImplementsNode()
                 .IdField(x => x.Id)
                 .ResolveNode((ctx, id) => {
+                    var (playerId, turnNumber) = DbPlayerTurn.ParseId(id);
                     var db = ctx.Service<Database>();
                     return db.PlayerTurns
                         .AsNoTracking()
                         .Include(x => x.Player)
-                        .SingleOrDefaultAsync(x => x.Id == id);
+                        .SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber);
                 });
         }
     }

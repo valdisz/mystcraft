@@ -20,6 +20,9 @@ public class DbReport : InGameContext {
 
     public string Error { get; set; }
 
+    public bool Parsed { get; set; }
+    public bool Imported { get; set; }
+
     public DbGame Game { get; set; }
     public DbTurn Turn { get; set; }
 }

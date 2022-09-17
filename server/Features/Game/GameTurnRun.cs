@@ -207,8 +207,8 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
         }
 
         foreach (var faction in MatchWithNewFactions(factionsOut, newFactions)) {
-            var player = await playersRepo.GetOneAsync(faction.Id, cancellation);
-            player.Number = faction.Number;
+            var player = await playersRepo.GetOneAsync(faction.Id);
+            player.Number = faction.Number.Value;
         }
 
         foreach (var faction in MatchWithQuitFactions(factionsOut, allOrders.Keys)) {

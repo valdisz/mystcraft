@@ -42,9 +42,13 @@ public class NewOriginsClient {
             { "password", password }
         };
 
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{this.url}/game/download-report") {
+        var url = $"{this.url}/game/download-report";
+        var request = new HttpRequestMessage(HttpMethod.Post, url) {
             Content = new FormUrlEncodedContent(fields)
         };
+
+        request.Headers.UserAgent.Clear();
+        request.Headers.UserAgent.Add(new System.Net.Http.Headers.ProductInfoHeaderValue("mystcraft.online", "1.0"));
 
         var response = await http.SendAsync(request, cancellation);
         response.EnsureSuccessStatusCode();
@@ -54,7 +58,7 @@ public class NewOriginsClient {
 
         var contents = await reader.ReadToEndAsync();
 
-        if (contents.StartsWith("<!doctype html>")) {
+        if (contents.StartsWith("<!doctype html>") || contents.StartsWith("Faction Password is not correct.")) {
             throw new WrongFactionOrPasswordException();
         }
 
@@ -75,9 +79,22 @@ public class NewOriginsClient {
             var ordersCol = cols[2];
             var timesCol = cols[3];
 
+            int? number;
+            string name = nameCol.TextContent.Trim();
+
+            if (numberValue == "new") {
+                number = null;
+            }
+            else {
+                number = int.Parse(numberValue);
+                var numberStrLen = number.ToString().Length + 2;
+
+                name = name.Substring(0, name.Length - numberStrLen).Trim();
+            }
+
             var faction = new NewOriginsFaction(
-                Number: numberValue == "new" ? null : int.Parse(numberValue),
-                Name: nameCol.TextContent.Trim(),
+                Number: number,
+                Name: name,
                 OrdersSubmitted: ordersCol.QuerySelector("span") != null,
                 TimesSubmitted: timesCol.QuerySelector("span") != null
             );

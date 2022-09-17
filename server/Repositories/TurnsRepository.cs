@@ -14,6 +14,8 @@ public interface ITurnsRepository {
 
     Task UpdateTurnNumberAsync(int oldNumber, int newNumber, CancellationToken cancellation = default);
     Task<DbTurn> GetOrCreateNextTurnAsync(int turnNumber, CancellationToken cancellation = default);
+
+    Task<DbReport> AddReportAsync(int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation = default);
 }
 
 public class TurnsRepository : ITurnsRepository {
@@ -49,5 +51,20 @@ public class TurnsRepository : ITurnsRepository {
             Number = turnNumber,
             Status = TurnStatus.PENDING
         };
+    }
+
+    public async Task<DbReport> AddReportAsync(int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation) {
+        var report = new DbReport {
+            GameId = game.Id,
+            Data = data,
+            FactionNumber = factionNumber,
+            TurnNumber = turnNumber,
+            Parsed = false,
+            Imported = false
+        };
+
+        await db.Reports.AddAsync(report, cancellation);
+
+        return report;
     }
 }

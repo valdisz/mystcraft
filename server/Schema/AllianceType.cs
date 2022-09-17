@@ -42,8 +42,7 @@ namespace advisor.Schema
                 .OnlyPlayer(member)
                 .Include(x => x.Player)
                 .OrderBy(x => x.TurnNumber)
-                .Where(x => x.Player.Number != null)
-                .Select(x => new { TurnNumber = x.TurnNumber, FactionNumber = x.Player.Number ?? 0, FactionName = x.Player.Name })
+                .Select(x => new { TurnNumber = x.TurnNumber, FactionNumber = x.Player.Number, FactionName = x.Player.Name })
                 .ToListAsync())
                 .Select(x => new AllianceMemberTurn(member.PlayerId, x.FactionNumber, x.FactionName, x.TurnNumber))
                 .ToList();
@@ -54,9 +53,9 @@ namespace advisor.Schema
                 .AsNoTracking()
                 .OnlyPlayer(member)
                 .Include(x => x.Player)
+                .Where(x => x.TurnNumber == number)
                 .OrderBy(x => x.TurnNumber)
-                .Where(x => x.Player.Number != null && x.TurnNumber == number)
-                .Select(x => new { TurnNumber = x.TurnNumber, FactionNumber = x.Player.Number ?? 0, FactionName = x.Player.Name })
+                .Select(x => new { TurnNumber = x.TurnNumber, FactionNumber = x.Player.Number, FactionName = x.Player.Name })
                 .FirstOrDefaultAsync();
 
             return new AllianceMemberTurn(member.PlayerId, data.FactionNumber, data.FactionName, data.TurnNumber);

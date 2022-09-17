@@ -16,8 +16,8 @@
             "stopAtEntry": false,
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ADVISOR_SEED__EMAIL": "valdis@zobela.eu",
-                "ADVISOR_SEED__PASSWORD": "valdis"
+                "ADVISOR_SEED__EMAIL": "admin@advisor",
+                "ADVISOR_SEED__PASSWORD": "admin123"
             }
         },
         {

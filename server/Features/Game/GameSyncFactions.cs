@@ -45,8 +45,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
 
         var factions = await players.AllPlayers
             .AsNoTracking()
-            .Where(x => x.Number.HasValue)
-            .Select(x => new PlayerProjection(x.Id, x.Number.Value))
+            .Select(x => new PlayerProjection(x.Id, x.Number))
             .ToListAsync(cancellationToken);
 
         async Task<DbPlayer> getPlayerAsync(int number, CancellationToken cancellation) {
@@ -55,7 +54,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
                 var item = factions[i];
                 factions.RemoveAt(i);
 
-                return await players.GetOneNoTrackingAsync(item.Id, cancellation);
+                return await players.GetOneAsync(item.Id);
             }
 
             return null;
@@ -70,14 +69,11 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
             }
 
             var player = await getPlayerAsync(faction.Number.Value, cancellationToken);
-            DbPlayerTurn turn;
             if (player == null) {
                 player = await players.AddRemoteAsync(faction.Number.Value, faction.Name, cancellationToken);
-                turn = player.NextTurn;
             }
-            else {
-                turn = await players.GetPlayerTurnAsync(player.NextTurnId.Value, cancellationToken);
-            }
+
+            DbPlayerTurn turn = await players.GetPlayerTurnAsync(player.Id, player.NextTurnNumber.Value, cancellationToken);
 
             turn.OrdersSubmitted = faction.OrdersSubmitted;
             turn.TimesSubmitted = faction.TimesSubmitted;

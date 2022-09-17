@@ -40,8 +40,10 @@ namespace advisor.Schema
         }
 
         public string LastTurnId(IResolverContext context, [Parent] DbPlayer player) {
-            var id = idSerializer.Serialize(null, "PlayerTurn", DbPlayerTurn.MakeId(player.Id, player.LastTurnNumber));
-            return id;
+            // FIXME
+            // var id = idSerializer.Serialize(null, "PlayerTurn", DbPlayerTurn.CreateId(player.Id, player.));
+            // return id;
+            return null;
         }
 
         public Task<DbAlliance> Alliance(Database db, [Parent] DbPlayer player) {

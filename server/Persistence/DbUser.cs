@@ -29,6 +29,8 @@ namespace advisor.Persistence
 
         public List<string> Roles { get; set; } = new ();
 
+        [GraphQLIgnore]
+        public List<DbRegistration> Registrations { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbPlayer> Players { get; set; } = new ();

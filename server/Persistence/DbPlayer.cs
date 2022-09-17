@@ -14,7 +14,7 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public long GameId { get; set; }
 
-        public int? Number { get; set; }
+        public int Number { get; set; }
 
         public bool IsClaimed => UserId.HasValue && !string.IsNullOrWhiteSpace(Password);
 
@@ -22,10 +22,10 @@ namespace advisor.Persistence
         public string Name { get; set; }
 
         [GraphQLIgnore]
-        public int LastTurnId { get; set; }
+        public int LastTurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public int? NextTurnId { get; set; }
+        public int? NextTurnNumber { get; set; }
 
         [MaxLength(64)]
         public string Password { get; set; }
@@ -37,12 +37,6 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         public DbGame Game { get;set; }
-
-        [GraphQLIgnore]
-        public DbPlayerTurn LastTurn { get; set; }
-
-        [GraphQLIgnore]
-        public DbPlayerTurn NextTurn { get; set; }
 
         [GraphQLIgnore]
         public List<DbPlayerTurn> Turns { get; set; } = new List<DbPlayerTurn>();

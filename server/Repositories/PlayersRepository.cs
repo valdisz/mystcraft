@@ -34,10 +34,10 @@ public interface IPlayersRepository {
 
     Task<DbPlayer> AddLocalAsync(string name, long userId, CancellationToken cancellation = default);
     Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default);
-    Task<DbPlayer> ClamFactionAsync(string reportText, long userId, long playerId, string password, CancellationToken cancellation = default);
+    Task<DbPlayer> ClamFactionAsync(long userId, long playerId, string password, CancellationToken cancellation = default);
     Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default);
 
-    Task<DbPlayer> GetOneAsync(long playerId, CancellationToken cancellation = default);
+    Task<DbPlayer> GetOneAsync(long playerId);
     Task<DbPlayer> GetOneNoTrackingAsync(long playerId, CancellationToken cancellation = default);
 
     Task<DbPlayer> GetOneByUserAsync(long userId, CancellationToken cancellation = default);
@@ -46,8 +46,8 @@ public interface IPlayersRepository {
     Task<DbPlayer> GetOneByNumberAsync(int number, CancellationToken cancellation = default);
     Task<DbPlayer> GetOneByNumberNoTrackingAsync(int number, CancellationToken cancellation = default);
 
-    Task<DbPlayerTurn> GetPlayerTurnAsync(long playerTurnId, CancellationToken cancellation = default);
-    Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerTurnId, CancellationToken cancellation = default);
+    Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default);
+    Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default);
 }
 
 [System.Serializable]
@@ -115,7 +115,9 @@ public class PlayersRepository : IPlayersRepository {
         player = new DbPlayer {
             GameId = game.Id,
             Number = number,
-            Name = name
+            Name = name,
+            LastTurnNumber = game.LastTurnNumber.Value,
+            NextTurnNumber = game.NextTurnNumber.Value
         };
 
         await db.Players.AddAsync(player, cancellation);
@@ -123,51 +125,37 @@ public class PlayersRepository : IPlayersRepository {
 
         var lastTurn = new DbPlayerTurn {
             PlayerId = player.Id,
-            TurnNumber = game.LastTurnNumber.Value
+            TurnNumber = game.LastTurnNumber.Value,
+            Name = name
         };
 
         var nextTurn = new DbPlayerTurn {
             PlayerId = player.Id,
-            TurnNumber = game.NextTurnNumber.Value
+            TurnNumber = game.NextTurnNumber.Value,
+            Name = name
         };
-
-        player.LastTurn = lastTurn;
-        player.NextTurn = nextTurn;
 
         await db.PlayerTurns.AddAsync(lastTurn, cancellation);
         await db.PlayerTurns.AddAsync(nextTurn, cancellation);
-        await db.SaveChangesAsync(cancellation);
 
+        await db.SaveChangesAsync(cancellation);
         await unit.CommitTransactionAsync(cancellation);
 
         return player;
     }
 
-    public async Task<DbPlayer> ClamFactionAsync(string reportText, long userId, long playerId, string password, CancellationToken cancellation = default) {
-        var player = await GetOneAsync(playerId);
-        if (player.UserId.HasValue) {
-            throw new PlayersRepositoryException($"Faction {player.Number} already claimed.");
-        }
-
+    public async Task<DbPlayer> ClamFactionAsync(long userId, long playerId, string password, CancellationToken cancellation = default) {
         if ((await GetOneByUserNoTrackingAsync(userId)) != null) {
             throw new PlayersRepositoryException($"User already have claimed control over another faction.");
         }
 
-        var (number, name) = await ReadPlayerFromReportAsync(reportText);
-
-        var report = new DbReport {
-            GameId = game.Id,
-            TurnNumber = game.LastTurnNumber.Value,
-            FactionNumber = number,
-            Data = Encoding.UTF8.GetBytes(reportText)
-        };
+        var player = await GetOneAsync(playerId);
+        if (player.IsClaimed) {
+            throw new PlayersRepositoryException($"Faction {player.Number} already claimed.");
+        }
 
         player.UserId = userId;
         player.Password = password;
-
-        await db.Reports.AddAsync(report, cancellation);
-
-        // await db.SaveChangesAsync(cancellation);
 
         return player;
     }
@@ -186,29 +174,28 @@ public class PlayersRepository : IPlayersRepository {
     public IQueryable<DbPlayer> AllPlayers => db.Players.InGame(game);
     public IQueryable<DbPlayer> AllActivePlayers => AllPlayers.OnlyActivePlayers();
 
-    public Task<DbPlayer> GetOneAsync(long playerId, CancellationToken cancellation = default) => AllPlayers.SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
-    public Task<DbPlayer> GetOneNoTrackingAsync(long playerId, CancellationToken cancellation = default) => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
+    public async Task<DbPlayer> GetOneAsync(long playerId) => await db.Players.FindAsync(playerId);
 
-    public Task<DbPlayer> GetOneByUserAsync(long userId, CancellationToken cancellation = default) => AllPlayers.SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
-    public Task<DbPlayer> GetOneByUserNoTrackingAsync(long userId, CancellationToken cancellation = default) => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+    public Task<DbPlayer> GetOneNoTrackingAsync(long playerId, CancellationToken cancellation = default)
+        => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
 
-    public Task<DbPlayer> GetOneByNumberAsync(int number, CancellationToken cancellation = default) => AllPlayers.SingleOrDefaultAsync(x => x.Number == number, cancellation);
-    public Task<DbPlayer> GetOneByNumberNoTrackingAsync(int number, CancellationToken cancellation = default) => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.Number == number, cancellation);
+    public Task<DbPlayer> GetOneByUserAsync(long userId, CancellationToken cancellation = default)
+        => AllPlayers.SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
-    public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerTurnId, CancellationToken cancellation = default) => db.PlayerTurns.SingleOrDefaultAsync(x => x.Id == playerTurnId, cancellation);
-    public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerTurnId, CancellationToken cancellation = default) => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.Id == playerTurnId, cancellation);
+    public Task<DbPlayer> GetOneByUserNoTrackingAsync(long userId, CancellationToken cancellation = default)
+        => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
-    private async Task<(int number, string name)> ReadPlayerFromReportAsync(string source) {
-        using var textReader = new StringReader(source);
+    public Task<DbPlayer> GetOneByNumberAsync(int number, CancellationToken cancellation = default)
+        => AllPlayers.SingleOrDefaultAsync(x => x.Number == number, cancellation);
 
-        using var atlantisReader = new AtlantisReportJsonConverter(textReader,
-            new ReportFactionSection()
-        );
-        var json = await atlantisReader.ReadAsJsonAsync();
-        var report  = json.ToObject<JReport>();
+    public Task<DbPlayer> GetOneByNumberNoTrackingAsync(int number, CancellationToken cancellation = default)
+        => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.Number == number, cancellation);
 
-        var faction = report.Faction;
+    public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
+        => db.PlayerTurns.SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
 
-        return (faction.Number, faction.Name);
-    }
+    public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
+        => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
+
+
 }

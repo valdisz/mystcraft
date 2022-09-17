@@ -59,6 +59,7 @@ public abstract class Database : DbContext {
 
     // Local and remote games
     public DbSet<DbGame> Games { get; set; }
+    public DbSet<DbRegistration> Registrations { get; set; }
 
     // Game turn data as the engine returns it
     public DbSet<DbTurn> Turns { get; set; }
@@ -121,20 +122,33 @@ public abstract class Database : DbContext {
 
     protected override void OnModelCreating(ModelBuilder model) {
         model.Entity<DbUser>(t => {
-            t.Property(x => x.Algorithm).HasConversion<string>();
+            t.Property(x => x.Id)
+                .UseIdentityColumn();
+
+            t.Property(x => x.Algorithm)
+                .HasConversion<string>();
 
             t.Property(p => p.Roles)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
+
+            t.HasMany(x => x.Registrations)
+                .WithOne(x => x.User)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             t.HasMany(p => p.Players)
                 .WithOne(p => p.User)
-                .HasForeignKey(x => x.UserId);
+                .HasForeignKey(x => x.UserId)
+                .IsRequired(false);
 
             t.HasIndex(x => new { x.Email })
                 .IsUnique();
         });
 
         model.Entity<DbGameEngine>(t => {
+            t.Property(x => x.Id)
+                .UseIdentityColumn();
+
             t.HasMany(x => x.Games)
                 .WithOne(x => x.Engine)
                 .HasForeignKey(x => x.EngineId)
@@ -146,13 +160,13 @@ public abstract class Database : DbContext {
 
         model.Entity<DbGame>(t => {
             t.Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityColumn();
 
             t.Property(x => x.Type)
                 .HasConversion<string>();
 
             t.Property(x => x.Options)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.HasMany(p => p.Players)
                 .WithOne(p => p.Game)
@@ -172,17 +186,18 @@ public abstract class Database : DbContext {
                 .HasForeignKey(x => x.GameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            t.HasOne(x => x.LastTurn)
-                .WithOne()
-                .HasForeignKey<DbGame>(x => new { x.Id, x.LastTurnNumber })
-                .IsRequired(false)
+            t.HasMany(x => x.Registrations)
+                .WithOne(x => x.Game)
+                .HasForeignKey(x => x.GameId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            t.HasOne(x => x.NextTurn)
-                .WithOne()
-                .HasForeignKey<DbGame>(x => new { x.Id, x.NextTurnNumber })
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.Cascade);
+            t.HasIndex(x => x.Name)
+                .IsUnique();
+        });
+
+        model.Entity<DbRegistration>(x => {
+            x.Property(x => x.Id)
+                .UseIdentityColumn();
         });
 
         model.Entity<DbTurn>(t => {
@@ -204,21 +219,31 @@ public abstract class Database : DbContext {
         });
 
         model.Entity<DbArticle>(t => {
-            t.HasKey(x => x.Id);
+            t.Property(x => x.Id)
+                .UseIdentityColumn();
         });
 
         model.Entity<DbPlayer>(t => {
-            t.HasMany<DbAditionalReport>(x => x.Reports)
-                .WithOne(x => x.Player)
-                .HasForeignKey(x => x.PlayerId);
+            t.Property(x => x.Id)
+                .UseIdentityColumn();
 
-            t.HasMany<DbPlayerTurn>(x => x.Turns)
+            t.HasMany<DbAditionalReport>(x => x.Reports)
                 .WithOne(x => x.Player)
                 .HasForeignKey(x => x.PlayerId);
 
             t.HasMany(x => x.AllianceMembererships)
                 .WithOne(x => x.Player)
                 .HasForeignKey(x => x.PlayerId);
+
+            t.HasMany<DbOrders>()
+                .WithOne()
+                .HasForeignKey(x => x.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            t.HasMany<DbPlayerTurn>(x => x.Turns)
+                .WithOne(x => x.Player)
+                .HasForeignKey(x => x.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         model.Entity<DbPlayerTurn>(t => {
@@ -293,10 +318,19 @@ public abstract class Database : DbContext {
                 .WithOne(x => x.Turn)
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                 .OnDelete(DeleteBehavior.Restrict);
+
+            t.HasMany(x => x.Orders)
+                .WithOne(x => x.Turn)
+                .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         model.Entity<DbAditionalReport>(t => {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
+        });
+
+        model.Entity<DbOrders>(t => {
+            t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
         });
 
         model.Entity<DbRegion>(t => {
@@ -337,8 +371,8 @@ public abstract class Database : DbContext {
         model.Entity<DbMarketItem>(t => {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Market, x.Code });
 
-            t.Property(x => x.Amount).IsRequired();
-            t.Property(x => x.Price).IsRequired();
+            t.Property(x => x.Amount);
+            t.Property(x => x.Price);
             t.Property(x => x.Market)
                 .HasConversion<string>();
         });
@@ -346,7 +380,7 @@ public abstract class Database : DbContext {
         model.Entity<DbProductionItem>(t => {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
 
-            t.Property(x => x.Amount).IsRequired();
+            t.Property(x => x.Amount);
         });
 
         model.Entity<DbExit>(t => {
@@ -408,7 +442,7 @@ public abstract class Database : DbContext {
 
         model.Entity<DbStatItem>(t => {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
-            t.Property(x => x.Amount).IsRequired();
+            t.Property(x => x.Amount);
 
             t.HasOne(x => x.Region)
                 .WithMany()
@@ -419,13 +453,13 @@ public abstract class Database : DbContext {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Id });
 
             t.Property(p => p.Flags)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.Property(p => p.SailDirections)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.Property(p => p.Contents)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.HasMany(x => x.Units)
                 .WithOne(x => x.Structure)
@@ -439,13 +473,13 @@ public abstract class Database : DbContext {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Number });
 
             t.Property(p => p.Flags)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.Property(p => p.CanStudy)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.Property(p => p.Skills)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.OwnsOne(p => p.Capacity);
 
@@ -466,7 +500,7 @@ public abstract class Database : DbContext {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
 
             t.Property(x => x.Teach)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.OwnsOne(p => p.Target, owned => {
                 owned.Ignore(x => x.Days);
@@ -478,6 +512,9 @@ public abstract class Database : DbContext {
         });
 
         model.Entity<DbAlliance>(t => {
+            t.Property(x => x.Id)
+                .UseIdentityColumn();
+
             t.HasMany(p => p.Members)
                 .WithOne(x => x.Alliance)
                 .HasForeignKey(x => x.AllianceId);
@@ -488,10 +525,11 @@ public abstract class Database : DbContext {
         });
 
         model.Entity<DbBattle>(t => {
-            t.HasKey(x => x.Id);
+            t.Property(x => x.Id)
+                .UseIdentityColumn();
 
             t.Property(x => x.Battle)
-                .HasJsonConversion(options.Provider);
+                .HasConversionJson(options.Provider);
 
             t.OwnsOne(x => x.Attacker);
             t.OwnsOne(x => x.Defender);

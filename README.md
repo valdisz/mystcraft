@@ -26,7 +26,7 @@ When server runs for the first time, it needs to create initial user. For this p
 To run server for development needs `ASPNETCORE_ENVIRONMENT` env variable must be set with value `Development`.
 
 ```
-ASPNETCORE_ENVIRONMENT=Development ADVISOR_SEED__EMAIL=admin@advisor ADVISOR_SEED__PASSWORD=admin123 dotnet watch run --no-hot-reload
+ASPNETCORE_ENVIRONMENT=Development ADVISOR_SEED__EMAIL=admin@advisor ADVISOR_SEED__PASSWORD=admin123 dotnet watch run
 ```
 
 ## Client

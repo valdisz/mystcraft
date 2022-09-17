@@ -1,33 +1,35 @@
 namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Linq;
     using HotChocolate;
 
-    public class DbPlayerTurn : InTurnContext {
+    public class DbPlayerTurn : InPlayerContext {
+        public static string CreateId(long playerId, int turnNumber) => $"{playerId}:{turnNumber}";
+        public static string CreateId(DbPlayerTurn player) => CreateId(player.PlayerId, player.TurnNumber);
+        public static (long playerId, int turnNumber) ParseId(string id) {
+            var values = id.Split(":");
+            return (
+                long.Parse(values[0]),
+                int.Parse(values[1])
+            );
+        }
+
+
+        public string Id => CreateId(this);
+
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
         public int TurnNumber { get; set; }
 
-        [GraphQLIgnore]
-        public long GameId { get; set; }
 
         [Required]
         [MaxLength(128)]
         public string Name { get; set; }
-
-
         public bool Ready { get; set; }
         public bool OrdersSubmitted { get; set; }
         public bool TimesSubmitted { get; set; }
 
-
-        [GraphQLIgnore]
-        public DbGame Game { get; set; }
-
-        [GraphQLIgnore]
-        public DbTurn Turn { get; set; }
 
         [GraphQLIgnore]
         public DbPlayer Player { get; set; }

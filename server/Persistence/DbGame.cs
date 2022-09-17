@@ -33,17 +33,12 @@ namespace advisor.Persistence {
 
         public int? NextTurnNumber { get; set; }
 
-        // The last processed or imported turn
-        [GraphQLIgnore]
-        public DbTurn LastTurn { get; set; }
-
-        // The pending turn, not yet processed
-        [GraphQLIgnore]
-        public DbTurn NextTurn { get; set; }
-
 
         [GraphQLIgnore]
         public List<DbPlayer> Players { get; set; } = new ();
+
+        [GraphQLIgnore]
+        public List<DbRegistration> Registrations { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbAlliance> Alliances { get; set; } = new ();

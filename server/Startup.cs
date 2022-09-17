@@ -251,7 +251,7 @@ public class Startup {
             .AddType<UploadType>()
             .AddType<UserType>()
                 .AddType<UserResolvers>()
-            .AddType<GameType>()
+            .AddType<advisor.Schema.GameType>()
                 .AddType<GameResolvers>()
             .AddType<PlayerType>()
                 .AddType<PlayerResolvers>()
@@ -266,7 +266,7 @@ public class Startup {
                 .AddType<StructureResolvers>()
             .AddType<FactionType>()
                 .AddType<FactionResolvers>()
-            .AddType<EventType>()
+            .AddType<advisor.Schema.EventType>()
             .AddType<MutationResult<string>>()
             .AddType<AllianceType>()
             .AddType<AllianceMemberType>()
@@ -291,7 +291,10 @@ public class Startup {
         services
             .AddMemoryCache();
 
-        services.AddTransient<TurnReProcessJob>();
+        // FIXME
+        // services.AddTransient<TurnReProcessJob>();
+
+        services.AddTransient<ReconcilationJob>();
     }
 
     public void Configure(IApplicationBuilder app) {
