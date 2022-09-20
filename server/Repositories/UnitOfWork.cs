@@ -97,9 +97,12 @@ public class UnitOfWork : IUnitOfWork {
 
             await tx.DisposeAsync();
             tx = null;
+            txCounter = 0;
+        }
+        else {
+            txCounter--;
         }
 
-        txCounter--;
         return !txRollback;
     }
 
@@ -112,9 +115,12 @@ public class UnitOfWork : IUnitOfWork {
             await tx.RollbackAsync(cancellation);
             await tx.DisposeAsync();
             tx = null;
+            txCounter = 0;
+        }
+        else {
+            txCounter--;
         }
 
-        txCounter--;
         txRollback = true;
     }
 
