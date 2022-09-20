@@ -26,8 +26,7 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
     private readonly IHttpClientFactory httpFactory;
 
     public async Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) {
-        var serverAddress = "http://atlantis-pbem.com";
-        var remote = new NewOriginsClient(serverAddress, httpFactory);
+        var remote = new NewOriginsClient(request.Options.ServerAddress, httpFactory);
 
         var turnNumber = await remote.GetCurrentTurnNumberAsync(cancellationToken);
         if (turnNumber < 0) {
@@ -38,7 +37,7 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
 
         var game = await games.CreateRemoteAsync(
             name: request.Name,
-            serverAddress: serverAddress,
+            serverAddress: request.Options.ServerAddress,
             turnNumber: turnNumber,
             options: request.Options,
             cancellationToken
@@ -47,7 +46,7 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
         await unit.SaveChangesAsync(cancellationToken);
 
         await mediator.Send(new GameSyncFactions(game.Id), cancellationToken);
-        // todo: arthicles
+        // TODO: import articles
 
         await unit.CommitTransactionAsync(cancellationToken);
 

@@ -295,6 +295,7 @@ public class Startup {
         // services.AddTransient<TurnReProcessJob>();
 
         services.AddTransient<ReconcilationJob>();
+        services.AddTransient<GameSyncFactionsJob>();
     }
 
     public void Configure(IApplicationBuilder app) {

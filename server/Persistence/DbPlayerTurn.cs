@@ -1,4 +1,5 @@
 namespace advisor.Persistence {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
@@ -26,9 +27,13 @@ namespace advisor.Persistence {
         [Required]
         [MaxLength(128)]
         public string Name { get; set; }
-        public bool Ready { get; set; }
-        public bool OrdersSubmitted { get; set; }
-        public bool TimesSubmitted { get; set; }
+        public DateTimeOffset? ReadyAt { get; set; }
+        public DateTimeOffset? OrdersSubmittedAt { get; set; }
+        public DateTimeOffset? TimesSubmittedAt { get; set; }
+
+        public bool IsReady => ReadyAt.HasValue;
+        public bool IsOrdersSubmitted => OrdersSubmittedAt.HasValue;
+        public bool IsTimesSubmitted => TimesSubmittedAt.HasValue;
 
 
         [GraphQLIgnore]

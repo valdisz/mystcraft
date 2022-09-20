@@ -32,7 +32,7 @@ public interface IPlayersRepository {
     IQueryable<DbPlayer> AllPlayers { get; }
     IQueryable<DbPlayer> AllActivePlayers { get; }
 
-    Task<DbPlayer> AddLocalAsync(string name, long userId, CancellationToken cancellation = default);
+    Task<DbRegistration> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default);
     Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default);
     Task<DbPlayer> ClamFactionAsync(long userId, long playerId, string password, CancellationToken cancellation = default);
     Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default);
@@ -50,17 +50,6 @@ public interface IPlayersRepository {
     Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default);
 }
 
-[System.Serializable]
-public class PlayersRepositoryException : System.Exception
-{
-    public PlayersRepositoryException() { }
-    public PlayersRepositoryException(string message) : base(message) { }
-    public PlayersRepositoryException(string message, System.Exception inner) : base(message, inner) { }
-    protected PlayersRepositoryException(
-        System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
-}
-
 public class PlayersRepository : IPlayersRepository {
     public PlayersRepository(DbGame game, IUnitOfWork unit, Database db) {
         this.game = game;
@@ -72,42 +61,59 @@ public class PlayersRepository : IPlayersRepository {
     private readonly IUnitOfWork unit;
     private readonly Database db;
 
-    public async Task<DbPlayer> AddLocalAsync(string name, long userId, CancellationToken cancellation = default) {
+    public async Task<DbRegistration> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
+        var reg = await unit.Games.GetRegistrationAsync(registrationId);
+
         if (game.Type != GameType.LOCAL) {
-            throw new PlayersRepositoryException("Local players can be added just to the local game.");
+            throw new RepositoryException("Local players can be added just to the local game.");
         }
 
         if (game.Status == GameStatus.COMPLEATED) {
-            throw new PlayersRepositoryException("Game already ended.");
+            throw new RepositoryException("Game already ended.");
         }
 
-        var player = await GetOneByUserNoTrackingAsync(userId, cancellation);
-        if (player != null) {
-            throw new PlayersRepositoryException("Only one player allowed per user.");
-        }
+        await unit.BeginTransactionAsync(cancellation);
 
-        player = new DbPlayer {
-            GameId = game.Id,
-            UserId = userId,
-            Name = name,
-
-            // there will be a random password
-            Password = Guid.NewGuid().ToString("N")
+        var player = new DbPlayer {
+            GameId = reg.GameId,
+            UserId = reg.UserId,
+            Name = reg.Name,
+            Number = factionNumber,
+            Password = reg.Password
         };
 
         await db.Players.AddAsync(player, cancellation);
+        await db.SaveChangesAsync(cancellation);
 
-        return player;
+        var lastTurn = new DbPlayerTurn {
+            PlayerId = player.Id,
+            TurnNumber = game.LastTurnNumber.Value,
+            Name = player.Name
+        };
+
+        var nextTurn = new DbPlayerTurn {
+            PlayerId = player.Id,
+            TurnNumber = game.NextTurnNumber.Value,
+            Name = player.Name
+        };
+
+        await db.PlayerTurns.AddAsync(lastTurn, cancellation);
+        await db.PlayerTurns.AddAsync(nextTurn, cancellation);
+
+        await db.SaveChangesAsync(cancellation);
+        await unit.CommitTransactionAsync(cancellation);
+
+        return reg;
     }
 
     public async Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default) {
         if (game.Type != GameType.REMOTE) {
-            throw new PlayersRepositoryException("Remote players can be added just to the remote game.");
+            throw new RepositoryException("Remote players can be added just to the remote game.");
         }
 
         var player = await GetOneByNumberNoTrackingAsync(number, cancellation);
         if (player != null) {
-            throw new PlayersRepositoryException($"Remote faction with number {number} is already added.");
+            throw new RepositoryException($"Remote faction with number {number} is already added.");
         }
 
         await unit.BeginTransactionAsync(cancellation);
@@ -146,12 +152,12 @@ public class PlayersRepository : IPlayersRepository {
 
     public async Task<DbPlayer> ClamFactionAsync(long userId, long playerId, string password, CancellationToken cancellation = default) {
         if ((await GetOneByUserNoTrackingAsync(userId)) != null) {
-            throw new PlayersRepositoryException($"User already have claimed control over another faction.");
+            throw new RepositoryException($"User already have claimed control over another faction.");
         }
 
         var player = await GetOneAsync(playerId);
         if (player.IsClaimed) {
-            throw new PlayersRepositoryException($"Faction {player.Number} already claimed.");
+            throw new RepositoryException($"Faction {player.Number} already claimed.");
         }
 
         player.UserId = userId;
@@ -163,7 +169,7 @@ public class PlayersRepository : IPlayersRepository {
     public async Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default) {
         var player = await GetOneAsync(playerId);
         if (player == null) {
-            throw new PlayersRepositoryException($"Player does not exist.");
+            throw new RepositoryException($"Player does not exist.");
         }
 
         player.IsQuit = true;

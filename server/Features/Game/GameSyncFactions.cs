@@ -1,5 +1,6 @@
 namespace advisor.Features;
 
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -40,10 +41,8 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
             return new GameSyncFactionsResult(false, "Games does not exist.");
         }
 
-        var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
-        var players = unit.Players(game);
-
-        var factions = await players.AllPlayers
+        var playersRepo = unit.Players(game);
+        var factions = await playersRepo.AllPlayers
             .AsNoTracking()
             .Select(x => new PlayerProjection(x.Id, x.Number))
             .ToListAsync(cancellationToken);
@@ -54,7 +53,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
                 var item = factions[i];
                 factions.RemoveAt(i);
 
-                return await players.GetOneAsync(item.Id);
+                return await playersRepo.GetOneAsync(item.Id);
             }
 
             return null;
@@ -63,6 +62,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
         await unit.BeginTransactionAsync(cancellationToken);
 
         // new and updated factions
+        var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
         await foreach (var faction in remote.ListFactionsAsync(cancellationToken)) {
             if (!faction.Number.HasValue) {
                 continue;
@@ -70,18 +70,25 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
 
             var player = await getPlayerAsync(faction.Number.Value, cancellationToken);
             if (player == null) {
-                player = await players.AddRemoteAsync(faction.Number.Value, faction.Name, cancellationToken);
+                player = await playersRepo.AddRemoteAsync(faction.Number.Value, faction.Name, cancellationToken);
             }
 
-            DbPlayerTurn turn = await players.GetPlayerTurnAsync(player.Id, player.NextTurnNumber.Value, cancellationToken);
+            DbPlayerTurn turn = await playersRepo.GetPlayerTurnAsync(player.Id, player.NextTurnNumber.Value, cancellationToken);
 
-            turn.OrdersSubmitted = faction.OrdersSubmitted;
-            turn.TimesSubmitted = faction.TimesSubmitted;
+            var now = DateTimeOffset.UtcNow;
+
+            if (faction.OrdersSubmitted && !turn.IsOrdersSubmitted) {
+                turn.OrdersSubmittedAt = now;
+            }
+
+            if (faction.TimesSubmitted && !turn.IsTimesSubmitted) {
+                turn.TimesSubmittedAt = now;
+            }
         }
 
         // quit factions
         foreach (var faction in factions) {
-            await players.QuitAsync(faction.Id, cancellationToken);
+            await playersRepo.QuitAsync(faction.Id, cancellationToken);
         }
 
         await unit.SaveChangesAsync();

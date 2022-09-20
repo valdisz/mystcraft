@@ -17,7 +17,7 @@ public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRuleset
     private readonly IUnitOfWork unit;
 
     public async Task<GameRulesetSetResult> Handle(GameRulesetSet request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId, cancellationToken);
+        var game = await unit.Games.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameRulesetSetResult(false, "Game does not exist.");
         }

@@ -20,7 +20,7 @@ public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameSched
     private readonly IMediator mediator;
 
     public async Task<GameScheduleSetResult> Handle(GameScheduleSet request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId, cancellationToken);
+        var game = await unit.Games.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameScheduleSetResult(false, "Game does not exist.");
         }

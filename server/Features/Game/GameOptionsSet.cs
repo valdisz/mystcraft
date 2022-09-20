@@ -19,7 +19,7 @@ public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptions
     private readonly IMediator mediator;
 
     public async Task<GameOptionsSetResult> Handle(GameOptionsSet request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId, cancellationToken);
+        var game = await unit.Games.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameOptionsSetResult(false, "Game does not exist.");
         }

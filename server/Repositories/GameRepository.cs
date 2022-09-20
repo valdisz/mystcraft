@@ -11,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 public interface IGameRepository {
     IQueryable<DbGame> AllGames { get; }
 
+    Task<DbGame> GetOneAsync(long gameId);
+    Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default);
+
     Task<DbGame> CompleateAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> CreateLocalAsync(string name, long engineId, GameOptions options, Stream playerData, Stream gameData, CancellationToken cancellation = default);
     Task<DbGame> CreateRemoteAsync(string name, string serverAddress, int turnNumber, GameOptions options, CancellationToken cancellation = default);
@@ -19,8 +22,10 @@ public interface IGameRepository {
     Task<DbGame> LockAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> UnlockAsync(long gameId, CancellationToken cancellation = default);
 
-    Task<DbGame> GetOneAsync(long gameId, CancellationToken cancellation = default);
-    Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default);
+    IQueryable<DbRegistration> GetRegistrations(long gameId);
+    Task<DbRegistration> GetRegistrationAsync(long registrationId);
+    Task<DbRegistration> RegisterAsync(long gameId, long userId, string name, CancellationToken cancellation = default);
+    Task CancelRegistrationAsync(long registrationId);
 }
 
 public class GameRepository : IGameRepository {
@@ -167,9 +172,60 @@ public class GameRepository : IGameRepository {
         return game;
     }
 
-    public async Task<DbGame> GetOneAsync(long gameId, CancellationToken cancellation = default)
-        => await db.Games.FindAsync(gameId, cancellation);
+    public async Task<DbGame> GetOneAsync(long gameId)
+        => await db.Games.FindAsync(gameId);
 
     public Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default)
         => AllGames.AsNoTracking().SingleOrDefaultAsync(x => x.Id == gameId, cancellation);
+
+    public async Task<DbRegistration> RegisterAsync(long gameId, long userId, string name, CancellationToken cancellation) {
+        var game = await GetOneNoTrackingAsync(gameId, cancellation);
+
+        if (game.Type != GameType.LOCAL) {
+            throw new RepositoryException("Local players can be added just to the local game.");
+        }
+
+        if (game.Status == GameStatus.COMPLEATED) {
+            throw new RepositoryException("Game already ended.");
+        }
+
+        var player = await unit.Players(game)
+            .GetOneByUserNoTrackingAsync(userId, cancellation);
+
+        if (player != null) {
+            throw new RepositoryException("Only one player allowed per user.");
+        }
+
+        var reg = await db.Registrations
+            .AsNoTracking()
+            .InGame(gameId)
+            .SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+
+        if (reg != null) {
+            throw new RepositoryException("There is an registration for this game.");
+        }
+
+        reg = new DbRegistration {
+            GameId = gameId,
+            UserId = userId,
+            Name = name,
+            Password = Guid.NewGuid().ToString("N") // there will be a random password
+        };
+
+        await db.Registrations.AddAsync(reg, cancellation);
+
+        return reg;
+    }
+
+    public async Task CancelRegistrationAsync(long registrationId) {
+        var reg = await GetRegistrationAsync(registrationId);
+
+        db.Registrations.Remove(reg);
+    }
+
+    public IQueryable<DbRegistration> GetRegistrations(long gameId)
+        => db.Registrations.InGame(gameId);
+
+    public async Task<DbRegistration> GetRegistrationAsync(long registrationId)
+        => await db.Registrations.FindAsync(registrationId);
 }

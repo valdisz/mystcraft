@@ -8,35 +8,33 @@ using MediatR;
 
 public record GameJoinLocal(long UserId, long GameId, string Name) : IRequest<GameJoinLocalResult>;
 
-public record GameJoinLocalResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : IMutationResult;
+public record GameJoinLocalResult(bool IsSuccess, string Error = null, DbRegistration Registration = null) : IMutationResult;
 
 public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocalResult> {
     public GameJoinLocalHandler(IUnitOfWork unit) {
         this.unit = unit;
-        this.games = unit.Games;
+        this.gamesRepo = unit.Games;
     }
 
     private readonly IUnitOfWork unit;
-    private readonly IGameRepository games;
+    private readonly IGameRepository gamesRepo;
 
     public async Task<GameJoinLocalResult> Handle(GameJoinLocal request, CancellationToken cancellationToken) {
-        var game = await games.GetOneNoTrackingAsync(request.GameId);
+        var game = await gamesRepo.GetOneNoTrackingAsync(request.GameId);
         if (game == null) {
             return new GameJoinLocalResult(false, "Game does not exist.");
         }
 
-        var players = unit.Players(game);
-
-        DbPlayer player;
+        DbRegistration reg;
         try {
-            player = await players.AddLocalAsync(request.Name, request.UserId, cancellationToken);
+            reg = await gamesRepo.RegisterAsync(request.GameId, request.UserId, request.Name, cancellationToken);
         }
-        catch (PlayersRepositoryException ex) {
+        catch (RepositoryException ex) {
             return new GameJoinLocalResult(false, ex.Message);
         }
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        return new GameJoinLocalResult(true, Player: player);
+        return new GameJoinLocalResult(true, Registration: reg);
     }
 }
