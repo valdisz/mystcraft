@@ -28,7 +28,7 @@ public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptions
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new JobReconcile(game.Id));
+        await mediator.Send(new JobReconcile(game.Id), cancellationToken);
 
         return new GameOptionsSetResult(true, Game: game);
     }

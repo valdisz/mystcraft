@@ -496,7 +496,7 @@ namespace advisor.Migrations.mssql
                     b.Property<bool>("IsQuit")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LastTurnNumber")
+                    b.Property<int?>("LastTurnNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -538,14 +538,14 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
-                    b.Property<bool>("OrdersSubmitted")
-                        .HasColumnType("bit");
+                    b.Property<DateTimeOffset?>("OrdersSubmittedAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("Ready")
-                        .HasColumnType("bit");
+                    b.Property<DateTimeOffset?>("ReadyAt")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("TimesSubmitted")
-                        .HasColumnType("bit");
+                    b.Property<DateTimeOffset?>("TimesSubmittedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("PlayerId", "TurnNumber");
 

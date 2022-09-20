@@ -12,8 +12,7 @@ public interface ITurnsRepository {
     Task<DbTurn> GetOneAsync(int number, CancellationToken cancellation = default);
     Task<DbTurn> GetOneNoTrackingAsync(int number, CancellationToken cancellation = default);
 
-    Task UpdateTurnNumberAsync(int oldNumber, int newNumber, CancellationToken cancellation = default);
-    Task<DbTurn> GetOrCreateNextTurnAsync(int turnNumber, CancellationToken cancellation = default);
+    Task<DbTurn> AddTurnAsync(int turnNumber, CancellationToken cancellation = default);
 
     Task<DbReport> AddReportAsync(int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation = default);
 }
@@ -39,18 +38,16 @@ public class TurnsRepository : ITurnsRepository {
         return AllTurns.AsNoTracking().SingleOrDefaultAsync(x => x.Number == number, cancellation);
     }
 
-    public Task UpdateTurnNumberAsync(int oldNumber, int newNumber, CancellationToken cancellation = default)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public async Task<DbTurn> GetOrCreateNextTurnAsync(int turnNumber, CancellationToken cancellation) {
-        await Task.Delay(0);
-
-        return new DbTurn {
+    public async Task<DbTurn> AddTurnAsync(int turnNumber, CancellationToken cancellation) {
+        var turn = new DbTurn {
+            GameId = game.Id,
             Number = turnNumber,
             Status = TurnStatus.PENDING
         };
+
+        await db.Turns.AddAsync(turn, cancellation);
+
+        return turn;
     }
 
     public async Task<DbReport> AddReportAsync(int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation) {

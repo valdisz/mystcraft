@@ -48,9 +48,9 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
         await mediator.Send(new GameSyncFactions(game.Id), cancellationToken);
         // TODO: import articles
 
-        await unit.CommitTransactionAsync(cancellationToken);
-
-        await mediator.Send(new JobReconcile(game.Id));
+        if (await unit.CommitTransactionAsync(cancellationToken)) {
+            await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+        }
 
         return new GameCreateRemoteResult(true, Game: game);
     }

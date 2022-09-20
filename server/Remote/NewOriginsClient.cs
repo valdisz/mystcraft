@@ -126,5 +126,8 @@ public class WrongFactionOrPasswordException : System.Exception
         System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }
 
-public record NewOriginsFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted);
+public record NewOriginsFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted) {
+    public bool IsNew => Number == null;
+}
+
 public record NewOriginsArticle(string Name, string Contents);

@@ -42,7 +42,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
         }
 
         var playersRepo = unit.Players(game);
-        var factions = await playersRepo.AllPlayers
+        var factions = await playersRepo.Players
             .AsNoTracking()
             .Select(x => new PlayerProjection(x.Id, x.Number))
             .ToListAsync(cancellationToken);

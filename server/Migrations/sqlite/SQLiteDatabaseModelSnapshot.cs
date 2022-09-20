@@ -477,7 +477,7 @@ namespace advisor.Migrations.sqlite
                     b.Property<bool>("IsQuit")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("LastTurnNumber")
+                    b.Property<int?>("LastTurnNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -519,14 +519,14 @@ namespace advisor.Migrations.sqlite
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("OrdersSubmitted")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("OrdersSubmittedAt")
+                        .HasColumnType("TEXT");
 
-                    b.Property<bool>("Ready")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("ReadyAt")
+                        .HasColumnType("TEXT");
 
-                    b.Property<bool>("TimesSubmitted")
-                        .HasColumnType("INTEGER");
+                    b.Property<DateTimeOffset?>("TimesSubmittedAt")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("PlayerId", "TurnNumber");
 

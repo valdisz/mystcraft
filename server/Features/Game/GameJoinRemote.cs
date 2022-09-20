@@ -58,7 +58,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
             player = await playersRepo.ClamFactionAsync(request.UserId, request.PlayerId, request.Password, cancellationToken);
             await turnsRepo.AddReportAsync(
                 player.Number,
-                player.LastTurnNumber,
+                player.LastTurnNumber.Value,
                 Encoding.UTF8.GetBytes(reportText),
                 cancellationToken
             );

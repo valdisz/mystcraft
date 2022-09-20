@@ -35,15 +35,18 @@ public class JobReconcileHandler : IRequestHandler<JobReconcile, JobReconcileRes
     private record GameProjection(long Id, GameStatus Status, Persistence.GameType Type, GameOptions Options);
 
     public async Task<JobReconcileResult> Handle(JobReconcile request, CancellationToken cancellation) {
-        var query = unit.Games.AllGames
-            .AsNoTracking()
-            .Select(x => new GameProjection(x.Id, x.Status, x.Type, x.Options));
+        var gamesRepo = unit.Games;
+
+        var query = gamesRepo.Games
+            .AsNoTracking();
 
         if (request.GameId.HasValue) {
             query = query.Where(x => x.Id == request.GameId);
         }
 
-        await foreach (var game in query.AsAsyncEnumerable().WithCancellation(cancellation)) {
+        var projection = query.Select(x => new GameProjection(x.Id, x.Status, x.Type, x.Options));
+
+        await foreach (var game in projection.AsAsyncEnumerable().WithCancellation(cancellation)) {
             ReconcileSingleGameJob(game, cancellation);
         }
 

@@ -9,7 +9,7 @@ using advisor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 public interface IGameRepository {
-    IQueryable<DbGame> AllGames { get; }
+    IQueryable<DbGame> Games { get; }
 
     Task<DbGame> GetOneAsync(long gameId);
     Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default);
@@ -37,7 +37,7 @@ public class GameRepository : IGameRepository {
     private readonly IUnitOfWork unit;
     private readonly Database db;
 
-    public IQueryable<DbGame> AllGames => db.Games.AsQueryable();
+    public IQueryable<DbGame> Games => db.Games.AsQueryable();
 
     public async Task<DbGame> CreateLocalAsync(string name, long engineId, GameOptions options, Stream playerData, Stream gameData, CancellationToken cancellation) {
         await unit.BeginTransactionAsync(cancellation);
@@ -58,15 +58,9 @@ public class GameRepository : IGameRepository {
 
         ///// seed turn
 
-        var seedTurn = new DbTurn
-        {
-            GameId = game.Id,
-            Number = game.NextTurnNumber.Value,
-            Status =  TurnStatus.PENDING,
-            PlayerData = await playerData.ReadAllBytesAsync(cancellation),
-            GameData = await gameData.ReadAllBytesAsync(cancellation)
-        };
-        await db.Turns.AddAsync(seedTurn, cancellation);
+        var seedTurn = await unit.Turns(game).AddTurnAsync(1, cancellation);
+        seedTurn.PlayerData = await playerData.ReadAllBytesAsync(cancellation);
+        seedTurn.GameData = await gameData.ReadAllBytesAsync(cancellation);
 
         /////
 
@@ -88,8 +82,7 @@ public class GameRepository : IGameRepository {
             CreatedAt = DateTimeOffset.UtcNow,
             Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
             Options = options,
-            LastTurnNumber = turnNumber,
-            NextTurnNumber = turnNumber + 1
+            NextTurnNumber = turnNumber
         };
 
         await db.Games.AddAsync(game, cancellation);
@@ -97,22 +90,7 @@ public class GameRepository : IGameRepository {
 
         ///// seed turn
 
-        var currentTurn = new DbTurn
-        {
-            GameId = game.Id,
-            Number = game.LastTurnNumber.Value,
-            Status = TurnStatus.READY
-        };
-
-        var nextTurn = new DbTurn
-        {
-            GameId = game.Id,
-            Number = game.NextTurnNumber.Value,
-            Status = TurnStatus.PENDING
-        };
-
-        await db.Turns.AddAsync(currentTurn, cancellation);
-        await db.Turns.AddAsync(nextTurn, cancellation);
+        await unit.Turns(game).AddTurnAsync(turnNumber, cancellation);
 
         /////
 
@@ -176,7 +154,7 @@ public class GameRepository : IGameRepository {
         => await db.Games.FindAsync(gameId);
 
     public Task<DbGame> GetOneNoTrackingAsync(long gameId, CancellationToken cancellation = default)
-        => AllGames.AsNoTracking().SingleOrDefaultAsync(x => x.Id == gameId, cancellation);
+        => Games.AsNoTracking().SingleOrDefaultAsync(x => x.Id == gameId, cancellation);
 
     public async Task<DbRegistration> RegisterAsync(long gameId, long userId, string name, CancellationToken cancellation) {
         var game = await GetOneNoTrackingAsync(gameId, cancellation);

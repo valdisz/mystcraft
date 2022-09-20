@@ -39,12 +39,12 @@ namespace advisor.Schema
                 .SingleOrDefaultAsync(x => x.Id == player.GameId);
         }
 
-        public string LastTurnId(IResolverContext context, [Parent] DbPlayer player) {
-            // FIXME
-            // var id = idSerializer.Serialize(null, "PlayerTurn", DbPlayerTurn.CreateId(player.Id, player.));
-            // return id;
-            return null;
-        }
+        // FIXME
+        // public string LastTurnId(IResolverContext context, [Parent] DbPlayer player) {
+        //     var id = idSerializer.Serialize(null, "PlayerTurn", DbPlayerTurn.CreateId(player.Id, player.));
+        //     return id;
+        //     return null;
+        // }
 
         public Task<DbAlliance> Alliance(Database db, [Parent] DbPlayer player) {
             return db.Alliances

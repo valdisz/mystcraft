@@ -14,40 +14,33 @@ using advisor.Schema;
 using advisor.TurnProcessing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 
 public record GameTurnRun(long GameId): IRequest<GameTurnRunResult>;
 public record GameTurnRunResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
 
-[System.Serializable]
-public class GameTurnRunException : System.Exception
-{
-    public GameTurnRunException() { }
-    public GameTurnRunException(string message) : base(message) { }
-    public GameTurnRunException(string message, System.Exception inner) : base(message, inner) { }
-    protected GameTurnRunException(
-        System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
-}
-
 public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult> {
-    public GameTurnRunHandler(IUnitOfWork unit, IHttpClientFactory httpFactory) {
+    public GameTurnRunHandler(IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator) {
         this.unit = unit;
         this.httpFactory = httpFactory;
+        this.mediator = mediator;
     }
 
     record GameProjection(long Id, byte[] Engine, int? LastTurnNumber, int? NextTurnNumber, Persistence.GameType Type, GameOptions Options);
 
-    record FactionProjection(long Id, int? Number, string Name, string Password) {
-        public bool IsNew => Number == null;
+    record FactionProjection(long PlayerId, int Number, string Name, string Password) {
         public bool IsClaimed => !string.IsNullOrWhiteSpace(Password);
     }
 
+    record PendingFaction(long RegistrationId, string Name, string Password);
+
     private readonly IUnitOfWork unit;
     private readonly IHttpClientFactory httpFactory;
+    private readonly IMediator mediator;
 
     public async Task<GameTurnRunResult> Handle(GameTurnRun request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId, cancellationToken);
+        var gamesRepo = unit.Games;
+
+        var game = await gamesRepo.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameTurnRunResult(false, "Game not found.");
         }
@@ -57,6 +50,10 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
                 return new GameTurnRunResult(false, "Game not yet started.");
 
             case GameStatus.RUNNING:
+                if (game.NextTurnNumber == null) {
+                    return new GameTurnRunResult(false, "Next turn is not defined.");
+                }
+
                 await unit.Games.LockAsync(request.GameId, cancellationToken);
                 await unit.SaveChangesAsync(cancellationToken);
                 break;
@@ -74,32 +71,29 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
                 return new GameTurnRunResult(false, "Game is in the unknonw state.");
         }
 
-        if (game.NextTurnNumber == null) {
-            return new GameTurnRunResult(false, "Next turn is not defined.");
-        }
-        var turnNumber = game.NextTurnNumber.Value;
-
         var playersRepo = unit.Players(game);
         var turnsRepo = unit.Turns(game);
 
         await unit.BeginTransactionAsync(cancellationToken);
 
-        var factions = await playersRepo.AllActivePlayers
+        var factions = await playersRepo.ActivePlayers
             .AsNoTracking()
             .Select(x => new FactionProjection(x.Id, x.Number, x.Name, x.Password))
             .ToListAsync(cancellationToken);
 
+        var turnNumber = game.NextTurnNumber.Value;
         DbTurn turn = await turnsRepo.GetOneAsync(turnNumber, cancellationToken);
         DbTurn nextTurn;
 
         switch (game.Type) {
             case Persistence.GameType.LOCAL:
                 // run local turn
+
                 var engine = await unit.Engines.GetOneNoTrackingAsync(game.EngineId.Value, cancellationToken);
 
                 var allOrders = new Dictionary<FactionProjection, IEnumerable<UnitOrdersRec>>();
-                foreach (var player in factions.Where(x => !x.IsNew)) {
-                    var playerRepo = await unit.PlayerAsync(player.Id);
+                foreach (var player in factions) {
+                    var playerRepo = await unit.PlayerAsync(player.PlayerId);
                     var orders = await playerRepo.Orders(turnNumber)
                         .Select(x => new UnitOrdersRec(x.UnitNumber, x.Orders))
                         .ToListAsync(cancellationToken);
@@ -107,7 +101,11 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
                     allOrders.Add(player, orders);
                 }
 
-                var newFactions = factions.Where(x => x.IsNew).ToList();
+                var newFactions = await gamesRepo.GetRegistrations(game.Id)
+                    .AsNoTracking()
+                    .Select(x => new PendingFaction(x.Id, x.Name, x.Password))
+                    .ToListAsync(cancellationToken);
+
                 var playersIn = AppendNewFactions(newFactions, turn.PlayerData);
 
                 try {
@@ -123,20 +121,23 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
             case Persistence.GameType.REMOTE:
                 // import remote turn
 
+                if (turn.Status != TurnStatus.PENDING) {
+                    return new GameTurnRunResult(false, "Turn was already imported.");
+                }
+
                 var client = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
                 var remoteTurnNumber = await client.GetCurrentTurnNumberAsync(cancellationToken);
 
+                if (turnNumber < remoteTurnNumber) {
+                    return new GameTurnRunResult(false, "No new turn found on remote server.");
+                }
+
                 if (remoteTurnNumber > turnNumber) {
-                    // some turns were missing
-                    await turnsRepo.UpdateTurnNumberAsync(turnNumber, remoteTurnNumber, cancellationToken);
                     turnNumber = remoteTurnNumber;
+                    turn.Number = remoteTurnNumber;
                 }
 
-                if (remoteTurnNumber < turnNumber) {
-                    // inconsisntent data or no turn yet
-                }
-
-                nextTurn = await ImportRemoteTurnAsync(turnsRepo, playersRepo, client, game, turn, factions, cancellationToken);
+                nextTurn = await ImportRemoteTurnAsync(turnsRepo, client, game, turn, factions, cancellationToken);
 
                 break;
 
@@ -145,9 +146,19 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
                 return new GameTurnRunResult(false, "Game is of unknown type, just LOCAL or REMOTE games are supported.");
         }
 
-        turn.Status = TurnStatus.EXECUTED;
+        if (turn.Status == TurnStatus.PENDING) {
+            turn.Status = TurnStatus.EXECUTED;
+        }
+
+        game.LastTurnNumber = turn.Number;
+        game.NextTurnNumber = nextTurn.Number;
 
         await unit.SaveChangesAsync(cancellationToken);
+
+        if (game.Type == Persistence.GameType.REMOTE) {
+            await mediator.Send(new GameSyncFactions(request.GameId));
+        }
+
         await unit.CommitTransactionAsync(cancellationToken);
 
         return new GameTurnRunResult(true, Game: game);
@@ -159,7 +170,7 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
         DbGame game,
         DbTurn turn,
         Dictionary<FactionProjection, IEnumerable<UnitOrdersRec>> allOrders,
-        List<FactionProjection> newFactions,
+        List<PendingFaction> newFactions,
         byte[] gameEngine,
         byte[] gameData,
         string playersIn,
@@ -178,7 +189,7 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
 
             // 3. Write faction orders
             foreach (var (faction, orders) in allOrders) {
-                await runner.WriteFactionOrdersAsync(faction.Number.Value, faction.Password, orders);
+                await runner.WriteFactionOrdersAsync(faction.Number, faction.Password, orders);
             }
 
             // 4. Run the simulation
@@ -194,7 +205,7 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
             var playersOut = runner.GetPlayersOut();
 
             // 6. Store game state into the upcoming turn
-            nextTurn = await turnsRepo.GetOrCreateNextTurnAsync(turn.Number + 1, cancellation);
+            nextTurn = await turnsRepo.AddTurnAsync(turn.Number + 1, cancellation);
             nextTurn.GameData = await gameOut.ReadAllBytesAsync(cancellation);
             nextTurn.PlayerData = await playersOut.ReadAllBytesAsync(cancellation);
 
@@ -206,13 +217,12 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
             runner.Clean();
         }
 
-        foreach (var faction in MatchWithNewFactions(factionsOut, newFactions)) {
-            var player = await playersRepo.GetOneAsync(faction.Id);
-            player.Number = faction.Number.Value;
+        foreach (var (number, faction) in MatchWithNewFactions(factionsOut, newFactions)) {
+            await playersRepo.AddLocalAsync(faction.RegistrationId, number, cancellation);
         }
 
         foreach (var faction in MatchWithQuitFactions(factionsOut, allOrders.Keys)) {
-            await playersRepo.QuitAsync(faction.Id, cancellation);
+            await playersRepo.QuitAsync(faction.PlayerId, cancellation);
         }
 
         foreach (var article in runner.ListArticles()) {
@@ -222,7 +232,7 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
             turn.Articles.Add(new DbArticle { Text = text, Type = "Global" });
         }
 
-        var errors = false;
+        var isError = false;
         var tempaltes = runner.ListTemplates().ToDictionary(x => x.Number);
         foreach (var reportFile in runner.ListReports()) {
             using var ms = new MemoryStream();
@@ -235,26 +245,14 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
                 await templateStream.CopyToAsync(ms);
             }
 
-            var report = new DbReport {
-                FactionNumber = reportFile.Number,
-                Data = ms.ToArray(),
-            };
+            var report = await turnsRepo.AddReportAsync(reportFile.Number, turn.Number, ms.ToArray(), cancellation);
 
-            try {
-                ms.Seek(0, SeekOrigin.Begin);
-                var json = await ParseReportAsync(ms, cancellation);
-                var jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
-                report.Json = Encoding.UTF8.GetBytes(jsonString);
-            }
-            catch (Exception ex) {
-                report.Error = ex.ToString();
-                errors = true;
-            }
-
-            turn.Reports.Add(report);
+            ms.Seek(0, SeekOrigin.Begin);
+            using var reader = new StreamReader(ms);
+            isError = !await TryParseReportAsync(reader, report, cancellation) || isError;
         }
 
-        if (errors) {
+        if (isError) {
             turn.Status = TurnStatus.ERROR;
         }
 
@@ -263,72 +261,48 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
 
     private async Task<DbTurn> ImportRemoteTurnAsync(
         ITurnsRepository turnsRepo,
-        IPlayersRepository playersRepo,
         NewOriginsClient client,
         DbGame game,
         DbTurn turn,
         List<FactionProjection> factions,
         CancellationToken cancellation
     ) {
-        bool errors = false;
+        bool isError = false;
         foreach (var faction in factions.Where(x => x.IsClaimed)) {
-            var report = new DbReport {
-                FactionNumber = faction.Number.Value,
-            };
+            string reportText = await client.DownloadReportAsync(faction.Number, faction.Password, cancellation);
+            var report = await turnsRepo.AddReportAsync(faction.Number, turn.Number, Encoding.UTF8.GetBytes(reportText), cancellation);
 
-            string reportText;
-            try {
-                reportText = await client.DownloadReportAsync(faction.Number.Value, faction.Password, cancellation);
-                report.Data = Encoding.UTF8.GetBytes(reportText);
-
-                using var reader = new StringReader(reportText);
-                var json = await ParseReportAsync(reader, cancellation);
-                var jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
-                report.Json = Encoding.UTF8.GetBytes(jsonString);
-            }
-            catch (Exception ex) {
-                report.Error = ex.ToString();
-                errors = true;
-            }
-
-            turn.Reports.Add(report);
+            using var reader = new StringReader(reportText);
+            isError = !await TryParseReportAsync(reader, report, cancellation);
         }
 
-        if (errors) {
+        if (isError) {
             turn.Status = TurnStatus.ERROR;
         }
 
-        await foreach (var faction in client.ListFactionsAsync(cancellation)) {
-            if (!faction.Number.HasValue) {
-                continue;
-            }
-
-            var player = await playersRepo.GetOneByNumberAsync(faction.Number.Value, cancellation);
-            if (player == null) {
-                await playersRepo.AddRemoteAsync(faction.Number.Value, faction.Name, cancellation);
-            }
-            else {
-                player.Name = faction.Name;
-            }
-        }
-
-        var nextTurn = await turnsRepo.GetOrCreateNextTurnAsync(turn.Number + 1, cancellation);
+        var nextTurn = await turnsRepo.AddTurnAsync(turn.Number + 1, cancellation);
         return nextTurn;
     }
 
-    private async Task<JObject> ParseReportAsync(Stream source, CancellationToken cancellation) {
-        using var reader = new StreamReader(source);
-        return await ParseReportAsync(reader, cancellation);
+    private async Task<bool> TryParseReportAsync(TextReader reader, DbReport report, CancellationToken cancellation) {
+        try {
+            using var atlantisReader = new AtlantisReportJsonConverter(reader);
+            var json = await atlantisReader.ReadAsJsonAsync();
+
+            var jsonString = json.ToString(Newtonsoft.Json.Formatting.None);
+            report.Json = Encoding.UTF8.GetBytes(jsonString);
+            report.Parsed = true;
+
+            return true;
+        }
+        catch (Exception ex) {
+            report.Error = ex.ToString();
+
+            return false;
+        }
     }
 
-    private async Task<JObject> ParseReportAsync(TextReader reader, CancellationToken cancellation) {
-        using var atlantisReader = new AtlantisReportJsonConverter(reader);
-        var json = await atlantisReader.ReadAsJsonAsync();
-
-        return json;
-    }
-
-    private string AppendNewFactions(IEnumerable<FactionProjection> players, byte[] playerData) {
+    private string AppendNewFactions(IEnumerable<PendingFaction> newPlayers, byte[] playerData) {
         using var ms = new MemoryStream(playerData);
         using var reader = new StreamReader(ms);
 
@@ -337,7 +311,7 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
 
         var playersWriter = new PlayersFileWriter(writer);
 
-        foreach (var player in players) {
+        foreach (var player in newPlayers) {
             var faction = new FactionRecord {
                 Name = player.Name,
                 Password = player.Password,
@@ -353,30 +327,34 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
         return writer.ToString();
     }
 
-    private List<FactionProjection> MatchWithNewFactions(List<FactionRecord> nextFactions, List<FactionProjection> newFactions) {
-        var i = 0;
-        foreach (var faction in nextFactions.TakeLast(newFactions.Count)) {
-            newFactions[i] = newFactions[i] with {
-                Number = faction.Number.Value
-            };
-
-            i++;
+    private IEnumerable<(int number, PendingFaction faction)> MatchWithNewFactions(List<FactionRecord> factions, List<PendingFaction> newFactions) {
+        int i = 0;
+        foreach (var faction in factions.TakeLast(newFactions.Count)) {
+            yield return (faction.Number.Value, newFactions[i++]);
         }
-
-        return newFactions;
     }
 
-    private List<FactionProjection> MatchWithQuitFactions(List<FactionRecord> nextFactions, IEnumerable<FactionProjection> factions) {
+    private IEnumerable<FactionProjection> MatchWithQuitFactions(List<FactionRecord> nextFactions, IEnumerable<FactionProjection> oldFactions) {
         var knownFactions = nextFactions
             .Select(x => x.Number.Value)
             .ToHashSet();
 
-        var quitFactions = factions
-            .Where(x => !knownFactions.Contains(x.Number.Value))
-            .ToList();
+        var quitFactions = oldFactions
+            .Where(x => !knownFactions.Contains(x.Number));
 
         return quitFactions;
     }
 
     private IEnumerable<FactionRecord> ReadFactions(Stream playersFileStream) => new PlayersFileReader(playersFileStream);
+}
+
+[System.Serializable]
+public class GameTurnRunException : System.Exception
+{
+    public GameTurnRunException() { }
+    public GameTurnRunException(string message) : base(message) { }
+    public GameTurnRunException(string message, System.Exception inner) : base(message, inner) { }
+    protected GameTurnRunException(
+        System.Runtime.Serialization.SerializationInfo info,
+        System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }

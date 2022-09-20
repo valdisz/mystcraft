@@ -21,10 +21,8 @@ namespace advisor.Persistence
         [MaxLength(128)]
         public string Name { get; set; }
 
-        [GraphQLIgnore]
-        public int LastTurnNumber { get; set; }
+        public int? LastTurnNumber { get; set; }
 
-        [GraphQLIgnore]
         public int? NextTurnNumber { get; set; }
 
         [MaxLength(64)]

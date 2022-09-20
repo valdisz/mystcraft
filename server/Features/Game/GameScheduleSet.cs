@@ -29,7 +29,7 @@ public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameSched
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new JobReconcile(game.Id));
+        await mediator.Send(new JobReconcile(game.Id), cancellationToken);
 
         return new GameScheduleSetResult(true, Game: game);
     }

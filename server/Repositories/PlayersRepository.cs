@@ -29,10 +29,10 @@ public class PlayerRepository : IPlayerRepository {
 }
 
 public interface IPlayersRepository {
-    IQueryable<DbPlayer> AllPlayers { get; }
-    IQueryable<DbPlayer> AllActivePlayers { get; }
+    IQueryable<DbPlayer> Players { get; }
+    IQueryable<DbPlayer> ActivePlayers { get; }
 
-    Task<DbRegistration> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default);
+    Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default);
     Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default);
     Task<DbPlayer> ClamFactionAsync(long userId, long playerId, string password, CancellationToken cancellation = default);
     Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default);
@@ -61,7 +61,10 @@ public class PlayersRepository : IPlayersRepository {
     private readonly IUnitOfWork unit;
     private readonly Database db;
 
-    public async Task<DbRegistration> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
+    public IQueryable<DbPlayer> Players => db.Players.InGame(game);
+    public IQueryable<DbPlayer> ActivePlayers => Players.OnlyActivePlayers();
+
+    public async Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
         var reg = await unit.Games.GetRegistrationAsync(registrationId);
 
         if (game.Type != GameType.LOCAL) {
@@ -103,7 +106,7 @@ public class PlayersRepository : IPlayersRepository {
         await db.SaveChangesAsync(cancellation);
         await unit.CommitTransactionAsync(cancellation);
 
-        return reg;
+        return player;
     }
 
     public async Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default) {
@@ -122,27 +125,30 @@ public class PlayersRepository : IPlayersRepository {
             GameId = game.Id,
             Number = number,
             Name = name,
-            LastTurnNumber = game.LastTurnNumber.Value,
-            NextTurnNumber = game.NextTurnNumber.Value
+            LastTurnNumber = game.LastTurnNumber,
+            NextTurnNumber = game.NextTurnNumber
         };
 
         await db.Players.AddAsync(player, cancellation);
         await db.SaveChangesAsync(cancellation);
 
-        var lastTurn = new DbPlayerTurn {
-            PlayerId = player.Id,
-            TurnNumber = game.LastTurnNumber.Value,
-            Name = name
-        };
+        if (game.LastTurnNumber != null) {
+            var lastTurn = new DbPlayerTurn {
+                PlayerId = player.Id,
+                TurnNumber = game.LastTurnNumber.Value,
+                Name = name
+            };
+            await db.PlayerTurns.AddAsync(lastTurn, cancellation);
+        }
 
-        var nextTurn = new DbPlayerTurn {
-            PlayerId = player.Id,
-            TurnNumber = game.NextTurnNumber.Value,
-            Name = name
-        };
-
-        await db.PlayerTurns.AddAsync(lastTurn, cancellation);
-        await db.PlayerTurns.AddAsync(nextTurn, cancellation);
+        if (game.NextTurnNumber != null) {
+            var nextTurn = new DbPlayerTurn {
+                PlayerId = player.Id,
+                TurnNumber = game.NextTurnNumber.Value,
+                Name = name
+            };
+            await db.PlayerTurns.AddAsync(nextTurn, cancellation);
+        }
 
         await db.SaveChangesAsync(cancellation);
         await unit.CommitTransactionAsync(cancellation);
@@ -177,31 +183,26 @@ public class PlayersRepository : IPlayersRepository {
         return player;
     }
 
-    public IQueryable<DbPlayer> AllPlayers => db.Players.InGame(game);
-    public IQueryable<DbPlayer> AllActivePlayers => AllPlayers.OnlyActivePlayers();
-
     public async Task<DbPlayer> GetOneAsync(long playerId) => await db.Players.FindAsync(playerId);
 
     public Task<DbPlayer> GetOneNoTrackingAsync(long playerId, CancellationToken cancellation = default)
-        => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
+        => Players.AsNoTracking().SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
 
     public Task<DbPlayer> GetOneByUserAsync(long userId, CancellationToken cancellation = default)
-        => AllPlayers.SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+        => Players.SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
     public Task<DbPlayer> GetOneByUserNoTrackingAsync(long userId, CancellationToken cancellation = default)
-        => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+        => Players.AsNoTracking().SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
     public Task<DbPlayer> GetOneByNumberAsync(int number, CancellationToken cancellation = default)
-        => AllPlayers.SingleOrDefaultAsync(x => x.Number == number, cancellation);
+        => Players.SingleOrDefaultAsync(x => x.Number == number, cancellation);
 
     public Task<DbPlayer> GetOneByNumberNoTrackingAsync(int number, CancellationToken cancellation = default)
-        => AllPlayers.AsNoTracking().SingleOrDefaultAsync(x => x.Number == number, cancellation);
+        => Players.AsNoTracking().SingleOrDefaultAsync(x => x.Number == number, cancellation);
 
     public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
         => db.PlayerTurns.SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
 
     public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
         => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
-
-
 }

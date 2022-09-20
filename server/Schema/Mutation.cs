@@ -61,6 +61,21 @@ public class Mutation {
         return mediator.Send(new GameJoinRemote(currentUserId, gameId, playerId, password));
     }
 
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<GameStartResult> GameStart(IMediator mediator, [ID("Game")] long gameId) {
+        return mediator.Send(new GameStart(gameId));
+    }
+
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<GamePauseResult> GamePause(IMediator mediator, [ID("Game")] long gameId) {
+        return mediator.Send(new GamePause(gameId));
+    }
+
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<GameCompleteResult> GameComplete(IMediator mediator, [ID("Game")] long gameId) {
+        return mediator.Send(new GameComplete(gameId));
+    }
+
     // FIXME
     // [Authorize(Policy = Policies.GameMasters)]
     // public Task<List<DbGame>> GameDelete(IMediator mediator, [ID("Game")] long gameId) {
