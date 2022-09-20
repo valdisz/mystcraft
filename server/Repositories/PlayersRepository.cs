@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 
 public interface IPlayerRepository {
     IQueryable<DbOrders> Orders(int turnNumber);
+
+    Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string name, CancellationToken cancellation = default);
 }
 
 public class PlayerRepository : IPlayerRepository {
@@ -26,6 +28,18 @@ public class PlayerRepository : IPlayerRepository {
     private readonly Database db;
 
     public IQueryable<DbOrders> Orders(int turnNumber) => db.Orders.InTurn(player.Id, turnNumber);
+
+    public async Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string name, CancellationToken cancellation) {
+        var turn = new DbPlayerTurn {
+            PlayerId = player.Id,
+            TurnNumber = turnNumber,
+            Name = name
+        };
+
+        await db.PlayerTurns.AddAsync(turn, cancellation);
+
+        return turn;
+    }
 }
 
 public interface IPlayersRepository {
@@ -88,20 +102,15 @@ public class PlayersRepository : IPlayersRepository {
         await db.Players.AddAsync(player, cancellation);
         await db.SaveChangesAsync(cancellation);
 
-        var lastTurn = new DbPlayerTurn {
-            PlayerId = player.Id,
-            TurnNumber = game.LastTurnNumber.Value,
-            Name = player.Name
-        };
+        var playerRepo = unit.Player(player);
 
-        var nextTurn = new DbPlayerTurn {
-            PlayerId = player.Id,
-            TurnNumber = game.NextTurnNumber.Value,
-            Name = player.Name
-        };
+        if (game.LastTurnNumber != null) {
+            await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, cancellation);
+        }
 
-        await db.PlayerTurns.AddAsync(lastTurn, cancellation);
-        await db.PlayerTurns.AddAsync(nextTurn, cancellation);
+        if (game.NextTurnNumber != null) {
+            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, cancellation);
+        }
 
         await db.SaveChangesAsync(cancellation);
         await unit.CommitTransactionAsync(cancellation);
@@ -132,22 +141,14 @@ public class PlayersRepository : IPlayersRepository {
         await db.Players.AddAsync(player, cancellation);
         await db.SaveChangesAsync(cancellation);
 
+        var playerRepo = unit.Player(player);
+
         if (game.LastTurnNumber != null) {
-            var lastTurn = new DbPlayerTurn {
-                PlayerId = player.Id,
-                TurnNumber = game.LastTurnNumber.Value,
-                Name = name
-            };
-            await db.PlayerTurns.AddAsync(lastTurn, cancellation);
+            await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, cancellation);
         }
 
         if (game.NextTurnNumber != null) {
-            var nextTurn = new DbPlayerTurn {
-                PlayerId = player.Id,
-                TurnNumber = game.NextTurnNumber.Value,
-                Name = name
-            };
-            await db.PlayerTurns.AddAsync(nextTurn, cancellation);
+            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, cancellation);
         }
 
         await db.SaveChangesAsync(cancellation);

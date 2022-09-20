@@ -159,6 +159,19 @@ public class GameTurnRunHandler : IRequestHandler<GameTurnRun, GameTurnRunResult
             await mediator.Send(new GameSyncFactions(request.GameId));
         }
 
+        await foreach (var player in playersRepo.ActivePlayers.AsAsyncEnumerable().WithCancellation(cancellationToken)) {
+            if (player.LastTurnNumber == game.LastTurnNumber) {
+                continue;
+            }
+
+            player.LastTurnNumber = game.LastTurnNumber;
+            player.NextTurnNumber = game.NextTurnNumber;
+
+            var playerRepo = unit.Player(player);
+            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name);
+        }
+
+        await unit.SaveChangesAsync(cancellationToken);
         await unit.CommitTransactionAsync(cancellationToken);
 
         return new GameTurnRunResult(true, Game: game);

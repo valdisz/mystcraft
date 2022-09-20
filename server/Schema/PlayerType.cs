@@ -46,6 +46,22 @@ namespace advisor.Schema
         //     return null;
         // }
 
+        public Task<DbPlayerTurn> LastTurn(Database db, [Parent] DbPlayer player) {
+            return db.PlayerTurns
+                .AsNoTracking()
+                .Include(x => x.Player)
+                .OnlyPlayer(player)
+                .SingleOrDefaultAsync(x => x.TurnNumber == player.LastTurnNumber);
+        }
+
+        public Task<DbPlayerTurn> NextTurn(Database db, [Parent] DbPlayer player, int number) {
+            return db.PlayerTurns
+                .AsNoTracking()
+                .Include(x => x.Player)
+                .OnlyPlayer(player)
+                .SingleOrDefaultAsync(x => x.TurnNumber == player.NextTurnNumber);
+        }
+
         public Task<DbAlliance> Alliance(Database db, [Parent] DbPlayer player) {
             return db.Alliances
                 .Include(x => x.Members)
