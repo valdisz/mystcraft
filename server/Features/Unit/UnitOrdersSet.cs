@@ -1,32 +1,37 @@
-// FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Persistence;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using advisor.Schema;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-// public record UnitOrdersSet(long PlayerId, int TurnNumber, int UnitNumber, string Orders): IRequest<string>;
+public record UnitOrdersSet(long PlayerId, int TurnNumber, int UnitNumber, string Orders): IRequest<UnitOrdersSetResult>;
 
-// public class UnitOrdersSetHandler : IRequestHandler<UnitOrdersSet, string> {
-//     public UnitOrdersSetHandler(Database db) {
-//         this.db = db;
-//     }
+public record UnitOrdersSetResult(bool IsSuccess, string Error = null) : MutationResult(IsSuccess, Error);
 
-//     private readonly Database db;
 
-//     public async Task<string> Handle(UnitOrdersSet request, CancellationToken cancellationToken) {
-//         var unit = await db.Units
-//             .InTurn(request.PlayerId, request.TurnNumber)
-//             .FirstOrDefaultAsync(x => x.Number == request.UnitNumber);
+public class UnitOrdersSetHandler : IRequestHandler<UnitOrdersSet, UnitOrdersSetResult> {
+    public UnitOrdersSetHandler(IUnitOfWork unit) {
+        this.db = unit.Database;
+    }
 
-//         if (unit == null) return "Unit not found";
+    private readonly Database db;
 
-//         unit.Orders = request.Orders;
+    public async Task<UnitOrdersSetResult> Handle(UnitOrdersSet request, CancellationToken cancellationToken) {
+        var orders = await db.Orders
+            .InTurn(request.PlayerId, request.TurnNumber)
+            .SingleOrDefaultAsync(x => x.UnitNumber == request.UnitNumber);
 
-//         await db.SaveChangesAsync();
+        if (orders == null) {
+            return new UnitOrdersSetResult(false, "Unit not found");
+        }
 
-//         return "Ok";
-//     }
-// }
+        orders.Orders = request.Orders;
+
+        await db.SaveChangesAsync();
+
+        return new UnitOrdersSetResult(true);
+    }
+}

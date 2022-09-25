@@ -2,6 +2,7 @@ namespace advisor.Schema;
 
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using advisor.Features;
 using HotChocolate;
@@ -108,87 +109,92 @@ public class Mutation {
     //     return mediator.Send(new TurnReProcess(gameId, turn));
     // }
 
-    // FIXME
-    // public async Task<MutationResult<string>> SetOrders(
-    //     IResolverContext context,
-    //     IMediator mediator,
-    //     Microsoft.AspNetCore.Authorization.IAuthorizationService auth,
-    //     [ID("Unit")] string unitId,
-    //     string orders
-    // ) {
-    //     var parsedId = DbUnit.ParseId(unitId);
+    public async Task<UnitOrdersSetResult> SetOrders(
+        IResolverContext context,
+        IMediator mediator,
+        Microsoft.AspNetCore.Authorization.IAuthorizationService auth,
+        [ID("Unit")] string unitId,
+        string orders
+    ) {
+        var parsedId = DbUnit.ParseId(unitId);
 
-    //     if (!await auth.AuthorizeOwnPlayerAsync(context.GetUser()!, parsedId.PlayerId)) {
-    //         context.ReportError(ErrorBuilder.New()
-    //             .SetMessage("You are not allowed to set orders for this Unit")
-    //             .SetCode(ErrorCodes.Authentication.NotAuthorized)
-    //             .SetPath(context.Path)
-    //             .AddLocation(context.Selection.SyntaxNode)
-    //             .Build());
+        if (!await auth.AuthorizeOwnPlayerAsync(context.GetUser()!, parsedId.PlayerId)) {
+            context.ReportError(ErrorBuilder.New()
+                .SetMessage("You are not allowed to set orders for this Unit")
+                .SetCode(ErrorCodes.Authentication.NotAuthorized)
+                .SetPath(context.Path)
+                .AddLocation(context.Selection.SyntaxNode)
+                .Build());
 
-    //         return null;
-    //     }
+            return null;
+        }
 
-    //     try {
-    //         var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));
-    //         return result == "Ok"
-    //             ? new MutationResult<string>(true, null, null)
-    //             : new MutationResult<string>(false, null, result);
-    //     }
-    //     catch (Exception ex) {
-    //         return new MutationResult<string>(false, null, ex.Message);
-    //     }
-    // }
+        try {
+            var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));
+            return result;
+        }
+        catch (Exception ex) {
+            return new UnitOrdersSetResult(false, ex.Message);
+        }
+    }
 
     // FIXME
-    // public Task<int> DeleteTurn([GlobalState] ClaimsPrincipal currentUser, [GraphQLType(typeof(RelayIdType))] string turnId) {
-    //     return mediator.Send(new DeleteTurn(
-    //         currentUser,
-    //         ParseRelayId<long>("Turn", turnId)
-    //     ));
-    // }
+    public Task<int> DeleteTurn([GlobalState] ClaimsPrincipal currentUser, [ID("PlayerTurn")] string turnId) {
+        // return mediator.Send(new DeleteTurn(
+        //     currentUser,
+        //     ParseRelayId<long>("Turn", turnId)
+        // ));
+        throw new NotImplementedException();
+    }
 
     // FIXME
-    // [Authorize(Policy = Policies.GameMasters)]
-    // public Task<DbGame> SetRuleset([GraphQLType(typeof(RelayIdType))] string gameId, string ruleset) {
-    //     return mediator.Send(new SetRuleset(
-    //         ParseRelayId<long>("Game", gameId),
-    //         ruleset
-    //     ));
-    // }
-
-    // FIXME
-    // TODO: this is temp till player rights can be checked
-    // [Authorize(Policy = Policies.GameMasters)]
-    // public Task<AllianceCreateResult> AllianceCreate(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, string name) {
-    //     return mediator.Send(new AllianceCreate(currentUserId, playerId, name));
-    // }
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<DbGame> SetRuleset([ID("Game")] long gameId, string ruleset) {
+        // return mediator.Send(new SetRuleset(
+        //     ParseRelayId<long>("Game", gameId),
+        //     ruleset
+        // ));
+        throw new NotImplementedException();
+    }
 
     // FIXME
     // TODO: this is temp till player rights can be checked
-    // [Authorize(Policy = Policies.GameMasters)]
-    // public Task<AllianceJoinResult> AllianceJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, [ID("Alliance")] long allianceId) {
-    //     return mediator.Send(new AllianceJoin(currentUserId, playerId, allianceId));
-    // }
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<AllianceCreateResult> AllianceCreate(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, string name) {
+        // return mediator.Send(new AllianceCreate(currentUserId, playerId, name));
+        throw new NotImplementedException();
+    }
 
     // FIXME
-    // public Task<StudyPlanResult> StudyPlanTarget(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, string skill, int level) {
-    //     return mediator.Send(new StudyPlanTarget(currentUserId, unitId, skill, level));
-    // }
+    // TODO: this is temp till player rights can be checked
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<AllianceJoinResult> AllianceJoin(IMediator mediator, [GlobalState] long currentUserId, [ID("Player")] long playerId, [ID("Alliance")] long allianceId) {
+        // return mediator.Send(new AllianceJoin(currentUserId, playerId, allianceId));
+        throw new NotImplementedException();
+    }
 
     // FIXME
-    // public Task<StudyPlanResult> StudyPlanStudy(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, string skill) {
-    //     return mediator.Send(new StudPlanyStudy(currentUserId, unitId, skill));
-    // }
+    public Task<StudyPlanResult> StudyPlanTarget(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, string skill, int level) {
+        // return mediator.Send(new StudyPlanTarget(currentUserId, unitId, skill, level));
+        throw new NotImplementedException();
+    }
 
     // FIXME
-    // public Task<StudyPlanResult> StudyPlanTeach(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, int[] units) {
-    //     return mediator.Send(new StudyPlanTeach(currentUserId, unitId, units));
-    // }
+    public Task<StudyPlanResult> StudyPlanStudy(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, string skill) {
+        // return mediator.Send(new StudPlanyStudy(currentUserId, unitId, skill));
+        throw new NotImplementedException();
+    }
 
     // FIXME
-    // [Authorize(Policy = Policies.GameMasters)]
-    // public Task<PlayerQuitResult> PlayerQuit(IMediator mediator, [ID("Player")] long playerId) {
-    //     return mediator.Send(new PlayerQuit(playerId));
-    // }
+    public Task<StudyPlanResult> StudyPlanTeach(IMediator mediator, [GlobalState] long currentUserId, [ID("Unit")] string unitId, int[] units) {
+        // return mediator.Send(new StudyPlanTeach(currentUserId, unitId, units));
+        throw new NotImplementedException();
+    }
+
+    // FIXME
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<PlayerQuitResult> PlayerQuit(IMediator mediator, [ID("Player")] long playerId) {
+        // return mediator.Send(new PlayerQuit(playerId));
+        throw new NotImplementedException();
+    }
 }

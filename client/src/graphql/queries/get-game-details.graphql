@@ -8,14 +8,13 @@ query GetGameDetails($gameId: ID!) {
           id
           name
           number
-
+          isClaimed
+          nextTurn {
+            isReady
+            isOrdersSubmitted
+            isTimesSubmitted
+          }
         }
-      }
-      remotePlayers {
-        number
-        name
-        orders
-        times
       }
     }
   }

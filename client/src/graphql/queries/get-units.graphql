@@ -1,6 +1,6 @@
 query GetUnits($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
   node(id: $turnId) {
-    ... on Turn {
+    ... on PlayerTurn {
       units(skip: $skip, take: $pageSize) {
         totalCount
         pageInfo {

@@ -20,7 +20,7 @@ export interface SkillStats {
 }
 
 interface TurnStats {
-    number: number
+    turnNumber: number
     stats: StaisticsFragment
 }
 

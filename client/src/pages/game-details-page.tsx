@@ -26,7 +26,7 @@ function GameDetailsPage() {
         content = <List dense disablePadding>
             { gameDetails.players.map(x => <ListItem key={x.number} disablePadding>
                 <ListItemButton sx={{ justifyContent: 'space-between', gap: 3 }}>
-                    <ListItemText primary={<Typography component={x.id ? 'strong' : 'div'}>{x.name}</Typography>} secondary={<Typography variant='caption'>Remote</Typography>} />
+                    <ListItemText primary={<Typography component={x.id ? 'strong' : 'div'}>{x.name}</Typography>} secondary={<Typography variant='caption' component='div'>Remote</Typography>} />
                     <Stack direction='row' gap={3}>
                         <Chip sx={{ opacity: x.orders ? 1 : 0 }} label='Orders' />
                         <Chip sx={{ opacity: x.times ? 1 : 0 }} label='Times' />

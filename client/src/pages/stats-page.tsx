@@ -94,7 +94,7 @@ export function IncomeTab() {
         <TableHead>
             <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
                 <HeadingCell>Turn</HeadingCell>
-                { stats.stats.map(x => <HeadingCell key={x.number}>{x.number}</HeadingCell>) }
+                { stats.stats.map(x => <HeadingCell key={x.turnNumber}>{x.turnNumber}</HeadingCell>) }
             </TableRow>
         </TableHead>
         <Observer>
@@ -102,25 +102,25 @@ export function IncomeTab() {
                 <TableBody>
                     <TableRow>
                         <HeadingCell>Work</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.work}</TableCell>) }
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.stats.income.work}</TableCell>) }
                     </TableRow>
                     <TableRow>
                         <HeadingCell>Trade</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.trade}</TableCell>) }
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.stats.income.trade}</TableCell>) }
                     </TableRow>
                     <TableRow>
                         <HeadingCell>Pillage</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.pillage}</TableCell>) }
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.stats.income.pillage}</TableCell>) }
                     </TableRow>
                     <TableRow>
                         <HeadingCell>Tax</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.tax}</TableCell>) }
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.stats.income.tax}</TableCell>) }
                     </TableRow>
                 </TableBody>
                 <TableFooter>
                     <TableRow>
                         <HeadingCell>Total</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.number}>{x.stats.income.total}</TableCell>) }
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.stats.income.total}</TableCell>) }
                     </TableRow>
                 </TableFooter>
             </> }
@@ -137,13 +137,13 @@ export function ProductionTab() {
                 <TableHead>
                     <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
                         <HeadingCell>Turn</HeadingCell>
-                        { stats.stats.map(x => <HeadingCell key={x.number}>{x.number}</HeadingCell>) }
+                        { stats.stats.map(x => <HeadingCell key={x.turnNumber}>{x.turnNumber}</HeadingCell>) }
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     { stats.products.map((p, i) => <TableRow key={p.code}>
                         <HeadingCell>{p.getName(2)}</HeadingCell>
-                        { stats.stats.map(turn => <TableCell key={turn.number}>{turn.stats.production[i].amount}</TableCell>) }
+                        { stats.stats.map(turn => <TableCell key={turn.turnNumber}>{turn.stats.production[i].amount}</TableCell>) }
                     </TableRow> )}
                 </TableBody>
             </> }

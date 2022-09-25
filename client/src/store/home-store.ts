@@ -1,7 +1,7 @@
 import { action, makeObservable, observable, runInAction } from 'mobx'
 import { mutate, querySeq } from './connection'
 import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
-import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
+// import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
 
 export class HomeStore {
     constructor() {
@@ -60,11 +60,11 @@ export class HomeStore {
         runInAction(() => this.uploading = false)
     }
 
-    deleteGame = (gameId: string) => mutate<DeleteGameMutation, DeleteGameMutationVariables>(
-        DeleteGame,
-        { gameId },
-        { refetch: [
-            this.games
-        ]}
-    )
+    // deleteGame = (gameId: string) => mutate<DeleteGameMutation, DeleteGameMutationVariables>(
+    //     DeleteGame,
+    //     { gameId },
+    //     { refetch: [
+    //         this.games
+    //     ]}
+    // )
 }

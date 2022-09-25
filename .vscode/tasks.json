@@ -37,8 +37,7 @@
             "type": "process",
             "args": [
                 "watch",
-                "run",
-                "--no-hot-reload"
+                "run"
             ],
             "problemMatcher": "$msCompile",
             "options": {

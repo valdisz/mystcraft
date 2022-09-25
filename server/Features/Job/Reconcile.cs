@@ -14,13 +14,15 @@ public record Reconcile(long? GameId = null): IRequest<ReconcileResult>;
 public record ReconcileResult(bool IsSuccess, string Error = null) : IMutationResult;
 
 public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
-    public ReconcileHandler(IUnitOfWork unit, IRecurringJobManager jobs) {
+    public ReconcileHandler(IUnitOfWork unit, IRecurringJobManager recurringJobs, IBackgroundJobClient backgroundJobs) {
         this.unit = unit;
-        this.jobs = jobs;
+        this.recurringJobs = recurringJobs;
+        this.backgroundJobs = backgroundJobs;
     }
 
     private readonly IUnitOfWork unit;
-    private readonly IRecurringJobManager jobs;
+    private readonly IRecurringJobManager recurringJobs;
+    private readonly IBackgroundJobClient backgroundJobs;
 
     private record GameProjection(long Id, GameStatus Status, Persistence.GameType Type, GameOptions Options);
 
@@ -37,38 +39,38 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         var projection = query.Select(x => new GameProjection(x.Id, x.Status, x.Type, x.Options));
 
         await foreach (var game in projection.AsAsyncEnumerable().WithCancellation(cancellation)) {
-            ReconcileSingleGameJob(game, cancellation);
+            ReconcileSingleGameJob(game);
         }
 
         if (request.GameId == null) {
-            jobs.AddOrUpdate<ReconcileJob>("reconcile", job => job.RunAsync(), "*/15 * * * *");
+            recurringJobs.AddOrUpdate<ReconcileJob>("reconcile", job => job.RunAsync(), "*/15 * * * *");
         }
 
         return new ReconcileResult(true);
     }
 
-    private void ReconcileSingleGameJob(GameProjection game, CancellationToken cancellation) {
+    private void ReconcileSingleGameJob(GameProjection game) {
         var jobIdPrefix = $"game-{game.Id}";
 
         var shouldRun = game.Status == GameStatus.RUNNING && !string.IsNullOrWhiteSpace(game.Options.Schedule);
-        var timeZone = FindTimeZone(game.Options.TimeZone);
 
         var nextTurnJobId = $"{jobIdPrefix}-turn";
         if (shouldRun) {
-            jobs.AddOrUpdate<GameNextTurnJob>(nextTurnJobId, job => job.RunAsync(game.Id, null), game.Options.Schedule, timeZone);
+            var timeZone = FindTimeZone(game.Options.TimeZone);
+            recurringJobs.AddOrUpdate<GameNextTurnJob>(nextTurnJobId, job => job.RunAsync(game.Id, null), game.Options.Schedule, timeZone);
         }
         else {
-            jobs.RemoveIfExists(nextTurnJobId);
+            recurringJobs.RemoveIfExists(nextTurnJobId);
         }
 
         if (game.Type == Persistence.GameType.REMOTE) {
             var factionSyncJobId = $"{jobIdPrefix}-factions";
 
             if (shouldRun) {
-                jobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *", timeZone);
+                recurringJobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *");
             }
             else {
-                jobs.RemoveIfExists(factionSyncJobId);
+                recurringJobs.RemoveIfExists(factionSyncJobId);
             }
         }
     }

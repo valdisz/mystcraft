@@ -162,7 +162,7 @@ export class GameStore {
                 variables: { skip, turnId, pageSize: 1000 },
             })
 
-            if (response.data.node.__typename !== 'Turn') {
+            if (response.data.node.__typename !== 'PlayerTurn') {
                 return items
             }
 
@@ -188,7 +188,7 @@ export class GameStore {
                 variables: { skip, turnId, pageSize: 1000 }
             })
 
-            if (response.data.node.__typename !== 'Turn') {
+            if (response.data.node.__typename !== 'PlayerTurn') {
                 return items
             }
 
@@ -235,11 +235,11 @@ export class GameStore {
         const turnDetails = await CLIENT.query<GetTurnQuery, GetTurnQueryVariables>({
             query: GetTurn,
             variables: {
-                turnId: me.lastTurnId
+                turnId: me.lastTurn.id
             }
         })
 
-        if (turnDetails.data.node.__typename !== 'Turn') {
+        if (turnDetails.data.node.__typename !== 'PlayerTurn') {
             return
         }
 
@@ -257,9 +257,9 @@ export class GameStore {
         ruleset.parse(game.ruleset)
 
         const world = new World(worldInfo, ruleset)
-        world.turnNumber = turn.number
-        world.month = turn.month
-        world.year = turn.year
+        world.turnNumber = turn.turnNumber
+        world.month = turn.turnNumber % 12
+        world.year = Math.floor(turn.turnNumber / 12) + 1
 
         const attitudes = new Map<number, Stance>()
         let defaultAttitude = Stance.Neutral
@@ -297,7 +297,7 @@ export class GameStore {
         }
 
         this.university = new UniversityStore(world)
-        await this.university.load(this.gameId, turn.number)
+        await this.university.load(this.gameId, turn.turnNumber)
 
         // world.getTradeRoutes()
 

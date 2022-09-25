@@ -2,7 +2,7 @@ overwrite: true
 schema:
   - http://localhost:5000/graphql:
       headers:
-        X-API-KEY: "local:valdis@zobela.eu"
+        X-API-KEY: "local:admin@advisor"
 documents:
   - ./src/graphql/**/*.graphql
 generates:

@@ -2,7 +2,7 @@ query GetTurnStats($playerId: ID!) {
   node(id: $playerId) {
     ... on Player {
       turns {
-        number
+        turnNumber
         stats {
           ...Staistics
         }

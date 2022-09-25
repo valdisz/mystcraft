@@ -3,5 +3,7 @@ fragment PlayerHeader on Player {
   number
   name
   lastTurnNumber
-  lastTurnId
+  lastTurn {
+    id
+  }
 }

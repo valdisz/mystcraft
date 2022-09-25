@@ -61,19 +61,8 @@ export class GameDetailsStore {
 
         const players: Player[] = []
 
-        for (const { id, name, number } of node.players.items) {
-            players.push({ id, name, number, orders: false, times: false })
-        }
-
-        for (const { name, number, orders, times } of node.remotePlayers) {
-            const p = players.find(x => x.number === number)
-            if (p) {
-                p.orders = orders
-                p.times = times
-            }
-            else {
-                players.push({ name, number, orders, times })
-            }
+        for (const { id, name, number, nextTurn } of node.players.items) {
+            players.push({ id, name, number, orders: nextTurn?.isOrdersSubmitted, times: nextTurn?.isTimesSubmitted })
         }
 
         players.sort((a, b) => a.number - b.number)

@@ -1,6 +1,6 @@
 query GetTurn($turnId: ID!) {
   node(id: $turnId) {
-    ... on Turn {
+    ... on PlayerTurn {
         ...Turn
     }
   }

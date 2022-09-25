@@ -130,8 +130,7 @@
             var stats = await db.Statistics
                 .AsNoTracking()
                 .InTurn(turn)
-                // FIXME
-                // .Include(x => x.Produced)
+                .Include(x => x.Items)
                 .ToListAsync();
 
             DbIncome income = new DbIncome();
@@ -143,12 +142,11 @@
                 income.Trade += stat.Income.Trade;
                 income.Work += stat.Income.Work;
 
-                // FIXME
-                // foreach (var item in stat.Produced) {
-                //     production[item.Code] = production.TryGetValue(item.Code, out var value)
-                //         ? value + item.Amount
-                //         : item.Amount;
-                // }
+                foreach (var item in stat.Items.Where(x => x.Category == StatisticsCategory.Produced)) {
+                    production[item.Code] = production.TryGetValue(item.Code, out var value)
+                        ? value + item.Amount
+                        : item.Amount;
+                }
             }
 
             return new Statistics {

@@ -1,8 +1,6 @@
-fragment Turn on Turn {
+fragment Turn on PlayerTurn {
   id
-  number
-  month
-  year
+  turnNumber
   factions {
     ...Faction
   }

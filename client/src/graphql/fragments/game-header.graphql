@@ -1,6 +1,6 @@
 fragment GameHeader on Game {
   id
-  finished
+  status
   createdAt
   name
   options {

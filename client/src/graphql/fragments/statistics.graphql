@@ -1,9 +1,11 @@
 fragment Staistics on Statistics {
   income {
     work
+    entertain
     tax
     pillage
     trade
+    claim
     total
   }
   production {

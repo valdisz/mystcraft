@@ -1,6 +1,6 @@
 query GetRegions($turnId: ID!, $skip: Int! = 0, $pageSize: Int! = 1000) {
   node(id: $turnId) {
-    ... on Turn {
+    ... on PlayerTurn {
       regions(skip: $skip, take: $pageSize, withStructures: true) {
         totalCount
         pageInfo {

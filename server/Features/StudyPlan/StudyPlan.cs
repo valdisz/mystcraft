@@ -1,26 +1,26 @@
 // FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Persistence;
-// using advisor.Schema;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using advisor.Schema;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-// public record StudyPlanTarget(long UserId, string UnitId, string Skill, int Level) : IRequest<StudyPlanResult> {
-// }
+public record StudyPlanTarget(long UserId, string UnitId, string Skill, int Level) : IRequest<StudyPlanResult> {
+}
 
-// public record StudPlanyStudy(long UserId, string UnitId, string Skill) : IRequest<StudyPlanResult> {
+public record StudPlanyStudy(long UserId, string UnitId, string Skill) : IRequest<StudyPlanResult> {
 
-// }
+}
 
-// public record StudyPlanTeach(long UserId, string UnitId, int[] Units) : IRequest<StudyPlanResult> {
+public record StudyPlanTeach(long UserId, string UnitId, int[] Units) : IRequest<StudyPlanResult> {
 
-// }
+}
 
-// public record StudyPlanResult(DbStudyPlan StudyPlan, bool IsSuccess, string Error) : IMutationResult;
+public record StudyPlanResult(DbStudyPlan StudyPlan, bool IsSuccess, string Error) : MutationResult(IsSuccess, Error);
 
 // public class SetStudyPlanTargetHandler :
 //     IRequestHandler<StudyPlanTarget, StudyPlanResult>,

@@ -2,8 +2,9 @@ mutation GameJoinLocal($gameId: ID!, $name: String!) {
   gameJoinLocal(gameId: $gameId, name: $name) {
     isSuccess
     error
-    player {
-      ...PlayerHeader
+    registration {
+      id
+      name
     }
   }
 }

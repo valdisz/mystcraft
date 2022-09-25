@@ -27,6 +27,14 @@ directive @stream(
   label: String
 ) on FIELD
 
+type AditionalReport implements Node {
+  factionName: String!
+  factionNumber: Int!
+  id: ID!
+  json: String
+  source: String!
+}
+
 type Alliance implements Node {
   id: ID!
   members: [AllianceMember]
@@ -77,6 +85,12 @@ type AuthorizeDirective {
   apply: ApplyPolicy!
   policy: String
   roles: [String!]
+}
+
+type BackgroundJob {
+  id: String
+  reason: String
+  state: JobState!
 }
 
 type Battle {
@@ -178,13 +192,19 @@ type Event {
 }
 
 enum EventCategory {
+  BUY
   CAST
   CLAIM
+  CONSUME
+  ENTERTAIN
+  GIVE
   PILLAGE
   PRODUCE
   SELL
+  STUDY
   TAX
   UNKNOWN
+  WITHDRAW
   WORK
 }
 
@@ -230,7 +250,6 @@ type FleetContent {
 
 type Game implements Node {
   createdAt: DateTime!
-  finished: Boolean!
   id: ID!
   lastTurnNumber: Int
   me: Player
@@ -238,8 +257,9 @@ type Game implements Node {
   nextTurnNumber: Int
   options: GameOptions!
   players(quit: Boolean! = false, skip: Int, take: Int): PlayerCollectionSegment
-  remotePlayers: [RemotePlayer]
   ruleset: String!
+  status: GameStatus!
+  turns: [Turn]
   type: GameType!
 }
 
@@ -249,6 +269,12 @@ type GameCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type GameCompleteResult {
+  error: String
+  game: Game
+  isSuccess: Boolean!
 }
 
 type GameCreateLocalResult {
@@ -286,7 +312,19 @@ type GameEngineCreateResult {
 type GameJoinLocalResult {
   error: String
   isSuccess: Boolean!
+  registration: Registration
+}
+
+type GameJoinRemoteResult {
+  error: String
+  isSuccess: Boolean!
   player: Player
+}
+
+type GameNextTurnResult {
+  error: String
+  isSuccess: Boolean!
+  jobId: String
 }
 
 type GameOptions {
@@ -307,15 +345,37 @@ input GameOptionsInput {
   timeZone: String
 }
 
+type GameOptionsSetResult {
+  error: String
+  game: Game
+  isSuccess: Boolean!
+}
+
+type GamePauseResult {
+  error: String
+  game: Game
+  isSuccess: Boolean!
+}
+
 type GameScheduleSetResult {
   error: String
   game: Game
   isSuccess: Boolean!
 }
 
-type GameTurnRunResult {
+type GameStartResult {
   error: String
+  game: Game
   isSuccess: Boolean!
+  jobId: String
+}
+
+enum GameStatus {
+  COMPLEATED
+  LOCKED
+  NEW
+  PAUSED
+  RUNNING
 }
 
 enum GameType {
@@ -323,7 +383,9 @@ enum GameType {
   REMOTE
 }
 
-type IncomeStats {
+type Income {
+  claim: Int!
+  entertain: Int!
   pillage: Int!
   tax: Int!
   total: Int!
@@ -334,6 +396,15 @@ type IncomeStats {
 type Item {
   amount: Int!
   code: String
+}
+
+enum JobState {
+  DELETED
+  FAILED
+  PENDING
+  RUNNING
+  SUCCEEDED
+  UNKNOWN
 }
 
 type Location {
@@ -370,27 +441,25 @@ type Mutation {
   allianceCreate(name: String, playerId: ID!): AllianceCreateResult
   allianceJoin(allianceId: ID!, playerId: ID!): AllianceJoinResult
   createUser(email: String, password: String): User
+  deleteTurn(turnId: ID): Int!
+  gameComplete(gameId: ID!): GameCompleteResult
   gameCreateLocal(gameData: Upload, gameEngineId: ID!, name: String, options: GameOptionsInput, playerData: Upload): GameCreateLocalResult
   gameCreateRemote(name: String, options: GameOptionsInput): GameCreateRemoteResult
-  gameDelete(gameId: ID!): [Game]
   gameEngineCreate(file: Upload, name: String): GameEngineCreateResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
-  gameOptionsSet(gameId: ID!, options: GameOptionsInput): Game
+  gameJoinRemote(gameId: ID!, password: String, playerId: ID!): GameJoinRemoteResult
+  gameNextTurn(gameId: ID!): GameNextTurnResult
+  gameOptionsSet(gameId: ID!, options: GameOptionsInput): GameOptionsSetResult
+  gamePause(gameId: ID!): GamePauseResult
   gameScheduleSet(gameId: ID!, schedule: String): GameScheduleSetResult
-  gameTurnRun(gameId: ID!): GameTurnRunResult
+  gameStart(gameId: ID!): GameStartResult
   playerQuit(playerId: ID!): PlayerQuitResult
-  setOrders(orders: String, unitId: ID): MutationResultOfString
+  setOrders(orders: String, unitId: ID): UnitOrdersSetResult
+  setRuleset(gameId: ID!, ruleset: String): Game
   studyPlanStudy(skill: String, unitId: ID): StudyPlanResult
   studyPlanTarget(level: Int!, skill: String, unitId: ID): StudyPlanResult
   studyPlanTeach(unitId: ID, units: [Int!]): StudyPlanResult
-  turnReProcess(gameId: ID!, turn: Int!): TurnReProcessResult
   updateUserRoles(add: [String], remove: [String], userId: ID!): User
-}
-
-type MutationResultOfString {
-  data: String
-  error: String
-  isSuccess: Boolean!
 }
 
 """
@@ -409,15 +478,18 @@ type Player implements Node {
   alliance: Alliance
   game: Game
   id: ID!
+  isClaimed: Boolean!
   isQuit: Boolean!
-  lastTurnId: String
-  lastTurnNumber: Int!
+  lastTurn: PlayerTurn
+  lastTurnNumber: Int
   name: String
-  number: Int
+  nextTurn: PlayerTurn
+  nextTurnNumber: Int
+  number: Int!
   password: String
-  reports(turn: Int): [Report]
-  turn(number: Int!): Turn
-  turns: [Turn]
+  reports(turn: Int): [AditionalReport]
+  turn(number: Int!): PlayerTurn
+  turns: [PlayerTurn]
 }
 
 type PlayerCollectionSegment {
@@ -431,11 +503,35 @@ type PlayerCollectionSegment {
 type PlayerQuitResult {
   error: String
   isSuccess: Boolean!
+  player: Player
+}
+
+type PlayerTurn implements Node {
+  battles: [Battle]
+  events(skip: Int, take: Int): EventCollectionSegment
+  factions: [Faction]
+  id: ID!
+  isOrdersSubmitted: Boolean!
+  isProcessed: Boolean!
+  isReady: Boolean!
+  isTimesSubmitted: Boolean!
+  name: String!
+  ordersSubmittedAt: DateTime
+  readyAt: DateTime
+  regions(skip: Int, take: Int, withStructures: Boolean! = false): RegionCollectionSegment
+  reports: [AditionalReport]
+  stats: Statistics
+  structures(skip: Int, take: Int): StructureCollectionSegment
+  studyPlans: [StudyPlan]
+  timesSubmittedAt: DateTime
+  turnNumber: Int!
+  units(filter: UnitsFilterInput, skip: Int, take: Int): UnitCollectionSegment
 }
 
 type Query {
   gameEngines(skip: Int, take: Int): GameEngineCollectionSegment
   games(skip: Int, take: Int): GameCollectionSegment
+  job(jobId: String): BackgroundJob
   me: User
 
   """Fetches an object given its ID."""
@@ -485,19 +581,17 @@ type RegionCollectionSegment {
   totalCount: Int!
 }
 
-type RemotePlayer {
+type Registration {
+  id: Long!
   name: String
-  number: Int!
-  orders: Boolean!
-  times: Boolean!
+  password: String
 }
 
-type Report implements Node {
-  factionName: String!
+type Report {
+  error: String
   factionNumber: Int!
-  id: ID!
-  json: String
-  source: String!
+  isMerged: Boolean!
+  isParsed: Boolean!
 }
 
 type Sailors {
@@ -531,7 +625,7 @@ enum Stance {
 }
 
 type Statistics {
-  income: IncomeStats
+  income: Income
   production: [Item]
 }
 
@@ -588,25 +682,15 @@ type TransportationLoad {
 }
 
 type Turn implements Node {
-  battles: [Battle]
-  events(skip: Int, take: Int): EventCollectionSegment
-  factions: [Faction]
   id: ID!
-  month: Int!
   number: Int!
-  ready: Boolean!
-  regions(skip: Int, take: Int, withStructures: Boolean! = false): RegionCollectionSegment
   reports: [Report]
-  stats: Statistics
-  structures(skip: Int, take: Int): StructureCollectionSegment
-  studyPlans: [StudyPlan]
-  units(filter: UnitsFilterInput, skip: Int, take: Int): UnitCollectionSegment
-  year: Int!
+  state: TurnState!
 }
 
-type TurnReProcessResult {
-  error: String
-  isSuccess: Boolean!
+enum TurnState {
+  PENDING
+  READY
 }
 
 type Unit implements Node {
@@ -639,6 +723,11 @@ type UnitCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type UnitOrdersSetResult {
+  error: String
+  isSuccess: Boolean!
 }
 
 input UnitsFilterInput {

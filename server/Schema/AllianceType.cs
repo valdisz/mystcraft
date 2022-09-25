@@ -92,12 +92,11 @@ namespace advisor.Schema
                 income.Trade += stat.Income.Trade;
                 income.Work += stat.Income.Work;
 
-                // FIXME
-                // foreach (var item in stat.Produced) {
-                //     production[item.Code] = production.TryGetValue(item.Code, out var value)
-                //         ? value + item.Amount
-                //         : item.Amount;
-                // }
+                foreach (var item in stat.Items.Where(x => x.Category == StatisticsCategory.Produced)) {
+                    production[item.Code] = production.TryGetValue(item.Code, out var value)
+                        ? value + item.Amount
+                        : item.Amount;
+                }
             }
 
             return new Statistics {

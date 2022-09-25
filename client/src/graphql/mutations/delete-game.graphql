@@ -1,5 +1,5 @@
-mutation DeleteGame($gameId: ID!) {
-    gameDelete(gameId: $gameId) {
-        ...GameHeader
-    }
-}
+# mutation DeleteGame($gameId: ID!) {
+#     gameDelete(gameId: $gameId) {
+#         ...GameHeader
+#     }
+# }

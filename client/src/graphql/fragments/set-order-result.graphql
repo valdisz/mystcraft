@@ -1,4 +1,4 @@
-fragment SetOrderResult on MutationResultOfString {
+fragment SetOrderResult on UnitOrdersSetResult {
   isSuccess
   error
 }

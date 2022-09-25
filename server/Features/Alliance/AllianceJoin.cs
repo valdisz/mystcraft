@@ -1,17 +1,17 @@
 // FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Persistence;
-// using advisor.Schema;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using advisor.Schema;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-// public record AllianceJoin(long UserId, long PlayerId, long AllianceId) : IRequest<AllianceJoinResult>;
+public record AllianceJoin(long UserId, long PlayerId, long AllianceId) : IRequest<AllianceJoinResult>;
 
-// public record AllianceJoinResult(DbAlliance alliance, DbAllianceMember membership, bool IsSuccess, string Error) : IMutationResult;
+public record AllianceJoinResult(DbAlliance alliance, DbAllianceMember membership, bool IsSuccess, string Error) : IMutationResult;
 
 // public class AllianceJoinHandler : IRequestHandler<AllianceJoin, AllianceJoinResult> {
 //     public AllianceJoinHandler(Database db) {
