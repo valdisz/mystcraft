@@ -3,7 +3,7 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    public class DbStat : InTurnContext {
+    public class DbStatistics : InTurnContext {
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
@@ -15,9 +15,10 @@ namespace advisor.Persistence {
         [MaxLength(14)]
         public string RegionId { get; set; }
 
-        public DbIncomeStats Income { get; set; }
+        public DbIncome Income { get; set; } = new ();
+        public DbExpenses Expenses { get; set; } = new ();
 
-        public List<DbStatItem> Production { get; set; } = new ();
+        public List<DbStatisticsItem> Items { get; set; } = new ();
 
         [GraphQLIgnore]
         public DbPlayerTurn Turn { get; set; }

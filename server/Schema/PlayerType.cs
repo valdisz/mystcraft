@@ -54,7 +54,7 @@ namespace advisor.Schema
                 .SingleOrDefaultAsync(x => x.TurnNumber == player.LastTurnNumber);
         }
 
-        public Task<DbPlayerTurn> NextTurn(Database db, [Parent] DbPlayer player, int number) {
+        public Task<DbPlayerTurn> NextTurn(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
                 .Include(x => x.Player)
@@ -85,8 +85,8 @@ namespace advisor.Schema
         public Task<List<DbPlayerTurn>> Turns(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
-                .Include(x => x.Player)
                 .OnlyPlayer(player)
+                .Include(x => x.Player)
                 .OrderBy(x => x.TurnNumber)
                 .ToListAsync();
         }
@@ -94,8 +94,8 @@ namespace advisor.Schema
         public Task<DbPlayerTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
             return db.PlayerTurns
                 .AsNoTracking()
-                .Include(x => x.Player)
                 .OnlyPlayer(player)
+                .Include(x => x.Player)
                 .SingleOrDefaultAsync(x => x.TurnNumber == number);
         }
     }

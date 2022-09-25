@@ -12,7 +12,7 @@ using MediatR;
 
 public record GameJoinRemote(long UserId, long GameId, long PlayerId, string Password) : IRequest<GameJoinRemoteResult>;
 
-public record GameJoinRemoteResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : IMutationResult;
+public record GameJoinRemoteResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : MutationResult(IsSuccess, Error);
 
 public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRemoteResult> {
     public GameJoinRemoteHandler(IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator) {
@@ -29,8 +29,13 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
 
     public async Task<GameJoinRemoteResult> Handle(GameJoinRemote request, CancellationToken cancellationToken) {
         var game = await games.GetOneNoTrackingAsync(request.GameId);
-        if (game == null) {
-            return new GameJoinRemoteResult(false, "Game does not exist.");
+
+        switch (game?.Status) {
+            case null: return new GameJoinRemoteResult(false, "Game does not exist.");
+            case GameStatus.NEW: return new GameJoinRemoteResult(false, "Game not yet started.");
+            case GameStatus.PAUSED: return new GameJoinRemoteResult(false, "Game paused.");
+            case GameStatus.LOCKED: return new GameJoinRemoteResult(false, "Game is processing turn.");
+            case GameStatus.COMPLEATED: return new GameJoinRemoteResult(false, "Game compleated.");
         }
 
         var playersRepo = unit.Players(game);
@@ -57,6 +62,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
         try {
             player = await playersRepo.ClamFactionAsync(request.UserId, request.PlayerId, request.Password, cancellationToken);
             var report = await turnsRepo.AddReportAsync(
+                request.PlayerId,
                 player.Number,
                 player.LastTurnNumber.Value,
                 Encoding.UTF8.GetBytes(reportText),
@@ -70,8 +76,32 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await unit.CommitTransactionAsync(cancellationToken);
+        if (player.LastTurnNumber.HasValue) {
+            var turnNumber = player.LastTurnNumber.Value;
+            long[] playerIds = { player.Id };
 
+            MutationResult result;
+
+            result = await mediator.Send(new TurnParse(game, turnNumber, PlayerIds: playerIds));
+            if (!result) {
+                await unit.RollbackTransactionAsync(cancellationToken);
+                return new GameJoinRemoteResult(result, result.Error);
+            }
+
+            result = await mediator.Send(new TurnMerge(game, turnNumber, PlayerIds: playerIds));
+            if (!result) {
+                await unit.RollbackTransactionAsync(cancellationToken);
+                return new GameJoinRemoteResult(result, result.Error);
+            }
+
+            result = await mediator.Send(new TurnProcess(game, turnNumber, PlayerIds: playerIds));
+            if (!result) {
+                await unit.RollbackTransactionAsync(cancellationToken);
+                return new GameJoinRemoteResult(result, result.Error);
+            }
+        }
+
+        await unit.CommitTransactionAsync(cancellationToken);
         return new GameJoinRemoteResult(true, Player: player);
     }
 }

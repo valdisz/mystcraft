@@ -6,6 +6,8 @@ using advisor.Persistence;
 using HotChocolate.AspNetCore.Authorization;
 using HotChocolate;
 using HotChocolate.Types;
+using advisor.Features;
+using MediatR;
 
 public class Query {
     [Authorize(Policy = Policies.GameMasters)]
@@ -21,4 +23,9 @@ public class Query {
 
     [Authorize]
     public ValueTask<DbUser> Me(Database db, [GlobalState] long currentUserId) => db.Users.FindAsync(currentUserId);
+
+    [Authorize]
+    public Task<BackgroundJob> Job(IMediator mediator, string jobId) {
+        return mediator.Send(new GetJobStatus(jobId));
+    }
 }

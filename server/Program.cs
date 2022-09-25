@@ -69,7 +69,7 @@
             var services = scope.ServiceProvider;
 
             var mediator = services.GetRequiredService<IMediator>();
-            await mediator.Send(new JobReconcile());
+            await mediator.Send(new Reconcile());
         }
 
         private static async Task RunDatabaseMigrationsAsync(IWebHost host) {

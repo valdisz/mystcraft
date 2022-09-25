@@ -23,11 +23,11 @@ namespace advisor {
     }
 
     public class UnitCombatSpellParser : BaseParser {
-        public UnitCombatSpellParser(IReportParser skillParser) {
+        public UnitCombatSpellParser(IParser skillParser) {
             this.skillParser = skillParser;
         }
 
-        private readonly IReportParser skillParser;
+        private readonly IParser skillParser;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var prefix = p.After("Combat spell:").SkipWhitespaces();
@@ -67,15 +67,15 @@ Ready item: book of exorcism [BKEX].
             combatSpellParser = new UnitCombatSpellParser(skillParser);
         }
 
-        readonly IReportParser nameParser;
-        readonly IReportParser factionParser;
-        readonly IReportParser itemParser;
-        readonly IReportParser skillsParser;
-        readonly IReportParser weightParser;
-        readonly IReportParser capacityParser;
-        readonly IReportParser canStudyParser;
-        readonly IReportParser readyItemParser;
-        readonly IReportParser combatSpellParser;
+        readonly IParser nameParser;
+        readonly IParser factionParser;
+        readonly IParser itemParser;
+        readonly IParser skillsParser;
+        readonly IParser weightParser;
+        readonly IParser capacityParser;
+        readonly IParser canStudyParser;
+        readonly IParser readyItemParser;
+        readonly IParser combatSpellParser;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             // don't need dot at the end of line

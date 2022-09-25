@@ -125,38 +125,4 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public DbRegion Region { get; set; }
     }
-
-    public class DbStatItem : AnItem, InTurnContext {
-        public DbStatItem() {
-
-        }
-
-        public DbStatItem(AnItem other) {
-            this.Code = other.Code;
-            this.Amount = other.Amount;
-        }
-
-        [GraphQLIgnore]
-        public long PlayerId { get; set; }
-
-        [GraphQLIgnore]
-        public int TurnNumber { get; set; }
-
-        [GraphQLIgnore]
-        [Required]
-        [MaxLength(14)]
-        public string RegionId { get; set; }
-
-        [Required]
-        [MaxLength(8)]
-        public string Code { get; set; }
-
-        public int Amount { get; set; }
-
-        [GraphQLIgnore]
-        public DbRegion Region { get; set; }
-
-        [GraphQLIgnore]
-        public DbStat Stat { get; set; }
-    }
 }

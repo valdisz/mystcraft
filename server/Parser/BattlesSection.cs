@@ -34,13 +34,13 @@ namespace advisor {
             }
         }
 
-        readonly IReportParser headlineParser = new BattleHeadlineParser();
-        readonly IReportParser assassinationParser = new AssassinationParser();
-        readonly IReportParser unit = new BattleUnitParser();
-        readonly IReportParser unitName = new UnitNameParser();
-        readonly IReportParser itemList = new ItemListParser();
-        readonly IReportParser item = new ItemParser();
-        readonly IReportParser healingAttempt = new HealingAttemptParser(new UnitNameParser());
+        readonly IParser headlineParser = new BattleHeadlineParser();
+        readonly IParser assassinationParser = new AssassinationParser();
+        readonly IParser unit = new BattleUnitParser();
+        readonly IParser unitName = new UnitNameParser();
+        readonly IParser itemList = new ItemListParser();
+        readonly IParser item = new ItemParser();
+        readonly IParser healingAttempt = new HealingAttemptParser(new UnitNameParser());
 
         private bool CanParseAsBattle(Cursor<TextParser> cursor) {
             var result = headlineParser.Parse(cursor.Value);
@@ -275,11 +275,11 @@ namespace advisor {
 
     // Peacekeeper (1541) heals 1 with 40% chance.
     public class HealingAttemptParser : BaseParser {
-        public HealingAttemptParser(IReportParser unitName) {
+        public HealingAttemptParser(IParser unitName) {
             this.unitName = unitName;
         }
 
-        private readonly IReportParser unitName;
+        private readonly IParser unitName;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var unit = unitName.Parse(p);

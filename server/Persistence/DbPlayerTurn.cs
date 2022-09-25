@@ -4,7 +4,7 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
 
-    public class DbPlayerTurn : InPlayerContext {
+    public class DbPlayerTurn : InPlayerContext, InGameContext {
         public static string CreateId(long playerId, int turnNumber) => $"{playerId}:{turnNumber}";
         public static string CreateId(DbPlayerTurn player) => CreateId(player.PlayerId, player.TurnNumber);
         public static (long playerId, int turnNumber) ParseId(string id) {
@@ -17,6 +17,9 @@ namespace advisor.Persistence {
 
 
         public string Id => CreateId(this);
+
+        [GraphQLIgnore]
+        public long GameId { get; set; }
 
         [GraphQLIgnore]
         public long PlayerId { get; set; }
@@ -35,6 +38,7 @@ namespace advisor.Persistence {
         public bool IsOrdersSubmitted => OrdersSubmittedAt.HasValue;
         public bool IsTimesSubmitted => TimesSubmittedAt.HasValue;
 
+        public bool IsProcessed { get; set; }
 
         [GraphQLIgnore]
         public DbPlayer Player { get; set; }
@@ -76,7 +80,7 @@ namespace advisor.Persistence {
         public List<DbStudyPlan> Plans { get; set; } = new ();
 
         [GraphQLIgnore]
-        public List<DbStat> Stats { get; set; } = new ();
+        public List<DbStatistics> Stats { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbBattle> Battles { get; set; } = new ();

@@ -7,7 +7,7 @@ using advisor.Schema;
 using MediatR;
 
 public record GameRulesetSet(long GameId, string Ruleset) : IRequest<GameRulesetSetResult>;
-public record GameRulesetSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GameRulesetSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRulesetSetResult> {
     public GameRulesetSetHandler(IUnitOfWork unit) {

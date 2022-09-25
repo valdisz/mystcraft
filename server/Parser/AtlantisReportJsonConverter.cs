@@ -38,6 +38,11 @@
             this.sections = sections.ToArray();
         }
 
+        /*
+            TODO: Use System.IO.Pipelines for better effiecneicy of converting Text report to JReport model
+                  https://learn.microsoft.com/en-us/dotnet/standard/io/pipelines
+        */
+
         private readonly AtlantisTextReader reader;
         private readonly IReportSectionParser[] sections;
 

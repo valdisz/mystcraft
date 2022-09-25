@@ -8,7 +8,7 @@ using advisor.Schema;
 
 public record GameScheduleSet(long GameId, string Schedule): IRequest<GameScheduleSetResult>;
 
-public record GameScheduleSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GameScheduleSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameScheduleSetResult> {
     public GameScheduleSetHandler(IUnitOfWork unit, IMediator mediator) {
@@ -29,7 +29,7 @@ public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameSched
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+        await mediator.Send(new Reconcile(game.Id), cancellationToken);
 
         return new GameScheduleSetResult(true, Game: game);
     }

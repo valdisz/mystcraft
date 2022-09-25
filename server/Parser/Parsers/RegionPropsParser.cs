@@ -9,7 +9,7 @@ namespace advisor
 
         private readonly ItemParser itemParser;
 
-        private Maybe<IReportNode> ParaseItems(TextParser src, IReportParser parser, List<IReportNode> items) {
+        private Maybe<IReportNode> ParaseItems(TextParser src, IParser parser, List<IReportNode> items) {
             if (src.Match("none")) {
                 return null;
             }

@@ -77,13 +77,13 @@ namespace advisor.Schema
         public int Number { get; }
 
         public async Task<Statistics> Stats(Database db) {
-            var stats = await db.Stats
+            var stats = await db.Statistics
                 .AsNoTracking()
                 .InTurn(playerId, Number)
-                .Include(x => x.Production)
+                .Include(x => x.Items)
                 .ToListAsync();
 
-            DbIncomeStats income = new DbIncomeStats();
+            DbIncome income = new DbIncome();
             Dictionary<string, int> production = new Dictionary<string, int>();
 
             foreach (var stat in stats) {
@@ -92,11 +92,12 @@ namespace advisor.Schema
                 income.Trade += stat.Income.Trade;
                 income.Work += stat.Income.Work;
 
-                foreach (var item in stat.Production) {
-                    production[item.Code] = production.TryGetValue(item.Code, out var value)
-                        ? value + item.Amount
-                        : item.Amount;
-                }
+                // FIXME
+                // foreach (var item in stat.Produced) {
+                //     production[item.Code] = production.TryGetValue(item.Code, out var value)
+                //         ? value + item.Amount
+                //         : item.Amount;
+                // }
             }
 
             return new Statistics {

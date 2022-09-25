@@ -12,6 +12,7 @@
 // using Newtonsoft.Json;
 // using advisor.Model;
 // using advisor.Persistence;
+// using advisor.TurnProcessing;
 
 // public record PlayerReportParse(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
 

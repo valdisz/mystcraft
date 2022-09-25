@@ -10,7 +10,7 @@ using MediatR;
 
 public record GameCreateRemote(string Name, GameOptions Options) : IRequest<GameCreateRemoteResult>;
 
-public record GameCreateRemoteResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GameCreateRemoteResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCreateRemoteResult> {
     public GameCreateRemoteHandler(IUnitOfWork unit, IMediator mediator, IHttpClientFactory httpFactory) {
@@ -26,30 +26,24 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
     private readonly IHttpClientFactory httpFactory;
 
     public async Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) {
-        var remote = new NewOriginsClient(request.Options.ServerAddress, httpFactory);
-
-        var turnNumber = await remote.GetCurrentTurnNumberAsync(cancellationToken);
-        if (turnNumber < 0) {
-            return new GameCreateRemoteResult(false, "Cannot get remote turn number.");
-        }
-
         await unit.BeginTransactionAsync(cancellationToken);
 
         var game = await games.CreateRemoteAsync(
             name: request.Name,
             serverAddress: request.Options.ServerAddress,
-            turnNumber: turnNumber,
             options: request.Options,
             cancellationToken
         );
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new GameSyncFactions(game.Id), cancellationToken);
-        // TODO: import articles
+        var syncResult = await mediator.Send(new GameSyncFactions(game.Id), cancellationToken);
+        if (!syncResult) {
+            return new GameCreateRemoteResult(syncResult.IsSuccess, syncResult.Error);
+        }
 
         if (await unit.CommitTransactionAsync(cancellationToken)) {
-            await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+            await mediator.Send(new Reconcile(game.Id), cancellationToken);
         }
 
         return new GameCreateRemoteResult(true, Game: game);

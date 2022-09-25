@@ -1,4 +1,5 @@
-﻿namespace advisor.Schema {
+﻿namespace advisor.Schema
+{
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -26,7 +27,7 @@
     }
 
     [ExtendObjectType("PlayerTurn")]
-    public class TurnResolvers {
+    public class PlayerTurnResolvers {
         public Task<List<DbAditionalReport>> GetReports(Database db, [Parent] DbPlayerTurn turn) {
             return db.AditionalReports
                 .AsNoTracking()
@@ -126,13 +127,14 @@
 
         public async Task<Statistics> Stats(Database db, [Parent] DbPlayerTurn turn) {
             var factionNumber = turn.Player.Number;
-            var stats = await db.Stats
+            var stats = await db.Statistics
                 .AsNoTracking()
                 .InTurn(turn)
-                .Include(x => x.Production)
+                // FIXME
+                // .Include(x => x.Produced)
                 .ToListAsync();
 
-            DbIncomeStats income = new DbIncomeStats();
+            DbIncome income = new DbIncome();
             Dictionary<string, int> production = new Dictionary<string, int>();
 
             foreach (var stat in stats) {
@@ -141,11 +143,12 @@
                 income.Trade += stat.Income.Trade;
                 income.Work += stat.Income.Work;
 
-                foreach (var item in stat.Production) {
-                    production[item.Code] = production.TryGetValue(item.Code, out var value)
-                        ? value + item.Amount
-                        : item.Amount;
-                }
+                // FIXME
+                // foreach (var item in stat.Produced) {
+                //     production[item.Code] = production.TryGetValue(item.Code, out var value)
+                //         ? value + item.Amount
+                //         : item.Amount;
+                // }
             }
 
             return new Statistics {

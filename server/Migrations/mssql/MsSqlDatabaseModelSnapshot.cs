@@ -533,6 +533,12 @@ namespace advisor.Migrations.mssql
                     b.Property<int>("TurnNumber")
                         .HasColumnType("int");
 
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -548,6 +554,8 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("datetimeoffset");
 
                     b.HasKey("PlayerId", "TurnNumber");
+
+                    b.HasIndex("GameId");
 
                     b.ToTable("PlayerTurns");
                 });
@@ -679,13 +687,10 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbReport", b =>
                 {
-                    b.Property<long>("GameId")
+                    b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FactionNumber")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("Data")
@@ -695,21 +700,26 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("Error")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("Imported")
+                    b.Property<int>("FactionNumber")
+                        .HasColumnType("int");
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsMerged")
                         .HasColumnType("bit");
 
                     b.Property<byte[]>("Json")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<bool>("Parsed")
-                        .HasColumnType("bit");
+                    b.HasKey("PlayerId", "TurnNumber");
 
-                    b.HasKey("GameId", "TurnNumber", "FactionNumber");
+                    b.HasIndex("GameId", "TurnNumber");
 
                     b.ToTable("Reports");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStat", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
                 {
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
@@ -723,31 +733,45 @@ namespace advisor.Migrations.mssql
 
                     b.HasKey("PlayerId", "TurnNumber", "RegionId");
 
-                    b.ToTable("Stats");
+                    b.ToTable("Statistics");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStatItem", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStatisticsItem", b =>
                 {
-                    b.Property<long>("PlayerId")
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RegionId")
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
-
-                    b.Property<string>("Code")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
                     b.Property<int>("Amount")
                         .HasColumnType("int");
 
-                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Code");
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("StatItems");
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("RegionId")
+                        .IsRequired()
+                        .HasMaxLength(14)
+                        .HasColumnType("nvarchar(14)");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
+
+                    b.ToTable("StatisticsItems");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
@@ -854,7 +878,7 @@ namespace advisor.Migrations.mssql
                     b.Property<byte[]>("PlayerData")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("State")
                         .HasColumnType("int");
 
                     b.HasKey("GameId", "Number");
@@ -1017,7 +1041,7 @@ namespace advisor.Migrations.mssql
             modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
-                        .WithMany("Reports")
+                        .WithMany("AdditionalReports")
                         .HasForeignKey("PlayerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1323,6 +1347,12 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbPlayerTurn", b =>
                 {
+                    b.HasOne("advisor.Persistence.DbGame", null)
+                        .WithMany()
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
                         .WithMany("Turns")
                         .HasForeignKey("PlayerId")
@@ -1416,6 +1446,12 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("advisor.Persistence.DbPlayer", "Player")
+                        .WithMany("Reports")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("advisor.Persistence.DbTurn", "Turn")
                         .WithMany("Reports")
                         .HasForeignKey("GameId", "TurnNumber")
@@ -1424,10 +1460,12 @@ namespace advisor.Migrations.mssql
 
                     b.Navigation("Game");
 
+                    b.Navigation("Player");
+
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStat", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayerTurn", "Turn")
                         .WithMany("Stats")
@@ -1441,16 +1479,50 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("advisor.Persistence.DbIncomeStats", "Income", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
                         {
-                            b1.Property<long>("DbStatPlayerId")
+                            b1.Property<long>("DbStatisticsPlayerId")
                                 .HasColumnType("bigint");
 
-                            b1.Property<int>("DbStatTurnNumber")
+                            b1.Property<int>("DbStatisticsTurnNumber")
                                 .HasColumnType("int");
 
-                            b1.Property<string>("DbStatRegionId")
+                            b1.Property<string>("DbStatisticsRegionId")
                                 .HasColumnType("nvarchar(14)");
+
+                            b1.Property<int>("Consume")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Study")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("int");
+
+                            b1.HasKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
+
+                            b1.ToTable("Statistics");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbStatisticsPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbStatisticsTurnNumber")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("DbStatisticsRegionId")
+                                .HasColumnType("nvarchar(14)");
+
+                            b1.Property<int>("Claim")
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Entertain")
+                                .HasColumnType("int");
 
                             b1.Property<int>("Pillage")
                                 .HasColumnType("int");
@@ -1464,13 +1536,15 @@ namespace advisor.Migrations.mssql
                             b1.Property<int>("Work")
                                 .HasColumnType("int");
 
-                            b1.HasKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatRegionId");
+                            b1.HasKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
 
-                            b1.ToTable("Stats");
+                            b1.ToTable("Statistics");
 
                             b1.WithOwner()
-                                .HasForeignKey("DbStatPlayerId", "DbStatTurnNumber", "DbStatRegionId");
+                                .HasForeignKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
                         });
+
+                    b.Navigation("Expenses");
 
                     b.Navigation("Income");
 
@@ -1479,7 +1553,7 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStatItem", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStatisticsItem", b =>
                 {
                     b.HasOne("advisor.Persistence.DbRegion", "Region")
                         .WithMany()
@@ -1487,15 +1561,15 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbStat", "Stat")
-                        .WithMany("Production")
+                    b.HasOne("advisor.Persistence.DbStatistics", "Statistics")
+                        .WithMany("Items")
                         .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Region");
 
-                    b.Navigation("Stat");
+                    b.Navigation("Statistics");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
@@ -1740,6 +1814,8 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbPlayer", b =>
                 {
+                    b.Navigation("AdditionalReports");
+
                     b.Navigation("AllianceMembererships");
 
                     b.Navigation("Reports");
@@ -1797,9 +1873,9 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Units");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStat", b =>
+            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
                 {
-                    b.Navigation("Production");
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>

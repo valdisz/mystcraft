@@ -3,7 +3,7 @@ namespace advisor
     using System.Collections.Generic;
 
     public class ItemListParser : BaseParser {
-        readonly IReportParser itemParser = new ItemParser();
+        readonly IParser itemParser = new ItemParser();
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             if (p.Match("none")) {

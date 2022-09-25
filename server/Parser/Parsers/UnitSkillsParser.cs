@@ -5,11 +5,11 @@ namespace advisor
     // Skills: endurance [ENDU] 1 (30)
     // Skills: fire [FIRE] 1 (30), earthquake [EQUA] 1 (30)
     public class UnitSkillsParser : BaseParser {
-        public UnitSkillsParser(IReportParser skillParser) {
+        public UnitSkillsParser(IParser skillParser) {
             this.skillParser = skillParser;
         }
 
-        private readonly IReportParser skillParser;
+        private readonly IParser skillParser;
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var prefix = p.After("Skills:").SkipWhitespaces();

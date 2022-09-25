@@ -10,21 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using System;
 
-public record JobReconcile(long? GameId = null): IRequest<JobReconcileResult>;
-public record JobReconcileResult(bool IsSuccess, string Error = null) : IMutationResult;
+public record Reconcile(long? GameId = null): IRequest<ReconcileResult>;
+public record ReconcileResult(bool IsSuccess, string Error = null) : IMutationResult;
 
-public class ReconcilationJob {
-    public ReconcilationJob(IMediator mediator) {
-        this.mediator = mediator;
-    }
-
-    private readonly IMediator mediator;
-
-    public Task RunAsync() => mediator.Send(new JobReconcile());
-}
-
-public class JobReconcileHandler : IRequestHandler<JobReconcile, JobReconcileResult> {
-    public JobReconcileHandler(IUnitOfWork unit, IRecurringJobManager jobs) {
+public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
+    public ReconcileHandler(IUnitOfWork unit, IRecurringJobManager jobs) {
         this.unit = unit;
         this.jobs = jobs;
     }
@@ -34,13 +24,13 @@ public class JobReconcileHandler : IRequestHandler<JobReconcile, JobReconcileRes
 
     private record GameProjection(long Id, GameStatus Status, Persistence.GameType Type, GameOptions Options);
 
-    public async Task<JobReconcileResult> Handle(JobReconcile request, CancellationToken cancellation) {
+    public async Task<ReconcileResult> Handle(Reconcile request, CancellationToken cancellation) {
         var gamesRepo = unit.Games;
 
         var query = gamesRepo.Games
             .AsNoTracking();
 
-        if (request.GameId.HasValue) {
+        if (request.GameId != null) {
             query = query.Where(x => x.Id == request.GameId);
         }
 
@@ -50,11 +40,11 @@ public class JobReconcileHandler : IRequestHandler<JobReconcile, JobReconcileRes
             ReconcileSingleGameJob(game, cancellation);
         }
 
-        if (!request.GameId.HasValue) {
-            jobs.AddOrUpdate<ReconcilationJob>("reconcile", job => job.RunAsync(), "*/5 * * * *");
+        if (request.GameId == null) {
+            jobs.AddOrUpdate<ReconcileJob>("reconcile", job => job.RunAsync(), "*/15 * * * *");
         }
 
-        return new JobReconcileResult(true);
+        return new ReconcileResult(true);
     }
 
     private void ReconcileSingleGameJob(GameProjection game, CancellationToken cancellation) {
@@ -63,17 +53,19 @@ public class JobReconcileHandler : IRequestHandler<JobReconcile, JobReconcileRes
         var shouldRun = game.Status == GameStatus.RUNNING && !string.IsNullOrWhiteSpace(game.Options.Schedule);
         var timeZone = FindTimeZone(game.Options.TimeZone);
 
-        if (game.Type == Persistence.GameType.LOCAL) {
-            // run turn job
+        var nextTurnJobId = $"{jobIdPrefix}-turn";
+        if (shouldRun) {
+            jobs.AddOrUpdate<GameNextTurnJob>(nextTurnJobId, job => job.RunAsync(game.Id, null), game.Options.Schedule, timeZone);
         }
         else {
+            jobs.RemoveIfExists(nextTurnJobId);
+        }
+
+        if (game.Type == Persistence.GameType.REMOTE) {
             var factionSyncJobId = $"{jobIdPrefix}-factions";
 
-            // run remote turn job
-            // sync faction status job
-
             if (shouldRun) {
-                // jobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *", timeZone);
+                jobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *", timeZone);
             }
             else {
                 jobs.RemoveIfExists(factionSyncJobId);

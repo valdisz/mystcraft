@@ -8,7 +8,7 @@ using advisor.Persistence;
 
 public record GamePause(long GameId): IRequest<GamePauseResult>;
 
-public record GamePauseResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GamePauseResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
     public GamePauseHandler(IUnitOfWork unit, IMediator mediator) {
@@ -33,7 +33,7 @@ public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+        await mediator.Send(new Reconcile(game.Id), cancellationToken);
 
         return new GamePauseResult(true, Game: game);
     }

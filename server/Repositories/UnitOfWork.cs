@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Persistence;
 
 public interface IUnitOfWork : IAsyncDisposable, IDisposable {
+    Database Database { get; }
+
     IGameRepository Games { get; }
     IEnginesRepository Engines { get; }
 
@@ -26,23 +28,22 @@ public interface IUnitOfWork : IAsyncDisposable, IDisposable {
 
 public class UnitOfWork : IUnitOfWork {
     public UnitOfWork(Database db) {
-        this.db = db;
+        this.Database = db;
 
         this.Games = new GameRepository(this, db);
         this.Engines = new EnginesRepository(this, db);
     }
 
-    private readonly Database db;
-
     private int txCounter = 0;
-    private bool txRollback = false;
+    private bool willRollback = false;
     private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction tx;
 
+    public Database Database { get; }
     public IGameRepository Games { get; }
     public IEnginesRepository Engines { get; }
 
     public IPlayersRepository Players(DbGame game) {
-        return new PlayersRepository(game, this, db);
+        return new PlayersRepository(game, this, Database);
     }
 
     public async Task<IPlayersRepository> PlayersAsync(long gameId, CancellationToken cancellation) {
@@ -50,48 +51,51 @@ public class UnitOfWork : IUnitOfWork {
         return Players(game);
     }
 
-    public ITurnsRepository Turns(DbGame game) => new TurnsRepository(game, this, db);
+    public ITurnsRepository Turns(DbGame game) => new TurnsRepository(game, this, Database);
 
     public async Task<ITurnsRepository> TurnsAsync(long gameId, CancellationToken cancellation) {
         var game = await Games.GetOneNoTrackingAsync(gameId, cancellation);
         return Turns(game);
     }
 
-    public IPlayerRepository Player(DbPlayer player) => new PlayerRepository(player, this, db);
+    public IPlayerRepository Player(DbPlayer player) => new PlayerRepository(player, this, Database);
 
     public async Task<IPlayerRepository> PlayerAsync(long playerId, CancellationToken cancellation) {
-        var player = await db.Players.FindAsync(playerId);
+        var player = await Database.Players.FindAsync(playerId);
         return Player(player);
     }
 
     public async ValueTask<int> SaveChangesAsync(CancellationToken cancellation = default) {
-        if (!db.ChangeTracker.HasChanges()) {
+        if (!Database.ChangeTracker.HasChanges()) {
             return 0;
         }
 
-        return await db.SaveChangesAsync();
+        return await Database.SaveChangesAsync();
     }
 
     public async ValueTask BeginTransactionAsync(CancellationToken cancellation = default) {
         if (txCounter == 0) {
-            tx = await db.Database.BeginTransactionAsync(cancellation);
-            txRollback = false;
+            tx = await Database.Database.BeginTransactionAsync(cancellation);
+            willRollback = false;
         }
 
         txCounter++;
     }
 
     public async ValueTask<bool> CommitTransactionAsync(CancellationToken cancellation = default) {
+        if (!willRollback) {
+            await SaveChangesAsync(cancellation);
+        }
+
         if (txCounter == 0) {
             return true;
         }
 
         if (txCounter == 1) {
-            if (txRollback) {
+            if (willRollback) {
                 await tx.RollbackAsync(cancellation);
             }
             else {
-                await SaveChangesAsync(cancellation);
                 await tx.CommitAsync(cancellation);
             }
 
@@ -103,7 +107,7 @@ public class UnitOfWork : IUnitOfWork {
             txCounter--;
         }
 
-        return !txRollback;
+        return !willRollback;
     }
 
     public async ValueTask RollbackTransactionAsync(CancellationToken cancellation = default) {
@@ -121,7 +125,7 @@ public class UnitOfWork : IUnitOfWork {
             txCounter--;
         }
 
-        txRollback = true;
+        willRollback = true;
     }
 
     public async ValueTask DisposeAsync() {

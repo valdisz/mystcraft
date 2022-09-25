@@ -31,6 +31,7 @@ public class PlayerRepository : IPlayerRepository {
 
     public async Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string name, CancellationToken cancellation) {
         var turn = new DbPlayerTurn {
+            GameId = player.GameId,
             PlayerId = player.Id,
             TurnNumber = turnNumber,
             Name = name

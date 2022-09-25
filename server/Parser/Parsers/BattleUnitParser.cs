@@ -6,10 +6,10 @@ namespace advisor {
     // Nookers (12462), Nomads (82), behind, 14 gnolls [GNOL], 13 humans [HUMN], combat 1.
     // for nookers (8466), Nomads (82), behind, 5 humans [HUMN], combat 1.
     public class BattleUnitParser : BaseParser {
-        readonly IReportParser nameParser = new UnitNameParser();
-        readonly IReportParser factionParser = new FactionNameParser();
-        readonly IReportParser itemParser = new ItemParser();
-        readonly IReportParser skillParser = new BattleSkillParser();
+        readonly IParser nameParser = new UnitNameParser();
+        readonly IParser factionParser = new FactionNameParser();
+        readonly IParser itemParser = new ItemParser();
+        readonly IParser skillParser = new BattleSkillParser();
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             // don't need dot at the end of line

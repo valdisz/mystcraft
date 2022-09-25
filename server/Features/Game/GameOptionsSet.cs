@@ -7,7 +7,7 @@ using advisor.Schema;
 using MediatR;
 
 public record GameOptionsSet(long GameId, GameOptions Options) : IRequest<GameOptionsSetResult>;
-public record GameOptionsSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GameOptionsSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptionsSetResult> {
     public GameOptionsSetHandler(IUnitOfWork unit, IMediator mediator) {
@@ -28,7 +28,7 @@ public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptions
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+        await mediator.Send(new Reconcile(game.Id), cancellationToken);
 
         return new GameOptionsSetResult(true, Game: game);
     }

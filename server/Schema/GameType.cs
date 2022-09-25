@@ -34,6 +34,12 @@
                 .SingleOrDefaultAsync(x => x.GameId == game.Id && x.UserId == currentUserId);
         }
 
+        public IOrderedQueryable<DbTurn> Turns(Database db, [Parent] DbGame game) {
+            return db.Turns
+                .InGame(game)
+                .OrderBy(x => x.Number);
+        }
+
         // public Task<DbAlliance> Alliance(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
         //     return db.Alliances
         //         .Include(x => x.Members)

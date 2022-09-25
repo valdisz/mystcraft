@@ -3,8 +3,8 @@ namespace advisor
     // Sandlings (384) attacks Mystic Masons (15876) in desert (50,28) in Feapi'iss!
     // Unit (127) attempts to assassinate Sneaky Git (8720) in mountain (49,39) in Swerthenchi!
     public class BattleHeadlineParser : BaseParser {
-        readonly IReportParser unitName = new UnitNameParser();
-        readonly IReportParser locationParser = new LocationParser(new CoordsParser());
+        readonly IParser unitName = new UnitNameParser();
+        readonly IParser locationParser = new LocationParser(new CoordsParser());
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var h = p.BeforeBackwards("!");

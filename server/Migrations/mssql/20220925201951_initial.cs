@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace advisor.Migrations.pgsql
+namespace advisor.Migrations.mssql
 {
     public partial class initial : Migration
     {
@@ -15,10 +14,10 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Contents = table.Column<byte[]>(type: "bytea", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Contents = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,12 +29,12 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Email = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    Salt = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
-                    Algorithm = table.Column<string>(type: "text", nullable: false),
-                    Digest = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    Roles = table.Column<string>(type: "jsonb", nullable: true)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Email = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Salt = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
+                    Algorithm = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Digest = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    Roles = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -47,16 +46,16 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     EngineId = table.Column<long>(type: "bigint", nullable: true),
-                    Options = table.Column<string>(type: "jsonb", nullable: false),
-                    Ruleset = table.Column<string>(type: "text", nullable: false),
-                    LastTurnNumber = table.Column<int>(type: "integer", nullable: true),
-                    NextTurnNumber = table.Column<int>(type: "integer", nullable: true)
+                    Options = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ruleset = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastTurnNumber = table.Column<int>(type: "int", nullable: true),
+                    NextTurnNumber = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -73,9 +72,9 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -93,15 +92,15 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<long>(type: "bigint", nullable: true),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    LastTurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    NextTurnNumber = table.Column<int>(type: "integer", nullable: true),
-                    Password = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    IsQuit = table.Column<bool>(type: "boolean", nullable: false)
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    LastTurnNumber = table.Column<int>(type: "int", nullable: true),
+                    NextTurnNumber = table.Column<int>(type: "int", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    IsQuit = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -124,11 +123,11 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    Password = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -152,10 +151,10 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     GameId = table.Column<long>(type: "bigint", nullable: false),
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    PlayerData = table.Column<byte[]>(type: "bytea", nullable: true),
-                    GameData = table.Column<byte[]>(type: "bytea", nullable: true)
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    State = table.Column<int>(type: "int", nullable: false),
+                    PlayerData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    GameData = table.Column<byte[]>(type: "varbinary(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -174,10 +173,10 @@ namespace advisor.Migrations.pgsql
                 {
                     AllianceId = table.Column<long>(type: "bigint", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    ShareMap = table.Column<bool>(type: "boolean", nullable: false),
-                    TeachMages = table.Column<bool>(type: "boolean", nullable: false),
-                    Owner = table.Column<bool>(type: "boolean", nullable: false),
-                    CanInvite = table.Column<bool>(type: "boolean", nullable: false)
+                    ShareMap = table.Column<bool>(type: "bit", nullable: false),
+                    TeachMages = table.Column<bool>(type: "bit", nullable: false),
+                    Owner = table.Column<bool>(type: "bit", nullable: false),
+                    CanInvite = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -201,15 +200,23 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    Ready = table.Column<bool>(type: "boolean", nullable: false),
-                    OrdersSubmitted = table.Column<bool>(type: "boolean", nullable: false),
-                    TimesSubmitted = table.Column<bool>(type: "boolean", nullable: false)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    GameId = table.Column<long>(type: "bigint", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ReadyAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    OrdersSubmittedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    TimesSubmittedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsProcessed = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlayerTurns", x => new { x.PlayerId, x.TurnNumber });
+                    table.ForeignKey(
+                        name: "FK_PlayerTurns_Games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PlayerTurns_Players_PlayerId",
                         column: x => x.PlayerId,
@@ -223,12 +230,12 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: true),
-                    Type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false)
+                    Type = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -251,22 +258,28 @@ namespace advisor.Migrations.pgsql
                 name: "Reports",
                 columns: table => new
                 {
+                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    FactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    Data = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Json = table.Column<byte[]>(type: "bytea", nullable: true),
-                    Error = table.Column<string>(type: "text", nullable: true),
-                    Parsed = table.Column<bool>(type: "boolean", nullable: false),
-                    Imported = table.Column<bool>(type: "boolean", nullable: false)
+                    FactionNumber = table.Column<int>(type: "int", nullable: false),
+                    Data = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    Json = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    Error = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsMerged = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Reports", x => new { x.GameId, x.TurnNumber, x.FactionNumber });
+                    table.PrimaryKey("PK_Reports", x => new { x.PlayerId, x.TurnNumber });
                     table.ForeignKey(
                         name: "FK_Reports_Games_GameId",
                         column: x => x.GameId,
                         principalTable: "Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reports_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -281,12 +294,12 @@ namespace advisor.Migrations.pgsql
                 name: "AditionalReports",
                 columns: table => new
                 {
-                    FactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    FactionNumber = table.Column<int>(type: "int", nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Source = table.Column<string>(type: "text", nullable: false),
-                    Json = table.Column<string>(type: "text", nullable: true)
+                    FactionName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Source = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Json = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -310,20 +323,20 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
-                    Z = table.Column<int>(type: "integer", nullable: false),
-                    Label = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Province = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Terrain = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Attacker_Number = table.Column<int>(type: "integer", nullable: false),
-                    Attacker_Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Defender_Number = table.Column<int>(type: "integer", nullable: false),
-                    Defender_Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Battle = table.Column<string>(type: "jsonb", nullable: false)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    X = table.Column<int>(type: "int", nullable: false),
+                    Y = table.Column<int>(type: "int", nullable: false),
+                    Z = table.Column<int>(type: "int", nullable: false),
+                    Label = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Province = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Terrain = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Attacker_Number = table.Column<int>(type: "int", nullable: false),
+                    Attacker_Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Defender_Number = table.Column<int>(type: "int", nullable: false),
+                    Defender_Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Battle = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -341,10 +354,10 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    DefaultAttitude = table.Column<string>(type: "text", nullable: true)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    DefaultAttitude = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -362,9 +375,9 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    UnitNumber = table.Column<int>(type: "integer", nullable: false),
-                    Orders = table.Column<string>(type: "text", nullable: true)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    UnitNumber = table.Column<int>(type: "int", nullable: false),
+                    Orders = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -387,26 +400,26 @@ namespace advisor.Migrations.pgsql
                 name: "Regions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
-                    Z = table.Column<int>(type: "integer", nullable: false),
-                    Explored = table.Column<bool>(type: "boolean", nullable: false),
-                    LastVisitedAt = table.Column<int>(type: "integer", nullable: true),
-                    Label = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Province = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Terrain = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Settlement_Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    Settlement_Size = table.Column<string>(type: "text", nullable: true),
-                    Population = table.Column<int>(type: "integer", nullable: false),
-                    Race = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    Entertainment = table.Column<int>(type: "integer", nullable: false),
-                    Tax = table.Column<int>(type: "integer", nullable: false),
-                    Wages = table.Column<double>(type: "double precision", nullable: false),
-                    TotalWages = table.Column<int>(type: "integer", nullable: false),
-                    Gate = table.Column<int>(type: "integer", nullable: true)
+                    X = table.Column<int>(type: "int", nullable: false),
+                    Y = table.Column<int>(type: "int", nullable: false),
+                    Z = table.Column<int>(type: "int", nullable: false),
+                    Explored = table.Column<bool>(type: "bit", nullable: false),
+                    LastVisitedAt = table.Column<int>(type: "int", nullable: true),
+                    Label = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Province = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Terrain = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Settlement_Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Settlement_Size = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Population = table.Column<int>(type: "int", nullable: false),
+                    Race = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Entertainment = table.Column<int>(type: "int", nullable: false),
+                    Tax = table.Column<int>(type: "int", nullable: false),
+                    Wages = table.Column<double>(type: "float", nullable: false),
+                    TotalWages = table.Column<int>(type: "int", nullable: false),
+                    Gate = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -424,10 +437,10 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    FactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    TargetFactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    Stance = table.Column<string>(type: "text", nullable: false)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    FactionNumber = table.Column<int>(type: "int", nullable: false),
+                    TargetFactionNumber = table.Column<int>(type: "int", nullable: false),
+                    Stance = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -451,18 +464,18 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    OriginRegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    TargetRegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Direction = table.Column<string>(type: "text", nullable: false),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
-                    Z = table.Column<int>(type: "integer", nullable: false),
-                    Label = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Province = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Terrain = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Settlement_Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    Settlement_Size = table.Column<string>(type: "text", nullable: true)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    OriginRegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    TargetRegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    Direction = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    X = table.Column<int>(type: "int", nullable: false),
+                    Y = table.Column<int>(type: "int", nullable: false),
+                    Z = table.Column<int>(type: "int", nullable: false),
+                    Label = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Province = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Terrain = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Settlement_Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Settlement_Size = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -491,13 +504,13 @@ namespace advisor.Migrations.pgsql
                 name: "Markets",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Market = table.Column<string>(type: "text", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    Market = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<int>(type: "integer", nullable: false)
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -520,11 +533,11 @@ namespace advisor.Migrations.pgsql
                 name: "Production",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false)
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -544,28 +557,33 @@ namespace advisor.Migrations.pgsql
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stats",
+                name: "Statistics",
                 columns: table => new
                 {
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Income_Work = table.Column<int>(type: "integer", nullable: true),
-                    Income_Tax = table.Column<int>(type: "integer", nullable: true),
-                    Income_Pillage = table.Column<int>(type: "integer", nullable: true),
-                    Income_Trade = table.Column<int>(type: "integer", nullable: true)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    Income_Work = table.Column<int>(type: "int", nullable: true),
+                    Income_Entertain = table.Column<int>(type: "int", nullable: true),
+                    Income_Tax = table.Column<int>(type: "int", nullable: true),
+                    Income_Pillage = table.Column<int>(type: "int", nullable: true),
+                    Income_Trade = table.Column<int>(type: "int", nullable: true),
+                    Income_Claim = table.Column<int>(type: "int", nullable: true),
+                    Expenses_Trade = table.Column<int>(type: "int", nullable: true),
+                    Expenses_Study = table.Column<int>(type: "int", nullable: true),
+                    Expenses_Consume = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stats", x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+                    table.PrimaryKey("PK_Statistics", x => new { x.PlayerId, x.TurnNumber, x.RegionId });
                     table.ForeignKey(
-                        name: "FK_Stats_PlayerTurns_PlayerId_TurnNumber",
+                        name: "FK_Statistics_PlayerTurns_PlayerId_TurnNumber",
                         columns: x => new { x.PlayerId, x.TurnNumber },
                         principalTable: "PlayerTurns",
                         principalColumns: new[] { "PlayerId", "TurnNumber" },
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Stats_Regions_PlayerId_TurnNumber_RegionId",
+                        name: "FK_Statistics_Regions_PlayerId_TurnNumber_RegionId",
                         columns: x => new { x.PlayerId, x.TurnNumber, x.RegionId },
                         principalTable: "Regions",
                         principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
@@ -576,27 +594,27 @@ namespace advisor.Migrations.pgsql
                 name: "Structures",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
-                    Z = table.Column<int>(type: "integer", nullable: false),
-                    Sequence = table.Column<int>(type: "integer", nullable: false),
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Description = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    Contents = table.Column<string>(type: "jsonb", nullable: true),
-                    Flags = table.Column<string>(type: "jsonb", nullable: true),
-                    SailDirections = table.Column<string>(type: "jsonb", nullable: true),
-                    Speed = table.Column<int>(type: "integer", nullable: true),
-                    Needs = table.Column<int>(type: "integer", nullable: true),
-                    Load_Used = table.Column<int>(type: "integer", nullable: true),
-                    Load_Max = table.Column<int>(type: "integer", nullable: true),
-                    Sailors_Current = table.Column<int>(type: "integer", nullable: true),
-                    Sailors_Required = table.Column<int>(type: "integer", nullable: true)
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: true),
+                    X = table.Column<int>(type: "int", nullable: false),
+                    Y = table.Column<int>(type: "int", nullable: false),
+                    Z = table.Column<int>(type: "int", nullable: false),
+                    Sequence = table.Column<int>(type: "int", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Contents = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Flags = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SailDirections = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Speed = table.Column<int>(type: "int", nullable: true),
+                    Needs = table.Column<int>(type: "int", nullable: true),
+                    Load_Used = table.Column<int>(type: "int", nullable: true),
+                    Load_Max = table.Column<int>(type: "int", nullable: true),
+                    Sailors_Current = table.Column<int>(type: "int", nullable: true),
+                    Sailors_Required = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -615,28 +633,31 @@ namespace advisor.Migrations.pgsql
                 });
 
             migrationBuilder.CreateTable(
-                name: "StatItems",
+                name: "StatisticsItems",
                 columns: table => new
                 {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false)
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StatItems", x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Code });
+                    table.PrimaryKey("PK_StatisticsItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StatItems_Regions_PlayerId_TurnNumber_RegionId",
+                        name: "FK_StatisticsItems_Regions_PlayerId_TurnNumber_RegionId",
                         columns: x => new { x.PlayerId, x.TurnNumber, x.RegionId },
                         principalTable: "Regions",
                         principalColumns: new[] { "PlayerId", "TurnNumber", "Id" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StatItems_Stats_PlayerId_TurnNumber_RegionId",
+                        name: "FK_StatisticsItems_Statistics_PlayerId_TurnNumber_RegionId",
                         columns: x => new { x.PlayerId, x.TurnNumber, x.RegionId },
-                        principalTable: "Stats",
+                        principalTable: "Statistics",
                         principalColumns: new[] { "PlayerId", "TurnNumber", "RegionId" },
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -645,31 +666,31 @@ namespace advisor.Migrations.pgsql
                 name: "Units",
                 columns: table => new
                 {
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    X = table.Column<int>(type: "integer", nullable: false),
-                    Y = table.Column<int>(type: "integer", nullable: false),
-                    Z = table.Column<int>(type: "integer", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
-                    StrcutureId = table.Column<string>(type: "character varying(24)", maxLength: 24, nullable: true),
-                    StructureNumber = table.Column<int>(type: "integer", nullable: true),
-                    FactionNumber = table.Column<int>(type: "integer", nullable: true),
-                    Sequence = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Description = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    OnGuard = table.Column<bool>(type: "boolean", nullable: false),
-                    Flags = table.Column<string>(type: "jsonb", nullable: true),
-                    Weight = table.Column<int>(type: "integer", nullable: true),
-                    Capacity_Flying = table.Column<int>(type: "integer", nullable: true),
-                    Capacity_Riding = table.Column<int>(type: "integer", nullable: true),
-                    Capacity_Walking = table.Column<int>(type: "integer", nullable: true),
-                    Capacity_Swimming = table.Column<int>(type: "integer", nullable: true),
-                    Skills = table.Column<string>(type: "jsonb", nullable: true),
-                    CanStudy = table.Column<string>(type: "jsonb", nullable: true),
-                    ReadyItem = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
-                    CombatSpell = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
-                    Orders = table.Column<string>(type: "text", nullable: true)
+                    X = table.Column<int>(type: "int", nullable: false),
+                    Y = table.Column<int>(type: "int", nullable: false),
+                    Z = table.Column<int>(type: "int", nullable: false),
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: true),
+                    StrcutureId = table.Column<string>(type: "nvarchar(24)", maxLength: 24, nullable: true),
+                    StructureNumber = table.Column<int>(type: "int", nullable: true),
+                    FactionNumber = table.Column<int>(type: "int", nullable: true),
+                    Sequence = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    OnGuard = table.Column<bool>(type: "bit", nullable: false),
+                    Flags = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Weight = table.Column<int>(type: "int", nullable: true),
+                    Capacity_Flying = table.Column<int>(type: "int", nullable: true),
+                    Capacity_Riding = table.Column<int>(type: "int", nullable: true),
+                    Capacity_Walking = table.Column<int>(type: "int", nullable: true),
+                    Capacity_Swimming = table.Column<int>(type: "int", nullable: true),
+                    Skills = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CanStudy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReadyItem = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: true),
+                    CombatSpell = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: true),
+                    Orders = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -702,21 +723,21 @@ namespace advisor.Migrations.pgsql
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
-                    UnitNumber = table.Column<int>(type: "integer", nullable: true),
-                    UnitName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    MissingUnitNumber = table.Column<int>(type: "integer", nullable: true),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Category = table.Column<string>(type: "text", nullable: false),
-                    Message = table.Column<string>(type: "text", nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: true),
-                    ItemCode = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
-                    ItemName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    ItemPrice = table.Column<int>(type: "integer", nullable: true)
+                    FactionNumber = table.Column<int>(type: "int", nullable: false),
+                    RegionId = table.Column<string>(type: "nvarchar(14)", maxLength: 14, nullable: true),
+                    UnitNumber = table.Column<int>(type: "int", nullable: true),
+                    UnitName = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: true),
+                    MissingUnitNumber = table.Column<int>(type: "int", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: true),
+                    ItemCode = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: true),
+                    ItemName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    ItemPrice = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -749,14 +770,14 @@ namespace advisor.Migrations.pgsql
                 name: "Items",
                 columns: table => new
                 {
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    UnitNumber = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
-                    Illusion = table.Column<bool>(type: "boolean", nullable: false),
-                    Unfinished = table.Column<bool>(type: "boolean", nullable: false),
-                    Props = table.Column<string>(type: "text", nullable: true)
+                    UnitNumber = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<int>(type: "int", nullable: false),
+                    Illusion = table.Column<bool>(type: "bit", nullable: false),
+                    Unfinished = table.Column<bool>(type: "bit", nullable: false),
+                    Props = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -779,13 +800,13 @@ namespace advisor.Migrations.pgsql
                 name: "StudyPlans",
                 columns: table => new
                 {
-                    UnitNumber = table.Column<int>(type: "integer", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    UnitNumber = table.Column<int>(type: "int", nullable: false),
+                    TurnNumber = table.Column<int>(type: "int", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    Target_Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
-                    Target_Level = table.Column<int>(type: "integer", nullable: true),
-                    Study = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    Teach = table.Column<string>(type: "jsonb", nullable: true)
+                    Target_Code = table.Column<string>(type: "nvarchar(8)", maxLength: 8, nullable: true),
+                    Target_Level = table.Column<int>(type: "int", nullable: true),
+                    Study = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    Teach = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -872,6 +893,11 @@ namespace advisor.Migrations.pgsql
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlayerTurns_GameId",
+                table: "PlayerTurns",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Registrations_GameId",
                 table: "Registrations",
                 column: "GameId");
@@ -880,6 +906,16 @@ namespace advisor.Migrations.pgsql
                 name: "IX_Registrations_UserId",
                 table: "Registrations",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reports_GameId_TurnNumber",
+                table: "Reports",
+                columns: new[] { "GameId", "TurnNumber" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StatisticsItems_PlayerId_TurnNumber_RegionId",
+                table: "StatisticsItems",
+                columns: new[] { "PlayerId", "TurnNumber", "RegionId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Structures_PlayerId_TurnNumber_RegionId",
@@ -950,7 +986,7 @@ namespace advisor.Migrations.pgsql
                 name: "Reports");
 
             migrationBuilder.DropTable(
-                name: "StatItems");
+                name: "StatisticsItems");
 
             migrationBuilder.DropTable(
                 name: "StudyPlans");
@@ -962,7 +998,7 @@ namespace advisor.Migrations.pgsql
                 name: "Turns");
 
             migrationBuilder.DropTable(
-                name: "Stats");
+                name: "Statistics");
 
             migrationBuilder.DropTable(
                 name: "Units");

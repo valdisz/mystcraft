@@ -14,7 +14,9 @@ public interface ITurnsRepository {
 
     Task<DbTurn> AddTurnAsync(int turnNumber, CancellationToken cancellation = default);
 
-    Task<DbReport> AddReportAsync(int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation = default);
+    Task<DbReport> AddReportAsync(long playerId, int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation = default);
+
+    IQueryable<DbReport> GetReports(int turnNumber);
 }
 
 public class TurnsRepository : ITurnsRepository {
@@ -42,7 +44,7 @@ public class TurnsRepository : ITurnsRepository {
         var turn = new DbTurn {
             GameId = game.Id,
             Number = turnNumber,
-            Status = TurnStatus.PENDING
+            State = TurnState.PENDING
         };
 
         await db.Turns.AddAsync(turn, cancellation);
@@ -50,18 +52,20 @@ public class TurnsRepository : ITurnsRepository {
         return turn;
     }
 
-    public async Task<DbReport> AddReportAsync(int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation) {
+    public async Task<DbReport> AddReportAsync(long playerId, int factionNumber, int turnNumber, byte[] data, CancellationToken cancellation) {
         var report = new DbReport {
-            GameId = game.Id,
-            Data = data,
-            FactionNumber = factionNumber,
+            PlayerId = playerId,
             TurnNumber = turnNumber,
-            Parsed = false,
-            Imported = false
+            GameId = game.Id,
+            FactionNumber = factionNumber,
+            Data = data,
         };
 
         await db.Reports.AddAsync(report, cancellation);
 
         return report;
     }
+
+    public IQueryable<DbReport> GetReports(int turnNumber)
+        => db.Reports.InGame(game).Where(x => x.TurnNumber == turnNumber);
 }

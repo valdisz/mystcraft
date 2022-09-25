@@ -8,4 +8,6 @@ public interface IMutationResult {
     string Error { get; }
 }
 
-public record MutationResult<T>(bool IsSuccess, T data, string Error) : IMutationResult;
+public abstract record MutationResult(bool IsSuccess, string Error = null) : IMutationResult {
+    public static implicit operator bool(MutationResult result) => result.IsSuccess;
+}

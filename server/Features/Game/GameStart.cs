@@ -8,7 +8,7 @@ using advisor.Persistence;
 
 public record GameStart(long GameId): IRequest<GameStartResult>;
 
-public record GameStartResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GameStartResult(bool IsSuccess, string Error = null, DbGame Game = null, string JobId = null) : MutationResult(IsSuccess, Error);
 
 public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
     public GameStartHandler(IUnitOfWork unit, IMediator mediator) {
@@ -22,28 +22,33 @@ public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
     public async Task<GameStartResult> Handle(GameStart request, CancellationToken cancellationToken) {
         var gamesRepo = unit.Games;
 
+        await unit.BeginTransactionAsync(cancellationToken);
+
         var game = await gamesRepo.StartAsync(request.GameId, cancellationToken);
         if (game == null) {
             return new GameStartResult(false, "Game not found.");
         }
 
-        await unit.BeginTransactionAsync(cancellationToken);
-
         if (game.Status != GameStatus.RUNNING) {
             return new GameStartResult(false, "Game cannot be started.");
         }
-        else {
-            if (game.LastTurnNumber == null && game.Type == Persistence.GameType.REMOTE) {
-                await mediator.Send(new GameTurnRun(game.Id), cancellationToken);
+
+        string jobId = null;
+        if (game.LastTurnNumber == null && game.Type == Persistence.GameType.REMOTE) {
+            var result = await mediator.Send(new GameNextTurn(game.Id), cancellationToken);
+            if (!result.IsSuccess) {
+                return new GameStartResult(result.IsSuccess, result.Error);
             }
+
+            jobId = result.JobId;
         }
 
-        await unit.SaveChangesAsync(cancellationToken);
-
-        if (await unit.CommitTransactionAsync(cancellationToken)) {
-            await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+        if (!await unit.CommitTransactionAsync(cancellationToken)) {
+            return new GameStartResult(false);
         }
 
-        return new GameStartResult(true, Game: game);
+        await mediator.Send(new Reconcile(game.Id), cancellationToken);
+
+        return new GameStartResult(true, Game: game, JobId: jobId);
     }
 }

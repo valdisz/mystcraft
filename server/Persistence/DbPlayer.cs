@@ -37,10 +37,13 @@ namespace advisor.Persistence
         public DbGame Game { get;set; }
 
         [GraphQLIgnore]
+        public List<DbReport> Reports { get; set; } = new List<DbReport>();
+
+        [GraphQLIgnore]
         public List<DbPlayerTurn> Turns { get; set; } = new List<DbPlayerTurn>();
 
         [GraphQLIgnore]
-        public List<DbAditionalReport> Reports { get; set; } = new List<DbAditionalReport>();
+        public List<DbAditionalReport> AdditionalReports { get; set; } = new List<DbAditionalReport>();
 
         [GraphQLIgnore]
         public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();

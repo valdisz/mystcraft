@@ -1,9 +1,9 @@
 namespace advisor {
-    public interface IReportParser {
+    public interface IParser {
         Maybe<IReportNode> Parse(TextParser p);
     }
 
-    public abstract class BaseParser : IReportParser {
+    public abstract class BaseParser : IParser {
         public Maybe<IReportNode> Parse(TextParser p) => p.Try(Execute);
 
         protected abstract Maybe<IReportNode> Execute(TextParser p);
@@ -21,7 +21,7 @@ namespace advisor {
     }
 
     public static class ReportParserExtensions {
-        public static Maybe<IReportNode> ParseMaybe(this IReportParser parser, Maybe<TextParser> p)
+        public static Maybe<IReportNode> ParseMaybe(this IParser parser, Maybe<TextParser> p)
             => p ? parser.Parse(p.Value) : p.Convert<IReportNode>();
     }
 }

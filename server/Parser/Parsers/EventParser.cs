@@ -72,10 +72,21 @@ namespace advisor {
                         break;
                     }
 
+                    // Miners (955): Buys 4 orcs [ORC] at $35 each.
+                    case "buys": {
+                        category = EventCategory.Buy;
+                        item = itemParser.Parse(msg.BeforeBackwards(" each.").SkipWhitespacesBackwards());
+                        break;
+                    }
+
                     case "earns": {
-                        category = EventCategory.Work;
                         amount = msg.Integer();
                         location = locationParser.Parse(msg.After(" in ").SkipWhitespaces().BeforeBackwards("."));
+
+                        category = msg.Contains("entertaining")
+                            ? EventCategory.Entertain
+                            : EventCategory.Work;
+
                         break;
                     }
 
@@ -103,6 +114,12 @@ namespace advisor {
                         }
                         break;
                     }
+
+                    // Scout (1464): Gives 10 silver [SILV] to Imperial Guard (1744).
+                    // case "gives": {
+                    //     /* item */ msg.Before(" to "); /* unit */
+                    //     break;
+                    // }
 
                     default:
                         // other event

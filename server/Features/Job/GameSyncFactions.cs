@@ -12,7 +12,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 public record GameSyncFactions(long GameId) : IRequest<GameSyncFactionsResult>;
-public record GameSyncFactionsResult(bool IsSuccess, string Error = null, DbGame Game = null) : IMutationResult;
+public record GameSyncFactionsResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameSyncFactionsJob {
     public GameSyncFactionsJob(IMediator mediator) {
@@ -61,6 +61,8 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
 
         await unit.BeginTransactionAsync(cancellationToken);
 
+        var now = DateTimeOffset.UtcNow;
+
         // new and updated factions
         var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
         await foreach (var faction in remote.ListFactionsAsync(cancellationToken)) {
@@ -73,16 +75,16 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
                 player = await playersRepo.AddRemoteAsync(faction.Number.Value, faction.Name, cancellationToken);
             }
 
-            DbPlayerTurn turn = await playersRepo.GetPlayerTurnAsync(player.Id, player.NextTurnNumber.Value, cancellationToken);
+            if (player.NextTurnNumber != null) {
+                DbPlayerTurn turn = await playersRepo.GetPlayerTurnAsync(player.Id, player.NextTurnNumber.Value, cancellationToken);
 
-            var now = DateTimeOffset.UtcNow;
+                if (faction.OrdersSubmitted && !turn.IsOrdersSubmitted) {
+                    turn.OrdersSubmittedAt = now;
+                }
 
-            if (faction.OrdersSubmitted && !turn.IsOrdersSubmitted) {
-                turn.OrdersSubmittedAt = now;
-            }
-
-            if (faction.TimesSubmitted && !turn.IsTimesSubmitted) {
-                turn.TimesSubmittedAt = now;
+                if (faction.TimesSubmitted && !turn.IsTimesSubmitted) {
+                    turn.TimesSubmittedAt = now;
+                }
             }
         }
 

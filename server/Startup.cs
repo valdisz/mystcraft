@@ -35,6 +35,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using advisor.TurnProcessing;
+using System.Threading.Tasks;
+using System.Threading;
+using Microsoft.Extensions.Logging;
 
 public class Startup {
     public Startup(IConfiguration configuration, IWebHostEnvironment env) {
@@ -257,6 +261,8 @@ public class Startup {
                 .AddType<PlayerResolvers>()
             .AddType<AditionalReportType>()
             .AddType<PlayerTurnType>()
+                .AddType<PlayerTurnResolvers>()
+            .AddType<TurnType>()
                 .AddType<TurnResolvers>()
             .AddType<RegionType>()
                 .AddType<RegionResolvers>()
@@ -267,7 +273,6 @@ public class Startup {
             .AddType<FactionType>()
                 .AddType<FactionResolvers>()
             .AddType<advisor.Schema.EventType>()
-            .AddType<MutationResult<string>>()
             .AddType<AllianceType>()
             .AddType<AllianceMemberType>()
                 .AddType<AllianceMemberResolvers>()
@@ -275,7 +280,7 @@ public class Startup {
             .BindRuntimeType<Item, ItemType>()
             .BindRuntimeType<DbUnitItem, ItemType>()
             .BindRuntimeType<DbProductionItem, ItemType>()
-            .BindRuntimeType<DbStatItem, ItemType>()
+            .BindRuntimeType<DbStatisticsItem, ItemType>()
             .BindRuntimeType<JItem, ItemType>()
             .BindRuntimeType<DbSkill, SkillType>()
             .BindRuntimeType<JSkill, SkillType>()
@@ -284,9 +289,12 @@ public class Startup {
         services
             .AddSingleton<AccessControl>()
             .AddScoped<IAuthorizationHandler, OwnPlayerAuthorizationHandler>()
-            .AddMediatR(typeof(Startup))
             .AddMvcCore()
                 .AddDataAnnotations();
+
+        services
+            .AddMediatR(typeof(Startup))
+            .AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
         services
             .AddMemoryCache();
@@ -294,8 +302,11 @@ public class Startup {
         // FIXME
         // services.AddTransient<TurnReProcessJob>();
 
-        services.AddTransient<ReconcilationJob>();
+        services.AddSingleton<IReportParser, ReportParser>();
+
+        services.AddTransient<ReconcileJob>();
         services.AddTransient<GameSyncFactionsJob>();
+        services.AddTransient<GameNextTurnJob>();
     }
 
     public void Configure(IApplicationBuilder app) {
@@ -328,5 +339,30 @@ public class Startup {
                     }
                 });
             });
+    }
+}
+
+public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse> {
+    public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger) {
+        this.logger = logger;
+    }
+
+    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> logger;
+
+    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next) {
+        var triggerName = typeof(TRequest).Name;
+
+        logger.LogInformation($"Starting [{triggerName}]");
+        try {
+            var response = await next();
+            logger.LogInformation($"Executed [{triggerName}] --> [{typeof(TResponse).Name}]");
+
+            return response;
+        }
+        catch (Exception ex) {
+            logger.LogError(ex, $"Failed [{triggerName}] --> {ex.GetType().Name}");
+
+            throw;
+        }
     }
 }

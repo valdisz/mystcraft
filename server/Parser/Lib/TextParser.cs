@@ -516,10 +516,10 @@ namespace advisor {
         public static Maybe<T> Try<T>(this Maybe<TextParser> p, Func<TextParser, Maybe<T>> parser)
             => p ? Try(p.Value, parser) : p.Convert<T>();
 
-        public static Maybe<IReportNode> Try(this TextParser parser, IReportParser reportParser)
+        public static Maybe<IReportNode> Try(this TextParser parser, IParser reportParser)
             => Try(parser, reportParser.Parse);
 
-        public static Maybe<IReportNode> Try(this Maybe<TextParser> parser, IReportParser reportParser)
+        public static Maybe<IReportNode> Try(this Maybe<TextParser> parser, IParser reportParser)
             => Try(parser, reportParser.Parse);
 
         public static Maybe<T> Try<T>(this TextParser p, Func<TextParser, Maybe<T>> parser) {
@@ -548,7 +548,7 @@ namespace advisor {
             return new Maybe<T>("OneOf: all options does not fit", p.Ln, p.Pos + 1);
         }
 
-        public static Maybe<IReportNode> OneOf(this Maybe<TextParser> p, params IReportParser[] parsers)
+        public static Maybe<IReportNode> OneOf(this Maybe<TextParser> p, params IParser[] parsers)
             => p ? OneOf(p.Value, parsers) : p.Convert<IReportNode>();
 
         public static Maybe<TextParser> OneOf(this TextParser p, params string[] str) {
@@ -563,7 +563,7 @@ namespace advisor {
         public static Maybe<TextParser> OneOf(this Maybe<TextParser> p, params string[] str)
             => p ? OneOf(p.Value, str) : p.Convert<TextParser>();
 
-        public static Maybe<IReportNode> OneOf(this TextParser p, params IReportParser[] parsers) {
+        public static Maybe<IReportNode> OneOf(this TextParser p, params IParser[] parsers) {
             for (var i = 0; i < parsers.Length; i++) {
                 var result = p.Try(parsers[i]);
                 if (result) return result;
@@ -598,10 +598,10 @@ namespace advisor {
         public static Maybe<T[]> List<T>(this Maybe<TextParser> p, ReadOnlySpan<char> separator, Func<TextParser, Maybe<T>> itemParser)
             => p ? List(p.Value, separator, itemParser) : p.Convert<T[]>();
 
-        public static Maybe<IReportNode[]> List(this TextParser p, ReadOnlySpan<char> separator, IReportParser itemParser)
+        public static Maybe<IReportNode[]> List(this TextParser p, ReadOnlySpan<char> separator, IParser itemParser)
             => List(p, separator, x => itemParser.Parse(x));
 
-        public static Maybe<IReportNode[]> List(this Maybe<TextParser> p, ReadOnlySpan<char> separator, IReportParser itemParser)
+        public static Maybe<IReportNode[]> List(this Maybe<TextParser> p, ReadOnlySpan<char> separator, IParser itemParser)
             => p ? List(p.Value, separator, itemParser) : p.Convert<IReportNode[]>();
 
         public static Maybe<T> RecoverWith<T>(this Maybe<T> p, Func<T> onFailure) => p ? p : new Maybe<T>(onFailure());

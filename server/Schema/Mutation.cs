@@ -76,6 +76,11 @@ public class Mutation {
         return mediator.Send(new GameComplete(gameId));
     }
 
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<GameNextTurnResult> GameNextTurn(IMediator mediator, [ID("Game")] long gameId) {
+        return mediator.Send(new GameNextTurn(gameId));
+    }
+
     // FIXME
     // [Authorize(Policy = Policies.GameMasters)]
     // public Task<List<DbGame>> GameDelete(IMediator mediator, [ID("Game")] long gameId) {

@@ -3,8 +3,8 @@ namespace advisor
     // sailors (10990) is assassinated in jungle (39,35) in Su'agie!
     // Scout (83) is assassinated in mountain (49,39) in Swerthenchi!
     public class AssassinationParser : BaseParser {
-        readonly IReportParser unitName = new UnitNameParser();
-        readonly IReportParser locationParser = new LocationParser(new CoordsParser());
+        readonly IParser unitName = new UnitNameParser();
+        readonly IParser locationParser = new LocationParser(new CoordsParser());
 
         protected override Maybe<IReportNode> Execute(TextParser p) {
             var h = p.BeforeBackwards("!");

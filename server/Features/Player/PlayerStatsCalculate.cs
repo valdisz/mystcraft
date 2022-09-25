@@ -1,4 +1,3 @@
-// FIXME
 // namespace advisor.Features;
 
 // using System.Collections.Generic;
@@ -44,13 +43,13 @@
 //                 regionStat.TurnNumber = turnNumber;
 //                 regionStat.RegionId = regionId;
 
-//                 foreach (var p in regionStat.Production) {
+//                 foreach (var p in regionStat.Produced) {
 //                     p.PlayerId = request.PlayerId;
 //                     p.TurnNumber = turnNumber;
 //                     p.RegionId = regionId;
 //                 }
 
-//                 await db.Stats.AddAsync(regionStat);
+//                 await db.Statistics.AddAsync(regionStat);
 //             }
 //         }
 
@@ -60,13 +59,13 @@
 //     }
 
 //     private Task DeleteStatItems(long playerId, int turnNumber) {
-//         var entity = db.Model.FindEntityType(typeof(DbStatItem));
+//         var entity = db.Model.FindEntityType(typeof(DbStatisticsItem));
 
 //         var table = entity.GetTableName();
 //         var schema = entity.GetSchema();
 
-//         var playerIdColumn = entity.FindProperty(nameof(DbStatItem.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
-//         var turnNumberColumn = entity.FindProperty(nameof(DbStatItem.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
+//         var playerIdColumn = entity.FindProperty(nameof(DbStatisticsItem.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
+//         var turnNumberColumn = entity.FindProperty(nameof(DbStatisticsItem.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
 
 //         string sql;
 //         switch (db.Provider) {
@@ -82,13 +81,13 @@
 //     }
 
 //     private Task DeleteStats(long playerId, int turnNumber) {
-//         var entity = db.Model.FindEntityType(typeof(DbStat));
+//         var entity = db.Model.FindEntityType(typeof(DbStatistics));
 
 //         var table = entity.GetTableName();
 //         var schema = entity.GetSchema();
 
-//         var playerIdColumn = entity.FindProperty(nameof(DbStat.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
-//         var turnNumberColumn = entity.FindProperty(nameof(DbStat.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
+//         var playerIdColumn = entity.FindProperty(nameof(DbStatistics.PlayerId)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
+//         var turnNumberColumn = entity.FindProperty(nameof(DbStatistics.TurnNumber)).GetColumnName(StoreObjectIdentifier.Table(table, schema));
 
 //         string sql;
 //         switch (db.Provider) {
@@ -103,7 +102,7 @@
 //         return db.Database.ExecuteSqlRawAsync(sql);
 //     }
 
-//     public static void SyncProduction(ICollection<DbStatItem> production, IEnumerable<DbStatItem> update) {
+//     public static void SyncProduction(ICollection<DbStatisticsItem> production, IEnumerable<DbStatisticsItem> update) {
 //         var dest = production
 //             .ToDictionary(x => x.Code);
 
@@ -123,9 +122,9 @@
 //         }
 //     }
 
-//     private DbStat Reduce(IEnumerable<DbEvent> events) {
-//         var income = new DbIncomeStats();
-//         var production = new List<DbStatItem>();
+//     private DbStatistics Reduce(IEnumerable<DbEvent> events) {
+//         var income = new DbIncome();
+//         var production = new List<DbStatisticsItem>();
 
 //         foreach (var category in events.GroupBy(x => x.Category)) {
 //             switch (category.Key) {
@@ -148,7 +147,7 @@
 //                 case Model.EventCategory.Produce:
 //                     production.AddRange(category
 //                         .GroupBy(item => item.ItemCode)
-//                         .Select(item => new DbStatItem {
+//                         .Select(item => new DbStatisticsItem {
 //                             Code = item.Key,
 //                             Amount = item.Sum(x => x.Amount ?? 1)
 //                         }));
@@ -156,9 +155,9 @@
 //             }
 //         }
 
-//         return new DbStat {
+//         return new DbStatistics {
 //             Income = income,
-//             Production = production
+//             Produced = production
 //         };
 //     }
 // }

@@ -16,7 +16,7 @@ public interface IGameRepository {
 
     Task<DbGame> CompleateAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> CreateLocalAsync(string name, long engineId, GameOptions options, Stream playerData, Stream gameData, CancellationToken cancellation = default);
-    Task<DbGame> CreateRemoteAsync(string name, string serverAddress, int turnNumber, GameOptions options, CancellationToken cancellation = default);
+    Task<DbGame> CreateRemoteAsync(string name, string serverAddress, GameOptions options, CancellationToken cancellation = default);
     Task<DbGame> PauseAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> StartAsync(long gameId, CancellationToken cancellation = default);
     Task<DbGame> LockAsync(long gameId, CancellationToken cancellation = default);
@@ -70,10 +70,8 @@ public class GameRepository : IGameRepository {
         return game;
     }
 
-    public async Task<DbGame> CreateRemoteAsync(string name, string serverAddress, int turnNumber, GameOptions options, CancellationToken cancellation) {
+    public async Task<DbGame> CreateRemoteAsync(string name, string serverAddress, GameOptions options, CancellationToken cancellation) {
         options.ServerAddress = serverAddress;
-
-        await unit.BeginTransactionAsync(cancellation);
 
         var game = new DbGame {
             Name = name,
@@ -81,21 +79,10 @@ public class GameRepository : IGameRepository {
             Status = GameStatus.NEW,
             CreatedAt = DateTimeOffset.UtcNow,
             Ruleset = await File.ReadAllTextAsync("data/ruleset.yaml"),
-            Options = options,
-            NextTurnNumber = turnNumber
+            Options = options
         };
 
         await db.Games.AddAsync(game, cancellation);
-        await unit.SaveChangesAsync(cancellation);
-
-        ///// seed turn
-
-        await unit.Turns(game).AddTurnAsync(turnNumber, cancellation);
-
-        /////
-
-        await unit.SaveChangesAsync(cancellation);
-        await unit.CommitTransactionAsync(cancellation);
 
         return game;
     }

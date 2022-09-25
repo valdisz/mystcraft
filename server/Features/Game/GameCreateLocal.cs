@@ -9,7 +9,7 @@ using MediatR;
 
 public record GameCreateLocal(string Name, long EngineId, GameOptions Options, Stream PlayerData, Stream GameData) : IRequest<GameCreateLocalResult>;
 
-public record GameCreateLocalResult(DbGame Game, bool IsSuccess, string Error) : IMutationResult;
+public record GameCreateLocalResult(DbGame Game, bool IsSuccess, string Error) : MutationResult(IsSuccess, Error);
 
 public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreateLocalResult> {
     public GameCreateLocalHandler(IUnitOfWork unit, IMediator mediator) {
@@ -34,7 +34,7 @@ public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreat
 
         await unit.SaveChangesAsync(cancellationToken);
 
-        await mediator.Send(new JobReconcile(game.Id), cancellationToken);
+        await mediator.Send(new Reconcile(game.Id), cancellationToken);
 
         return new GameCreateLocalResult(game, true, null);
     }
