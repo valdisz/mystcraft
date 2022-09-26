@@ -245,8 +245,10 @@ export class GameStore {
 
         const turn = turnDetails.data.node
 
-        game.options.map.sort((a, b) => a.level - b.level)
-        const map: WorldLevel[] = game.options.map.map(level => ({
+        const levels = [...game.options.map]
+        levels.sort((a, b) => a.level - b.level)
+
+        const map: WorldLevel[] = levels.map(level => ({
             label: level.label,
             width: level.width,
             height: level.height
