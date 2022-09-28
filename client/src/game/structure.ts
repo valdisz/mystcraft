@@ -11,6 +11,11 @@ export class Structure {
     name: string
     description: string
     type: string
+    needs: number
+
+    get isFinished() {
+        return this.needs === 0
+    }
 
     region: Region
     readonly units: Unit[] = [];
@@ -24,6 +29,7 @@ export class Structure {
         struct.name = src.name
         struct.description = src.description
         struct.type = src.type
+        struct.needs = src.needs || 0
 
         return struct
     }

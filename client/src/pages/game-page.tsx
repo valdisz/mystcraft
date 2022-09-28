@@ -20,6 +20,7 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
 import CloseIcon from '@mui/icons-material/Close'
+import { useTheme } from '@mui/system'
 
 export interface GameMapProps {
     selectedRegion: ICoords | null
@@ -462,24 +463,27 @@ const StructuresContainer = styled(Box)`
     }
 `
 
-const StructuresBody = styled('div')`
-    min-height: 0;
-`
-
-const StructureItem = styled('div')`
-    margin: 0.5rem 1rem;
-`
-
 const StructuresComponent = observer(() => {
     const { game } = useStore()
+    const theme = useTheme()
     return <StructuresContainer>
-        <StructuresBody>
-            {game.structures.map((row) => (
-                <StructureItem key={row.id}>
-                    {row.name} [{row.num}]: {row.type} { row.description ? ';' : null }
-                </StructureItem>
-            ))}
-        </StructuresBody>
+        <Stack gap={2} sx={{ minHeight: 0, mb: 2 }}>
+            {game.structures.map((row) => {
+                return <Box sx={{ px: 2 }} key={row.id}>
+                    <Stack gap={2} direction='row' alignItems='center'>
+                        <Typography variant='h6'>{row.num}</Typography>
+                        <Stack flex={1}>
+                            <Typography variant='caption'>{row.type}</Typography>
+                            <Stack gap={2} direction='row' alignItems='center' justifyContent='space-between'>
+                                <Typography fontWeight={600} color={row.isFinished ? 'WindowText' : theme.palette.warning[theme.palette.mode]}>{row.name}</Typography>
+                                { !row.isFinished && <Chip size='small' label={`needs ${row.needs}`} color='warning' /> }
+                            </Stack>
+                            { row.description&& <Typography color='GrayText' variant='body2'>{row.description}</Typography> }
+                        </Stack>
+                    </Stack>
+                </Box>
+            })}
+        </Stack>
     </StructuresContainer>
 })
 
