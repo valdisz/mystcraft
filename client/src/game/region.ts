@@ -1,6 +1,6 @@
 import { Direction, ExitFragment, RegionFragment } from '../schema'
 import {
-    Item, ItemMap, Province, Coords, TerrainInfo, Settlement, Ruleset, Wages, Structure, SettlementSize, Links, Unit, Troops, Battle
+    Item, ItemMap, Province, Coords, TerrainInfo, Settlement, Ruleset, Wages, Structure, SettlementSize, Links, Unit, Troops, Battle, TradeRoute
 } from './internal'
 
 export class Region {
@@ -19,6 +19,8 @@ export class Region {
 
     province: Province
     readonly neighbors = new Links()
+    readonly incomingTrade: TradeRoute[] = [ ]
+    readonly outgoingTrade: TradeRoute[] = [ ]
 
     terrain: TerrainInfo
     population: Item | null
@@ -69,6 +71,22 @@ export class Region {
 
         for (const str of this.structures) {
             str.units.sort((a, b) => a.seq - b.seq)
+        }
+    }
+
+    addTradeRoute(route: TradeRoute) {
+        if (route.distance > 12) {
+            return
+        }
+
+        if (route.buy.region === this) {
+            this.outgoingTrade.push(route)
+            this.outgoingTrade.sort((a, b) => a.distance - b.distance)
+        }
+
+        if (route.sell.region === this) {
+            this.incomingTrade.push(route)
+            this.incomingTrade.sort((a, b) => a.distance - b.distance)
         }
     }
 

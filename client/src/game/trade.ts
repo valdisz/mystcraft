@@ -1,4 +1,3 @@
-import { Hex } from '../geometry'
 import { ItemInfo, Level, MovementPathfinder, Region } from './internal'
 
 

@@ -11,11 +11,12 @@ export class World {
         }
     }
 
-    readonly levels: Level[] = []
+    readonly levels: Level[] = [ ]
     readonly provinces = new Provinces()
     readonly factions = new Factions()
     readonly pathfinder = new MovementPathfinder()
     readonly battles: Battle[] = [ ]
+    readonly tradeRoutes: TradeRoute[] = [ ]
 
     defaultStance: Stance = Stance.Neutral
     month: number
@@ -264,8 +265,18 @@ export class World {
         return null
     }
 
-    getTradeRoutes() {
-        const level = this.getLevel(1)
+    findAllTradeRoutes() {
+        for (const level of this.levels) {
+            for (const route of this.findTradeRoutes(level)) {
+                this.tradeRoutes.push(route)
+
+                route.buy.region.addTradeRoute(route)
+                route.sell.region.addTradeRoute(route)
+            }
+        }
+    }
+
+    findTradeRoutes(level: Level) {
         const pf = new MovementPathfinder()
         const markets = new Map<string, Trade>()
 
@@ -308,12 +319,6 @@ export class World {
             }
         }
 
-        routes.sort((a, b) => b.profit - a.profit)
-        for (const route of routes.filter(x => x.distance < 16)) {
-            console.log(`${route.amount} ${route.item.getName(2)} [${route.item.code}] for ${route.profit} silver\n
-            from ${route.buy.region.toString()}\n
-            to ${route.sell.region.toString()}\n
-            distance ${route.distance} regions (cost: ${route.cost})`)
-        }
+        return routes
     }
 }

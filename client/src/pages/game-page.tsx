@@ -314,7 +314,7 @@ const UnitRow = observer(({ unit, game }: { unit: Unit, game: GameStore }) => {
             <TableCell className='skills'>{unit.skills.map(x => `${x.name} ${x.level} (${x.days})`).join(', ')}</TableCell>
         </TableRow>
         { rows > 1 && <TableRow>
-            <TableCell className='unit-nr'></TableCell>
+            <TableCell colSpan={3}></TableCell>
             <TableCell colSpan={5} className='description'>
                 {unit.description}
             </TableCell>
@@ -368,11 +368,7 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
 
     return (
         <Box {...props} sx={{ display: 'flex', flexDirection: 'column', ...(sx || { }) }}>
-
-
-
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-
             <Box component={SimpleBar} sx={{ height: '100%' }} autoHide={false}>
                 <UnitsTable size='small' stickyHeader >
                     <TableHead>
@@ -405,10 +401,10 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
 
                         return <React.Fragment key={unit.id}>
                             <TableRow className={unitClasses} onClick={() => game.selectUnit(unit)} selected={unit.num === game.unit?.num}>
-                                <TableCell rowSpan={rows} className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
-                                <TableCell rowSpan={rows} className='structure-name'>{unit.structure?.name ?? null}</TableCell>
-                                <TableCell rowSpan={rows} className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
-                                <TableCell component='th' rowSpan={rows} className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
+                                <TableCell className='structure-nr'>{unit.structure?.num ?? null}</TableCell>
+                                <TableCell className='structure-name'>{unit.structure?.name ?? null}</TableCell>
+                                <TableCell className='faction-nr'>{unit.faction.known ? unit.faction.num : null}</TableCell>
+                                <TableCell component='th' className='faction-name'>{unit.faction.known ? unit.faction.name : null}</TableCell>
                                 <TableCell className='unit-nr'>{unit.num}</TableCell>
                                 <TableCell component='th' className={`unit-name ${noBorder}`}>
                                     {unit.name}
@@ -436,6 +432,7 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                                 <TableCell className='flags'>{unit.flags.join(', ')}</TableCell>
                             </TableRow>
                             { rows > 1 && <TableRow className={ownUnit} selected={unit.num === game.unit?.num}>
+                                <TableCell colSpan={5} className={noBorder} />
                                 <TableCell colSpan={9} className='description'>
                                     {unit.description}
                                 </TableCell>
@@ -479,7 +476,7 @@ const StructuresComponent = observer(() => {
         <StructuresBody>
             {game.structures.map((row) => (
                 <StructureItem key={row.id}>
-                    {row.name} [{row.num}]: {row.type}
+                    {row.name} [{row.num}]: {row.type} { row.description ? ';' : null }
                 </StructureItem>
             ))}
         </StructuresBody>

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
 import { Container, Stack, List, ListItem, ListItemButton, ListItemText, Typography, Paper, Button, Chip } from '@mui/material'
+import { Link } from 'react-router-dom'
 import { PageTitle } from '../components'
 import { useParams } from 'react-router'
 import { useStore } from '../store'
@@ -40,7 +41,7 @@ function GameDetailsPage() {
         <PageTitle
             title={gameDetails.name || 'Loading...'}
             back='/'
-            actions={<Button variant='outlined' color='primary' size='large'>Open</Button>}
+            actions={<Button variant='outlined' color='primary' size='large' component={Link} to={`/play/${gameId}`}>Play</Button>}
         />
         <Paper elevation={0} variant='outlined'>
             { content }

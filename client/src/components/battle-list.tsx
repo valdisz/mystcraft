@@ -9,6 +9,7 @@ import { FixedTypography } from './fixed-typography'
 import { useStore } from '../store'
 import { useMapContext } from '../map'
 import CloseIcon from '@mui/icons-material/Close'
+
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
 
 type Size = 'normal' | 'small'

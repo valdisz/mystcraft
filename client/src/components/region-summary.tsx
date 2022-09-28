@@ -1,11 +1,15 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { Box, BoxProps, Typography, Button, IconButton, Grid, Stack, Tooltip, Menu, MenuItem, ClickAwayListener } from '@mui/material'
+import { Box, BoxProps, Typography, Button, IconButton, Grid, Stack, Tooltip, Menu, MenuItem, ClickAwayListener, Divider } from '@mui/material'
 import { observer } from 'mobx-react'
 import { Region, Coords, TerrainInfo, Item, ItemInfo } from '../game'
 import { copy } from '../lib'
 import { Item as ItemComponent2, FixedTypography } from '../components'
+
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import LocationSearchingIcon from '@mui/icons-material/LocationSearching'
+import { useMapContext } from '../map'
+import { useStore } from '../store'
 
 const WideTooltip = styled(Tooltip)`
     max-width: 500px;
@@ -289,6 +293,14 @@ export function RegionHeader({ region, sx, ...props }: RegionHeaderProps) {
 }
 
 export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
+    const mapContext = useMapContext()
+    const { game } = useStore()
+
+    function centerAt(reg: Region) {
+        mapContext.map.centerAt(reg.coords)
+        game.selectRegion(reg)
+    }
+
     return <Box m={1}>
         <Grid container spacing={1}>
             { (region.population || region.settlement) && <SpaceBetween item xs={12}>
@@ -309,6 +321,110 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                 { region.wanted.size > 0 && <Grid item xs={4}>
                     <ResourcesColumn title='Wanted' items={region.wanted} />
                 </Grid> }
+
+                { (region.outgoingTrade.length > 0 || region.incomingTrade.length > 0) &&
+                <Grid item xs={12}>
+                    <Typography variant='subtitle1'>Trade Routes</Typography>
+                    { region.outgoingTrade.length > 0 && <>
+                        <Divider />
+                        <Box>
+                            <Typography variant='subtitle2'>Wanted</Typography>
+                            <Box component='table' sx={{
+                                width: '100%',
+                                'td, th': {
+                                    textAlign: 'right'
+                                },
+                                '.left': {
+                                    textAlign: 'left'
+                                },
+                                '.item': {
+                                    width: '50px'
+                                },
+                                '.shrink': {
+                                    width: '1px'
+                                }
+                            }}>
+                                <thead>
+                                    <tr>
+                                        <th className='left item'>Item</th>
+                                        <th className='left'>Location</th>
+                                        <th className='shrink' title='Move Points'>MP</th>
+                                        <th className='shrink' title='Price'>Pr.</th>
+                                        <th className='shrink' title='Amount'>Amnt.</th>
+                                        <th className='shrink' title='Profit'>$</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { region.outgoingTrade.map((trade, i) => <tr key={i}>
+                                        <td className='left'>{trade.item.getName(trade.amount)}</td>
+                                        <td className='left'>
+                                            <Button variant='outlined' size='small' onClick={() => centerAt(trade.sell.region)} startIcon={<LocationSearchingIcon />}>
+                                                {trade.sell.region.settlement.name}
+                                                { ' ' }
+                                                ({trade.sell.region.coords.toString()})
+                                            </Button>
+                                        </td>
+                                        <td className='shrink'>{trade.distance}/{trade.cost}</td>
+                                        <td className='shrink'>${trade.sell.price}</td>
+                                        <td className='shrink'>{trade.amount}</td>
+                                        <td className='shrink'>${trade.profit}</td>
+                                    </tr>) }
+                                </tbody>
+                            </Box>
+                        </Box>
+                    </> }
+                    { region.incomingTrade.length > 0 && <>
+                        <Divider />
+                        <Box>
+                            <Typography variant='subtitle2'>For Sale</Typography>
+                            <Box component='table' sx={{
+                                width: '100%',
+                                borderCollapse: 'collapse',
+                                'td, th': {
+                                    textAlign: 'right',
+                                    px: 1,
+                                },
+                                '.left': {
+                                    textAlign: 'left'
+                                },
+                                '.item': {
+                                    width: '50px'
+                                },
+                                '.shrink': {
+                                    width: '1px'
+                                }
+                            }}>
+                                <thead>
+                                    <tr>
+                                        <th className='left item'>Item</th>
+                                        <th className='left'>Location</th>
+                                        <th className='shrink' title='Move Points'>MP</th>
+                                        <th className='shrink' title='Price'>Pr.</th>
+                                        <th className='shrink' title='Amount'>Amnt.</th>
+                                        <th className='shrink' title='Profit'>$</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    { region.incomingTrade.map((trade, i) => <tr key={i}>
+                                        <td className='left'>{trade.item.getName(trade.amount)}</td>
+                                        <td className='left'>
+                                            <Button variant='outlined' size='small' onClick={() => centerAt(trade.buy.region)} startIcon={<LocationSearchingIcon />}>
+                                                {trade.buy.region.settlement.name}
+                                                { ' ' }
+                                                ({trade.buy.region.coords.toString()})
+                                            </Button>
+                                        </td>
+                                        <td className='shrink'>{trade.distance}/{trade.cost}</td>
+                                        <td className='shrink'>${trade.buy.price}</td>
+                                        <td className='shrink'>{trade.amount}</td>
+                                        <td className='shrink'>${trade.profit}</td>
+                                    </tr>) }
+                                </tbody>
+                            </Box>
+                        </Box>
+                    </> }
+                </Grid>
+                }
             </> }
         </Grid>
     </Box>

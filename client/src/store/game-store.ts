@@ -301,7 +301,7 @@ export class GameStore {
         this.university = new UniversityStore(world)
         await this.university.load(this.gameId, turn.turnNumber)
 
-        // world.getTradeRoutes()
+        world.findAllTradeRoutes()
 
         runInAction(() =>{
             this.world = world
