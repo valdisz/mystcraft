@@ -19,7 +19,7 @@ directive @stream(
   if: Boolean
 
   """The initial elements that shall be send down to the consumer."""
-  initialCount: Int!
+  initialCount: Int! = 0
 
   """
   If this argument label has a value other than null, it will be passed on to the result of this stream directive. This label is intended to give client applications a way to identify to which fragment a streamed result belongs to.
@@ -487,7 +487,7 @@ type Player implements Node {
   nextTurnNumber: Int
   number: Int!
   password: String
-  reports(turn: Int): [AditionalReport]
+  reports: [Report]
   turn(number: Int!): PlayerTurn
   turns: [PlayerTurn]
 }

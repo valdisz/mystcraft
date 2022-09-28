@@ -655,14 +655,9 @@ export type Player = Node & {
   nextTurnNumber?: Maybe<Scalars['Int']>;
   number: Scalars['Int'];
   password?: Maybe<Scalars['String']>;
-  reports?: Maybe<Array<Maybe<AditionalReport>>>;
+  reports?: Maybe<Array<Maybe<Report>>>;
   turn?: Maybe<PlayerTurn>;
   turns?: Maybe<Array<Maybe<PlayerTurn>>>;
-};
-
-
-export type PlayerReportsArgs = {
-  turn?: InputMaybe<Scalars['Int']>;
 };
 
 
@@ -1077,6 +1072,15 @@ export type GameCreateLocalMutationVariables = Exact<{
 
 export type GameCreateLocalMutation = { __typename?: 'Mutation', gameCreateLocal?: { __typename?: 'GameCreateLocalResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, status: GameStatus, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null> | null } | null } | null } | null };
 
+export type FactionClaimMutationVariables = Exact<{
+  gameId: Scalars['ID'];
+  playerId: Scalars['ID'];
+  password: Scalars['String'];
+}>;
+
+
+export type FactionClaimMutation = { __typename?: 'Mutation', gameJoinRemote?: { __typename?: 'GameJoinRemoteResult', isSuccess: boolean, error?: string | null, player?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null } | null };
+
 export type GameCreateRemoteMutationVariables = Exact<{
   name: Scalars['String'];
   options: GameOptionsInput;
@@ -1147,7 +1151,7 @@ export type GetGameDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number: number, isClaimed: boolean, nextTurn?: { __typename?: 'PlayerTurn', isReady: boolean, isOrdersSubmitted: boolean, isTimesSubmitted: boolean } | null } | null> | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, lastTurnNumber?: number | null, me?: { __typename?: 'Player', id: string } | null, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number: number, isClaimed: boolean, nextTurn?: { __typename?: 'PlayerTurn', isReady: boolean, isOrdersSubmitted: boolean, isTimesSubmitted: boolean } | null } | null> | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetGameEnginesQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['Int']>;
@@ -1664,6 +1668,17 @@ export const GameCreateLocal = gql`
   }
 }
     ${GameHeader}`;
+export const FactionClaim = gql`
+    mutation FactionClaim($gameId: ID!, $playerId: ID!, $password: String!) {
+  gameJoinRemote(gameId: $gameId, playerId: $playerId, password: $password) {
+    isSuccess
+    error
+    player {
+      ...PlayerHeader
+    }
+  }
+}
+    ${PlayerHeader}`;
 export const GameCreateRemote = gql`
     mutation GameCreateRemote($name: String!, $options: GameOptionsInput!) {
   gameCreateRemote(name: $name, options: $options) {
@@ -1770,6 +1785,10 @@ export const GetGameDetails = gql`
     ... on Game {
       id
       name
+      lastTurnNumber
+      me {
+        id
+      }
       players(quit: false) {
         items {
           id

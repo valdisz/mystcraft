@@ -1,10 +1,14 @@
-import { action, makeObservable, observable } from 'mobx'
-import { query } from './connection'
+import { action, makeObservable, observable, runInAction } from 'mobx'
+import { mutate, query } from './connection'
 import { GetGameDetails, GetGameDetailsQuery, GetGameDetailsQueryVariables } from '../schema'
+import { FactionClaim, FactionClaimMutation, FactionClaimMutationVariables } from '../schema'
+import React from 'react'
 
 export interface Game {
     id: string
     name: string
+    lastTurnNumber: number
+    joined: boolean
     players: Player[]
 }
 
@@ -14,6 +18,8 @@ export interface Player {
     name: string
     orders: boolean
     times: boolean
+    isClaimed: boolean
+    isOwn: boolean
 }
 
 export class GameDetailsStore {
@@ -29,6 +35,8 @@ export class GameDetailsStore {
         () => ({ gameId: this.gameId }),
         'Game Details'
     )
+
+    readonly claimFaction = new ClaimFactionStore(this)
 
     get name() {
         return this.source.value?.name
@@ -50,8 +58,41 @@ export class GameDetailsStore {
         return this.source.error
     }
 
+    get canPlay() {
+        return this.isReady && this.source.value?.joined
+    }
+
+    get canJoin() {
+        return !(this.source.value?.joined || false)
+    }
+
+    get turnNumber() {
+        return this.source.value?.lastTurnNumber
+    }
+
+    get playerCount() {
+        return this.players.length
+    }
+
+    get locaPlayerCount() {
+        let count = 0
+        for (const player of this.players) {
+            if (player.isClaimed) {
+                count++
+            }
+        }
+
+        return count
+    }
+
     @action setGameId = (id: string) => {
         this.gameId = id
+    }
+
+    readonly claim = (player: Player) => {
+        if (!player.isClaimed && this.canJoin) {
+            this.claimFaction.open(this.gameId, player.id, player.name, player.number)
+        }
     }
 
     private mapReponse({ node }: GetGameDetailsQuery): Game | null {
@@ -59,10 +100,20 @@ export class GameDetailsStore {
             return null
         }
 
+        let joined = false
         const players: Player[] = []
-
-        for (const { id, name, number, nextTurn } of node.players.items) {
-            players.push({ id, name, number, orders: nextTurn?.isOrdersSubmitted, times: nextTurn?.isTimesSubmitted })
+        for (const { id, name, number, nextTurn, isClaimed } of node.players.items) {
+            const isOwn = id === node.me?.id
+            joined = joined || isOwn
+            players.push({
+                id,
+                name,
+                number,
+                isClaimed,
+                isOwn,
+                orders: nextTurn?.isOrdersSubmitted,
+                times: nextTurn?.isTimesSubmitted
+            })
         }
 
         players.sort((a, b) => a.number - b.number)
@@ -70,7 +121,78 @@ export class GameDetailsStore {
         return {
             id: node.id,
             name: node.name,
+            lastTurnNumber: node.lastTurnNumber,
+            joined,
             players
         }
+    }
+}
+
+export class ClaimFactionStore {
+    constructor(private readonly gameDetails: GameDetailsStore) {
+        makeObservable(this)
+    }
+
+    private gameId: string
+    private playerId: string
+
+    @observable isLoading = false
+    @observable isOpen = false
+    @observable error = ''
+
+    @observable factionName = ''
+    @observable factionNumber = 0
+    @observable password = ''
+
+    @action open = (gameId: string, playerId: string, factionName: string, factionNumber: number) => {
+        this.gameId = gameId
+        this.playerId = playerId
+
+        this.isOpen = true;
+        this.error = ''
+        this.factionName = factionName
+        this.factionNumber = factionNumber
+    }
+
+    readonly claim = async () => {
+        runInAction(() => this.isLoading = true)
+
+        let error = ''
+        try {
+            const result = await mutate<FactionClaimMutation, FactionClaimMutationVariables>(FactionClaim, {
+                gameId: this.gameId,
+                playerId: this.playerId,
+                password: this.password
+            }, {
+                refetch: [ this.gameDetails.source ]
+            })
+
+            if (result.error) {
+                error = result.error.message
+                return
+            }
+            else if (!result.data?.gameJoinRemote?.isSuccess) {
+                error = result.data?.gameJoinRemote?.error
+            }
+        }
+        finally {
+            runInAction(() => {
+                this.isLoading = false
+                this.isOpen = !!error
+                this.error = error
+            })
+        }
+    }
+
+    @action close = () => {
+        if (this.isLoading) {
+            return
+        }
+
+        this.isOpen = false
+    }
+
+    @action onPasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.password = e.target.value
     }
 }

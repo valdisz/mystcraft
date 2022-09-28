@@ -3,6 +3,10 @@ query GetGameDetails($gameId: ID!) {
     ... on Game {
       id
       name
+      lastTurnNumber
+      me {
+        id
+      }
       players(quit: false) {
         items {
           id

@@ -1,0 +1,9 @@
+mutation FactionClaim($gameId: ID!, $playerId: ID!, $password: String!) {
+    gameJoinRemote(gameId: $gameId, playerId: $playerId, password: $password) {
+        isSuccess
+        error
+        player {
+          ...PlayerHeader
+        }
+    }
+}
