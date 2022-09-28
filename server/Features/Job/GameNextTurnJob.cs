@@ -24,7 +24,6 @@ public class GameNextTurnJob {
         logger.LogInformation("Starting turn processing");
 
         var gamesRep = unit.Games;
-        await unit.BeginTransactionAsync();
 
         var game = await gamesRep.GetOneAsync(gameId);
 
@@ -45,6 +44,8 @@ public class GameNextTurnJob {
                 }
             }
 
+            await unit.BeginTransactionAsync();
+
             logger.LogInformation("Parsing reports");
             await EnusreSuccessAsync(mediator.Send(new TurnParse(game, turnNumber.Value)));
 
@@ -57,13 +58,12 @@ public class GameNextTurnJob {
             logger.LogInformation("Unlocking game");
             await gamesRep.UnlockAsync(gameId);
 
-            await unit.SaveChangesAsync();
             await unit.CommitTransactionAsync();
 
             logger.LogInformation($"Turn {turnNumber} is ready");
         }
         catch (Exception ex) {
-            logger.LogError(ex, "Failed to run turn");
+            logger.LogError(ex, ex.Message);
 
             await unit.RollbackTransactionAsync();
 

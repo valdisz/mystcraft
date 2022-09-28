@@ -238,12 +238,12 @@ public class Startup {
             .ModifyOptions(opt => {
                 opt.DefaultResolverStrategy = ExecutionStrategy.Serial;
             })
-            .ConfigureResolverCompiler(r => {
-                r.AddService<Database>();
-                r.AddService<IMediator>();
-                r.AddService<IAuthorizationService>();
-            })
+            .RegisterService<Database>()
+            .RegisterService<IUnitOfWork>()
+            .RegisterService<IMediator>()
+            .RegisterService<IAuthorizationService>()
             .AddApolloTracing()
+            .AddProjections()
             .SetPagingOptions(new PagingOptions {
                 DefaultPageSize = 100,
                 MaxPageSize = 100,

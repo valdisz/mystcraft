@@ -13,6 +13,7 @@ namespace advisor {
     using advisor.Persistence;
     using Microsoft.EntityFrameworkCore;
     using System.Linq;
+    using System.Net.Http.Headers;
 
     public interface IApiKeyStore {
         bool ValidateApiKey(string apiKey);
@@ -63,11 +64,24 @@ namespace advisor {
         private readonly IApiKeyStore apiKeys;
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync() {
-            var xApiKey = Request.Headers[Options.ApiKeyHeaderName];
-            if (xApiKey.Count == 0) {
-                xApiKey = Request.Query[Options.ApiKeyHeaderName];
+            string xApiKey = null;
 
-                if (xApiKey.Count == 0) return AuthenticateResult.NoResult();
+            var apiKeyHeader = Request.Headers[Options.ApiKeyHeaderName];
+            var authHeader = Request.Headers.Authorization;
+            var apiQuery = Request.Query[Options.ApiKeyHeaderName];
+
+            if (apiKeyHeader.Count > 0) {
+                xApiKey = apiKeyHeader;
+            }
+            else if (authHeader.Count > 0 && AuthenticationHeaderValue.TryParse(authHeader, out var value)) {
+                xApiKey = value.Parameter;
+            }
+            else if (apiQuery.Count > 0) {
+                xApiKey = apiQuery;
+            }
+
+            if (xApiKey == null) {
+                 return AuthenticateResult.NoResult();
             }
 
             if (!apiKeys.ValidateApiKey(xApiKey)) {

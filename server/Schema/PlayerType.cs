@@ -27,12 +27,6 @@ namespace advisor.Schema
 
     [ExtendObjectType("Player")]
     public class PlayerResolvers {
-        public PlayerResolvers(IIdSerializer idSerializer) {
-            this.idSerializer = idSerializer;
-        }
-
-        private readonly IIdSerializer idSerializer;
-
         public Task<DbGame> Game(Database db, [Parent] DbPlayer player) {
             return db.Games
                 .AsNoTracking()
@@ -42,7 +36,6 @@ namespace advisor.Schema
         public Task<DbPlayerTurn> LastTurn(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
-                .Include(x => x.Player)
                 .OnlyPlayer(player)
                 .SingleOrDefaultAsync(x => x.TurnNumber == player.LastTurnNumber);
         }
@@ -63,17 +56,17 @@ namespace advisor.Schema
                 .SingleOrDefaultAsync();
         }
 
-        public Task<List<DbAditionalReport>> Reports(Database db, [Parent] DbPlayer player, int? turn = null) {
-            var q = db.AditionalReports
-                .AsNoTracking()
-                .OnlyPlayer(player);
+        // public IQueryable<DbReport> Reports(Database db, [Parent] DbPlayer player, int? turn = null) {
+        //     var q = db.Reports
+        //         .AsNoTracking()
+        //         .OnlyPlayer(player);
 
-            if (turn != null) {
-                q = q.Where(x => x.TurnNumber == turn);
-            }
+        //     if (turn != null) {
+        //         q = q.Where(x => x.TurnNumber == turn);
+        //     }
 
-            return q.ToListAsync();
-        }
+        //     return q;
+        // }
 
         public Task<List<DbPlayerTurn>> Turns(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns

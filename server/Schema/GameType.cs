@@ -5,6 +5,7 @@
     using advisor.Features;
     using HotChocolate;
     using HotChocolate.AspNetCore.Authorization;
+    using HotChocolate.Data;
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
@@ -28,10 +29,13 @@
 
     [ExtendObjectType("Game")]
     public class GameResolvers {
-        public Task<DbPlayer> Me(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
+        [UseFirstOrDefault]
+        [UseProjection]
+        public IQueryable<DbPlayer> Me(Database db, [Parent] DbGame game, [GlobalState] long currentUserId) {
             return db.Players
                 .AsNoTracking()
-                .SingleOrDefaultAsync(x => x.GameId == game.Id && x.UserId == currentUserId);
+                .InGame(game)
+                .Where(x => x.GameId == game.Id && x.UserId == currentUserId);
         }
 
         public IOrderedQueryable<DbTurn> Turns(Database db, [Parent] DbGame game) {

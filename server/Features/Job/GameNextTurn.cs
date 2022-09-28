@@ -6,6 +6,7 @@ using MediatR;
 using advisor.Schema;
 using advisor.Persistence;
 using Hangfire;
+using System;
 
 public record GameNextTurn(long GameId, int? TurnNumber = null): IRequest<GameNextTurnResult>;
 
@@ -35,9 +36,13 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
         var gameId = request.GameId;
         var turnNumber = request.TurnNumber ?? game.NextTurnNumber;
 
-        var jobId = jobs.Enqueue<GameNextTurnJob>(x => x.RunAsync(gameId, turnNumber));
-
-        return new GameNextTurnResult(true, JobId: jobId);
+        try {
+            var jobId = jobs.Enqueue<GameNextTurnJob>(x => x.RunAsync(gameId, turnNumber));
+            return new GameNextTurnResult(true, JobId: jobId);
+        }
+        catch (Exception ex) {
+            return new GameNextTurnResult(false, ex.ToString());
+        }
     }
 }
 

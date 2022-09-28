@@ -3,6 +3,7 @@ namespace advisor.Persistence
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
+    using HotChocolate.Data;
 
     public class DbPlayer : InGameContext {
         [Key]
@@ -36,7 +37,7 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         public DbGame Game { get;set; }
 
-        [GraphQLIgnore]
+        // [GraphQLIgnore]
         public List<DbReport> Reports { get; set; } = new List<DbReport>();
 
         [GraphQLIgnore]

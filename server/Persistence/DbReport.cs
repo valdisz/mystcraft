@@ -3,7 +3,7 @@ namespace advisor.Persistence;
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
 
-public class DbReport : InGameContext {
+public class DbReport : InGameContext, InPlayerContext {
     [GraphQLIgnore]
     public long PlayerId { get; set; }
 
