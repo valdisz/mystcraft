@@ -12,14 +12,19 @@ export interface Game {
     players: Player[]
 }
 
+export interface TurnState {
+    turnNumber: number
+    orders: boolean
+    times: boolean
+}
+
 export interface Player {
     id?: string
     number: number
     name: string
-    orders: boolean
-    times: boolean
     isClaimed: boolean
     isOwn: boolean
+    turns: TurnState[]
 }
 
 export class GameDetailsStore {
@@ -44,6 +49,30 @@ export class GameDetailsStore {
 
     get players() {
         return this.source.value?.players || []
+    }
+
+    get ownPlayers() {
+        return this.players.filter(x => x.isOwn)
+    }
+
+    get showOwnPlayers() {
+        return this.ownPlayers.length > 0
+    }
+
+    get claimedPlayers() {
+        return this.players.filter(x => !x.isOwn && x.isClaimed)
+    }
+
+    get showClaimedPlayers() {
+        return this.claimedPlayers.length > 0
+    }
+
+    get remotePlayers() {
+        return this.players.filter(x => !x.isClaimed)
+    }
+
+    get showRemotePlayers() {
+        return this.remotePlayers.length > 0
     }
 
     get isLoading() {
@@ -102,7 +131,7 @@ export class GameDetailsStore {
 
         let joined = false
         const players: Player[] = []
-        for (const { id, name, number, nextTurn, isClaimed } of node.players.items) {
+        for (const { id, name, number, turns, isClaimed } of node.players.items) {
             const isOwn = id === node.me?.id
             joined = joined || isOwn
             players.push({
@@ -111,8 +140,11 @@ export class GameDetailsStore {
                 number,
                 isClaimed,
                 isOwn,
-                orders: nextTurn?.isOrdersSubmitted,
-                times: nextTurn?.isTimesSubmitted
+                turns: turns.items.map(x => ({
+                    turnNumber: x.turnNumber,
+                    orders: x.isOrdersSubmitted,
+                    times: x.isTimesSubmitted
+                } as TurnState))
             })
         }
 

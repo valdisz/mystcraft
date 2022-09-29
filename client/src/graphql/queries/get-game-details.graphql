@@ -13,10 +13,12 @@ query GetGameDetails($gameId: ID!) {
           name
           number
           isClaimed
-          nextTurn {
-            isReady
-            isOrdersSubmitted
-            isTimesSubmitted
+          turns(take: 10) {
+            items {
+              turnNumber
+              isOrdersSubmitted
+              isTimesSubmitted
+            }
           }
         }
       }

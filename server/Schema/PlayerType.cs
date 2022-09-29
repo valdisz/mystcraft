@@ -4,6 +4,7 @@ namespace advisor.Schema
     using System.Linq;
     using System.Threading.Tasks;
     using HotChocolate;
+    using HotChocolate.Data;
     using HotChocolate.Resolvers;
     using HotChocolate.Types;
     using HotChocolate.Types.Relay;
@@ -33,19 +34,20 @@ namespace advisor.Schema
                 .SingleOrDefaultAsync(x => x.Id == player.GameId);
         }
 
-        public Task<DbPlayerTurn> LastTurn(Database db, [Parent] DbPlayer player) {
+        [UseSingleOrDefault]
+        public IQueryable<DbPlayerTurn> LastTurn(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
                 .OnlyPlayer(player)
-                .SingleOrDefaultAsync(x => x.TurnNumber == player.LastTurnNumber);
+                .Where(x => x.TurnNumber == player.LastTurnNumber);
         }
 
-        public Task<DbPlayerTurn> NextTurn(Database db, [Parent] DbPlayer player) {
+        [UseSingleOrDefault]
+        public IQueryable<DbPlayerTurn> NextTurn(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
-                .Include(x => x.Player)
                 .OnlyPlayer(player)
-                .SingleOrDefaultAsync(x => x.TurnNumber == player.NextTurnNumber);
+                .Where(x => x.TurnNumber == player.NextTurnNumber);
         }
 
         public Task<DbAlliance> Alliance(Database db, [Parent] DbPlayer player) {
@@ -68,21 +70,20 @@ namespace advisor.Schema
         //     return q;
         // }
 
-        public Task<List<DbPlayerTurn>> Turns(Database db, [Parent] DbPlayer player) {
+        [UseOffsetPaging]
+        public IQueryable<DbPlayerTurn> Turns(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
                 .OnlyPlayer(player)
-                .Include(x => x.Player)
-                .OrderBy(x => x.TurnNumber)
-                .ToListAsync();
+                .OrderByDescending(x => x.TurnNumber);
         }
 
-        public Task<DbPlayerTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
+        [UseSingleOrDefault]
+        public IQueryable<DbPlayerTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
             return db.PlayerTurns
                 .AsNoTracking()
                 .OnlyPlayer(player)
-                .Include(x => x.Player)
-                .SingleOrDefaultAsync(x => x.TurnNumber == number);
+                .Where(x => x.TurnNumber == number);
         }
     }
 }

@@ -657,12 +657,18 @@ export type Player = Node & {
   password?: Maybe<Scalars['String']>;
   reports?: Maybe<Array<Maybe<Report>>>;
   turn?: Maybe<PlayerTurn>;
-  turns?: Maybe<Array<Maybe<PlayerTurn>>>;
+  turns?: Maybe<PlayerTurnCollectionSegment>;
 };
 
 
 export type PlayerTurnArgs = {
   number: Scalars['Int'];
+};
+
+
+export type PlayerTurnsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 export type PlayerCollectionSegment = {
@@ -727,6 +733,14 @@ export type PlayerTurnUnitsArgs = {
   filter?: InputMaybe<UnitsFilterInput>;
   skip?: InputMaybe<Scalars['Int']>;
   take?: InputMaybe<Scalars['Int']>;
+};
+
+export type PlayerTurnCollectionSegment = {
+  __typename?: 'PlayerTurnCollectionSegment';
+  items?: Maybe<Array<Maybe<PlayerTurn>>>;
+  /** Information to aid in pagination. */
+  pageInfo: CollectionSegmentInfo;
+  totalCount: Scalars['Int'];
 };
 
 export type Query = {
@@ -1151,7 +1165,7 @@ export type GetGameDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, lastTurnNumber?: number | null, me?: { __typename?: 'Player', id: string } | null, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number: number, isClaimed: boolean, nextTurn?: { __typename?: 'PlayerTurn', isReady: boolean, isOrdersSubmitted: boolean, isTimesSubmitted: boolean } | null } | null> | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, lastTurnNumber?: number | null, me?: { __typename?: 'Player', id: string } | null, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number: number, isClaimed: boolean, turns?: { __typename?: 'PlayerTurnCollectionSegment', items?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, isOrdersSubmitted: boolean, isTimesSubmitted: boolean } | null> | null } | null } | null> | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetGameEnginesQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['Int']>;
@@ -1195,7 +1209,7 @@ export type GetTurnStatsQueryVariables = Exact<{
 }>;
 
 
-export type GetTurnStatsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player', turns?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, stats?: { __typename?: 'Statistics', income?: { __typename?: 'Income', work: number, entertain: number, tax: number, pillage: number, trade: number, claim: number, total: number } | null, production?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null } | null } | null> | null } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetTurnStatsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player', turns?: { __typename?: 'PlayerTurnCollectionSegment', items?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, stats?: { __typename?: 'Statistics', income?: { __typename?: 'Income', work: number, entertain: number, tax: number, pillage: number, trade: number, claim: number, total: number } | null, production?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null } | null } | null> | null } | null } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetTurnQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -1795,10 +1809,12 @@ export const GetGameDetails = gql`
           name
           number
           isClaimed
-          nextTurn {
-            isReady
-            isOrdersSubmitted
-            isTimesSubmitted
+          turns(take: 10) {
+            items {
+              turnNumber
+              isOrdersSubmitted
+              isTimesSubmitted
+            }
           }
         }
       }
@@ -1873,10 +1889,12 @@ export const GetTurnStats = gql`
     query GetTurnStats($playerId: ID!) {
   node(id: $playerId) {
     ... on Player {
-      turns {
-        turnNumber
-        stats {
-          ...Staistics
+      turns(take: 10) {
+        items {
+          turnNumber
+          stats {
+            ...Staistics
+          }
         }
       }
     }

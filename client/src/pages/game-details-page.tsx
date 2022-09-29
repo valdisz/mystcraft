@@ -8,7 +8,7 @@ import { styled } from '@mui/material/styles'
 import { Link } from 'react-router-dom'
 import { PageTitle } from '../components'
 import { useParams } from 'react-router'
-import { useStore } from '../store'
+import { useStore, Player, TurnState } from '../store'
 
 function GameDetailsPage() {
     const { gameDetails } = useStore()
@@ -30,8 +30,8 @@ function GameDetailsPage() {
         content = <Alert severity="error">{gameDetails.source.error.message}</Alert>
     }
     else {
-        content = <>
-            <Stack mb={4} direction='row' justifyContent='center' gap={4}>
+        content = <Stack gap={4}>
+            <Stack direction='row' justifyContent='center' gap={4}>
                 <Card elevation={0} variant='outlined'>
                     <CenterCardContent>
                         <Typography variant='caption'>Turn</Typography>
@@ -51,23 +51,31 @@ function GameDetailsPage() {
                     </CenterCardContent>
                 </Card>
             </Stack>
-            <Paper elevation={0} variant='outlined'>
-                <List dense disablePadding>
-                    { gameDetails.players.map(player => <ListItem key={player.number} disablePadding>
-                        <ListItemButton sx={{ justifyContent: 'space-between', gap: 3 }} onClick={() => gameDetails.claim(player)}>
-                            <ListItemText
-                                primary={<Typography fontWeight={player.isOwn ? 600 : 400}>{player.name}</Typography>}
-                                secondary={<Typography variant='caption' component='div'>{player.isClaimed ? 'Claimed' : 'Remote'}</Typography>}
-                            />
-                            <Stack direction='row' gap={3}>
-                                <Chip sx={{ opacity: player.orders ? 1 : 0 }} label='Orders' />
-                                <Chip sx={{ opacity: player.times ? 1 : 0 }} label='Times' />
-                            </Stack>
-                        </ListItemButton>
-                    </ListItem>) }
-                </List>
-            </Paper>
-        </>
+
+            { gameDetails.showOwnPlayers &&
+                <Box>
+                    <Typography variant='h5'>Own Faction</Typography>
+                    <Paper elevation={0} variant='outlined'>
+                        <PlayerList items={gameDetails.ownPlayers} />
+                    </Paper>
+                </Box> }
+
+            { gameDetails.showClaimedPlayers &&
+                <Box>
+                    <Typography variant='h5'>Claimed Factions</Typography>
+                    <Paper elevation={0} variant='outlined'>
+                        <PlayerList items={gameDetails.claimedPlayers} />
+                    </Paper>
+                </Box> }
+
+            { gameDetails.showRemotePlayers &&
+                <Box>
+                    <Typography variant='h5'>Remote Factions</Typography>
+                    <Paper elevation={0} variant='outlined'>
+                        <PlayerList items={gameDetails.remotePlayers} onClaim={gameDetails.claim} />
+                    </Paper>
+                </Box> }
+        </Stack>
     }
 
     return <Container>
@@ -85,6 +93,68 @@ export default observer(GameDetailsPage)
 const CenterCardContent = styled(CardContent)({
     textAlign: 'center'
 })
+
+interface PlayerListProps {
+    items: Player[]
+    onClaim?: (player: Player) => void
+}
+
+function PlayerList({ items, onClaim }: PlayerListProps) {
+    return <List dense disablePadding>
+        { items.map(player => <ListItem key={player.number} disablePadding>
+            <ListItemButton
+                sx={{ justifyContent: 'space-between', gap: 3 }}
+                onClick={() => onClaim && onClaim(player)}>
+                <Stack direction='row' gap={2} alignItems='center'>
+                    <Box sx={{ minWidth: '3ch', textAlign: 'right' }}>
+                        <Typography variant='h6'>{player.number}</Typography>
+                    </Box>
+                    <ListItemText primary={<Typography fontWeight={player.isOwn ? 600 : 400}>{player.name}</Typography>} />
+                </Stack>
+                <Stack gap={4} direction='row'>
+                    <Box>
+                        <Typography variant='caption'>Orders History</Typography>
+                        <History items={player.turns} prop='orders' />
+                    </Box>
+                    <Box>
+                        <Typography variant='caption'>Times History</Typography>
+                        <History items={player.turns} prop='times' />
+                    </Box>
+                </Stack>
+            </ListItemButton>
+        </ListItem>) }
+    </List>
+}
+
+const Indicator = styled(Box)({
+    width: '1ch',
+    ':hover': {
+        position: 'relative',
+        transform: 'scale(1.2)'
+    }
+})
+
+const YesIndicator = styled(Indicator)(({ theme }) => ({
+    backgroundColor: theme.palette.success[theme.palette.mode]
+}))
+
+const NoIndicator = styled(Indicator)(({ theme }) => ({
+    backgroundColor: theme.palette.error[theme.palette.mode]
+}))
+
+interface HistoryProps {
+    items: TurnState[]
+    prop: keyof TurnState
+}
+
+function History({ items, prop }: HistoryProps) {
+    return <Stack direction='row' gap={.5} sx={{ height: '3ch' }}>
+        {items.map(x => {
+            const ItemIndicator = x[prop] ? YesIndicator : NoIndicator
+            return <ItemIndicator key={x.turnNumber} title={x.turnNumber.toString()} />
+        })}
+    </Stack>
+}
 
 function ClaimFactionPrompt() {
     const store = useStore().gameDetails.claimFaction

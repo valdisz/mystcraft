@@ -13,6 +13,7 @@ import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType } from '../gam
 import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList, FluidFab } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
 import { InterfaceCommand } from '../store/commands/move'
+import { useTheme } from '@mui/system'
 import SimpleBar from 'simplebar-react'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -20,7 +21,6 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import DoneIcon from '@mui/icons-material/Done'
 import CloseIcon from '@mui/icons-material/Close'
-import { useTheme } from '@mui/system'
 
 export interface GameMapProps {
     selectedRegion: ICoords | null
@@ -667,7 +667,7 @@ const GameComponent = observer(() => {
         }}>
             <AppBar position='static' color='primary'>
                 <Toolbar>
-                    <IconButton component={Link} to='/' edge='start' color='inherit' size="large">
+                    <IconButton component={Link} to={`/games/${game.gameId}`} edge='start' color='inherit' size="large">
                         <ArrowBackIcon />
                     </IconButton>
                     <Typography variant='h6'>{ game.name }</Typography>

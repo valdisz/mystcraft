@@ -489,7 +489,7 @@ type Player implements Node {
   password: String
   reports: [Report]
   turn(number: Int!): PlayerTurn
-  turns: [PlayerTurn]
+  turns(skip: Int, take: Int): PlayerTurnCollectionSegment
 }
 
 type PlayerCollectionSegment {
@@ -526,6 +526,14 @@ type PlayerTurn implements Node {
   timesSubmittedAt: DateTime
   turnNumber: Int!
   units(filter: UnitsFilterInput, skip: Int, take: Int): UnitCollectionSegment
+}
+
+type PlayerTurnCollectionSegment {
+  items: [PlayerTurn]
+
+  """Information to aid in pagination."""
+  pageInfo: CollectionSegmentInfo!
+  totalCount: Int!
 }
 
 type Query {
