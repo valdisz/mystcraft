@@ -3,7 +3,6 @@ namespace advisor.Schema {
     using Persistence;
 
     public class Statistics {
-        public DbIncome Income { get; set; }
-        public List<Item> Production { get; set; }
+        public List<DbStatisticsItem> Items { get; set; }
     }
 }

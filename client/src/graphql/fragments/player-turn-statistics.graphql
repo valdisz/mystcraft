@@ -1,0 +1,30 @@
+fragment PlayerTurnStatistics on PlayerTurn {
+    unclaimed
+    income {
+        work
+        entertain
+        tax
+        pillage
+        trade
+        claim
+        total
+    }
+    expenses {
+        trade
+        study
+        consume
+        total
+    }
+    statistics {
+        category
+        code
+        amount
+    }
+    treasury {
+        rank
+        max
+        total
+        code
+        amount
+    }
+}

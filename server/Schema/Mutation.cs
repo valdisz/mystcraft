@@ -78,8 +78,8 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameNextTurnResult> GameNextTurn(IMediator mediator, [ID("Game")] long gameId) {
-        return mediator.Send(new GameNextTurn(gameId));
+    public Task<GameNextTurnResult> GameNextTurn(IMediator mediator, [ID("Game")] long gameId, int? turnNumber = null, GameNextTurnForceInput force = null) {
+        return mediator.Send(new GameNextTurn(gameId, turnNumber, force));
     }
 
     // FIXME

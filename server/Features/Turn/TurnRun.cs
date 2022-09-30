@@ -155,10 +155,10 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
 
             var playerRepo = unit.Player(player);
             if (player.LastTurnNumber == null) {
-                await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name);
+                await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, player.Number);
             }
 
-            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name);
+            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, player.Number);
 
             player.LastTurnNumber = game.LastTurnNumber;
             player.NextTurnNumber = game.NextTurnNumber;

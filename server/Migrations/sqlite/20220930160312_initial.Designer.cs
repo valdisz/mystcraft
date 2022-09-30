@@ -9,43 +9,39 @@ using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.pgsql
+namespace advisor.Migrations.sqlite
 {
-    [DbContext(typeof(PgSqlDatabase))]
-    [Migration("20220925201948_initial")]
+    [DbContext(typeof(SQLiteDatabase))]
+    [Migration("20220930160312_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "6.0.8");
 
             modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FactionName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Json")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Source")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("PlayerId", "TurnNumber", "FactionNumber");
 
@@ -56,17 +52,16 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long>("GameId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -78,22 +73,22 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbAllianceMember", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("AllianceId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("CanInvite")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Owner")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("ShareMap")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("TeachMages")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "AllianceId");
 
@@ -106,27 +101,26 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long>("GameId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<long?>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -138,20 +132,20 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbAttitude", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TargetFactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Stance")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "TargetFactionNumber");
 
@@ -162,43 +156,42 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Battle")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -211,58 +204,56 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("Amount")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ItemCode")
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ItemName")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("ItemPrice")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("MissingUnitNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("UnitName")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("UnitNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -278,46 +269,46 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbExit", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("OriginRegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("TargetRegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Direction")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "OriginRegionId", "TargetRegionId");
 
@@ -329,21 +320,21 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbFaction", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("DefaultAttitude")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
 
@@ -354,41 +345,40 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("TEXT");
 
                     b.Property<long?>("EngineId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("LastTurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("NextTurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Options")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Ruleset")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -404,21 +394,20 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<byte[]>("Contents")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("BLOB");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -428,49 +417,19 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("GameEngines");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
-                {
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RegionId")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
-
-                    b.Property<string>("Market")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Code")
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("integer");
-
-                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Market", "Code");
-
-                    b.ToTable("Markets");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbOrders", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UnitNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Orders")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber");
 
@@ -481,35 +440,34 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long>("GameId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsQuit")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("LastTurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("NextTurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Password")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("TEXT");
 
                     b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -523,30 +481,36 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbPlayerTurn", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<long>("GameId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsProcessed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("FactionName")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FactionNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("GameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsProcessed")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("OrdersSubmittedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset?>("ReadyAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTimeOffset?>("TimesSubmittedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Unclaimed")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber");
 
@@ -558,21 +522,21 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbProductionItem", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Code")
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Amount")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "RegionId", "Code");
 
@@ -582,93 +546,126 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Id")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Entertainment")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Explored")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("Gate")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("LastVisitedAt")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Population")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Race")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Tax")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("TotalWages")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<double>("Wages")
-                        .HasColumnType("double precision");
+                        .HasColumnType("REAL");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
                     b.ToTable("Regions");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbRegionStatisticsItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RegionId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
+
+                    b.ToTable("RegionStatistics");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbRegistration", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long>("GameId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("TEXT");
 
                     b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -682,29 +679,29 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbReport", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("Data")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("Error")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("GameId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsMerged")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("Json")
-                        .HasColumnType("bytea");
+                        .HasColumnType("BLOB");
 
                     b.HasKey("PlayerId", "TurnNumber");
 
@@ -713,120 +710,65 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("Reports");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
-                {
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("RegionId")
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
-
-                    b.HasKey("PlayerId", "TurnNumber", "RegionId");
-
-                    b.ToTable("Statistics");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbStatisticsItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("RegionId")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
-
-                    b.ToTable("StatisticsItems");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Id")
                         .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Contents")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Flags")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("Needs")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SailDirections")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Sequence")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("Speed")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
@@ -838,119 +780,209 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbStudyPlan", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UnitNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Study")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Teach")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber");
 
                     b.ToTable("StudyPlans");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbTradableItem", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RegionId")
+                        .HasMaxLength(14)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Market")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Market", "Code");
+
+                    b.ToTable("Markets");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTreasuryItem", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Max")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Total")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("PlayerId", "TurnNumber", "Code");
+
+                    b.ToTable("Treasury");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.Property<long>("GameId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("GameData")
-                        .HasColumnType("bytea");
+                        .HasColumnType("BLOB");
 
                     b.Property<byte[]>("PlayerData")
-                        .HasColumnType("bytea");
+                        .HasColumnType("BLOB");
 
                     b.Property<int>("State")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("GameId", "Number");
 
                     b.ToTable("Turns");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbTurnStatisticsItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber");
+
+                    b.ToTable("TurnStatistics");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Number")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CanStudy")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CombatSpell")
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("FactionNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Flags")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("OnGuard")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Orders")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ReadyItem")
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("character varying(14)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Sequence")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Skills")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("StrcutureId")
                         .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("StructureNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("Weight")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("X")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Y")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Z")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
 
@@ -966,29 +998,29 @@ namespace advisor.Migrations.pgsql
             modelBuilder.Entity("advisor.Persistence.DbUnitItem", b =>
                 {
                     b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UnitNumber")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Code")
                         .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Amount")
-                        .HasColumnType("integer");
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Illusion")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Props")
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("Unfinished")
-                        .HasColumnType("boolean");
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber", "Code");
 
@@ -999,29 +1031,28 @@ namespace advisor.Migrations.pgsql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("INTEGER")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Algorithm")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Digest")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Roles")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Salt")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -1129,15 +1160,15 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbArmy", "Attacker", b1 =>
                         {
                             b1.Property<long>("DbBattleId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("character varying(256)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<int>("Number")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbBattleId");
 
@@ -1150,15 +1181,15 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbArmy", "Defender", b1 =>
                         {
                             b1.Property<long>("DbBattleId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("character varying(256)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<int>("Number")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbBattleId");
 
@@ -1231,24 +1262,24 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
                         {
                             b1.Property<long>("DbExitPlayerId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbExitTurnNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("DbExitOriginRegionId")
-                                .HasColumnType("character varying(14)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<string>("DbExitTargetRegionId")
-                                .HasColumnType("character varying(14)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<string>("Name")
                                 .HasMaxLength(256)
-                                .HasColumnType("character varying(256)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<string>("Size")
                                 .IsRequired()
-                                .HasColumnType("text");
+                                .HasColumnType("TEXT");
 
                             b1.HasKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
 
@@ -1285,23 +1316,6 @@ namespace advisor.Migrations.pgsql
                         .HasForeignKey("EngineId");
 
                     b.Navigation("Engine");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
-                        .WithMany("Markets")
-                        .HasForeignKey("PlayerId", "TurnNumber")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Markets")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbOrders", b =>
@@ -1352,6 +1366,69 @@ namespace advisor.Migrations.pgsql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
+                        {
+                            b1.Property<long>("DbPlayerTurnPlayerId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DbPlayerTurnTurnNumber")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Consume")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Study")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+
+                            b1.ToTable("PlayerTurns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbPlayerTurnPlayerId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DbPlayerTurnTurnNumber")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Claim")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Entertain")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Pillage")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Tax")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Work")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+
+                            b1.ToTable("PlayerTurns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+                        });
+
+                    b.Navigation("Expenses");
+
+                    b.Navigation("Income");
+
                     b.Navigation("Player");
                 });
 
@@ -1363,13 +1440,11 @@ namespace advisor.Migrations.pgsql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
+                    b.HasOne("advisor.Persistence.DbRegion", null)
                         .WithMany("Produces")
                         .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
@@ -1380,24 +1455,25 @@ namespace advisor.Migrations.pgsql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
                         {
                             b1.Property<long>("DbRegionPlayerId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbRegionTurnNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("DbRegionId")
-                                .HasColumnType("character varying(14)");
+                                .HasColumnType("TEXT");
 
-                            b1.Property<string>("Name")
-                                .HasMaxLength(256)
-                                .HasColumnType("character varying(256)");
+                            b1.Property<int>("Consume")
+                                .HasColumnType("INTEGER");
 
-                            b1.Property<string>("Size")
-                                .IsRequired()
-                                .HasColumnType("text");
+                            b1.Property<int>("Study")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
 
@@ -1407,9 +1483,90 @@ namespace advisor.Migrations.pgsql
                                 .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
                         });
 
+                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbRegionPlayerId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DbRegionTurnNumber")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("DbRegionId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<int>("Claim")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Entertain")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Pillage")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Tax")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("Work")
+                                .HasColumnType("INTEGER");
+
+                            b1.HasKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+
+                            b1.ToTable("Regions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                        {
+                            b1.Property<long>("DbRegionPlayerId")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<int>("DbRegionTurnNumber")
+                                .HasColumnType("INTEGER");
+
+                            b1.Property<string>("DbRegionId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("Size")
+                                .IsRequired()
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+
+                            b1.ToTable("Regions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+                        });
+
+                    b.Navigation("Expenses");
+
+                    b.Navigation("Income");
+
                     b.Navigation("Settlement");
 
                     b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegionStatisticsItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayer", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", null)
+                        .WithMany("Statistics")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbRegistration", b =>
@@ -1458,113 +1615,6 @@ namespace advisor.Migrations.pgsql
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbPlayerTurn", "Turn")
-                        .WithMany("Stats")
-                        .HasForeignKey("PlayerId", "TurnNumber")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Stats")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
-                        {
-                            b1.Property<long>("DbStatisticsPlayerId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("DbStatisticsTurnNumber")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("DbStatisticsRegionId")
-                                .HasColumnType("character varying(14)");
-
-                            b1.Property<int>("Consume")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Study")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-
-                            b1.ToTable("Statistics");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-                        });
-
-                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
-                        {
-                            b1.Property<long>("DbStatisticsPlayerId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("DbStatisticsTurnNumber")
-                                .HasColumnType("integer");
-
-                            b1.Property<string>("DbStatisticsRegionId")
-                                .HasColumnType("character varying(14)");
-
-                            b1.Property<int>("Claim")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Entertain")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Pillage")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Tax")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("integer");
-
-                            b1.Property<int>("Work")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-
-                            b1.ToTable("Statistics");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-                        });
-
-                    b.Navigation("Expenses");
-
-                    b.Navigation("Income");
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Turn");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbStatisticsItem", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany()
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbStatistics", "Statistics")
-                        .WithMany("Items")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Statistics");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayerTurn", "Turn")
@@ -1580,19 +1630,19 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbSailors", "Sailors", b1 =>
                         {
                             b1.Property<long>("DbStructurePlayerId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbStructureTurnNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("DbStructureId")
-                                .HasColumnType("character varying(24)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<int>("Current")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("Required")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbStructurePlayerId", "DbStructureTurnNumber", "DbStructureId");
 
@@ -1605,19 +1655,19 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbTransportationLoad", "Load", b1 =>
                         {
                             b1.Property<long>("DbStructurePlayerId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbStructureTurnNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("DbStructureId")
-                                .HasColumnType("character varying(24)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<int>("Max")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("Used")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbStructurePlayerId", "DbStructureTurnNumber", "DbStructureId");
 
@@ -1653,20 +1703,20 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbSkill", "Target", b1 =>
                         {
                             b1.Property<long>("DbStudyPlanPlayerId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbStudyPlanTurnNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbStudyPlanUnitNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<string>("Code")
                                 .HasMaxLength(8)
-                                .HasColumnType("character varying(8)");
+                                .HasColumnType("TEXT");
 
                             b1.Property<int?>("Level")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbStudyPlanPlayerId", "DbStudyPlanTurnNumber", "DbStudyPlanUnitNumber");
 
@@ -1683,6 +1733,36 @@ namespace advisor.Migrations.pgsql
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbTradableItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
+                        .WithMany("Markets")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", null)
+                        .WithMany("Markets")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTreasuryItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayer", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
+                        .WithMany("Treasury")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.HasOne("advisor.Persistence.DbGame", "Game")
@@ -1692,6 +1772,21 @@ namespace advisor.Migrations.pgsql
                         .IsRequired();
 
                     b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTurnStatisticsItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayer", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
+                        .WithMany("Statistics")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
@@ -1717,25 +1812,25 @@ namespace advisor.Migrations.pgsql
                     b.OwnsOne("advisor.Persistence.DbCapacity", "Capacity", b1 =>
                         {
                             b1.Property<long>("DbUnitPlayerId")
-                                .HasColumnType("bigint");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbUnitTurnNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("DbUnitNumber")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("Flying")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("Riding")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("Swimming")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.Property<int>("Walking")
-                                .HasColumnType("integer");
+                                .HasColumnType("INTEGER");
 
                             b1.HasKey("DbUnitPlayerId", "DbUnitTurnNumber", "DbUnitNumber");
 
@@ -1764,13 +1859,11 @@ namespace advisor.Migrations.pgsql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbUnit", "Unit")
+                    b.HasOne("advisor.Persistence.DbUnit", null)
                         .WithMany("Items")
                         .HasForeignKey("PlayerId", "TurnNumber", "UnitNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbAlliance", b =>
@@ -1842,9 +1935,11 @@ namespace advisor.Migrations.pgsql
 
                     b.Navigation("Reports");
 
-                    b.Navigation("Stats");
+                    b.Navigation("Statistics");
 
                     b.Navigation("Structures");
+
+                    b.Navigation("Treasury");
 
                     b.Navigation("Units");
                 });
@@ -1859,16 +1954,11 @@ namespace advisor.Migrations.pgsql
 
                     b.Navigation("Produces");
 
-                    b.Navigation("Stats");
+                    b.Navigation("Statistics");
 
                     b.Navigation("Structures");
 
                     b.Navigation("Units");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>

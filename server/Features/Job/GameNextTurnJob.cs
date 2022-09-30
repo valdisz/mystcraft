@@ -20,7 +20,7 @@ public class GameNextTurnJob {
     private readonly IServiceProvider services;
     private readonly ILogger<GameNextTurnJob> logger;
 
-    public async Task RunAsync(long gameId, int? turnNumber) {
+    public async Task RunAsync(long gameId, int? turnNumber, GameNextTurnForceInput force) {
         logger.LogInformation("Starting turn processing");
 
         var gamesRep = unit.Games;
@@ -47,13 +47,13 @@ public class GameNextTurnJob {
             await unit.BeginTransactionAsync();
 
             logger.LogInformation("Parsing reports");
-            await EnusreSuccessAsync(mediator.Send(new TurnParse(game, turnNumber.Value)));
+            await EnusreSuccessAsync(mediator.Send(new TurnParse(game, turnNumber.Value, Force: force?.Parse ?? false)));
 
             logger.LogInformation("Merging report state with game state");
-            await EnusreSuccessAsync(mediator.Send(new TurnMerge(game, turnNumber.Value)));
+            await EnusreSuccessAsync(mediator.Send(new TurnMerge(game, turnNumber.Value, Force: force?.Merge ?? false)));
 
             logger.LogInformation("Calculating statistics");
-            await EnusreSuccessAsync(mediator.Send(new TurnProcess(game, turnNumber.Value)));
+            await EnusreSuccessAsync(mediator.Send(new TurnProcess(game, turnNumber.Value, Force: force?.Process ?? false)));
 
             logger.LogInformation("Unlocking game");
             await gamesRep.UnlockAsync(gameId);

@@ -125,36 +125,6 @@
                 .ToListAsync();
         }
 
-        public async Task<Statistics> Stats(Database db, [Parent] DbPlayerTurn turn) {
-            var factionNumber = turn.Player.Number;
-            var stats = await db.Statistics
-                .AsNoTracking()
-                .InTurn(turn)
-                .Include(x => x.Items)
-                .ToListAsync();
-
-            DbIncome income = new DbIncome();
-            Dictionary<string, int> production = new Dictionary<string, int>();
-
-            foreach (var stat in stats) {
-                income.Pillage += stat.Income.Pillage;
-                income.Tax += stat.Income.Tax;
-                income.Trade += stat.Income.Trade;
-                income.Work += stat.Income.Work;
-
-                foreach (var item in stat.Items.Where(x => x.Category == StatisticsCategory.Produced)) {
-                    production[item.Code] = production.TryGetValue(item.Code, out var value)
-                        ? value + item.Amount
-                        : item.Amount;
-                }
-            }
-
-            return new Statistics {
-                Income = income,
-                Production = production.Select(x => new Item { Code = x.Key, Amount = x.Value }).ToList()
-            };
-        }
-
         public Task<List<DbStudyPlan>> StudyPlans(Database db, [Parent] DbPlayerTurn turn) {
             return db.StudyPlans
                 .AsNoTrackingWithIdentityResolution()

@@ -86,13 +86,13 @@ const UnitsTable = styled(Table)`
         font-weight: bold;
     }
 
-    .faction-nr, .structure-nr, .unit-nr, .men-count, .mounts-count {
+    .faction-nr, .structure-nr, .unit-nr, .men-count, .mounts-count, .short-items-count {
         width: 1px;
         text-align: right;
         padding-right: 4px;
     }
 
-    .faction-name, .structure-name, .unit-name, .men, .mounts {
+    .faction-name, .structure-name, .unit-name, .men, .mounts, .short-items {
         width: 1px;
         padding-left: 4px;
     }
@@ -181,8 +181,30 @@ function unitMounts(items: ItemMap<Item>) {
     }
 
     mounts.sort((a, b) => b.amount - a.amount)
-    const total = mounts.map(x => x.amount).reduce((value, next) => value + next, 0)
     const names = mounts.map(x => x.name).join(', ')
+
+    return names
+}
+
+function unitWeaponsCount(items: ItemMap<Item>) {
+    const weapons = items.filter(x => x.info.category === 'weapon')
+    if (weapons.length === 0) {
+        return null
+    }
+
+    const total = weapons.map(x => x.amount).reduce((value, next) => value + next, 0)
+
+    return total
+}
+
+function unitWeapons(items: ItemMap<Item>) {
+    const weapons = items.filter(x => x.info.category === 'weapon')
+    if (weapons.length === 0) {
+        return null
+    }
+
+    weapons.sort((a, b) => b.amount - a.amount)
+    const names = weapons.map(x => x.name).join(', ')
 
     return names
 }
@@ -384,6 +406,8 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                             <TableCell className='men-count'></TableCell>
                             <TableCell className='men'>Men</TableCell>
                             <TableCell className='mounts-count'></TableCell>
+                            <TableCell className='short-items'>Weapons</TableCell>
+                            <TableCell className='short-items-count'></TableCell>
                             <TableCell className='mounts'>Mounts</TableCell>
                             <TableCell className='movement'>Movement</TableCell>
                             <TableCell className='weight'>Weight</TableCell>
@@ -418,6 +442,12 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
                                 </TableCell>
                                 <TableCell className='men'>
                                     { unitMen(unit.inventory.items) }
+                                </TableCell>
+                                <TableCell className='short-items-count'>
+                                    { unitWeaponsCount(unit.inventory.items) }
+                                </TableCell>
+                                <TableCell className='short-items'>
+                                    { unitWeapons(unit.inventory.items) }
                                 </TableCell>
                                 <TableCell className='mounts-count'>
                                     { unitMountsCount(unit.inventory.items) }
@@ -469,7 +499,7 @@ const StructuresComponent = observer(() => {
     return <StructuresContainer>
         <Stack gap={2} sx={{ minHeight: 0, mb: 2 }}>
             {game.structures.map((row) => {
-                return <Box sx={{ px: 2 }} key={row.id}>
+                return <Box mx={2} my={1} key={row.id}>
                     <Stack gap={2} direction='row' alignItems='center'>
                         <Typography variant='h6'>{row.num}</Typography>
                         <Stack flex={1}>

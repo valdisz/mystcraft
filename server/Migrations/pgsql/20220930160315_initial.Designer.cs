@@ -2,7 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -10,10 +9,10 @@ using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.mssql
+namespace advisor.Migrations.pgsql
 {
-    [DbContext(typeof(MsSqlDatabase))]
-    [Migration("20220925201951_initial")]
+    [DbContext(typeof(PgSqlDatabase))]
+    [Migration("20220930160315_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,9 +20,9 @@ namespace advisor.Migrations.mssql
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.8")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
                 {
@@ -31,22 +30,22 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("FactionName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Json")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Source")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("PlayerId", "TurnNumber", "FactionNumber");
 
@@ -57,10 +56,9 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
@@ -68,7 +66,7 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -86,16 +84,16 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<bool>("CanInvite")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("Owner")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("ShareMap")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("TeachMages")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("PlayerId", "AllianceId");
 
@@ -108,10 +106,9 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
@@ -121,15 +118,15 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("Text")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasColumnType("character varying(32)");
 
                     b.HasKey("Id");
 
@@ -144,17 +141,17 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("TargetFactionNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Stance")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("PlayerId", "TurnNumber", "FactionNumber", "TargetFactionNumber");
 
@@ -165,19 +162,18 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Battle")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
@@ -185,24 +181,24 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("X")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Y")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Z")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -217,56 +213,56 @@ namespace advisor.Migrations.mssql
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<int?>("Amount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ItemCode")
                         .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("character varying(8)");
 
                     b.Property<string>("ItemName")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("ItemPrice")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int?>("MissingUnitNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("UnitName")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<int?>("UnitNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -285,43 +281,43 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("OriginRegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<string>("TargetRegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<string>("Direction")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int>("X")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Y")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Z")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber", "OriginRegionId", "TargetRegionId");
 
@@ -336,18 +332,18 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Number")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("DefaultAttitude")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
 
@@ -358,42 +354,41 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("EngineId")
                         .HasColumnType("bigint");
 
                     b.Property<int?>("LastTurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("NextTurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Options")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Ruleset")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -409,22 +404,21 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<byte[]>("Contents")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("bytea");
 
                     b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.HasKey("Id");
 
@@ -434,49 +428,19 @@ namespace advisor.Migrations.mssql
                     b.ToTable("GameEngines");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
-                {
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RegionId")
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
-
-                    b.Property<string>("Market")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Code")
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
-
-                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Market", "Code");
-
-                    b.ToTable("Markets");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbOrders", b =>
                 {
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UnitNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Orders")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber");
 
@@ -487,33 +451,32 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsQuit")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("LastTurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<int?>("NextTurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Number")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Password")
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
@@ -533,27 +496,33 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FactionName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("FactionNumber")
+                        .HasColumnType("integer");
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsProcessed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTimeOffset?>("OrdersSubmittedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("ReadyAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset?>("TimesSubmittedAt")
-                        .HasColumnType("datetimeoffset");
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Unclaimed")
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber");
 
@@ -568,18 +537,18 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<string>("Code")
                         .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("character varying(8)");
 
                     b.Property<int>("Amount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber", "RegionId", "Code");
 
@@ -592,88 +561,123 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Id")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<int>("Entertainment")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Explored")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("Gate")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Label")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("LastVisitedAt")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Population")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Province")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Race")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int>("Tax")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Terrain")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int>("TotalWages")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<double>("Wages")
-                        .HasColumnType("float");
+                        .HasColumnType("double precision");
 
                     b.Property<int>("X")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Y")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Z")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
                     b.ToTable("Regions");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbRegionStatisticsItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("RegionId")
+                        .HasColumnType("character varying(14)");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
+
+                    b.ToTable("RegionStatistics");
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbRegistration", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("Password")
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -693,26 +697,26 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<byte[]>("Data")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("bytea");
 
                     b.Property<string>("Error")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<int>("FactionNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsMerged")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<byte[]>("Json")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("bytea");
 
                     b.HasKey("PlayerId", "TurnNumber");
 
@@ -721,120 +725,65 @@ namespace advisor.Migrations.mssql
                     b.ToTable("Reports");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
-                {
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RegionId")
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
-
-                    b.HasKey("PlayerId", "TurnNumber", "RegionId");
-
-                    b.ToTable("Statistics");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbStatisticsItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
-
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("RegionId")
-                        .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
-
-                    b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PlayerId", "TurnNumber", "RegionId");
-
-                    b.ToTable("StatisticsItems");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Id")
                         .HasMaxLength(24)
-                        .HasColumnType("nvarchar(24)");
+                        .HasColumnType("character varying(24)");
 
                     b.Property<string>("Contents")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Flags")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("Needs")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Number")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<string>("SailDirections")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("Sequence")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("Speed")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<int>("X")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Y")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Z")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber", "Id");
 
@@ -849,21 +798,80 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UnitNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Study")
                         .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Teach")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber");
 
                     b.ToTable("StudyPlans");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTradableItem", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RegionId")
+                        .HasMaxLength(14)
+                        .HasColumnType("character varying(14)");
+
+                    b.Property<string>("Market")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PlayerId", "TurnNumber", "RegionId", "Market", "Code");
+
+                    b.ToTable("Markets");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTreasuryItem", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Max")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Total")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PlayerId", "TurnNumber", "Code");
+
+                    b.ToTable("Treasury");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
@@ -872,20 +880,53 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("Number")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<byte[]>("GameData")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("bytea");
 
                     b.Property<byte[]>("PlayerData")
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("bytea");
 
                     b.Property<int>("State")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("GameId", "Number");
 
                     b.ToTable("Turns");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTurnStatisticsItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TurnNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlayerId", "TurnNumber");
+
+                    b.ToTable("TurnStatistics");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
@@ -894,71 +935,71 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Number")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CanStudy")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("CombatSpell")
                         .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("character varying(8)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("FactionNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Flags")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<bool>("OnGuard")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Orders")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("ReadyItem")
                         .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("character varying(8)");
 
                     b.Property<string>("RegionId")
                         .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("character varying(14)");
 
                     b.Property<int>("Sequence")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Skills")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("StrcutureId")
                         .HasMaxLength(24)
-                        .HasColumnType("nvarchar(24)");
+                        .HasColumnType("character varying(24)");
 
                     b.Property<int?>("StructureNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("Weight")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("X")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Y")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Z")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("PlayerId", "TurnNumber", "Number");
 
@@ -977,26 +1018,26 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<int>("TurnNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UnitNumber")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Code")
                         .HasMaxLength(8)
-                        .HasColumnType("nvarchar(8)");
+                        .HasColumnType("character varying(8)");
 
                     b.Property<int>("Amount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Illusion")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Props")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("Unfinished")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("PlayerId", "TurnNumber", "UnitNumber", "Code");
 
@@ -1007,30 +1048,29 @@ namespace advisor.Migrations.mssql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                        .HasColumnType("bigint");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Algorithm")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Digest")
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("Roles")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("jsonb");
 
                     b.Property<string>("Salt")
                         .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasColumnType("character varying(32)");
 
                     b.HasKey("Id");
 
@@ -1143,10 +1183,10 @@ namespace advisor.Migrations.mssql
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)");
+                                .HasColumnType("character varying(256)");
 
                             b1.Property<int>("Number")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbBattleId");
 
@@ -1164,10 +1204,10 @@ namespace advisor.Migrations.mssql
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)");
+                                .HasColumnType("character varying(256)");
 
                             b1.Property<int>("Number")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbBattleId");
 
@@ -1243,21 +1283,21 @@ namespace advisor.Migrations.mssql
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbExitTurnNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("DbExitOriginRegionId")
-                                .HasColumnType("nvarchar(14)");
+                                .HasColumnType("character varying(14)");
 
                             b1.Property<string>("DbExitTargetRegionId")
-                                .HasColumnType("nvarchar(14)");
+                                .HasColumnType("character varying(14)");
 
                             b1.Property<string>("Name")
                                 .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)");
+                                .HasColumnType("character varying(256)");
 
                             b1.Property<string>("Size")
                                 .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                                .HasColumnType("text");
 
                             b1.HasKey("DbExitPlayerId", "DbExitTurnNumber", "DbExitOriginRegionId", "DbExitTargetRegionId");
 
@@ -1294,23 +1334,6 @@ namespace advisor.Migrations.mssql
                         .HasForeignKey("EngineId");
 
                     b.Navigation("Engine");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbMarketItem", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
-                        .WithMany("Markets")
-                        .HasForeignKey("PlayerId", "TurnNumber")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Markets")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbOrders", b =>
@@ -1361,6 +1384,69 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
+                        {
+                            b1.Property<long>("DbPlayerTurnPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbPlayerTurnTurnNumber")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Consume")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Study")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+
+                            b1.ToTable("PlayerTurns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbPlayerTurnPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbPlayerTurnTurnNumber")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Claim")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Entertain")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Pillage")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Tax")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Work")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+
+                            b1.ToTable("PlayerTurns");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbPlayerTurnPlayerId", "DbPlayerTurnTurnNumber");
+                        });
+
+                    b.Navigation("Expenses");
+
+                    b.Navigation("Income");
+
                     b.Navigation("Player");
                 });
 
@@ -1372,13 +1458,11 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
+                    b.HasOne("advisor.Persistence.DbRegion", null)
                         .WithMany("Produces")
                         .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Region");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbRegion", b =>
@@ -1389,24 +1473,25 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
                         {
                             b1.Property<long>("DbRegionPlayerId")
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbRegionTurnNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("DbRegionId")
-                                .HasColumnType("nvarchar(14)");
+                                .HasColumnType("character varying(14)");
 
-                            b1.Property<string>("Name")
-                                .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)");
+                            b1.Property<int>("Consume")
+                                .HasColumnType("integer");
 
-                            b1.Property<string>("Size")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
+                            b1.Property<int>("Study")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
 
@@ -1416,9 +1501,90 @@ namespace advisor.Migrations.mssql
                                 .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
                         });
 
+                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
+                        {
+                            b1.Property<long>("DbRegionPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbRegionTurnNumber")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("DbRegionId")
+                                .HasColumnType("character varying(14)");
+
+                            b1.Property<int>("Claim")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Entertain")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Pillage")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Tax")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Trade")
+                                .HasColumnType("integer");
+
+                            b1.Property<int>("Work")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+
+                            b1.ToTable("Regions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+                        });
+
+                    b.OwnsOne("advisor.Persistence.DbSettlement", "Settlement", b1 =>
+                        {
+                            b1.Property<long>("DbRegionPlayerId")
+                                .HasColumnType("bigint");
+
+                            b1.Property<int>("DbRegionTurnNumber")
+                                .HasColumnType("integer");
+
+                            b1.Property<string>("DbRegionId")
+                                .HasColumnType("character varying(14)");
+
+                            b1.Property<string>("Name")
+                                .HasMaxLength(256)
+                                .HasColumnType("character varying(256)");
+
+                            b1.Property<string>("Size")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+
+                            b1.ToTable("Regions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DbRegionPlayerId", "DbRegionTurnNumber", "DbRegionId");
+                        });
+
+                    b.Navigation("Expenses");
+
+                    b.Navigation("Income");
+
                     b.Navigation("Settlement");
 
                     b.Navigation("Turn");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbRegionStatisticsItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayer", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", null)
+                        .WithMany("Statistics")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbRegistration", b =>
@@ -1467,113 +1633,6 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Turn");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbPlayerTurn", "Turn")
-                        .WithMany("Stats")
-                        .HasForeignKey("PlayerId", "TurnNumber")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany("Stats")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.OwnsOne("advisor.Persistence.DbExpenses", "Expenses", b1 =>
-                        {
-                            b1.Property<long>("DbStatisticsPlayerId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("DbStatisticsTurnNumber")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("DbStatisticsRegionId")
-                                .HasColumnType("nvarchar(14)");
-
-                            b1.Property<int>("Consume")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Study")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("int");
-
-                            b1.HasKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-
-                            b1.ToTable("Statistics");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-                        });
-
-                    b.OwnsOne("advisor.Persistence.DbIncome", "Income", b1 =>
-                        {
-                            b1.Property<long>("DbStatisticsPlayerId")
-                                .HasColumnType("bigint");
-
-                            b1.Property<int>("DbStatisticsTurnNumber")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("DbStatisticsRegionId")
-                                .HasColumnType("nvarchar(14)");
-
-                            b1.Property<int>("Claim")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Entertain")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Pillage")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Tax")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Trade")
-                                .HasColumnType("int");
-
-                            b1.Property<int>("Work")
-                                .HasColumnType("int");
-
-                            b1.HasKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-
-                            b1.ToTable("Statistics");
-
-                            b1.WithOwner()
-                                .HasForeignKey("DbStatisticsPlayerId", "DbStatisticsTurnNumber", "DbStatisticsRegionId");
-                        });
-
-                    b.Navigation("Expenses");
-
-                    b.Navigation("Income");
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Turn");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbStatisticsItem", b =>
-                {
-                    b.HasOne("advisor.Persistence.DbRegion", "Region")
-                        .WithMany()
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("advisor.Persistence.DbStatistics", "Statistics")
-                        .WithMany("Items")
-                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Region");
-
-                    b.Navigation("Statistics");
-                });
-
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayerTurn", "Turn")
@@ -1592,16 +1651,16 @@ namespace advisor.Migrations.mssql
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbStructureTurnNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("DbStructureId")
-                                .HasColumnType("nvarchar(24)");
+                                .HasColumnType("character varying(24)");
 
                             b1.Property<int>("Current")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Required")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbStructurePlayerId", "DbStructureTurnNumber", "DbStructureId");
 
@@ -1617,16 +1676,16 @@ namespace advisor.Migrations.mssql
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbStructureTurnNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("DbStructureId")
-                                .HasColumnType("nvarchar(24)");
+                                .HasColumnType("character varying(24)");
 
                             b1.Property<int>("Max")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Used")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbStructurePlayerId", "DbStructureTurnNumber", "DbStructureId");
 
@@ -1665,17 +1724,17 @@ namespace advisor.Migrations.mssql
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbStudyPlanTurnNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("DbStudyPlanUnitNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<string>("Code")
                                 .HasMaxLength(8)
-                                .HasColumnType("nvarchar(8)");
+                                .HasColumnType("character varying(8)");
 
                             b1.Property<int?>("Level")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbStudyPlanPlayerId", "DbStudyPlanTurnNumber", "DbStudyPlanUnitNumber");
 
@@ -1692,6 +1751,36 @@ namespace advisor.Migrations.mssql
                     b.Navigation("Unit");
                 });
 
+            modelBuilder.Entity("advisor.Persistence.DbTradableItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
+                        .WithMany("Markets")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbRegion", null)
+                        .WithMany("Markets")
+                        .HasForeignKey("PlayerId", "TurnNumber", "RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTreasuryItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayer", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
+                        .WithMany("Treasury")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("advisor.Persistence.DbTurn", b =>
                 {
                     b.HasOne("advisor.Persistence.DbGame", "Game")
@@ -1701,6 +1790,21 @@ namespace advisor.Migrations.mssql
                         .IsRequired();
 
                     b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbTurnStatisticsItem", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbPlayer", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("advisor.Persistence.DbPlayerTurn", null)
+                        .WithMany("Statistics")
+                        .HasForeignKey("PlayerId", "TurnNumber")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbUnit", b =>
@@ -1729,22 +1833,22 @@ namespace advisor.Migrations.mssql
                                 .HasColumnType("bigint");
 
                             b1.Property<int>("DbUnitTurnNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("DbUnitNumber")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Flying")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Riding")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Swimming")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.Property<int>("Walking")
-                                .HasColumnType("int");
+                                .HasColumnType("integer");
 
                             b1.HasKey("DbUnitPlayerId", "DbUnitTurnNumber", "DbUnitNumber");
 
@@ -1773,13 +1877,11 @@ namespace advisor.Migrations.mssql
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("advisor.Persistence.DbUnit", "Unit")
+                    b.HasOne("advisor.Persistence.DbUnit", null)
                         .WithMany("Items")
                         .HasForeignKey("PlayerId", "TurnNumber", "UnitNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbAlliance", b =>
@@ -1851,9 +1953,11 @@ namespace advisor.Migrations.mssql
 
                     b.Navigation("Reports");
 
-                    b.Navigation("Stats");
+                    b.Navigation("Statistics");
 
                     b.Navigation("Structures");
+
+                    b.Navigation("Treasury");
 
                     b.Navigation("Units");
                 });
@@ -1868,16 +1972,11 @@ namespace advisor.Migrations.mssql
 
                     b.Navigation("Produces");
 
-                    b.Navigation("Stats");
+                    b.Navigation("Statistics");
 
                     b.Navigation("Structures");
 
                     b.Navigation("Units");
-                });
-
-            modelBuilder.Entity("advisor.Persistence.DbStatistics", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbStructure", b =>

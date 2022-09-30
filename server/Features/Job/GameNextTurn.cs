@@ -8,9 +8,15 @@ using advisor.Persistence;
 using Hangfire;
 using System;
 
-public record GameNextTurn(long GameId, int? TurnNumber = null): IRequest<GameNextTurnResult>;
+public record GameNextTurn(long GameId, int? TurnNumber = null, GameNextTurnForceInput Force = null): IRequest<GameNextTurnResult>;
 
 public record GameNextTurnResult(bool IsSuccess, string Error = null, string JobId = null) : MutationResult(IsSuccess, Error);
+
+public class GameNextTurnForceInput {
+    public bool Parse { get; set; }
+    public bool Process { get; set; }
+    public bool Merge { get; set; }
+}
 
 public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnResult> {
     public GameNextTurnHandler(IUnitOfWork unit, IBackgroundJobClient jobs) {
@@ -37,7 +43,7 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
         var turnNumber = request.TurnNumber ?? game.NextTurnNumber;
 
         try {
-            var jobId = jobs.Enqueue<GameNextTurnJob>(x => x.RunAsync(gameId, turnNumber));
+            var jobId = jobs.Enqueue<GameNextTurnJob>(x => x.RunAsync(gameId, turnNumber, request.Force));
             return new GameNextTurnResult(true, JobId: jobId);
         }
         catch (Exception ex) {

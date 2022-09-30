@@ -67,8 +67,12 @@ type AllianceMember {
 
 type AllianceMemberTurn {
   number: Int!
-  stats: Statistics
   units(filter: UnitsFilterInput, skip: Int, take: Int): UnitCollectionSegment
+}
+
+interface AnItem {
+  amount: Int!
+  code: String
 }
 
 enum ApplyPolicy {
@@ -100,15 +104,20 @@ type Battle {
   defender: Participant
   defenders: [BattleUnit]
   location: Location
-  rose: [Item]
+  rose: [BattleItem]
   rounds: [BattleRound]
-  spoils: [Item]
+  spoils: [BattleItem]
   statistics: String
 }
 
 type BattleFaction {
   name: String
   number: Int!
+}
+
+type BattleItem implements AnItem {
+  amount: Int!
+  code: String
 }
 
 type BattleRound {
@@ -125,7 +134,7 @@ type BattleUnit {
   description: String
   faction: BattleFaction
   flags: [String]
-  items: [Item]
+  items: [BattleItem]
   name: String
   number: Int!
   skills: [BattleSkill]
@@ -234,6 +243,13 @@ type Exit {
   z: Int!
 }
 
+type Expenses {
+  consume: Int!
+  study: Int!
+  total: Int!
+  trade: Int!
+}
+
 type Faction implements Node {
   attitudes: [Attitude]
   defaultAttitude: Stance
@@ -321,6 +337,12 @@ type GameJoinRemoteResult {
   player: Player
 }
 
+input GameNextTurnForceInput {
+  merge: Boolean!
+  parse: Boolean!
+  process: Boolean!
+}
+
 type GameNextTurnResult {
   error: String
   isSuccess: Boolean!
@@ -393,9 +415,9 @@ type Income {
   work: Int!
 }
 
-type Item {
+type Item implements AnItem {
   amount: Int!
-  code: String
+  code: String!
 }
 
 enum JobState {
@@ -448,7 +470,7 @@ type Mutation {
   gameEngineCreate(file: Upload, name: String): GameEngineCreateResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
   gameJoinRemote(gameId: ID!, password: String, playerId: ID!): GameJoinRemoteResult
-  gameNextTurn(gameId: ID!): GameNextTurnResult
+  gameNextTurn(force: GameNextTurnForceInput, gameId: ID!, turnNumber: Int): GameNextTurnResult
   gameOptionsSet(gameId: ID!, options: GameOptionsInput): GameOptionsSetResult
   gamePause(gameId: ID!): GamePauseResult
   gameScheduleSet(gameId: ID!, schedule: String): GameScheduleSetResult
@@ -509,22 +531,27 @@ type PlayerQuitResult {
 type PlayerTurn implements Node {
   battles: [Battle]
   events(skip: Int, take: Int): EventCollectionSegment
+  expenses: Expenses
+  factionName: String!
+  factionNumber: Int!
   factions: [Faction]
   id: ID!
+  income: Income
   isOrdersSubmitted: Boolean!
   isProcessed: Boolean!
   isReady: Boolean!
   isTimesSubmitted: Boolean!
-  name: String!
   ordersSubmittedAt: DateTime
   readyAt: DateTime
   regions(skip: Int, take: Int, withStructures: Boolean! = false): RegionCollectionSegment
   reports: [AditionalReport]
-  stats: Statistics
+  statistics: [TurnStatisticsItem]
   structures(skip: Int, take: Int): StructureCollectionSegment
   studyPlans: [StudyPlan]
   timesSubmittedAt: DateTime
+  treasury: [TreasuryItem]
   turnNumber: Int!
+  unclaimed: Int!
   units(filter: UnitsFilterInput, skip: Int, take: Int): UnitCollectionSegment
 }
 
@@ -559,10 +586,12 @@ type Query {
 type Region implements Node {
   entertainment: Int!
   exits: [Exit]
+  expenses: Expenses
   explored: Boolean!
   forSale: [TradableItem]
   gate: Int
   id: ID!
+  income: Income
   label: String!
   lastVisitedAt: Int
   population: Int!
@@ -570,6 +599,7 @@ type Region implements Node {
   province: String!
   race: String
   settlement: Settlement
+  statistics: [RegionStatisticsItem]
   structures: [Structure]
   tax: Int!
   terrain: String!
@@ -587,6 +617,12 @@ type RegionCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type RegionStatisticsItem implements AnItem {
+  amount: Int!
+  category: StatisticsCategory!
+  code: String!
 }
 
 type Registration {
@@ -632,9 +668,11 @@ enum Stance {
   UNFRIENDLY
 }
 
-type Statistics {
-  income: Income
-  production: [Item]
+enum StatisticsCategory {
+  BOUGHT
+  CONSUMED
+  PRODUCED
+  SOLD
 }
 
 type Structure implements Node {
@@ -677,7 +715,7 @@ type StudyPlanResult {
   studyPlan: StudyPlan
 }
 
-type TradableItem {
+type TradableItem implements AnItem {
   amount: Int!
   code: String!
   market: Market!
@@ -687,6 +725,14 @@ type TradableItem {
 type TransportationLoad {
   max: Int!
   used: Int!
+}
+
+type TreasuryItem implements AnItem {
+  amount: Int!
+  code: String!
+  max: Int!
+  rank: Int!
+  total: Int!
 }
 
 type Turn implements Node {
@@ -701,6 +747,12 @@ enum TurnState {
   READY
 }
 
+type TurnStatisticsItem implements AnItem {
+  amount: Int!
+  category: StatisticsCategory!
+  code: String!
+}
+
 type Unit implements Node {
   canStudy: [String]
   capacity: Capacity
@@ -709,7 +761,7 @@ type Unit implements Node {
   factionNumber: Int
   flags: [String]
   id: ID!
-  items: [Item]!
+  items: [UnitItem]!
   name: String!
   number: Int!
   onGuard: Boolean!
@@ -731,6 +783,14 @@ type UnitCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type UnitItem implements AnItem {
+  amount: Int!
+  code: String!
+  illusion: Boolean!
+  props: String
+  unfinished: Boolean!
 }
 
 type UnitOrdersSetResult {

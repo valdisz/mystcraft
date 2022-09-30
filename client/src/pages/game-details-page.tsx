@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom'
 import { PageTitle } from '../components'
 import { useParams } from 'react-router'
 import { useStore, Player, TurnState } from '../store'
+import { GameStatus } from '../schema'
 
 function GameDetailsPage() {
     const { gameDetails } = useStore()
@@ -82,13 +83,23 @@ function GameDetailsPage() {
         <PageTitle
             title={gameDetails.name || 'Loading...'}
             back='/'
-            actions={gameDetails.canPlay && <Button variant='outlined' color='primary' size='large' component={Link} to={`/play/${gameId}`}>Play</Button>}
+            actions={<GameActionsObserved />}
         />
         { content }
         <ClaimFactionPromptObserved />
     </Container>
 }
 export default observer(GameDetailsPage)
+
+function GameActions() {
+    const { gameDetails } = useStore()
+    const { gameId } = useParams()
+
+    if (gameDetails.status === GameStatus.New) return <Button variant='outlined' color='primary' size='large' onClick={gameDetails.start}>Start</Button>
+
+    if (gameDetails.canPlay) return <Button variant='outlined' color='primary' size='large' component={Link} to={`/play/${gameId}`}>Play</Button>
+}
+const GameActionsObserved = observer(GameActions)
 
 const CenterCardContent = styled(CardContent)({
     textAlign: 'center'

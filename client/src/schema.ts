@@ -67,7 +67,6 @@ export type AllianceMemberTurnArgs = {
 export type AllianceMemberTurn = {
   __typename?: 'AllianceMemberTurn';
   number: Scalars['Int'];
-  stats?: Maybe<Statistics>;
   units?: Maybe<UnitCollectionSegment>;
 };
 
@@ -76,6 +75,11 @@ export type AllianceMemberTurnUnitsArgs = {
   filter?: InputMaybe<UnitsFilterInput>;
   skip?: InputMaybe<Scalars['Int']>;
   take?: InputMaybe<Scalars['Int']>;
+};
+
+export type AnItem = {
+  amount: Scalars['Int'];
+  code?: Maybe<Scalars['String']>;
 };
 
 export enum ApplyPolicy {
@@ -111,9 +115,9 @@ export type Battle = {
   defender?: Maybe<Participant>;
   defenders?: Maybe<Array<Maybe<BattleUnit>>>;
   location?: Maybe<Location>;
-  rose?: Maybe<Array<Maybe<Item>>>;
+  rose?: Maybe<Array<Maybe<BattleItem>>>;
   rounds?: Maybe<Array<Maybe<BattleRound>>>;
-  spoils?: Maybe<Array<Maybe<Item>>>;
+  spoils?: Maybe<Array<Maybe<BattleItem>>>;
   statistics?: Maybe<Scalars['String']>;
 };
 
@@ -121,6 +125,12 @@ export type BattleFaction = {
   __typename?: 'BattleFaction';
   name?: Maybe<Scalars['String']>;
   number: Scalars['Int'];
+};
+
+export type BattleItem = AnItem & {
+  __typename?: 'BattleItem';
+  amount: Scalars['Int'];
+  code?: Maybe<Scalars['String']>;
 };
 
 export type BattleRound = {
@@ -140,7 +150,7 @@ export type BattleUnit = {
   description?: Maybe<Scalars['String']>;
   faction?: Maybe<BattleFaction>;
   flags?: Maybe<Array<Maybe<Scalars['String']>>>;
-  items?: Maybe<Array<Maybe<Item>>>;
+  items?: Maybe<Array<Maybe<BattleItem>>>;
   name?: Maybe<Scalars['String']>;
   number: Scalars['Int'];
   skills?: Maybe<Array<Maybe<BattleSkill>>>;
@@ -247,6 +257,14 @@ export type Exit = {
   z: Scalars['Int'];
 };
 
+export type Expenses = {
+  __typename?: 'Expenses';
+  consume: Scalars['Int'];
+  study: Scalars['Int'];
+  total: Scalars['Int'];
+  trade: Scalars['Int'];
+};
+
 export type Faction = Node & {
   __typename?: 'Faction';
   attitudes?: Maybe<Array<Maybe<Attitude>>>;
@@ -351,6 +369,12 @@ export type GameJoinRemoteResult = {
   player?: Maybe<Player>;
 };
 
+export type GameNextTurnForceInput = {
+  merge: Scalars['Boolean'];
+  parse: Scalars['Boolean'];
+  process: Scalars['Boolean'];
+};
+
 export type GameNextTurnResult = {
   __typename?: 'GameNextTurnResult';
   error?: Maybe<Scalars['String']>;
@@ -430,10 +454,10 @@ export type Income = {
   work: Scalars['Int'];
 };
 
-export type Item = {
+export type Item = AnItem & {
   __typename?: 'Item';
   amount: Scalars['Int'];
-  code?: Maybe<Scalars['String']>;
+  code: Scalars['String'];
 };
 
 export enum JobState {
@@ -562,7 +586,9 @@ export type MutationGameJoinRemoteArgs = {
 
 
 export type MutationGameNextTurnArgs = {
+  force?: InputMaybe<GameNextTurnForceInput>;
   gameId: Scalars['ID'];
+  turnNumber?: InputMaybe<Scalars['Int']>;
 };
 
 
@@ -690,22 +716,27 @@ export type PlayerTurn = Node & {
   __typename?: 'PlayerTurn';
   battles?: Maybe<Array<Maybe<Battle>>>;
   events?: Maybe<EventCollectionSegment>;
+  expenses?: Maybe<Expenses>;
+  factionName: Scalars['String'];
+  factionNumber: Scalars['Int'];
   factions?: Maybe<Array<Maybe<Faction>>>;
   id: Scalars['ID'];
+  income?: Maybe<Income>;
   isOrdersSubmitted: Scalars['Boolean'];
   isProcessed: Scalars['Boolean'];
   isReady: Scalars['Boolean'];
   isTimesSubmitted: Scalars['Boolean'];
-  name: Scalars['String'];
   ordersSubmittedAt?: Maybe<Scalars['DateTime']>;
   readyAt?: Maybe<Scalars['DateTime']>;
   regions?: Maybe<RegionCollectionSegment>;
   reports?: Maybe<Array<Maybe<AditionalReport>>>;
-  stats?: Maybe<Statistics>;
+  statistics?: Maybe<Array<Maybe<TurnStatisticsItem>>>;
   structures?: Maybe<StructureCollectionSegment>;
   studyPlans?: Maybe<Array<Maybe<StudyPlan>>>;
   timesSubmittedAt?: Maybe<Scalars['DateTime']>;
+  treasury?: Maybe<Array<Maybe<TreasuryItem>>>;
   turnNumber: Scalars['Int'];
+  unclaimed: Scalars['Int'];
   units?: Maybe<UnitCollectionSegment>;
 };
 
@@ -793,10 +824,12 @@ export type Region = Node & {
   __typename?: 'Region';
   entertainment: Scalars['Int'];
   exits?: Maybe<Array<Maybe<Exit>>>;
+  expenses?: Maybe<Expenses>;
   explored: Scalars['Boolean'];
   forSale?: Maybe<Array<Maybe<TradableItem>>>;
   gate?: Maybe<Scalars['Int']>;
   id: Scalars['ID'];
+  income?: Maybe<Income>;
   label: Scalars['String'];
   lastVisitedAt?: Maybe<Scalars['Int']>;
   population: Scalars['Int'];
@@ -804,6 +837,7 @@ export type Region = Node & {
   province: Scalars['String'];
   race?: Maybe<Scalars['String']>;
   settlement?: Maybe<Settlement>;
+  statistics?: Maybe<Array<Maybe<RegionStatisticsItem>>>;
   structures?: Maybe<Array<Maybe<Structure>>>;
   tax: Scalars['Int'];
   terrain: Scalars['String'];
@@ -821,6 +855,13 @@ export type RegionCollectionSegment = {
   /** Information to aid in pagination. */
   pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
+};
+
+export type RegionStatisticsItem = AnItem & {
+  __typename?: 'RegionStatisticsItem';
+  amount: Scalars['Int'];
+  category: StatisticsCategory;
+  code: Scalars['String'];
 };
 
 export type Registration = {
@@ -871,11 +912,12 @@ export enum Stance {
   Unfriendly = 'UNFRIENDLY'
 }
 
-export type Statistics = {
-  __typename?: 'Statistics';
-  income?: Maybe<Income>;
-  production?: Maybe<Array<Maybe<Item>>>;
-};
+export enum StatisticsCategory {
+  Bought = 'BOUGHT',
+  Consumed = 'CONSUMED',
+  Produced = 'PRODUCED',
+  Sold = 'SOLD'
+}
 
 export type Structure = Node & {
   __typename?: 'Structure';
@@ -920,7 +962,7 @@ export type StudyPlanResult = {
   studyPlan?: Maybe<StudyPlan>;
 };
 
-export type TradableItem = {
+export type TradableItem = AnItem & {
   __typename?: 'TradableItem';
   amount: Scalars['Int'];
   code: Scalars['String'];
@@ -932,6 +974,15 @@ export type TransportationLoad = {
   __typename?: 'TransportationLoad';
   max: Scalars['Int'];
   used: Scalars['Int'];
+};
+
+export type TreasuryItem = AnItem & {
+  __typename?: 'TreasuryItem';
+  amount: Scalars['Int'];
+  code: Scalars['String'];
+  max: Scalars['Int'];
+  rank: Scalars['Int'];
+  total: Scalars['Int'];
 };
 
 export type Turn = Node & {
@@ -947,6 +998,13 @@ export enum TurnState {
   Ready = 'READY'
 }
 
+export type TurnStatisticsItem = AnItem & {
+  __typename?: 'TurnStatisticsItem';
+  amount: Scalars['Int'];
+  category: StatisticsCategory;
+  code: Scalars['String'];
+};
+
 export type Unit = Node & {
   __typename?: 'Unit';
   canStudy?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -956,7 +1014,7 @@ export type Unit = Node & {
   factionNumber?: Maybe<Scalars['Int']>;
   flags?: Maybe<Array<Maybe<Scalars['String']>>>;
   id: Scalars['ID'];
-  items: Array<Maybe<Item>>;
+  items: Array<Maybe<UnitItem>>;
   name: Scalars['String'];
   number: Scalars['Int'];
   onGuard: Scalars['Boolean'];
@@ -978,6 +1036,15 @@ export type UnitCollectionSegment = {
   /** Information to aid in pagination. */
   pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
+};
+
+export type UnitItem = AnItem & {
+  __typename?: 'UnitItem';
+  amount: Scalars['Int'];
+  code: Scalars['String'];
+  illusion: Scalars['Boolean'];
+  props?: Maybe<Scalars['String']>;
+  unfinished: Scalars['Boolean'];
 };
 
 export type UnitOrdersSetResult = {
@@ -1015,9 +1082,9 @@ export type BattleRoundFragment = { __typename?: 'BattleRound', log?: string | n
 
 export type BattleSkillFragment = { __typename?: 'BattleSkill', name?: string | null, level: number };
 
-export type BattleUnitFragment = { __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null };
+export type BattleUnitFragment = { __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null };
 
-export type BattleFragment = { __typename?: 'Battle', statistics?: string | null, location?: { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null } | null, attacker?: { __typename?: 'Participant', number: number, name?: string | null } | null, defender?: { __typename?: 'Participant', number: number, name?: string | null } | null, attackers?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, defenders?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, rounds?: Array<{ __typename?: 'BattleRound', log?: string | null, statistics?: string | null } | null> | null, casualties?: Array<{ __typename?: 'Casualties', lost: number, damagedUnits?: Array<number> | null, army?: { __typename?: 'Participant', number: number, name?: string | null } | null } | null> | null, spoils?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, rose?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null };
+export type BattleFragment = { __typename?: 'Battle', statistics?: string | null, location?: { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null } | null, attacker?: { __typename?: 'Participant', number: number, name?: string | null } | null, defender?: { __typename?: 'Participant', number: number, name?: string | null } | null, attackers?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, defenders?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, rounds?: Array<{ __typename?: 'BattleRound', log?: string | null, statistics?: string | null } | null> | null, casualties?: Array<{ __typename?: 'Casualties', lost: number, damagedUnits?: Array<number> | null, army?: { __typename?: 'Participant', number: number, name?: string | null } | null } | null> | null, spoils?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, rose?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null };
 
 export type CapacityFragment = { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number };
 
@@ -1041,8 +1108,6 @@ export type GameHeaderFragment = { __typename?: 'Game', id: string, status: Game
 
 export type GameOptionsFragment = { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null };
 
-export type ItemFragment = { __typename?: 'Item', code?: string | null, amount: number };
-
 export type LoadFragment = { __typename?: 'TransportationLoad', used: number, max: number };
 
 export type LocationFragment = { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null };
@@ -1053,7 +1118,9 @@ export type ParticipantFragment = { __typename?: 'Participant', number: number, 
 
 export type PlayerHeaderFragment = { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null };
 
-export type RegionFragment = { __typename?: 'Region', id: string, lastVisitedAt?: number | null, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null, population: number, tax: number, wages: number, totalWages: number, gate?: number | null, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, produces?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null } | null> | null, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null } | null> | null };
+export type PlayerTurnStatisticsFragment = { __typename?: 'PlayerTurn', unclaimed: number, income?: { __typename?: 'Income', work: number, entertain: number, tax: number, pillage: number, trade: number, claim: number, total: number } | null, expenses?: { __typename?: 'Expenses', trade: number, study: number, consume: number, total: number } | null, statistics?: Array<{ __typename?: 'TurnStatisticsItem', category: StatisticsCategory, code: string, amount: number } | null> | null, treasury?: Array<{ __typename?: 'TreasuryItem', rank: number, max: number, total: number, code: string, amount: number } | null> | null };
+
+export type RegionFragment = { __typename?: 'Region', id: string, lastVisitedAt?: number | null, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null, population: number, tax: number, wages: number, totalWages: number, gate?: number | null, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, produces?: Array<{ __typename?: 'Item', code: string, amount: number } | null> | null, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null } | null> | null, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null } | null> | null };
 
 export type SailorsFragment = { __typename?: 'Sailors', current: number, required: number };
 
@@ -1063,17 +1130,15 @@ export type SettlementFragment = { __typename?: 'Settlement', name?: string | nu
 
 export type SkillFragment = { __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null };
 
-export type StaisticsFragment = { __typename?: 'Statistics', income?: { __typename?: 'Income', work: number, entertain: number, tax: number, pillage: number, trade: number, claim: number, total: number } | null, production?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null };
-
 export type StructureFragment = { __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null };
 
 export type StudyPlanFragment = { __typename?: 'StudyPlan', study?: string | null, teach?: Array<number> | null, target?: { __typename?: 'Skill', code?: string | null, level?: number | null } | null };
 
 export type TradableItemFragment = { __typename?: 'TradableItem', code: string, price: number, amount: number };
 
-export type TurnFragment = { __typename?: 'PlayerTurn', id: string, turnNumber: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null } | null> | null, battles?: Array<{ __typename?: 'Battle', statistics?: string | null, location?: { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null } | null, attacker?: { __typename?: 'Participant', number: number, name?: string | null } | null, defender?: { __typename?: 'Participant', number: number, name?: string | null } | null, attackers?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, defenders?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, rounds?: Array<{ __typename?: 'BattleRound', log?: string | null, statistics?: string | null } | null> | null, casualties?: Array<{ __typename?: 'Casualties', lost: number, damagedUnits?: Array<number> | null, army?: { __typename?: 'Participant', number: number, name?: string | null } | null } | null> | null, spoils?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, rose?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null } | null> | null };
+export type TurnFragment = { __typename?: 'PlayerTurn', id: string, turnNumber: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null } | null> | null, battles?: Array<{ __typename?: 'Battle', statistics?: string | null, location?: { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null } | null, attacker?: { __typename?: 'Participant', number: number, name?: string | null } | null, defender?: { __typename?: 'Participant', number: number, name?: string | null } | null, attackers?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, defenders?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, rounds?: Array<{ __typename?: 'BattleRound', log?: string | null, statistics?: string | null } | null> | null, casualties?: Array<{ __typename?: 'Casualties', lost: number, damagedUnits?: Array<number> | null, army?: { __typename?: 'Participant', number: number, name?: string | null } | null } | null> | null, spoils?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, rose?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null } | null> | null };
 
-export type UnitFragment = { __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null };
+export type UnitFragment = { __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'UnitItem', code: string, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null };
 
 export type GameCreateLocalMutationVariables = Exact<{
   name: Scalars['String'];
@@ -1118,6 +1183,20 @@ export type GameJoinLocalMutationVariables = Exact<{
 
 
 export type GameJoinLocalMutation = { __typename?: 'Mutation', gameJoinLocal?: { __typename?: 'GameJoinLocalResult', isSuccess: boolean, error?: string | null, registration?: { __typename?: 'Registration', id: any, name?: string | null } | null } | null };
+
+export type GameStartMutationVariables = Exact<{
+  gameId: Scalars['ID'];
+}>;
+
+
+export type GameStartMutation = { __typename?: 'Mutation', gameStart?: { __typename?: 'GameStartResult', isSuccess: boolean, error?: string | null, jobId?: string | null } | null };
+
+export type GetJobQueryVariables = Exact<{
+  jobId: Scalars['String'];
+}>;
+
+
+export type GetJobQuery = { __typename?: 'Query', job?: { __typename?: 'BackgroundJob', state: JobState } | null };
 
 export type SetOrderMutationVariables = Exact<{
   unitId: Scalars['ID'];
@@ -1165,7 +1244,7 @@ export type GetGameDetailsQueryVariables = Exact<{
 }>;
 
 
-export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, lastTurnNumber?: number | null, me?: { __typename?: 'Player', id: string } | null, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number: number, isClaimed: boolean, turns?: { __typename?: 'PlayerTurnCollectionSegment', items?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, isOrdersSubmitted: boolean, isTimesSubmitted: boolean } | null> | null } | null } | null> | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetGameDetailsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game', id: string, name: string, status: GameStatus, lastTurnNumber?: number | null, me?: { __typename?: 'Player', id: string } | null, players?: { __typename?: 'PlayerCollectionSegment', items?: Array<{ __typename?: 'Player', id: string, name?: string | null, number: number, isClaimed: boolean, turns?: { __typename?: 'PlayerTurnCollectionSegment', items?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, isOrdersSubmitted: boolean, isTimesSubmitted: boolean } | null> | null } | null } | null> | null } | null } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetGameEnginesQueryVariables = Exact<{
   skip?: InputMaybe<Scalars['Int']>;
@@ -1202,21 +1281,21 @@ export type GetRegionsQueryVariables = Exact<{
 }>;
 
 
-export type GetRegionsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', regions?: { __typename?: 'RegionCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Region', id: string, lastVisitedAt?: number | null, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null, population: number, tax: number, wages: number, totalWages: number, gate?: number | null, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, produces?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null } | null> | null, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null } | null> | null } | null> | null } | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetRegionsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', regions?: { __typename?: 'RegionCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Region', id: string, lastVisitedAt?: number | null, explored: boolean, x: number, y: number, z: number, label: string, terrain: string, province: string, race?: string | null, population: number, tax: number, wages: number, totalWages: number, gate?: number | null, entertainment: number, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null, wanted?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, produces?: Array<{ __typename?: 'Item', code: string, amount: number } | null> | null, forSale?: Array<{ __typename?: 'TradableItem', code: string, price: number, amount: number } | null> | null, exits?: Array<{ __typename?: 'Exit', direction: Direction, x: number, y: number, z: number, label: string, terrain: string, province: string, settlement?: { __typename?: 'Settlement', name?: string | null, size: SettlementSize } | null } | null> | null, structures?: Array<{ __typename?: 'Structure', id: string, x: number, y: number, z: number, sequence: number, description?: string | null, flags?: Array<string | null> | null, name: string, needs?: number | null, number: number, sailDirections?: Array<Direction> | null, speed?: number | null, type: string, contents?: Array<{ __typename?: 'FleetContent', type?: string | null, count: number } | null> | null, load?: { __typename?: 'TransportationLoad', used: number, max: number } | null, sailors?: { __typename?: 'Sailors', current: number, required: number } | null } | null> | null } | null> | null } | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetTurnStatsQueryVariables = Exact<{
   playerId: Scalars['ID'];
 }>;
 
 
-export type GetTurnStatsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player', turns?: { __typename?: 'PlayerTurnCollectionSegment', items?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, stats?: { __typename?: 'Statistics', income?: { __typename?: 'Income', work: number, entertain: number, tax: number, pillage: number, trade: number, claim: number, total: number } | null, production?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null } | null } | null> | null } | null } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetTurnStatsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player', turns?: { __typename?: 'PlayerTurnCollectionSegment', items?: Array<{ __typename?: 'PlayerTurn', turnNumber: number, unclaimed: number, income?: { __typename?: 'Income', work: number, entertain: number, tax: number, pillage: number, trade: number, claim: number, total: number } | null, expenses?: { __typename?: 'Expenses', trade: number, study: number, consume: number, total: number } | null, statistics?: Array<{ __typename?: 'TurnStatisticsItem', category: StatisticsCategory, code: string, amount: number } | null> | null, treasury?: Array<{ __typename?: 'TreasuryItem', rank: number, max: number, total: number, code: string, amount: number } | null> | null } | null> | null } | null } | { __typename?: 'PlayerTurn' } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetTurnQueryVariables = Exact<{
   turnId: Scalars['ID'];
 }>;
 
 
-export type GetTurnQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', id: string, turnNumber: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null } | null> | null, battles?: Array<{ __typename?: 'Battle', statistics?: string | null, location?: { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null } | null, attacker?: { __typename?: 'Participant', number: number, name?: string | null } | null, defender?: { __typename?: 'Participant', number: number, name?: string | null } | null, attackers?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, defenders?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, rounds?: Array<{ __typename?: 'BattleRound', log?: string | null, statistics?: string | null } | null> | null, casualties?: Array<{ __typename?: 'Casualties', lost: number, damagedUnits?: Array<number> | null, army?: { __typename?: 'Participant', number: number, name?: string | null } | null } | null> | null, spoils?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null, rose?: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null> | null } | null> | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetTurnQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', id: string, turnNumber: number, factions?: Array<{ __typename?: 'Faction', id: string, name: string, number: number, defaultAttitude?: Stance | null, attitudes?: Array<{ __typename?: 'Attitude', factionNumber: number, stance: Stance } | null> | null, events?: Array<{ __typename?: 'Event', type: EventType, category: EventCategory, message: string, regionCode?: string | null, unitNumber?: number | null, unitName?: string | null, itemCode?: string | null, itemName?: string | null, itemPrice?: number | null, amount?: number | null } | null> | null } | null> | null, battles?: Array<{ __typename?: 'Battle', statistics?: string | null, location?: { __typename?: 'Location', terrain?: string | null, province?: string | null, coords?: { __typename?: 'Coords', x: number, y: number, z: number, label?: string | null } | null } | null, attacker?: { __typename?: 'Participant', number: number, name?: string | null } | null, defender?: { __typename?: 'Participant', number: number, name?: string | null } | null, attackers?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, defenders?: Array<{ __typename?: 'BattleUnit', number: number, name?: string | null, description?: string | null, flags?: Array<string | null> | null, faction?: { __typename?: 'BattleFaction', number: number, name?: string | null } | null, items?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, skills?: Array<{ __typename?: 'BattleSkill', name?: string | null, level: number } | null> | null } | null> | null, rounds?: Array<{ __typename?: 'BattleRound', log?: string | null, statistics?: string | null } | null> | null, casualties?: Array<{ __typename?: 'Casualties', lost: number, damagedUnits?: Array<number> | null, army?: { __typename?: 'Participant', number: number, name?: string | null } | null } | null> | null, spoils?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null, rose?: Array<{ __typename?: 'BattleItem', code?: string | null, amount: number } | null> | null } | null> | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export type GetUnitsQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -1225,7 +1304,7 @@ export type GetUnitsQueryVariables = Exact<{
 }>;
 
 
-export type GetUnitsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', units?: { __typename?: 'UnitCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'Item', code?: string | null, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null } | null> | null } | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+export type GetUnitsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', units?: { __typename?: 'UnitCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'UnitItem', code: string, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null } | null> | null } | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export const GameOptions = gql`
     fragment GameOptions on GameOptions {
@@ -1327,6 +1406,38 @@ export const Mage = gql`
 }
     ${Skill}
 ${StudyPlan}`;
+export const PlayerTurnStatistics = gql`
+    fragment PlayerTurnStatistics on PlayerTurn {
+  unclaimed
+  income {
+    work
+    entertain
+    tax
+    pillage
+    trade
+    claim
+    total
+  }
+  expenses {
+    trade
+    study
+    consume
+    total
+  }
+  statistics {
+    category
+    code
+    amount
+  }
+  treasury {
+    rank
+    max
+    total
+    code
+    amount
+  }
+}
+    `;
 export const Settlement = gql`
     fragment Settlement on Settlement {
   name
@@ -1337,12 +1448,6 @@ export const TradableItem = gql`
     fragment TradableItem on TradableItem {
   code
   price
-  amount
-}
-    `;
-export const Item = gql`
-    fragment Item on Item {
-  code
   amount
 }
     `;
@@ -1431,7 +1536,8 @@ export const Region = gql`
   }
   entertainment
   produces {
-    ...Item
+    code
+    amount
   }
   forSale {
     ...TradableItem
@@ -1445,30 +1551,12 @@ export const Region = gql`
 }
     ${Settlement}
 ${TradableItem}
-${Item}
 ${Exit}
 ${Structure}`;
 export const SetOrderResult = gql`
     fragment SetOrderResult on UnitOrdersSetResult {
   isSuccess
   error
-}
-    `;
-export const Staistics = gql`
-    fragment Staistics on Statistics {
-  income {
-    work
-    entertain
-    tax
-    pillage
-    trade
-    claim
-    total
-  }
-  production {
-    code
-    amount
-  }
 }
     `;
 export const Attitude = gql`
@@ -1551,14 +1639,14 @@ export const BattleUnit = gql`
   description
   flags
   items {
-    ...Item
+    code
+    amount
   }
   skills {
     ...BattleSkill
   }
 }
     ${BattleFaction}
-${Item}
 ${BattleSkill}`;
 export const BattleRound = gql`
     fragment BattleRound on BattleRound {
@@ -1599,10 +1687,12 @@ export const Battle = gql`
     ...Casualties
   }
   spoils {
-    ...Item
+    code
+    amount
   }
   rose {
-    ...Item
+    code
+    amount
   }
   statistics
 }
@@ -1610,8 +1700,7 @@ export const Battle = gql`
 ${Participant}
 ${BattleUnit}
 ${BattleRound}
-${Casualties}
-${Item}`;
+${Casualties}`;
 export const Turn = gql`
     fragment Turn on PlayerTurn {
   id
@@ -1650,7 +1739,8 @@ export const Unit = gql`
   factionNumber
   flags
   items {
-    ...Item
+    code
+    amount
   }
   name
   number
@@ -1663,7 +1753,6 @@ export const Unit = gql`
   orders
 }
     ${Capacity}
-${Item}
 ${Skill}`;
 export const GameCreateLocal = gql`
     mutation GameCreateLocal($name: String!, $gameEngineId: ID!, $options: GameOptionsInput!, $playerData: Upload!, $gameData: Upload!) {
@@ -1724,6 +1813,22 @@ export const GameJoinLocal = gql`
       id
       name
     }
+  }
+}
+    `;
+export const GameStart = gql`
+    mutation GameStart($gameId: ID!) {
+  gameStart(gameId: $gameId) {
+    isSuccess
+    error
+    jobId
+  }
+}
+    `;
+export const GetJob = gql`
+    query GetJob($jobId: String!) {
+  job(jobId: $jobId) {
+    state
   }
 }
     `;
@@ -1799,6 +1904,7 @@ export const GetGameDetails = gql`
     ... on Game {
       id
       name
+      status
       lastTurnNumber
       me {
         id
@@ -1889,18 +1995,16 @@ export const GetTurnStats = gql`
     query GetTurnStats($playerId: ID!) {
   node(id: $playerId) {
     ... on Player {
-      turns(take: 10) {
+      turns(take: 10, skip: 1) {
         items {
           turnNumber
-          stats {
-            ...Staistics
-          }
+          ...PlayerTurnStatistics
         }
       }
     }
   }
 }
-    ${Staistics}`;
+    ${PlayerTurnStatistics}`;
 export const GetTurn = gql`
     query GetTurn($turnId: ID!) {
   node(id: $turnId) {

@@ -14,7 +14,8 @@ fragment Unit on Unit {
   factionNumber
   flags
   items {
-    ...Item
+    code
+    amount
   }
   name
   number

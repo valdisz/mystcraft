@@ -21,10 +21,12 @@ fragment Battle on Battle {
     ...Casualties
   }
   spoils {
-    ...Item
+    code
+    amount
   }
   rose {
-    ...Item
+    code
+    amount
   }
   statistics
 }

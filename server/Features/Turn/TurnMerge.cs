@@ -33,8 +33,6 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
     private readonly Database db;
 
     public async Task<TurnMergeResult> Handle(TurnMerge request, CancellationToken cancellationToken) {
-        Debug.Assert(Object.ReferenceEquals(unit.Database, db));
-
         var game = request.Game;
 
         await unit.BeginTransactionAsync(cancellationToken);
@@ -49,8 +47,12 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
             return new TurnMergeResult(false, "Turn not found.");
         }
 
-        var reports = turnsRepo.GetReports(turnNumber)
-            .Where(x => !x.IsMerged)
+        var q = turnsRepo.GetReports(turnNumber);
+        if (!request.Force) {
+            q = q.Where(x => !x.IsMerged);
+        }
+
+        var reports = q
             .AsAsyncEnumerable()
             .WithCancellation(cancellationToken);
 
@@ -63,33 +65,26 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
                     doc.Merge(sharedReport);
                 }
 
-                foreach (var unit in doc.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>()) {
-                    var orders = new DbOrders {
-                        PlayerId = report.PlayerId,
-                        TurnNumber = nextTurnNumber,
-                        UnitNumber = unit.Unit,
-                        Orders = unit.Orders,
-                    };
-                    await db.Orders.AddAsync(orders);
-                }
-
                 var player = await playersRepo.GetOneAsync(report.PlayerId);
-                var thisTurn = await db.PlayerTurns
-                    .Where(x => x.PlayerId == report.PlayerId && x.TurnNumber == turnNumber)
-                    .SingleOrDefaultAsync();
-                var prevTurn = await GetTurnAsync(report.PlayerId, prevTurnNumber, track: false, addUnits: false, addEvents: false);
+                var thisTurn = await GetTurnAsync(report.PlayerId, turnNumber);
+                var prevTurn = await GetTurnAsync(report.PlayerId, prevTurnNumber, track: false, addUnits: false, addEvents: false, addStatistics: false);
 
                 ReportSync sync = new ReportSync(db, report.PlayerId, request.TurnNumber, doc);
-                if (prevTurn != null) {
+                if (prevTurn != null)
+                {
                     sync.Copy(prevTurn, mapper);
                 }
 
-                sync.LoadOrders();
+                sync.Load(thisTurn);
                 await sync.SyncReportAsync();
+
+                await AddOrdersOnceAsync(nextTurnNumber, report, doc);
 
                 player.Name = doc.Faction.Name;
                 player.Password = doc.OrdersTemplate.Password ?? player.Password;
-                thisTurn.Name = player.Name;
+                thisTurn.FactionName = player.Name;
+                thisTurn.FactionNumber = player.Number;
+                thisTurn.Unclaimed = doc.UnclaimedSilver;
                 report.IsMerged = true;
 
                 await unit.SaveChangesAsync();
@@ -104,6 +99,32 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
         await unit.CommitTransactionAsync(cancellationToken);
 
         return new TurnMergeResult(true, Turn: turn);
+    }
+
+    private async Task AddOrdersOnceAsync(int nextTurnNumber, DbReport report, JReport doc)
+    {
+        var orders = new HashSet<int>(await db.Orders
+            .AsNoTracking()
+            .InTurn(report.PlayerId, nextTurnNumber)
+            .Select(x => x.UnitNumber)
+            .ToListAsync());
+
+        foreach (var unit in doc.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>())
+        {
+            if (orders.Contains(unit.Unit))
+            {
+                continue;
+            }
+
+            var o = new DbOrders
+            {
+                PlayerId = report.PlayerId,
+                TurnNumber = nextTurnNumber,
+                UnitNumber = unit.Unit,
+                Orders = unit.Orders,
+            };
+            await db.Orders.AddAsync(o);
+        }
     }
 
     private async IAsyncEnumerable<JReport> GetSharedReportsAsync(long gameId, long playerId, int turnNumber) {
@@ -142,7 +163,7 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
     }
 
     private Task<DbPlayerTurn> GetTurnAsync(long playerId, int turnNumber, bool track = true, bool addUnits = true, bool addEvents = true,
-        bool addStructures = true, bool addFactions = true) {
+        bool addStructures = true, bool addFactions = true, bool addStatistics = true) {
         IQueryable<DbPlayerTurn> turns = db.PlayerTurns
             .AsSplitQuery()
             .OnlyPlayer(playerId);
@@ -152,10 +173,20 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
         }
 
         turns = turns
-            .Include(x => x.Regions)
             .Include(x => x.Exits)
             .Include(x => x.Production)
             .Include(x => x.Markets);
+
+        if (addStatistics) {
+            turns = turns
+                .Include(x => x.Statistics)
+                .Include(x => x.Regions)
+                    .ThenInclude(x => x.Statistics)
+            ;
+        }
+        else {
+            turns = turns.Include(x => x.Regions);
+        }
 
         if (addFactions) {
             turns = turns
@@ -172,7 +203,7 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
         if (addEvents) {
             turns = turns
                 .Include(x => x.Events)
-                .Include(x => x.Stats);
+                ;
         }
 
         if (addStructures || addUnits) {

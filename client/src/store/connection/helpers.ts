@@ -10,7 +10,7 @@ import { RequestPolicy } from './data-source-connection'
 export function query<TData, T extends object, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,
     projection: Projection<TData, T>,
-    variables?: VariablesGetter<TVariables>,
+    variables?: TVariables | VariablesGetter<TVariables>,
     name?: string
 ) {
     const conn = new UrqlConnection<TData, TVariables>(client)
@@ -28,7 +28,7 @@ export function query<TData, T extends object, TVariables extends object = { }>(
 export function querySeq<TData, T, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,
     projection: Projection<TData, T[]>,
-    variables?: VariablesGetter<TVariables>,
+    variables?: TVariables | VariablesGetter<TVariables>,
     name?: string
 ) {
     const conn = new UrqlConnection<TData, TVariables>(client)

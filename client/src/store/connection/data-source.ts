@@ -18,7 +18,7 @@ export interface DataSourceOptions<T, TData, TVariables extends object> {
     initialValue: T,
     document: DocumentNode | TypedDocumentNode<TData, TVariables>
     projection: Projection<TData, T>
-    variables?: VariablesGetter<TVariables>
+    variables?: TVariables | VariablesGetter<TVariables>
     name?: string
 }
 
@@ -50,7 +50,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     private _error: IObservableValue<TError | null> = observable.box<TError | null>(null)
     private _document: DocumentNode | TypedDocumentNode<TData, TVariables>
     private _projection: (data: TData) => T
-    private _variables?: () => TVariables
+    private _variables?: TVariables | VariablesGetter<TVariables>
 
     private _variablesWatch: IReactionDisposer
     private _requestHandle: Disposable
@@ -94,10 +94,15 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         console.debug(`${this._name}::resume`)
 
         if (this._variables) {
-            this._variablesWatch = reaction(this._variables, vars => this.load(vars, this.defaultRequestPolicy), {
-                name: `${this._valueAtom.name_}::variables`,
-                fireImmediately: true
-            })
+            if (this._variables instanceof Function) {
+                this._variablesWatch = reaction(this._variables, vars => this.load(vars, this.defaultRequestPolicy), {
+                    name: `${this._valueAtom.name_}::variables`,
+                    fireImmediately: true
+                })
+            }
+            else {
+                this.load(this._variables, this.defaultRequestPolicy)
+            }
         }
         else {
             this.load(null, this.defaultRequestPolicy)
@@ -107,15 +112,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     protected suspend() {
         console.debug(`${this._name}::suspend`)
 
-        if (this._variablesWatch) {
-            this._variablesWatch()
-            this._variablesWatch = null
-        }
-
-        if (this._requestHandle) {
-            this._requestHandle.dispose()
-            this._requestHandle = null
-        }
+        this.close()
     }
 
     protected load(variables: TVariables, requestPolicy: RequestPolicy) {
@@ -152,8 +149,26 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     }
 
     reload(requestPolicy?: RequestPolicy) {
-        const variables = this._variables ? this._variables() : null
+        let variables: TVariables = null
+
+        if (this._variables) {
+            variables = this._variables instanceof Function
+                ? this._variables()
+                : this._variables
+        }
 
         return this.load(variables, requestPolicy || this.defaultRequestPolicy)
+    }
+
+    close() {
+        if (this._variablesWatch) {
+            this._variablesWatch()
+            this._variablesWatch = null
+        }
+
+        if (this._requestHandle) {
+            this._requestHandle.dispose()
+            this._requestHandle = null
+        }
     }
 }

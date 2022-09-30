@@ -301,7 +301,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
         game.selectRegion(reg)
     }
 
-    return <Box m={1}>
+    return <Box mx={2} my={1}>
         <Grid container spacing={1}>
             { (region.population || region.settlement) && <SpaceBetween item xs={12}>
                 <FixedTypography>{ region?.province?.name }</FixedTypography>

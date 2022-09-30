@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 public interface IPlayerRepository {
     IQueryable<DbOrders> Orders(int turnNumber);
 
-    Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string name, CancellationToken cancellation = default);
+    Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string factionName, int factionNumber, CancellationToken cancellation = default);
 }
 
 public class PlayerRepository : IPlayerRepository {
@@ -29,12 +29,13 @@ public class PlayerRepository : IPlayerRepository {
 
     public IQueryable<DbOrders> Orders(int turnNumber) => db.Orders.InTurn(player.Id, turnNumber);
 
-    public async Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string name, CancellationToken cancellation) {
+    public async Task<DbPlayerTurn> AddTurnAsync(int turnNumber, string factionName, int factionNumber, CancellationToken cancellation) {
         var turn = new DbPlayerTurn {
             GameId = player.GameId,
             PlayerId = player.Id,
             TurnNumber = turnNumber,
-            Name = name
+            FactionName = factionName,
+            FactionNumber = factionNumber
         };
 
         await db.PlayerTurns.AddAsync(turn, cancellation);
@@ -106,11 +107,11 @@ public class PlayersRepository : IPlayersRepository {
         var playerRepo = unit.Player(player);
 
         if (game.LastTurnNumber != null) {
-            await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, cancellation);
+            await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, player.Number, cancellation);
         }
 
         if (game.NextTurnNumber != null) {
-            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, cancellation);
+            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, player.Number, cancellation);
         }
 
         await db.SaveChangesAsync(cancellation);
@@ -145,11 +146,11 @@ public class PlayersRepository : IPlayersRepository {
         var playerRepo = unit.Player(player);
 
         if (game.LastTurnNumber != null) {
-            await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, cancellation);
+            await playerRepo.AddTurnAsync(game.LastTurnNumber.Value, player.Name, player.Number, cancellation);
         }
 
         if (game.NextTurnNumber != null) {
-            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, cancellation);
+            await playerRepo.AddTurnAsync(game.NextTurnNumber.Value, player.Name, player.Number, cancellation);
         }
 
         await db.SaveChangesAsync(cancellation);

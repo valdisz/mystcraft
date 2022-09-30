@@ -78,7 +78,7 @@ public abstract class Database : DbContext {
     public DbSet<DbEvent> Events { get; set; }
     public DbSet<DbRegion> Regions { get; set; }
     public DbSet<DbProductionItem> Production { get; set; }
-    public DbSet<DbMarketItem> Markets { get; set; }
+    public DbSet<DbTradableItem> Markets { get; set; }
     public DbSet<DbExit> Exits { get; set; }
     public DbSet<DbStructure> Structures { get; set; }
     public DbSet<DbUnit> Units { get; set; }
@@ -89,9 +89,9 @@ public abstract class Database : DbContext {
     public DbSet<DbAlliance> Alliances { get; set; }
     public DbSet<DbAllianceMember> AllianceMembers { get; set; }
     public DbSet<DbStudyPlan> StudyPlans { get; set; }
-    public DbSet<DbStatistics> Statistics { get; set; }
-    public DbSet<DbStatisticsItem> StatisticsItems { get; set; }
-
+    public DbSet<DbTurnStatisticsItem> TurnStatistics { get; set; }
+    public DbSet<DbRegionStatisticsItem> RegionStatistics { get; set; }
+    public DbSet<DbTreasuryItem> Treasury { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
         switch (options.Provider) {
@@ -261,6 +261,21 @@ public abstract class Database : DbContext {
                 .WithOne(x => x.Player)
                 .HasForeignKey(x => x.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            t.HasMany<DbTurnStatisticsItem>()
+                .WithOne()
+                .HasForeignKey(x => x.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            t.HasMany<DbRegionStatisticsItem>()
+                .WithOne()
+                .HasForeignKey(x => x.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            t.HasMany<DbTreasuryItem>()
+                .WithOne()
+                .HasForeignKey(x => x.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         model.Entity<DbPlayerTurn>(t => {
@@ -326,10 +341,15 @@ public abstract class Database : DbContext {
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                 .OnDelete(DeleteBehavior.Restrict);
 
-            t.HasMany(x => x.Stats)
+            t.HasMany(x => x.Statistics)
                 .WithOne(x => x.Turn)
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                 .OnDelete(DeleteBehavior.Restrict);
+
+            t.HasMany(x => x.Treasury)
+                .WithOne(x => x.Turn)
+                .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
+                .OnDelete(DeleteBehavior.Cascade);
 
             t.HasMany(x => x.Battles)
                 .WithOne(x => x.Turn)
@@ -340,6 +360,9 @@ public abstract class Database : DbContext {
                 .WithOne(x => x.Turn)
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber })
                 .OnDelete(DeleteBehavior.Restrict);
+
+            t.OwnsOne(x => x.Income);
+            t.OwnsOne(x => x.Expenses);
         });
 
         model.Entity<DbAditionalReport>(t => {
@@ -364,8 +387,8 @@ public abstract class Database : DbContext {
                 .WithOne(x => x.Region)
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
-            t.HasMany(x => x.Stats)
-                .WithOne(x => x.Region)
+            t.HasMany(x => x.Statistics)
+                .WithOne()
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
             t.HasMany(x => x.Events)
@@ -377,15 +400,22 @@ public abstract class Database : DbContext {
             });
 
             t.HasMany(p => p.Produces)
-                .WithOne(p => p.Region)
+                .WithOne()
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
 
             t.HasMany(p => p.Markets)
-                .WithOne(p => p.Region)
+                .WithOne()
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+            t.HasMany(x => x.Statistics)
+                .WithOne()
+                .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+            t.OwnsOne(x => x.Income);
+            t.OwnsOne(x => x.Expenses);
         });
 
-        model.Entity<DbMarketItem>(t => {
+        model.Entity<DbTradableItem>(t => {
             t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId, x.Market, x.Code });
 
             t.Property(x => x.Amount);
@@ -447,24 +477,18 @@ public abstract class Database : DbContext {
             t.Property(x => x.Category).HasConversion<string>();
         });
 
-        model.Entity<DbStatistics>(t => {
-            t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
-
-            t.OwnsOne(x => x.Income);
-            t.OwnsOne(x => x.Expenses);
-
-            t.HasMany(p => p.Items)
-                .WithOne(x => x.Statistics)
-                .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
-        });
-
-        model.Entity<DbStatisticsItem>(t => {
+        model.Entity<DbTurnStatisticsItem>(t => {
             t.Property(x => x.Category)
                 .HasConversion<string>();
+        });
 
-            t.HasOne(x => x.Region)
-                .WithMany()
-                .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+        model.Entity<DbRegionStatisticsItem>(t => {
+            t.Property(x => x.Category)
+                .HasConversion<string>();
+        });
+
+        model.Entity<DbTreasuryItem>(t => {
+            t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Code });
         });
 
         model.Entity<DbStructure>(t => {
@@ -506,7 +530,7 @@ public abstract class Database : DbContext {
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
 
             t.HasMany(p => p.Items)
-                .WithOne(p => p.Unit)
+                .WithOne()
                 .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.UnitNumber });
         });
 

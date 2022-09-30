@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using advisor.Model;
+using System;
 
 public record TurnProcess(DbGame Game, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnProcessResult>;
 
@@ -36,57 +37,139 @@ public class TurnProcessHandler : IRequestHandler<TurnProcess, TurnProcessResult
 
         await unit.BeginTransactionAsync(cancellationToken);
 
-        await CalculateStatisticsAsync(turn.GameId, turn.Number);
+        var q = db.PlayerTurns
+            .InGame(turn.GameId)
+            .Include(x => x.Player)
+            .Include(x => x.Statistics)
+            .Include(x => x.Treasury)
+            .Where(x => x.Player.UserId != null && x.Player.Password != null && x.TurnNumber == request.TurnNumber);
 
-        await unit.SaveChangesAsync(cancellationToken);
+        if (!request.Force) {
+            q = q.Where(x => !x.IsProcessed);
+        }
+
+        await foreach (var pt in q.AsAsyncEnumerable()) {
+            await CalculateStatisticsAsync(pt);
+            await CalculateTreasuryAsync(pt);
+            pt.IsProcessed = true;
+        }
+
         await unit.CommitTransactionAsync(cancellationToken);
 
         return new TurnProcessResult(true, Turn: turn);
     }
+    private async Task CalculateTreasuryAsync(DbPlayerTurn turn) {
+        var treasury = turn.Treasury.ToDictionary(x => x.Code);
+        foreach (var item in treasury.Values) {
+            item.Amount = 0;
+        }
 
-    private async Task CalculateStatisticsAsync(long gameId, int turnNumber) {
-        var playerTurns = db.PlayerTurns
-            .InGame(gameId)
-            .Where(x => !x.IsProcessed && x.TurnNumber == turnNumber)
+        var units = db.Units
+            .Include(x => x.Items)
+            .Where(x => x.PlayerId == turn.PlayerId && x.TurnNumber == turn.TurnNumber && x.FactionNumber == turn.FactionNumber)
             .AsAsyncEnumerable();
 
-        await foreach (var pt in playerTurns) {
-            var stats = await CalculatePlayerStatisticsAsync(pt.PlayerId, pt.TurnNumber);
-            await db.Statistics.AddRangeAsync(stats);
-            pt.IsProcessed = true;
+        await foreach (var unit in units) {
+            foreach (var item in unit.Items) {
+                if (!treasury.TryGetValue(item.Code, out var target)) {
+                    target = new DbTreasuryItem {
+                        PlayerId = turn.PlayerId,
+                        TurnNumber = turn.TurnNumber,
+                        Code = item.Code,
+                        Amount = 0,
+                    };
+
+                    treasury.Add(target.Code, target);
+                    await db.Treasury.AddAsync(target);
+                }
+
+                target.Amount += item.Amount;
+            }
         }
+
+        db.RemoveRange(treasury.Values.Where(x => x.Amount == 0));
     }
 
-    private async Task<IEnumerable<DbStatistics>> CalculatePlayerStatisticsAsync(long playerId, int turnNumber) {
-        Dictionary<string, DbStatistics> items = new ();
+    private async Task CalculateStatisticsAsync(DbPlayerTurn turn) {
+        var regions = await db.Regions
+            .InTurn(turn)
+            .Include(x => x.Statistics)
+            .ToDictionaryAsync(x => x.Id);
 
-        DbStatistics get(DbEvent ev) {
-            var regionId = ev.RegionId;
+        // Reset statistics
+        foreach (var region in regions.Values) {
+            region.Income.Work = 0;
+            region.Income.Entertain = 0;
+            region.Income.Tax = 0;
+            region.Income.Pillage = 0;
+            region.Income.Trade = 0;
+            region.Income.Claim = 0;
+            region.Expenses.Consume = 0;
+            region.Expenses.Study = 0;
+            region.Expenses.Trade = 0;
 
-            if (!items.TryGetValue(regionId, out var stats)) {
-                stats = new DbStatistics {
-                    PlayerId = playerId,
-                    TurnNumber = turnNumber,
-                    RegionId = regionId
-                };
-
-                items.Add(regionId, stats);
+            foreach (var item in region.Statistics) {
+                item.Amount = 0;
             }
-
-            return stats;
         }
 
-        DbStatisticsItem getItem(DbEvent ev, StatisticsCategory category) {
-            var itemCode = ev.ItemCode;
-            var list = get(ev).Items;
+        turn.Income.Work = 0;
+        turn.Income.Entertain = 0;
+        turn.Income.Tax = 0;
+        turn.Income.Pillage = 0;
+        turn.Income.Trade = 0;
+        turn.Income.Claim = 0;
+        turn.Expenses.Consume = 0;
+        turn.Expenses.Study = 0;
+        turn.Expenses.Trade = 0;
 
-            var item = list.Find(x => x.Code == itemCode && x.Category == category);
+        foreach (var item in turn.Statistics) {
+            item.Amount = 0;
+        }
+
+        // Calculate new statistics
+        DbRegion get(DbEvent ev) {
+            var regionId = ev.RegionId;
+            if (regionId == null) {
+                return null;
+            }
+
+            if (!regions.TryGetValue(regionId, out var reg)) {
+                return reg;
+            }
+
+            return null;
+        }
+
+        void income(DbEvent ev, Action<DbIncome> onIncome) {
+            var income = get(ev)?.Income;
+            if (income != null) {
+                onIncome(income);
+            }
+
+            onIncome(turn.Income);
+        }
+
+        void expenses(DbEvent ev, Action<DbExpenses> onExpense) {
+            var expenses = get(ev)?.Expenses;
+            if (expenses != null) {
+                onExpense(expenses);
+            }
+
+            onExpense(turn.Expenses);
+        }
+
+        DbRegionStatisticsItem regionItem(DbRegion region, string code, StatisticsCategory category) {
+            var list = region.Statistics;
+
+            var item = list.FirstOrDefault(x => x.Code == code && x.Category == category);
             if (item == null) {
-                item = new DbStatisticsItem {
-                    PlayerId = playerId,
-                    RegionId = ev.RegionId,
-                    Code = itemCode,
-                    TurnNumber = turnNumber
+                item = new DbRegionStatisticsItem {
+                    PlayerId = turn.PlayerId,
+                    TurnNumber = turn.TurnNumber,
+                    RegionId = region.Id,
+                    Category = category,
+                    Code = code
                 };
                 list.Add(item);
             }
@@ -94,76 +177,99 @@ public class TurnProcessHandler : IRequestHandler<TurnProcess, TurnProcessResult
             return item;
         }
 
-        DbIncome income(DbEvent ev) => get(ev).Income;
-        DbExpenses expenses(DbEvent ev) => get(ev).Expenses;
-        DbStatisticsItem produced(DbEvent ev) => getItem(ev, StatisticsCategory.Produced);
-        DbStatisticsItem bought(DbEvent ev) => getItem(ev, StatisticsCategory.Bought);
-        DbStatisticsItem sold(DbEvent ev) => getItem(ev, StatisticsCategory.Sold);
-        DbStatisticsItem consumed(DbEvent ev) => getItem(ev, StatisticsCategory.Consumed);
+        DbTurnStatisticsItem turnItem(string code, StatisticsCategory category) {
+            var list = turn.Statistics;
+
+            var item = list.FirstOrDefault(x => x.Code == code && x.Category == category);
+            if (item == null) {
+                item = new DbTurnStatisticsItem {
+                    PlayerId = turn.PlayerId,
+                    TurnNumber = turn.TurnNumber,
+                    Category = category,
+                    Code = code
+                };
+                list.Add(item);
+            }
+
+            return item;
+        }
+
+        void updateItem(DbEvent ev, StatisticsCategory category) {
+            var code = ev.ItemCode;
+            var amount = ev.Amount ?? 0;
+
+            turnItem(code, category).Amount += amount;
+
+            var regionId = ev.RegionId;
+            if (regionId != null && regions.TryGetValue(regionId, out var region)) {
+                regionItem(region, code, category).Amount += amount;
+            }
+        }
+
+        void produced(DbEvent ev) => updateItem(ev, StatisticsCategory.Produced);
+        void bought(DbEvent ev) => updateItem(ev, StatisticsCategory.Bought);
+        void sold(DbEvent ev) => updateItem(ev, StatisticsCategory.Sold);
+        void consumed(DbEvent ev) => updateItem(ev, StatisticsCategory.Consumed);
 
         var events = db.Events
             .AsNoTracking()
-            .Where(x => x.PlayerId == playerId && x.TurnNumber == turnNumber)
+            .InTurn(turn)
             .AsAsyncEnumerable();
 
         await foreach (var ev in events) {
-            if (ev.RegionId == null) {
-                continue;
-            }
-
             var amount = ev.Amount ?? 0;
             var price = ev.ItemPrice ?? 0;
 
             switch (ev.Category) {
                 case EventCategory.Pillage:
-                    income(ev).Pillage += amount;
+                    income(ev, x => x.Pillage += amount);
                     break;
 
                 case EventCategory.Tax:
-                    income(ev).Tax += amount;
+                    income(ev, x => x.Tax += amount);
                     break;
 
                 case EventCategory.Entertain:
-                    income(ev).Entertain += amount;
+                    income(ev, x => x.Entertain += amount);
                     break;
 
                 case EventCategory.Work:
-                    income(ev).Work += amount;
+                    income(ev, x => x.Work += amount);
                     break;
 
                 case EventCategory.Sell:
-                    income(ev).Trade += amount * price;
-                    sold(ev).Amount += amount;
+                    income(ev, x => x.Trade += amount * price);
+                    sold(ev);
                     break;
 
                 case EventCategory.Buy:
-                    expenses(ev).Trade += amount * price;
-                    bought(ev).Amount += amount;
+                    expenses(ev, x => x.Trade += amount * price);
+                    bought(ev);
                     break;
 
                 case EventCategory.Produce:
-                    produced(ev).Amount += amount;
+                    produced(ev);
                     break;
 
                 case EventCategory.Claim:
-                    income(ev).Claim += amount;
+                    income(ev, x => x.Claim += amount);
                     break;
 
                 case EventCategory.Cast:
-                    income(ev).Entertain += amount;
+                    income(ev, x => x.Entertain += amount);
                     break;
 
                 case EventCategory.Consume:
                     if (ev.ItemCode == null) {
-                        expenses(ev).Consume += amount;
+                        expenses(ev, x => x.Consume += amount);
                     }
                     else {
-                        consumed(ev).Amount += amount;
+                        consumed(ev);
                     }
                     break;
 
                 case EventCategory.Withdraw:
-                    income(ev).Entertain += amount;
+                    income(ev, x => x.Entertain += amount);
                     break;
 
                 case EventCategory.Give:
@@ -174,6 +280,19 @@ public class TurnProcessHandler : IRequestHandler<TurnProcess, TurnProcessResult
             }
         }
 
-        return items.Values;
+        // Remove empty statistic items
+        foreach (var region in regions.Values) {
+            foreach (var item in region.Statistics) {
+                if (item.Amount == 0) {
+                    db.RegionStatistics.Remove(item);
+                }
+            }
+        }
+
+        foreach (var item in turn.Statistics) {
+            if (item.Amount == 0) {
+                db.TurnStatistics.Remove(item);
+            }
+        }
     }
 }

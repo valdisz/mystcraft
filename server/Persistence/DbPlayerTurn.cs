@@ -3,8 +3,10 @@ namespace advisor.Persistence {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
+    using HotChocolate.Data;
+    using HotChocolate.Types;
 
-    public class DbPlayerTurn : InPlayerContext, InGameContext {
+    public class DbPlayerTurn : InTurnContext, InGameContext, IStatistics<DbTurnStatisticsItem> {
         public static string CreateId(long playerId, int turnNumber) => $"{playerId}:{turnNumber}";
         public static string CreateId(DbPlayerTurn player) => CreateId(player.PlayerId, player.TurnNumber);
         public static (long playerId, int turnNumber) ParseId(string id) {
@@ -29,7 +31,23 @@ namespace advisor.Persistence {
 
         [Required]
         [MaxLength(128)]
-        public string Name { get; set; }
+        public string FactionName { get; set; }
+
+        public int FactionNumber { get; set; }
+
+        public int Unclaimed { get; set; }
+
+        public DbIncome Income { get; set; } = new ();
+
+        public DbExpenses Expenses { get; set; } = new ();
+
+        // [UseOffsetPaging]
+        public List<DbTurnStatisticsItem> Statistics { get; set; } = new ();
+
+        // [UseOffsetPaging]
+        public List<DbTreasuryItem> Treasury { get; set; } = new ();
+
+
         public DateTimeOffset? ReadyAt { get; set; }
         public DateTimeOffset? OrdersSubmittedAt { get; set; }
         public DateTimeOffset? TimesSubmittedAt { get; set; }
@@ -53,7 +71,7 @@ namespace advisor.Persistence {
         public List<DbExit> Exits { get; set; } = new List<DbExit>();
 
         [GraphQLIgnore]
-        public List<DbMarketItem> Markets { get; set; } = new ();
+        public List<DbTradableItem> Markets { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbProductionItem> Production { get; set; } = new ();
@@ -78,9 +96,6 @@ namespace advisor.Persistence {
 
         [GraphQLIgnore]
         public List<DbStudyPlan> Plans { get; set; } = new ();
-
-        [GraphQLIgnore]
-        public List<DbStatistics> Stats { get; set; } = new ();
 
         [GraphQLIgnore]
         public List<DbBattle> Battles { get; set; } = new ();

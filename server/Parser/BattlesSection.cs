@@ -270,6 +270,8 @@ namespace advisor {
                 await item.WriteJson(writer);
             }
             await writer.WriteEndArrayAsync();
+
+            cursor.Back();
         }
     }
 

@@ -81,11 +81,12 @@ namespace advisor {
 
                     case "earns": {
                         amount = msg.Integer();
-                        location = locationParser.Parse(msg.After(" in ").SkipWhitespaces().BeforeBackwards("."));
 
                         category = msg.Contains("entertaining")
                             ? EventCategory.Entertain
                             : EventCategory.Work;
+
+                        location = locationParser.Parse(msg.After(" in ").SkipWhitespaces().BeforeBackwards("."));
 
                         break;
                     }
@@ -105,13 +106,8 @@ namespace advisor {
                     }
 
                     case "casts": {
-                        amount = msg.Try(x => x.BeforeBackwards("raising").SkipWhitespaces().Integer());
-                        if (amount) {
-                            category = EventCategory.Work;
-                        }
-                        else {
-                            category = EventCategory.Cast;
-                        }
+                        category = EventCategory.Cast;
+                        amount = msg.Try(x => x.After(", raising").SkipWhitespaces().Integer());
                         break;
                     }
 

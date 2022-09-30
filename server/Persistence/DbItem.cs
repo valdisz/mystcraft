@@ -5,23 +5,24 @@ namespace advisor.Persistence
     using HotChocolate;
     using HotChocolate.Types;
 
-    public class Item : AnItem {
-        public Item() {
+    public class DbItem : AnItem {
+        public DbItem() {
 
         }
 
-        public Item(Item other) {
+        public DbItem(DbItem other) {
             this.Code = other.Code;
             this.Amount = other.Amount;
         }
 
+        [Required]
         [MaxLength(8)]
         public string Code { get; set; }
 
         public int Amount { get; set; }
     }
 
-    public class DbUnitItem : AnItem, InTurnContext {
+    public class DbUnitItem : DbItem, InTurnContext {
         public DbUnitItem() {
 
         }
@@ -31,11 +32,14 @@ namespace advisor.Persistence
             this.Amount = other.Amount;
         }
 
-        [Required]
-        [MaxLength(8)]
-        public string Code { get; set; }
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
 
-        public int Amount { get; set; }
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        public int UnitNumber { get; set; }
 
         [DefaultValue(false)]
         public bool Illusion { get; set; }
@@ -44,21 +48,9 @@ namespace advisor.Persistence
         public bool Unfinished { get; set; }
 
         public string Props { get; set; }
-
-        [GraphQLIgnore]
-        public int TurnNumber { get; set; }
-
-        [GraphQLIgnore]
-        public long PlayerId { get; set; }
-
-        [GraphQLIgnore]
-        public int UnitNumber { get; set; }
-
-        [GraphQLIgnore]
-        public DbUnit Unit { get; set; }
     }
 
-    public class DbProductionItem : AnItem, InTurnContext {
+    public class DbProductionItem : DbItem, InTurnContext {
         public DbProductionItem() {
 
         }
@@ -68,61 +60,68 @@ namespace advisor.Persistence
             this.Amount = other.Amount;
         }
 
-        [Required]
-        [MaxLength(8)]
-        public string Code { get; set; }
-
-        public int Amount { get; set; }
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
 
         [GraphQLIgnore]
         public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        public long PlayerId { get; set; }
-
-        [GraphQLIgnore]
         [MaxLength(14)]
         public string RegionId { get; set; }
-
-        [GraphQLIgnore]
-        public DbRegion Region { get; set; }
     }
 
-    [GraphQLName("TradableItem")]
-    public class DbMarketItem : AnItem, InTurnContext {
-        public DbMarketItem() {
+    public class DbTradableItem : DbItem, InTurnContext {
+        public DbTradableItem() {
 
         }
 
-        public DbMarketItem(DbMarketItem other) {
+        public DbTradableItem(DbTradableItem other) {
             this.Code = other.Code;
             this.Amount = other.Amount;
             this.Price = other.Price;
         }
 
-        [Required]
-        [MaxLength(8)]
-        public string Code { get; set; }
+        [GraphQLIgnore]
+        public long PlayerId { get; set; }
 
-        public int Amount { get; set; }
+        [GraphQLIgnore]
+        public int TurnNumber { get; set; }
+
+        [GraphQLIgnore]
+        [MaxLength(14)]
+        public string RegionId { get; set; }
 
         [Required]
         public int Price { get; set; }
 
         [Required]
         public Market Market { get; set; }
+    }
 
-        [GraphQLIgnore]
-        public int TurnNumber { get; set; }
+    public class DbTreasuryItem : DbItem, InTurnContext {
+        public DbTreasuryItem() {
+
+        }
+
+        public DbTreasuryItem(DbTreasuryItem other) {
+            this.Code = other.Code;
+            this.Amount = other.Amount;
+        }
 
         [GraphQLIgnore]
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(14)]
-        public string RegionId { get; set; }
+        public int TurnNumber { get; set; }
+
+        public int Rank { get; set; }
+
+        public int Max { get; set; }
+
+        public int Total { get; set; }
 
         [GraphQLIgnore]
-        public DbRegion Region { get; set; }
+        public DbPlayerTurn Turn { get; set; }
     }
 }

@@ -11,27 +11,38 @@ public class MappingProfile : Profile {
         CreateMap<DbSettlement, DbSettlement>();
         CreateMap<DbSkill, DbSkill>();
         CreateMap<DbTransportationLoad, DbTransportationLoad>();
-        CreateMap<Item, Item>();
+        CreateMap<DbItem, DbItem>();
 
         CreateMap<DbUnitItem, DbUnitItem>()
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
-            .ForMember(x => x.Unit, opt => opt.Ignore())
         ;
 
-        CreateMap<DbStatisticsItem, DbStatisticsItem>()
-            .ForMember(x => x.TurnNumber, opt => opt.Ignore())
-            .ForMember(x => x.Region, opt => opt.Ignore())
-            .ForMember(x => x.Statistics, opt => opt.Ignore())
+        CreateMap<DbTurnStatisticsItem, DbTurnStatisticsItem>()
+            .ForMember(x => x.Id, opt => opt.Ignore())
         ;
 
-        CreateMap<DbMarketItem, DbMarketItem>()
+        CreateMap<DbRegionStatisticsItem, DbRegionStatisticsItem>()
+            .ForMember(x => x.Id, opt => opt.Ignore())
+        ;
+
+        CreateMap<DbTradableItem, DbTradableItem>()
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
-            .ForMember(x => x.Region, opt => opt.Ignore())
         ;
 
         CreateMap<DbProductionItem, DbProductionItem>()
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
-            .ForMember(x => x.Region, opt => opt.Ignore())
+        ;
+
+        CreateMap<DbTreasuryItem, DbTreasuryItem>()
+            .ForMember(x => x.TurnNumber, opt => opt.Ignore())
+        ;
+
+        CreateMap<DbTurnStatisticsItem, DbTurnStatisticsItem>()
+            .ForMember(x => x.TurnNumber, opt => opt.Ignore())
+        ;
+
+        CreateMap<DbRegionStatisticsItem, DbRegionStatisticsItem>()
+            .ForMember(x => x.TurnNumber, opt => opt.Ignore())
         ;
 
         CreateMap<DbAttitude, DbAttitude>()

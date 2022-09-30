@@ -57,7 +57,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         var nextTurnJobId = $"{jobIdPrefix}-turn";
         if (shouldRun) {
             var timeZone = FindTimeZone(game.Options.TimeZone);
-            recurringJobs.AddOrUpdate<GameNextTurnJob>(nextTurnJobId, job => job.RunAsync(game.Id, null), game.Options.Schedule, timeZone);
+            recurringJobs.AddOrUpdate<GameNextTurnJob>(nextTurnJobId, job => job.RunAsync(game.Id, null, null), game.Options.Schedule, timeZone);
         }
         else {
             recurringJobs.RemoveIfExists(nextTurnJobId);

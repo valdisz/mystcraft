@@ -27,7 +27,7 @@ public class NewOriginsClient {
         foreach (var h in allHeadings) {
             if (h.TextContent.StartsWith("Turn Number:")) {
                 var turnNumber = int.Parse(h.QuerySelector("span").TextContent);
-                return turnNumber + 1;  // because New Origins all turns starts from 0, bet we start from 1
+                return turnNumber;
             }
         }
 

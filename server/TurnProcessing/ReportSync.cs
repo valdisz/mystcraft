@@ -11,7 +11,6 @@ using advisor.Persistence;
 using RegionDic = System.Collections.Generic.Dictionary<string, Persistence.DbRegion>;
 using FactionsDic = System.Collections.Generic.Dictionary<int, Persistence.DbFaction>;
 using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
-using UnitOrders = System.Collections.Generic.Dictionary<int, string>;
 using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,7 +26,6 @@ public class ReportSync : InTurnContext {
 
     long InPlayerContext.PlayerId { get => this.PlayerId; set { } }
 
-    public UnitOrders Orders { get; } = new ();
     public Database Db { get; }
     public long PlayerId { get; }
     public int TurnNumber { get; }
@@ -60,7 +58,12 @@ public class ReportSync : InTurnContext {
 
         foreach (var unit in turn.Units) {
             Units.Add(unit.Number, unit);
-            Orders.Add(unit.Number, unit.Orders);
+        }
+
+        foreach (var order in Report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>()) {
+            if (Units.TryGetValue(order.Unit, out var unit)) {
+                unit.Orders = order.Orders;
+            }
         }
     }
 
@@ -99,15 +102,6 @@ public class ReportSync : InTurnContext {
 
             Factions.Add(fac.Number, fac);
             NewFactions.Add(fac.Number);
-        }
-    }
-
-    public void LoadOrders() {
-        var reportOrders = (Report.OrdersTemplate?.Units ?? Enumerable.Empty<JUnitOrders>())
-            .ToDictionary(x => x.Unit, x => x.Orders);
-
-        foreach (var key in reportOrders.Keys.Except(Orders.Keys)) {
-            Orders.Add(key, reportOrders[key]);
         }
     }
 
@@ -178,12 +172,6 @@ public class ReportSync : InTurnContext {
     private void ApplyTurnContext(InTurnContext ctx) {
         ctx.PlayerId = PlayerId;
         ctx.TurnNumber = TurnNumber;
-    }
-
-    private string GetOrders(int unitNumber) {
-        return Orders.TryGetValue(unitNumber, out var orders)
-            ? orders
-            : null;
     }
 
     private DbFaction GetFaction(int number) {
@@ -526,7 +514,6 @@ public class ReportSync : InTurnContext {
         unit.OnGuard = source.OnGuard;
         unit.Flags = source.Flags.ToList();
         unit.Weight = source.Weight;
-        unit.Orders = GetOrders(unit.Number);
 
         if (source.Capacity != null) {
             unit.Capacity = new DbCapacity {
@@ -560,7 +547,9 @@ public class ReportSync : InTurnContext {
     private void SyncEvents(int factionNumber, IEnumerable<string> errors, IEnumerable<JEvent> events) {
         var faction = GetFaction(Report.Faction.Number);
 
-        if (faction.Events.Count > 0) return;
+        if (faction.Events.Count > 0) {
+            Db.Events.RemoveRange(faction.Events);
+        }
 
         foreach (var error in errors) {
             faction.Events.Add(new DbEvent {
@@ -638,14 +627,14 @@ public class ReportSync : InTurnContext {
         });
     }
 
-    private static void SetMarketItems(Market market, ICollection<DbMarketItem> dbItems, IEnumerable<JTradableItem> items) {
+    private static void SetMarketItems(Market market, ICollection<DbTradableItem> dbItems, IEnumerable<JTradableItem> items) {
         var dest = dbItems
             .Where(x => x.Market == market)
             .ToDictionary(x => x.Code);
 
         foreach (var item in items) {
             if (!dest.TryGetValue(item.Code, out var d)) {
-                d = new DbMarketItem();
+                d = new DbTradableItem();
                 dbItems.Add(d);
             }
 

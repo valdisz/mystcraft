@@ -1,0 +1,13 @@
+mutation GameStart($gameId: ID!) {
+    gameStart(gameId: $gameId) {
+        isSuccess
+        error
+        jobId
+    }
+}
+
+query GetJob($jobId: String!) {
+    job(jobId: $jobId) {
+        state
+    }
+}

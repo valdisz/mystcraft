@@ -2,7 +2,7 @@ import { makeObservable, computed, action, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
 import { GameStore } from './game-store'
 import { SkillInfo } from '../game'
-import { StaisticsFragment } from '../schema'
+import { AnItem, Income, PlayerTurnStatisticsFragment, StatisticsCategory } from '../schema'
 import { GetTurnStats, GetTurnStatsQuery, GetTurnStatsQueryVariables } from '../schema'
 import { ItemCategory } from '../game'
 import { ItemInfo } from '../game'
@@ -21,7 +21,8 @@ export interface SkillStats {
 
 interface TurnStats {
     turnNumber: number
-    stats: StaisticsFragment
+    production: AnItem[]
+    income: Income
 }
 
 export type StatTabs = 'skills'
@@ -47,6 +48,10 @@ export class StatsStore {
     constructor(private game: GameStore) {
         makeObservable(this)
     }
+
+    readonly stats = observable<TurnStats>([])
+
+    readonly products = observable<ItemInfo>([])
 
     @computed get skills() {
         const { world, factionNumber } = this.game
@@ -86,10 +91,10 @@ export class StatsStore {
             return (a.skill.name ?? a.skill.code).localeCompare(b.skill.name ?? b.skill.code)
         })
 
+        console.log(skillStats)
+
         return skillStats
     }
-
-    readonly stats = observable<TurnStats>([])
 
     loadStats = async () => {
         if (this.stats.length) {
@@ -107,12 +112,16 @@ export class StatsStore {
             return
         }
 
-        const turns = response.data.node.turns as TurnStats[]
+        const turns: TurnStats[] = response.data.node.turns.items.map(x => ({
+            turnNumber: x.turnNumber,
+            income: x.income,
+            production: x.statistics.filter(i => i.category === StatisticsCategory.Produced).map(({ code, amount }) => ({ code, amount }))
+        }))
 
         // all items produced during all turns
         const items: string[] = []
         for (const turn of turns) {
-            for (const prod of turn.stats.production) {
+            for (const prod of turn.production) {
                 if (items.includes(prod.code)) continue
 
                 items.push(prod.code)
@@ -140,7 +149,7 @@ export class StatsStore {
         }
 
         for (const turn of turns) {
-            const { production } = turn.stats
+            const production  = turn.production
 
             for (const item of producedItems) {
                 if (!production.some(x => x.code === item.code)) {
@@ -149,7 +158,6 @@ export class StatsStore {
                         code: item.code,
                         amount: null
                     })
-                    console.log('missing', item.code)
                 }
             }
 
@@ -163,6 +171,4 @@ export class StatsStore {
             this.products.replace(producedItems)
         })
     }
-
-    readonly products = observable<ItemInfo>([])
 }

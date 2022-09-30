@@ -7,7 +7,8 @@ fragment BattleUnit on BattleUnit {
   description
   flags
   items {
-    ...Item
+    code
+    amount
   }
   skills {
     ...BattleSkill

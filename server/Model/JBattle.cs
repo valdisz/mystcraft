@@ -14,6 +14,11 @@ namespace advisor.Model {
         public int Level { get; set; }
     }
 
+    public class JBattleItem : AnItem {
+        public string Code { get; set; }
+        public int Amount { get; set; }
+    }
+
     [GraphQLName("BattleUnit")]
     public class JBattleUnit {
         public string Name { get; set; }
@@ -21,7 +26,7 @@ namespace advisor.Model {
         public JBattleFaction Faction { get; set; }
         public string Description { get; set; }
         public List<string> Flags { get; set; } = new ();
-        public List<JItem> Items { get; set; } = new ();
+        public List<JBattleItem> Items { get; set; } = new ();
         public List<JBattleSkill> Skills { get; set; } = new ();
     }
 
@@ -35,7 +40,7 @@ namespace advisor.Model {
         public List<JBattleRound> Rounds { get; set; }
         public string Statistics { get; set; }
         public List<JCasualties> Casualties { get; set; }
-        public List<JItem> Spoils { get; set; }
-        public List<JItem> Rose { get; set; }
+        public List<JBattleItem> Spoils { get; set; }
+        public List<JBattleItem> Rose { get; set; }
     }
 }

@@ -29,7 +29,7 @@ public record RegionId(long PlayerId, int TurnNumber, int X, int Y, int Z) {
     public override string ToString() =>  $"{PlayerId} ({X},{Y},{Z})@{TurnNumber}";
 }
 
-public class DbRegion : InTurnContext {
+public class DbRegion : InTurnContext, IStatistics<DbRegionStatisticsItem> {
     [GraphQLIgnore]
     public string PublicId => RegionId.CreateFrom(this).ToString();
 
@@ -91,12 +91,16 @@ public class DbRegion : InTurnContext {
     public int? Gate { get; set; }
 
     [GraphQLIgnore]
-    public List<DbMarketItem> Markets { get; set; } = new List<DbMarketItem>();
+    public List<DbTradableItem> Markets { get; set; } = new List<DbTradableItem>();
 
-    public IEnumerable<DbMarketItem> ForSale => Markets.Where(x => x.Market == Persistence.Market.FOR_SALE);
-    public IEnumerable<DbMarketItem> Wanted => Markets.Where(x => x.Market == Persistence.Market.WANTED);
+    public IEnumerable<DbTradableItem> ForSale => Markets.Where(x => x.Market == Persistence.Market.FOR_SALE);
+    public IEnumerable<DbTradableItem> Wanted => Markets.Where(x => x.Market == Persistence.Market.WANTED);
 
     public List<DbProductionItem> Produces { get; set; } = new List<DbProductionItem>();
+
+    public DbIncome Income { get; set; } = new ();
+    public DbExpenses Expenses { get; set; } = new ();
+    public List<DbRegionStatisticsItem> Statistics { get; set; } = new ();
 
     public List<DbExit> Exits { get; set; } = new List<DbExit>();
 
@@ -107,9 +111,6 @@ public class DbRegion : InTurnContext {
     public List<DbUnit> Units { get; set; } = new List<DbUnit>();
 
     public List<DbStructure> Structures { get; set; } = new ();
-
-    [GraphQLIgnore]
-    public List<DbStatistics> Stats { get; set; } = new ();
 
     [GraphQLIgnore]
     public List<DbEvent> Events { get; set; } = new ();

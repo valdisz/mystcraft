@@ -22,7 +22,8 @@ fragment Region on Region {
   }
   entertainment
   produces {
-    ...Item
+    code
+    amount
   }
   forSale {
     ...TradableItem
