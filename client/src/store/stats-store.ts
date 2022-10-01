@@ -2,7 +2,7 @@ import { makeObservable, computed, action, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
 import { GameStore } from './game-store'
 import { SkillInfo } from '../game'
-import { AnItem, Income, PlayerTurnStatisticsFragment, StatisticsCategory } from '../schema'
+import { AnItem, Expenses, Income, PlayerTurnStatisticsFragment, StatisticsCategory } from '../schema'
 import { GetTurnStats, GetTurnStatsQuery, GetTurnStatsQueryVariables } from '../schema'
 import { ItemCategory } from '../game'
 import { ItemInfo } from '../game'
@@ -23,6 +23,7 @@ interface TurnStats {
     turnNumber: number
     production: AnItem[]
     income: Income
+    expenses: Expenses
 }
 
 export type StatTabs = 'skills'
@@ -115,6 +116,7 @@ export class StatsStore {
         const turns: TurnStats[] = response.data.node.turns.items.map(x => ({
             turnNumber: x.turnNumber,
             income: x.income,
+            expenses: x.expenses,
             production: x.statistics.filter(i => i.category === StatisticsCategory.Produced).map(({ code, amount }) => ({ code, amount }))
         }))
 
@@ -163,8 +165,6 @@ export class StatsStore {
 
             production.sort((a, b) => index[a.code] - index[b.code])
         }
-
-        turns.reverse()
 
         runInAction(() => {
             this.stats.replace(turns)

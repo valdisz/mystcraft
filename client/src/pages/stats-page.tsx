@@ -87,6 +87,23 @@ const HeadingCell = styled(TableCell)`
     font-weight: bold;
 `
 
+const TotalsHeadingCell = styled(HeadingCell)`
+    font-size: 1.1rem;
+`
+
+const TotalsCell = styled(TableCell)`
+    font-size: 1.1rem;
+`
+
+function usage(income: number, expenses: number) {
+    if (!expenses || !income) {
+        return ''
+    }
+
+    const value = Number(expenses / income)
+    return value.toLocaleString(undefined, { style: 'percent' })
+}
+
 export function IncomeTab() {
     const { stats } = useStore()
 
@@ -94,7 +111,7 @@ export function IncomeTab() {
         <TableHead>
             <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
                 <HeadingCell>Turn</HeadingCell>
-                { stats.stats.map(x => <HeadingCell key={x.turnNumber}>{x.turnNumber}</HeadingCell>) }
+                { stats.stats.map(x => <TurnCell key={x.turnNumber}>{x.turnNumber}</TurnCell>) }
             </TableRow>
         </TableHead>
         <Observer>
@@ -113,7 +130,7 @@ export function IncomeTab() {
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.entertain}</TableCell>) }
                     </TableRow>
                     <TableRow>
-                        <HeadingCell>Trade</HeadingCell>
+                        <HeadingCell>Trade (sell)</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.trade}</TableCell>) }
                     </TableRow>
                     <TableRow>
@@ -125,12 +142,36 @@ export function IncomeTab() {
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.tax}</TableCell>) }
                     </TableRow>
                 </TableBody>
-                <TableFooter>
+
+                <TableBody>
                     <TableRow>
-                        <HeadingCell>Total</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.total}</TableCell>) }
+                        <HeadingCell>Trade (buy)</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.trade}</TableCell>) }
                     </TableRow>
-                </TableFooter>
+                    <TableRow>
+                        <HeadingCell>Study</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.study}</TableCell>) }
+                    </TableRow>
+                    <TableRow>
+                        <HeadingCell>Consume</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.consume}</TableCell>) }
+                    </TableRow>
+                </TableBody>
+
+                <TableBody>
+                    <TableRow>
+                        <TotalsHeadingCell>Total Income</TotalsHeadingCell>
+                        { stats.stats.map(x => <TotalsCell key={x.turnNumber}>{x.income.total}</TotalsCell>) }
+                    </TableRow>
+                    <TableRow>
+                        <TotalsHeadingCell>Total Expenses</TotalsHeadingCell>
+                        { stats.stats.map(x => <TotalsCell key={x.turnNumber}>{-x.expenses.total} ({usage(x?.income?.total, x?.expenses?.total)})</TotalsCell>) }
+                    </TableRow>
+                    <TableRow>
+                        <TotalsHeadingCell>Balance</TotalsHeadingCell>
+                        { stats.stats.map(x => <TotalsCell key={x.turnNumber}>{x.income.total - x.expenses.total}</TotalsCell>) }
+                    </TableRow>
+                </TableBody>
             </> }
         </Observer>
     </Table>
