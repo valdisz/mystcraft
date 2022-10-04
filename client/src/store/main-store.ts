@@ -1,6 +1,6 @@
 import { GameDetailsStore } from './game-details-store'
 import { GameEnginesStore } from './game-engines-store'
-import { GameStore } from './game-store'
+import { GameLoadingStore, GameStore } from './game-store'
 import { HomeStore } from './home-store'
 import { NewGameStore } from './new-game-store'
 // import { UniversityStore } from './university-store'
@@ -13,5 +13,6 @@ export class MainStore {
     readonly game = new GameStore()
     readonly stats = new StatsStore(this.game)
     readonly gameEngines = new GameEnginesStore()
+    readonly loading = new GameLoadingStore()
 }
 

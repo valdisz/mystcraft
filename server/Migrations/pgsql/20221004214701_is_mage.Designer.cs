@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using advisor.Persistence;
@@ -11,9 +12,10 @@ using advisor.Persistence;
 namespace advisor.Migrations.pgsql
 {
     [DbContext(typeof(PgSqlDatabase))]
-    partial class PgSqlDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20221004214701_is_mage")]
+    partial class is_mage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

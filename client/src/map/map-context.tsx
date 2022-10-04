@@ -24,7 +24,10 @@ export class MapContext {
         const regions = level.toArray()
         this.map.setRegions(regions)
 
-        return (() => this.map.destroy())
+        return (() => {
+            this.map.destroy()
+            this.map = null
+        })
     }
 
     findCoordsToCenterAt(troops: Troops, region?: Region) {

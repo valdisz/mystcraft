@@ -44,7 +44,6 @@ export class Resources {
     private queueSpritesheet(name: string, url: string) {
         return new Promise((resolve, reject) => {
             if (this.loader.resources[name]) {
-                console.log(`Resource ${name} (${url}) already exists`)
                 resolve(this.loader.resources[name])
                 return
             }
@@ -54,7 +53,6 @@ export class Resources {
                     this.tileSet = new TileSet(this.loader.resources['sprites'].spritesheet)
 
                     resolve(res)
-                    console.log(`Loaded ${name} from ${url}`, res)
                 }
                 else {
                     reject()
@@ -71,8 +69,6 @@ export class Resources {
     }
 
     async load() {
-        console.log('Loading resources')
-
         this.queueFont('Fira Code')
         this.queueFont('Almendra')
 

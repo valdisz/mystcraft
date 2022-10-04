@@ -44,7 +44,7 @@ export class GameLoadingStore {
 
     readonly done: IObservableArray<string> = observable([])
 
-    @observable phase: string = null
+    @observable phase: string = ''
 
     @computed get indeterminate() {
         return this.total === 0
@@ -80,6 +80,14 @@ export class GameLoadingStore {
     @action update(value: number, total: number) {
         this.value = Math.min(value, total)
         this.total = total
+    }
+
+    @action clear() {
+        this.done.clear()
+        this.isLoading = true
+        this.value = 0
+        this.total = 0
+        this.phase = ''
     }
 }
 
@@ -130,26 +138,43 @@ export class GameStore {
 
     private ordersSaveAbortController: AbortController
 
-    // @observable loading = true
-    // @action startLoading = () => {
-    //     this.loading = true
-    //     this.loadingMessage = 'Loading...'
-    // }
-
-    // @action stopLoading = () => this.loading = false
-
-    // @observable loadingMessage = 'Loading...'
-    // @action updateLoadingMessage = (message: string) => this.loadingMessage = message
-
-    @observable name: string = null
-    factionNumber: number = null
-
-    @observable world: World = null
+    university: UniversityStore = null
 
     gameId: string = null
     playerId: string = null
 
-    university: UniversityStore = null
+    @observable world: World = null
+
+    @observable name: string = null
+    factionNumber: number = null
+
+    @computed get unclaimed() {
+        return this.world.unclaimed || 0
+    }
+
+    get faction() {
+        return this.world.getFaction(this.factionNumber)
+    }
+
+    @computed get money() {
+        return this.faction.troops.reduce((acc, value) => acc + value.money, 0)
+    }
+
+    @computed get men() {
+        return this.faction.troops.reduce((acc, value) => acc + value.inventory.menCount, 0)
+    }
+
+    @computed get weapons() {
+        return this.faction.troops.reduce((acc, value) => acc + value.inventory.items.reduce((ac, v) => ac + (v.info.category === 'weapon' ? v.amount : 0), 0), 0)
+    }
+
+    @computed get food() {
+        return this.faction.troops.reduce((acc, value) => acc + value.inventory.items.reduce((ac, v) => ac + (v.info.category === 'food' ? v.amount : 0), 0), 0)
+    }
+
+    @computed get mounts() {
+        return this.faction.troops.reduce((acc, value) => acc + value.inventory.items.reduce((ac, v) => ac + (v.info.category === 'mount' ? v.amount : 0), 0), 0)
+    }
 
     async loadRegions(turnId: string, onProgress: ProgressCallback) {
         const items: RegionFragment[] = []
@@ -262,6 +287,7 @@ export class GameStore {
         world.turnNumber = turn.turnNumber
         world.month = turn.turnNumber % 12
         world.year = Math.floor(turn.turnNumber / 12) + 1
+        world.unclaimed = turn.unclaimed || 0
 
         const attitudes = new Map<number, Stance>()
         let defaultAttitude = Stance.Neutral

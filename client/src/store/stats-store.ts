@@ -92,8 +92,6 @@ export class StatsStore {
             return (a.skill.name ?? a.skill.code).localeCompare(b.skill.name ?? b.skill.code)
         })
 
-        console.log(skillStats)
-
         return skillStats
     }
 

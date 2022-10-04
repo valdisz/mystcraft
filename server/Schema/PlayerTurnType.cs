@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using advisor.Model;
     using HotChocolate;
+    using HotChocolate.Data;
     using HotChocolate.Resolvers;
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@
                     var db = ctx.Service<Database>();
                     return db.PlayerTurns
                         .AsNoTracking()
-                        .Include(x => x.Player)
+                        // .Include(x => x.Player)
                         .SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber);
                 });
         }
@@ -28,12 +29,12 @@
 
     [ExtendObjectType("PlayerTurn")]
     public class PlayerTurnResolvers {
-        public Task<List<DbAditionalReport>> GetReports(Database db, [Parent] DbPlayerTurn turn) {
+        [UseOffsetPaging]
+        public IQueryable<DbAditionalReport> Reports(Database db, [Parent] DbPlayerTurn turn) {
             return db.AditionalReports
                 .AsNoTracking()
                 .InTurn(turn)
-                .OrderBy(x => x.FactionNumber)
-                .ToListAsync();
+                .OrderBy(x => x.FactionNumber);
         }
         public async Task<List<JBattle>> Battles(Database db, [Parent] DbPlayerTurn turn) {
             var battles = (await db.Battles
@@ -47,8 +48,8 @@
             return battles;
         }
 
-        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public IQueryable<DbRegion> GetRegions(Database db, [Parent] DbPlayerTurn turn, bool withStructures = false) {
+        [UseOffsetPaging(MaxPageSize = 1000)]
+        public IQueryable<DbRegion> Regions(Database db, [Parent] DbPlayerTurn turn, bool withStructures = false) {
             IQueryable<DbRegion> query = db.Regions
                 .AsSplitQuery()
                 .AsNoTrackingWithIdentityResolution()
@@ -64,17 +65,17 @@
             return query.OrderBy(x => x.Id);
         }
 
-        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        [UseOffsetPaging(MaxPageSize = 1000)]
         public IQueryable<DbStructure> Structures(Database db, [Parent] DbPlayerTurn turn) {
             return db.Structures
-                .AsNoTracking()
+                .AsNoTrackingWithIdentityResolution()
                 .InTurn(turn)
                 .OrderBy(x => x.RegionId)
                 .ThenBy(x => x.Sequence);
         }
 
-        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
-        public async Task<IQueryable<DbUnit>> Units(IResolverContext context, Database db, [Parent] DbPlayerTurn turn, UnitsFilter filter = null) {
+        [UseOffsetPaging(MaxPageSize = 1000)]
+        public IQueryable<DbUnit> Units(IResolverContext context, Database db, [Parent] DbPlayerTurn turn, UnitsFilter filter = null) {
             var fields = context.CollectSelectedFields<DbUnit>();
 
             var query = db.Units
@@ -89,47 +90,39 @@
                 query = query.Include(x => x.StudyPlan);
             }
 
-            if (filter != null) {
-                if (filter.Own != null) {
-                    var factionNumber = turn.Player.Number;
+            if (filter?.Own != null) {
+                var factionNumber = turn.FactionNumber;
 
-                    query = filter.Own.Value
-                        ? query.Where(x => x.FactionNumber == factionNumber)
-                        : query.Where(x => x.FactionNumber != factionNumber);
-                }
+                query = filter.Own.Value
+                    ? query.Where(x => x.FactionNumber == factionNumber)
+                    : query.Where(x => x.FactionNumber != factionNumber);
+            }
 
-                if (filter.Mages != null) {
-                    query = (await query.ToListAsync())
-                        .Where(x => x.Skills.Any(s => s.Code == "FORC" || s.Code == "PATT" || s.Code == "SPIR"))
-                        .AsQueryable();
-                }
+            if (filter?.Mages != null) {
+                query = query.Where(x => x.IsMage);
             }
 
             return query.OrderBy(x => x.Number);
         }
 
-        [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 1000)]
+        [UseOffsetPaging(MaxPageSize = 1000)]
         public IQueryable<DbEvent> Events(Database db, [Parent] DbPlayerTurn turn) {
             return db.Events
-                .AsNoTracking()
+                .AsNoTrackingWithIdentityResolution()
                 .InTurn(turn)
                 .OrderBy(x => x.Id);
         }
 
-        public Task<List<DbFaction>> Factions(Database db, [Parent] DbPlayerTurn turn) {
+        public IQueryable<DbFaction> Factions(Database db, [Parent] DbPlayerTurn turn) {
             return db.Factions
                 .AsNoTrackingWithIdentityResolution()
-                .Include(x => x.Attitudes)
-                .OrderBy(x => x.Number)
-                .InTurn(turn)
-                .ToListAsync();
+                .InTurn(turn);
         }
 
-        public Task<List<DbStudyPlan>> StudyPlans(Database db, [Parent] DbPlayerTurn turn) {
+        public IQueryable<DbStudyPlan> StudyPlans(Database db, [Parent] DbPlayerTurn turn) {
             return db.StudyPlans
                 .AsNoTrackingWithIdentityResolution()
-                .InTurn(turn)
-                .ToListAsync();
+                .InTurn(turn);
         }
     }
 }

@@ -1,23 +1,14 @@
 import * as React from 'react'
 import {
-    Typography,
-    Container,
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-    Grid,
-    Tabs,
-    Tab,
-    Tooltip,
-    TableFooter,
+    Typography, Container, Table, TableHead, TableRow, TableCell, TableBody, Tabs, Tab, Tooltip, AppBar, IconButton, Toolbar
 } from '@mui/material';
 import { styled } from '@mui/material/styles'
 import { useStore } from '../store'
 import { Observer } from 'mobx-react'
 import { SkillInfo } from '../game'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, PathMatch, useLocation, useMatch, useResolvedPath } from 'react-router-dom'
+
+import CloseIcon from '@mui/icons-material/Close'
 
 interface SkillInfoTooltipProps {
     info: SkillInfo
@@ -39,9 +30,9 @@ function SkillInfoTooltip({ info, level }: SkillInfoTooltipProps) {
     </>
 }
 
-const WideTooltip = styled(Tooltip)`
-    max-width: 500px;
-`
+const WideTooltip = styled(Tooltip)({
+    maxWidth: '500px'
+})
 
 export function SkillsTab() {
     const { stats } = useStore()
@@ -61,7 +52,7 @@ export function SkillsTab() {
         </TableHead>
         <Observer>
             {() => <TableBody>
-                { stats.skills.map(({ skill, levels, total }) => <TableRow key={skill.code}>
+                { stats.skills.map(({ skill, levels, total }) => <TableRow key={skill.code} hover>
                     <TableCell>
                         <WideTooltip title={<SkillInfoTooltip info={skill} level={1} />}>
                             <span>{skill.name}</span>
@@ -79,21 +70,21 @@ export function SkillsTab() {
     </Table>
 }
 
-const TurnCell = styled(TableCell)`
-    font-weight: bold;
-`
+const TurnCell = styled(TableCell)({
+    fontWeight: 'bold'
+})
 
-const HeadingCell = styled(TableCell)`
-    font-weight: bold;
-`
+const HeadingCell = styled(TableCell)({
+    fontWeight: 'bold'
+})
 
-const TotalsHeadingCell = styled(HeadingCell)`
-    font-size: 1.1rem;
-`
+const TotalsHeadingCell = styled(HeadingCell)({
+    fontSize: '1.1rem'
+})
 
-const TotalsCell = styled(TableCell)`
-    font-size: 1.1rem;
-`
+const TotalsCell = styled(TableCell)({
+    fontSize: '1.1rem'
+})
 
 function usage(income: number, expenses: number) {
     if (!expenses || !income) {
@@ -117,57 +108,61 @@ export function IncomeTab() {
         <Observer>
             {() => <>
                 <TableBody>
-                    <TableRow>
+                    <TableRow hover>
+                        <HeadingCell>Borrow</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>0</TableCell>) }
+                    </TableRow>
+                    <TableRow hover>
                         <HeadingCell>Claim</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.claim}</TableCell>) }
                     </TableRow>
-                    <TableRow>
+                    <TableRow hover>
                         <HeadingCell>Work</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.work}</TableCell>) }
                     </TableRow>
-                    <TableRow>
+                    <TableRow hover>
                         <HeadingCell>Entertain</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.entertain}</TableCell>) }
                     </TableRow>
-                    <TableRow>
+                    <TableRow hover>
                         <HeadingCell>Trade (sell)</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.trade}</TableCell>) }
                     </TableRow>
-                    <TableRow>
+                    <TableRow hover>
                         <HeadingCell>Pillage</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.pillage}</TableCell>) }
                     </TableRow>
-                    <TableRow>
+                    <TableRow hover>
                         <HeadingCell>Tax</HeadingCell>
                         { stats.stats.map(x => <TableCell key={x.turnNumber}>{x.income.tax}</TableCell>) }
                     </TableRow>
-                </TableBody>
-
-                <TableBody>
-                    <TableRow>
-                        <HeadingCell>Trade (buy)</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.trade}</TableCell>) }
-                    </TableRow>
-                    <TableRow>
-                        <HeadingCell>Study</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.study}</TableCell>) }
-                    </TableRow>
-                    <TableRow>
-                        <HeadingCell>Consume</HeadingCell>
-                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.consume}</TableCell>) }
-                    </TableRow>
-                </TableBody>
-
-                <TableBody>
-                    <TableRow>
+                    <TableRow hover>
                         <TotalsHeadingCell>Total Income</TotalsHeadingCell>
                         { stats.stats.map(x => <TotalsCell key={x.turnNumber}>{x.income.total}</TotalsCell>) }
                     </TableRow>
-                    <TableRow>
+                </TableBody>
+
+                <TableBody>
+                    <TableRow hover>
+                        <HeadingCell>Trade (buy)</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.trade}</TableCell>) }
+                    </TableRow>
+                    <TableRow hover>
+                        <HeadingCell>Study</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.study}</TableCell>) }
+                    </TableRow>
+                    <TableRow hover>
+                        <HeadingCell>Consume</HeadingCell>
+                        { stats.stats.map(x => <TableCell key={x.turnNumber}>{-x.expenses.consume}</TableCell>) }
+                    </TableRow>
+                    <TableRow hover>
                         <TotalsHeadingCell>Total Expenses</TotalsHeadingCell>
                         { stats.stats.map(x => <TotalsCell key={x.turnNumber}>{-x.expenses.total} ({usage(x?.income?.total, x?.expenses?.total)})</TotalsCell>) }
                     </TableRow>
-                    <TableRow>
+                </TableBody>
+
+                <TableBody>
+                    <TableRow hover>
                         <TotalsHeadingCell>Balance</TotalsHeadingCell>
                         { stats.stats.map(x => <TotalsCell key={x.turnNumber}>{x.income.total - x.expenses.total}</TotalsCell>) }
                     </TableRow>
@@ -190,7 +185,30 @@ export function ProductionTab() {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    { stats.products.map((p, i) => <TableRow key={p.code}>
+                    { stats.products.map((p, i) => <TableRow key={p.code} hover>
+                        <HeadingCell>{p.getName(2)}</HeadingCell>
+                        { stats.stats.map(turn => <TableCell key={turn.turnNumber}>{turn.production[i].amount}</TableCell>) }
+                    </TableRow> )}
+                </TableBody>
+            </> }
+        </Observer>
+    </Table>
+}
+
+export function TreasuryTab() {
+    const { stats } = useStore()
+
+    return <Table size='small' stickyHeader={true}>
+        <Observer>
+            {() => <>
+                <TableHead>
+                    <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
+                        <HeadingCell>Turn</HeadingCell>
+                        { stats.stats.map(x => <HeadingCell key={x.turnNumber}>{x.turnNumber}</HeadingCell>) }
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    { stats.products.map((p, i) => <TableRow key={p.code} hover>
                         <HeadingCell>{p.getName(2)}</HeadingCell>
                         { stats.stats.map(turn => <TableCell key={turn.turnNumber}>{turn.production[i].amount}</TableCell>) }
                     </TableRow> )}
@@ -203,21 +221,44 @@ export function ProductionTab() {
 export function StatsPage() {
     const { stats } = useStore()
 
+    const routes = [
+        { label: 'Treasury', path: '', pathname: '' },
+        { label: 'Income', path: 'income', pathname: '' },
+        { label: 'Production', path: 'production', pathname: '' },
+        { label: 'Skills', path: 'skills', pathname: '' },
+    ]
+
+    let currentMatch: PathMatch<string> | null = null
+    for (const route of routes) {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { pathname } = useResolvedPath(route.path)
+
+        route.pathname = pathname
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const match = useMatch({ path: pathname })
+        if (match) {
+            currentMatch = match
+        }
+    }
+
     React.useEffect(() => { stats.loadStats() }, [ ])
 
-    return <Container component='main' maxWidth={false}>
-        <Typography variant='h4'>Statistics</Typography>
-        <Grid container>
-            <Grid item xs={12}>
-                <Tabs>
-                    <Tab label='Skills' component={Link} to='' />
-                    <Tab label='Income' component={Link} to='income' />
-                    <Tab label='Production' component={Link} to='production' />
+    return <>
+        <AppBar position='static' variant='outlined' elevation={0}>
+            <Toolbar>
+                <IconButton component={Link} to={`..`} edge='start' color='inherit' size="large">
+                    <CloseIcon />
+                </IconButton>
+                <Typography variant='h6'>Statistics</Typography>
+
+                <Tabs value={currentMatch?.pathname} sx={{ ml: 8 }}>
+                    { routes.map(x => <Tab key={x.label} label={x.label} value={x.pathname} component={Link} to={x.path} />)}
                 </Tabs>
-            </Grid>
-            <Grid item xs={4}>
-                <Outlet />
-            </Grid>
-        </Grid>
-    </Container>
+            </Toolbar>
+        </AppBar>
+        <Container component='main'>
+            <Outlet />
+        </Container>
+    </>
 }

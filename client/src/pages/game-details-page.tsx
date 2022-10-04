@@ -33,19 +33,19 @@ function GameDetailsPage() {
     else {
         content = <Stack gap={4}>
             <Stack direction='row' justifyContent='center' gap={4}>
-                <Card elevation={0} variant='outlined'>
+                <Card variant='outlined'>
                     <CenterCardContent>
                         <Typography variant='caption'>Turn</Typography>
                         <Typography variant='h5'>{gameDetails.turnNumber}</Typography>
                     </CenterCardContent>
                 </Card>
-                <Card elevation={0} variant='outlined'>
+                <Card variant='outlined'>
                 <CenterCardContent>
                         <Typography variant='caption'>Players</Typography>
                         <Typography variant='h5'>{gameDetails.playerCount}</Typography>
                     </CenterCardContent>
                 </Card>
-                <Card elevation={0} variant='outlined'>
+                <Card variant='outlined'>
                     <CenterCardContent>
                         <Typography variant='caption'>Local Players</Typography>
                         <Typography variant='h5'>{gameDetails.locaPlayerCount}</Typography>
@@ -56,7 +56,7 @@ function GameDetailsPage() {
             { gameDetails.showOwnPlayers &&
                 <Box>
                     <Typography variant='h5'>Own Faction</Typography>
-                    <Paper elevation={0} variant='outlined'>
+                    <Paper variant='outlined'>
                         <PlayerList items={gameDetails.ownPlayers} />
                     </Paper>
                 </Box> }
@@ -64,7 +64,7 @@ function GameDetailsPage() {
             { gameDetails.showClaimedPlayers &&
                 <Box>
                     <Typography variant='h5'>Claimed Factions</Typography>
-                    <Paper elevation={0} variant='outlined'>
+                    <Paper variant='outlined'>
                         <PlayerList items={gameDetails.claimedPlayers} />
                     </Paper>
                 </Box> }
@@ -72,7 +72,7 @@ function GameDetailsPage() {
             { gameDetails.showRemotePlayers &&
                 <Box>
                     <Typography variant='h5'>Remote Factions</Typography>
-                    <Paper elevation={0} variant='outlined'>
+                    <Paper variant='outlined'>
                         <PlayerList items={gameDetails.remotePlayers} onClaim={gameDetails.claim} />
                     </Paper>
                 </Box> }
@@ -96,8 +96,7 @@ function GameActions() {
     const { gameId } = useParams()
 
     if (gameDetails.status === GameStatus.New) return <Button variant='outlined' color='primary' size='large' onClick={gameDetails.start}>Start</Button>
-
-    if (gameDetails.canPlay) return <Button variant='outlined' color='primary' size='large' component={Link} to={`/play/${gameId}`}>Play</Button>
+    if (gameDetails.canPlay) return <Button variant='outlined' color='primary' size='large' component={Link} to={`/play/${gameId}`} replace>Play</Button>
 }
 const GameActionsObserved = observer(GameActions)
 

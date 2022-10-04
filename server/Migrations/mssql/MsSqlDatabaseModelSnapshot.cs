@@ -963,6 +963,9 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("Flags")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsMage")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)

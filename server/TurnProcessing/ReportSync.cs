@@ -448,7 +448,7 @@ public class ReportSync : InTurnContext {
         str.Z = region.Z;
 
         str.Speed = info.Speed ?? str.Speed;
-        str.Needs = info.Needs ?? str.Needs;
+        str.Needs = info.Needs;
 
         if (info.Load != null) {
             str.Load ??= new DbTransportationLoad();
@@ -514,6 +514,9 @@ public class ReportSync : InTurnContext {
         unit.OnGuard = source.OnGuard;
         unit.Flags = source.Flags.ToList();
         unit.Weight = source.Weight;
+        unit.IsMage = source.Skills
+            .Select(x => x.Code.ToLower())
+            .Any(x => x == "forc" || x == "patt" || x == "spir");
 
         if (source.Capacity != null) {
             unit.Capacity = new DbCapacity {

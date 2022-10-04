@@ -1,6 +1,7 @@
 fragment Turn on PlayerTurn {
   id
   turnNumber
+  unclaimed
   factions {
     ...Faction
   }

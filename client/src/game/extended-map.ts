@@ -6,6 +6,10 @@ export interface ExtendedMapTransform<K, V, U> {
     (value: V, key: K): U
 }
 
+export interface ExtendedMapReduce<K, V, U> {
+    (previousValue: U, currentValue: V, currentKey: K, currentIndex: number, source: ExtendedMap<K, V>): U;
+}
+
 export class ExtendedMap<K, V> implements Iterable<V> {
     constructor(private readonly keyAccesor: (value: V) => K) {
 
@@ -98,5 +102,15 @@ export class ExtendedMap<K, V> implements Iterable<V> {
         }
 
         return items
+    }
+
+    reduce<U>(predicate: ExtendedMapReduce<K, V, U>, initialValue: U): U {
+        let value = initialValue
+        let i = 0;
+        for (const [ k, v ] of this.items) {
+            value = predicate(value, v, k, i++, this)
+        }
+
+        return value
     }
 }

@@ -35,8 +35,15 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
             return new GameNextTurnResult(false, "Game not found.");
         }
 
-        if (game.Status != GameStatus.RUNNING) {
-            return new GameNextTurnResult(false, "Game must be in runnung state.");
+        if (request.TurnNumber == null) {
+            if (game.Status != GameStatus.RUNNING) {
+                return new GameNextTurnResult(false, "Game must be in runnung state.");
+            }
+        }
+        else {
+            if (game.Status != GameStatus.RUNNING && game.Status != GameStatus.LOCKED) {
+                return new GameNextTurnResult(false, "Game must be in runnung or locked state.");
+            }
         }
 
         var gameId = request.GameId;

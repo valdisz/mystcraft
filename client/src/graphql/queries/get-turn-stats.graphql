@@ -3,6 +3,7 @@ query GetTurnStats($playerId: ID!) {
     ... on Player {
       turns(take: 10, skip: 1) {
         items {
+            id
             turnNumber
             ...PlayerTurnStatistics
         }

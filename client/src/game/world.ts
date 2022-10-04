@@ -22,6 +22,7 @@ export class World {
     month: number
     year: number
     turnNumber: number
+    unclaimed: number
 
     private addLevel(z: number, { width, height, label }: WorldLevel) {
         const level = new Level(width, height, z, label)

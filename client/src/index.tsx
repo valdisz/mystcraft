@@ -1,6 +1,5 @@
 import React from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter} from 'react-router-dom'
 import { CssBaseline, GlobalStyles } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import 'regenerator-runtime/runtime.js'
@@ -22,11 +21,7 @@ const RoutedApp = () => (
     <ThemeProvider theme={THEME}>
         <CssBaseline />
         {globalStyles}
-        <Authenticate>
-            <BrowserRouter>
-                <App />
-            </BrowserRouter>
-        </Authenticate>
+        <App />
     </ThemeProvider>
 )
 

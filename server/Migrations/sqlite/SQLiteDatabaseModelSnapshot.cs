@@ -938,6 +938,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<string>("Flags")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsMage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)

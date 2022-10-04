@@ -312,8 +312,6 @@ export class Battle {
             battle.rounds.push({ log, statistics })
         }
 
-        console.log(battle)
-
         return battle
     }
 }

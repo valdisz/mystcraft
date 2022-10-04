@@ -1,26 +1,75 @@
 import * as React from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { StoreProvider } from './store'
+import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { MainStore, StoreProvider, useStore } from './store'
+import { MapContext, MapProvider, useMapContext } from './map'
+import { Authenticate } from './auth'
 import * as Pages from './pages'
+
+function gameLoader(store: MainStore, map: MapContext) {
+    return ({ params }) => {
+        const { gameId } = params
+
+        const { game, loading } = store
+
+        loading.clear()
+
+        game.load(gameId, loading)
+            .then(() => {
+                loading.begin('Map graphics')
+                return map.load()
+            })
+            .then(() => loading.end())
+    }
+}
+
+function statsLoader(store: MainStore) {
+    return () => store.stats.loadStats()
+}
+
+const router = (store: MainStore, map: MapContext) => createBrowserRouter([
+    {
+        path: '/play/:gameId', element: <Pages.GamePage />,
+        loader: gameLoader(store, map),
+        children: [
+            { index: true, element: <Pages.MapTab /> },
+            {
+                path: 'stats', element: <Pages.StatsPage />,
+                loader: statsLoader(store),
+                children: [
+                    { index: true, element: <Pages.TreasuryTab />},
+                    { path: 'income', element: <Pages.IncomeTab /> },
+                    { path: 'production', element: <Pages.ProductionTab />},
+                    { path: 'skills', element: <Pages.SkillsTab />},
+                ]
+            },
+            // { path: '', element: <Pages.UniversityPage /> }
+        ]
+    },
+    {
+        path: '/', element: <Pages.Layout />,
+        children: [
+            { index: true, element: <Pages.HomePage /> },
+            { path: 'engines', element: <Pages.GameEnginesPage /> },
+            { path: 'users', element: <Pages.UsersPage />},
+            { path: 'games/:gameId', element: <Pages.GameDetailsPage />}
+        ]
+    }
+])
+
 
 export function App() {
     return <StoreProvider>
-        <Routes>
-            <Route path='/play/:gameId' element={<Pages.GamePage />}>
-                <Route path='stats' element={<Pages.StatsPage />}>
-                    <Route path={`income`} element={<Pages.IncomeTab />} />
-                    <Route path={`production`} element={<Pages.ProductionTab />} />
-                    <Route index element={<Pages.SkillsTab />} />
-                </Route>
-                <Route path='university' element={<Pages.UniversityPage />} />
-                <Route index element={<Pages.MapTab />} />
-            </Route>
-            <Route path='/' element={<Pages.Layout />}>
-                <Route index element={<Pages.HomePage />} />
-                <Route path='engines' element={<Pages.GameEnginesPage />} />
-                <Route path='users' element={<Pages.UsersPage />} />
-                <Route path='games/:gameId' element={<Pages.GameDetailsPage />} />
-            </Route>
-        </Routes>
+        <MapProvider>
+            <Authenticate>
+                <AppRoutes />
+            </Authenticate>
+        </MapProvider>
     </StoreProvider>
+}
+
+function AppRoutes() {
+    const store = useStore()
+    const map = useMapContext()
+
+    return <RouterProvider router={router(store, map)} />
 }

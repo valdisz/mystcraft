@@ -1,20 +1,21 @@
 import * as React from 'react'
 import { styled } from '@mui/material/styles'
-import { Link, useParams, Outlet } from 'react-router-dom'
+import { Link, useLocation, useResolvedPath, useParams, Outlet } from 'react-router-dom'
 import { useCallbackRef } from '../lib'
 import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, TableCell, TableBody, Button,
     ButtonGroup, Chip, Avatar, Box, Tooltip, Card, CardContent, Stack, CircularProgress, Container, Grid,
-    BoxProps, Badge, Dialog, DialogContent, DialogContentText
+    BoxProps, Badge, Dialog, DialogContent, DialogContentText, List, ListItem, ListItemButton,
+    ButtonProps
 } from '@mui/material'
 import { useStore, GameLoadingStore, GameStore } from '../store'
 import { observer } from 'mobx-react'
 import {MapProvider, Paths, useMapContext} from '../map'
-import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType } from '../game'
+import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType, Structure } from '../game'
 import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList, FluidFab } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
-import { InterfaceCommand } from '../store/commands/move'
 import { useTheme } from '@mui/system'
 import SimpleBar from 'simplebar-react'
+import { sumBy } from 'lodash'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import AddIcon from '@mui/icons-material/Add'
@@ -48,7 +49,10 @@ export function GameMapComponent({ selectedRegion, onRegionSelected, paths }: Ga
 
         context.map.render()
 
-        return finalizer
+        return () => {
+            setCanvasRef(null)
+            finalizer()
+        }
     }, [ canvasRef ])
 
     React.useEffect(() => {
@@ -281,24 +285,6 @@ function UnitCapacity({ weight, capacity }: UnitCapacityProps) {
     </UnitCapacityContainer>
 }
 
-interface CommandButtonProps {
-    command: InterfaceCommand
-}
-
-const CommandButton = observer(({ command: { title, tooltip, canExecute, error, execute } }: CommandButtonProps) => {
-    const text = []
-    if (tooltip) text.push(tooltip)
-    if (error) text.push(`!: ${error}`)
-
-    console.log('canExecute', canExecute)
-
-    const btn = <Button disabled={!canExecute} onClick={execute} variant='contained'>{title}</Button>
-
-    return text.length
-        ? <Tooltip title={text.join('\n')}><span>{btn}</span></Tooltip>
-        : btn
-})
-
 const UnitRow = observer(({ unit, game }: { unit: Unit, game: GameStore }) => {
     const rows = unit.description ? 2 : 1
     const noBorder = rows > 1 ? 'no-border' : ''
@@ -493,27 +479,59 @@ const StructuresContainer = styled(Box)`
     }
 `
 
+interface StuctureItemProps extends BoxProps {
+    item: Structure
+}
+
+function StuctureItem({ item, sx, ...props }: StuctureItemProps) {
+    // const game = useStore()
+    const theme = useTheme()
+
+    const color = item.isFinished
+        ? theme.palette.text.primary
+        : theme.palette.warning.main
+
+    const inside = sumBy(item.units, x => x.inventory.menCount)
+    // const { world } = game.game
+
+    return <Box columnGap={2} sx={{
+        display: 'grid',
+        gridTemplateColumns: 'minmax(2ch, min-content) minmax(0, 1fr) minmax(5ch, min-content) minmax(5ch, min-content)',
+        gridAutoRows: 'min-content',
+        justifyItems: 'center',
+        alignItems: 'center',
+        ...(sx || {})
+    }} {...props}>
+        <Typography variant='h6' sx={{ gridRow: 2, gridColumn: 1, justifySelf: 'end'  }}>{item.num}</Typography>
+        <Typography variant='caption' sx={{ gridRow: 1, gridColumn: 2, justifySelf: 'start', alignSelf: 'center' }}>{item.type}</Typography>
+
+        <Typography sx={{ gridRow: 2, gridColumn: 2, justifySelf: 'start' }} fontWeight={600} color={color}>{item.name}</Typography>
+
+        { inside > 0 && <>
+            <Typography variant='caption' sx={{ gridRow: 1, gridColumn: 3 }}>Inside</Typography>
+            <Typography sx={{ gridRow: 2, gridColumn: 3 }}>{inside}</Typography>
+        </> }
+
+        { !item.isFinished && <>
+            <Typography variant='caption' sx={{ gridRow: 1, gridColumn: 4 }}>Needs</Typography>
+            <Chip sx={{ gridRow: 2, gridColumn: 4 }} size='small' label={item.needs.toString()} color='warning' />
+        </> }
+
+        { item.description && <Typography sx={{ gridRow: 3, gridColumn: 2, justifySelf: 'start' }} color='GrayText' fontStyle='italic' variant='body2'>{item.description}</Typography> }
+    </Box>
+}
+
 const StructuresComponent = observer(() => {
     const { game } = useStore()
     const theme = useTheme()
     return <StructuresContainer>
-        <Stack gap={2} sx={{ minHeight: 0, mb: 2 }}>
-            {game.structures.map((row) => {
-                return <Box mx={2} my={1} key={row.id}>
-                    <Stack gap={2} direction='row' alignItems='center'>
-                        <Typography variant='h6'>{row.num}</Typography>
-                        <Stack flex={1}>
-                            <Typography variant='caption'>{row.type}</Typography>
-                            <Stack gap={2} direction='row' alignItems='center' justifyContent='space-between'>
-                                <Typography fontWeight={600} color={row.isFinished ? 'WindowText' : theme.palette.warning[theme.palette.mode]}>{row.name}</Typography>
-                                { !row.isFinished && <Chip size='small' label={`needs ${row.needs}`} color='warning' /> }
-                            </Stack>
-                            { row.description&& <Typography color='GrayText' variant='body2'>{row.description}</Typography> }
-                        </Stack>
-                    </Stack>
-                </Box>
-            })}
-        </Stack>
+        <List>
+            {game.structures.map((row) => <ListItem key={row.id} disablePadding>
+                <ListItemButton>
+                    <StuctureItem flex={1} item={row} />
+                </ListItemButton>
+            </ListItem>)}
+        </List>
     </StructuresContainer>
 })
 
@@ -543,181 +561,158 @@ export const MapTab = observer(() => {
     const { battles } = game.world
     const context = useMapContext()
 
-    return <Box sx={{
-        flex: 1,
-        minHeight: 0,
-        position: 'relative'
-    }}>
-        <GameMapComponent
-            selectedRegion={game.region?.coords}
-            onRegionSelected={game.selectRegion}
-            paths={game.paths}
-        />
-
+    return <GameLayout>
         <Box sx={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            pointerEvents: 'none',
-            display: 'grid',
-            gap: 2,
-            m: 2,
-            gridTemplateColumns: 'minmax(min-content, 50vw) 1fr minmax(min-content, 400px)',
-            gridTemplateRows: 'minmax(0, 33vh) 1fr minmax(min-content, 0)'
+            flex: 1,
+            minHeight: 0,
+            position: 'relative'
         }}>
+            <GameMapComponent
+                selectedRegion={game.region?.coords}
+                onRegionSelected={game.selectRegion}
+                paths={game.paths}
+            />
 
-            {/* Left Panel */}
             <Box sx={{
-                gridColumnStart: 1, gridColumnEnd: 2,
-                gridRowStart: 1, gridRowEnd: 3,
-                overflow: 'hidden',
-                position: 'relative',
-                minHeight: 0
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+                pointerEvents: 'none',
+                display: 'grid',
+                gap: 2,
+                m: 2,
+                gridTemplateColumns: 'minmax(min-content, 50vw) 1fr minmax(min-content, 400px)',
+                gridTemplateRows: 'minmax(0, 33vh) 1fr minmax(min-content, 0)'
             }}>
-                {/* Game Screens */}
-                <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
-                    <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                        <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
-                            <Button variant='contained' onClick={() => context.map.zoomIn()}>
-                                <AddIcon />
-                            </Button>
-                            <Button variant='contained' onClick={() => context.map.zoomOut()}>
-                                <RemoveIcon />
-                            </Button>
-                        </ButtonGroup>
-                    </Box>
-                </Box>
-                { !game.battlesVisible && <Box sx={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 70,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'flex-start',
-                    alignItems: 'center',
-                    gap: 2,
-                    mt: 4,
-                    pointerEvents: 'all'
-                }}>
-                    { battles.length > 0 && <Badge badgeContent={battles.length} color='error'>
-                        <FluidFab icon={<Box component='span' sx={{ fontSize: '24px' }}>⚔</Box>} sx={{ zIndex: 0 }} onClick={game.toggleBattles}>
-                            Battles
-                        </FluidFab>
-                    </Badge> }
-                </Box> }
 
-                { game.battlesVisible && <FloatingPanel header='Battles' onClose={game.hideBattles} sx={{
-                    maxWidth: '400px',
-                    height: '100%',
-                    minHeight: 0,
-                    pointerEvents: 'all',
-                    display: 'flex',
-                    flexDirection: 'column'
+                {/* Left Panel */}
+                <Box sx={{
+                    gridColumnStart: 1, gridColumnEnd: 2,
+                    gridRowStart: 1, gridRowEnd: 3,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    minHeight: 0
                 }}>
-                    <Box sx={{ flex: 1, minHeight: 0 }}>
-                        <Box component={SimpleBar} autoHide={false} sx={{ height: '100%' }}>
-                            <BattleList battles={battles} />
+                    {/* Game Screens */}
+                    <Box sx={{ position: 'absolute', display: 'flex', top: 0, left: 0, right: 0, bottom: 0, pointerEvents: 'none' }}>
+                        <Box sx={{ m: 2, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <ButtonGroup sx={{ pointerEvents: 'all' }} orientation='vertical' size='small' color='inherit'>
+                                <Button variant='contained' onClick={() => context.map.zoomIn()}>
+                                    <AddIcon />
+                                </Button>
+                                <Button variant='contained' onClick={() => context.map.zoomOut()}>
+                                    <RemoveIcon />
+                                </Button>
+                            </ButtonGroup>
                         </Box>
                     </Box>
+                    { !game.battlesVisible && <Box sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 70,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        gap: 2,
+                        mt: 4,
+                        pointerEvents: 'all'
+                    }}>
+                        { battles.length > 0 && <Badge badgeContent={battles.length} color='error'>
+                            <FluidFab icon={<Box component='span' sx={{ fontSize: '24px' }}>⚔</Box>} sx={{ zIndex: 0 }} onClick={game.toggleBattles}>
+                                Battles
+                            </FluidFab>
+                        </Badge> }
+                    </Box> }
+
+                    { game.battlesVisible && <FloatingPanel header='Battles' onClose={game.hideBattles} sx={{
+                        maxWidth: '400px',
+                        height: '100%',
+                        minHeight: 0,
+                        pointerEvents: 'all',
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
+                        <Box sx={{ flex: 1, minHeight: 0 }}>
+                            <Box component={SimpleBar} autoHide={false} sx={{ height: '100%' }}>
+                                <BattleList battles={battles} />
+                            </Box>
+                        </Box>
+                    </FloatingPanel> }
+
+                    {/* <Box component={SimpleBar} autoHide={false} sx={{
+                        pointerEvents: 'all',
+                        minHeight: 0,
+                        height: '100%',
+                        zIndex: 'drawer'
+                    }} onMouseDown={noop} onMouseUp={noop} onClick={noop}> */}
+                    {/* </Box> */}
+                </Box>
+
+                {/* Right Panel */}
+                <Box sx={{
+                    gridColumnStart: 3, gridColumnEnd: 4,
+                    gridRowStart: 1, gridRowEnd: 3,
+                    overflow: 'hidden'
+                }}>
+                    <Box component={SimpleBar} autoHide={false} sx={{
+                        pointerEvents: 'all',
+                        minHeight: 0,
+                        maxHeight: '100%'
+                    }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            { game.region && <FloatingPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />} expanded={game.regionPanel && game.region.explored} onExpand={game.exapandRegion}>
+                                <RegionComponent />
+                            </FloatingPanel> }
+                            { game.structures?.length > 0 && <FloatingPanel header='Structures' expanded={game.structuresPanel} onExpand={game.exapandStructures}>
+                                <StructuresComponent />
+                            </FloatingPanel> }
+                        </Box>
+                    </Box>
+                </Box>
+
+                {/* Bottom Panel */}
+                { game.region && <FloatingPanel header={<Stack direction='row' spacing={2}>
+                        <Typography variant='h6'>Units</Typography>
+                        <Button variant='outlined' onClick={game.openBattleSim}>Battle Sim</Button>
+                    </Stack>}
+                sx={{
+                    gridColumnStart: 1, gridColumnEnd: 4,
+                    gridRow: 3,
+                    alignSelf: 'flex-end',
+                    minHeight: 0,
+                    pointerEvents: 'all'
+                }} expanded={game.unitsPanel} onExpand={game.exapandUnits}>
+                    <Box sx={{ height: '30vh', display: 'flex' }}>
+                        <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
+                            <UnitsComponent sx={{ width: '100%', height: '100%' }} />
+                        </Box>
+                        { game.unit && <UnitSummary unit={game.unit} sx={{ width: '25vw', maxWidth: '400px' }} /> }
+                        { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '25vw', maxWidth: '400px' }} /> }
+                    </Box>
+                    <BattleSim />
                 </FloatingPanel> }
-
-                {/* <Box component={SimpleBar} autoHide={false} sx={{
-                    pointerEvents: 'all',
-                    minHeight: 0,
-                    height: '100%',
-                    zIndex: 'drawer'
-                }} onMouseDown={noop} onMouseUp={noop} onClick={noop}> */}
-                {/* </Box> */}
             </Box>
-
-            {/* Right Panel */}
-            <Box sx={{
-                gridColumnStart: 3, gridColumnEnd: 4,
-                gridRowStart: 1, gridRowEnd: 3,
-                overflow: 'hidden'
-            }}>
-                <Box component={SimpleBar} autoHide={false} sx={{
-                    pointerEvents: 'all',
-                    minHeight: 0,
-                    maxHeight: '100%'
-                }} onMouseDown={noop} onMouseUp={noop} onClick={noop}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        { game.region && <FloatingPanel header={<RegionHeader region={game.region} sx={{ flex: 1, minWidth: 0 }} />} expanded={game.regionPanel && game.region.explored} onExpand={game.exapandRegion}>
-                            <RegionComponent />
-                        </FloatingPanel> }
-                        { game.structures?.length > 0 && <FloatingPanel header='Structures' expanded={game.structuresPanel} onExpand={game.exapandStructures}>
-                            <StructuresComponent />
-                        </FloatingPanel> }
-                    </Box>
-                </Box>
-            </Box>
-
-            {/* Bottom Panel */}
-            { game.region && <FloatingPanel header={<Stack direction='row' spacing={2}>
-                    <Typography variant='h6'>Units</Typography>
-                    <Button variant='outlined' onClick={game.openBattleSim}>Battle Sim</Button>
-                </Stack>}
-            sx={{
-                gridColumnStart: 1, gridColumnEnd: 4,
-                gridRow: 3,
-                alignSelf: 'flex-end',
-                minHeight: 0,
-                pointerEvents: 'all'
-            }} expanded={game.unitsPanel} onExpand={game.exapandUnits}>
-                <Box sx={{ height: '30vh', display: 'flex' }}>
-                    <Box sx={{ flex: 1, minHeight: 0, minWidth: 0 }}>
-                        <UnitsComponent sx={{ width: '100%', height: '100%' }} />
-                    </Box>
-                    { game.unit && <UnitSummary unit={game.unit} sx={{ width: '25vw', maxWidth: '400px' }} /> }
-                    { game.isOrdersVisible && <Orders readOnly={game.isOrdersReadonly} sx={{ width: '25vw', maxWidth: '400px' }} /> }
-                </Box>
-                <BattleSim />
-            </FloatingPanel> }
         </Box>
-    </Box>
+    </GameLayout>
 })
 
-const GameInfoItem = styled(Box)({
-    mr: 1
-})
-
-const GameComponent = observer(() => {
-    const { game } = useStore()
-    const { world } = game
-    const { player } = world.factions
-
-    return (
-        <Box sx={{
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
-            <AppBar position='static' color='primary'>
-                <Toolbar>
-                    <IconButton component={Link} to={`/games/${game.gameId}`} edge='start' color='inherit' size="large">
-                        <ArrowBackIcon />
-                    </IconButton>
-                    <Typography variant='h6'>{ game.name }</Typography>
-                    <GameInfoItem>
-                        <Typography variant='subtitle2'>{ player.name } ({ player.num })</Typography>
-                    </GameInfoItem>
-                    <GameInfoItem>
-                        <Typography variant='subtitle2'>Turn: { world.turnNumber }</Typography>
-                    </GameInfoItem>
-                    <Button color='inherit' variant='outlined' component={Link as any} to={``}>Map</Button>
-                    <Button color='inherit' variant='outlined' component={Link as any} to={`stats`}>Statistics</Button>
-                    { game.university?.locations?.length > 0 && <Button color='inherit' variant='outlined' component={Link as any} to={`university`}>University</Button> }
-                    <Box flex={1} />
-                    <Button color='inherit' onClick={game.getOrders}>Download Orders</Button>
-                </Toolbar>
-            </AppBar>
-            <Outlet />
-        </Box>
-    );
-})
+const MONTH_NAME = {
+    1: 'January',
+    2: 'February',
+    3: 'March',
+    4: 'April',
+    5: 'May',
+    6: 'June',
+    7: 'July',
+    8: 'August',
+    9: 'September',
+    10: 'October',
+    11: 'November',
+    12: 'December',
+}
 
 export interface ProgressItemProps {
     text: string
@@ -746,7 +741,6 @@ export interface LoadingProps {
 }
 
 export const Loading = observer(({ loading }: LoadingProps) => {
-
     return <Container sx={{ height: '100%' }}>
         <Grid sx={{ height: '100%' }} container justifyContent='center' alignItems='center'>
             <Grid item xs={12} md={6} lg={3}>
@@ -764,28 +758,113 @@ export const Loading = observer(({ loading }: LoadingProps) => {
     </Container>
 })
 
-const GameObserver = observer(() => {
-    const [ loading ] = React.useState(() => new GameLoadingStore())
-    const { gameId } = useParams()
+function GameLayout({ children }: React.PropsWithChildren) {
     const { game } = useStore()
-    const map = useMapContext()
+    const { world } = game
+    const { player } = world.factions
 
-    React.useEffect(() => {
-        game.load(gameId, loading)
-            .then(() => {
-                loading.begin('Map graphics')
-                return map.load()
-            })
-            .then(() => loading.end())
-    }, [ gameId ])
+    return <>
+            <AppBar position='static' variant='outlined' elevation={0}>
+                <Toolbar>
+                    <IconButton component={Link} to={`/games/${game.gameId}`} edge='start' color='inherit' size="large">
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <Typography variant='h6'>{ game.name }</Typography>
 
-    return loading.isLoading
-        ? <Loading loading={loading} />
-        : <GameComponent />
-})
+                    <Stack direction='row' ml={8} gap={8} alignItems='center'>
+                        <Stack direction='row' gap={4}>
+                            <Stack>
+                                <Typography variant='caption'>Turn</Typography>
+                                <Typography fontWeight='bold'>{ world.turnNumber }</Typography>
+                            </Stack>
+                            <Stack>
+                                <Typography variant='caption'>Year</Typography>
+                                <Typography fontWeight='bold'>{ world.year }</Typography>
+                            </Stack>
+                            <Stack>
+                                <Typography variant='caption'>Month</Typography>
+                                <Typography fontWeight='bold'>{ MONTH_NAME[world.month] }</Typography>
+                            </Stack>
+                            <Stack>
+                                <Typography variant='caption'>Faction</Typography>
+                                <Typography fontWeight='bold'>{ player.name }</Typography>
+                            </Stack>
+                            <Stack>
+                                <Typography variant='caption'>Number</Typography>
+                                <Typography fontWeight='bold'>{ player.num }</Typography>
+                            </Stack>
+                        </Stack>
 
-export function GamePage() {
-    return <MapProvider>
-        <GameObserver />
-    </MapProvider>
+                        <Button component={Link} to='stats' sx={{
+                            color: 'inherit',
+                            textTransform: 'inherit',
+                            textAlign: 'left'
+                        }}>
+                            <Stack direction='row' gap={4}>
+                                <Stack>
+                                    <Typography variant='caption'>Unclaimed Silver</Typography>
+                                    <Typography fontWeight='bold'>{ game.unclaimed }</Typography>
+                                </Stack>
+                                <Stack>
+                                    <Typography variant='caption'>Silver</Typography>
+                                    <Typography fontWeight='bold'>{ game.money }</Typography>
+                                </Stack>
+                                <Stack>
+                                    <Typography variant='caption'>Food</Typography>
+                                    <Typography fontWeight='bold'>{ game.food }</Typography>
+                                </Stack>
+                                <Stack>
+                                    <Typography variant='caption'>Men</Typography>
+                                    <Typography fontWeight='bold'>{ game.men }</Typography>
+                                </Stack>
+                                <Stack>
+                                    <Typography variant='caption'>Mounts</Typography>
+                                    <Typography fontWeight='bold'>{ game.mounts }</Typography>
+                                </Stack>
+                                <Stack>
+                                    <Typography variant='caption'>Weapons</Typography>
+                                    <Typography fontWeight='bold'>{ game.weapons }</Typography>
+                                </Stack>
+                            </Stack>
+                        </Button>
+                    </Stack>
+
+                    <Box flex={1} />
+
+                    {/* <Tabs value={location.pathname}>
+                        { routes.filter(x => x.enabled).map(({ label, path }) => <Tab key={path} label={label} value={path} to={path} component={Link} />) }
+                    </Tabs>
+
+                    <Box flex={1} /> */}
+
+                    <Button size='medium' color='inherit' onClick={game.getOrders}>Download Orders</Button>
+                </Toolbar>
+            </AppBar>
+            {children}
+        </>
 }
+
+function _GamePage() {
+    const { loading } = useStore()
+
+    // const routes = [
+    //     { enabled: true, label: 'Map', path: useResolvedPath('').pathname },
+    //     { enabled: true, label: 'Statistics', path: useResolvedPath('stats').pathname },
+    //     { enabled: game.university?.locations?.length > 0, label: '', path: useResolvedPath('university').pathname }
+    // ]
+
+    if (loading.isLoading) {
+        return <Loading loading={loading} />
+    }
+
+    return <Box sx={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+    }}>
+        <Outlet />
+    </Box>
+}
+
+export const GamePage = observer(_GamePage)

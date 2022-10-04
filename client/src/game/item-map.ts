@@ -8,6 +8,11 @@ export interface ItemMapTransform<T extends UniqueItem, U> {
     (item: T): U
 }
 
+export interface ItemMapReduce<T extends UniqueItem, U> {
+    (previousValue: U, currentValue: T, currentIndex: number, source: ItemMap<T>): U;
+}
+
+
 export class ItemMap<T extends UniqueItem> implements Iterable<T> {
     constructor(items?: T[]) {
         if (!items)
@@ -102,5 +107,15 @@ export class ItemMap<T extends UniqueItem> implements Iterable<T> {
         }
 
         return items
+    }
+
+    reduce<U>(predicate: ItemMapReduce<T, U>, initialValue: U): U {
+        let value = initialValue
+        let i = 0;
+        for (const [ k, v ] of this.items) {
+            value = predicate(value, v, i++, this)
+        }
+
+        return value
     }
 }

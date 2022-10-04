@@ -71,7 +71,6 @@ namespace advisor.Schema
         // }
 
         [UseOffsetPaging]
-        [UseProjection]
         public IQueryable<DbPlayerTurn> Turns(Database db, [Parent] DbPlayer player) {
             return db.PlayerTurns
                 .AsNoTracking()
@@ -80,7 +79,6 @@ namespace advisor.Schema
         }
 
         [UseSingleOrDefault]
-        [UseProjection]
         public IQueryable<DbPlayerTurn> Turn(Database db, [Parent] DbPlayer player, int number) {
             return db.PlayerTurns
                 .AsNoTracking()

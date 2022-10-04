@@ -348,9 +348,9 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                                     <tr>
                                         <th className='left item'>Item</th>
                                         <th className='left'>Location</th>
-                                        <th className='shrink' title='Move Points'>MP</th>
-                                        <th className='shrink' title='Price'>Pr.</th>
-                                        <th className='shrink' title='Amount'>Amnt.</th>
+                                        <th className='shrink' title='Distance'>D</th>
+                                        <th className='shrink' title='Price'>Pr</th>
+                                        <th className='shrink' title='Amount'>Amnt</th>
                                         <th className='shrink' title='Profit'>$</th>
                                     </tr>
                                 </thead>
@@ -364,7 +364,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                                                 ({trade.sell.region.coords.toString()})
                                             </Button>
                                         </td>
-                                        <td className='shrink'>{trade.distance}/{trade.cost}</td>
+                                        <td className='shrink'>{trade.distance}</td>
                                         <td className='shrink'>${trade.sell.price}</td>
                                         <td className='shrink'>{trade.amount}</td>
                                         <td className='shrink'>${trade.profit}</td>
@@ -398,9 +398,9 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                                     <tr>
                                         <th className='left item'>Item</th>
                                         <th className='left'>Location</th>
-                                        <th className='shrink' title='Move Points'>MP</th>
-                                        <th className='shrink' title='Price'>Pr.</th>
-                                        <th className='shrink' title='Amount'>Amnt.</th>
+                                        <th className='shrink' title='Distnace'>D</th>
+                                        <th className='shrink' title='Price'>Pr</th>
+                                        <th className='shrink' title='Amount'>Amnt</th>
                                         <th className='shrink' title='Profit'>$</th>
                                     </tr>
                                 </thead>
@@ -414,7 +414,7 @@ export const RegionSummary = observer(({ region }: RegionSummaryProps) => {
                                                 ({trade.buy.region.coords.toString()})
                                             </Button>
                                         </td>
-                                        <td className='shrink'>{trade.distance}/{trade.cost}</td>
+                                        <td className='shrink'>{trade.distance}</td>
                                         <td className='shrink'>${trade.buy.price}</td>
                                         <td className='shrink'>{trade.amount}</td>
                                         <td className='shrink'>${trade.profit}</td>

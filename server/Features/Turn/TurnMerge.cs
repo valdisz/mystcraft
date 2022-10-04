@@ -59,32 +59,33 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
         var playersRepo = unit.Players(game);
         await foreach (var report in reports) {
             try {
-                JReport doc = ReadReport(report.Json);
+                JReport reportModel = ReadReport(report.Json);
 
                 await foreach (var sharedReport in GetSharedReportsAsync(request.Game.Id, report.PlayerId, request.TurnNumber)) {
-                    doc.Merge(sharedReport);
+                    reportModel.Merge(sharedReport);
                 }
 
                 var player = await playersRepo.GetOneAsync(report.PlayerId);
                 var thisTurn = await GetTurnAsync(report.PlayerId, turnNumber);
                 var prevTurn = await GetTurnAsync(report.PlayerId, prevTurnNumber, track: false, addUnits: false, addEvents: false, addStatistics: false);
 
-                ReportSync sync = new ReportSync(db, report.PlayerId, request.TurnNumber, doc);
-                if (prevTurn != null)
-                {
+                ReportSync sync = new ReportSync(db, report.PlayerId, request.TurnNumber, reportModel);
+                if (thisTurn.IsProcessed || prevTurn == null) {
+                    sync.Load(thisTurn);
+                }
+                else if (prevTurn != null) {
                     sync.Copy(prevTurn, mapper);
                 }
 
-                sync.Load(thisTurn);
                 await sync.SyncReportAsync();
 
-                await AddOrdersOnceAsync(nextTurnNumber, report, doc);
+                await AddOrdersOnceAsync(nextTurnNumber, report, reportModel);
 
-                player.Name = doc.Faction.Name;
-                player.Password = doc.OrdersTemplate.Password ?? player.Password;
+                player.Name = reportModel.Faction.Name;
+                player.Password = reportModel.OrdersTemplate.Password ?? player.Password;
                 thisTurn.FactionName = player.Name;
                 thisTurn.FactionNumber = player.Number;
-                thisTurn.Unclaimed = doc.UnclaimedSilver;
+                thisTurn.Unclaimed = reportModel.UnclaimedSilver;
                 report.IsMerged = true;
 
                 await unit.SaveChangesAsync();

@@ -68,6 +68,9 @@ namespace advisor.Persistence
         [Required]
         public bool OnGuard { get; set; }
 
+        [Required]
+        public bool IsMage { get; set; }
+
         public List<string> Flags { get; set; } = new List<string>();
 
         public int? Weight { get; set; }

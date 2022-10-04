@@ -347,7 +347,7 @@ export class HexMap2 implements MapState {
 
     destroy() {
         this.clearAll()
-
+        this.viewport.destroy()
         this.renderer.destroy()
         this.canvas.removeEventListener('dblclick', this.onDblClick)
     }
