@@ -7,7 +7,7 @@ import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
 import { GetUnits, GetUnitsQuery, GetUnitsQueryVariables } from '../schema'
 import { SetOrder, SetOrderMutation, SetOrderMutationVariables } from '../schema'
-import { Ruleset } from "../game"
+import { Ruleset, SkillInfo } from "../game"
 import { Region } from "../game"
 import { World } from "../game"
 import { WorldInfo, WorldLevel } from '../game'
@@ -447,7 +447,7 @@ export class GameStore {
                 flags: unit.flags.filter(x => x === 'behind') as any[]
             }
 
-            if (!u.skills.length) delete u.skills
+            // if (!u.skills.length) delete u.skills
             if (!u.items.length) delete u.items
             if (!u.flags.length) delete u.flags
             if (!u.combatSpell) delete u.combatSpell

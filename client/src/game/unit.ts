@@ -16,7 +16,6 @@ export class Unit {
 
     seq: number
     faction: Faction;
-    // troops: Troops;
     region: Region;
     structure?: Structure;
     get isPlayer() {

@@ -1,11 +1,9 @@
 import { makeObservable, computed, action, observable, runInAction } from 'mobx'
 import { CLIENT } from '../client'
 import { GameStore } from './game-store'
-import { SkillInfo } from '../game'
+import { Item, SkillInfo, ItemInfo, defaultItemOrder } from '../game'
 import { AnItem, Expenses, Income, PlayerTurnStatisticsFragment, StatisticsCategory } from '../schema'
 import { GetTurnStats, GetTurnStatsQuery, GetTurnStatsQueryVariables } from '../schema'
-import { ItemCategory } from '../game'
-import { ItemInfo } from '../game'
 
 interface KnownSkill {
     skill: SkillInfo
@@ -46,13 +44,35 @@ const CATEGORY_ORDER = {
 }
 
 export class StatsStore {
-    constructor(private game: GameStore) {
+    constructor(private readonly game: GameStore) {
         makeObservable(this)
     }
 
     readonly stats = observable<TurnStats>([])
-
     readonly products = observable<ItemInfo>([])
+
+    @computed get tresury(): Item[] {
+        const world = this.game.world
+        const player = world.factions.player
+
+        const map: Map<string, Item> = new Map()
+
+        for (const troop of player.troops) {
+            for (const item of troop.inventory.items) {
+                if (map.has(item.code)) {
+                    map.get(item.code).amount += item.amount
+                }
+                else {
+                    map.set(item.code, item.info.create(item.amount))
+                }
+            }
+        }
+
+        const result = Array.from(map.values())
+        result.sort(defaultItemOrder)
+
+        return result
+    }
 
     @computed get skills() {
         const { world, factionNumber } = this.game

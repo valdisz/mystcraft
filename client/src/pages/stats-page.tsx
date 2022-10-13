@@ -10,6 +10,10 @@ import { Link, Outlet, PathMatch, useLocation, useMatch, useResolvedPath } from 
 
 import CloseIcon from '@mui/icons-material/Close'
 
+export const SubTable = styled(Table)({
+    fontWeight: 'bold'
+})
+
 interface SkillInfoTooltipProps {
     info: SkillInfo
     level: number
@@ -203,14 +207,14 @@ export function TreasuryTab() {
             {() => <>
                 <TableHead>
                     <TableRow sx={{ backgroundColor: 'palette.primary.main' }}>
-                        <HeadingCell>Turn</HeadingCell>
-                        { stats.stats.map(x => <HeadingCell key={x.turnNumber}>{x.turnNumber}</HeadingCell>) }
+                        <HeadingCell>Item</HeadingCell>
+                        <HeadingCell>Count</HeadingCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    { stats.products.map((p, i) => <TableRow key={p.code} hover>
-                        <HeadingCell>{p.getName(2)}</HeadingCell>
-                        { stats.stats.map(turn => <TableCell key={turn.turnNumber}>{turn.production[i].amount}</TableCell>) }
+                    { stats.tresury.map(item => <TableRow key={item.code} hover>
+                        <HeadingCell>{item.name}</HeadingCell>
+                        <TableCell>{item.amount}</TableCell>
                     </TableRow> )}
                 </TableBody>
             </> }

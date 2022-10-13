@@ -1,4 +1,4 @@
-import { UniqueItem, ItemInfo } from "./internal";
+import { UniqueItem, ItemInfo, getCategoryOrder } from './internal'
 
 export class Item implements UniqueItem {
     constructor(public readonly info: ItemInfo) {
@@ -35,4 +35,19 @@ export class Item implements UniqueItem {
     get isMount() {
         return this.info.category === 'mount'
     }
+}
+
+export function defaultItemOrder(a: Item, b: Item) {
+    const aV = getCategoryOrder(a.info.category)
+    const bV = getCategoryOrder(b.info.category)
+
+    if (aV === bV) {
+        if (a.price > 0) {
+            return a.price - b.price
+        }
+
+        return a.amount - b.amount
+    }
+
+    return aV - bV
 }

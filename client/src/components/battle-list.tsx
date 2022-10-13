@@ -224,49 +224,26 @@ interface ParticipantsProps {
 function Participants({ items }: ParticipantsProps) {
     return <Box sx={{
         display: 'flex',
-        gap: 4
+        flexDirection: 'column',
+        flexWrap: 'wrap',
+        gap: 2,
+        maxHeight: '100%',
+        minWidth: 0
     }}>
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexWrap: 'wrap',
-            gap: 1,
-            maxHeight: '100%'
-        }}>
-            { items.filter(x => x.behind).map((f, i) => <React.Fragment key={i}>
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 128,
-                    height: 32,
-                    backgroundColor: 'silver'
-                }}>
-                    {f.size} {f.men.map(x => x.name).join(', ')} ({f.attackLevel})
+        { items.map((f, i) => <React.Fragment key={i}>
+            <Box sx={{
+                width: '100%',
+                border: 1
+            }}>
+                <Box m={2}>
+                    <Box sx={{ minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {f.size} {f.men.map(x => x.name).join(', ')}
+                    </Box>
+                    <Typography>Attack: {f.attackLevel}</Typography>
+                    <Typography>{f.weapon?.getName(1)}</Typography>
                 </Box>
-            </React.Fragment>) }
-        </Box>
-        <Box sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexWrap: 'wrap',
-            gap: 1,
-            maxHeight: '100%'
-        }}>
-            { items.filter(x => !x.behind).map((f, i) => <React.Fragment key={i}>
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 128,
-                    height: 32,
-                    backgroundColor: 'silver'
-                }}>
-                    {f.size} {f.men.map(x => x.name).join(', ')} ({f.attackLevel})
-                </Box>
-            </React.Fragment>) }
-        </Box>
-
+            </Box>
+        </React.Fragment>) }
     </Box>
 }
 
@@ -278,8 +255,8 @@ interface BattleViewProps {
 }
 
 function BattleView({ battle, open, onClose }: BattleViewProps) {
-    const attackers = React.useMemo(() => battle ? groupByFaction(battle.attacker.units) : null, [ battle ])
-    const defenders = React.useMemo(() => battle ? groupByFaction(battle.defender.units) : null, [ battle ])
+    // const attackers = React.useMemo(() => battle ? groupByFaction(battle.attacker.units) : null, [ battle ])
+    // const defenders = React.useMemo(() => battle ? groupByFaction(battle.defender.units) : null, [ battle ])
 
     if (!battle) return null
 
@@ -305,15 +282,26 @@ function BattleView({ battle, open, onClose }: BattleViewProps) {
             </Box>
         </Box>
         <DialogContent dividers>
-            <Grid container>
-                <Grid item xs={6} sx={{ maxHeight: '33vh' }}>
+            <Grid container spacing={2}>
+                <Grid item xs={6}>
                     <Typography variant='h6'>Attackers</Typography>
-                    <Participants items={battle.attacker.squads} />
                 </Grid>
 
-                <Grid item xs={6} sx={{ maxHeight: '33vh' }}>
+                <Grid item xs={6}>
                     <Typography variant='h6'>Defenders</Typography>
-                    <Participants items={battle.defender.squads} />
+                </Grid>
+
+                <Grid item xs={3}>
+                    <Participants items={battle.attacker.squads.filter(x => x.behind)} />
+                </Grid>
+                <Grid item xs={3}>
+                    <Participants items={battle.attacker.squads.filter(x => !x.behind)} />
+                </Grid>
+                <Grid item xs={3}>
+                    <Participants items={battle.defender.squads.filter(x => !x.behind)} />
+                </Grid>
+                <Grid item xs={3}>
+                    <Participants items={battle.defender.squads.filter(x => x.behind)} />
                 </Grid>
             </Grid>
 

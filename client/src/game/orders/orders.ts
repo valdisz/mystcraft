@@ -32,6 +32,8 @@ export abstract class BaseOrder {
     }
 
     isValid: boolean
+    dirty: boolean
+    executed: boolean
     error: string
 
     setError(message: string) {
@@ -68,9 +70,11 @@ export class Move extends BaseOrder {
             const step = S.pop()
 
             if (typeof step === 'number') {
-                const nextStructure = curRegion.structures.find(s => s.num == step)
-                if (!this.ensure(() => !!nextStructure, `Cannot find structure with number ${step} in the region ${curRegion}`)) {
-                    break
+                if (curRegion.explored) {
+                    const nextStructure = curRegion.structures.find(s => s.num == step)
+                    if (!this.ensure(() => !!nextStructure, `Cannot find structure with number ${step} in the region ${curRegion}`)) {
+                        break loop
+                    }
                 }
 
                 P.push(step)
@@ -103,12 +107,17 @@ export class Move extends BaseOrder {
             }
         }
 
-        return {}
+        return {
+            path: [ ]
+        }
     }
 
     toString(): string {
-        return this.isValid
-            ? `move ${this.path.join(' ')}`
-            : `move; ${this.error}`
+        let str = `move ${this.path.join(' ')}`
+        if (!this.isValid) {
+            str += `; ${this.error}`
+        }
+
+        return str
     }
 }
