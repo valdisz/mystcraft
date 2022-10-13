@@ -1,7 +1,6 @@
 namespace advisor.Schema;
 
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using advisor.Features;
@@ -25,6 +24,7 @@ public class Mutation {
         return mediator.Send(new UserRolesUpdate(userId, add, remove));
     }
 
+    [Authorize(Policy = Policies.GameMasters)]
     public async Task<GameEngineCreateResult> GameEngineCreate(IMediator mediator, string name, IFile file) {
         using var stream = file.OpenReadStream();
         var result = await mediator.Send(new GameEngineCreate(name, stream));
@@ -109,6 +109,7 @@ public class Mutation {
     //     return mediator.Send(new TurnReProcess(gameId, turn));
     // }
 
+    [Authorize(Policy = Policies.OwnPlayer)]
     public async Task<UnitOrdersSetResult> SetOrders(
         IResolverContext context,
         IMediator mediator,
@@ -118,16 +119,16 @@ public class Mutation {
     ) {
         var parsedId = DbUnit.ParseId(unitId);
 
-        if (!await auth.AuthorizeOwnPlayerAsync(context.GetUser()!, parsedId.PlayerId)) {
-            context.ReportError(ErrorBuilder.New()
-                .SetMessage("You are not allowed to set orders for this Unit")
-                .SetCode(ErrorCodes.Authentication.NotAuthorized)
-                .SetPath(context.Path)
-                .AddLocation(context.Selection.SyntaxNode)
-                .Build());
+        // if (!await auth.AuthorizeOwnPlayerAsync(context.GetUser()!, context)) {
+        //     context.ReportError(ErrorBuilder.New()
+        //         .SetMessage("You are not allowed to set orders for this Unit")
+        //         .SetCode(ErrorCodes.Authentication.NotAuthorized)
+        //         .SetPath(context.Path)
+        //         .AddLocation(context.Selection.SyntaxNode)
+        //         .Build());
 
-            return null;
-        }
+        //     return null;
+        // }
 
         try {
             var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));

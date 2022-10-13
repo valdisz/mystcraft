@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using advisor.Model;
     using HotChocolate;
-    using HotChocolate.Data;
     using HotChocolate.Resolvers;
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
@@ -16,10 +15,14 @@
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.Id)
-                .ResolveNode((ctx, id) => {
+                .ResolveNode(async (ctx, id) => {
+                    if (!await ctx.AuthorizeAsync(Policies.OwnPlayer)) {
+                        return null;
+                    }
+
                     var (playerId, turnNumber) = DbPlayerTurn.ParseId(id);
                     var db = ctx.Service<Database>();
-                    return db.PlayerTurns
+                    return await db.PlayerTurns
                         .AsNoTracking()
                         // .Include(x => x.Player)
                         .SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber);

@@ -3,7 +3,6 @@ namespace advisor;
 using System;
 using System.Linq;
 using System.Net;
-using advisor.Authorization;
 using advisor.Features;
 using advisor.Model;
 using advisor.Persistence;
@@ -36,9 +35,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using advisor.TurnProcessing;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.Extensions.Logging;
+using System.IO;
+using advisor.Authorization;
 
 public class Startup {
     public Startup(IConfiguration configuration, IWebHostEnvironment env) {
@@ -56,8 +54,10 @@ public class Startup {
     public void ConfigureServices(IServiceCollection services) {
         var discord = Configuration.GetSection("Discord");
         var discordOAuth = discord.GetSection("OAuth");
-
         var proxy = Configuration.GetSection("Proxy");
+
+        services
+            .AddOptions();
 
         services.Configure<DiscordOptions>(discord);
         services.Configure<ForwardedHeadersOptions>(opt => {
@@ -100,6 +100,13 @@ public class Startup {
             }
         });
 
+        services
+            .Configure<DatabaseOptions>(opt => {
+                opt.Provider = DbProvider;
+                opt.ConnectionString = DbConnectionString;
+                opt.IsProduction = Env.IsProduction();
+            });
+
         services.AddResponseCompression(opt => {
             opt.EnableForHttps = true;
         });
@@ -115,6 +122,8 @@ public class Startup {
                 opt.SlidingExpiration = true;
                 opt.ExpireTimeSpan = TimeSpan.FromDays(30);
                 opt.Cookie.MaxAge = TimeSpan.FromDays(30);
+
+                opt.Events.OnValidatePrincipal = AccountController.ValidatePrinciaplAsync;
             })
             .AddCookie(ExternalAuthentication.AuthenticationScheme, opt => {
                 opt.Cookie.MaxAge = null;
@@ -127,14 +136,6 @@ public class Startup {
                 opt.SignInScheme = ExternalAuthentication.AuthenticationScheme;
                 opt.SaveTokens = true;
             });
-
-        services.AddDataProtection()
-            .PersistKeysToFileSystem(new System.IO.DirectoryInfo(Configuration.GetValue<string>("DataProtection:Path")));
-
-        services.AddHttpsRedirection(options => {
-            options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
-            options.HttpsPort = 443;
-        });
 
         services
             .AddAuthorization(conf => {
@@ -150,26 +151,26 @@ public class Startup {
                 conf.AddPolicyAnyRole(Policies.Root, Roles.Root);
                 conf.AddPolicyAnyRole(Policies.GameMasters, Roles.Root, Roles.GameMaster);
                 conf.AddPolicyAnyRole(Policies.UserManagers, Roles.Root, Roles.UserManager);
-                conf.AddOwnPlayerPolicy();
+
+                conf.AddOwnPlayerPolicy(Policies.OwnPlayer);
             });
 
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(Configuration.GetValue<string>("DataProtection:Path")));
+
+        services.AddHttpsRedirection(options => {
+            options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+            options.HttpsPort = 443;
+        });
 
         services.AddHttpClient();
 
         services
-            .AddOptions()
             .AddCors(opt => {
                 opt.AddDefaultPolicy(builder => builder
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowAnyOrigin());
-            });
-
-        services
-            .Configure<DatabaseOptions>(opt => {
-                opt.Provider = DbProvider;
-                opt.ConnectionString = DbConnectionString;
-                opt.IsProduction = Env.IsProduction();
             });
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -210,9 +211,6 @@ public class Startup {
             conf.UseConsole();
             conf.UseRecurringJobAdmin(typeof(Startup).Assembly);
             conf.UseHeartbeatPage(TimeSpan.FromSeconds(5));
-
-            // conf.UseRecurringJob(typeof(RemoteGameServerJobs));
-            // conf.UseRecurringJob(typeof(MaintenanceJobs));
         });
 
         // GlobalJobFilters.Filters.Add(new JoiningSupportAttribute(new BackgroundJobStateChanger()));
@@ -230,8 +228,17 @@ public class Startup {
 
         services
             .AddGraphQLServer()
+            .AddAuthorization()
+            .AddApolloTracing()
+            .AddProjections()
+            .AddGlobalObjectIdentification()
             .AddConvention<INamingConventions>(sp => new CustomNamingConventions())
             .AddHttpRequestInterceptor<GraphQLHttpRequestInterceptor>()
+            .SetPagingOptions(new PagingOptions {
+                DefaultPageSize = 100,
+                MaxPageSize = 100,
+                IncludeTotalCount = true
+            })
             .ModifyRequestOptions(opt => {
                 opt.IncludeExceptionDetails = !Env.IsProduction();
             })
@@ -242,16 +249,8 @@ public class Startup {
             .RegisterService<IUnitOfWork>()
             .RegisterService<IMediator>()
             .RegisterService<IAuthorizationService>()
-            .AddApolloTracing()
-            .AddProjections()
-            .SetPagingOptions(new PagingOptions {
-                DefaultPageSize = 100,
-                MaxPageSize = 100,
-                IncludeTotalCount = true
-            })
             .AddQueryType<QueryType>()
             .AddMutationType<Mutation>()
-            .AddGlobalObjectIdentification()
             .AddType<UploadType>()
             .AddType<UserType>()
                 .AddType<UserResolvers>()
@@ -292,9 +291,16 @@ public class Startup {
 
         services
             .AddSingleton<AccessControl>()
-            .AddScoped<IAuthorizationHandler, OwnPlayerAuthorizationHandler>()
             .AddMvcCore()
                 .AddDataAnnotations();
+
+        services.AddSingleton<IAuthorizationHandler, OwnPlayerAuthorizationHandler>();
+        // services.Scan(x => x
+        //     .FromExecutingAssembly()
+        //     .AddClasses(classes => classes.AssignableTo<IAuthorizationHandler>())
+        //         .AsImplementedInterfaces()
+        //         .WithSingletonLifetime()
+        // );
 
         services
             .AddMediatR(typeof(Startup))
@@ -302,9 +308,6 @@ public class Startup {
 
         services
             .AddMemoryCache();
-
-        // FIXME
-        // services.AddTransient<TurnReProcessJob>();
 
         services.AddSingleton<IReportParser, ReportParser>();
 
@@ -343,30 +346,5 @@ public class Startup {
                     }
                 });
             });
-    }
-}
-
-public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse> {
-    public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger) {
-        this.logger = logger;
-    }
-
-    private readonly ILogger<LoggingBehavior<TRequest, TResponse>> logger;
-
-    public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next) {
-        var triggerName = typeof(TRequest).Name;
-
-        logger.LogInformation($"Starting [{triggerName}]");
-        try {
-            var response = await next();
-            logger.LogInformation($"Executed [{triggerName}] --> [{typeof(TResponse).Name}]");
-
-            return response;
-        }
-        catch (Exception ex) {
-            logger.LogError(ex, $"Failed [{triggerName}] --> {ex.GetType().Name}");
-
-            throw;
-        }
     }
 }

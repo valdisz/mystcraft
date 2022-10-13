@@ -16,18 +16,24 @@ namespace advisor {
     using System.Collections.Generic;
     using Microsoft.Extensions.Options;
     using HotChocolate.Types.Relay;
+    using System;
+    using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.DependencyInjection;
+
+    public record UserPlayers(long UserId, long[] PlayerIds, long Timestamp);
 
     [AllowAnonymous]
     [Route("account")]
     public class AccountController : ControllerBase {
         public AccountController(Database db, AccessControl accessControl, IMediator mediator, IHttpClientFactory httpFactory,
-            IOptionsSnapshot<DiscordOptions> discordOptions, IIdSerializer idSerializer
+            IOptionsSnapshot<DiscordOptions> discordOptions, IIdSerializer idSerializer, IMemoryCache cache
         ) {
             this.db = db;
             this.accessControl = accessControl;
             this.mediator = mediator;
             this.httpFactory = httpFactory;
             this.idSerializer = idSerializer;
+            this.cache = cache;
             this.discordOptions = discordOptions.Value;
         }
 
@@ -36,15 +42,34 @@ namespace advisor {
         private readonly IMediator mediator;
         private readonly IHttpClientFactory httpFactory;
         private readonly IIdSerializer idSerializer;
+        private readonly IMemoryCache cache;
         private readonly DiscordOptions discordOptions;
 
-        private ClaimsIdentity MapIdentity(string schema, DbUser user) {
+
+        private static string GetUserPlayersCacheKey(long userId) => $"user-{userId}-players";
+        private static string GetUserPlayersCacheKey(string userId) => $"user-{userId}-players";
+
+        private static Task<DbUser> GetUserByIdAsync(Database db, long userId)
+            => db.Users.Include(x => x.Players).SingleOrDefaultAsync(x => x.Id == userId);
+
+        private static Task<DbUser> GetUserByEamilAsync(Database db, string email)
+            => db.Users.Include(x => x.Players).SingleOrDefaultAsync(x => x.Email == email);
+
+        private static ClaimsIdentity MapIdentity(IMemoryCache cache, string schema, DbUser user) {
             var claims = new List<Claim> {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
                 new Claim(WellKnownClaimTypes.Email, user.Email)
             };
 
+            var cacheKey = GetUserPlayersCacheKey(user.Id);
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var playerIds = user.Players.Select(x => x.Id).ToArray();
+
+            cache.Set(cacheKey, new UserPlayers(user.Id, playerIds, timestamp));
+
             claims.AddRange(user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role)));
+            claims.AddRange(playerIds.Select(playerId => new Claim(WellKnownClaimTypes.Player, playerId.ToString())));
+            claims.Add(new Claim(WellKnownClaimTypes.Timestamp, timestamp.ToString()));
 
             var identity = new ClaimsIdentity(claims, schema, null, WellKnownClaimTypes.Role);
             return identity;
@@ -58,6 +83,44 @@ namespace advisor {
             await HttpContext.SignInAsync(identity.AuthenticationType, principal);
         }
 
+        public static async Task ValidatePrinciaplAsync(CookieValidatePrincipalContext context) {
+            var principal = context.Principal;
+
+            var userId = principal.FindFirstValue(WellKnownClaimTypes.UserId);
+            if (userId == null) {
+                context.RejectPrincipal();
+                return;
+            }
+
+            var timestamp = principal.FindFirstValue(WellKnownClaimTypes.Timestamp);
+            if (timestamp == null) {
+                context.RejectPrincipal();
+                return;
+            }
+
+            var services = context.HttpContext.RequestServices;
+            var cache = services.GetService<IMemoryCache>();
+
+            var cacheKey = GetUserPlayersCacheKey(userId);
+            var players = cache.Get<UserPlayers>(cacheKey);
+            if (players != null && players.Timestamp == long.Parse(timestamp)) {
+                return;
+            }
+
+            var db = services.GetRequiredService<Database>();
+            var user = await GetUserByIdAsync(db, long.Parse(userId));
+            if (user == null) {
+                context.RejectPrincipal();
+                return;
+            }
+
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
+            var newPrincipal = new ClaimsPrincipal(identity);
+
+            context.ReplacePrincipal(newPrincipal);
+            context.ShouldRenew = true;
+        }
+
         [HttpGet("login-as/{userId}")]
         [Authorize(Policy = Policies.Root)]
         public async Task<IActionResult> LoginAsAsync([FromRoute, Required] string userId) {
@@ -68,12 +131,12 @@ namespace advisor {
             var id = idSerializer.Deserialize(userId);
             var idValue = (long) id.Value;
 
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Id == idValue);
+            var user = await GetUserByIdAsync(db, idValue);
             if (user == null) {
                 return NotFound();
             }
 
-            var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
             await SignInIdentity(identity);
 
             return Redirect("/");
@@ -89,7 +152,7 @@ namespace advisor {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == model.Email && x.Digest != null);
+            var user = await GetUserByEamilAsync(db, model.Email);
             if (user == null) {
                 return Unauthorized();
             }
@@ -98,7 +161,10 @@ namespace advisor {
                 return Unauthorized();
             }
 
-            var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
+            user.LastLoginAt = DateTimeOffset.UtcNow;
+            await db.SaveChangesAsync();
+
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
             await SignInIdentity(identity);
 
             return NoContent();
@@ -135,12 +201,16 @@ namespace advisor {
 
             var email = json.Value<string>("email");
 
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email);
+            var user = await GetUserByEamilAsync(db, email);
             if (user == null) {
                 user = await mediator.Send(new UserCreate(email, null));
             }
+            else {
+                user.LastLoginAt = DateTimeOffset.UtcNow;
+                await db.SaveChangesAsync();
+            }
 
-            var identity = MapIdentity(CookieAuthenticationDefaults.AuthenticationScheme, user);
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
             await SignInIdentity(identity);
 
             return Redirect("/");

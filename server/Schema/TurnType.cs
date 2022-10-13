@@ -11,10 +11,14 @@ namespace advisor.Schema
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.PublicId)
-                .ResolveNode((ctx, id) => {
+                .ResolveNode(async (ctx, id) => {
+                    if (!await ctx.AuthorizeAsync(Policies.GameMasters)) {
+                        return null;
+                    }
+
                     var (gameId, turnNumber) = TurnId.CreateFrom(id);
                     var db = ctx.Service<Database>();
-                    return db.Turns
+                    return await db.Turns
                         .AsNoTracking()
                         .InGame(gameId)
                         .SingleOrDefaultAsync(x => x.Number == turnNumber);

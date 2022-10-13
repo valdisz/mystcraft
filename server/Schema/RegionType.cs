@@ -1,9 +1,4 @@
 ﻿namespace advisor.Schema {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-    using HotChocolate;
     using HotChocolate.Types;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
@@ -13,11 +8,15 @@
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.PublicId)
-                .ResolveNode((ctx, idValue) => {
+                .ResolveNode(async (ctx, idValue) => {
+                    if (!await ctx.AuthorizeAsync(Policies.OwnPlayer)) {
+                        return null;
+                    }
+
                     var id = RegionId.CreateFrom(idValue);
 
                     var db = ctx.Service<Database>();
-                    return db.Regions
+                    return await db.Regions
                         .AsNoTracking()
                         .OnlyPlayer(id.PlayerId)
                         .SingleOrDefaultAsync(x => x.TurnNumber == id.TurnNumber && x.X == id.X && x.Y == id.Y && x.Z == id.Z);

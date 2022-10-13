@@ -5,9 +5,8 @@ namespace advisor.Schema
     using System.Threading.Tasks;
     using HotChocolate;
     using HotChocolate.Data;
-    using HotChocolate.Resolvers;
     using HotChocolate.Types;
-    using HotChocolate.Types.Relay;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.EntityFrameworkCore;
     using Persistence;
 
@@ -16,9 +15,13 @@ namespace advisor.Schema
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.Id)
-                .ResolveNode((ctx, id) => {
+                .ResolveNode(async (ctx, id) => {
+                    if (!await ctx.AuthorizeAsync(Policies.OwnPlayer)) {
+                        return null;
+                    }
+
                     var db = ctx.Service<Database>();
-                    return db.Players
+                    return await db.Players
                         .AsNoTracking()
                         .Include(x => x.Game)
                         .FirstOrDefaultAsync(x => x.Id == id);

@@ -213,6 +213,9 @@ public abstract class Database : DbContext {
         model.Entity<DbTurn>(t => {
             t.HasKey(x => new { x.GameId, x.Number });
 
+            t.Property(x => x.State)
+                .HasConversion<string>();
+
             t.HasMany(x => x.Articles)
                 .WithOne(x => x.Turn)
                 .HasForeignKey(x => new { x.GameId, x.TurnNumber })

@@ -76,8 +76,14 @@ namespace advisor.Migrations.sqlite
                     b.Property<long>("AllianceId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("CanInvite")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("Owner")
                         .HasColumnType("INTEGER");
@@ -871,8 +877,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<byte[]>("PlayerData")
                         .HasColumnType("BLOB");
 
-                    b.Property<int>("State")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("GameId", "Number");
 
@@ -1039,6 +1046,9 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Digest")
                         .HasMaxLength(128)
                         .HasColumnType("TEXT");
@@ -1046,6 +1056,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastLoginAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Roles")

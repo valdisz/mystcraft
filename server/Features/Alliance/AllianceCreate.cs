@@ -1,6 +1,6 @@
-// FIXME
 namespace advisor.Features;
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using advisor.Persistence;
@@ -12,43 +12,47 @@ public record AllianceCreate(long UserId, long PlayerId, string Name) : IRequest
 
 public record AllianceCreateResult(bool IsSuccess, string Error = null, DbAlliance Alliance = null) : MutationResult(IsSuccess, Error);
 
-// public class AllianceCreateHandler : IRequestHandler<AllianceCreate, AllianceCreateResult> {
-//     public AllianceCreateHandler(Database db) {
-//         this.db = db;
-//     }
+public class AllianceCreateHandler : IRequestHandler<AllianceCreate, AllianceCreateResult> {
+    public AllianceCreateHandler(Database db) {
+        this.db = db;
+    }
 
-//     private readonly Database db;
+    private readonly Database db;
 
-//     public async Task<AllianceCreateResult> Handle(AllianceCreate request, CancellationToken cancellationToken) {
-//         var player = await db.Players
-//             .OnlyActivePlayers()
-//             .Include(x => x.AllianceMembererships)
-//             .SingleOrDefaultAsync(x => x.Id == request.PlayerId && x.UserId == request.UserId);
+    public async Task<AllianceCreateResult> Handle(AllianceCreate request, CancellationToken cancellationToken) {
+        var player = await db.Players
+            .OnlyActivePlayers()
+            .Include(x => x.AllianceMembererships)
+            .SingleOrDefaultAsync(x => x.Id == request.PlayerId && x.UserId == request.UserId);
 
-//         if (player == null) {
-//             return new AllianceCreateResult(false, "Player was not found.");
-//         }
+        if (player == null) {
+            return new AllianceCreateResult(false, "Player was not found.");
+        }
 
-//         if (player.AllianceMembererships.Count != 0) {
-//             return new AllianceCreateResult(false, "Player is member of another alliance.");
-//         }
+        if (player.AllianceMembererships.Count != 0) {
+            return new AllianceCreateResult(false, "Player is member of another alliance.");
+        }
 
-//         var alliance = new DbAlliance {
-//             GameId = player.GameId,
-//             Name = request.Name
-//         };
+        var alliance = new DbAlliance {
+            GameId = player.GameId,
+            Name = request.Name
+        };
 
-//         alliance.Members.Add(new DbAllianceMember {
-//             PlayerId = player.Id,
-//             Owner = true,
-//             CanInvite = true,
-//             ShareMap = true,
-//             TeachMages = true
-//         });
+        var now = DateTimeOffset.UtcNow;
 
-//         await db.Alliances.AddAsync(alliance);
-//         await db.SaveChangesAsync();
+        alliance.Members.Add(new DbAllianceMember {
+            PlayerId = player.Id,
+            CreatedAt = now,
+            AcceptedAt = now,
+            Owner = true,
+            CanInvite = true,
+            ShareMap = true,
+            TeachMages = true
+        });
 
-//         return new AllianceCreateResult(true, Alliance: alliance);
-//     }
-// }
+        await db.Alliances.AddAsync(alliance);
+        await db.SaveChangesAsync();
+
+        return new AllianceCreateResult(true, Alliance: alliance);
+    }
+}

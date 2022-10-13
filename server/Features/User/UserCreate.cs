@@ -1,5 +1,6 @@
 namespace advisor.Features;
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,8 +26,12 @@ public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
             return user;
         }
 
+        var now = DateTimeOffset.UtcNow;
+
         user = new DbUser {
-            Email = request.Email
+            Email = request.Email,
+            CreatedAt = now,
+            LastLoginAt = now
         };
 
         if (!string.IsNullOrWhiteSpace(request.Password)) {

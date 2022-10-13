@@ -81,8 +81,14 @@ namespace advisor.Migrations.pgsql
                     b.Property<long>("AllianceId")
                         .HasColumnType("bigint");
 
+                    b.Property<DateTimeOffset?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<bool>("CanInvite")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("Owner")
                         .HasColumnType("boolean");
@@ -886,8 +892,9 @@ namespace advisor.Migrations.pgsql
                     b.Property<byte[]>("PlayerData")
                         .HasColumnType("bytea");
 
-                    b.Property<int>("State")
-                        .HasColumnType("integer");
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("GameId", "Number");
 
@@ -1057,6 +1064,9 @@ namespace advisor.Migrations.pgsql
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Digest")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
@@ -1065,6 +1075,9 @@ namespace advisor.Migrations.pgsql
                         .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("LastLoginAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Roles")
                         .HasColumnType("jsonb");

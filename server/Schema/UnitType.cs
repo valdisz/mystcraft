@@ -14,7 +14,11 @@ namespace advisor.Schema {
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.CompositeId)
-                .ResolveNode((ctx, id) => {
+                .ResolveNode(async (ctx, id) => {
+                    if (!await ctx.AuthorizeAsync(Policies.OwnPlayer)) {
+                        return null;
+                    }
+
                     var parsedId = DbUnit.ParseId(id);
                     var db = ctx.Service<Database>();
 
@@ -26,7 +30,7 @@ namespace advisor.Schema {
                         query = query.Include(x => x.StudyPlan);
                     }
 
-                    return query.SingleOrDefaultAsync();
+                    return await query.SingleOrDefaultAsync();
                 });
         }
     }

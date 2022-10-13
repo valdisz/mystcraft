@@ -16,18 +16,8 @@ namespace advisor.Schema {
                 .IdField(x => x.Id)
                 .ResolveNode(async (ctx, id) => {
                     var currentUserId = (long) ctx.ContextData["currentUserId"];
-
                     if (id != currentUserId) {
-                        var authorization = ctx.Service<IAuthorizationService>();
-                        var principal = ctx.ContextData["ClaimsPrincipal"] as ClaimsPrincipal;
-                        var result = await authorization.AuthorizeAsync(principal, ctx, Policies.UserManagers);
-
-                        if (!result.Succeeded) {
-                            ctx.ReportError(ErrorBuilder.New()
-                                .SetCode(ErrorCodes.Authentication.NotAuthorized)
-                                .Build()
-                            );
-
+                        if (!await ctx.AuthorizeAsync(Policies.UserManagers)) {
                             return null;
                         }
                     }

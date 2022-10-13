@@ -1,5 +1,6 @@
 namespace advisor.Persistence
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using HotChocolate;
@@ -26,6 +27,9 @@ namespace advisor.Persistence
         [GraphQLIgnore]
         [MaxLength(128)]
         public string Digest { get; set; }
+
+        public DateTimeOffset CreatedAt { get; set; }
+        public DateTimeOffset LastLoginAt { get; set; }
 
         public List<string> Roles { get; set; } = new ();
 

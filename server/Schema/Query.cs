@@ -8,17 +8,18 @@ using HotChocolate;
 using HotChocolate.Types;
 using advisor.Features;
 using MediatR;
+using HotChocolate.Types.Relay;
 
 public class Query {
     [Authorize(Policy = Policies.GameMasters)]
-    [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 100)]
+    [UseOffsetPaging]
     public IQueryable<DbGameEngine> GameEngines(Database db) => db.GameEngines;
 
-    [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 100)]
+    [UseOffsetPaging]
     public IQueryable<DbGame> Games(Database db) => db.Games;
 
     [Authorize(Policy = Policies.UserManagers)]
-    [UseOffsetPaging(IncludeTotalCount = true, MaxPageSize = 100)]
+    [UseOffsetPaging]
     public IQueryable<DbUser> Users(Database db) => db.Users;
 
     [Authorize]

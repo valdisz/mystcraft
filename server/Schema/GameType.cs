@@ -17,8 +17,7 @@
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.Id)
-                .ResolveNode((ctx, id) =>
-                {
+                .ResolveNode((ctx, id) => {
                     var db = ctx.Service<Database>();
                     return db.Games
                         .AsNoTracking()
