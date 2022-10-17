@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using advisor.Features;
 using HotChocolate;
 using HotChocolate.AspNetCore.Authorization;
-using HotChocolate.Resolvers;
 using HotChocolate.Types;
 using HotChocolate.Types.Relay;
 using MediatR;
@@ -110,28 +109,10 @@ public class Mutation {
     // }
 
     [Authorize(Policy = Policies.OwnPlayer)]
-    public async Task<UnitOrdersSetResult> SetOrders(
-        IResolverContext context,
-        IMediator mediator,
-        Microsoft.AspNetCore.Authorization.IAuthorizationService auth,
-        [ID("Unit")] string unitId,
-        string orders
-    ) {
-        var parsedId = DbUnit.ParseId(unitId);
-
-        // if (!await auth.AuthorizeOwnPlayerAsync(context.GetUser()!, context)) {
-        //     context.ReportError(ErrorBuilder.New()
-        //         .SetMessage("You are not allowed to set orders for this Unit")
-        //         .SetCode(ErrorCodes.Authentication.NotAuthorized)
-        //         .SetPath(context.Path)
-        //         .AddLocation(context.Selection.SyntaxNode)
-        //         .Build());
-
-        //     return null;
-        // }
-
+    public async Task<UnitOrdersSetResult> SetOrders(IMediator mediator, [ID("Unit")] string unitId, string orders) {
         try {
-            var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber, parsedId.UnitNumber, orders));
+            var parsedId = DbUnit.ParseId(unitId);
+            var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber + 1, parsedId.UnitNumber, orders));
             return result;
         }
         catch (Exception ex) {

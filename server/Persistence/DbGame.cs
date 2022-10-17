@@ -9,11 +9,13 @@ namespace advisor.Persistence {
         public long Id { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
 
+        [MaxLength(Size.TYPE)]
         public GameType Type { get; set; }
 
+        [MaxLength(Size.TYPE)]
         public GameStatus Status { get; set; }
 
         [Required]

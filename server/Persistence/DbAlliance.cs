@@ -12,7 +12,7 @@ namespace advisor.Persistence {
         public long GameId { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.NAME)]
         public string Name { get; set; }
 
         public List<DbAllianceMember> Members { get; set; } = new ();

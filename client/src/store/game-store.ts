@@ -7,6 +7,7 @@ import { GetTurn, GetTurnQuery, GetTurnQueryVariables } from '../schema'
 import { GetRegions, GetRegionsQuery, GetRegionsQueryVariables } from '../schema'
 import { GetUnits, GetUnitsQuery, GetUnitsQueryVariables } from '../schema'
 import { SetOrder, SetOrderMutation, SetOrderMutationVariables } from '../schema'
+import { OrdersGet, OrdersGetQuery, OrdersGetQueryVariables } from '../schema'
 import { Ruleset, SkillInfo } from "../game"
 import { Region } from "../game"
 import { World } from "../game"
@@ -89,6 +90,11 @@ export class GameLoadingStore {
         this.total = 0
         this.phase = ''
     }
+}
+
+interface UnitOrders {
+    unitNumber: number
+    orders?: string
 }
 
 export class GameStore {
@@ -228,6 +234,32 @@ export class GameStore {
         return items
     }
 
+    async loadOrders(turnId: string, onProgress: ProgressCallback) {
+        const items: UnitOrders[] = []
+
+        let skip = 0
+        let response: ApolloQueryResult<OrdersGetQuery> = null
+        do {
+            response = await CLIENT.query<OrdersGetQuery, OrdersGetQueryVariables>({
+                query: OrdersGet,
+                variables: { skip, turnId, take: 100 }
+            })
+
+            if (response.data.node.__typename !== 'PlayerTurn') {
+                return items
+            }
+
+            const data = response.data.node
+            data.orders.items.forEach(x => items.push(x))
+
+            onProgress({ total: data.orders.totalCount, position: items.length })
+            skip = items.length
+        }
+        while (response.data.node.orders.pageInfo.hasNextPage)
+
+        return items
+    }
+
     async load(gameId: string, loading: GameLoadingStore) {
         if (this.gameId === gameId) {
             return
@@ -307,12 +339,21 @@ export class GameStore {
 
         loading.begin(`Regions`)
         const regions = await this.loadRegions(turn.id, ({ position, total }) => loading.update(position, total))
+        world.addRegions(regions)
 
         loading.begin(`Units`)
         const units = await this.loadUnits(turn.id, ({ position, total }) => loading.update(position, total))
-
-        world.addRegions(regions)
         world.addUnits(units)
+
+        loading.begin('Orders')
+        const unitOrders = await this.loadOrders(turn.id, ({ position, total }) => loading.update(position, total))
+
+        for (const { unitNumber, orders } of unitOrders) {
+            const unit = world.getUnit(unitNumber)
+            if (unit) {
+                unit.setOrders(orders)
+            }
+        }
 
         for (const level of world.levels) {
             for (const region of level) {

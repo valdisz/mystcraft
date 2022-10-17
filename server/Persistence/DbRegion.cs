@@ -34,8 +34,8 @@ public class DbRegion : InTurnContext, IStatistics<DbRegionStatisticsItem> {
     public string PublicId => RegionId.CreateFrom(this).ToString();
 
     [GraphQLIgnore]
-    [MaxLength(14)]
     [Required]
+    [MaxLength(Size.REGION_ID)]
     public string Id { get; set; }
 
     public static string MakeId(int x, int y, int z) => $"{x},{y},{z}";
@@ -57,15 +57,15 @@ public class DbRegion : InTurnContext, IStatistics<DbRegionStatisticsItem> {
     public int? LastVisitedAt { get; set; }
 
     [Required]
-    [MaxLength(256)]
+    [MaxLength(Size.LEVEL)]
     public string Label { get; set; }
 
     [Required]
-    [MaxLength(256)]
+    [MaxLength(Size.PROVINCE)]
     public string Province { get; set; }
 
     [Required]
-    [MaxLength(256)]
+    [MaxLength(Size.TERRAIN)]
     public string Terrain { get; set; }
 
     public DbSettlement Settlement { get; set; }
@@ -73,7 +73,7 @@ public class DbRegion : InTurnContext, IStatistics<DbRegionStatisticsItem> {
     [Required]
     public int Population { get; set; }
 
-    [MaxLength(256)]
+    [MaxLength(Size.RACE)]
     public string Race { get; set; }
 
     [Required]

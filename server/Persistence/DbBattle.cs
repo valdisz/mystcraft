@@ -9,7 +9,7 @@ namespace advisor.Persistence {
         public int Number { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
     }
 
@@ -24,15 +24,15 @@ namespace advisor.Persistence {
         public int Z { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Label { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.PROVINCE)]
         public string Province { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.TERRAIN)]
         public string Terrain { get; set; }
 
         [Required]

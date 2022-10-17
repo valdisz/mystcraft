@@ -30,7 +30,7 @@ namespace advisor.Persistence {
 
 
         [Required]
-        [MaxLength(128)]
+        [MaxLength(Size.FACTION)]
         public string FactionName { get; set; }
 
         public int FactionNumber { get; set; }
@@ -62,7 +62,7 @@ namespace advisor.Persistence {
         public DbPlayer Player { get; set; }
 
         [GraphQLIgnore]
-        public List<DbAditionalReport> Reports { get; set; } = new List<DbAditionalReport>();
+        public List<DbAdditionalReport> Reports { get; set; } = new List<DbAdditionalReport>();
 
         [GraphQLIgnore]
         public List<DbRegion> Regions { get; set; } = new List<DbRegion>();

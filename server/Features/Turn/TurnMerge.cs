@@ -13,7 +13,6 @@ using System.IO;
 using System.Collections.Generic;
 using AutoMapper;
 using System;
-using System.Diagnostics;
 
 public record TurnMerge(DbGame Game, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnMergeResult>;
 
@@ -62,7 +61,11 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
                 JReport reportModel = ReadReport(report.Json);
 
                 await foreach (var sharedReport in GetSharedReportsAsync(request.Game.Id, report.PlayerId, request.TurnNumber)) {
-                    reportModel.Merge(sharedReport);
+                    reportModel.Merge(sharedReport, addStructures: true, addUnits: true);
+                }
+
+                await foreach (var rep in GetAdditionalReportsAsync(report.PlayerId, request.TurnNumber)) {
+                    reportModel.Merge(rep, addStructures: true, addUnits: true);
                 }
 
                 var player = await playersRepo.GetOneAsync(report.PlayerId);
@@ -152,6 +155,18 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
 
                 yield return doc;
             }
+        }
+    }
+
+    private async IAsyncEnumerable<JReport> GetAdditionalReportsAsync(long playerId, int turnNumber) {
+        var reports = db.AditionalReports
+            .InTurn(playerId, turnNumber)
+            .Select(x => x.Json)
+            .AsAsyncEnumerable();
+
+        await foreach (var json in reports) {
+            JReport doc = ReadReport(json);
+            yield return doc;
         }
     }
 

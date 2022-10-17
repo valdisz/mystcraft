@@ -17,13 +17,13 @@ namespace advisor.Persistence {
         public int FactionNumber { get; set; }
 
         [GraphQLName("regionCode")]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]
         public int? UnitNumber { get; set; }
 
-        [MaxLength(128)]
+        [MaxLength(Size.LABEL)]
         public string UnitName { get; set; }
 
         [GraphQLIgnore]
@@ -40,10 +40,10 @@ namespace advisor.Persistence {
 
         public int? Amount { get; set; }
 
-        [MaxLength(8)]
+        [MaxLength(Size.ITEM_CODE)]
         public string ItemCode { get; set; }
 
-        [MaxLength(256)]
+        [MaxLength(Size.ITEM_NAME)]
         public string ItemName { get; set; }
 
         public int? ItemPrice { get; set; }

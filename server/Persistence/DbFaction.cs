@@ -35,7 +35,7 @@ namespace advisor.Persistence {
         public int Number { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
 
         public Stance? DefaultAttitude { get; set; }

@@ -58,7 +58,7 @@ public class TurnsRepository : ITurnsRepository {
             TurnNumber = turnNumber,
             GameId = game.Id,
             FactionNumber = factionNumber,
-            Data = data,
+            Source = data,
         };
 
         await db.Reports.AddAsync(report, cancellation);

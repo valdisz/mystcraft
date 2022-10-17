@@ -16,7 +16,7 @@ namespace advisor.Persistence
         }
 
         [Required]
-        [MaxLength(8)]
+        [MaxLength(Size.ITEM_CODE)]
         public string Code { get; set; }
 
         public int Amount { get; set; }
@@ -67,7 +67,7 @@ namespace advisor.Persistence
         public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
         public string RegionId { get; set; }
     }
 
@@ -89,7 +89,7 @@ namespace advisor.Persistence
         public int TurnNumber { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
         public string RegionId { get; set; }
 
         [Required]

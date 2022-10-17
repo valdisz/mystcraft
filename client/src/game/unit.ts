@@ -202,7 +202,7 @@ export class Unit {
             : unit.inventory.items.toArray().map(x => x.weight).reduce((w, v) => w + v)
 
         unit.region = region;
-        unit.setOrders(src.orders)
+        // unit.setOrders(src.orders)
 
         if (src.capacity) {
             const { walking, swimming, riding, flying } = src.capacity

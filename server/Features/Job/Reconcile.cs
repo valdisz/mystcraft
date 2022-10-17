@@ -43,7 +43,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         }
 
         if (request.GameId == null) {
-            recurringJobs.AddOrUpdate<ReconcileJob>("reconcile", job => job.RunAsync(), "*/15 * * * *");
+            recurringJobs.AddOrUpdate<AllJobs>("reconcile", job => job.ReconcileAsync(), "*/15 * * * *");
         }
 
         return new ReconcileResult(true);
@@ -57,7 +57,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         var nextTurnJobId = $"{jobIdPrefix}-turn";
         if (shouldRun) {
             var timeZone = FindTimeZone(game.Options.TimeZone);
-            recurringJobs.AddOrUpdate<GameNextTurnJob>(nextTurnJobId, job => job.RunAsync(game.Id, null, null), game.Options.Schedule, timeZone);
+            recurringJobs.AddOrUpdate<AllJobs>(nextTurnJobId, job => job.RunTurnAsync(game.Id, null, null), game.Options.Schedule, timeZone);
         }
         else {
             recurringJobs.RemoveIfExists(nextTurnJobId);
@@ -67,7 +67,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
             var factionSyncJobId = $"{jobIdPrefix}-factions";
 
             if (shouldRun) {
-                recurringJobs.AddOrUpdate<GameSyncFactionsJob>(factionSyncJobId, job => job.RunAsync(game.Id), "*/5 * * * *");
+                recurringJobs.AddOrUpdate<AllJobs>(factionSyncJobId, job => job.SyncFactionsAsync(game.Id), "*/5 * * * *");
             }
             else {
                 recurringJobs.RemoveIfExists(factionSyncJobId);

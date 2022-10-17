@@ -771,7 +771,7 @@ function GameLayout({ children }: React.PropsWithChildren) {
                     </IconButton>
                     <Typography variant='h6'>{ game.name }</Typography>
 
-                    <Stack direction='row' ml={8} gap={8} alignItems='center'>
+                    <Stack direction='row' ml={8} gap={2} alignItems='center'>
                         <Stack direction='row' gap={4}>
                             <Stack>
                                 <Typography variant='caption'>Turn</Typography>
@@ -799,7 +799,7 @@ function GameLayout({ children }: React.PropsWithChildren) {
                             color: 'inherit',
                             textTransform: 'inherit',
                             textAlign: 'left'
-                        }}>
+                        }} variant='outlined'>
                             <Stack direction='row' gap={4}>
                                 <Stack>
                                     <Typography variant='caption'>Unclaimed Silver</Typography>
@@ -827,6 +827,10 @@ function GameLayout({ children }: React.PropsWithChildren) {
                                 </Stack>
                             </Stack>
                         </Button>
+
+                        <Button variant='outlined' sx={{ color: 'inherit', alignSelf: 'stretch' }}>Attitudes</Button>
+                        <Button variant='outlined' sx={{ color: 'inherit', alignSelf: 'stretch' }}>Mages</Button>
+                        <Button variant='outlined' sx={{ color: 'inherit', alignSelf: 'stretch' }}>Alliance</Button>
                     </Stack>
 
                     <Box flex={1} />
@@ -846,12 +850,6 @@ function GameLayout({ children }: React.PropsWithChildren) {
 
 function _GamePage() {
     const { loading } = useStore()
-
-    // const routes = [
-    //     { enabled: true, label: 'Map', path: useResolvedPath('').pathname },
-    //     { enabled: true, label: 'Statistics', path: useResolvedPath('stats').pathname },
-    //     { enabled: game.university?.locations?.length > 0, label: '', path: useResolvedPath('university').pathname }
-    // ]
 
     if (loading.isLoading) {
         return <Loading loading={loading} />

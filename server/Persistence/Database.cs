@@ -69,7 +69,7 @@ public abstract class Database : DbContext {
     // Player controled factions and data which is modified during the game
     public DbSet<DbPlayer> Players { get; set; }
     public DbSet<DbPlayerTurn> PlayerTurns { get; set; }
-    public DbSet<DbAditionalReport> AditionalReports { get; set; }
+    public DbSet<DbAdditionalReport> AditionalReports { get; set; }
     public DbSet<DbOrders> Orders { get; set; }
 
     // Parsed and normalized game state for the each player based on their reports
@@ -368,8 +368,8 @@ public abstract class Database : DbContext {
             t.OwnsOne(x => x.Expenses);
         });
 
-        model.Entity<DbAditionalReport>(t => {
-            t.HasKey(x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
+        model.Entity<DbAdditionalReport>(t => {
+
         });
 
         model.Entity<DbOrders>(t => {

@@ -18,7 +18,7 @@ public class DbReport : InGameContext, InPlayerContext {
 
     [Required]
     [GraphQLIgnore]
-    public byte[] Data { get; set; }
+    public byte[] Source { get; set; }
 
     [GraphQLIgnore]
     public byte[] Json { get; set; }

@@ -50,7 +50,7 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
         var turnNumber = request.TurnNumber ?? game.NextTurnNumber;
 
         try {
-            var jobId = jobs.Enqueue<GameNextTurnJob>(x => x.RunAsync(gameId, turnNumber, request.Force));
+            var jobId = jobs.Enqueue<AllJobs>(x => x.RunTurnAsync(gameId, turnNumber, request.Force));
             return new GameNextTurnResult(true, JobId: jobId);
         }
         catch (Exception ex) {

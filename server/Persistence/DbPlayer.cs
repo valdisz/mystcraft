@@ -19,14 +19,14 @@ namespace advisor.Persistence
 
         public bool IsClaimed => UserId != null && Password != null;
 
-        [MaxLength(128)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
 
         public int? LastTurnNumber { get; set; }
 
         public int? NextTurnNumber { get; set; }
 
-        [MaxLength(64)]
+        [MaxLength(Size.PASSWORD)]
         public string Password { get; set; }
 
         public bool IsQuit { get; set; }
@@ -44,7 +44,7 @@ namespace advisor.Persistence
         public List<DbPlayerTurn> Turns { get; set; } = new List<DbPlayerTurn>();
 
         [GraphQLIgnore]
-        public List<DbAditionalReport> AdditionalReports { get; set; } = new List<DbAditionalReport>();
+        public List<DbAdditionalReport> AdditionalReports { get; set; } = new List<DbAdditionalReport>();
 
         [GraphQLIgnore]
         public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();

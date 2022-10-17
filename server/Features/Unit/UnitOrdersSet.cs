@@ -25,7 +25,13 @@ public class UnitOrdersSetHandler : IRequestHandler<UnitOrdersSet, UnitOrdersSet
             .SingleOrDefaultAsync(x => x.UnitNumber == request.UnitNumber);
 
         if (orders == null) {
-            return new UnitOrdersSetResult(false, "Unit not found");
+            orders = new DbOrders {
+                PlayerId = request.PlayerId,
+                TurnNumber = request.TurnNumber,
+                UnitNumber = request.UnitNumber
+            };
+
+            await db.AddAsync(orders);
         }
 
         orders.Orders = request.Orders;

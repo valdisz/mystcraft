@@ -45,11 +45,11 @@ namespace advisor.Persistence
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
         public string RegionId { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(24)]
+        [MaxLength(Size.STRUCTURE_ID)]
         public string StrcutureId { get; set; }
 
         public int? StructureNumber { get; set; }
@@ -59,10 +59,10 @@ namespace advisor.Persistence
         public int Sequence { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
 
-        [MaxLength(256)]
+        [MaxLength(Size.DESCRIPTION)]
         public string Description { get; set; }
 
         [Required]
@@ -84,10 +84,10 @@ namespace advisor.Persistence
 
         public List<string> CanStudy { get; set; } = new List<string>();
 
-        [MaxLength(8)]
+        [MaxLength(Size.ITEM_CODE)]
         public string ReadyItem { get; set; }
 
-        [MaxLength(8)]
+        [MaxLength(Size.ITEM_CODE)]
         public string CombatSpell { get; set; }
 
         public string Orders { get; set; }

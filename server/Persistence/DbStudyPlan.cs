@@ -14,6 +14,7 @@ namespace advisor.Persistence {
 
         public DbSkill Target { get; set; }
 
+        // TODO: Use size constant
         [MaxLength(64)]
         public string Study { get; set; }
 

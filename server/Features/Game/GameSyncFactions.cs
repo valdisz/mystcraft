@@ -14,16 +14,6 @@ using Microsoft.EntityFrameworkCore;
 public record GameSyncFactions(long GameId) : IRequest<GameSyncFactionsResult>;
 public record GameSyncFactionsResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
-public class GameSyncFactionsJob {
-    public GameSyncFactionsJob(IMediator mediator) {
-        this.mediator = mediator;
-    }
-
-    private readonly IMediator mediator;
-
-    public Task RunAsync(long gameId) => mediator.Send(new GameSyncFactions(gameId));
-}
-
 public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyncFactionsResult> {
     public GameSyncFactionsHandler(IUnitOfWork unit, IHttpClientFactory httpFactory) {
         this.unit = unit;

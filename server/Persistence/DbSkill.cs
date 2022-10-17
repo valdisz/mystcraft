@@ -3,7 +3,7 @@ namespace advisor.Persistence {
     using System.ComponentModel.DataAnnotations;
 
     public class DbSkill : AnSkill {
-        [MaxLength(8)]
+        [MaxLength(Size.SKILL_CODE)]
         public string Code { get; set; }
         public int? Level { get; set; }
         public int? Days { get; set; }

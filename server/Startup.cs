@@ -258,7 +258,6 @@ public class Startup {
                 .AddType<GameResolvers>()
             .AddType<PlayerType>()
                 .AddType<PlayerResolvers>()
-            .AddType<AditionalReportType>()
             .AddType<PlayerTurnType>()
                 .AddType<PlayerTurnResolvers>()
             .AddType<TurnType>()
@@ -311,9 +310,8 @@ public class Startup {
 
         services.AddSingleton<IReportParser, ReportParser>();
 
-        services.AddTransient<ReconcileJob>();
+        services.AddTransient<AllJobs>();
         services.AddTransient<GameSyncFactionsJob>();
-        services.AddTransient<GameNextTurnJob>();
     }
 
     public void Configure(IApplicationBuilder app) {

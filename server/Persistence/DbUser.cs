@@ -14,18 +14,18 @@ namespace advisor.Persistence
         public long Id { get; set; }
 
         [Required]
-        [MaxLength(128)]
+        [MaxLength(Size.EMAIL)]
         public string Email { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(32)]
+        [MaxLength(Size.SALT)]
         public string Salt { get; set; }
 
         [GraphQLIgnore]
         public DigestAlgorithm Algorithm { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(128)]
+        [MaxLength(Size.DIGEST)]
         public string Digest { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; }

@@ -4,8 +4,9 @@ namespace advisor.Persistence {
     using Microsoft.EntityFrameworkCore;
 
     public class DbFleetContent {
-        [MaxLength(64)]
+        [MaxLength(Size.TYPE)]
         public string Type { get; set; }
+
         public int Count { get; set; }
     }
 }

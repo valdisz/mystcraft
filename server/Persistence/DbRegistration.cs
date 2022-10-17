@@ -13,10 +13,10 @@ public class DbRegistration : InGameContext {
     [GraphQLIgnore]
     public long UserId { get; set; }
 
-    [MaxLength(128)]
+    [MaxLength(Size.LABEL)]
     public string Name { get; set; }
 
-    [MaxLength(64)]
+    [MaxLength(Size.PASSWORD)]
     public string Password { get; set; }
 
     [GraphQLIgnore]

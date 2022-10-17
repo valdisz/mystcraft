@@ -1,0 +1,16 @@
+query OrdersGet($turnId: ID!, $take: Int!, $skip: Int!) {
+  node(id: $turnId) {
+    ... on PlayerTurn {
+      orders(take: $take, skip: $skip) {
+        totalCount
+        pageInfo {
+          hasNextPage
+        }
+        items {
+          unitNumber
+          orders
+        }
+      }
+    }
+  }
+}

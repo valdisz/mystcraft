@@ -14,7 +14,7 @@ namespace advisor.Persistence {
 
         public long? PlayerId { get; set; }
 
-        [Required, MaxLength(32)]
+        [Required, MaxLength(Size.TYPE)]
         public string Type { get; set; }
 
         [Required]

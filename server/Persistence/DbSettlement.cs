@@ -6,7 +6,7 @@ namespace advisor.Persistence {
 
     [Owned]
     public class DbSettlement {
-        [MaxLength(256)]
+        [MaxLength(advisor.Persistence.Size.SETTLEMENT)]
         public string Name { get; set; }
 
         public SettlementSize Size { get; set; }

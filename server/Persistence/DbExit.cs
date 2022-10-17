@@ -3,6 +3,7 @@ namespace advisor.Persistence
     using System.ComponentModel.DataAnnotations;
     using advisor.Model;
     using HotChocolate;
+    using HotChocolate.Types.Relay;
     using Microsoft.EntityFrameworkCore;
 
     public class DbExit : InTurnContext {
@@ -14,12 +15,13 @@ namespace advisor.Persistence
 
         [GraphQLIgnore]
         [Required]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
         public string OriginRegionId { get; set; }
 
         [GraphQLName("targetRegion")]
         [Required]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
+        [ID("Region")]
         public string TargetRegionId { get; set; }
 
         [Required]
@@ -30,15 +32,15 @@ namespace advisor.Persistence
         public int Z { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Label { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.PROVINCE)]
         public string Province { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.TERRAIN)]
         public string Terrain { get; set; }
 
         public DbSettlement Settlement { get; set; }

@@ -1,3 +1,18 @@
+directive @authorize(
+  """
+  Defines when when the resolver shall be executed.By default the resolver is executed after the policy has determined that the current user is allowed to access the field.
+  """
+  apply: ApplyPolicy! = BEFORE_RESOLVER
+
+  """
+  The name of the authorization policy that determines access to the annotated resource.
+  """
+  policy: String
+
+  """Roles that are allowed to access the annotated resource."""
+  roles: [String!]
+) on FIELD_DEFINITION | OBJECT | SCHEMA
+
 """
 The `@defer` directive may be provided for fragment spreads and inline fragments to inform the executor to delay the execution of the current fragment to indicate deprioritization of the current fragment. A query with `@defer` directive will cause the request to potentially return multiple responses, where non-deferred data is delivered in the initial response and data deferred is delivered in a subsequent response. `@include` and `@skip` take precedence over `@defer`.
 """
@@ -35,6 +50,14 @@ type AditionalReport implements Node {
   source: String!
 }
 
+type AditionalReportCollectionSegment {
+  items: [AditionalReport]
+
+  """Information to aid in pagination."""
+  pageInfo: CollectionSegmentInfo!
+  totalCount: Int!
+}
+
 type Alliance implements Node {
   id: ID!
   members: [AllianceMember]
@@ -55,7 +78,9 @@ type AllianceJoinResult {
 }
 
 type AllianceMember {
+  acceptedAt: DateTime
   canInvite: Boolean!
+  createdAt: DateTime!
   name: String
   number: Int
   owner: Boolean!
@@ -83,12 +108,6 @@ enum ApplyPolicy {
 type Attitude {
   factionNumber: Int!
   stance: Stance!
-}
-
-type AuthorizeDirective {
-  apply: ApplyPolicy!
-  policy: String
-  roles: [String!]
 }
 
 type BackgroundJob {
@@ -491,6 +510,20 @@ interface Node {
   id: ID!
 }
 
+type Orders {
+  orders: String
+  turnNumber: Int!
+  unitNumber: Int!
+}
+
+type OrdersCollectionSegment {
+  items: [Orders]
+
+  """Information to aid in pagination."""
+  pageInfo: CollectionSegmentInfo!
+  totalCount: Int!
+}
+
 type Participant {
   name: String
   number: Int!
@@ -541,10 +574,11 @@ type PlayerTurn implements Node {
   isProcessed: Boolean!
   isReady: Boolean!
   isTimesSubmitted: Boolean!
+  orders(skip: Int, take: Int, unitNumber: Int): OrdersCollectionSegment
   ordersSubmittedAt: DateTime
   readyAt: DateTime
   regions(skip: Int, take: Int, withStructures: Boolean! = false): RegionCollectionSegment
-  reports: [AditionalReport]
+  reports(skip: Int, take: Int): AditionalReportCollectionSegment
   statistics: [TurnStatisticsItem]
   structures(skip: Int, take: Int): StructureCollectionSegment
   studyPlans: [StudyPlan]
@@ -761,6 +795,7 @@ type Unit implements Node {
   factionNumber: Int
   flags: [String]
   id: ID!
+  isMage: Boolean!
   items: [UnitItem]!
   name: String!
   number: Int!
@@ -807,8 +842,10 @@ input UnitsFilterInput {
 scalar Upload
 
 type User implements Node {
+  createdAt: DateTime!
   email: String!
   id: ID!
+  lastLoginAt: DateTime!
   players: [Player]
   roles: [String]
 }

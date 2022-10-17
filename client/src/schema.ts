@@ -25,6 +25,14 @@ export type AditionalReport = Node & {
   source: Scalars['String'];
 };
 
+export type AditionalReportCollectionSegment = {
+  __typename?: 'AditionalReportCollectionSegment';
+  items?: Maybe<Array<Maybe<AditionalReport>>>;
+  /** Information to aid in pagination. */
+  pageInfo: CollectionSegmentInfo;
+  totalCount: Scalars['Int'];
+};
+
 export type Alliance = Node & {
   __typename?: 'Alliance';
   id: Scalars['ID'];
@@ -49,7 +57,9 @@ export type AllianceJoinResult = {
 
 export type AllianceMember = {
   __typename?: 'AllianceMember';
+  acceptedAt?: Maybe<Scalars['DateTime']>;
   canInvite: Scalars['Boolean'];
+  createdAt: Scalars['DateTime'];
   name?: Maybe<Scalars['String']>;
   number?: Maybe<Scalars['Int']>;
   owner: Scalars['Boolean'];
@@ -91,13 +101,6 @@ export type Attitude = {
   __typename?: 'Attitude';
   factionNumber: Scalars['Int'];
   stance: Stance;
-};
-
-export type AuthorizeDirective = {
-  __typename?: 'AuthorizeDirective';
-  apply: ApplyPolicy;
-  policy?: Maybe<Scalars['String']>;
-  roles?: Maybe<Array<Scalars['String']>>;
 };
 
 export type BackgroundJob = {
@@ -661,6 +664,21 @@ export type Node = {
   id: Scalars['ID'];
 };
 
+export type Orders = {
+  __typename?: 'Orders';
+  orders?: Maybe<Scalars['String']>;
+  turnNumber: Scalars['Int'];
+  unitNumber: Scalars['Int'];
+};
+
+export type OrdersCollectionSegment = {
+  __typename?: 'OrdersCollectionSegment';
+  items?: Maybe<Array<Maybe<Orders>>>;
+  /** Information to aid in pagination. */
+  pageInfo: CollectionSegmentInfo;
+  totalCount: Scalars['Int'];
+};
+
 export type Participant = {
   __typename?: 'Participant';
   name?: Maybe<Scalars['String']>;
@@ -726,10 +744,11 @@ export type PlayerTurn = Node & {
   isProcessed: Scalars['Boolean'];
   isReady: Scalars['Boolean'];
   isTimesSubmitted: Scalars['Boolean'];
+  orders?: Maybe<OrdersCollectionSegment>;
   ordersSubmittedAt?: Maybe<Scalars['DateTime']>;
   readyAt?: Maybe<Scalars['DateTime']>;
   regions?: Maybe<RegionCollectionSegment>;
-  reports?: Maybe<Array<Maybe<AditionalReport>>>;
+  reports?: Maybe<AditionalReportCollectionSegment>;
   statistics?: Maybe<Array<Maybe<TurnStatisticsItem>>>;
   structures?: Maybe<StructureCollectionSegment>;
   studyPlans?: Maybe<Array<Maybe<StudyPlan>>>;
@@ -747,10 +766,23 @@ export type PlayerTurnEventsArgs = {
 };
 
 
+export type PlayerTurnOrdersArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
+  unitNumber?: InputMaybe<Scalars['Int']>;
+};
+
+
 export type PlayerTurnRegionsArgs = {
   skip?: InputMaybe<Scalars['Int']>;
   take?: InputMaybe<Scalars['Int']>;
   withStructures?: Scalars['Boolean'];
+};
+
+
+export type PlayerTurnReportsArgs = {
+  skip?: InputMaybe<Scalars['Int']>;
+  take?: InputMaybe<Scalars['Int']>;
 };
 
 
@@ -1014,6 +1046,7 @@ export type Unit = Node & {
   factionNumber?: Maybe<Scalars['Int']>;
   flags?: Maybe<Array<Maybe<Scalars['String']>>>;
   id: Scalars['ID'];
+  isMage: Scalars['Boolean'];
   items: Array<Maybe<UnitItem>>;
   name: Scalars['String'];
   number: Scalars['Int'];
@@ -1060,8 +1093,10 @@ export type UnitsFilterInput = {
 
 export type User = Node & {
   __typename?: 'User';
+  createdAt: Scalars['DateTime'];
   email: Scalars['String'];
   id: Scalars['ID'];
+  lastLoginAt: Scalars['DateTime'];
   players?: Maybe<Array<Maybe<Player>>>;
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
 };
@@ -1305,6 +1340,15 @@ export type GetUnitsQueryVariables = Exact<{
 
 
 export type GetUnitsQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', id: string, units?: { __typename?: 'UnitCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Unit', id: string, x: number, y: number, z: number, structureNumber?: number | null, sequence: number, canStudy?: Array<string | null> | null, combatSpell?: string | null, description?: string | null, factionNumber?: number | null, flags?: Array<string | null> | null, name: string, number: number, onGuard: boolean, readyItem?: string | null, weight?: number | null, orders?: string | null, capacity?: { __typename?: 'Capacity', walking: number, riding: number, flying: number, swimming: number } | null, items: Array<{ __typename?: 'UnitItem', code: string, amount: number } | null>, skills?: Array<{ __typename?: 'Skill', code?: string | null, level?: number | null, days?: number | null } | null> | null } | null> | null } | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
+
+export type OrdersGetQueryVariables = Exact<{
+  turnId: Scalars['ID'];
+  take: Scalars['Int'];
+  skip: Scalars['Int'];
+}>;
+
+
+export type OrdersGetQuery = { __typename?: 'Query', node?: { __typename?: 'AditionalReport' } | { __typename?: 'Alliance' } | { __typename?: 'Faction' } | { __typename?: 'Game' } | { __typename?: 'GameEngine' } | { __typename?: 'Player' } | { __typename?: 'PlayerTurn', orders?: { __typename?: 'OrdersCollectionSegment', totalCount: number, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean }, items?: Array<{ __typename?: 'Orders', unitNumber: number, orders?: string | null } | null> | null } | null } | { __typename?: 'Region' } | { __typename?: 'Structure' } | { __typename?: 'Turn' } | { __typename?: 'Unit' } | { __typename?: 'User' } | null };
 
 export const GameOptions = gql`
     fragment GameOptions on GameOptions {
@@ -2035,3 +2079,21 @@ export const GetUnits = gql`
   }
 }
     ${Unit}`;
+export const OrdersGet = gql`
+    query OrdersGet($turnId: ID!, $take: Int!, $skip: Int!) {
+  node(id: $turnId) {
+    ... on PlayerTurn {
+      orders(take: $take, skip: $skip) {
+        totalCount
+        pageInfo {
+          hasNextPage
+        }
+        items {
+          unitNumber
+          orders
+        }
+      }
+    }
+  }
+}
+    `;

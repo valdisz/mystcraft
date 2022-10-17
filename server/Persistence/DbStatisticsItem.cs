@@ -29,6 +29,7 @@ public class DbStatisticsItem : DbItem, InPlayerContext {
     [GraphQLIgnore]
     public long PlayerId { get; set; }
 
+    [MaxLength(Size.TYPE)]
     public StatisticsCategory Category { get; set; }
 }
 

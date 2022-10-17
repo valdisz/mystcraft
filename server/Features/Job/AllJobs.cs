@@ -2,15 +2,17 @@ namespace advisor.Features;
 
 using System.Threading.Tasks;
 using MediatR;
+using System.Threading.Tasks;
+using MediatR;
 using advisor.Schema;
 using advisor.Persistence;
 using System;
 using Microsoft.Extensions.Logging;
 
-public class GameNextTurnJob {
-    public GameNextTurnJob(IUnitOfWork unit, IMediator mediator, IServiceProvider services, ILogger<GameNextTurnJob> logger) {
-        this.unit = unit;
+public class AllJobs {
+    public AllJobs(IMediator mediator, IUnitOfWork unit, IServiceProvider services, ILogger<AllJobs> logger) {
         this.mediator = mediator;
+        this.unit = unit;
         this.services = services;
         this.logger = logger;
     }
@@ -18,9 +20,13 @@ public class GameNextTurnJob {
     private readonly IUnitOfWork unit;
     private readonly IMediator mediator;
     private readonly IServiceProvider services;
-    private readonly ILogger<GameNextTurnJob> logger;
+    private readonly ILogger<AllJobs> logger;
 
-    public async Task RunAsync(long gameId, int? turnNumber, GameNextTurnForceInput force) {
+    public Task ReconcileAsync() => mediator.Send(new Reconcile());
+
+    public Task SyncFactionsAsync(long gameId) => mediator.Send(new GameSyncFactions(gameId));
+
+    public async Task RunTurnAsync(long gameId, int? turnNumber, GameNextTurnForceInput force) {
         logger.LogInformation("Starting turn processing");
 
         var gamesRep = unit.Games;
@@ -80,3 +86,4 @@ public class GameNextTurnJob {
         throw new GameNextTurnException(result.Error);
     }
 }
+

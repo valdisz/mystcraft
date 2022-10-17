@@ -10,7 +10,7 @@ namespace advisor.Persistence
         public long Id { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
 
         [Required]

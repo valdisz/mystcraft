@@ -33,11 +33,23 @@
     [ExtendObjectType("PlayerTurn")]
     public class PlayerTurnResolvers {
         [UseOffsetPaging]
-        public IQueryable<DbAditionalReport> Reports(Database db, [Parent] DbPlayerTurn turn) {
+        public IQueryable<DbAdditionalReport> AdditionalReports(Database db, [Parent] DbPlayerTurn turn) {
             return db.AditionalReports
                 .AsNoTracking()
                 .InTurn(turn)
-                .OrderBy(x => x.FactionNumber);
+                .OrderBy(x => x.Id);
+        }
+
+        [UseOffsetPaging]
+        public IQueryable<DbOrders> Orders(Database db, [Parent] DbPlayerTurn turn, int? unitNumber) {
+            var q = db.Orders
+                .InTurn(turn.PlayerId, turn.TurnNumber + 1);
+
+            if (unitNumber.HasValue) {
+                q = q.Where(x => x.UnitNumber == unitNumber);
+            }
+
+            return q.OrderBy(x => x.UnitNumber);
         }
         public async Task<List<JBattle>> Battles(Database db, [Parent] DbPlayerTurn turn) {
             var battles = (await db.Battles

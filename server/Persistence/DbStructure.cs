@@ -25,7 +25,7 @@ namespace advisor.Persistence {
             );
         }
 
-        [MaxLength(24)]
+        [MaxLength(Size.STRUCTURE_ID)]
         public string Id { get; set; }
 
         public static string MakeId(int number, string regionId) => IsShip(number) ? number.ToString() : $"{number}@{regionId}";
@@ -41,7 +41,7 @@ namespace advisor.Persistence {
         public long PlayerId { get; set; }
 
         [GraphQLIgnore]
-        [MaxLength(14)]
+        [MaxLength(Size.REGION_ID)]
         public string RegionId { get; set; }
 
         public int X { get; set; }
@@ -53,14 +53,14 @@ namespace advisor.Persistence {
         public int Number { get; set; }
 
         [Required]
-        [MaxLength(256)]
+        [MaxLength(Size.LABEL)]
         public string Name { get; set; }
 
         [Required]
-        [MaxLength(64)]
+        [MaxLength(Size.STRUCTURE)]
         public string Type { get; set; }
 
-        [MaxLength(256)]
+        [MaxLength(Size.DESCRIPTION)]
         public string Description { get; set; }
 
         public List<DbFleetContent> Contents { get; set; } = new List<DbFleetContent>();

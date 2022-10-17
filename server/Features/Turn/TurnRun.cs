@@ -20,7 +20,7 @@ public record TurnRun(long GameId): IRequest<TurnRunResult>;
 public record TurnRunResult(bool IsSuccess, string Error = null, DbTurn Turn = null) : IMutationResult;
 
 public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
-    public TurnRunHandler(IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator, ILogger<GameNextTurnJob> logger) {
+    public TurnRunHandler(IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator, ILogger<TurnRunHandler> logger) {
         this.unit = unit;
         this.httpFactory = httpFactory;
         this.mediator = mediator;
@@ -38,7 +38,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
     private readonly IUnitOfWork unit;
     private readonly IHttpClientFactory httpFactory;
     private readonly IMediator mediator;
-    private readonly ILogger<GameNextTurnJob> logger;
+    private readonly ILogger<TurnRunHandler> logger;
 
     public async Task<TurnRunResult> Handle(TurnRun request, CancellationToken cancellationToken) {
         var gamesRepo = unit.Games;
