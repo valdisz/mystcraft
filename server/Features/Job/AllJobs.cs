@@ -2,24 +2,25 @@ namespace advisor.Features;
 
 using System.Threading.Tasks;
 using MediatR;
-using System.Threading.Tasks;
-using MediatR;
 using advisor.Schema;
 using advisor.Persistence;
 using System;
 using Microsoft.Extensions.Logging;
+using Hangfire;
 
 public class AllJobs {
-    public AllJobs(IMediator mediator, IUnitOfWork unit, IServiceProvider services, ILogger<AllJobs> logger) {
+    public AllJobs(IMediator mediator, IUnitOfWork unit, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
         this.mediator = mediator;
         this.unit = unit;
         this.services = services;
+        this.jobs = jobs;
         this.logger = logger;
     }
 
     private readonly IUnitOfWork unit;
     private readonly IMediator mediator;
     private readonly IServiceProvider services;
+    private readonly IBackgroundJobClient jobs;
     private readonly ILogger<AllJobs> logger;
 
     public Task ReconcileAsync() => mediator.Send(new Reconcile());
