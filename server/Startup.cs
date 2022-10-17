@@ -311,7 +311,6 @@ public class Startup {
         services.AddSingleton<IReportParser, ReportParser>();
 
         services.AddTransient<AllJobs>();
-        services.AddTransient<GameSyncFactionsJob>();
     }
 
     public void Configure(IApplicationBuilder app) {
