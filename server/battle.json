@@ -1,0 +1,1766 @@
+{
+    "attacker": {
+        "name": "Ogre Mage",
+        "number": 1388
+    },
+    "defender": {
+        "name": "City Guard",
+        "number": 74
+    },
+    "location": {
+        "terrain": "desert",
+        "coords": {
+            "x": 8,
+            "y": 58,
+            "z": 1,
+            "label": "surface"
+        },
+        "province": "Great Autarkirmos Desert"
+    },
+    "attackers": [
+        {
+            "name": "Zly Kasztelan",
+            "number": 2501,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": "Disapointed..",
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "human",
+                    "code": "HUMN"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Unit",
+            "number": 2793,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "high elf",
+                    "code": "HELF"
+                },
+                {
+                    "amount": 2,
+                    "name": "horses",
+                    "code": "HORS"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "tactics",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 2
+                },
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 5992,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 3,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 1,
+                    "name": "human",
+                    "code": "HUMN"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 6592,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "horse",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "high elf",
+                    "code": "HELF"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "riding",
+                    "level": 2
+                },
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 1388,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Unit",
+            "number": 5027,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "goblin",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 5,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 5028,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "goblin",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 2,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "riding",
+                    "level": 2
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 5029,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "goblin",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 2,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "riding",
+                    "level": 2
+                },
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 5031,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 3,
+                    "name": "gnomes",
+                    "code": "GNOM"
+                },
+                {
+                    "amount": 3,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 852,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 57,
+                    "name": "horses",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 41,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 4,
+                    "name": "wolves",
+                    "code": "WOLF",
+                    "props": "Combat 2/2, Attacks 2, Hits 2, Tactics 1"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 3
+                }
+            ]
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 3482,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "horse",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 3484,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 4,
+                    "name": "wolves",
+                    "code": "WOLF",
+                    "props": "Combat -5/-5, Attacks 0, Hits 0, Tactics 0"
+                },
+                {
+                    "amount": 1,
+                    "name": "horse",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 3485,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "horse",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 4274,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "horse",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Ogre Mage",
+            "number": 4581,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "horse",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "tactics",
+                    "level": 3
+                }
+            ]
+        },
+        {
+            "name": "Brzydale",
+            "number": 2502,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 13,
+                    "name": "humans",
+                    "code": "HUMN"
+                },
+                {
+                    "amount": 13,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 13,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 6594,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "human",
+                    "code": "HUMN"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 7183,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 3,
+                    "name": "horses",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 3,
+                    "name": "high elves",
+                    "code": "HELF"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "riding",
+                    "level": 2
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 7186,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 2,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 2,
+                    "name": "goblins",
+                    "code": "GBLN"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "riding",
+                    "level": 2
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 5483,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 15,
+                    "name": "ice dwarves",
+                    "code": "IDWA"
+                },
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 15,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 8376,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "horses",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "high elf",
+                    "code": "HELF"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Unit",
+            "number": 7178,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 27,
+                    "name": "horses",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 30,
+                    "name": "high elves",
+                    "code": "HELF"
+                },
+                {
+                    "amount": 55,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Unit",
+            "number": 9069,
+            "faction": {
+                "name": "Ogre Mages",
+                "number": 62
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 20,
+                    "name": "horses",
+                    "code": "HORS"
+                },
+                {
+                    "amount": 1,
+                    "name": "high elf",
+                    "code": "HELF"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Goblinz",
+            "number": 5989,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 20,
+                    "name": "goblins",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 20,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 20,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Gobliny",
+            "number": 4575,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "goblins",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 10,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 10,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Brzydale",
+            "number": 3480,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 6,
+                    "name": "humans",
+                    "code": "HUMN"
+                },
+                {
+                    "amount": 6,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 6,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Gnolle",
+            "number": 4586,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 5,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 6,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 5,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 5,
+                    "name": "plate armor",
+                    "code": "PARM"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 3
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "_Diggers",
+            "number": 5030,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 6,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 6,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 6,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Gobliny",
+            "number": 5482,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 5,
+                    "name": "goblins",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 6,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 5,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 5,
+                    "name": "plate armor",
+                    "code": "PARM"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Orki",
+            "number": 5990,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "orcs",
+                    "code": "ORC"
+                },
+                {
+                    "amount": 10,
+                    "name": "plate armor",
+                    "code": "PARM"
+                },
+                {
+                    "amount": 10,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 10,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Elfy",
+            "number": 4570,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 4,
+                    "name": "high elves",
+                    "code": "HELF"
+                },
+                {
+                    "amount": 4,
+                    "name": "plate armor",
+                    "code": "PARM"
+                },
+                {
+                    "amount": 4,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 4,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "_Farmers",
+            "number": 3830,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "human",
+                    "code": "HUMN"
+                },
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 2,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Waldemar",
+            "number": 720,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 3
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Komik-General",
+            "number": 1386,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "leader",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "tactics",
+                    "level": 4
+                }
+            ]
+        },
+        {
+            "name": "Zog",
+            "number": 5442,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "camel",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 1,
+                    "name": "goblin",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 1,
+                    "name": "plate armor",
+                    "code": "PARM"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Gnolle",
+            "number": 7164,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 30,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 30,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 17,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "_Diggers",
+            "number": 5991,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 4,
+                    "name": "ice dwarves",
+                    "code": "IDWA"
+                },
+                {
+                    "amount": 4,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Gobliny",
+            "number": 5025,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 23,
+                    "name": "goblins",
+                    "code": "GBLN"
+                },
+                {
+                    "amount": 31,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 24,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Orki",
+            "number": 2499,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 12,
+                    "name": "orcs",
+                    "code": "ORC"
+                },
+                {
+                    "amount": 12,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 3,
+                    "name": "plate armor",
+                    "code": "PARM"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Elvez",
+            "number": 4580,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 3,
+                    "name": "high elves",
+                    "code": "HELF"
+                },
+                {
+                    "amount": 4,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 3,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 3,
+                    "name": "plate armor",
+                    "code": "PARM"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Mobo",
+            "number": 5942,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 1,
+                    "name": "sword",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 1,
+                    "name": "gnoll",
+                    "code": "GNOL"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                }
+            ]
+        },
+        {
+            "name": "Gawiedz",
+            "number": 7738,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 60,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 240,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Saperzy",
+            "number": 7739,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 7,
+                    "name": "hammers",
+                    "code": "HAMM"
+                },
+                {
+                    "amount": 10,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Mobiki",
+            "number": 7740,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 13,
+                    "name": "camels",
+                    "code": "CAME"
+                },
+                {
+                    "amount": 20,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 4,
+                    "name": "plate armor",
+                    "code": "PARM"
+                },
+                {
+                    "amount": 20,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        },
+        {
+            "name": "Kapelani",
+            "number": 7741,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 10,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Gnolle",
+            "number": 7742,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 20,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 21,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 11,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 2
+                }
+            ]
+        },
+        {
+            "name": "Gawiedz",
+            "number": 8369,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 60,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 60,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "_Miners",
+            "number": 9052,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Smiths",
+            "number": 9053,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [
+                "behind"
+            ],
+            "items": [
+                {
+                    "amount": 10,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                }
+            ],
+            "skills": []
+        },
+        {
+            "name": "Gnolls",
+            "number": 1867,
+            "faction": {
+                "name": "Orc Hunters",
+                "number": 56
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 4,
+                    "name": "gnolls",
+                    "code": "GNOL"
+                },
+                {
+                    "amount": 4,
+                    "name": "swords",
+                    "code": "SWOR"
+                },
+                {
+                    "amount": 4,
+                    "name": "plate armor",
+                    "code": "PARM"
+                },
+                {
+                    "amount": 3,
+                    "name": "camels",
+                    "code": "CAME"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 3
+                },
+                {
+                    "name": "riding",
+                    "level": 1
+                }
+            ]
+        }
+    ],
+    "defenders": [
+        {
+            "name": "City Guard",
+            "number": 74,
+            "faction": {
+                "name": "The Guardsmen",
+                "number": 1
+            },
+            "description": null,
+            "flags": [],
+            "items": [
+                {
+                    "amount": 120,
+                    "name": "leaders",
+                    "code": "LEAD"
+                },
+                {
+                    "amount": 120,
+                    "name": "swords",
+                    "code": "SWOR"
+                }
+            ],
+            "skills": [
+                {
+                    "name": "combat",
+                    "level": 3
+                }
+            ]
+        }
+    ],
+    "rounds": [
+        {
+            "log": "Ogre Mage (1388) tactics bonus 3.\nElfy (4570) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (4575) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nOrki (5990) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (4586) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\n_Diggers (5030) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (4575) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nOrki (5990) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5482) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nOrki (5990) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\n_Diggers (5030) strikes fear into enemy mounts, causing 0 mounts to panic.\n_Diggers (5030) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\n_Diggers (5030) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5482) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (4586) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\n_Diggers (5030) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolls (1867) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (4575) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (3480) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (3480) strikes fear into enemy mounts, causing 0 mounts to panic.\nOgre Mage (1388) shoots a Fireball, killing 9.\nGnolls (1867) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5482) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nZog (5442) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (4575) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (3480) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (3480) strikes fear into enemy mounts, causing 0 mounts to panic.\nBrzydale (2502) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (4586) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (4586) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGoblinz (5989) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (5025) strikes fear into enemy mounts, causing 0 mounts to panic.\nGobliny (4575) strikes fear into enemy mounts, causing 0 mounts to panic.\nElvez (4580) strikes fear into enemy mounts, causing 0 mounts to panic.\nOgre Mage (3485) shoots a Fireball, killing 17.\nGobliny (5482) strikes fear into enemy mounts, causing 0 mounts to panic.\nElfy (4570) strikes fear into enemy mounts, causing 0 mounts to panic.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nMobiki (7740) strikes fear into enemy mounts, causing 0 mounts to panic.\nOgre Mage (3482) shoots a Fireball, killing 9.\nGnolle (7164) strikes fear into enemy mounts, causing 0 mounts to panic.\nOrki (5990) strikes fear into enemy mounts, causing 0 mounts to panic.\n\nOgre Mage (1388) loses 11.\nCity Guard (74) loses 120.",
+            "statistics": "Ogre Mage (1388) army:\n- Ogre Mage (852): - without weapon (slashing melee attack), attacked 3 of 4 times, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Ogre Mage (1388): - a fireball (magic energy attack), attacked 10 of 10 times, 9 successful attacks, 0 blocked by armor, 9 hits, 9 total damage, and killed 9 enemies.\n- Gnolls (1867): - sword [SWOR] (slashing melee attack), attacked 3 of 6 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies. - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Orki (2499): - sword [SWOR] (slashing melee attack), attacked 5 of 9 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.\n- Brzydale (2502): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 4 of 7 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.\n- Brzydale (3480): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 4 times, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Ogre Mage (3482): - a fireball (magic energy attack), attacked 9 of 9 times, 9 successful attacks, 0 blocked by armor, 9 hits, 9 total damage, and killed 9 enemies.\n- Ogre Mage (3484): - without weapon (slashing melee attack), attacked 1 of 3 times, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Ogre Mage (3485): - a fireball (magic energy attack), attacked 18 of 18 times, 17 successful attacks, 0 blocked by armor, 17 hits, 17 total damage, and killed 17 enemies.\n- Elfy (4570): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 2 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gobliny (4575): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 2 of 5 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Elvez (4580): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 0 of 1 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Gnolle (4586): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 3 of 8 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.\n- Gobliny (5025): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 11 of 15 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.\n- _Diggers (5030): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 2 of 5 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.\n- Zog (5442): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 1 time, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gobliny (5482): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 3 of 4 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.\n- Mobo (5942): - sword [SWOR] (slashing melee attack), attacked 1 of 1 time, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Goblinz (5989): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 10 of 14 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.\n- Orki (5990): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 4 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- _Diggers (5991): - sword [SWOR] (slashing melee attack), attacked 2 of 2 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gnolle (7164): - sword [SWOR] (slashing melee attack), attacked 12 of 22 times, 12 successful attacks, 0 blocked by armor, 12 hits, 12 total damage, and killed 12 enemies. - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Unit (7178): - sword [SWOR] (slashing melee attack), attacked 10 of 19 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.\n- Gawiedz (7738): - sword [SWOR] (slashing melee attack), attacked 15 of 27 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.\n- Mobiki (7740): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 4 of 11 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.\n- Kapelani (7741): - sword [SWOR] (slashing melee attack), attacked 1 of 6 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gnolle (7742): - sword [SWOR] (slashing melee attack), attacked 6 of 12 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.\n- Gawiedz (8369): - sword [SWOR] (slashing melee attack), attacked 13 of 33 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.\n\nCity Guard (74) army:\n- City Guard (74): - sword [SWOR] (slashing melee attack), attacked 36 of 82 times, 11 successful attacks, 0 blocked by armor, 11 hits, 11 total damage, and killed 11 enemies.\n\nCity Guard (74) is destroyed!"
+        }
+    ],
+    "statistics": "Ogre Mage (1388) army:\n- Ogre Mage (852): - without weapon (slashing melee attack), attacked 3 of 4 times, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Ogre Mage (1388): - a fireball (magic energy attack), attacked 10 of 10 times, 9 successful attacks, 0 blocked by armor, 9 hits, 9 total damage, and killed 9 enemies.\n- Gnolls (1867): - sword [SWOR] (slashing melee attack), attacked 3 of 6 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies. - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Orki (2499): - sword [SWOR] (slashing melee attack), attacked 5 of 9 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.\n- Brzydale (2502): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 4 of 7 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.\n- Brzydale (3480): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 4 times, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Ogre Mage (3482): - a fireball (magic energy attack), attacked 9 of 9 times, 9 successful attacks, 0 blocked by armor, 9 hits, 9 total damage, and killed 9 enemies.\n- Ogre Mage (3484): - without weapon (slashing melee attack), attacked 1 of 3 times, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Ogre Mage (3485): - a fireball (magic energy attack), attacked 18 of 18 times, 17 successful attacks, 0 blocked by armor, 17 hits, 17 total damage, and killed 17 enemies.\n- Elfy (4570): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 2 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gobliny (4575): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 2 of 5 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Elvez (4580): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 0 of 1 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Gnolle (4586): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 3 of 8 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.\n- Gobliny (5025): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 11 of 15 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.\n- _Diggers (5030): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 2 of 5 times, 2 successful attacks, 0 blocked by armor, 2 hits, 2 total damage, and killed 2 enemies.\n- Zog (5442): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 1 time, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gobliny (5482): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 3 of 4 times, 3 successful attacks, 0 blocked by armor, 3 hits, 3 total damage, and killed 3 enemies.\n- Mobo (5942): - sword [SWOR] (slashing melee attack), attacked 1 of 1 time, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Goblinz (5989): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 10 of 14 times, 10 successful attacks, 0 blocked by armor, 10 hits, 10 total damage, and killed 10 enemies.\n- Orki (5990): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 1 of 4 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- _Diggers (5991): - sword [SWOR] (slashing melee attack), attacked 2 of 2 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gnolle (7164): - sword [SWOR] (slashing melee attack), attacked 12 of 22 times, 12 successful attacks, 0 blocked by armor, 12 hits, 12 total damage, and killed 12 enemies. - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy.\n- Unit (7178): - sword [SWOR] (slashing melee attack), attacked 10 of 19 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.\n- Gawiedz (7738): - sword [SWOR] (slashing melee attack), attacked 15 of 27 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.\n- Mobiki (7740): - terrify horses (magic riding attack), attacked 0 of 0 time, 0 successful attack, 0 blocked by armor, 0 hit, 0 total damage, and killed 0 enemy. - sword [SWOR] (slashing melee attack), attacked 4 of 11 times, 4 successful attacks, 0 blocked by armor, 4 hits, 4 total damage, and killed 4 enemies.\n- Kapelani (7741): - sword [SWOR] (slashing melee attack), attacked 1 of 6 times, 1 successful attack, 0 blocked by armor, 1 hit, 1 total damage, and killed 1 enemy.\n- Gnolle (7742): - sword [SWOR] (slashing melee attack), attacked 6 of 12 times, 5 successful attacks, 0 blocked by armor, 5 hits, 5 total damage, and killed 5 enemies.\n- Gawiedz (8369): - sword [SWOR] (slashing melee attack), attacked 13 of 33 times, 7 successful attacks, 0 blocked by armor, 7 hits, 7 total damage, and killed 7 enemies.\n\nCity Guard (74) army:\n- City Guard (74): - sword [SWOR] (slashing melee attack), attacked 36 of 82 times, 11 successful attacks, 0 blocked by armor, 11 hits, 11 total damage, and killed 11 enemies.",
+    "casualties": [
+        {
+            "heals": [],
+            "army": {
+                "name": "City Guard",
+                "number": 74
+            },
+            "lost": 120,
+            "damagedUnits": [
+                74
+            ]
+        },
+        {
+            "heals": [
+                {
+                    "name": "Ogre Mage",
+                    "number": 3485,
+                    "amount": 3,
+                    "chance": 70
+                }
+            ],
+            "army": {
+                "name": "Ogre Mage",
+                "number": 1388
+            },
+            "lost": 8,
+            "damagedUnits": [
+                4575,
+                7740,
+                7738,
+                7742,
+                8369
+            ]
+        }
+    ],
+    "spoils": [
+        {
+            "amount": 60,
+            "name": "swords",
+            "code": "SWOR"
+        },
+        {
+            "amount": 3000,
+            "name": "silver",
+            "code": "SILV"
+        }
+    ]
+}

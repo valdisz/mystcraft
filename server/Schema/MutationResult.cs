@@ -2,10 +2,15 @@ namespace advisor.Schema;
 
 using HotChocolate.Types;
 
-[InterfaceType("MutationResult")]
 public interface IMutationResult {
     bool IsSuccess { get; }
     string Error { get; }
+}
+
+public class MutationResultType : InterfaceType<IMutationResult> {
+    protected override void Configure(IInterfaceTypeDescriptor<IMutationResult> descriptor) {
+        descriptor.Name("MutationResult");
+    }
 }
 
 public abstract record MutationResult(bool IsSuccess, string Error = null) : IMutationResult {

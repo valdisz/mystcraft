@@ -162,7 +162,10 @@ function BattleItem({ battle, active, scrollOnActive, onClick }: BattleItemProps
     }), [ active, scrollOnActive ])
 
     const attackingTroops = countSoldiers(attacker.units)
-    const defendungTroops = countSoldiers(defender.units)
+    const defendingTroops = countSoldiers(defender.units)
+
+    const attackerLost = attacker.casualties.lost / attackingTroops
+    const defenderLost = defender.casualties.lost / defendingTroops
 
     return <ListItemButton ref={ref} selected={active} divider onClick={onClick}>
             <Box sx={{
@@ -174,9 +177,9 @@ function BattleItem({ battle, active, scrollOnActive, onClick }: BattleItemProps
                 gap: 2,
                 minWidth: 0
             }}>
-                <Army side='Attacker' leader={attacker.leader} victory={true} troops={attackingTroops} lost={attacker.casualties.lost} />
+                <Army side='Attacker' leader={attacker.leader} victory={defenderLost > attackerLost} troops={attackingTroops} lost={attacker.casualties.lost} />
                 <Divider orientation='vertical' flexItem />
-                <Army side='Defender' leader={defender.leader} victory={false} troops={defendungTroops} lost={defender.casualties.lost} />
+                <Army side='Defender' leader={defender.leader} victory={attackerLost > defenderLost} troops={defendingTroops} lost={defender.casualties.lost} />
             </Box>
     </ListItemButton>
 }

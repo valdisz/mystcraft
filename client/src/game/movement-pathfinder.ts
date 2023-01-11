@@ -3,18 +3,16 @@ import { MoveType, Link, Region, Level } from './internal'
 import { Coord } from '../geometry'
 
 export function distanceHeuristic(mapWidth: number, start: Region, goal: Region) {
-    const s = start.coords
+    const s = start.coords.toCube()
     const g = goal.coords
 
-    const s0 = s.cube
     const g0 = g.cube
-
-    const s1 = new Coord(s.x + mapWidth, s.y).toCube()
     const g1 = new Coord(g.x + mapWidth, g.y).toCube()
+    const g2 = new Coord(g.x - mapWidth, g.y).toCube()
 
-    const d0 = s0.distance(g0)
-    const d1 = s0.distance(g1)
-    const d2 = s1.distance(g0)
+    const d0 = s.distance(g0)
+    const d1 = s.distance(g1)
+    const d2 = s.distance(g2)
 
     return Math.min(d0, d1, d2)
 }

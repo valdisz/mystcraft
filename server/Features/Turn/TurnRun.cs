@@ -117,17 +117,21 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
             case Persistence.GameType.REMOTE:
                 var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
                 var remoteTurnNumber = await remote.GetCurrentTurnNumberAsync(cancellationToken);
-                if (game.NextTurnNumber < remoteTurnNumber) {
+                if (game.NextTurnNumber > remoteTurnNumber) {
                     return new TurnRunResult(false, "No new turn found on remote server.");
                 }
 
                 turnNumber = remoteTurnNumber;
-                turn = await (game.NextTurnNumber == null
-                    ? turnsRepo.AddTurnAsync(turnNumber, cancellationToken)
-                    : turnsRepo.GetOneAsync(turnNumber, cancellationToken));
+                if (game.NextTurnNumber < turnNumber) {
+                    turn = await turnsRepo.AddTurnAsync(remoteTurnNumber, cancellationToken);
+                }
+                else {
+                    turn = await (game.NextTurnNumber == null
+                        ? turnsRepo.AddTurnAsync(turnNumber, cancellationToken)
+                        : turnsRepo.GetOneAsync(turnNumber, cancellationToken));
+                }
 
                 // import remote turn
-
                 if (turn.State != TurnState.PENDING) {
                     return new TurnRunResult(false, "Turn was already imported.");
                 }

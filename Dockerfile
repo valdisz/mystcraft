@@ -15,7 +15,6 @@ WORKDIR /server
 COPY server/*.csproj ./
 RUN dotnet restore
 
-
 COPY server/ ./
 RUN dotnet publish -c Release -o out
 
@@ -52,4 +51,4 @@ RUN mkdir -p /usr/var/advisor \
 VOLUME /usr/var/advisor
 
 USER app
-ENTRYPOINT ["dotnet", "advisor.dll"]
+ENTRYPOINT ["dotnet", "server.dll"]

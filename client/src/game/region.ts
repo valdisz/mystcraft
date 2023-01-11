@@ -75,9 +75,9 @@ export class Region {
     }
 
     addTradeRoute(route: TradeRoute) {
-        if (route.distance > 12) {
-            return
-        }
+        // if (route.distance > 24) {
+        //     return
+        // }
 
         if (route.buy.region === this) {
             this.outgoingTrade.push(route)

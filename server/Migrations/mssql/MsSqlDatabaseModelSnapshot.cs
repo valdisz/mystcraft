@@ -23,30 +23,41 @@ namespace advisor.Migrations.mssql
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
+            modelBuilder.Entity("advisor.Persistence.DbAdditionalReport", b =>
                 {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
+
+                    b.Property<string>("Error")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Json")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
+
+                    b.Property<byte[]>("Source")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("TurnNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("FactionNumber")
+                    b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<string>("FactionName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("Json")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber");
+                    b.HasIndex("PlayerId", "TurnNumber");
 
                     b.ToTable("AditionalReports");
                 });
@@ -132,8 +143,8 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.HasKey("Id");
 
@@ -266,8 +277,8 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UnitName")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<int?>("UnitNumber")
                         .HasColumnType("int");
@@ -393,11 +404,13 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
+                        .HasMaxLength(64)
                         .HasColumnType("int");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.HasKey("Id");
 
@@ -476,8 +489,8 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<int?>("NextTurnNumber")
                         .HasColumnType("int");
@@ -511,8 +524,8 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("FactionName")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<int>("FactionNumber")
                         .HasColumnType("int");
@@ -589,8 +602,8 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("Label")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int?>("LastVisitedAt")
                         .HasColumnType("int");
@@ -648,7 +661,8 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -684,8 +698,8 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Password")
                         .HasMaxLength(64)
@@ -711,10 +725,6 @@ namespace advisor.Migrations.mssql
                     b.Property<int>("TurnNumber")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("Data")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<string>("Error")
                         .HasColumnType("nvarchar(max)");
 
@@ -728,6 +738,10 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("bit");
 
                     b.Property<byte[]>("Json")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("Source")
+                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.HasKey("PlayerId", "TurnNumber");
@@ -785,8 +799,8 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("X")
                         .HasColumnType("int");
@@ -922,7 +936,8 @@ namespace advisor.Migrations.mssql
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -1103,7 +1118,7 @@ namespace advisor.Migrations.mssql
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
+            modelBuilder.Entity("advisor.Persistence.DbAdditionalReport", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
                         .WithMany("AdditionalReports")

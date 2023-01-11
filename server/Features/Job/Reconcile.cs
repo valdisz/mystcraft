@@ -39,7 +39,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         var projection = query.Select(x => new GameProjection(x.Id, x.Status, x.Type, x.Options));
 
         await foreach (var game in projection.AsAsyncEnumerable().WithCancellation(cancellation)) {
-            ReconcileSingleGameJob(game);
+            ReconcileSingleGame(game);
         }
 
         if (request.GameId == null) {
@@ -49,7 +49,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         return new ReconcileResult(true);
     }
 
-    private void ReconcileSingleGameJob(GameProjection game) {
+    private void ReconcileSingleGame(GameProjection game) {
         var jobIdPrefix = $"game-{game.Id}";
 
         var shouldRun = game.Status == GameStatus.RUNNING && !string.IsNullOrWhiteSpace(game.Options.Schedule);

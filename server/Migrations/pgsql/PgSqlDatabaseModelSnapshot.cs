@@ -22,30 +22,41 @@ namespace advisor.Migrations.pgsql
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
+            modelBuilder.Entity("advisor.Persistence.DbAdditionalReport", b =>
                 {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Error")
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("Json")
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
                     b.Property<long>("PlayerId")
                         .HasColumnType("bigint");
+
+                    b.Property<byte[]>("Source")
+                        .IsRequired()
+                        .HasColumnType("bytea");
 
                     b.Property<int>("TurnNumber")
                         .HasColumnType("integer");
 
-                    b.Property<int>("FactionNumber")
+                    b.Property<int>("Type")
                         .HasColumnType("integer");
 
-                    b.Property<string>("FactionName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("Json")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("PlayerId", "TurnNumber", "FactionNumber");
+                    b.HasIndex("PlayerId", "TurnNumber");
 
                     b.ToTable("AditionalReports");
                 });
@@ -129,8 +140,8 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
 
@@ -262,8 +273,8 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("text");
 
                     b.Property<string>("UnitName")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("UnitNumber")
                         .HasColumnType("integer");
@@ -388,11 +399,13 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
+                        .HasMaxLength(64)
                         .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.HasKey("Id");
 
@@ -469,8 +482,8 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int?>("NextTurnNumber")
                         .HasColumnType("integer");
@@ -504,8 +517,8 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("FactionName")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<int>("FactionNumber")
                         .HasColumnType("integer");
@@ -582,8 +595,8 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("Label")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<int?>("LastVisitedAt")
                         .HasColumnType("integer");
@@ -641,7 +654,8 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -676,8 +690,8 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Password")
                         .HasMaxLength(64)
@@ -703,10 +717,6 @@ namespace advisor.Migrations.pgsql
                     b.Property<int>("TurnNumber")
                         .HasColumnType("integer");
 
-                    b.Property<byte[]>("Data")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
                     b.Property<string>("Error")
                         .HasColumnType("text");
 
@@ -720,6 +730,10 @@ namespace advisor.Migrations.pgsql
                         .HasColumnType("boolean");
 
                     b.Property<byte[]>("Json")
+                        .HasColumnType("bytea");
+
+                    b.Property<byte[]>("Source")
+                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.HasKey("PlayerId", "TurnNumber");
@@ -777,8 +791,8 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<int>("X")
                         .HasColumnType("integer");
@@ -914,7 +928,8 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -1094,7 +1109,7 @@ namespace advisor.Migrations.pgsql
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("advisor.Persistence.DbAditionalReport", b =>
+            modelBuilder.Entity("advisor.Persistence.DbAdditionalReport", b =>
                 {
                     b.HasOne("advisor.Persistence.DbPlayer", "Player")
                         .WithMany("AdditionalReports")

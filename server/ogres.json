@@ -1,0 +1,102 @@
+[
+{"name":"Zly Kasztelan [2501]","items":[{"abbr":"HUMN","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Unit [2793]","items":[{"abbr":"HELF","amount":1},{"abbr":"HORS","amount":2}],"skills":[{"abbr":"TACT","level":2},{"abbr":"RIDI","level":2},{"abbr":"COMB","level":1}],"flags":["behind"]}
+,
+{"name":"Unit [5992]","items":[{"abbr":"CAME","amount":3},{"abbr":"HUMN","amount":1}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":["behind"]}
+,
+{"name":"Unit [6592]","items":[{"abbr":"HORS","amount":1},{"abbr":"HELF","amount":1}],"skills":[{"abbr":"RIDI","level":2},{"abbr":"COMB","level":1}],"flags":["behind"]}
+,
+{"name":"Ogre Mage [1388]","items":[{"abbr":"LEAD","amount":1},{"abbr":"CAME","amount":1},{"abbr":"SWOR","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Unit [5027]","items":[{"abbr":"GBLN","amount":1},{"abbr":"CAME","amount":5}],"skills":[{"abbr":"RIDI","level":1}],"flags":["behind"]}
+,
+{"name":"Unit [5028]","items":[{"abbr":"GBLN","amount":1},{"abbr":"CAME","amount":2}],"skills":[{"abbr":"RIDI","level":2}],"flags":["behind"]}
+,
+{"name":"Unit [5029]","items":[{"abbr":"GBLN","amount":1},{"abbr":"CAME","amount":2},{"abbr":"SWOR","amount":1}],"skills":[{"abbr":"RIDI","level":2},{"abbr":"COMB","level":1}],"flags":["behind"]}
+,
+{"name":"Unit [5031]","items":[{"abbr":"GNOM","amount":3},{"abbr":"SWOR","amount":3}],"skills":[{"abbr":"COMB","level":1}],"flags":["behind"]}
+,
+{"name":"Ogre Mage [852]","items":[{"abbr":"LEAD","amount":1},{"abbr":"HORS","amount":57},{"abbr":"CAME","amount":41},{"abbr":"WOLF","amount":4},{"abbr":"SWOR","amount":1}],"skills":[{"abbr":"COMB","level":3}],"flags":["behind"]}
+,
+{"name":"Ogre Mage [3482]","items":[{"abbr":"LEAD","amount":1},{"abbr":"HORS","amount":1},{"abbr":"SWOR","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Ogre Mage [3484]","items":[{"abbr":"CAME","amount":1},{"abbr":"LEAD","amount":1},{"abbr":"WOLF","amount":4},{"abbr":"HORS","amount":1},{"abbr":"SWOR","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Ogre Mage [3485]","items":[{"abbr":"CAME","amount":1},{"abbr":"LEAD","amount":1},{"abbr":"HORS","amount":1},{"abbr":"SWOR","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Ogre Mage [4274]","items":[{"abbr":"LEAD","amount":1},{"abbr":"HORS","amount":1},{"abbr":"SWOR","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Ogre Mage [4581]","items":[{"abbr":"HORS","amount":1},{"abbr":"LEAD","amount":1},{"abbr":"SWOR","amount":1}],"skills":[{"abbr":"TACT","level":3}],"flags":["behind"]}
+,
+{"name":"Brzydale [2502]","items":[{"abbr":"HUMN","amount":13},{"abbr":"CAME","amount":13},{"abbr":"SWOR","amount":13}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Unit [6594]","items":[{"abbr":"HUMN","amount":1}],"skills":[{"abbr":"COMB","level":1}],"flags":["behind"]}
+,
+{"name":"Unit [7183]","items":[{"abbr":"HORS","amount":3},{"abbr":"HELF","amount":3}],"skills":[{"abbr":"RIDI","level":2}],"flags":["behind"]}
+,
+{"name":"Unit [7186]","items":[{"abbr":"CAME","amount":2},{"abbr":"GBLN","amount":2}],"skills":[{"abbr":"RIDI","level":2}],"flags":["behind"]}
+,
+{"name":"Unit [5483]","items":[{"abbr":"IDWA","amount":15},{"abbr":"CAME","amount":1},{"abbr":"SWOR","amount":15}],"skills":[{"abbr":"COMB","level":1}],"flags":["behind"]}
+,
+{"name":"Unit [8376]","items":[{"abbr":"HORS","amount":10},{"abbr":"HELF","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Unit [7178]","items":[{"abbr":"HORS","amount":27},{"abbr":"HELF","amount":30},{"abbr":"SWOR","amount":55}],"skills":[{"abbr":"COMB","level":1}],"flags":[]}
+,
+{"name":"Unit [9069]","items":[{"abbr":"HORS","amount":20},{"abbr":"HELF","amount":1}],"skills":[],"flags":["behind"]}
+,
+{"name":"Goblinz [5989]","items":[{"abbr":"GBLN","amount":20},{"abbr":"CAME","amount":20},{"abbr":"SWOR","amount":20}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Gobliny [4575]","items":[{"abbr":"GBLN","amount":10},{"abbr":"SWOR","amount":10},{"abbr":"CAME","amount":10}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Brzydale [3480]","items":[{"abbr":"HUMN","amount":6},{"abbr":"CAME","amount":6},{"abbr":"SWOR","amount":6}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Gnolle [4586]","items":[{"abbr":"GNOL","amount":5},{"abbr":"CAME","amount":6},{"abbr":"SWOR","amount":5},{"abbr":"PARM","amount":5}],"skills":[{"abbr":"COMB","level":3},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"_Diggers [5030]","items":[{"abbr":"GNOL","amount":6},{"abbr":"SWOR","amount":6},{"abbr":"CAME","amount":6}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Gobliny [5482]","items":[{"abbr":"GBLN","amount":5},{"abbr":"CAME","amount":6},{"abbr":"SWOR","amount":5},{"abbr":"PARM","amount":5}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Orki [5990]","items":[{"abbr":"ORC","amount":10},{"abbr":"PARM","amount":10},{"abbr":"CAME","amount":10},{"abbr":"SWOR","amount":10}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Elfy [4570]","items":[{"abbr":"HELF","amount":4},{"abbr":"PARM","amount":4},{"abbr":"SWOR","amount":4},{"abbr":"CAME","amount":4}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"_Farmers [3830]","items":[{"abbr":"HUMN","amount":1},{"abbr":"CAME","amount":1},{"abbr":"GNOL","amount":2}],"skills":[],"flags":["behind"]}
+,
+{"name":"Waldemar [720]","items":[{"abbr":"LEAD","amount":1},{"abbr":"SWOR","amount":1},{"abbr":"CAME","amount":1}],"skills":[{"abbr":"COMB","level":3},{"abbr":"RIDI","level":1}],"flags":["behind"]}
+,
+{"name":"Komik-General [1386]","items":[{"abbr":"LEAD","amount":1},{"abbr":"SWOR","amount":1}],"skills":[{"abbr":"TACT","level":4}],"flags":["behind"]}
+,
+{"name":"Zog [5442]","items":[{"abbr":"CAME","amount":1},{"abbr":"GBLN","amount":1},{"abbr":"SWOR","amount":1},{"abbr":"PARM","amount":1}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Gnolle [7164]","items":[{"abbr":"SWOR","amount":30},{"abbr":"GNOL","amount":30},{"abbr":"CAME","amount":17}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"_Diggers [5991]","items":[{"abbr":"IDWA","amount":4},{"abbr":"SWOR","amount":4}],"skills":[{"abbr":"COMB","level":1}],"flags":[]}
+,
+{"name":"Gobliny [5025]","items":[{"abbr":"GBLN","amount":23},{"abbr":"CAME","amount":31},{"abbr":"SWOR","amount":24}],"skills":[{"abbr":"COMB","level":1},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Orki [2499]","items":[{"abbr":"ORC","amount":12},{"abbr":"SWOR","amount":12},{"abbr":"PARM","amount":3}],"skills":[{"abbr":"COMB","level":1}],"flags":[]}
+,
+{"name":"Elvez [4580]","items":[{"abbr":"HELF","amount":3},{"abbr":"CAME","amount":4},{"abbr":"SWOR","amount":3},{"abbr":"PARM","amount":3}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Mobo [5942]","items":[{"abbr":"SWOR","amount":1},{"abbr":"GNOL","amount":1}],"skills":[{"abbr":"COMB","level":2}],"flags":[]}
+,
+{"name":"Gawiedz [7738]","items":[{"abbr":"GNOL","amount":60},{"abbr":"SWOR","amount":240}],"skills":[],"flags":[]}
+,
+{"name":"Saperzy [7739]","items":[{"abbr":"GNOL","amount":10},{"abbr":"HAMM","amount":7},{"abbr":"SWOR","amount":10}],"skills":[],"flags":["behind"]}
+,
+{"name":"Mobiki [7740]","items":[{"abbr":"CAME","amount":13},{"abbr":"GNOL","amount":20},{"abbr":"PARM","amount":4},{"abbr":"SWOR","amount":20}],"skills":[{"abbr":"COMB","level":2},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+{"name":"Kapelani [7741]","items":[{"abbr":"GNOL","amount":10},{"abbr":"SWOR","amount":10}],"skills":[],"flags":[]}
+,
+{"name":"Gnolle [7742]","items":[{"abbr":"GNOL","amount":20},{"abbr":"SWOR","amount":21},{"abbr":"CAME","amount":11}],"skills":[{"abbr":"COMB","level":2}],"flags":[]}
+,
+{"name":"Gawiedz [8369]","items":[{"abbr":"GNOL","amount":60},{"abbr":"SWOR","amount":60}],"skills":[],"flags":[]}
+,
+{"name":"_Miners [9052]","items":[{"abbr":"GNOL","amount":10}],"skills":[],"flags":["behind"]}
+,
+{"name":"Smiths [9053]","items":[{"abbr":"GNOL","amount":10}],"skills":[],"flags":["behind"]}
+,
+{"name":"Gnolls [1867]","items":[{"abbr":"GNOL","amount":4},{"abbr":"SWOR","amount":4},{"abbr":"PARM","amount":4},{"abbr":"CAME","amount":3}],"skills":[{"abbr":"COMB","level":3},{"abbr":"RIDI","level":1}],"flags":[]}
+,
+]

@@ -24,7 +24,7 @@ const DEFAULT_OPTIONS = `{
     ],
     "schedule": "0 12 * * *",
     "timeZone": "Europe/Riga",
-    "serverAddress": null
+    "serverAddress": "http://atlantis-pbem.com"
 }`
 
 export class NewGameStore {

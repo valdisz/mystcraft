@@ -283,6 +283,7 @@ public class Startup {
             .AddType<TreasuryItemType>()
             .AddType<TurnStatisticsItemType>()
             .AddType<RegionStatisticsItemType>()
+            .AddType<MutationResultType>()
             .BindRuntimeType<DbProductionItem, ItemType>()
             .BindRuntimeType<DbSkill, SkillType>()
             .BindRuntimeType<JSkill, SkillType>()
