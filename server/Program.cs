@@ -14,7 +14,7 @@
     using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
-    class Program {
+    public class Program {
         public static Task Main(string[] args) {
             if (!Debugger.IsAttached && Console.IsInputRedirected) {
                 return RunConverterAsync(Console.In);
@@ -87,9 +87,11 @@
                     var password = conf.GetValue<string>("Seed:Password");
 
                     await mediator.Send(new UserCreate(email, password, Policies.Root));
+
+                    await db.SaveChangesAsync();
                 }
 
-                await db.SaveChangesAsync();
+                await AddSeedDataAsync(db);
             }
         }
 
@@ -100,6 +102,10 @@
             writer.Formatting = Formatting.Indented;
 
             await converter.ReadAsJsonAsync(writer);
+        }
+
+        public static Task AddSeedDataAsync(Database db) {
+            return Task.CompletedTask;
         }
     }
 }

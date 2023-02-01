@@ -13,10 +13,10 @@ public record GameCreateRemote(string Name, GameOptions Options) : IRequest<Game
 public record GameCreateRemoteResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCreateRemoteResult> {
-    public GameCreateRemoteHandler(IUnitOfWork unit, IMediator mediator, IHttpClientFactory httpFactory) {
+    public GameCreateRemoteHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator, IHttpClientFactory httpFactory) {
         this.unit = unit;
         this.mediator = mediator;
-        this.games = unit.Games;
+        this.games = games;
         this.httpFactory = httpFactory;
     }
 
@@ -31,6 +31,7 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
         var game = await games.CreateRemoteAsync(
             name: request.Name,
             serverAddress: request.Options.ServerAddress,
+            ruleset: "",
             options: request.Options,
             cancellationToken
         );

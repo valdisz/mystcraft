@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using advisor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-public interface ITurnsRepository {
+public interface ITurnRepository {
     IQueryable<DbTurn> AllTurns { get; }
 
     Task<DbTurn> GetOneAsync(int number, CancellationToken cancellation = default);
@@ -19,8 +19,8 @@ public interface ITurnsRepository {
     IQueryable<DbReport> GetReports(int turnNumber);
 }
 
-public class TurnsRepository : ITurnsRepository {
-    public TurnsRepository(DbGame game, IUnitOfWork unit, Database db) {
+public class TurnRepository : ITurnRepository {
+    public TurnRepository(DbGame game, IUnitOfWork unit, Database db) {
         this.game = game;
         this.unit = unit;
         this.db = db;

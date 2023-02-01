@@ -2,6 +2,8 @@ namespace advisor.Persistence;
 
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public enum ReportType {
     Report,
@@ -39,4 +41,15 @@ public class DbAdditionalReport : InTurnContext {
 
     [GraphQLIgnore]
     public DbPlayerTurn Turn { get; set; }
+}
+
+public class DbAdditionalReportConfiguration : IEntityTypeConfiguration<DbAdditionalReport> {
+    public DbAdditionalReportConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbAdditionalReport> builder) {
+    }
 }

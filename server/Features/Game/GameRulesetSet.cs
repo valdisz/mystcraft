@@ -10,14 +10,16 @@ public record GameRulesetSet(long GameId, string Ruleset) : IRequest<GameRuleset
 public record GameRulesetSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRulesetSetResult> {
-    public GameRulesetSetHandler(IUnitOfWork unit) {
+    public GameRulesetSetHandler(IGameRepository games, IUnitOfWork unit) {
+        this.games = games;
         this.unit = unit;
     }
 
+    private readonly IGameRepository games;
     private readonly IUnitOfWork unit;
 
     public async Task<GameRulesetSetResult> Handle(GameRulesetSet request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId);
+        var game = await games.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameRulesetSetResult(false, "Game does not exist.");
         }

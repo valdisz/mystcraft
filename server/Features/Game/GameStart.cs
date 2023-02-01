@@ -11,20 +11,20 @@ public record GameStart(long GameId): IRequest<GameStartResult>;
 public record GameStartResult(bool IsSuccess, string Error = null, DbGame Game = null, string JobId = null) : MutationResult(IsSuccess, Error);
 
 public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
-    public GameStartHandler(IUnitOfWork unit, IMediator mediator) {
+    public GameStartHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator) {
+        this.games = games;
         this.unit = unit;
         this.mediator = mediator;
     }
 
+    private readonly IGameRepository games;
     private readonly IUnitOfWork unit;
     private readonly IMediator mediator;
 
     public async Task<GameStartResult> Handle(GameStart request, CancellationToken cancellationToken) {
-        var gamesRepo = unit.Games;
-
         await unit.BeginTransactionAsync(cancellationToken);
 
-        var game = await gamesRepo.StartAsync(request.GameId, cancellationToken);
+        var game = await games.StartAsync(request.GameId, cancellationToken);
         if (game == null) {
             return new GameStartResult(false, "Game not found.");
         }

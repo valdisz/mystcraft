@@ -15,9 +15,9 @@ public record GameJoinRemote(long UserId, long GameId, long PlayerId, string Pas
 public record GameJoinRemoteResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : MutationResult(IsSuccess, Error);
 
 public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRemoteResult> {
-    public GameJoinRemoteHandler(IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator) {
+    public GameJoinRemoteHandler(IGameRepository games, IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator) {
         this.unit = unit;
-        this.games = unit.Games;
+        this.games = games;
         this.httpFactory = httpFactory;
         this.mediator = mediator;
     }
@@ -28,7 +28,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
     private readonly IMediator mediator;
 
     public async Task<GameJoinRemoteResult> Handle(GameJoinRemote request, CancellationToken cancellationToken) {
-        var game = await games.GetOneNoTrackingAsync(request.GameId);
+        var game = await games.GetOneAsync(request.GameId, withTracking: false);
 
         switch (game?.Status) {
             case null: return new GameJoinRemoteResult(false, "Game does not exist.");

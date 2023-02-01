@@ -11,16 +11,18 @@ public record GameScheduleSet(long GameId, string Schedule): IRequest<GameSchedu
 public record GameScheduleSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameScheduleSetResult> {
-    public GameScheduleSetHandler(IUnitOfWork unit, IMediator mediator) {
+    public GameScheduleSetHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator) {
+        this.games = games;
         this.unit = unit;
         this.mediator = mediator;
     }
 
+    private readonly IGameRepository games;
     private readonly IUnitOfWork unit;
     private readonly IMediator mediator;
 
     public async Task<GameScheduleSetResult> Handle(GameScheduleSet request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId);
+        var game = await games.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameScheduleSetResult(false, "Game does not exist.");
         }

@@ -3,6 +3,8 @@ namespace advisor.Persistence;
 using System.ComponentModel.DataAnnotations;
 using advisor.Model;
 using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public enum StatisticsCategory {
     Produced,
@@ -47,4 +49,30 @@ public class DbRegionStatisticsItem : DbStatisticsItem, InRegionContext {
 
     [GraphQLIgnore]
     public string RegionId { get; set; }
+}
+
+public class DbTurnStatisticsItemConfiguration : IEntityTypeConfiguration<DbTurnStatisticsItem> {
+    public DbTurnStatisticsItemConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbTurnStatisticsItem> builder) {
+        builder.Property(x => x.Category)
+            .HasConversion<string>();
+    }
+}
+
+public class DbRegionStatisticsItemConfiguration : IEntityTypeConfiguration<DbRegionStatisticsItem> {
+    public DbRegionStatisticsItemConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbRegionStatisticsItem> builder) {
+        builder.Property(x => x.Category)
+            .HasConversion<string>();
+    }
 }

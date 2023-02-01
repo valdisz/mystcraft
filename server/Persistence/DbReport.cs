@@ -2,6 +2,8 @@ namespace advisor.Persistence;
 
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class DbReport : InGameContext, InPlayerContext {
     [GraphQLIgnore]
@@ -37,4 +39,16 @@ public class DbReport : InGameContext, InPlayerContext {
 
     [GraphQLIgnore]
     public DbTurn Turn { get; set; }
+}
+
+public class DbReportConfiguration : IEntityTypeConfiguration<DbReport> {
+    public DbReportConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbReport> builder) {
+        builder.HasKey(x => new { x.PlayerId, x.TurnNumber });
+    }
 }

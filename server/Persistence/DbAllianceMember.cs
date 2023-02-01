@@ -2,6 +2,8 @@ namespace advisor.Persistence;
 
 using System;
 using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class DbSharingOptions {
     public bool AdvancedResources { get; set; }
@@ -29,4 +31,16 @@ public class DbAllianceMember : InPlayerContext {
 
     [GraphQLIgnore]
     public DbPlayer Player { get; set; }
+}
+
+public class DbAllianceMemberConfiguration : IEntityTypeConfiguration<DbAllianceMember> {
+    public DbAllianceMemberConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbAllianceMember> builder) {
+        builder.HasKey(x => new { x.PlayerId, x.AllianceId });
+    }
 }

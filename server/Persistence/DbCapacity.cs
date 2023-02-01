@@ -1,5 +1,4 @@
 namespace advisor.Persistence {
-    using HotChocolate;
     using Microsoft.EntityFrameworkCore;
 
     [Owned]

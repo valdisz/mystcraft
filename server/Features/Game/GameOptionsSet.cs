@@ -10,16 +10,18 @@ public record GameOptionsSet(long GameId, GameOptions Options) : IRequest<GameOp
 public record GameOptionsSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptionsSetResult> {
-    public GameOptionsSetHandler(IUnitOfWork unit, IMediator mediator) {
+    public GameOptionsSetHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator) {
+        this.games = games;
         this.unit = unit;
         this.mediator = mediator;
     }
 
+    private readonly IGameRepository games;
     private readonly IUnitOfWork unit;
     private readonly IMediator mediator;
 
     public async Task<GameOptionsSetResult> Handle(GameOptionsSet request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneAsync(request.GameId);
+        var game = await games.GetOneAsync(request.GameId);
         if (game == null) {
             return new GameOptionsSetResult(false, "Game does not exist.");
         }

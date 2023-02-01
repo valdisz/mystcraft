@@ -7,15 +7,15 @@ using advisor.Persistence;
 using advisor.Schema;
 using MediatR;
 
-public record GameCreateLocal(string Name, long EngineId, GameOptions Options, Stream PlayerData, Stream GameData) : IRequest<GameCreateLocalResult>;
+public record GameCreateLocal(string Name, long EngineId, GameOptions Options) : IRequest<GameCreateLocalResult>;
 
 public record GameCreateLocalResult(DbGame Game, bool IsSuccess, string Error) : MutationResult(IsSuccess, Error);
 
 public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreateLocalResult> {
-    public GameCreateLocalHandler(IUnitOfWork unit, IMediator mediator) {
+    public GameCreateLocalHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator) {
+        this.games = games;
         this.unit = unit;
         this.mediator = mediator;
-        this.games = unit.Games;
     }
 
     private readonly IUnitOfWork unit;
@@ -26,9 +26,8 @@ public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreat
         DbGame game = await games.CreateLocalAsync(
             name: request.Name,
             engineId: request.EngineId,
+            ruleset: "",
             options: request.Options,
-            playerData: request.PlayerData,
-            gameData: request.GameData,
             cancellationToken
         );
 

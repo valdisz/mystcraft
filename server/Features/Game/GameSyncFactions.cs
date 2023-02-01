@@ -15,18 +15,20 @@ public record GameSyncFactions(long GameId) : IRequest<GameSyncFactionsResult>;
 public record GameSyncFactionsResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyncFactionsResult> {
-    public GameSyncFactionsHandler(IUnitOfWork unit, IHttpClientFactory httpFactory) {
+    public GameSyncFactionsHandler(IGameRepository games, IUnitOfWork unit, IHttpClientFactory httpFactory) {
+        this.games = games;
         this.unit = unit;
         this.httpFactory = httpFactory;
     }
 
+    private readonly IGameRepository games;
     private readonly IUnitOfWork unit;
     private readonly IHttpClientFactory httpFactory;
 
     private record PlayerProjection(long Id, int Number);
 
     public async Task<GameSyncFactionsResult> Handle(GameSyncFactions request, CancellationToken cancellationToken) {
-        var game = await unit.Games.GetOneNoTrackingAsync(request.GameId);
+        var game = await games.GetOneAsync(request.GameId, withTracking: false);
         if (game == null) {
             return new GameSyncFactionsResult(false, "Games does not exist.");
         }

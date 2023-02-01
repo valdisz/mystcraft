@@ -100,12 +100,7 @@ public class Startup {
             }
         });
 
-        services
-            .Configure<DatabaseOptions>(opt => {
-                opt.Provider = DbProvider;
-                opt.ConnectionString = DbConnectionString;
-                opt.IsProduction = Env.IsProduction();
-            });
+        services.AddRepositories();
 
         services.AddResponseCompression(opt => {
             opt.EnableForHttps = true;
@@ -173,21 +168,11 @@ public class Startup {
                     .AllowAnyOrigin());
             });
 
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-        switch (DbProvider) {
-            case DatabaseProvider.SQLite:
-                services.AddDbContext<Database, SQLiteDatabase>(ServiceLifetime.Transient);
-                break;
-
-            case DatabaseProvider.PgSQL:
-                services.AddDbContext<Database, PgSqlDatabase>(ServiceLifetime.Transient);
-                break;
-
-            case DatabaseProvider.MsSQL:
-                services.AddDbContext<Database, MsSqlDatabase>(ServiceLifetime.Transient);
-                break;
-        }
+        services.AddDatabase(new DatabaseOptions {
+            Provider = DbProvider,
+            ConnectionString = DbConnectionString,
+            IsProduction = Env.IsProduction()
+        });
 
         services.AddHangfire(conf => {
             conf.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);

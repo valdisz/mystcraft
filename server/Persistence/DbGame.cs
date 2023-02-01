@@ -1,57 +1,114 @@
-namespace advisor.Persistence {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using HotChocolate;
+namespace advisor.Persistence;
 
-    public class DbGame {
-        [Key]
-        public long Id { get; set; }
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-        [Required]
-        [MaxLength(Size.LABEL)]
-        public string Name { get; set; }
+public class DbGame {
+    [Key]
+    public long Id { get; set; }
 
-        [MaxLength(Size.TYPE)]
-        public GameType Type { get; set; }
+    [Required]
+    [MaxLength(Size.LABEL)]
+    public string Name { get; set; }
 
-        [MaxLength(Size.TYPE)]
-        public GameStatus Status { get; set; }
+    [MaxLength(Size.TYPE)]
+    public GameType Type { get; set; }
 
-        [Required]
-        public DateTimeOffset CreatedAt { get; set; }
+    [MaxLength(Size.TYPE)]
+    public GameStatus Status { get; set; }
 
-        [GraphQLIgnore]
-        public long? EngineId { get; set; }
+    [Required]
+    public DateTimeOffset CreatedAt { get; set; }
 
-        [Required]
-        public GameOptions Options { get; set; }
+    [GraphQLIgnore]
+    public long? EngineId { get; set; }
 
-        [Required]
-        public string Ruleset { get; set; }
+    [Required]
+    public GameOptions Options { get; set; }
 
-
-        public int? LastTurnNumber { get; set; }
-
-        public int? NextTurnNumber { get; set; }
+    [Required]
+    public string Ruleset { get; set; }
 
 
-        [GraphQLIgnore]
-        public List<DbPlayer> Players { get; set; } = new ();
+    public int? LastTurnNumber { get; set; }
 
-        [GraphQLIgnore]
-        public List<DbRegistration> Registrations { get; set; } = new ();
+    public int? NextTurnNumber { get; set; }
 
-        [GraphQLIgnore]
-        public List<DbAlliance> Alliances { get; set; } = new ();
 
-        [GraphQLIgnore]
-        public List<DbTurn> Turns { get; set; } = new ();
+    [GraphQLIgnore]
+    public List<DbPlayer> Players { get; set; } = new ();
 
-        [GraphQLIgnore]
-        public List<DbArticle> Articles { get; set; } = new ();
+    [GraphQLIgnore]
+    public List<DbRegistration> Registrations { get; set; } = new ();
 
-        [GraphQLIgnore]
-        public DbGameEngine Engine { get; set; }
+    [GraphQLIgnore]
+    public List<DbAlliance> Alliances { get; set; } = new ();
+
+    [GraphQLIgnore]
+    public List<DbTurn> Turns { get; set; } = new ();
+
+    [GraphQLIgnore]
+    public List<DbArticle> Articles { get; set; } = new ();
+
+    [GraphQLIgnore]
+    public DbGameEngine Engine { get; set; }
+}
+
+public class DbGameConfiguration : IEntityTypeConfiguration<DbGame> {
+    public DbGameConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbGame> builder) {
+        builder.Property(x => x.Id)
+            .UseIdentityColumn();
+
+        builder.Property(x => x.Type)
+            .HasConversion<string>();
+
+        builder.Property(x => x.Options)
+            .HasConversionJson(db.Provider);
+
+        builder.HasMany(p => p.Players)
+            .WithOne(p => p.Game)
+            .HasForeignKey(x => x.GameId);
+
+        builder.HasMany(x => x.Alliances)
+            .WithOne(x => x.Game)
+            .HasForeignKey(x => x.GameId);
+
+        builder.HasMany(x => x.Turns)
+            .WithOne(x => x.Game)
+            .HasForeignKey(x => x.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.Articles)
+            .WithOne(x => x.Game)
+            .HasForeignKey(x => x.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(x => x.Registrations)
+            .WithOne(x => x.Game)
+            .HasForeignKey(x => x.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany<DbReport>()
+            .WithOne(x => x.Game)
+            .HasForeignKey(x => x.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany<DbPlayerTurn>()
+            .WithOne()
+            .HasForeignKey(x => x.GameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
     }
 }

@@ -187,8 +187,8 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
     }
 
     private async Task<DbTurn> RunLocalTurnAsync(
-        ITurnsRepository turnsRepo,
-        IPlayersRepository playersRepo,
+        ITurnRepository turnsRepo,
+        IPlayerRepository playersRepo,
         DbGame game,
         DbTurn turn,
         Dictionary<FactionProjection, IEnumerable<UnitOrdersRec>> allOrders,
@@ -277,7 +277,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
     }
 
     private async Task<DbTurn> ImportRemoteTurnAsync(
-        ITurnsRepository turnsRepo,
+        ITurnRepository turnsRepo,
         NewOriginsClient client,
         DbGame game,
         DbTurn turn,

@@ -2,6 +2,8 @@ namespace advisor.Persistence;
 
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public class DbRegistration : InGameContext {
     [Key]
@@ -24,4 +26,17 @@ public class DbRegistration : InGameContext {
 
     [GraphQLIgnore]
     public DbGame Game { get;set; }
+}
+
+public class DbRegistrationConfiguration : IEntityTypeConfiguration<DbRegistration> {
+    public DbRegistrationConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbRegistration> builder) {
+        builder.Property(x => x.Id)
+            .UseIdentityColumn();
+    }
 }

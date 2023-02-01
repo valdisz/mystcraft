@@ -5,6 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HotChocolate;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public record RegionId(long PlayerId, int TurnNumber, int X, int Y, int Z) {
     private static readonly Regex PATTERN = new Regex(@"^(\d+) \((\d+),(\d+),(\d+)\)\@(\d+)$", RegexOptions.Compiled);
@@ -118,3 +120,52 @@ public class DbRegion : InTurnContext, IStatistics<DbRegionStatisticsItem> {
     public override string ToString() => Id;
 }
 
+public class DbRegionConfiguration : IEntityTypeConfiguration<DbRegion> {
+    public DbRegionConfiguration(Database db) {
+        this.db = db;
+    }
+
+    private readonly Database db;
+
+    public void Configure(EntityTypeBuilder<DbRegion> builder) {
+        builder.HasKey(x => new { x.PlayerId, x.TurnNumber, x.Id });
+
+        builder.Ignore(x => x.ForSale);
+        builder.Ignore(x => x.Wanted);
+
+        builder.HasMany(x => x.Units)
+            .WithOne(x => x.Region)
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.HasMany(x => x.Structures)
+            .WithOne(x => x.Region)
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.HasMany(x => x.Statistics)
+            .WithOne()
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.HasMany(x => x.Events)
+            .WithOne(x => x.Region)
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.OwnsOne(p => p.Settlement, a => {
+            a.Property(x => x.Size).HasConversion<string>();
+        });
+
+        builder.HasMany(p => p.Produces)
+            .WithOne()
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.HasMany(p => p.Markets)
+            .WithOne()
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.HasMany(x => x.Statistics)
+            .WithOne()
+            .HasForeignKey(x => new { x.PlayerId, x.TurnNumber, x.RegionId });
+
+        builder.OwnsOne(x => x.Income);
+        builder.OwnsOne(x => x.Expenses);
+    }
+}

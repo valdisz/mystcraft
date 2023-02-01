@@ -11,18 +11,18 @@ public record GamePause(long GameId): IRequest<GamePauseResult>;
 public record GamePauseResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
-    public GamePauseHandler(IUnitOfWork unit, IMediator mediator) {
+    public GamePauseHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator) {
+        this.games = games;
         this.unit = unit;
         this.mediator = mediator;
     }
 
+    private readonly IGameRepository games;
     private readonly IUnitOfWork unit;
     private readonly IMediator mediator;
 
     public async Task<GamePauseResult> Handle(GamePause request, CancellationToken cancellationToken) {
-        var gamesRepo = unit.Games;
-
-        var game = await gamesRepo.PauseAsync(request.GameId, cancellationToken);
+        var game = await games.PauseAsync(request.GameId, cancellationToken);
         if (game == null) {
             return new GamePauseResult(false, "Game not found.");
         }
