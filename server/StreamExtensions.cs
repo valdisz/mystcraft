@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 public static class StreamExtensions {
     public static async Task<byte[]> ReadAllBytesAsync(this Stream stream, CancellationToken cancellationToken = default) {
         await using var ms = new MemoryStream();
-        using var lease = MemoryPool<byte>.Shared.Rent();
+        using var lease = MemoryPool<byte>.Shared.Rent(0x10000);
 
         Memory<byte> buffer = lease.Memory;
 

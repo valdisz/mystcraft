@@ -1,16 +1,12 @@
 namespace advisor.Persistence;
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
-public interface WithCreationTime {
-    DateTimeOffset CreatedAt { get; set; }
-}
-
-public class CreationTimeInterceptor : SaveChangesInterceptor {
-    public CreationTimeInterceptor(ITime time)
+public class TimeInterceptor : SaveChangesInterceptor {
+    public TimeInterceptor(ITime time)
     {
         this.time = time;
     }
@@ -21,8 +17,21 @@ public class CreationTimeInterceptor : SaveChangesInterceptor {
         var ct = eventData.Context.ChangeTracker;
 
         var now = time.UtcNow;
+
         foreach (var entry in ct.Entries<WithCreationTime>()) {
+            if (entry.State != EntityState.Added) {
+                continue;
+            }
+
             entry.Entity.CreatedAt = now;
+        }
+
+        foreach (var entry in ct.Entries<WithUpdateTime>()) {
+            if (entry.State != EntityState.Added && entry.State != EntityState.Modified) {
+                continue;
+            }
+
+            entry.Entity.UpdatedAt = now;
         }
 
         return result;
