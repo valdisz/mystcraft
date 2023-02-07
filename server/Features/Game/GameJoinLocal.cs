@@ -24,7 +24,7 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
     public Task<GameJoinLocalResult> Handle(GameJoinLocal request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(_ => gameRepo.GetOneGame(request.GameId, withTracking: true, cancellation: cancellationToken))
-            .Bind<Option<DbGame>, DbGame>(maybeGame => () => maybeGame
+            .Select(maybeGame => maybeGame
                 .Select(game => game switch {
                     { Type: Persistence.GameType.REMOTE } => Failure<DbGame>("Cannot join remote game."),
                     { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),

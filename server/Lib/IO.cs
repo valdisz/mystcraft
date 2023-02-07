@@ -66,6 +66,18 @@ public static class IOExtensions {
     public static AsyncIO<B> Select<A, B>(this AsyncIO<A> self, Func<A, Task<B>> selector)
         => () => self().Select(selector);
 
+    public static IO<B> Select<A, B>(this IO<A> self, Func<A, Result<B>> selector)
+        => () => self().Select(selector).Flatten();
+
+    public static AsyncIO<B> Select<A, B>(this IO<A> self, Func<A, Task<Result<B>>> selector)
+        => () => self().Select(selector).Flatten();
+
+    public static AsyncIO<B> Select<A, B>(this AsyncIO<A> self, Func<A, Result<B>> selector)
+        => () => self().Select(selector).Flatten();
+
+    public static AsyncIO<B> Select<A, B>(this AsyncIO<A> self, Func<A, Task<Result<B>>> selector)
+        => () => self().Select(selector).Flatten();
+
 
     public static IO<B> Bind<A, B>(this IO<A> self, Func<A, IO<B>> selector)
         => self.Select(selector).Flatten();

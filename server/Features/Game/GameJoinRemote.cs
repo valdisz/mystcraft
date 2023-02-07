@@ -2,106 +2,89 @@ namespace advisor.Features;
 
 using System;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using advisor.Persistence;
 using advisor.Remote;
 using advisor.Schema;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 public record GameJoinRemote(long UserId, long GameId, long PlayerId, string Password) : IRequest<GameJoinRemoteResult>;
 
 public record GameJoinRemoteResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : MutationResult(IsSuccess, Error);
 
 public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRemoteResult> {
-    public GameJoinRemoteHandler(IGameRepository games, IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator) {
-        this.unit = unit;
-        this.games = games;
+    public GameJoinRemoteHandler(IGameRepository gameRepo, IHttpClientFactory httpFactory, IMediator mediator) {
+        this.gameRepo = gameRepo;
+        this.unitOfWork = gameRepo.UnitOfWork;
         this.httpFactory = httpFactory;
         this.mediator = mediator;
     }
 
-    private readonly IUnitOfWork unit;
-    private readonly IGameRepository games;
+    private readonly IGameRepository gameRepo;
+    private readonly IUnitOfWork unitOfWork;
     private readonly IHttpClientFactory httpFactory;
     private readonly IMediator mediator;
 
-    public async Task<GameJoinRemoteResult> Handle(GameJoinRemote request, CancellationToken cancellationToken) {
-        var game = await games.GetOneAsync(request.GameId, withTracking: false);
+    public Task<GameJoinRemoteResult> Handle(GameJoinRemote request, CancellationToken cancellationToken)
+        => unitOfWork.BeginTransaction(cancellationToken)
+            .Bind(_ => gameRepo.GetOneGame(request.GameId, withTracking: false, cancellation: cancellationToken))
+            .Select(maybeGame => maybeGame
+                .Select(game => game switch {
+                    { Type: Persistence.GameType.LOCAL } => Failure<DbGame>("Cannot claim players in local game."),
+                    { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
+                    { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
+                    { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
+                    _ => Success(game)
+                })
+                .Unwrap(() => Failure<DbGame>("Game does not exist."))
+            )
+            .Bind(game => gameRepo.GetOnePlayer(game, request.PlayerId, cancellation: cancellationToken)
+                .Select(maybePlayer => maybePlayer
+                    .Select(player => player switch {
+                        { IsClaimed: true } => Failure<DbPlayer>($"Player already claimed by {(player.UserId == request.UserId ? "this" : "another" )} player."),
+                        _ => Success(player)
+                    })
+                    .Unwrap(() => Failure<DbPlayer>("Player does not exist."))
+                )
+                .Bind(player => DoesNotContainActivePlayer(game, request.UserId, cancellationToken)
+                    .Bind(_ => DownloadRemoteReport(game.Options.ServerAddress, player.Number, request.Password, cancellationToken))
+                    .Bind(report => UploadPlayerReport(player.Id, report, cancellationToken))
+                    .Bind(_ => {
+                        player.UserId = request.UserId;
+                        gameRepo.Update(player);
 
-        switch (game?.Status) {
-            case null: return new GameJoinRemoteResult(false, "Game does not exist.");
-            case GameStatus.NEW: return new GameJoinRemoteResult(false, "Game not yet started.");
-            case GameStatus.PAUSED: return new GameJoinRemoteResult(false, "Game paused.");
-            case GameStatus.LOCKED: return new GameJoinRemoteResult(false, "Game is processing turn.");
-            case GameStatus.COMPLEATED: return new GameJoinRemoteResult(false, "Game compleated.");
-        }
+                        return unitOfWork.CommitTransaction(cancellationToken);
+                    })
+                    .Select(_ => new GameJoinRemoteResult(true, Player: player))
+                )
+            )
+            .Run()
+            .OnFailure(_ => unitOfWork.RollbackTransaction(cancellationToken).Run())
+            .Unwrap(error => new GameJoinRemoteResult(false, error.Message));
 
-        var playersRepo = unit.Players(game);
-        var player = await playersRepo.GetOneAsync(request.PlayerId);
-        if (player == null) {
-            return new GameJoinRemoteResult(false, "Player does not exist.");
-        }
+    private AsyncIO<advisor.Unit> DoesNotContainActivePlayer(DbGame game, long userId, CancellationToken cancellation)
+        => async () => await gameRepo.QueryPlayers(game)
+            .AsNoTracking()
+            .OnlyActivePlayers()
+            .AnyAsync(x => x.UserId == userId, cancellation)
+                ? Failure<advisor.Unit>("Game already includes active player from this user.")
+                : Success(unit);
 
-        var remote = new NewOriginsClient(game.Options.ServerAddress, httpFactory);
-        string reportText;
-        try {
-            reportText = await remote.DownloadReportAsync(player.Number, request.Password, cancellationToken);
-        }
-        catch (WrongFactionOrPasswordException) {
-            return new GameJoinRemoteResult(false, "Wrong faction number or password.");
-        }
-        catch (Exception) {
-            return new GameJoinRemoteResult(false, "Cannot reach the remote server.");
-        }
-
-        await unit.BeginTransactionAsync(cancellationToken);
-
-        var turnsRepo = unit.Turns(game);
-        try {
-            player = await playersRepo.ClamFactionAsync(request.UserId, request.PlayerId, request.Password, cancellationToken);
-            var report = await turnsRepo.AddReportAsync(
-                request.PlayerId,
-                player.Number,
-                player.LastTurnNumber.Value,
-                Encoding.UTF8.GetBytes(reportText),
-                cancellationToken
-            );
-        }
-        catch (RepositoryException ex) {
-            await unit.RollbackTransactionAsync(cancellationToken);
-            return new GameJoinRemoteResult(false, ex.Message);
-        }
-
-        await unit.SaveChangesAsync(cancellationToken);
-
-        if (player.LastTurnNumber.HasValue) {
-            var turnNumber = player.LastTurnNumber.Value;
-            long[] playerIds = { player.Id };
-
-            MutationResult result;
-
-            result = await mediator.Send(new TurnParse(game, turnNumber, PlayerIds: playerIds));
-            if (!result) {
-                await unit.RollbackTransactionAsync(cancellationToken);
-                return new GameJoinRemoteResult(result, result.Error);
-            }
-
-            result = await mediator.Send(new TurnMerge(game, turnNumber, PlayerIds: playerIds));
-            if (!result) {
-                await unit.RollbackTransactionAsync(cancellationToken);
-                return new GameJoinRemoteResult(result, result.Error);
-            }
-
-            result = await mediator.Send(new TurnProcess(game, turnNumber, PlayerIds: playerIds));
-            if (!result) {
-                await unit.RollbackTransactionAsync(cancellationToken);
-                return new GameJoinRemoteResult(result, result.Error);
-            }
-        }
-
-        await unit.CommitTransactionAsync(cancellationToken);
-        return new GameJoinRemoteResult(true, Player: player);
+    private IO<advisor.Unit> UploadPlayerReport(long playerId, string report, CancellationToken cancellation)
+    {
+        throw new NotImplementedException();
     }
+
+    private AsyncIO<string> DownloadRemoteReport(string serverAddress, int number, string password, CancellationToken cancellation)
+        => async () => {
+            var remote = new NewOriginsClient(serverAddress, httpFactory);
+            try {
+                return Success(await remote.DownloadReportAsync(number, password, cancellation));
+            }
+            catch (WrongFactionOrPasswordException ex) {
+                return Failure<string>("Wrong faction number or password.", ex);
+            }
+        };
 }
