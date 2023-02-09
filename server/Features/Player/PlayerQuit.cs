@@ -26,7 +26,7 @@ public class PlayerQuitHandler : IRequestHandler<PlayerQuit, PlayerQuitResult> {
 
         player.IsQuit = true;
 
-        await unit.SaveChangesAsync(cancellationToken);
+        await unit.SaveChanges(cancellationToken);
 
         return new PlayerQuitResult(true, Player: player);
     }

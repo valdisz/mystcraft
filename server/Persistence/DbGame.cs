@@ -7,7 +7,7 @@ using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbGame {
+public class DbGame : IsAggregateRoot, WithCreationTime {
     [Key]
     public long Id { get; set; }
 
@@ -31,7 +31,7 @@ public class DbGame {
     public GameOptions Options { get; set; }
 
     [Required]
-    public string Ruleset { get; set; }
+    public byte[] Ruleset { get; set; }
 
 
     public int? LastTurnNumber { get; set; }
@@ -56,6 +56,34 @@ public class DbGame {
 
     [GraphQLIgnore]
     public DbGameEngine Engine { get; set; }
+
+    public static DbGame CreateLocal(string name, long engineId, byte[] ruleset, GameOptions options) {
+        var game = new DbGame {
+            Name = name,
+            Type = GameType.LOCAL,
+            Status = GameStatus.NEW,
+            EngineId = engineId,
+            Ruleset = ruleset,
+            Options = options,
+            NextTurnNumber = 1
+        };
+
+        return game;
+    }
+
+    public static DbGame CreateRemote(string name, string serverAddress, byte[] ruleset, GameOptions options) {
+        var game = new DbGame {
+            Name = name,
+            Type = GameType.REMOTE,
+            Status = GameStatus.NEW,
+            Ruleset = ruleset,
+            Options = options with {
+                ServerAddress = serverAddress
+            }
+        };
+
+        return game;
+    }
 }
 
 public class DbGameConfiguration : IEntityTypeConfiguration<DbGame> {
@@ -74,6 +102,9 @@ public class DbGameConfiguration : IEntityTypeConfiguration<DbGame> {
 
         builder.Property(x => x.Options)
             .HasConversionJson(db.Provider);
+
+        builder.Property(x => x.Ruleset)
+            .HasCompression();
 
         builder.HasMany(p => p.Players)
             .WithOne(p => p.Game)

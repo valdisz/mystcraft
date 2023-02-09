@@ -16,9 +16,9 @@ public abstract class Database : DbContext, IUnitOfWork {
 
     public DatabaseProvider Provider {
         get {
-            if (Database.IsSqlite()) { return DatabaseProvider.SQLite; }
-            if (Database.IsSqlServer()) { return DatabaseProvider.MsSQL;}
             if (Database.IsNpgsql()) { return DatabaseProvider.PgSQL; }
+            if (Database.IsSqlServer()) { return DatabaseProvider.MsSQL;}
+            if (Database.IsSqlite()) { return DatabaseProvider.SQLite; }
 
             throw new System.Exception();
         }
@@ -101,60 +101,63 @@ public abstract class Database : DbContext, IUnitOfWork {
     private bool willRollback = false;
     private IDbContextTransaction transaction;
 
-    public async Task BeginTransactionAsync(CancellationToken cancellation = default) {
-        if (txCounter == 0) {
+    AsyncIO<int> IUnitOfWork.SaveChanges(CancellationToken cancellation)
+        => async () => Success(await this.SaveChangesAsync(cancellation));
+
+    public AsyncIO<Unit> BeginTransaction(CancellationToken cancellation = default)
+        => async () => {
+            if (txCounter++ != 0) {
+                return Success(unit);
+            }
+
             transaction = await Database.BeginTransactionAsync(cancellation);
             willRollback = false;
-        }
 
-        txCounter++;
-    }
+            return Success(unit);
+        };
 
-    public async Task<bool> CommitTransactionAsync(CancellationToken cancellation = default) {
-        if (!willRollback) {
-            await SaveChangesAsync(cancellation);
-        }
+    public AsyncIO<Unit> CommitTransaction(CancellationToken cancellation = default)
+        => async () => {
+            if (!willRollback) {
+                await SaveChangesAsync(cancellation);
+            }
 
-        if (txCounter == 0) {
-            return true;
-        }
+            if (txCounter == 0) {
+                return Success(unit);
+            }
 
-        if (txCounter == 1) {
-            if (willRollback) {
-                await transaction.RollbackAsync(cancellation);
+            if (txCounter == 1) {
+                if (willRollback) {
+                    await transaction.RollbackAsync(cancellation);
+                }
+                else {
+                    await transaction.CommitAsync(cancellation);
+                }
+
+                await transaction.DisposeAsync();
+                transaction = null;
+                txCounter = 0;
             }
             else {
-                await transaction.CommitAsync(cancellation);
+                txCounter--;
             }
 
-            await transaction.DisposeAsync();
-            transaction = null;
-            txCounter = 0;
-        }
-        else {
-            txCounter--;
-        }
+            return !willRollback ? Success(unit) : Failure<Unit>("Failed to rollback transaction.");
+        };
 
-        return !willRollback;
-    }
+    public AsyncIO<Unit> RollbackTransaction(CancellationToken cancellation = default)
+        => async () => {
+            if (txCounter != 0) {
+                willRollback = true;
 
-    public async Task RollbackTransactionAsync(CancellationToken cancellation = default) {
-        if (txCounter == 0) {
-            return;
-        }
+                if (--txCounter == 0) {
+                    await transaction.RollbackAsync(cancellation);
+                    await transaction.DisposeAsync();
+                }
+            }
 
-        if (txCounter == 1) {
-            await transaction.RollbackAsync(cancellation);
-            await transaction.DisposeAsync();
-            transaction = null;
-            txCounter = 0;
-        }
-        else {
-            txCounter--;
-        }
-
-        willRollback = true;
-    }
+            return Success(unit);
+        };
 
     public override ValueTask DisposeAsync() {
         return base.DisposeAsync();

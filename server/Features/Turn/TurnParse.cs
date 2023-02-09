@@ -72,7 +72,7 @@ public class TurnParseHandler : IRequestHandler<TurnParse, TurnParseResult> {
             }
         }
 
-        await unit.SaveChangesAsync(cancellationToken);
+        await unit.SaveChanges(cancellationToken);
 
         var turn = await turnsRepo.GetOneNoTrackingAsync(request.TurnNumber);
 

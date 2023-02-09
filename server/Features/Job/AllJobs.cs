@@ -21,7 +21,7 @@ public class AllJobs {
     private readonly IMediator mediator;
     private readonly IServiceProvider services;
     private readonly IBackgroundJobClient jobs;
-    private readonly ILogger<AllJobs> logger;
+    private readonly ILogger logger;
 
     public Task ReconcileAsync() => mediator.Send(new Reconcile());
 
@@ -51,7 +51,7 @@ public class AllJobs {
                 }
             }
 
-            await unit.BeginTransactionAsync();
+            await unit.BeginTransaction();
 
             logger.LogInformation("Parsing reports");
             await EnusreSuccessAsync(mediator.Send(new TurnParse(game, turnNumber.Value, Force: force?.Parse ?? false)));
@@ -65,14 +65,14 @@ public class AllJobs {
             logger.LogInformation("Unlocking game");
             await gamesRep.UnlockAsync(gameId);
 
-            await unit.CommitTransactionAsync();
+            await unit.CommitTransaction();
 
             logger.LogInformation($"Turn {turnNumber} is ready");
         }
         catch (Exception ex) {
             logger.LogError(ex, ex.Message);
 
-            await unit.RollbackTransactionAsync();
+            await unit.RollbackTransaction();
 
             throw;
         }

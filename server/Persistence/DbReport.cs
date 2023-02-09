@@ -50,5 +50,11 @@ public class DbReportConfiguration : IEntityTypeConfiguration<DbReport> {
 
     public void Configure(EntityTypeBuilder<DbReport> builder) {
         builder.HasKey(x => new { x.PlayerId, x.TurnNumber });
+
+        builder.Property(x => x.Source)
+            .HasCompression();
+
+        builder.Property(x => x.Json)
+            .HasCompression();
     }
 }

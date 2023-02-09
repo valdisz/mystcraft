@@ -10,7 +10,7 @@ using advisor.Schema;
 
 public record GameEngineCreate(string Name, Stream Contents): IRequest<GameEngineCreateResult>;
 
-public record GameEngineCreateResult(DbGameEngine Engine, bool IsSuccess, string Error) : IMutationResult;
+public record GameEngineCreateResult(bool IsSuccess, string Error = null, DbGameEngine Engine = null) : IMutationResult;
 
 public class GameEngineCreateHandler : IRequestHandler<GameEngineCreate, GameEngineCreateResult> {
     public GameEngineCreateHandler(Database db) {
@@ -33,6 +33,6 @@ public class GameEngineCreateHandler : IRequestHandler<GameEngineCreate, GameEng
 
         await db.SaveChangesAsync();
 
-        return new GameEngineCreateResult(ge, true, null);
+        return new GameEngineCreateResult(true, Engine: ge);
     }
 }

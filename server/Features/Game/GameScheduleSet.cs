@@ -11,28 +11,31 @@ public record GameScheduleSet(long GameId, string Schedule): IRequest<GameSchedu
 public record GameScheduleSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameScheduleSetResult> {
-    public GameScheduleSetHandler(IGameRepository games, IUnitOfWork unit, IMediator mediator) {
-        this.games = games;
-        this.unit = unit;
+    public GameScheduleSetHandler(IGameRepository gameRepo, IMediator mediator) {
+        this.gameRepo = gameRepo;
+        this.unitOfWork = gameRepo.UnitOfWork;
         this.mediator = mediator;
     }
 
-    private readonly IGameRepository games;
-    private readonly IUnitOfWork unit;
+    private readonly IGameRepository gameRepo;
+    private readonly IUnitOfWork unitOfWork;
     private readonly IMediator mediator;
 
-    public async Task<GameScheduleSetResult> Handle(GameScheduleSet request, CancellationToken cancellationToken) {
-        var game = await games.GetOneAsync(request.GameId);
-        if (game == null) {
-            return new GameScheduleSetResult(false, "Game does not exist.");
-        }
-
-        game.Options.Schedule = request.Schedule;
-
-        await unit.SaveChangesAsync(cancellationToken);
-
-        await mediator.Send(new Reconcile(game.Id), cancellationToken);
-
-        return new GameScheduleSetResult(true, Game: game);
-    }
+    public Task<GameScheduleSetResult> Handle(GameScheduleSet request, CancellationToken cancellationToken)
+        => unitOfWork.BeginTransaction(cancellationToken)
+            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+                { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
+                _ => Success(game)
+            }, cancellationToken))
+            .Bind(game => gameRepo.UpdateGame(game, x => x.Options.Schedule = request.Schedule)
+                .Bind(() => unitOfWork.SaveChanges(cancellationToken))
+                .Bind(() => GameFunctions.Reconcile(request.GameId, mediator, cancellationToken))
+                .Bind(() => unitOfWork.CommitTransaction(cancellationToken))
+                .Return(game)
+            )
+            .PipeTo(unitOfWork.RunWithRollback<DbGame, GameScheduleSetResult>(
+                game => new GameScheduleSetResult(true, Game: game),
+                error => new GameScheduleSetResult(false, error.Message),
+                cancellationToken
+            ));
 }

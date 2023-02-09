@@ -30,9 +30,9 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
     private readonly IBackgroundJobClient jobs;
 
     public async Task<GameNextTurnResult> Handle(GameNextTurn request, CancellationToken cancellationToken) {
-        await unit.BeginTransactionAsync(cancellationToken);
+        await unit.BeginTransaction(cancellationToken);
 
-        var game = await games.GetOneAsync(request.GameId, cancellation: cancellationToken);
+        var game = await games.GetOneGame(request.GameId, cancellation: cancellationToken);
         if (game == null) {
             return new GameNextTurnResult(false, "Game not found.");
         }
@@ -53,7 +53,7 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
         var gameId = request.GameId;
         var turnNumber = request.TurnNumber ?? game.NextTurnNumber;
 
-        await unit.CommitTransactionAsync(cancellationToken);
+        await unit.CommitTransaction(cancellationToken);
 
         try {
             var jobId = jobs.Enqueue<AllJobs>(x => x.RunTurnAsync(gameId, turnNumber, request.Force));

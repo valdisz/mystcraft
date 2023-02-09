@@ -15,9 +15,6 @@ public static class ResultExtensions {
         _ => throw new InvalidOperationException()
     };
 
-    public static async Task<T> Unwrap<T>(this Task<Result<T>> self)
-        => (await self).Unwrap();
-
     public static T Unwrap<T>(this Result<T> self, T defaultValue)
         => self.IsSuccess ? (self as Result<T>.Success).Value : defaultValue;
 
@@ -28,18 +25,24 @@ public static class ResultExtensions {
             _ => throw new InvalidOperationException()
         };
 
-    public static async Task<T> Unwrap<T>(this Task<Result<T>> self, Func<Error, Task<T>> defaultValue)
-        => await self switch {
-            Result<T>.Success(var value) => value,
-            Result<T>.Failure(var error) => await defaultValue(error),
-            _ => throw new InvalidOperationException()
-        };
+
+    public static async Task<T> Unwrap<T>(this Task<Result<T>> self) => await self switch {
+        Result<T>.Success some => some.Value,
+        _ => throw new InvalidOperationException()
+    };
 
     public static async Task<T> Unwrap<T>(this Task<Result<T>> self, T defaultValue)
-        => (await self).Unwrap(defaultValue);
+        => await self switch {
+            Result<T>.Success(var value) => value,
+            _ => defaultValue
+        };
 
     public static async Task<T> Unwrap<T>(this Task<Result<T>> self, Func<Error, T> defaultValue)
-        => (await self).Unwrap(defaultValue);
+        => await self switch {
+            Result<T>.Success(var value) => value,
+            Result<T>.Failure(var error) => defaultValue(error),
+            _ => throw new InvalidOperationException()
+        };
 
 
     public static Result<T> Flatten<T>(this Result<Result<T>> self)
@@ -49,14 +52,8 @@ public static class ResultExtensions {
             _ => throw new InvalidOperationException()
         };
 
-    public static async Task<Result<T>> Flatten<T>(this Task<Result<Result<T>>> self)
-        => (await self).Flatten<T>();
-
     /// Alias of `Flatten`
     public static Result<T> Join<T>(this Result<Result<T>> self)
-        => self.Flatten();
-
-    public static Task<Result<T>> Join<T>(this Task<Result<Result<T>>> self)
         => self.Flatten();
 
 
@@ -67,35 +64,9 @@ public static class ResultExtensions {
             _ => throw new InvalidOperationException()
         };
 
-    public static async Task<Result<R>> Select<T, R>(this Task<Result<T>> self, Func<T, Task<R>> selector)
-        => await self switch {
-            Result<T>.Success(var value) => Success(await selector(value)),
-            Result<T>.Failure(var error) => Failure<R>(error),
-            _ => throw new InvalidOperationException()
-        };
-
-    public static async Task<Result<R>> Select<T, R>(this Task<Result<T>> self, Func<T, R> selector)
-        => (await self).Select(selector);
-
-    public static async Task<Result<R>> Select<T, R>(this Result<T> self, Func<T, Task<R>> selector)
-        => self switch {
-            Result<T>.Success(var value) => Success(await selector(value)),
-            Result<T>.Failure(var error) => Failure<R>(error),
-            _ => throw new InvalidOperationException()
-        };
-
-
     public static Result<R> Bind<T, R>(this Result<T> self, Func<T, Result<R>> selector)
         => self.Select(selector).Flatten();
 
-    public static Task<Result<R>> Bind<T, R>(this Task<Result<T>> self, Func<T, Task<Result<R>>> selector)
-        => self.Select(selector).Flatten();
-
-    public static Task<Result<R>> Bind<T, R>(this Task<Result<T>> self, Func<T, Result<R>> selector)
-        => self.Select(selector).Flatten();
-
-    public static async Task<Result<R>> Bind<T, R>(this Result<T> self, Func<T, Task<Result<R>>> selector)
-        => (await self.Select(selector)).Flatten();
 
     /// Alias of `Bind`
     public static Result<R> SelectMany<T, R>(this Result<T> self, Func<T, Result<R>> selector)
@@ -107,33 +78,6 @@ public static class ResultExtensions {
 
     public static Result<T> OnFailure<T, R>(this Result<T> self, Func<Error, Result<R>> action)
         => self switch {
-            Result<T>.Success success => success,
-            Result<T>.Failure failure => action(failure.Error) is Result<R>.Failure(var error)
-                    ? Failure<T>(error)
-                    : failure,
-            _ =>throw new InvalidOperationException()
-        };
-
-    public static async Task<Result<T>> OnFailure<T, R>(this Result<T> self, Func<Error, Task<Result<R>>> asyncAction)
-        => self switch {
-            Result<T>.Success success => success,
-            Result<T>.Failure failure => await asyncAction(failure.Error) is Result<R>.Failure(var error)
-                    ? Failure<T>(error)
-                    : failure,
-            _ =>throw new InvalidOperationException()
-        };
-
-    public static async Task<Result<T>> OnFailure<T, R>(this Task<Result<T>> self, Func<Error, Task<Result<R>>> asyncAction)
-        => await self switch {
-            Result<T>.Success success => success,
-            Result<T>.Failure failure => await asyncAction(failure.Error) is Result<R>.Failure(var error)
-                    ? Failure<T>(error)
-                    : failure,
-            _ =>throw new InvalidOperationException()
-        };
-
-    public static async Task<Result<T>> OnFailure<T, R>(this Task<Result<T>> self, Func<Error, Result<R>> action)
-        => await self switch {
             Result<T>.Success success => success,
             Result<T>.Failure failure => action(failure.Error) is Result<R>.Failure(var error)
                     ? Failure<T>(error)

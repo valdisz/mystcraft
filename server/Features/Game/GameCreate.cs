@@ -51,67 +51,51 @@ public class GameCreateHandler :
     private readonly IMediator mediator;
     private readonly ILogger logger;
 
-    public async Task<GameCreateLocalResult> Handle(GameCreateLocal request, CancellationToken cancellationToken) {
-        var game = DbGame.CreateLocal(
-            name: request.Name,
-            engineId: request.EngineId,
-            ruleset: await request.Ruleset.ReadAllBytesAsync(cancellationToken),
-            options: new GameOptions {
-                Map = request.Map,
-                Schedule = request.Schedule,
-                TimeZone = request.TimeZone,
-                StartAt = request.StartAt,
-                FinishAt = request.FinishAt
-            }
-        );
+    public async Task<GameCreateLocalResult> Handle(GameCreateLocal request, CancellationToken cancellationToken)
+        => await CreateGameAsync(
+            DbGame.CreateLocal(
+                name: request.Name,
+                engineId: request.EngineId,
+                ruleset: await request.Ruleset.ReadAllBytesAsync(cancellationToken),
+                options: new GameOptions {
+                    Map = request.Map,
+                    Schedule = request.Schedule,
+                    TimeZone = request.TimeZone,
+                    StartAt = request.StartAt,
+                    FinishAt = request.FinishAt
+                }
+            ),
+            x => new GameCreateLocalResult(true, Game: x),
+            error => new GameCreateLocalResult(false, Error: error.Message),
+        cancellationToken);
 
-        return (await CreateGameAsync(game, cancellationToken)) switch {
-            var (result, _) when result is not null => new GameCreateLocalResult(true, Game: result),
-            var (_, error) => new GameCreateLocalResult(false, Error: error)
-        };
-    }
+    public async Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken)
+        => await CreateGameAsync(
+            DbGame.CreateRemote(
+                name: request.Name,
+                serverAddress: request.ServerAddress,
+                ruleset: await request.Ruleset.ReadAllBytesAsync(cancellationToken),
+                options: new GameOptions {
+                    Map = request.Map,
+                    Schedule = request.Schedule,
+                    TimeZone = request.TimeZone,
+                    StartAt = request.StartAt,
+                    FinishAt = request.FinishAt
+                }
+            ),
+            x => new GameCreateRemoteResult(true, Game: x),
+            error => new GameCreateRemoteResult(false, Error: error.Message),
+        cancellationToken);
 
-    public async Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) {
-        var game = DbGame.CreateRemote(
-            name: request.Name,
-            serverAddress: request.ServerAddress,
-            ruleset: await request.Ruleset.ReadAllBytesAsync(cancellationToken),
-            options: new GameOptions {
-                Map = request.Map,
-                Schedule = request.Schedule,
-                TimeZone = request.TimeZone,
-                StartAt = request.StartAt,
-                FinishAt = request.FinishAt
-            }
-        );
-
-        return (await CreateGameAsync(game, cancellationToken)) switch {
-            var (result, _) when result is not null => new GameCreateRemoteResult(true, Game: result),
-            var (_, error) => new GameCreateRemoteResult(false, Error: error)
-        };
-    }
-
-    private async Task<(DbGame result, string error)> CreateGameAsync(DbGame game, CancellationToken cancellation) {
-        var result = gameRepo.Add(game);
-
-        await unitOfWork.BeginTransaction(cancellation);
-
-        try {
-            await unitOfWork.SaveChanges(cancellation);
-        }
-        catch (Exception ex) {
-            logger.LogWarning(ex, "Cannot create game");
-            await unitOfWork.RollbackTransaction(cancellation);
-
-            return (null, "Cannot create game");
-        }
-
-        await mediator.Send(new Reconcile(result.Id), cancellation);
-
-        if ((await unitOfWork.CommitTransaction(cancellation).Run()).IsFailure) {
-            return (null, "Failed to commit transaction");
-        }
-
-        return (result, null);
-    }
+    private Task<T> CreateGameAsync<T>(DbGame game, Func<DbGame, T> onSuccess, Func<Error, T> onFailure, CancellationToken cancellation)
+        => unitOfWork.BeginTransaction(cancellation)
+            .Select(_ => gameRepo.Add(game))
+            .Bind(game => unitOfWork.SaveChanges(cancellation)
+                .Bind(_ => Effect(() => mediator.Send(new Reconcile(game.Id))))
+                .Bind(_ => unitOfWork.CommitTransaction())
+                .Select(_ => onSuccess(game))
+            )
+            .OnFailure(_ => unitOfWork.RollbackTransaction())
+            .Run()
+            .Unwrap(onFailure);
 }

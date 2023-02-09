@@ -8,7 +8,7 @@ using advisor.Schema;
 
 public record GameEngineDelete(long GameEngineId): IRequest<GameEngineDeleteResult>;
 
-public record GameEngineDeleteResult(bool IsSuccess, string Error) : IMutationResult;
+public record GameEngineDeleteResult(bool IsSuccess, string Error = null) : IMutationResult;
 
 public class GameEngineDeleteHandler : IRequestHandler<GameEngineDelete, GameEngineDeleteResult> {
     public GameEngineDeleteHandler(Database db) {
@@ -27,6 +27,6 @@ public class GameEngineDeleteHandler : IRequestHandler<GameEngineDelete, GameEng
         db.Remove(engine);
         await db.SaveChangesAsync();
 
-        return new GameEngineDeleteResult(true, null);
+        return new GameEngineDeleteResult(true);
     }
 }

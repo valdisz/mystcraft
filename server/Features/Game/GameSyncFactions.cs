@@ -28,7 +28,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
     private record PlayerProjection(long Id, int Number);
 
     public async Task<GameSyncFactionsResult> Handle(GameSyncFactions request, CancellationToken cancellationToken) {
-        var game = await games.GetOneAsync(request.GameId, withTracking: false);
+        var game = await games.GetOneGame(request.GameId, withTracking: false);
         if (game == null) {
             return new GameSyncFactionsResult(false, "Games does not exist.");
         }
@@ -51,7 +51,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
             return null;
         }
 
-        await unit.BeginTransactionAsync(cancellationToken);
+        await unit.BeginTransaction(cancellationToken);
 
         var now = DateTimeOffset.UtcNow;
 
@@ -85,8 +85,8 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
             await playersRepo.QuitAsync(faction.Id, cancellationToken);
         }
 
-        await unit.SaveChangesAsync();
-        await unit.CommitTransactionAsync(cancellationToken);
+        await unit.SaveChanges();
+        await unit.CommitTransaction(cancellationToken);
 
         return new GameSyncFactionsResult(true, Game: game);
     }

@@ -1,12 +1,13 @@
 namespace advisor.Persistence;
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbPlayer : InGameContext {
+public class DbPlayer : InGameContext, WithCreationTime, WithUpdateTime {
     [Key]
     public long Id { get; set; }
 
@@ -49,6 +50,8 @@ public class DbPlayer : InGameContext {
 
     [GraphQLIgnore]
     public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 }
 
 public class DbPlayerConfiguration : IEntityTypeConfiguration<DbPlayer> {

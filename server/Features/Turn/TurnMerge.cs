@@ -34,7 +34,7 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
     public async Task<TurnMergeResult> Handle(TurnMerge request, CancellationToken cancellationToken) {
         var game = request.Game;
 
-        await unit.BeginTransactionAsync(cancellationToken);
+        await unit.BeginTransaction(cancellationToken);
 
         var turnNumber = request.TurnNumber;
         var nextTurnNumber = turnNumber + 1;
@@ -91,16 +91,16 @@ public class TurnMergeHandler : IRequestHandler<TurnMerge, TurnMergeResult> {
                 thisTurn.Unclaimed = reportModel.UnclaimedSilver;
                 report.IsMerged = true;
 
-                await unit.SaveChangesAsync();
+                await unit.SaveChanges();
             }
             catch (Exception ex) {
-                await unit.RollbackTransactionAsync(cancellationToken);
+                await unit.RollbackTransaction(cancellationToken);
 
                 return new TurnMergeResult(false, $"Cannot merge reports. {ex}");
             }
         }
 
-        await unit.CommitTransactionAsync(cancellationToken);
+        await unit.CommitTransaction(cancellationToken);
 
         return new TurnMergeResult(true, Turn: turn);
     }

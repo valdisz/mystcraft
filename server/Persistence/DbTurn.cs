@@ -14,7 +14,7 @@ public record struct TurnId(long GameId, int TurnNumber) {
     public static Option<TurnId> CreateFrom(string s) {
         var m = PATTERN.Match(s);
         if (!m.Success) {
-            return Option.None<TurnId>();
+            return None<TurnId>();
         }
 
         return new TurnId(
@@ -65,6 +65,12 @@ public class DbTurnConfiguration : IEntityTypeConfiguration<DbTurn> {
 
         builder.Property(x => x.State)
             .HasConversion<string>();
+
+        builder.Property(x => x.GameData)
+            .HasCompression();
+
+        builder.Property(x => x.PlayerData)
+            .HasCompression();
 
         builder.HasMany(x => x.Articles)
             .WithOne(x => x.Turn)

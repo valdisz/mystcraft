@@ -51,7 +51,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
 
             case GameStatus.RUNNING:
                 await unit.Games.LockAsync(request.GameId, cancellationToken);
-                await unit.SaveChangesAsync(cancellationToken);
+                await unit.SaveChanges(cancellationToken);
                 break;
 
             case GameStatus.LOCKED:
@@ -67,7 +67,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
         var playersRepo = unit.Players(game);
         var turnsRepo = unit.Turns(game);
 
-        await unit.BeginTransactionAsync(cancellationToken);
+        await unit.BeginTransaction(cancellationToken);
 
         var factions = await playersRepo.ActivePlayers
             .AsNoTracking()
@@ -108,7 +108,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
                     nextTurn = await RunLocalTurnAsync(turnsRepo, playersRepo, game, turn, allOrders, newFactions, engine.Contents, turn.GameData, playersIn, cancellationToken);
                 }
                 catch (GameTurnRunException ex) {
-                    await unit.RollbackTransactionAsync(cancellationToken);
+                    await unit.RollbackTransaction(cancellationToken);
                     return new TurnRunResult(false, ex.Message);
                 }
 
@@ -141,7 +141,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
                 break;
 
             default:
-                await unit.RollbackTransactionAsync(cancellationToken);
+                await unit.RollbackTransaction(cancellationToken);
                 return new TurnRunResult(false, "Game is of unknown type, just LOCAL or REMOTE games are supported.");
         }
 
@@ -150,7 +150,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
         game.LastTurnNumber = turn.Number;
         game.NextTurnNumber = nextTurn.Number;
 
-        await unit.SaveChangesAsync(cancellationToken);
+        await unit.SaveChanges(cancellationToken);
 
         await foreach (var player in playersRepo.ActivePlayers.AsAsyncEnumerable().WithCancellation(cancellationToken)) {
             if (player.LastTurnNumber == game.LastTurnNumber) {
@@ -168,20 +168,20 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
             player.NextTurnNumber = game.NextTurnNumber;
         }
 
-        await unit.SaveChangesAsync(cancellationToken);
+        await unit.SaveChanges(cancellationToken);
 
         if (game.Type == Persistence.GameType.REMOTE) {
             var result = await mediator.Send(new GameSyncFactions(request.GameId), cancellationToken);
             if (!result) {
-                await unit.RollbackTransactionAsync(cancellationToken);
+                await unit.RollbackTransaction(cancellationToken);
                 return new TurnRunResult(result, result.Error);
             }
         }
 
         game.Status = GameStatus.RUNNING;
 
-        await unit.SaveChangesAsync(cancellationToken);
-        await unit.CommitTransactionAsync(cancellationToken);
+        await unit.SaveChanges(cancellationToken);
+        await unit.CommitTransaction(cancellationToken);
 
         return new TurnRunResult(true, Turn: turn);
     }

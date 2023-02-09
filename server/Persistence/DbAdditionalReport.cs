@@ -51,5 +51,10 @@ public class DbAdditionalReportConfiguration : IEntityTypeConfiguration<DbAdditi
     private readonly Database db;
 
     public void Configure(EntityTypeBuilder<DbAdditionalReport> builder) {
+        builder.Property(x => x.Source)
+            .HasCompression();
+
+        builder.Property(x => x.Json)
+            .HasCompression();
     }
 }

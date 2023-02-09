@@ -2,7 +2,6 @@ namespace advisor;
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 public static partial class Prelude {
     public static Option<T> None<T>() => Option<T>.None.Instance;
@@ -16,71 +15,27 @@ public static class OptionExtensions {
         _ => throw new InvalidOperationException()
     };
 
-    public static async Task<T> Unwrap<T>(this Task<Option<T>> self)
-        => (await self).Unwrap();
-
     public static T Unwrap<T>(this Option<T> self, T defaultValue)
         => self.HasValue ? (self as Option<T>.Some).Value : defaultValue;
 
     public static T Unwrap<T>(this Option<T> self, Func<T> defaultValue)
         => self.HasValue ? (self as Option<T>.Some).Value : defaultValue();
 
-    public static async Task<T> Unwrap<T>(this Task<Option<T>> self, Func<Task<T>> defaultValue) {
-        var option = await self;
-
-        return option.HasValue ? (self as Option<T>.Some).Value : await defaultValue();
-    }
-
-    public static async Task<T> Unwrap<T>(this Task<Option<T>> self, T defaultValue)
-        => (await self).Unwrap(defaultValue);
-
-    public static async Task<T> Unwrap<T>(this Task<Option<T>> self, Func<T> defaultValue)
-        => (await self).Unwrap(defaultValue);
-
     public static Option<T> Flatten<T>(this Option<Option<T>> self)
-        => self.Unwrap(None<T>());
-
-    public static Task<Option<T>> Flatten<T>(this Task<Option<Option<T>>> self)
         => self.Unwrap(None<T>());
 
     /// Alias of `Flatten`
     public static Option<T> Join<T>(this Option<Option<T>> self)
         => self.Flatten();
 
-    public static Task<Option<T>> Join<T>(this Task<Option<Option<T>>> self)
-        => self.Flatten();
-
 
     public static Option<R> Select<T, R>(this Option<T> self, Func<T, R> selector)
         => self.HasValue ? selector(self.Unwrap()) : None<R>();
-
-    public static async Task<Option<TResult>> Select<T, TResult>(this Task<Option<T>> self, Func<T, Task<TResult>> selector) {
-        var option = await self;
-        return option.HasValue ? await selector(option.Unwrap()) : None<TResult>();
-    }
-
-    public static async Task<Option<TResult>> Select<T, TResult>(this Task<Option<T>> self, Func<T, TResult> selector)
-        => (await self).Select(selector);
-
-    public static async Task<Option<R>> Select<T, R>(this Option<T> self, Func<T, Task<R>> selector)
-        => self switch {
-            Option<T>.Some(var value) => Some(await selector(value)),
-            Option<T>.None => None<R>(),
-            _ => throw new InvalidOperationException()
-        };
 
 
     public static Option<R> Bind<T, R>(this Option<T> self, Func<T, Option<R>> selector)
         => self.Select(selector).Flatten();
 
-    public static Task<Option<R>> Bind<T, R>(this Task<Option<T>> self, Func<T, Task<Option<R>>> selector)
-        => self.Select(selector).Flatten();
-
-    public static Task<Option<R>> Bind<T, R>(this Task<Option<T>> self, Func<T, Option<R>> selector)
-        => self.Select(selector).Flatten();
-
-    public static async Task<Option<R>> Bind<T, R>(this Option<T> self, Func<T, Task<Option<R>>> selector)
-        => (await self.Select(selector)).Flatten();
 
     /// Alias of `Bind`
     public static Option<R> SelectMany<T, R>(this Option<T> self, Func<T, Option<R>> selector)
@@ -90,9 +45,6 @@ public static class OptionExtensions {
         => self.Bind(x => k(x).Select(y => selector(x, y)));
 
     public static Option<T> AsOption<T>(this T value) => value is not null ? value : None<T>();
-
-    public static async Task<Option<T>> AsOptionAsync<T>(this Task<T> value)
-        => value.IsCompleted ? value.Result : await value;
 }
 
 public abstract class Option<T> : IEquatable<Option<T>>, IEquatable<T> {

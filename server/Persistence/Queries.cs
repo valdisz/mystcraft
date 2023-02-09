@@ -1,5 +1,6 @@
 namespace advisor.Persistence;
 
+using System.Collections.Generic;
 using System.Linq;
 
 public static class Queries {
@@ -32,6 +33,9 @@ public static class Queries {
 
     public static IQueryable<DbPlayer> OnlyActivePlayers(this IQueryable<DbPlayer> query)
         => query.Where(x => !x.IsQuit);
+
+    public static IEnumerable<DbPlayer> OnlyActivePlayers(this IEnumerable<DbPlayer> source)
+        => source.Where(x => !x.IsQuit);
 
     public static IQueryable<T> InGame<T>(this IQueryable<T> query, long gameId) where T: InGameContext
         => query.Where(x => x.GameId == gameId);

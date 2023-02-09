@@ -1,11 +1,12 @@
 namespace advisor.Persistence;
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbRegistration : InGameContext {
+public class DbRegistration : InGameContext, WithCreationTime {
     [Key]
     public long Id { get; set; }
 
@@ -26,6 +27,18 @@ public class DbRegistration : InGameContext {
 
     [GraphQLIgnore]
     public DbGame Game { get;set; }
+
+    public DateTimeOffset CreatedAt { get; set; }
+
+    public static DbRegistration Create(long userId, string name, string password) {
+        var reg = new DbRegistration {
+            Name = name,
+            Password = password,
+            UserId = userId
+        };
+
+        return reg;
+    }
 }
 
 public class DbRegistrationConfiguration : IEntityTypeConfiguration<DbRegistration> {

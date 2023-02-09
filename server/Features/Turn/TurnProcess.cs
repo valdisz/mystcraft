@@ -35,7 +35,7 @@ public class TurnProcessHandler : IRequestHandler<TurnProcess, TurnProcessResult
             return new TurnProcessResult(false, "Turn not found.");
         }
 
-        await unit.BeginTransactionAsync(cancellationToken);
+        await unit.BeginTransaction(cancellationToken);
 
         var q = db.PlayerTurns
             .InGame(turn.GameId)
@@ -54,7 +54,7 @@ public class TurnProcessHandler : IRequestHandler<TurnProcess, TurnProcessResult
             pt.IsProcessed = true;
         }
 
-        await unit.CommitTransactionAsync(cancellationToken);
+        await unit.CommitTransaction(cancellationToken);
 
         return new TurnProcessResult(true, Turn: turn);
     }

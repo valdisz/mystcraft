@@ -60,8 +60,8 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
                     .Select(_ => new GameJoinRemoteResult(true, Player: player))
                 )
             )
+            .OnFailure(_ => unitOfWork.RollbackTransaction(cancellationToken))
             .Run()
-            .OnFailure(_ => unitOfWork.RollbackTransaction(cancellationToken).Run())
             .Unwrap(error => new GameJoinRemoteResult(false, error.Message));
 
     private AsyncIO<advisor.Unit> DoesNotContainActivePlayer(DbGame game, long userId, CancellationToken cancellation)
@@ -72,7 +72,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
                 ? Failure<advisor.Unit>("Game already includes active player from this user.")
                 : Success(unit);
 
-    private IO<advisor.Unit> UploadPlayerReport(long playerId, string report, CancellationToken cancellation)
+    private AsyncIO<advisor.Unit> UploadPlayerReport(long playerId, string report, CancellationToken cancellation)
     {
         throw new NotImplementedException();
     }

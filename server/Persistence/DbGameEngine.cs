@@ -21,6 +21,9 @@ public class DbGameEngine : WithCreationTime {
     [GraphQLIgnore]
     public byte[] Contents { get; set; }
 
+    [Required]
+    public byte[] Ruleset { get; set; }
+
     [GraphQLIgnore]
     public List<DbGame> Games { get; set; } = new ();
 }

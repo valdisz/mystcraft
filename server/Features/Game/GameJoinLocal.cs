@@ -41,8 +41,9 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
             .Bind(reg => unitOfWork.CommitTransaction(cancellationToken)
                 .Select(_ => new GameJoinLocalResult(true, Registration: reg))
             )
+            .OnFailure(error => unitOfWork.RollbackTransaction(cancellationToken))
+            .Select(x => x)
             .Run()
-            .OnFailure(_ => unitOfWork.RollbackTransaction(cancellationToken).Run())
             .Unwrap(error => new GameJoinLocalResult(false, error.Message));
 
     private AsyncIO<advisor.Unit> DoesNotHaveRegistration(DbGame game, long userId, CancellationToken cancellation)
