@@ -90,12 +90,10 @@ public class GameCreateHandler :
     private Task<T> CreateGameAsync<T>(DbGame game, Func<DbGame, T> onSuccess, Func<Error, T> onFailure, CancellationToken cancellation)
         => unitOfWork.BeginTransaction(cancellation)
             .Select(_ => gameRepo.Add(game))
-            .Bind(game => unitOfWork.SaveChanges(cancellation)
-                .Bind(_ => Effect(() => mediator.Send(new Reconcile(game.Id))))
-                .Bind(_ => unitOfWork.CommitTransaction())
-                .Select(_ => onSuccess(game))
+            .Bind(g => unitOfWork.SaveChanges(cancellation)
+                .Bind(() => GameFunctions.Reconcile(g.Id, mediator, cancellation))
+                .Bind(() => unitOfWork.CommitTransaction(cancellation))
+                .Return(g)
             )
-            .OnFailure(_ => unitOfWork.RollbackTransaction())
-            .Run()
-            .Unwrap(onFailure);
+            .PipeTo(unitOfWork.RunWithRollback<DbGame, T>(onSuccess, onFailure, cancellation));
 }

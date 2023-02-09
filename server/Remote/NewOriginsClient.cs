@@ -1,6 +1,5 @@
 namespace advisor.Remote;
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -9,8 +8,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp;
 
-public class NewOriginsClient {
-    public NewOriginsClient(string url, IHttpClientFactory httpClientFactory, IConfiguration confg = null) {
+
+public record RemoteFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted) {
+    public bool IsNew => Number == null;
+}
+
+public record RemoteArticle(string Name, string Contents);
+
+public interface IRemoteGame {
+    Task<int> GetCurrentTurnNumberAsync(CancellationToken cancellation = default);
+    Task<string> DownloadReportAsync(int factionNumber, string password, CancellationToken cancellation = default);
+    IAsyncEnumerable<RemoteFaction> ListFactionsAsync(CancellationToken cancellation = default);
+    IAsyncEnumerable<RemoteArticle> ListArticlesAsync(CancellationToken cancellation = default);
+}
+
+public class NewOrigins : IRemoteGame {
+    public NewOrigins(string url, IHttpClientFactory httpClientFactory, IConfiguration confg = null) {
         this.url = url;
         this.httpClientFactory = httpClientFactory;
         this.context = new BrowsingContext(confg ?? Configuration.Default.WithDefaultLoader());
@@ -65,7 +78,7 @@ public class NewOriginsClient {
         return contents;
     }
 
-    public async IAsyncEnumerable<NewOriginsFaction> ListFactionsAsync([EnumeratorCancellation] CancellationToken cancellation) {
+    public async IAsyncEnumerable<RemoteFaction> ListFactionsAsync([EnumeratorCancellation] CancellationToken cancellation) {
         var doc = await context.OpenAsync($"{this.url}/game", cancellation);
 
         var rows = doc.QuerySelectorAll("table tbody tr");
@@ -92,7 +105,7 @@ public class NewOriginsClient {
                 name = name.Substring(0, name.Length - numberStrLen).Trim();
             }
 
-            var faction = new NewOriginsFaction(
+            var faction = new RemoteFaction(
                 Number: number,
                 Name: name,
                 OrdersSubmitted: ordersCol.QuerySelector("span") != null,
@@ -103,7 +116,7 @@ public class NewOriginsClient {
         }
     }
 
-    public async IAsyncEnumerable<NewOriginsArticle> ListArticlesAsync([EnumeratorCancellation] CancellationToken cancellation) {
+    public async IAsyncEnumerable<RemoteArticle> ListArticlesAsync([EnumeratorCancellation] CancellationToken cancellation) {
         var doc = await context.OpenAsync($"{this.url}/times", cancellation);
 
         var root = doc.QuerySelector(".container.my-5");
@@ -125,9 +138,3 @@ public class WrongFactionOrPasswordException : System.Exception
         System.Runtime.Serialization.SerializationInfo info,
         System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }
-
-public record NewOriginsFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted) {
-    public bool IsNew => Number == null;
-}
-
-public record NewOriginsArticle(string Name, string Contents);

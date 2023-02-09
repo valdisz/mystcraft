@@ -52,6 +52,42 @@ public class DbPlayer : InGameContext, WithCreationTime, WithUpdateTime {
     public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+
+    public static DbPlayer CreateLocal(DbRegistration reg, int number)
+        => new DbPlayer {
+            GameId = reg.GameId,
+            UserId = reg.UserId,
+            Name = reg.Name,
+            Number = number,
+            Password = reg.Password
+        };
+
+    public static DbPlayer CreateRemote(int number, string name)
+        => new DbPlayer {
+            Number = number,
+            Name = name
+        };
+
+    public Result<Unit> Claim(long userId, string password) {
+        if (IsClaimed) {
+            return Failure<Unit>("Player already claimed.");
+        }
+
+        UserId = userId;
+        Password = password;
+
+        return Success(unit);
+    }
+
+    public Result<Unit> Quit() {
+        if (IsQuit) {
+            return Failure<Unit>("Player already quitted.");
+        }
+
+        IsQuit = true;
+
+        return Success(unit);
+    }
 }
 
 public class DbPlayerConfiguration : IEntityTypeConfiguration<DbPlayer> {

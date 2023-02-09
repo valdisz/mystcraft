@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 public static class RepositoriesExtensions {
     public static IServiceCollection AddRepositories(this IServiceCollection services) {
         services.AddSingleton<ITime, DefaultTime>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         services.AddScoped<IGameRepository, GameRepository>();
         services.AddScoped<IGameEnginesRepository, GameEnginesRepository>();

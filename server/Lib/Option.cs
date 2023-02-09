@@ -2,6 +2,7 @@ namespace advisor;
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public static partial class Prelude {
     public static Option<T> None<T>() => Option<T>.None.Instance;
@@ -44,7 +45,11 @@ public static class OptionExtensions {
     public static Option<R> SelectMany<T, U, R>(this Option<T> self, Func<T, Option<U>> k, Func<T, U, R> selector)
         => self.Bind(x => k(x).Select(y => selector(x, y)));
 
-    public static Option<T> AsOption<T>(this T value) => value is not null ? value : None<T>();
+    public static Option<T> AsOption<T>(this T value)
+        => value is not null ? value : None<T>();
+
+    public static async Task<Option<T>> AsOption<T>(this Task<T> value)
+        => (await value).AsOption<T>();
 }
 
 public abstract class Option<T> : IEquatable<Option<T>>, IEquatable<T> {

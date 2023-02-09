@@ -278,7 +278,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
 
     private async Task<DbTurn> ImportRemoteTurnAsync(
         ITurnRepository turnsRepo,
-        NewOriginsClient client,
+        NewOrigins client,
         DbGame game,
         DbTurn turn,
         List<FactionProjection> factions,

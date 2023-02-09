@@ -79,7 +79,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
 
     private AsyncIO<string> DownloadRemoteReport(string serverAddress, int number, string password, CancellationToken cancellation)
         => async () => {
-            var remote = new NewOriginsClient(serverAddress, httpFactory);
+            var remote = new NewOrigins(serverAddress, httpFactory);
             try {
                 return Success(await remote.DownloadReportAsync(number, password, cancellation));
             }

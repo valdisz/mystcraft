@@ -42,7 +42,6 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
                 .Select(_ => new GameJoinLocalResult(true, Registration: reg))
             )
             .OnFailure(error => unitOfWork.RollbackTransaction(cancellationToken))
-            .Select(x => x)
             .Run()
             .Unwrap(error => new GameJoinLocalResult(false, error.Message));
 

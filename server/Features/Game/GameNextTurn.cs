@@ -19,50 +19,35 @@ public class GameNextTurnForceInput {
 }
 
 public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnResult> {
-    public GameNextTurnHandler(IGameRepository games, IUnitOfWork unit, IBackgroundJobClient jobs) {
-        this.games = games;
-        this.unit = unit;
+    public GameNextTurnHandler(IGameRepository gameRepo, IBackgroundJobClient jobs) {
+        this.gameRepo = gameRepo;
+        this.unitOfWork = gameRepo.UnitOfWork;
         this.jobs = jobs;
     }
 
-    private readonly IGameRepository games;
-    private readonly IUnitOfWork unit;
+    private readonly IGameRepository gameRepo;
+    private readonly IUnitOfWork unitOfWork;
     private readonly IBackgroundJobClient jobs;
 
-    public async Task<GameNextTurnResult> Handle(GameNextTurn request, CancellationToken cancellationToken) {
-        await unit.BeginTransaction(cancellationToken);
+    public Task<GameNextTurnResult> Handle(GameNextTurn request, CancellationToken cancellationToken)
+        => unitOfWork.BeginTransaction(cancellationToken)
+            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+                { Status: GameStatus.RUNNING } => Success(game),
+                _ => Failure<DbGame>("Game must be RUNNING state.")
+            }, cancellationToken))
+            .Bind(game => EnqueueTurnRun(jobs, request.GameId, request.TurnNumber ?? game.NextTurnNumber, request.Force)
+                .Bind(jobId => unitOfWork.CommitTransaction(cancellationToken)
+                    .Return(jobId)
+                )
+            )
+            .PipeTo(unitOfWork.RunWithRollback<string, GameNextTurnResult>(
+                jobId => new GameNextTurnResult(true, JobId: jobId),
+                error => new GameNextTurnResult(false, error.Message),
+                cancellationToken
+            ));
 
-        var game = await games.GetOneGame(request.GameId, cancellation: cancellationToken);
-        if (game == null) {
-            return new GameNextTurnResult(false, "Game not found.");
-        }
-
-        if (request.TurnNumber == null) {
-            if (game.Status != GameStatus.RUNNING) {
-                return new GameNextTurnResult(false, "Game must be in runnung state.");
-            }
-        }
-        else {
-            if (game.Status != GameStatus.RUNNING && game.Status != GameStatus.LOCKED) {
-                return new GameNextTurnResult(false, "Game must be in runnung or locked state.");
-            }
-        }
-
-        game.Status = GameStatus.RUNNING;
-
-        var gameId = request.GameId;
-        var turnNumber = request.TurnNumber ?? game.NextTurnNumber;
-
-        await unit.CommitTransaction(cancellationToken);
-
-        try {
-            var jobId = jobs.Enqueue<AllJobs>(x => x.RunTurnAsync(gameId, turnNumber, request.Force));
-            return new GameNextTurnResult(true, JobId: jobId);
-        }
-        catch (Exception ex) {
-            return new GameNextTurnResult(false, ex.ToString());
-        }
-    }
+    public static IO<string> EnqueueTurnRun(IBackgroundJobClient jobs, long gameId, int? turnNumber, GameNextTurnForceInput force)
+        => () => Success(jobs.Enqueue<AllJobs>(x => x.RunTurnAsync(gameId, turnNumber, force)));
 }
 
 [System.Serializable]
