@@ -64,8 +64,18 @@ public static class ResultExtensions {
             _ => throw new InvalidOperationException()
         };
 
+    public static async Task<Result<R>> Select<T, R>(this Result<T> self, Func<T, Task<R>> selector)
+        => self switch {
+            Result<T>.Success(var value) => Success(await selector(value)),
+            Result<T>.Failure(var error) => Failure<R>(error),
+            _ => throw new InvalidOperationException()
+        };
+
     public static Result<R> Bind<T, R>(this Result<T> self, Func<T, Result<R>> selector)
         => self.Select(selector).Flatten();
+
+    public static async Task<Result<R>> Bind<T, R>(this Result<T> self, Func<T, Task<Result<R>>> selector)
+        => (await self.Select(selector)).Flatten();
 
 
     /// Alias of `Bind`
@@ -84,6 +94,10 @@ public static class ResultExtensions {
                     : failure,
             _ =>throw new InvalidOperationException()
         };
+
+
+    public static Result<T> Do<T>(this Result<T> self, Action<T> action)
+        => self.Select(x => { action(x); return x; });
 }
 
 public abstract class Result<T> {

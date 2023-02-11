@@ -7,7 +7,7 @@ using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbPlayer : InGameContext, WithCreationTime, WithUpdateTime {
+public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUpdateTime {
     [Key]
     public long Id { get; set; }
 

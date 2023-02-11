@@ -103,6 +103,14 @@ public class DbPlayerTurn : InTurnContext, InGameContext, IStatistics<DbTurnStat
 
     [GraphQLIgnore]
     public List<DbOrders> Orders { get; set; } = new ();
+
+    public static DbPlayerTurn Create(int factionNumber, string factionName, int turnNumber) {
+        return new DbPlayerTurn {
+            FactionNumber = factionNumber,
+            FactionName = factionName,
+            TurnNumber = turnNumber
+        };
+    }
 }
 
 public class DbPlayerTurnConfiguration : IEntityTypeConfiguration<DbPlayerTurn> {

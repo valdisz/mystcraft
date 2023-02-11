@@ -45,6 +45,11 @@ public static class OptionExtensions {
     public static Option<R> SelectMany<T, U, R>(this Option<T> self, Func<T, Option<U>> k, Func<T, U, R> selector)
         => self.Bind(x => k(x).Select(y => selector(x, y)));
 
+
+    public static Option<T> Do<T>(this Option<T> self, Action<T> action)
+        => self.Select(x => { action(x); return x; });
+
+
     public static Option<T> AsOption<T>(this T value)
         => value is not null ? value : None<T>();
 

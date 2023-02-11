@@ -13,12 +13,14 @@ public record GameJoinLocal(long UserId, long GameId, string Name) : IRequest<Ga
 public record GameJoinLocalResult(bool IsSuccess, string Error = null, DbRegistration Registration = null) : MutationResult(IsSuccess, Error);
 
 public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocalResult> {
-    public GameJoinLocalHandler(IGameRepository gameRepo) {
+    public GameJoinLocalHandler(IGameRepository gameRepo, IPlayerRepository playerRepo) {
         this.gameRepo = gameRepo;
+        this.playerRepo = playerRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
     }
 
     private readonly IGameRepository gameRepo;
+    private readonly IPlayerRepository playerRepo;
     private readonly IUnitOfWork unitOfWork;
 
     public Task<GameJoinLocalResult> Handle(GameJoinLocal request, CancellationToken cancellationToken)
@@ -34,26 +36,27 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
                 })
                 .Unwrap(() => Failure<DbGame>("Game does not exist."))
             )
-            .Bind(game => DoesNotHaveRegistration(game, request.UserId, cancellationToken)
-                .Bind(_ => DoesNotHaveActivePlayer(game, request.UserId, cancellationToken))
-                .Select(_ => gameRepo.Add(game, DbRegistration.Create(request.UserId, request.Name, Guid.NewGuid().ToString("N"))))
+            .Select(game => playerRepo.Specialize(game))
+            .Bind(repo => DoesNotHaveRegistration(repo, request.UserId, cancellationToken)
+                .Bind(_ => DoesNotHaveActivePlayer(repo, request.UserId, cancellationToken))
+                .Select(_ => repo.Add(DbRegistration.Create(request.UserId, request.Name, Guid.NewGuid().ToString("N"))))
             )
-            .Bind(reg => unitOfWork.CommitTransaction(cancellationToken)
-                .Select(_ => new GameJoinLocalResult(true, Registration: reg))
-            )
-            .OnFailure(error => unitOfWork.RollbackTransaction(cancellationToken))
-            .Run()
-            .Unwrap(error => new GameJoinLocalResult(false, error.Message));
+            .Bind(reg => unitOfWork.CommitTransaction(cancellationToken).Return(reg))
+            .PipeTo(unitOfWork.RunWithRollback<DbRegistration, GameJoinLocalResult>(
+                reg => new GameJoinLocalResult(true, Registration: reg),
+                error => new GameJoinLocalResult(false, error.Message),
+                cancellationToken
+            ));
 
-    private AsyncIO<advisor.Unit> DoesNotHaveRegistration(DbGame game, long userId, CancellationToken cancellation)
-        => async () => await gameRepo.QueryRegistrations(game)
+    private AsyncIO<advisor.Unit> DoesNotHaveRegistration(ISpecializedPlayerRepository repo, long userId, CancellationToken cancellation)
+        => async () => await repo.Registrations
             .AsNoTracking()
             .AnyAsync(x => x.UserId == userId, cancellation)
                 ? Failure<advisor.Unit>("Game already includes registration from this user.")
                 : Success(unit);
 
-    private AsyncIO<advisor.Unit> DoesNotHaveActivePlayer(DbGame game, long userId, CancellationToken cancellation)
-        =>  async () => await gameRepo.QueryPlayers(game)
+    private AsyncIO<advisor.Unit> DoesNotHaveActivePlayer(ISpecializedPlayerRepository repo, long userId, CancellationToken cancellation)
+        =>  async () => await repo.Players
             .AsNoTracking()
             .OnlyActivePlayers()
             .AnyAsync(x => x.UserId == userId, cancellation)

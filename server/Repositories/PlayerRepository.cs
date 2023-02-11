@@ -2,150 +2,233 @@ namespace advisor;
 
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using advisor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-public interface IPlayerRepository {
-    IBoundPlayerRepository For(long gameId);
-    IBoundPlayerRepository For(DbGame game);
+public interface IPlayerRepository : IReporsitory<DbPlayer> {
+    ISpecializedPlayerRepository Specialize(DbGame game);
 }
 
-public interface IBoundPlayerRepository {
-    IQueryable<DbRegistration> Registrations { get; }
+public interface ISpecializedPlayerRepository : IReporsitory<DbPlayer> {
     IQueryable<DbPlayer> Players { get; }
+    IQueryable<DbRegistration> Registrations { get; }
+    IQueryable<DbPlayerTurn> PlayerTurns { get; }
 
-    Task<DbPlayer> GetPlayerAsync(long playerId, bool withTracking = true, CancellationToken cancellation = default);
-    Task<DbPlayer> GetPlayerByUserAsync(long userId, bool withTracking = true, CancellationToken cancellation = default);
-    Task<DbPlayer> GetPlayerByNumberAsync(int number, bool withTracking = true, CancellationToken cancellation = default);
+    DbRegistration Add(DbRegistration registration);
+    DbPlayer Add(DbPlayer player);
+    DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn);
 
-    Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default);
-    Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default);
-    Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default);
-    Task DeleteRegistrationAsync(long registrationId, CancellationToken cancellation = default);
-    Task DeletePlayerAsync(long playerId, CancellationToken cancellation = default);
+    void Update(DbRegistration registration);
+    void Update(DbPlayer player);
+    void Update(DbPlayerTurn playerTurn);
+
+    AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default);
+    AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default);
+    AsyncIO<Option<DbPlayerTurn>> GetOnePlayerTurn(long playerId, int turnNumber, bool withTracking = true, CancellationToken cancellation = default);
+
+    IO<Unit> Delete(DbRegistration registration);
+    IO<Unit> Delete(DbPlayer player);
+    IO<Unit> Delete(DbPlayerTurn playerTurn);
 }
 
 public class PlayerRepository: IPlayerRepository {
-    public PlayerRepository(IUnitOfWork unit) {
-        this.unit = unit;
+    public PlayerRepository(Database db) {
+        this.db = db;
     }
+    private readonly Database db;
 
-    private readonly IUnitOfWork unit;
+    public IUnitOfWork UnitOfWork => db;
 
-    public IBoundPlayerRepository For(long gameId) => new BoundPlayersRepository(gameId, unit);
+    public ISpecializedPlayerRepository Specialize(DbGame game) => new SpecializePlayersRepository(db, game);
 
-    public IBoundPlayerRepository For(DbGame game) => For(game.Id);
-
-    class BoundPlayersRepository : IBoundPlayerRepository {
-        public BoundPlayersRepository(long gameId, IUnitOfWork unit) {
-            this.gameId = gameId;
-            this.unit = unit;
-            this.db = unit.Database;
+    sealed class SpecializePlayersRepository : ISpecializedPlayerRepository {
+        public SpecializePlayersRepository(Database db, DbGame game) {
+            this.db = db;
+            this.game = game;
         }
 
-        private readonly long gameId;
-        private readonly IUnitOfWork unit;
+        private readonly DbGame game;
         private readonly Database db;
 
-        public IQueryable<DbRegistration> Registrations => db.Registrations.InGame(gameId);
-        public IQueryable<DbPlayer> Players => db.Players.InGame(gameId);
+        public IUnitOfWork UnitOfWork => db;
 
-        public Task<DbRegistration> GetRegistrationAsync(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
-            => Registrations.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == registrationId, cancellation);
+        public IQueryable<DbPlayer> Players => db.Players.InGame(game);
 
-        public Task<DbPlayer> GetPlayerAsync(long playerId, bool withTracking = true, CancellationToken cancellation = default)
-            => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
+        public IQueryable<DbRegistration> Registrations => db.Registrations.InGame(game);
 
-        public Task<DbPlayer> GetPlayerByUserAsync(long userId, bool withTracking = true, CancellationToken cancellation = default)
-            => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+        public IQueryable<DbPlayerTurn> PlayerTurns => db.PlayerTurns.InGame(game);
 
-        public Task<DbPlayer> GetPlayerByNumberAsync(int number, bool withTracking = true, CancellationToken cancellation = default)
-            => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Number == number, cancellation);
+        public DbRegistration Add(DbRegistration registration) {
+            registration.Game = game;
+            registration.GameId = game.Id;
 
-        public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
-            => db.PlayerTurns.SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
+            game.Registrations.Add(registration);
 
-        public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
-            => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
+            return db.Registrations.Add(registration).Entity;
+        }
 
-        public async Task<DbRegistration> RegisterPlayerAsync(long userId, string name, string password, CancellationToken cancellation = default) {
-            var reg = new DbRegistration {
-                GameId = gameId,
-                UserId = userId,
-                Name = name,
-                Password = password
+        public DbPlayer Add(DbPlayer player) {
+            player.Game = game;
+            player.GameId = game.Id;
+
+            game.Players.Add(player);
+
+            return db.Players.Add(player).Entity;
+        }
+
+        public DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn) {
+            playerTurn.Player = player;
+            playerTurn.PlayerId = player.Id;
+
+            player.Turns.Add(playerTurn);
+
+            return db.PlayerTurns.Add(playerTurn).Entity;
+        }
+
+        public void Update(DbRegistration registration)
+            => db.Entry(registration).State = EntityState.Modified;
+
+        public void Update(DbPlayer player)
+            => db.Entry(player).State = EntityState.Modified;
+
+        public void Update(DbPlayerTurn playerTurn)
+            => db.Entry(playerTurn).State = EntityState.Modified;
+
+        public AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default)
+            => async () => Success(await Players
+                .WithTracking(withTracking)
+                .SingleOrDefaultAsync(x => x.Id == playerId, cancellation)
+                .AsOption()
+            );
+
+        public AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
+            => async () => Success(await Registrations
+                .WithTracking(withTracking)
+                .SingleOrDefaultAsync(x => x.Id == registrationId, cancellation)
+                .AsOption()
+            );
+
+        public AsyncIO<Option<DbPlayerTurn>> GetOnePlayerTurn(long playerId, int turnNumber, bool withTracking = true, CancellationToken cancellation = default)
+            => async () => Success(await PlayerTurns
+                .WithTracking(withTracking)
+                .SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation)
+                .AsOption()
+            );
+
+        public IO<Unit> Delete(DbRegistration registration)
+            => () => {
+                db.Entry(registration).State = EntityState.Deleted;
+                return Success(unit);
             };
 
-            await db.Registrations.AddAsync(reg, cancellation);
-
-            return reg;
-        }
-
-        public async Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
-            if (await GetPlayerByNumberAsync(factionNumber, withTracking: false) is not null) {
-                throw new RepositoryException("Player already exist");
-            }
-
-            var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
-
-            var player = new DbPlayer {
-                GameId = reg.GameId,
-                UserId = reg.UserId,
-                Name = reg.Name,
-                Number = factionNumber,
-                Password = reg.Password
+        public IO<Unit> Delete(DbPlayer player)
+            => () => {
+                db.Entry(player).State = EntityState.Deleted;
+                return Success(unit);
             };
 
-            db.Remove(reg);
-            await db.Players.AddAsync(player, cancellation);
-
-            return player;
-        }
-
-        public async Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default) {
-            if (await GetPlayerByNumberAsync(number, withTracking: false) is not null) {
-                throw new RepositoryException("Player already exist");
-            }
-
-            var player = new DbPlayer {
-                GameId = gameId,
-                Number = number,
-                Name = name
+        public IO<Unit> Delete(DbPlayerTurn playerTurn)
+            => () => {
+                db.Entry(playerTurn).State = EntityState.Deleted;
+                return Success(unit);
             };
 
-            await db.Players.AddAsync(player, cancellation);
 
-            return player;
-        }
+        // public Task<DbRegistration> GetRegistrationAsync(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
+        //     => Registrations.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == registrationId, cancellation);
 
-        public async Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default) {
-            var player = await GetPlayerAsync(playerId);
-            if (player is null) {
-                throw new RepositoryException($"Player does not exist");
-            }
+        // public Task<DbPlayer> GetPlayerAsync(long playerId, bool withTracking = true, CancellationToken cancellation = default)
+        //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
 
-            player.IsQuit = true;
+        // public Task<DbPlayer> GetPlayerByUserAsync(long userId, bool withTracking = true, CancellationToken cancellation = default)
+        //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
-            return player;
-        }
+        // public Task<DbPlayer> GetPlayerByNumberAsync(int number, bool withTracking = true, CancellationToken cancellation = default)
+        //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Number == number, cancellation);
 
-        public async Task DeleteRegistrationAsync(long registrationId, CancellationToken cancellation = default) {
-            var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
-            if (reg is null) {
-                throw new RepositoryException($"Registration does not exist");
-            }
+        // public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
+        //     => db.PlayerTurns.SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
 
-            db.Remove(reg);
-        }
+        // public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
+        //     => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
 
-        public async Task DeletePlayerAsync(long playerId, CancellationToken cancellation = default) {
-            var reg = await GetPlayerAsync(playerId, cancellation: cancellation);
-            if (reg is null) {
-                throw new RepositoryException($"Player does not exist");
-            }
+        // public async Task<DbRegistration> RegisterPlayerAsync(long userId, string name, string password, CancellationToken cancellation = default) {
+        //     var reg = new DbRegistration {
+        //         GameId = gameId,
+        //         UserId = userId,
+        //         Name = name,
+        //         Password = password
+        //     };
 
-            db.Remove(reg);
-        }
+        //     await db.Registrations.AddAsync(reg, cancellation);
+
+        //     return reg;
+        // }
+
+        // public async Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
+        //     if (await GetPlayerByNumberAsync(factionNumber, withTracking: false) is not null) {
+        //         throw new RepositoryException("Player already exist");
+        //     }
+
+        //     var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
+
+        //     var player = new DbPlayer {
+        //         GameId = reg.GameId,
+        //         UserId = reg.UserId,
+        //         Name = reg.Name,
+        //         Number = factionNumber,
+        //         Password = reg.Password
+        //     };
+
+        //     db.Remove(reg);
+        //     await db.Players.AddAsync(player, cancellation);
+
+        //     return player;
+        // }
+
+        // public async Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default) {
+        //     if (await GetPlayerByNumberAsync(number, withTracking: false) is not null) {
+        //         throw new RepositoryException("Player already exist");
+        //     }
+
+        //     var player = new DbPlayer {
+        //         GameId = gameId,
+        //         Number = number,
+        //         Name = name
+        //     };
+
+        //     await db.Players.AddAsync(player, cancellation);
+
+        //     return player;
+        // }
+
+        // public async Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default) {
+        //     var player = await GetPlayerAsync(playerId);
+        //     if (player is null) {
+        //         throw new RepositoryException($"Player does not exist");
+        //     }
+
+        //     player.IsQuit = true;
+
+        //     return player;
+        // }
+
+        // public async Task DeleteRegistrationAsync(long registrationId, CancellationToken cancellation = default) {
+        //     var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
+        //     if (reg is null) {
+        //         throw new RepositoryException($"Registration does not exist");
+        //     }
+
+        //     db.Remove(reg);
+        // }
+
+        // public async Task DeletePlayerAsync(long playerId, CancellationToken cancellation = default) {
+        //     var reg = await GetPlayerAsync(playerId, cancellation: cancellation);
+        //     if (reg is null) {
+        //         throw new RepositoryException($"Player does not exist");
+        //     }
+
+        //     db.Remove(reg);
+        // }
     }
 }

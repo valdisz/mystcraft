@@ -6,12 +6,18 @@ using System.Threading.Tasks;
 public delegate Task<Result<T>> AsyncIO<T>();
 
 public static partial class Prelude {
-    public static AsyncIO<T> Effect<T>(Func<Task<T>> action) => async () => Success(await action());
     public static AsyncIO<T> Effect<T>(Func<Task<Result<T>>> action) => () => action();
+
+    public static AsyncIO<T> Effect<T>(Func<Task<T>> action) => async () => Success(await action());
+
     public static AsyncIO<Unit> Effect(Func<Task> action) => async () => {
         await action();
         return Success(unit);
     };
+
+    public static AsyncIO<T> Effect<T>(Func<Result<T>> action) => () => Task.FromResult(action());
+
+    public static AsyncIO<T> Effect<T>(Func<T> action) => () => Task.FromResult(Success(action()));
 }
 
 public static class AsyncIOExtensions {
@@ -113,5 +119,45 @@ public static class AsyncIOExtensions {
                     ? Failure<T>(error)
                     : failure,
             _ =>throw new InvalidOperationException()
+        };
+
+    public static AsyncIO<T> Do<T>(this AsyncIO<T> self, Action<T> action)
+        => async () => {
+            var result = await self();
+            if (result is Result<T>.Success success) {
+                action(success.Value);
+            }
+
+            return result;
+        };
+
+    public static AsyncIO<T> Do<T>(this AsyncIO<T> self, Action action)
+        => async () => {
+            var result = await self();
+            if (result.IsSuccess) {
+                action();
+            }
+
+            return result;
+        };
+
+    public static AsyncIO<T> Do<T>(this AsyncIO<T> self, Func<T, Task> action)
+        => async () => {
+            var result = await self();
+            if (result is Result<T>.Success success) {
+                await action(success.Value);
+            }
+
+            return result;
+        };
+
+    public static AsyncIO<T> Do<T>(this AsyncIO<T> self, Func<Task> action)
+        => async () => {
+            var result = await self();
+            if (result.IsSuccess) {
+                await action();
+            }
+
+            return result;
         };
 }
