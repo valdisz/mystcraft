@@ -29,7 +29,7 @@ public class GameCompleteHandler : IRequestHandler<GameComplete, GameCompleteRes
             }, cancellationToken))
             .Bind(game => gameRepo.UpdateGame(game, x => x.Status = GameStatus.COMPLEATED)
                 .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => GameFunctions.Reconcile(request.GameId, mediator, cancellationToken))
+                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
                 .Bind(() => unitOfWork.CommitTransaction(cancellationToken))
                 .Return(game)
             )

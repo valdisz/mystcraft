@@ -68,25 +68,25 @@ public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUp
             Name = name
         };
 
-    public Result<Unit> Claim(long userId, string password) {
+    public Result<DbPlayer> Claim(long userId, string password) {
         if (IsClaimed) {
-            return Failure<Unit>("Player already claimed.");
+            return Failure<DbPlayer>("Player already claimed.");
         }
 
         UserId = userId;
         Password = password;
 
-        return Success(unit);
+        return Success(this);
     }
 
-    public Result<Unit> Quit() {
+    public Result<DbPlayer> Quit() {
         if (IsQuit) {
-            return Failure<Unit>("Player already quitted.");
+            return Failure<DbPlayer>("Player already quitted.");
         }
 
         IsQuit = true;
 
-        return Success(unit);
+        return Success(this);
     }
 }
 

@@ -29,7 +29,7 @@ public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameSched
             }, cancellationToken))
             .Bind(game => gameRepo.UpdateGame(game, x => x.Options.Schedule = request.Schedule)
                 .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => GameFunctions.Reconcile(request.GameId, mediator, cancellationToken))
+                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
                 .Bind(() => unitOfWork.CommitTransaction(cancellationToken))
                 .Return(game)
             )

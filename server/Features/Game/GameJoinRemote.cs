@@ -32,16 +32,14 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
     public Task<GameJoinRemoteResult> Handle(GameJoinRemote request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(_ => gameRepo.GetOneGame(request.GameId, withTracking: false, cancellation: cancellationToken))
-            .Select(maybeGame => maybeGame
-                .Select(game => game switch {
-                    { Type: Persistence.GameType.LOCAL } => Failure<DbGame>("Cannot claim players in local game."),
-                    { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
-                    { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
-                    { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
-                    _ => Success(game)
-                })
-                .Unwrap(() => Failure<DbGame>("Game does not exist."))
-            )
+            .Select(Functions.EnsurePresent<DbGame>("Game does not exist."))
+            .Select(game => game switch {
+                { Type: Persistence.GameType.LOCAL } => Failure<DbGame>("Cannot claim players in local game."),
+                { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
+                { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
+                { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
+                _ => Success(game)
+            })
             .Select(game => (game: game, repo: playerRepo.Specialize(game)))
             .Bind(state => state.repo.GetOnePlayer(request.PlayerId, cancellation: cancellationToken)
                 .Select(maybePlayer => maybePlayer

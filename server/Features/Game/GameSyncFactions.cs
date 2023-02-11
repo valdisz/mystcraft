@@ -108,8 +108,8 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
 
     private Result<advisor.Unit> QuitPlayers(ISpecializedPlayerRepository repo, IEnumerable<DbPlayer> players) {
         foreach (var player in players) {
-            if (player.Quit() is Result<advisor.Unit>.Failure failure) {
-                return failure;
+            if (player.Quit() is Result<DbPlayer>.Failure(var error)) {
+                return Failure<advisor.Unit>(error);
             }
 
             repo.Update(player);

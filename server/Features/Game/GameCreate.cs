@@ -91,7 +91,7 @@ public class GameCreateHandler :
         => unitOfWork.BeginTransaction(cancellation)
             .Select(_ => gameRepo.Add(game))
             .Bind(g => unitOfWork.SaveChanges(cancellation)
-                .Bind(() => GameFunctions.Reconcile(g.Id, mediator, cancellation))
+                .Bind(() => Functions.Reconcile(g.Id, mediator, cancellation))
                 .Bind(() => unitOfWork.CommitTransaction(cancellation))
                 .Return(g)
             )

@@ -25,17 +25,13 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
 
     public Task<GameJoinLocalResult> Handle(GameJoinLocal request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(_ => gameRepo.GetOneGame(request.GameId, withTracking: true, cancellation: cancellationToken))
-            .Select(maybeGame => maybeGame
-                .Select(game => game switch {
-                    { Type: Persistence.GameType.REMOTE } => Failure<DbGame>("Cannot join remote game."),
-                    { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
-                    { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
-                    { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
-                    _ => Success(game)
-                })
-                .Unwrap(() => Failure<DbGame>("Game does not exist."))
-            )
+            .Bind(_ => gameRepo.GetOneGame(request.GameId, game => game switch {
+                { Type: Persistence.GameType.REMOTE } => Failure<DbGame>("Cannot join remote game."),
+                { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
+                { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
+                { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
+                _ => Success(game)
+            }, cancellation: cancellationToken))
             .Select(game => playerRepo.Specialize(game))
             .Bind(repo => DoesNotHaveRegistration(repo, request.UserId, cancellationToken)
                 .Bind(_ => DoesNotHaveActivePlayer(repo, request.UserId, cancellationToken))
