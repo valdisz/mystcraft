@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 public record TurnRun(long GameId): IRequest<TurnRunResult>;
 public record TurnRunResult(bool IsSuccess, string Error = null, DbTurn Turn = null) : IMutationResult;
 
+// todo: make smaller. this is too big and it is why it is buggy.
 public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
     public TurnRunHandler(IUnitOfWork unit, IHttpClientFactory httpFactory, IMediator mediator, ILogger<TurnRunHandler> logger) {
         this.unit = unit;

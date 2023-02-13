@@ -31,7 +31,6 @@ public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
             .Bind(game => gameRepo.UpdateGame(game, x => x.Status = GameStatus.RUNNING)
                 .Bind(() => unitOfWork.SaveChanges(cancellationToken))
                 .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
-                .Bind(() => unitOfWork.CommitTransaction(cancellationToken))
                 .Return(game)
             )
             .PipeTo(unitOfWork.RunWithRollback<DbGame, GameStartResult>(

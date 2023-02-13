@@ -9,15 +9,15 @@ using Microsoft.Extensions.Logging;
 using Hangfire;
 
 public class AllJobs {
-    public AllJobs(IMediator mediator, IUnitOfWork unit, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
+    public AllJobs(IGameRepository gameRepo, IMediator mediator, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
+        this.gameRepo = gameRepo;
         this.mediator = mediator;
-        this.unit = unit;
         this.services = services;
         this.jobs = jobs;
         this.logger = logger;
     }
 
-    private readonly IUnitOfWork unit;
+    private readonly IGameRepository gameRepo;
     private readonly IMediator mediator;
     private readonly IServiceProvider services;
     private readonly IBackgroundJobClient jobs;
@@ -30,9 +30,11 @@ public class AllJobs {
     public async Task RunTurnAsync(long gameId, int? turnNumber, GameNextTurnForceInput force) {
         logger.LogInformation("Starting turn processing");
 
-        var gamesRep = unit.Games;
-
-        var game = await gamesRep.GetOneAsync(gameId);
+        var game = (await gameRepo.GetOneGame(gameId).Run().Unwrap()).Unwrap();
+        if (game.Status != GameStatus.LOCKED) {
+            logger.LogInformation("Game must be LOCKED before turn processing can start");
+            return;
+        }
 
         try {
             if (turnNumber == null) {

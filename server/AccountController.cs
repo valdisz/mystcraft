@@ -25,7 +25,7 @@ namespace advisor {
     [AllowAnonymous]
     [Route("account")]
     public class AccountController : ControllerBase {
-        public AccountController(Database db, AccessControl accessControl, IMediator mediator, IHttpClientFactory httpFactory,
+        public AccountController(Database db, IAccessControl accessControl, IMediator mediator, IHttpClientFactory httpFactory,
             IOptionsSnapshot<DiscordOptions> discordOptions, IIdSerializer idSerializer, IMemoryCache cache
         ) {
             this.db = db;
@@ -38,7 +38,7 @@ namespace advisor {
         }
 
         private readonly Database db;
-        private readonly AccessControl accessControl;
+        private readonly IAccessControl accessControl;
         private readonly IMediator mediator;
         private readonly IHttpClientFactory httpFactory;
         private readonly IIdSerializer idSerializer;

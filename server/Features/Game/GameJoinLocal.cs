@@ -37,7 +37,6 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
                 .Bind(_ => DoesNotHaveActivePlayer(repo, request.UserId, cancellationToken))
                 .Select(_ => repo.Add(DbRegistration.Create(request.UserId, request.Name, Guid.NewGuid().ToString("N"))))
             )
-            .Bind(reg => unitOfWork.CommitTransaction(cancellationToken).Return(reg))
             .PipeTo(unitOfWork.RunWithRollback<DbRegistration, GameJoinLocalResult>(
                 reg => new GameJoinLocalResult(true, Registration: reg),
                 error => new GameJoinLocalResult(false, error.Message),

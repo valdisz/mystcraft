@@ -5,7 +5,7 @@ using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbArticle {
+public class DbArticle : InGameContext {
     [Key]
     public long Id { get; set; }
 

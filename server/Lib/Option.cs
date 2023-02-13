@@ -49,11 +49,16 @@ public static class OptionExtensions {
     public static Option<T> Do<T>(this Option<T> self, Action<T> action)
         => self.Select(x => { action(x); return x; });
 
-
     public static Option<T> AsOption<T>(this T value)
         => value is not null ? value : None<T>();
 
+    public static Option<T> AsOption<T>(this T? value) where T: struct
+        => value.HasValue ? value.Value : None<T>();
+
     public static async Task<Option<T>> AsOption<T>(this Task<T> value)
+        => (await value).AsOption<T>();
+
+    public static async Task<Option<T>> AsOption<T>(this Task<T?> value) where T: struct
         => (await value).AsOption<T>();
 }
 

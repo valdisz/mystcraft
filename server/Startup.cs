@@ -56,8 +56,7 @@ public class Startup {
         var discordOAuth = discord.GetSection("OAuth");
         var proxy = Configuration.GetSection("Proxy");
 
-        services
-            .AddOptions();
+        services.AddOptions();
 
         services.Configure<DiscordOptions>(discord);
         services.Configure<ForwardedHeadersOptions>(opt => {
@@ -100,14 +99,11 @@ public class Startup {
             }
         });
 
-        services.AddRepositories();
-
         services.AddResponseCompression(opt => {
             opt.EnableForHttps = true;
         });
 
         services
-            .AddSingleton<IApiKeyStore, ConfigurationApiKeyStore>()
             .ConfigureApiKeys(Configuration)
             .ConfigureApplicationCookie(options => Configuration.Bind("CookieSettings", options));
 
@@ -274,12 +270,9 @@ public class Startup {
             .BindRuntimeType<JSkill, SkillType>()
             ;
 
-        services
-            .AddSingleton<AccessControl>()
-            .AddMvcCore()
-                .AddDataAnnotations();
+        services.AddMvcCore()
+            .AddDataAnnotations();
 
-        services.AddSingleton<IAuthorizationHandler, OwnPlayerAuthorizationHandler>();
         // services.Scan(x => x
         //     .FromExecutingAssembly()
         //     .AddClasses(classes => classes.AssignableTo<IAuthorizationHandler>())
@@ -294,9 +287,13 @@ public class Startup {
         services
             .AddMemoryCache();
 
-        services.AddSingleton<IReportParser, ReportParser>();
-
-        services.AddTransient<AllJobs>();
+        services
+            .AddRepositories()
+            .AddSingleton<IAuthorizationHandler, OwnPlayerAuthorizationHandler>()
+            .AddSingleton<IApiKeyStore, ConfigurationApiKeyStore>()
+            .AddSingleton<IAccessControl, AccessControl>()
+            .AddSingleton<IReportParser, ReportParser>()
+            .AddTransient<AllJobs>();
     }
 
     public void Configure(IApplicationBuilder app) {
@@ -314,10 +311,10 @@ public class Startup {
 
         app
             .UseMiddleware<DefaultFilesMiddleware>()
-            .UseStaticFiles()
             .UseRouting()
             .UseAuthentication()
             .UseAuthorization()
+            .UseStaticFiles()
             .UseEndpoints(endpoints => {
                 endpoints.MapControllers();
 

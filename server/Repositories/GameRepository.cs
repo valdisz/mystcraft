@@ -7,9 +7,26 @@ using Microsoft.EntityFrameworkCore;
 
 public interface IGameRepository : IReporsitory<DbGame> {
     IQueryable<DbGame> Games { get; }
-    DbGame Add(DbGame game);
-    void Update(DbGame game);
+    ISpecializedGameRepository Specialize(DbGame game);
+    IO<DbGame> Add(DbGame game);
+    IO<DbGame> Update(DbGame game);
     AsyncIO<Option<DbGame>> GetOneGame(long gameId, bool withTracking = true, CancellationToken cancellation = default);
+}
+
+public interface ISpecializedGameRepository {
+    IQueryable<DbTurn> Turns { get; }
+    IQueryable<DbReport> Reports { get; }
+    IQueryable<DbArticle> Articles { get; }
+
+    IO<DbTurn> Add(DbTurn turn);
+    IO<DbReport> Add(DbReport report);
+    IO<DbArticle> Add(DbArticle article);
+    IO<DbTurn> Update(DbTurn turn);
+    IO<DbReport> Update(DbReport report);
+    IO<DbArticle> Update(DbArticle article);
+    AsyncIO<Option<DbTurn>> GetOneTurn(int turnNumber, bool withTracking = true, CancellationToken cancellation = default);
+    AsyncIO<Option<DbReport>> GetOneReport(int turnNumber, int factionNumber, bool withTracking = true, CancellationToken cancellation = default);
+    AsyncIO<Option<DbArticle>> GetOneArticle(long articleId, bool withTracking = true, CancellationToken cancellation = default);
 }
 
 public class GameRepository : IGameRepository {
@@ -30,9 +47,80 @@ public class GameRepository : IGameRepository {
             .AsOption()
         );
 
-    public DbGame Add(DbGame game)
-        => db.Games.Add(game).Entity;
+    public IO<DbGame> Add(DbGame game)
+        => () => Success(db.Games.Add(game).Entity);
 
-    public void Update(DbGame game)
-        => db.Entry(game).State = EntityState.Modified;
+    public IO<DbGame> Update(DbGame game)
+        => () => {
+            db.Entry(game).State = EntityState.Modified;
+            return Success(game);
+        };
+
+    public ISpecializedGameRepository Specialize(DbGame game) => new SpecializedGameRepository(game, db);
+
+    class SpecializedGameRepository : ISpecializedGameRepository {
+        public SpecializedGameRepository(DbGame game, Database db) {
+            this.game = game;
+            this.db = db;
+        }
+
+        private readonly DbGame game;
+        private readonly Database db;
+
+        public IQueryable<DbTurn> Turns => db.Turns.InGame(game);
+
+        public IQueryable<DbReport> Reports => db.Reports.InGame(game);
+
+        public IQueryable<DbArticle> Articles => db.Articles.InGame(game);
+
+        public IO<DbTurn> Add(DbTurn turn)
+            => () => Success(db.Turns.Add(turn).Entity);
+
+        public IO<DbReport> Add(DbReport report)
+            => () => Success(db.Reports.Add(report).Entity);
+
+        public IO<DbArticle> Add(DbArticle article)
+            => () => Success(db.Articles.Add(article).Entity);
+
+        public IO<DbTurn> Update(DbTurn turn)
+            => () => {
+                db.Entry(turn).State = EntityState.Modified;
+                return Success(turn);
+            };
+
+
+        public IO<DbReport> Update(DbReport report)
+            => () => {
+                db.Entry(report).State = EntityState.Modified;
+                return Success(report);
+            };
+
+
+        public IO<DbArticle> Update(DbArticle article)
+            => () => {
+                db.Entry(article).State = EntityState.Modified;
+                return Success(article);
+            };
+
+        public AsyncIO<Option<DbTurn>> GetOneTurn(int turnNumber, bool withTracking = true, CancellationToken cancellation = default)
+            => AsyncEffect(() => Turns
+                .WithTracking(withTracking)
+                .SingleOrDefaultAsync(x => x.Number == turnNumber, cancellation)
+                .AsOption()
+            );
+
+        public AsyncIO<Option<DbReport>> GetOneReport(int turnNumber, int factionNumber, bool withTracking = true, CancellationToken cancellation = default)
+            => AsyncEffect(() => Reports
+                .WithTracking(withTracking)
+                .SingleOrDefaultAsync(x => x.TurnNumber == turnNumber && x.FactionNumber == factionNumber, cancellation)
+                .AsOption()
+            );
+
+        public AsyncIO<Option<DbArticle>> GetOneArticle(long articleId, bool withTracking = true, CancellationToken cancellation = default)
+            => AsyncEffect(() => Articles
+                .WithTracking(withTracking)
+                .SingleOrDefaultAsync(x => x.Id == articleId, cancellation)
+                .AsOption()
+            );
+    }
 }

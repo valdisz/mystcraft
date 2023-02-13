@@ -57,7 +57,6 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
                         player.UserId = request.UserId;
                         state.repo.Update(player);
                     })
-                    .Bind(() => unitOfWork.CommitTransaction(cancellationToken))
                     .Return(player)
                 )
             )

@@ -10,7 +10,7 @@ using System;
 
 public record GameNextTurn(long GameId, int? TurnNumber = null, GameNextTurnForceInput Force = null): IRequest<GameNextTurnResult>;
 
-public record GameNextTurnResult(bool IsSuccess, string Error = null, string JobId = null) : MutationResult(IsSuccess, Error);
+public record GameNextTurnResult(bool IsSuccess, string Error = null, DbGame Game = null, string JobId = null) : MutationResult(IsSuccess, Error);
 
 public class GameNextTurnForceInput {
     public bool Parse { get; set; }
@@ -29,19 +29,24 @@ public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnRes
     private readonly IUnitOfWork unitOfWork;
     private readonly IBackgroundJobClient jobs;
 
+    private record struct GameAndJob(DbGame Game, string JobId);
+
     public Task<GameNextTurnResult> Handle(GameNextTurn request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
                 { Status: GameStatus.RUNNING } => Success(game),
-                _ => Failure<DbGame>("Game must be RUNNING state.")
+                _ => Failure<DbGame>("Game must be in RUNNING state")
             }, cancellationToken))
-            .Bind(game => EnqueueTurnRun(jobs, request.GameId, request.TurnNumber ?? game.NextTurnNumber, request.Force)
-                .Bind(jobId => unitOfWork.CommitTransaction(cancellationToken)
-                    .Return(jobId)
-                )
+            .Do(game => game.Status = GameStatus.LOCKED)
+            .Do(game => gameRepo.Update(game))
+            .Bind(game => unitOfWork.SaveChanges(cancellationToken)
+                .Return(game)
             )
-            .PipeTo(unitOfWork.RunWithRollback<string, GameNextTurnResult>(
-                jobId => new GameNextTurnResult(true, JobId: jobId),
+            .Bind(game => EnqueueTurnRun(jobs, request.GameId, request.TurnNumber ?? game.NextTurnNumber, request.Force)
+                .Select(jobId => new GameAndJob(game, jobId))
+            )
+            .PipeTo(unitOfWork.RunWithRollback<GameAndJob, GameNextTurnResult>(
+                x => new GameNextTurnResult(true, Game: x.Game, JobId: x.JobId),
                 error => new GameNextTurnResult(false, error.Message),
                 cancellationToken
             ));

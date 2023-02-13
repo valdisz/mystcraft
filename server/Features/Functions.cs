@@ -19,21 +19,20 @@ public static class Functions {
 
     public static Func<AsyncIO<T>, Task<R>> RunWithRollback<T, R>(this IUnitOfWork unitOfWork, Func<T, R> onSuccess, Func<Error, R> onFailure, CancellationToken cancellation)
         => (AsyncIO<T> self) => self
+            .Bind(value => unitOfWork.CommitTransaction(cancellation).Return(value))
             .Select(onSuccess)
             .OnFailure(_ => unitOfWork.RollbackTransaction(cancellation))
             .Run()
             .Unwrap(onFailure);
 
-    public static IO<DbGame> UpdateGame(this IGameRepository repo, DbGame game, Action<DbGame> update)
+    public static IO<DbGame> UpdateGame(this IGameRepository repo, DbGame game, Action<DbGame> onUpdate)
         => () => {
-            update(game);
-            repo.Update(game);
-            return Success(game);
+            onUpdate(game);
+            return repo.Update(game)();
         };
 
-    public static AsyncIO<advisor.Unit> Reconcile(long gameId, IMediator mediator, CancellationToken cancellation)
-        => Effect(() => mediator.Send(new Reconcile(gameId), cancellation))
-            .Select(result => result.IsSuccess ? Success(unit) : Failure<advisor.Unit>(result.Error));
+    public static AsyncIO<ReconcileResult> Reconcile(long gameId, IMediator mediator, CancellationToken cancellation)
+        => AsyncEffect(() => mediator.Send(new Reconcile(gameId), cancellation).AsResult());
 
     public static Func<Option<T>, Result<T>> EnsurePresent<T>(string missing)
         => option => option.Select(Success).Unwrap(() => Failure<T>(missing));

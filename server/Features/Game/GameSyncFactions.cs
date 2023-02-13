@@ -75,7 +75,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
                             .Unwrap(() => Failure<PlayerAndTurn>("Next player turn does not exist."))
                         )
                     )
-                    .Unwrap(() => Effect(() => Success(DbPlayer.CreateRemote(faction.Number.Value, faction.Name))
+                    .Unwrap(() => AsyncEffect(() => Success(DbPlayer.CreateRemote(faction.Number.Value, faction.Name))
                         .Do(player => player.NextTurnNumber = game.NextTurnNumber)
                         .Select(player => repo.Add(player))
                         .Bind(player => Success(DbPlayerTurn.Create(faction.Number.Value, faction.Name, game.NextTurnNumber.Value))

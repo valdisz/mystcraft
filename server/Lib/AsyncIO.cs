@@ -6,18 +6,18 @@ using System.Threading.Tasks;
 public delegate Task<Result<T>> AsyncIO<T>();
 
 public static partial class Prelude {
-    public static AsyncIO<T> Effect<T>(Func<Task<Result<T>>> action) => () => action();
+    public static AsyncIO<T> AsyncEffect<T>(Func<Task<Result<T>>> action) => () => action();
 
-    public static AsyncIO<T> Effect<T>(Func<Task<T>> action) => async () => Success(await action());
+    public static AsyncIO<T> AsyncEffect<T>(Func<Task<T>> action) => async () => Success(await action());
 
-    public static AsyncIO<Unit> Effect(Func<Task> action) => async () => {
+    public static AsyncIO<Unit> AsyncEffect(Func<Task> action) => async () => {
         await action();
         return Success(unit);
     };
 
-    public static AsyncIO<T> Effect<T>(Func<Result<T>> action) => () => Task.FromResult(action());
+    public static AsyncIO<T> AsyncEffect<T>(Func<Result<T>> action) => () => Task.FromResult(action());
 
-    public static AsyncIO<T> Effect<T>(Func<T> action) => () => Task.FromResult(Success(action()));
+    public static AsyncIO<T> AsyncEffect<T>(Func<T> action) => () => Task.FromResult(Success(action()));
 }
 
 public static class AsyncIOExtensions {
@@ -26,7 +26,7 @@ public static class AsyncIOExtensions {
             return await self();
         }
         catch (Exception ex) {
-            return Failure<T>(ex.Message, ex);
+            return Failure<T>(ex);
         }
     }
 
@@ -115,7 +115,7 @@ public static class AsyncIOExtensions {
     public static AsyncIO<T> OnFailure<T, R>(this AsyncIO<T> self, Func<Error, AsyncIO<R>> action)
         => async () => await self() switch {
             Result<T>.Success success => success,
-            Result<T>.Failure failure => action(failure.Error) is Result<R>.Failure(var error)
+            Result<T>.Failure failure => (await action(failure.Error)()) is Result<R>.Failure(var error)
                     ? Failure<T>(error)
                     : failure,
             _ =>throw new InvalidOperationException()

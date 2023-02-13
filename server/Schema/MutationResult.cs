@@ -1,5 +1,6 @@
 namespace advisor.Schema;
 
+using System.Threading.Tasks;
 using HotChocolate.Types;
 
 public interface IMutationResult {

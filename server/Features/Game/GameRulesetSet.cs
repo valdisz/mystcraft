@@ -31,7 +31,6 @@ public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRuleset
                 .Bind(ruleset => gameRepo.UpdateGame(game, x => x.Ruleset = ruleset))
                 .Bind(() => unitOfWork.SaveChanges(cancellationToken))
                 .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
-                .Bind(() => unitOfWork.CommitTransaction(cancellationToken))
                 .Return(game)
             )
             .PipeTo(unitOfWork.RunWithRollback<DbGame, GameRulesetSetResult>(
@@ -41,5 +40,5 @@ public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRuleset
             ));
 
     public static AsyncIO<byte[]> ReadStream(Stream stream, CancellationToken cancellation)
-        => Effect(() => stream.ReadAllBytesAsync(cancellation));
+        => AsyncEffect(() => stream.ReadAllBytesAsync(cancellation));
 }

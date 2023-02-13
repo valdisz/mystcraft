@@ -2,11 +2,13 @@ namespace advisor;
 
 using System;
 using System.Threading.Tasks;
+using advisor.Schema;
 
 public static partial class Prelude {
     public static Result<T> Success<T>(T value) => new Result<T>.Success(value);
     public static Result<T> Failure<T>(Error error) => new Result<T>.Failure(error);
     public static Result<T> Failure<T>(string message, Exception exception = null) => new Result<T>.Failure(new Error(message, exception));
+    public static Result<T> Failure<T>(Exception exception) => new Result<T>.Failure(new Error(exception.Message, exception));
 }
 
 public static class ResultExtensions {
@@ -98,6 +100,14 @@ public static class ResultExtensions {
 
     public static Result<T> Do<T>(this Result<T> self, Action<T> action)
         => self.Select(x => { action(x); return x; });
+
+    public static Result<T> AsResult<T>(this T self) where T: IMutationResult
+        => self.IsSuccess ? Success(self) : Failure<T>(self.Error);
+
+    public static async Task<Result<T>> AsResult<T>(this Task<T> self) where T: IMutationResult {
+        var result = await self;
+        return result.IsSuccess ? Success(result) : Failure<T>(result.Error);
+    }
 }
 
 public abstract class Result<T> {

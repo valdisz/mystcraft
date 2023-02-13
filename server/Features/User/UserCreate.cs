@@ -8,17 +8,16 @@ using advisor.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public record UserCreate(string Email, string Password, params string[] Roles) : IRequest<DbUser> {
-}
+public record UserCreate(string Email, string Password, params string[] Roles) : IRequest<DbUser>;
 
 public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
-    public UserCreateHandler(Database db, AccessControl accessControl) {
+    public UserCreateHandler(Database db, IAccessControl accessControl) {
         this.db = db;
         this.accessControl = accessControl;
     }
 
     private readonly Database db;
-    private readonly AccessControl accessControl;
+    private readonly IAccessControl accessControl;
 
     public async Task<DbUser> Handle(UserCreate request, CancellationToken cancellationToken) {
         var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);

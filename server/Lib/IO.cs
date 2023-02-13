@@ -4,13 +4,25 @@ using System;
 
 public delegate Result<T> IO<T>();
 
+public static partial class Prelude {
+    public static IO<T> Effect<T>(Func<Result<T>> action) => () => action();
+
+    public static IO<T> Effect<T>(Func<T> action) => () => Success(action());
+
+    public static IO<Unit> Effect(Action action) => () => {
+        action();
+        return Success(unit);
+    };
+}
+
+
 public static class IOExtensions {
     public static Result<T> Run<T>(this IO<T> self) {
         try {
             return self();
         }
         catch (Exception ex) {
-            return Failure<T>(ex.Message, ex);
+            return Failure<T>(ex);
         }
     }
 
@@ -32,6 +44,15 @@ public static class IOExtensions {
 
 
     public static IO<T> OnFailure<T, R>(this IO<T> self, Func<Error, IO<R>> action)
+        => () => self() switch {
+            Result<T>.Success success => success,
+            Result<T>.Failure failure => action(failure.Error)() is Result<R>.Failure(var error)
+                    ? Failure<T>(error)
+                    : failure,
+            _ =>throw new InvalidOperationException()
+        };
+
+    public static IO<T> OnFailure<T, R>(this IO<T> self, Func<Error, Result<R>> action)
         => () => self() switch {
             Result<T>.Success success => success,
             Result<T>.Failure failure => action(failure.Error) is Result<R>.Failure(var error)
