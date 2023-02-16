@@ -23,26 +23,25 @@ public class PlayerQuitHandler : IRequestHandler<PlayerQuit, PlayerQuitResult> {
 
     public Task<PlayerQuitResult> Handle(PlayerQuit request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.RUNNING } => Success(game),
                 { Status: GameStatus.PAUSED } => Success(game),
                 _ => Failure<DbGame>("Game must be in RUNNING or PAUSED state.")
-            }, cancellationToken))
+            })
             .Select(playerRepo.Specialize)
-            .Bind(repo => repo.GetOnePlayer(request.PlayerId,
-                player => player switch {
-                    { IsQuit: true } => Failure<DbPlayer>("Player have quitted."),
+            .Bind(repo => repo.GetOnePlayer(request.PlayerId, cancellation: cancellationToken)
+                .Validate(player => player switch {
+                    { IsQuit: true } => Failure<DbPlayer>("Player quitted."),
                     _ => Success(player)
-                }, cancellationToken)
-                    .Select(player => player.Quit())
-                    .Do(player => repo.Update(player))
+                })
+                .Bind(player => player.Quit())
+                .Bind(repo.Update)
             )
-            .Bind(player => unitOfWork.CommitTransaction(cancellationToken)
-                .Return(player)
-            )
-            .PipeTo(unitOfWork.RunWithRollback<DbPlayer, PlayerQuitResult>(
+            .RunWithRollback(
+                unitOfWork,
                 player => new PlayerQuitResult(true, Player: player),
                 error => new PlayerQuitResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 }

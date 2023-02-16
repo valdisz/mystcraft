@@ -23,21 +23,23 @@ public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRuleset
 
     public Task<GameRulesetSetResult> Handle(GameRulesetSet request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
-            }, cancellationToken))
+            })
             .Bind(game => ReadStream(request.Ruleset, cancellationToken)
-                .Bind(ruleset => gameRepo.UpdateGame(game, x => x.Ruleset = ruleset))
-                .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
+                .Do(ruleset => game.Ruleset = ruleset)
                 .Return(game)
             )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, GameRulesetSetResult>(
+            .Bind(gameRepo.Update)
+            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
+            .RunWithRollback(
+                unitOfWork,
                 game => new GameRulesetSetResult(true, Game: game),
                 error => new GameRulesetSetResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 
     public static AsyncIO<byte[]> ReadStream(Stream stream, CancellationToken cancellation)
         => AsyncEffect(() => stream.ReadAllBytesAsync(cancellation));

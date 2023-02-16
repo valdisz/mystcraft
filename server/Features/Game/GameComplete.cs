@@ -23,18 +23,18 @@ public class GameCompleteHandler : IRequestHandler<GameComplete, GameCompleteRes
 
     public Task<GameCompleteResult> Handle(GameComplete request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
-            }, cancellationToken))
-            .Bind(game => gameRepo.UpdateGame(game, x => x.Status = GameStatus.COMPLEATED)
-                .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
-                .Return(game)
-            )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, GameCompleteResult>(
+            })
+            .Do(game => game.Status = GameStatus.COMPLEATED)
+            .Bind(gameRepo.Update)
+            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
+            .RunWithRollback(
+                unitOfWork,
                 game => new GameCompleteResult(true, Game: game),
                 error => new GameCompleteResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 }

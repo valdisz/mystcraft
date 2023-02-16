@@ -12,7 +12,7 @@ using advisor.Schema;
 using advisor.Persistence;
 using advisor.TurnProcessing;
 
-public record TurnParse(DbGame Game, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnParseResult>;
+public record TurnParse(long GameId, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnParseResult>;
 
 public record TurnParseResult(bool IsSuccess, string Error = null, DbTurn Turn = null) : MutationResult(IsSuccess, Error);
 

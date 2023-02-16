@@ -11,7 +11,7 @@ using System.Linq;
 using advisor.Model;
 using System;
 
-public record TurnProcess(DbGame Game, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnProcessResult>;
+public record TurnProcess(long GameId, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnProcessResult>;
 
 public record TurnProcessResult(bool IsSuccess, string Error = null, DbTurn Turn = null) : MutationResult(IsSuccess, Error);
 

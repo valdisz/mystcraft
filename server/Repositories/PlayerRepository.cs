@@ -18,9 +18,9 @@ public interface ISpecializedPlayerRepository : IReporsitory<DbPlayer> {
     DbPlayer Add(DbPlayer player);
     DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn);
 
-    void Update(DbRegistration registration);
-    void Update(DbPlayer player);
-    void Update(DbPlayerTurn playerTurn);
+    IO<DbRegistration> Update(DbRegistration registration);
+    IO<DbPlayer> Update(DbPlayer player);
+    IO<DbPlayerTurn> Update(DbPlayerTurn playerTurn);
 
     AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default);
     AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default);
@@ -85,14 +85,20 @@ public class PlayerRepository: IPlayerRepository {
             return db.PlayerTurns.Add(playerTurn).Entity;
         }
 
-        public void Update(DbRegistration registration)
-            => db.Entry(registration).State = EntityState.Modified;
+        private IO<T> UpdateEntity<T>(T entity)
+            => Effect(() => {
+                db.Entry(entity).State = EntityState.Modified;
+                return entity;
+            });
 
-        public void Update(DbPlayer player)
-            => db.Entry(player).State = EntityState.Modified;
+        public IO<DbRegistration> Update(DbRegistration registration)
+            => UpdateEntity(registration);
 
-        public void Update(DbPlayerTurn playerTurn)
-            => db.Entry(playerTurn).State = EntityState.Modified;
+        public IO<DbPlayer> Update(DbPlayer player)
+            => UpdateEntity(player);
+
+        public IO<DbPlayerTurn> Update(DbPlayerTurn playerTurn)
+            => UpdateEntity(playerTurn);
 
         public AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default)
             => async () => Success(await Players

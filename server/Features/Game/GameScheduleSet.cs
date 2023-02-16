@@ -23,18 +23,18 @@ public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameSched
 
     public Task<GameScheduleSetResult> Handle(GameScheduleSet request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
-            }, cancellationToken))
-            .Bind(game => gameRepo.UpdateGame(game, x => x.Options.Schedule = request.Schedule)
-                .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
-                .Return(game)
-            )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, GameScheduleSetResult>(
+            })
+            .Do(game => game.Options.Schedule = request.Schedule)
+            .Bind(gameRepo.Update)
+            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
+            .RunWithRollback(
+                unitOfWork,
                 game => new GameScheduleSetResult(true, Game: game),
                 error => new GameScheduleSetResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 }

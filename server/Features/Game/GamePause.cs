@@ -23,19 +23,19 @@ public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
 
     public Task<GamePauseResult> Handle(GamePause request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(_ => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.RUNNING } => Success(game),
                 { Status: GameStatus.LOCKED } => Success(game),
                 _ => Failure<DbGame>("Game must be in RUNNING or LOCKED state.")
-            }, cancellationToken))
-            .Bind(game => gameRepo.UpdateGame(game, x => x.Status = GameStatus.PAUSED)
-                .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
-                .Return(game)
-            )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, GamePauseResult>(
+            })
+            .Do(game => game.Status = GameStatus.PAUSED)
+            .Bind(gameRepo.Update)
+            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
+            .RunWithRollback(
+                unitOfWork,
                 game => new GamePauseResult(true, Game: game),
                 error => new GamePauseResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 }

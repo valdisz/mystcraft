@@ -32,8 +32,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
     public Task<GameJoinRemoteResult> Handle(GameJoinRemote request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(_ => gameRepo.GetOneGame(request.GameId, withTracking: false, cancellation: cancellationToken))
-            .Select(Functions.EnsurePresent<DbGame>("Game does not exist."))
-            .Select(game => game switch {
+            .Validate(game => game switch {
                 { Type: Persistence.GameType.LOCAL } => Failure<DbGame>("Cannot claim players in local game."),
                 { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
                 { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
@@ -42,7 +41,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
             })
             .Select(game => (game: game, repo: playerRepo.Specialize(game)))
             .Bind(state => state.repo.GetOnePlayer(request.PlayerId, cancellation: cancellationToken)
-                .Select(maybePlayer => maybePlayer
+                .Bind(maybePlayer => maybePlayer
                     .Select(player => player switch {
                         { IsClaimed: true } => Failure<DbPlayer>($"Player already claimed by {(player.UserId == request.UserId ? "this" : "another" )} player."),
                         _ => Success(player)
@@ -53,18 +52,17 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
                     .Bind(() => DownloadRemoteReport(state.game.Options.ServerAddress, player.Number, request.Password, cancellationToken)
                         .Bind(report => UploadPlayerReport(player.Id, report, cancellationToken))
                     )
-                    .Do(() => {
-                        player.UserId = request.UserId;
-                        state.repo.Update(player);
-                    })
                     .Return(player)
                 )
+                .Do(player => player.UserId = request.UserId)
+                .Bind(state.repo.Update)
             )
-            .PipeTo(unitOfWork.RunWithRollback<DbPlayer, GameJoinRemoteResult>(
+            .RunWithRollback(
+                unitOfWork,
                 player => new GameJoinRemoteResult(true, Player: player),
                 error => new GameJoinRemoteResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 
     private AsyncIO<advisor.Unit> DoesNotContainActivePlayer(ISpecializedPlayerRepository repo, long userId, CancellationToken cancellation)
         => async () => await repo.Players

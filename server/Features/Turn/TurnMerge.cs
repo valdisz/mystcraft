@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using AutoMapper;
 using System;
 
-public record TurnMerge(DbGame Game, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnMergeResult>;
+public record TurnMerge(long GameId, int TurnNumber, bool Force = false, long[] PlayerIds = null): IRequest<TurnMergeResult>;
 
 public record TurnMergeResult(bool IsSuccess, string Error = null, DbTurn Turn = null) : MutationResult(IsSuccess, Error);
 

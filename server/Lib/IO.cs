@@ -5,9 +5,14 @@ using System;
 public delegate Result<T> IO<T>();
 
 public static partial class Prelude {
-    public static IO<T> Effect<T>(Func<Result<T>> action) => () => action();
+    public static IO<T> Effect<T>(Func<Result<T>> action)
+        => () => action();
 
-    public static IO<T> Effect<T>(Func<T> action) => () => Success(action());
+    public static IO<T> Effect<T>(Func<T> action)
+        => () => Success(action());
+
+    public static IO<T> Effect<T>(T value)
+        => () => Success(value);
 
     public static IO<Unit> Effect(Action action) => () => {
         action();
@@ -26,6 +31,16 @@ public static class IOExtensions {
         }
     }
 
+    public static IO<T> Finally<T>(this IO<T> self, Action finalizer)
+        => () => {
+            try {
+                return self();
+            }
+            finally {
+                finalizer();
+            }
+        };
+
     public static IO<T> Flatten<T>(this IO<IO<T>> self)
         => () => self() switch {
             Result<IO<T>>.Success(var success) => success(),
@@ -38,6 +53,12 @@ public static class IOExtensions {
 
     public static IO<B> Select<A, B>(this IO<A> self, Func<A, Result<B>> selector)
         => () => self().Bind(selector);
+
+    public static IO<R> Return<T, R>(this IO<T> self, Func<R> selector)
+        => () => (self()).Select(_ => selector());
+
+    public static IO<R> Return<T, R>(this IO<T> self, R value)
+        => () => (self()).Select(_ => value);
 
     public static IO<B> Bind<A, B>(this IO<A> self, Func<A, IO<B>> selector)
         => self.Select(selector).Flatten();

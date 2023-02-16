@@ -22,18 +22,18 @@ public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptions
 
     public Task<GameOptionsSetResult> Handle(GameOptionsSet request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
-            }, cancellationToken))
-            .Bind(game => gameRepo.UpdateGame(game, x => x.Options = request.Options)
-                .Bind(() => unitOfWork.SaveChanges(cancellationToken))
-                .Bind(() => Functions.Reconcile(request.GameId, mediator, cancellationToken))
-                .Return(game)
-            )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, GameOptionsSetResult>(
+            })
+            .Do(game => game.Options = request.Options)
+            .Bind(gameRepo.Update)
+            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
+            .RunWithRollback(
+                unitOfWork,
                 game => new GameOptionsSetResult(true, Game: game),
                 error => new GameOptionsSetResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 }

@@ -52,6 +52,8 @@ public static class DatabaseExtensions {
                 break;
         }
 
+        services.AddTransient<IUnitOfWork>(ctx => ctx.GetRequiredService<Database>());
+
         return services;
     }
 }

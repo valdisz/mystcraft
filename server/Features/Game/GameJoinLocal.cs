@@ -25,23 +25,25 @@ public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocal
 
     public Task<GameJoinLocalResult> Handle(GameJoinLocal request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(_ => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Type: Persistence.GameType.REMOTE } => Failure<DbGame>("Cannot join remote game."),
                 { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
                 { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
                 { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
                 _ => Success(game)
-            }, cancellation: cancellationToken))
+            })
             .Select(game => playerRepo.Specialize(game))
             .Bind(repo => DoesNotHaveRegistration(repo, request.UserId, cancellationToken)
                 .Bind(_ => DoesNotHaveActivePlayer(repo, request.UserId, cancellationToken))
                 .Select(_ => repo.Add(DbRegistration.Create(request.UserId, request.Name, Guid.NewGuid().ToString("N"))))
             )
-            .PipeTo(unitOfWork.RunWithRollback<DbRegistration, GameJoinLocalResult>(
+            .RunWithRollback(
+                unitOfWork,
                 reg => new GameJoinLocalResult(true, Registration: reg),
                 error => new GameJoinLocalResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 
     private AsyncIO<advisor.Unit> DoesNotHaveRegistration(ISpecializedPlayerRepository repo, long userId, CancellationToken cancellation)
         => async () => await repo.Registrations

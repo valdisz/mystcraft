@@ -14,6 +14,11 @@ using System.Linq.Expressions;
 public record Reconcile(long? GameId = null): IRequest<ReconcileResult>;
 public record ReconcileResult(bool IsSuccess, string Error = null) : IMutationResult;
 
+public static class ReconcileExtensions {
+    public static AsyncIO<ReconcileResult> Reconcile(this IMediator self, long gameId, CancellationToken cancellation = default)
+        => self.Mutate(new Reconcile(gameId), cancellation);
+}
+
 public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
     public ReconcileHandler(IGameRepository gameRepo, IRecurringJobManager recurringJobs, IBackgroundJobClient backgroundJobs) {
         this.gameRepo = gameRepo;
@@ -22,7 +27,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         this.backgroundJobs = backgroundJobs;
     }
 
-    public const string RECONCILE_ONCE_PER_HOUR = "0 0 * * *";
+    public const string RECONCILE_EVERY_HOUR = "0 0 * * *";
     public const string SYNC_FACTIONS_EVERY_5_MINUTES = "*/5 * * * *";
 
     private readonly IGameRepository gameRepo;
@@ -47,7 +52,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
             }
         }
 
-        var setupReconcilation = Effect(() => recurringJobs.AddOrUpdate<AllJobs>("reconcile", job => job.ReconcileAsync(), RECONCILE_ONCE_PER_HOUR));
+        var setupReconcilation = Effect(() => recurringJobs.AddOrUpdate<AllJobs>("reconcile", job => job.ReconcileAsync(CancellationToken.None), RECONCILE_EVERY_HOUR));
         if (setupReconcilation.Run() is Result<advisor.Unit>.Failure(var err2)) {
             return new ReconcileResult(false, err2.Message);
         }
@@ -65,14 +70,14 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
             .Bind(tz => DefineJob(
                 $"{jobIdPrefix}-turn",
                 game.Status.In(GameStatus.RUNNING, GameStatus.LOCKED) && !string.IsNullOrWhiteSpace(game.Options.Schedule),
-                job => job.RunTurnAsync(game.Id, null, null),
+                job => job.RunTurnAsync(game.Id, null, CancellationToken.None),
                 game.Options?.Schedule,
                 tz
             ))
             .Bind(_ => DefineJob(
                 $"{jobIdPrefix}-factions",
                 game.Type == Persistence.GameType.REMOTE && game.Status == GameStatus.RUNNING,
-                job => job.SyncFactionsAsync(game.Id),
+                job => job.SyncFactionsAsync(game.Id, CancellationToken.None),
                 SYNC_FACTIONS_EVERY_5_MINUTES
             ))
             .Run();
@@ -86,10 +91,10 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
         => Effect(() => {
             if (condition) {
                 recurringJobs.AddOrUpdate<AllJobs>(id, setUp, cronExpression, tz);
+                return;
             }
-            else {
-                recurringJobs.RemoveIfExists(id);
-            }
+
+            recurringJobs.RemoveIfExists(id);
         });
 }
 

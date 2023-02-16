@@ -1,5 +1,6 @@
 namespace advisor;
 
+using System;
 using System.Linq;
 using System.Threading;
 using advisor.Persistence;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 public interface IGameRepository : IReporsitory<DbGame> {
     IQueryable<DbGame> Games { get; }
     ISpecializedGameRepository Specialize(DbGame game);
+    ISpecializedGameRepository Specialize(long gameId);
     IO<DbGame> Add(DbGame game);
     IO<DbGame> Update(DbGame game);
     AsyncIO<Option<DbGame>> GetOneGame(long gameId, bool withTracking = true, CancellationToken cancellation = default);
@@ -56,22 +58,27 @@ public class GameRepository : IGameRepository {
             return Success(game);
         };
 
-    public ISpecializedGameRepository Specialize(DbGame game) => new SpecializedGameRepository(game, db);
+    public ISpecializedGameRepository Specialize(DbGame game)
+        => new SpecializedGameRepository(game.Id, db);
+
+    public ISpecializedGameRepository Specialize(long gameId)
+        => new SpecializedGameRepository(gameId, db);
 
     class SpecializedGameRepository : ISpecializedGameRepository {
-        public SpecializedGameRepository(DbGame game, Database db) {
-            this.game = game;
+        public SpecializedGameRepository(long gameId, Database db) {
+            this.gameId = gameId;
             this.db = db;
         }
 
-        private readonly DbGame game;
         private readonly Database db;
 
-        public IQueryable<DbTurn> Turns => db.Turns.InGame(game);
+        private readonly long gameId;
 
-        public IQueryable<DbReport> Reports => db.Reports.InGame(game);
+        public IQueryable<DbTurn> Turns => db.Turns.InGame(gameId);
 
-        public IQueryable<DbArticle> Articles => db.Articles.InGame(game);
+        public IQueryable<DbReport> Reports => db.Reports.InGame(gameId);
+
+        public IQueryable<DbArticle> Articles => db.Articles.InGame(gameId);
 
         public IO<DbTurn> Add(DbTurn turn)
             => () => Success(db.Turns.Add(turn).Entity);

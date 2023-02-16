@@ -33,19 +33,21 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
 
     public  Task<GameSyncFactionsResult> Handle(GameSyncFactions request, CancellationToken cancellationToken)
         => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, game => game switch {
+            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
+            .Validate(game => game switch {
                 { Status: GameStatus.RUNNING } => Success(game),
                 { Status: GameStatus.PAUSED } => Success(game),
                 _ => Failure<DbGame>("Game must be in RUNNING or PAUSED state.")
-            }, cancellationToken))
+            })
             .Bind(game => SyncWithRemotePlayers(game, game.Options.ServerAddress, cancellationToken)
                 .Return(game)
             )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, GameSyncFactionsResult>(
+            .RunWithRollback(
+                unitOfWork,
                 game => new GameSyncFactionsResult(true, Game: game),
                 error => new GameSyncFactionsResult(false, error.Message),
                 cancellationToken
-            ));
+            );
 
     // todo: rewrite this to fully functional style
     private AsyncIO<advisor.Unit> SyncWithRemotePlayers(DbGame game, string serverAddress, CancellationToken cancellation)
@@ -70,7 +72,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
 
                 var result = await popPlayer(faction.Number.Value)
                     .Select(player => repo.GetOnePlayerTurn(player.Id, player.NextTurnNumber.Value, cancellation: cancellation)
-                        .Select(maybeTurn => maybeTurn
+                        .Bind(maybeTurn => maybeTurn
                             .Select(turn => Success(new PlayerAndTurn(player, turn)))
                             .Unwrap(() => Failure<PlayerAndTurn>("Next player turn does not exist."))
                         )

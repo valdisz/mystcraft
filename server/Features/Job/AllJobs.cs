@@ -7,6 +7,10 @@ using advisor.Persistence;
 using System;
 using Microsoft.Extensions.Logging;
 using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
+
+public delegate AsyncIO<T> StagePipeline<T>(IServiceScope scope, CancellationToken cancellation);
 
 public class AllJobs {
     public AllJobs(IGameRepository gameRepo, IMediator mediator, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
@@ -23,70 +27,142 @@ public class AllJobs {
     private readonly IBackgroundJobClient jobs;
     private readonly ILogger logger;
 
-    public Task ReconcileAsync() => mediator.Send(new Reconcile());
+    public Task ReconcileAsync(CancellationToken cancellation)
+        => mediator.Send(new Reconcile(), cancellation);
 
-    public Task SyncFactionsAsync(long gameId) => mediator.Send(new GameSyncFactions(gameId));
+    public Task SyncFactionsAsync(long gameId, CancellationToken cancellation)
+        => mediator.Send(new GameSyncFactions(gameId), cancellation);
 
-    public async Task RunTurnAsync(long gameId, int? turnNumber, GameNextTurnForceInput force) {
-        logger.LogInformation("Starting turn processing");
+    public record ProcessingState(long gameId, int turnNumber, TurnState state);
 
-        var game = (await gameRepo.GetOneGame(gameId).Run().Unwrap()).Unwrap();
-        if (game.Status != GameStatus.LOCKED) {
-            logger.LogInformation("Game must be LOCKED before turn processing can start");
-            return;
-        }
-
-        try {
-            if (turnNumber == null) {
-                logger.LogInformation("Running next turn");
-                var result = await EnusreSuccessAsync(mediator.Send(new TurnRun(gameId)));
-                turnNumber = result.Turn.Number;
-            }
-            else {
-                var turnsRepo = await unit.TurnsAsync(gameId);
-                var turn = await turnsRepo.GetOneAsync(turnNumber.Value);
-
-                if (turn.State == TurnState.PENDING) {
-                    logger.LogInformation("Running next turn");
-                    var result = await EnusreSuccessAsync(mediator.Send(new TurnRun(gameId)));
-                    turnNumber = result.Turn.Number;
-                }
-            }
-
-            await unit.BeginTransaction();
-
-            logger.LogInformation("Parsing reports");
-            await EnusreSuccessAsync(mediator.Send(new TurnParse(game, turnNumber.Value, Force: force?.Parse ?? false)));
-
-            logger.LogInformation("Merging report state with game state");
-            await EnusreSuccessAsync(mediator.Send(new TurnMerge(game, turnNumber.Value, Force: force?.Merge ?? false)));
-
-            logger.LogInformation("Calculating statistics");
-            await EnusreSuccessAsync(mediator.Send(new TurnProcess(game, turnNumber.Value, Force: force?.Process ?? false)));
-
-            logger.LogInformation("Unlocking game");
-            await gamesRep.UnlockAsync(gameId);
-
-            await unit.CommitTransaction();
-
-            logger.LogInformation($"Turn {turnNumber} is ready");
-        }
-        catch (Exception ex) {
-            logger.LogError(ex, ex.Message);
-
-            await unit.RollbackTransaction();
-
-            throw;
-        }
+    public async Task RunTurnAsync(long gameId, GameNextTurnForceInput force, CancellationToken cancellation) {
+        await Log(LogLevel.Information, "Starting turn processing")
+            .Bind(() => PrepareProcessing(gameId, cancellation))
+            .Bind(x => StageWithMediator("Execute engine",
+                condition:     x.state == TurnState.PENDING,
+                pipeline:      (m, _) => m.Mutate(new TurnRun(x.gameId, x.turnNumber, 0, null), cancellation)
+                                    .Select(ret => x with { state = ret.Turn.State }),
+                defaultResult: x,
+                cancellation:  cancellation
+            ))
+            .Bind(x => StageWithMediator("Parse reports",
+                condition:     x.state == TurnState.EXECUTED,
+                pipeline:      (m, _) => m.Mutate(new TurnParse(x.gameId, x.turnNumber, Force: force?.Parse ?? false), cancellation)
+                                    .Select(ret => x with { state = ret.Turn.State }),
+                defaultResult: x,
+                cancellation:  cancellation
+            ))
+            .Bind(x => StageWithMediator("Merge reports",
+                condition:    x.state == TurnState.PARSED,
+                input:        new TurnMerge(gameId, turn.Number, Force: force?.Merge ?? false),
+                cancellation: cancellation
+            ))
+            .Bind(x => StageWithMediator("Statistics",
+                condition:    x.state == TurnState.MERGED,
+                input:        new TurnProcess(gameId, turn.Number, Force: force?.Process ?? false),
+                cancellation: cancellation
+            ))
+            .Bind(x => Stage("Finish",
+                    condition:    x.state == TurnState.PROCESSED,
+                    input:        FinshTurnProcessing(turn.GameId, turn.Number),
+                    cancellation: cancellation
+                )
+                .Bind(() => Log(LogLevel.Information, $"Turn {x.} is ready"))
+            )
+            // todo: unlock game, set next turn, etc.
+            .OnFailure(err => Log(LogLevel.Warning, err.Message))
+            .Run();
     }
 
-    private async Task<T> EnusreSuccessAsync<T>(Task<T> resultTask) where T: IMutationResult {
-        var result = await resultTask;
-        if (result.IsSuccess) {
-            return result;
-        }
+    public AsyncIO<ProcessingState> PrepareProcessing(long gameId, CancellationToken cancellation)
+        => gameRepo.GetOneGame(gameId, withTracking: false, cancellation: cancellation)
+            .Validate(game => game switch {
+                { LastTurnNumber: null } => Failure<DbGame>("Last Turn is not specified"),
+                { NextTurnNumber: null } => Failure<DbGame>("Next Turn is not specified"),
+                { Status: GameStatus.LOCKED } => Success(game),
+                { Status: GameStatus.RUNNING } => Success(game),
+                _ => Failure<DbGame>("Game must be in RUNNING or LOCKED state")
+            })
+            .Select(game => ( gameId: game.Id, lastTurn: game.LastTurnNumber.Value, nextTurn: game.NextTurnNumber.Value ))
+            .Bind(state => PickTurnToProcess(gameRepo.Specialize(state.gameId), state.lastTurn, state.nextTurn))
+            .Select(turn => new ProcessingState(turn.GameId, turn.Number, turn.State));
 
-        throw new GameNextTurnException(result.Error);
-    }
+    public AsyncIO<DbTurn> PickTurnToProcess(ISpecializedGameRepository repo, int lastTurnNumber, int nextTurnNumber)
+        => repo.GetOneTurn(lastTurnNumber)
+            .Bind(Functions.EnsurePresent<DbTurn>("Last Turn not found"))
+            .Bind(lastTurn => lastTurn.State != TurnState.READY
+                ? Log(LogLevel.Information, $"Will try to finish running turn {lastTurnNumber}")
+                    .Return(lastTurn)
+                    .AsAsync()
+                : repo.GetOneTurn(nextTurnNumber)
+                    .Bind(Functions.EnsurePresent<DbTurn>("Next Turn not found"))
+                    .Bind(turn => Log(LogLevel.Information, $"Running turn {nextTurnNumber}")
+                        .Return(turn)
+                    )
+            )
+            .Bind(turn => turn switch {
+                { State: TurnState.READY } => Failure<DbTurn>("Turn can't be in READY state"),
+                _ => Success(turn)
+            });
+
+    public StagePipeline<advisor.Unit> FinshTurnProcessing(long gameId, int turnNumber)
+        => (scope, cancellation) => RequiredService<IGameRepository>(scope)
+            .Bind(gameRepo => gameRepo.GetOneGame(gameId, cancellation: cancellation)
+                .Bind(Functions.EnsurePresent<DbGame>("Game not found"))
+                // change game state
+                .Do(game => game.Status = GameStatus.RUNNING)
+                // set new turns
+                .Bind(gameRepo.Update)
+                .Bind(game => Effect(gameRepo.Specialize(game))
+                    .Bind(repo => repo.GetOneTurn(turnNumber)
+                        .Bind(Functions.EnsurePresent<DbTurn>("Turn not found"))
+                        .Do(turn => turn.State = TurnState.READY)
+                        .Bind(repo.Update)
+                    )
+                )
+            )
+            .Return(unit);
+
+    private IO<T> RequiredService<T>(IServiceScope scope)
+        => Effect(() => scope.ServiceProvider.GetRequiredService<T>());
+
+    private IO<Tuple<T1, T2>> RequiredServices<T1, T2>(IServiceScope scope)
+        => Effect(() => Tuple.Create(
+            scope.ServiceProvider.GetRequiredService<T1>(),
+            scope.ServiceProvider.GetRequiredService<T2>()
+        ));
+
+    private IO<Tuple<T1, T2, T3>> RequiredServices<T1, T2, T3>(IServiceScope scope)
+        => Effect(() => Tuple.Create(
+            scope.ServiceProvider.GetRequiredService<T1>(),
+            scope.ServiceProvider.GetRequiredService<T2>(),
+            scope.ServiceProvider.GetRequiredService<T3>()
+        ));
+
+    private IO<advisor.Unit> Log(LogLevel level, string message)
+        => Effect(() => logger.Log(level, message));
+
+    // we want to run each turn in a transaction and new scope
+    private AsyncIO<T> Stage<T>(string name, bool condition, Func<IServiceScope, AsyncIO<T>> pipeline, T defaultResult, CancellationToken cancellation)
+        => condition
+            ? Effect(() => services.CreateScope())
+                .Bind(scope => RequiredService<IUnitOfWork>(scope)
+                    .Bind(unitOfWork => unitOfWork.BeginTransaction(cancellation)
+                        .Bind(() => Log(LogLevel.Information, $"[Starting] {name}"))
+                        .Bind(() => pipeline(scope))
+                        .Bind(result => unitOfWork.CommitTransaction(cancellation).Return(result))
+                        .OnFailure(err => unitOfWork.RollbackTransaction(cancellation))
+                    )
+                    .Finally(() => scope.Dispose())
+                )
+            : AsyncEffect(() => Log(LogLevel.Information, $"[Skipping] {name}").Run())
+                .Return(defaultResult);
+
+    private AsyncIO<T> StageWithMediator<T>(string name, bool condition, Func<IMediator, IServiceScope, AsyncIO<T>> pipeline, T defaultResult, CancellationToken cancellation)
+        => Stage<T>(name, condition,
+            scope => RequiredService<IMediator>(scope)
+                .Bind(med => pipeline(med, scope)),
+            defaultResult,
+            cancellation
+        );
 }
-

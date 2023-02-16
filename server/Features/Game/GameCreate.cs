@@ -91,8 +91,8 @@ public class GameCreateHandler :
         => unitOfWork.BeginTransaction(cancellation)
             .Bind(_ => gameRepo.Add(game))
             .Bind(g => unitOfWork.SaveChanges(cancellation)
-                .Bind(() => Functions.Reconcile(g.Id, mediator, cancellation))
+                .Bind(() => mediator.Reconcile(g.Id, cancellation))
                 .Return(g)
             )
-            .PipeTo(unitOfWork.RunWithRollback<DbGame, T>(onSuccess, onFailure, cancellation));
+            .RunWithRollback(unitOfWork, onSuccess, onFailure, cancellation);
 }
