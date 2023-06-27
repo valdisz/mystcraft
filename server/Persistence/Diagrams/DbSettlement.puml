@@ -1,0 +1,6 @@
+@startuml
+class DbSettlement {
+    + Name : string <<get>> <<set>>
+    + Size : SettlementSize <<get>> <<set>>
+}
+@enduml

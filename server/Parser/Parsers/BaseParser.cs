@@ -1,27 +1,27 @@
 namespace advisor {
     public interface IParser {
-        Maybe<IReportNode> Parse(TextParser p);
+        PMaybe<IReportNode> Parse(TextParser p);
     }
 
     public abstract class BaseParser : IParser {
-        public Maybe<IReportNode> Parse(TextParser p) => p.Try(Execute);
+        public PMaybe<IReportNode> Parse(TextParser p) => p.Try(Execute);
 
-        protected abstract Maybe<IReportNode> Execute(TextParser p);
+        protected abstract PMaybe<IReportNode> Execute(TextParser p);
 
-        protected Maybe<IReportNode> Ok(IReportNode result) => new Maybe<IReportNode>(result);
+        protected PMaybe<IReportNode> Ok(IReportNode result) => new PMaybe<IReportNode>(result);
 
-        protected Maybe<IReportNode> Error<T>(Maybe<T> p) => p.Convert<IReportNode>();
+        protected PMaybe<IReportNode> Error<T>(PMaybe<T> p) => p.Convert<IReportNode>();
 
-        protected Maybe<TextParser> LastResult;
+        protected PMaybe<TextParser> LastResult;
 
-        protected Maybe<TextParser> Mem(Maybe<TextParser> result) {
+        protected PMaybe<TextParser> Mem(PMaybe<TextParser> result) {
             LastResult = result;
             return result;
         }
     }
 
     public static class ReportParserExtensions {
-        public static Maybe<IReportNode> ParseMaybe(this IParser parser, Maybe<TextParser> p)
+        public static PMaybe<IReportNode> ParseMaybe(this IParser parser, PMaybe<TextParser> p)
             => p ? parser.Parse(p.Value) : p.Convert<IReportNode>();
     }
 }

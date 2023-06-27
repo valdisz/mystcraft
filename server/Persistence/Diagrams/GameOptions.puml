@@ -1,0 +1,16 @@
+@startuml
+class MapLevel <<record>> {
+    + Label : string <<get>> <<init>>
+    + Level : int <<get>> <<init>>
+    + Width : int <<get>> <<init>>
+    + Height : int <<get>> <<init>>
+}
+class GameOptions <<record>> {
+    + Map : List<MapLevel> <<get>> <<set>>
+    + Schedule : string <<get>> <<set>>
+    + TimeZone : string <<get>> <<set>>
+    + ServerAddress : string <<get>> <<set>>
+    + StartAt : DateTimeOffset? <<get>> <<set>>
+    + FinishAt : DateTimeOffset? <<get>> <<set>>
+}
+@enduml

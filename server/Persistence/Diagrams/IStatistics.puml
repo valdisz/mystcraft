@@ -1,0 +1,7 @@
+@startuml
+interface "IStatistics`1"<T> {
+    Income : DbIncome <<get>> <<set>>
+    Expenses : DbExpenses <<get>> <<set>>
+    Statistics : List<T> <<get>> <<set>>
+}
+@enduml

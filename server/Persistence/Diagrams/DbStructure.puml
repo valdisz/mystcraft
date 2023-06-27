@@ -1,0 +1,34 @@
+@startuml
+class DbStructure {
+    + CompositeId : StructureId <<get>>
+    + {static} MakeId(playerId:long, turnNumber:int, structureId:string) : StructureId
+    + {static} MakeId(structure:DbStructure) : StructureId
+    + {static} FilterById(q:IQueryable<DbStructure>, id:StructureId) : IQueryable<DbStructure>
+    + Id : string <<get>> <<set>>
+    + {static} MakeId(number:int, regionId:string) : string
+    + {static} IsBuilding(number:int) : bool
+    + {static} IsShip(number:int) : bool
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + Sequence : int <<get>> <<set>>
+    + Number : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Type : string <<get>> <<set>>
+    + Description : string <<get>> <<set>>
+    + Contents : List<DbFleetContent> <<get>> <<set>>
+    + Flags : List<string> <<get>> <<set>>
+    + SailDirections : List<Direction> <<get>> <<set>>
+    + Speed : int? <<get>> <<set>>
+    + Needs : int? <<get>> <<set>>
+    + Load : DbTransportationLoad <<get>> <<set>>
+    + Sailors : DbSailors <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Region : DbRegion <<get>> <<set>>
+    + Units : List<DbUnit> <<get>> <<set>>
+}
+InTurnContext <|-- DbStructure
+@enduml

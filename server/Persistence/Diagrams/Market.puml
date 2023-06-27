@@ -1,0 +1,6 @@
+@startuml
+enum Market {
+    FOR_SALE,
+    WANTED,
+}
+@enduml

@@ -1,0 +1,471 @@
+@startuml "Game Data Model"
+
+interface InGameContext {
+    * GameId : long
+}
+
+
+interface InPlayerContext {
+    * PlayerId : long
+}
+InGameContext <|-- InPlayerContext
+
+
+interface InTurnContext {
+    * TurnNumber : int
+}
+InPlayerContext <|-- InTurnContext
+
+
+interface InFactionContext {
+    * FactionNumber : int
+}
+InTurnContext <|-- InFactionContext
+
+
+interface InRegionContext {
+    * RegionId : string
+}
+InTurnContext <|-- InRegionContext
+
+
+interface WithCreationTime {
+    * CreatedAt : DateTimeOffset
+}
+
+
+entity DbUser {
+    <<implements>> WithCreationTime
+    ==
+    * Id : long
+    ..
+    * Email : string
+      Salt : string
+      Digest : string
+      LastLoginAt : DateTimeOffset
+    * Roles : List<string>
+    * CreatedAt : DateTimeOffset
+}
+
+
+enum DigestAlgorithm {
+    SHA256
+}
+DbUser *-- DigestAlgorithm: Algorithm
+
+
+entity DbGame {
+    <<implements>> WithCreationTime
+    ==
+    * Id : long
+      EngineId : long <<FK>>
+    ..
+    * Name : string
+    * Type : GameType
+    * Status : GameStatus
+    * Options : GameOptions
+    * Ruleset : string
+      LastTurnNumber : int
+      NextTurnNumber : int
+    * CreatedAt : DateTimeOffset
+}
+
+
+entity DbGameEngine {
+    <<implements>> WithCreationTime
+    ==
+    * Id : long
+    ..
+    * Name : string
+    * Contents : byte[]
+    * CreatedAt : DateTimeOffset
+}
+DbGame }o--o| DbGameEngine
+
+
+entity DbRegistration {
+    <<implements>> InGameContext
+    <<implements>> WithCreationTime
+    ==
+    * Id : long <<PK>>
+    * GameId : long <<FK>>
+    * UserId : long <<FK>>
+    ..
+    * Name : string
+    * Password : string
+    * CreatedAt : DateTimeOffset
+}
+DbGame ||--o{ DbRegistration
+DbUser ||--o{ DbRegistration
+
+
+entity DbPlayer {
+    <<implements>> InGameContext
+    <<implements>> WithCreationTime
+    ==
+    * Id : long <<PK>>
+    * GameId : long <<FK>>
+      UserId : long <<FK>>
+    ..
+    * Number : int
+    * IsClaimed : bool
+    * Name : string
+      LastTurnNumber : int
+      NextTurnNumber : int
+      Password : string
+    * IsQuit : bool
+    * CreatedAt : DateTimeOffset
+}
+DbUser |o--o{ DbPlayer
+DbGame ||--o{ DbPlayer
+
+
+entity DbTurn {
+    <<implements>> InGameContext
+    <<implements>> WithCreationTime
+    ==
+    * GameId : long <<get>> <<set>>
+    * Number : int <<get>> <<set>>
+    ..
+    * State : TurnState <<get>> <<set>>
+      PlayerData : byte[] <<get>> <<set>>
+      GameData : byte[] <<get>> <<set>>
+    * CreatedAt : DateTimeOffset
+}
+DbGame ||--o{ DbTurn
+
+
+entity DbReport {
+    <<implements>> InFactionContext
+    ==
+    * GameId : long
+    * PlayerId : long
+    * TurnNumber : int
+    ..
+    * FactionNumber : int
+    * Source : byte[]
+      Json : byte[]
+      Error : string
+    * IsParsed : bool
+    * IsMerged : bool
+}
+' DbGame ||--o{ DbReport
+DbPlayer ||--o{ DbReport
+DbTurn ||--o{ DbReport
+
+
+entity DbArticle {
+    <<implements>> InTurnContext
+    ==
+    * Id : long <<PK>>
+    * GameId : long <<FK>>
+    ' nullable PlayarID could be a problem
+    * PlayerId : long? <<FK>>
+    * TurnNumber : int <<FK>>
+    ..
+    * Type : string
+    * Text : string
+}
+' DbGame ||--o{ DbArticle
+DbTurn ||--o{ DbArticle
+
+
+entity DbAlliance {
+    <<implements>> InGameContext
+    <<implements>> WithCreationTime
+    ==
+    * Id : long
+    * GameId : long
+    ..
+    * Name : string
+    * CreatedAt : DateTimeOffset
+}
+DbGame ||--o{ DbAlliance
+
+
+entity DbAllianceMember {
+    <<implements>> InPlayerContext
+    <<implements>> WithCreationTime
+    ==
+    * GameId : long <<FK>>
+    * PlayerId : long
+    * AllianceId : long
+    ..
+    * ShareMap : bool
+    * TeachMages : bool
+    * Owner : bool
+    * CanInvite : bool
+    * CreatedAt : DateTimeOffset
+    * AcceptedAt : DateTimeOffset?
+}
+DbAlliance ||--o{ DbAllianceMember
+DbPlayer ||--o{ DbAllianceMember
+
+
+entity DbPlayerTurn {
+    <<implements>> InFactionContext
+    ==
+    + Id : string
+    + GameId : long
+    + PlayerId : long
+    + TurnNumber : int
+    + FactionNumber : int
+    ..
+    + FactionName : string
+    + Unclaimed : int
+    + Income : DbIncome
+    + Expenses : DbExpenses
+    + Statistics : List<DbTurnStatisticsItem>
+    + Treasury : List<DbTreasuryItem>
+    + ReadyAt : DateTimeOffset?
+    + OrdersSubmittedAt : DateTimeOffset?
+    + TimesSubmittedAt : DateTimeOffset?
+    + IsReady : bool
+    + IsOrdersSubmitted : bool
+    + IsTimesSubmitted : bool
+    + IsProcessed : bool
+    ==
+    + Exits : List<DbExit>
+    + Markets : List<DbTradableItem>
+    + Production : List<DbProductionItem>
+    + Factions : List<DbFaction>
+    + Attitudes : List<DbAttitude>
+    + Events : List<DbEvent>
+    + Units : List<DbUnit>
+    + Items : List<DbUnitItem>
+    + Structures : List<DbStructure>
+    + Plans : List<DbStudyPlan>
+    + Battles : List<DbBattle>
+    + Orders : List<DbOrders>
+}
+' DbGame ||--o{ DbPlayerTurn
+DbTurn ||--o{ DbPlayerTurn
+DbPlayer ||--o{ DbPlayerTurn
+' "IStatistics`1" "<DbTurnStatisticsItem>" <|-- DbPlayerTurn
+
+
+entity DbAdditionalReport {
+    <<implements>> InTurnContext
+    ==
+    + Id : long <<key>>
+    + GameId : long
+    + PlayerId : long
+    + TurnNumber : int
+    ..
+    + Name : string
+    + Source : byte[]
+    + Json : byte[]
+    + Error : string
+}
+' DbPlayer ||--o{ DbAdditionalReport
+DbPlayerTurn ||--o{ DbAdditionalReport
+
+
+enum ReportType {
+    Report
+    Map
+}
+DbAdditionalReport *-- ReportType : Type
+
+
+entity DbRegion {
+    <<implements>> InTurnContext
+    ==
+    + Id : string
+    + GameId : long
+    + PlayerId : long
+    + TurnNumber : int
+    ..
+    + X : int
+    + Y : int
+    + Z : int
+    + Explored : bool
+    + LastVisitedAt : int?
+    + Label : string
+    + Province : string
+    + Terrain : string
+    + Settlement : DbSettlement
+    + Population : int
+    + Race : string
+    + Entertainment : int
+    + Tax : int
+    + Wages : double
+    + TotalWages : int
+    + Gate : int?
+    + Markets : List<DbTradableItem>
+    + ForSale : IEnumerable<DbTradableItem>
+    + Wanted : IEnumerable<DbTradableItem>
+    + Produces : List<DbProductionItem>
+    + Income : DbIncome
+    + Expenses : DbExpenses
+    ==
+    + Statistics : List<DbRegionStatisticsItem>
+    + Units : List<DbUnit>
+    + Structures : List<DbStructure>
+    + Events : List<DbEvent>
+}
+' "IStatistics`1" "<DbRegionStatisticsItem>" <|-- DbRegion
+DbPlayerTurn ||--o{ DbRegion
+
+
+class DbExit {
+    <<implements>> InTurnContext
+    ==
+    + GameId : long
+    + PlayerId : long
+    + TurnNumber : int
+    ..
+    + OriginRegionId : string
+    + TargetRegionId : string
+    + Direction : Direction
+    + X : int
+    + Y : int
+    + Z : int
+    + Label : string
+    + Province : string
+    + Terrain : string
+    + Settlement : DbSettlement
+    ==
+    + Origin : DbRegion
+    + Target : DbRegion
+    + Turn : DbPlayerTurn
+}
+DbRegion ||--o{ DbExit
+DbRegion ||--o{ DbExit
+
+'############################
+
+entity DbSharingOptions <<owned>> {
+    + AdvancedResources : bool
+    + Structures : bool
+    + Units : bool
+}
+
+class DbAttitude {
+    + PlayerId : long
+    + TurnNumber : int
+    + FactionNumber : int
+    + TargetFactionNumber : int
+    + Stance : Stance
+    ==
+    + Turn : DbPlayerTurn
+    + Faction : DbFaction
+}
+InFactionContext <|-- DbAttitude
+
+
+
+class DbArmy <<owned>> {
+    + Number : int
+    + Name : string
+}
+
+class DbBattle {
+    + Id : long
+    + PlayerId : long
+    + TurnNumber : int
+    + X : int
+    + Y : int
+    + Z : int
+    + Label : string
+    + Province : string
+    + Terrain : string
+    + Battle : JBattle
+    ==
+    + Attacker : DbArmy
+    + Defender : DbArmy
+    + Turn : DbPlayerTurn
+}
+InTurnContext <|-- DbBattle
+
+
+
+class DbCapacity <<owned>> {
+    + Flying : int
+    + Riding : int
+    + Walking : int
+    + Swimming : int
+}
+
+
+
+class DbEvent {
+    + Id : long
+    + TurnNumber : int
+    + PlayerId : long
+    + FactionNumber : int
+    + RegionId : string
+    + UnitNumber : int?
+    + UnitName : string
+    + MissingUnitNumber : int?
+    + Type : EventType
+    + Category : EventCategory
+    + Message : string
+    + Amount : int?
+    + ItemCode : string
+    + ItemName : string
+    + ItemPrice : int?
+    ==
+    + Turn : DbPlayerTurn
+    + Faction : DbFaction
+    + Region : DbRegion
+    + Unit : DbUnit
+}
+InFactionContext <|-- DbEvent
+
+
+
+class DbFaction {
+    + CompsiteId : FactionId
+    + PlayerId : long
+    + TurnNumber : int
+    + Number : int
+    + Name : string
+    + DefaultAttitude : Stance?
+    ==
+    + Attitudes : List<DbAttitude>
+    + Turn : DbPlayerTurn
+    + Events : List<DbEvent>
+    + Units : List<DbUnit>
+}
+InTurnContext <|-- DbFaction
+
+
+
+class DbFleetContent <<owned>> {
+    + Type : string
+    + Count : int
+}
+
+
+
+class DbIncome <<owned>> {
+    + Work : int
+    + Entertain : int
+    + Tax : int
+    + Pillage : int
+    + Trade : int
+    + Claim : int
+    + Total : int
+}
+
+class DbExpenses <<owned>> {
+    + Trade : int
+    + Study : int
+    + Consume : int
+    + Total : int
+}
+
+
+
+class DbOrders {
+    + PlayerId : long
+    + TurnNumber : int
+    + UnitNumber : int
+    + Orders : string
+    ==
+    + Turn : DbPlayerTurn
+}
+InTurnContext <|-- DbOrders
+
+@enduml

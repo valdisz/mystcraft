@@ -1,0 +1,29 @@
+@startuml
+enum StatisticsCategory {
+    Produced,
+    Bought,
+    Sold,
+    Consumed,
+}
+class DbStatisticsItem {
+    + DbStatisticsItem()
+    + DbStatisticsItem(other:AnItem)
+    + Id : long <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + Category : StatisticsCategory <<get>> <<set>>
+}
+class DbTurnStatisticsItem {
+    + TurnNumber : int <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+class DbRegionStatisticsItem {
+    + TurnNumber : int <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+}
+DbItem <|-- DbStatisticsItem
+InPlayerContext <|-- DbStatisticsItem
+DbStatisticsItem <|-- DbTurnStatisticsItem
+InTurnContext <|-- DbTurnStatisticsItem
+DbStatisticsItem <|-- DbRegionStatisticsItem
+InRegionContext <|-- DbRegionStatisticsItem
+@enduml

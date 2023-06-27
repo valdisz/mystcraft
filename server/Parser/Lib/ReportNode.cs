@@ -65,7 +65,7 @@ namespace advisor {
         public static IReportNode Object(IEnumerable<IReportNode> children) => new ReportObject(children.ToArray());
         public static IReportNode Bag(params IReportNode[] children) => new ReportBag(children);
         public static IReportNode Key(string key, IReportNode value) => new ReportKey(key, value);
-        public static IReportNode Key(string key, Maybe<IReportNode> value) => value ? new ReportKey(key, value.Value) : null;
+        public static IReportNode Key(string key, PMaybe<IReportNode> value) => value ? new ReportKey(key, value.Value) : null;
         public static IReportNode Int(string key, int value) => new ReportKey(key, new ReportInt(value));
         public static IReportNode Real(string key, double value) => new ReportKey(key, new ReportReal(value));
         public static IReportNode Str(string key, string value) => new ReportKey(key, new ReportStr(value));

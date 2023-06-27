@@ -9,7 +9,7 @@ namespace advisor {
 
         private readonly ItemParser itemParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var prefix = p.After("Ready item:").SkipWhitespaces();
             if (!prefix) return Error(prefix);
 
@@ -29,7 +29,7 @@ namespace advisor {
 
         private readonly IParser skillParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var prefix = p.After("Combat spell:").SkipWhitespaces();
             if (!prefix) return Error(prefix);
 
@@ -77,7 +77,7 @@ Ready item: book of exorcism [BKEX].
         readonly IParser readyItemParser;
         readonly IParser combatSpellParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             // don't need dot at the end of line
             p = p.BeforeBackwards(".");
 
@@ -108,11 +108,11 @@ Ready item: book of exorcism [BKEX].
             }
 
             // now check for description, it must start with `;`
-            Maybe<string> description = Maybe<string>.NA;
+            PMaybe<string> description = PMaybe<string>.NA;
             p.PushBookmark();
             if (p.After(";")) {
                 var descPos = p.Pos - 2;
-                description = new Maybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
+                description = new PMaybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
 
                 // w/o description
                 p.PopBookmark();
@@ -178,7 +178,7 @@ Ready item: book of exorcism [BKEX].
             result.Add(ReportNode.Key("items", ReportNode.Array(items)));
             result.AddRange(props);
 
-            return new Maybe<IReportNode>(result);
+            return new PMaybe<IReportNode>(result);
         }
     }
 }

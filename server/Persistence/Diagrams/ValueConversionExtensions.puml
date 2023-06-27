@@ -1,0 +1,5 @@
+@startuml
+class ValueConversionExtensions <<static>> {
+    + {static} HasConversionJson(propertyBuilder:PropertyBuilder<T>, databaseType:DatabaseProvider) : PropertyBuilder<T>
+}
+@enduml

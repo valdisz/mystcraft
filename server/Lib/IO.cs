@@ -1,8 +1,15 @@
 namespace advisor;
 
 using System;
+using System.Threading;
+
+interface WithCancellation {
+    CancellationToken CancellationToken { get; }
+}
 
 public delegate Result<T> IO<T>();
+
+public delegate Result<T> IO<T, R>(R runtime);
 
 public static partial class Prelude {
     public static IO<T> Effect<T>(Func<Result<T>> action)

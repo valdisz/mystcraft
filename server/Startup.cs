@@ -297,13 +297,13 @@ public class Startup {
     }
 
     public void Configure(IApplicationBuilder app) {
-        app.UseForwardedHeaders();
-        app.UseCors();
-        // app.UseResponseCompression();
-
         if (!Env.IsProduction()) {
             app.UseDeveloperExceptionPage();
         }
+
+        app.UseForwardedHeaders();
+        app.UseCors();
+        // app.UseResponseCompression();
 
         if (Env.IsProduction()) {
             app.UseHsts();

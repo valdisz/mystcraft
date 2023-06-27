@@ -11,7 +11,7 @@ namespace advisor
 
         private readonly IParser skillParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var prefix = p.After("Can Study:").SkipWhitespaces();
             if (!prefix) return Error(prefix);
 

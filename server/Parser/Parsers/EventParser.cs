@@ -36,7 +36,7 @@ namespace advisor {
         private readonly LocationParser locationParser;
         private readonly ItemParser itemParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var result = p.Try<IReportNode>(msg => {
                 var unit = unitNameParser.Parse(msg);
                 if (!unit) return Error(unit);
@@ -49,9 +49,9 @@ namespace advisor {
 
                 msg.SkipWhitespaces();
 
-                Maybe<IReportNode> location = null;
-                Maybe<int> amount = null;
-                Maybe<IReportNode> item = null;
+                PMaybe<IReportNode> location = null;
+                PMaybe<int> amount = null;
+                PMaybe<IReportNode> item = null;
 
                 EventCategory category;
                 switch (keyword.ToString().ToLower()) {
@@ -151,6 +151,6 @@ namespace advisor {
             return result;
         }
 
-        private Maybe<int> Money(TextParser p) => p.After("$").Integer();
+        private PMaybe<int> Money(TextParser p) => p.After("$").Integer();
     }
 }

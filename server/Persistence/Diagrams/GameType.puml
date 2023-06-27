@@ -1,0 +1,6 @@
+@startuml
+enum GameType {
+    LOCAL,
+    REMOTE,
+}
+@enduml

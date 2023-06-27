@@ -1,0 +1,45 @@
+@startuml
+class UnitId <<record>> {
+    + PlayerId : long <<get>> <<init>>
+    + TurnNumber : int <<get>> <<init>>
+    + UnitNumber : int <<get>> <<init>>
+}
+class DbUnit {
+    + CompositeId : string <<get>>
+    + {static} MakeId(unit:DbUnit) : string
+    + {static} MakeId(playerId:long, turnNumber:int, unitNumber:int) : string
+    + {static} ParseId(id:string) : UnitId
+    + {static} FilterById(q:IQueryable<DbUnit>, id:UnitId) : IQueryable<DbUnit>
+    + Number : int <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+    + StrcutureId : string <<get>> <<set>>
+    + StructureNumber : int? <<get>> <<set>>
+    + FactionNumber : int? <<get>> <<set>>
+    + Sequence : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Description : string <<get>> <<set>>
+    + OnGuard : bool <<get>> <<set>>
+    + IsMage : bool <<get>> <<set>>
+    + Flags : List<string> <<get>> <<set>>
+    + Weight : int? <<get>> <<set>>
+    + Items : List<DbUnitItem> <<get>> <<set>>
+    + Capacity : DbCapacity <<get>> <<set>>
+    + Skills : List<DbSkill> <<get>> <<set>>
+    + CanStudy : List<string> <<get>> <<set>>
+    + ReadyItem : string <<get>> <<set>>
+    + CombatSpell : string <<get>> <<set>>
+    + Orders : string <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Region : DbRegion <<get>> <<set>>
+    + Faction : DbFaction <<get>> <<set>>
+    + Structure : DbStructure <<get>> <<set>>
+    + StudyPlan : DbStudyPlan <<get>> <<set>>
+    + Events : List<DbEvent> <<get>> <<set>>
+}
+InTurnContext <|-- DbUnit
+@enduml

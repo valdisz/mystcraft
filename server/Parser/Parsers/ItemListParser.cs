@@ -5,7 +5,7 @@ namespace advisor
     public class ItemListParser : BaseParser {
         readonly IParser itemParser = new ItemParser();
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             if (p.Match("none")) {
                 return Ok(ReportNode.Array());
             }
@@ -13,7 +13,7 @@ namespace advisor
             var items = new List<IReportNode>();
             while (!p.EOF) {
                 if (items.Count > 0) {
-                    Maybe<TextParser> result = p.After(",").SkipWhitespaces();
+                    PMaybe<TextParser> result = p.After(",").SkipWhitespaces();
                     if (!result) {
                         return Error(result);
                     }

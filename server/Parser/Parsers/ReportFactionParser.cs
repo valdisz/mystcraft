@@ -9,7 +9,7 @@ namespace advisor
         private readonly FactionNameParser factionName;
         private readonly FactionArgumentParser argumentParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var faction = factionName.Parse(p);
             if (!faction) return Error(faction);
 

@@ -102,7 +102,7 @@ public class BattlesSection : IReportSectionParser {
         }
 
         // soldiers rising
-        Maybe<IReportNode> unitItem;
+        PMaybe<IReportNode> unitItem;
         List<IReportNode> rose = new();
         while ((unitItem = item.Parse(cursor.Value)) == true)
         {
@@ -153,7 +153,7 @@ public class BattlesSection : IReportSectionParser {
 
         await writer.WritePropertyNameAsync("heals");
         await writer.WriteStartArrayAsync();
-        Maybe<IReportNode> heal;
+        PMaybe<IReportNode> heal;
         while ((heal = healingAttempt.Parse(cursor.Value)) == true) {
             await heal.Value.WriteJson(writer);
             await cursor.NextAsync();
@@ -176,7 +176,7 @@ public class BattlesSection : IReportSectionParser {
         await writer.WritePropertyNameAsync("damagedUnits");
         await writer.WriteStartArrayAsync();
         if (cursor.Value.Try(_ => _.Then("Damaged units:"))) {
-            Maybe<int> p;
+            PMaybe<int> p;
             while ((p = cursor.Value.Skip(c => char.IsWhiteSpace(c) || c == ',').Integer()) == true) {
                 await writer.WriteValueAsync(p.Value);
             }
@@ -222,7 +222,7 @@ public class BattlesSection : IReportSectionParser {
             }
 
             // round battle log
-            Maybe<TextParser> roundHeader;
+            PMaybe<TextParser> roundHeader;
             if ((roundHeader = p.Try(x => x.OneOf(
                 _ => _.Then("Round ").MatchEnd(":"),
                 _ => _.MatchEnd(" is routed!"),
@@ -289,7 +289,7 @@ public class HealingAttemptParser : BaseParser {
 
     private readonly IParser unitName;
 
-    protected override Maybe<IReportNode> Execute(TextParser p) {
+    protected override PMaybe<IReportNode> Execute(TextParser p) {
         var unit = unitName.Parse(p);
         if (!unit) return Error(unit);
 
@@ -315,7 +315,7 @@ public class CasualtiesParser : BaseParser {
 
     private readonly IParser unitName;
 
-    protected override Maybe<IReportNode> Execute(TextParser p) {
+    protected override PMaybe<IReportNode> Execute(TextParser p) {
         var unit = unitName.Parse(p);
         if (!unit) return Error(unit);
 

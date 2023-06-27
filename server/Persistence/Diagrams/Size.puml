@@ -1,0 +1,24 @@
+@startuml
+class Size <<static>> {
+    + <<const>> REGION_ID : int = 14
+    + <<const>> STRUCTURE_ID : int = 24
+    + <<const>> LABEL : int = 256
+    + <<const>> DESCRIPTION : int = 256
+    + <<const>> PROVINCE : int = 256
+    + <<const>> TERRAIN : int = 256
+    + <<const>> LEVEL : int = 128
+    + <<const>> FACTION : int = 256
+    + <<const>> RACE : int = 256
+    + <<const>> NAME : int = 256
+    + <<const>> TYPE : int = 64
+    + <<const>> ITEM_NAME : int = 256
+    + <<const>> ITEM_CODE : int = 8
+    + <<const>> SKILL_CODE : int = 8
+    + <<const>> PASSWORD : int = 64
+    + <<const>> SETTLEMENT : int = 256
+    + <<const>> STRUCTURE : int = 128
+    + <<const>> EMAIL : int = 128
+    + <<const>> SALT : int = 32
+    + <<const>> DIGEST : int = 128
+}
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+class DbTransportationLoad {
+    + Used : int <<get>> <<set>>
+    + Max : int <<get>> <<set>>
+}
+@enduml

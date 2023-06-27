@@ -1,0 +1,5 @@
+@startuml
+interface WithCreationTime {
+    CreatedAt : DateTimeOffset <<get>> <<set>>
+}
+@enduml

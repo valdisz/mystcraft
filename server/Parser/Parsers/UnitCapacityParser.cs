@@ -2,7 +2,7 @@ namespace advisor
 {
     // Capacity: 0/0/45/0
     public class UnitCapacityParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var capacities = p.After("Capacity:").SkipWhitespaces();
             if (!capacities) return Error(capacities);
 

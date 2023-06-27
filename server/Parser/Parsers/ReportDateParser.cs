@@ -3,7 +3,7 @@ namespace advisor
     using System;
 
     public class ReportDateParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var month = p.Before(",").AsString();
             if (!month) return Error(month);
 

@@ -1,6 +1,6 @@
 namespace advisor {
     public class RegionGateParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var gate = p
                 .After("There is a Gate here")
                 .SkipWhitespaces()

@@ -1,6 +1,6 @@
 namespace advisor {
     public class FactionStatusItemParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var key = p.Before(":").AsString();
             if (!key) return Error(key);
 

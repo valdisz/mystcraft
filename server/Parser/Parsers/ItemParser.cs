@@ -10,7 +10,7 @@ namespace advisor
     // 2 high elves [HELF] at $48
     // unlimited high elves [HELF] at $75
     public class ItemParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var amount = p.Try(pp => pp.Word().OneOf(
                 _ => _.Match("unlimited").Map(_ => -1),
                 _ => _.Integer()

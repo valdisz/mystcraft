@@ -11,7 +11,7 @@ namespace advisor {
         readonly IParser itemParser = new ItemParser();
         readonly IParser skillParser = new BattleSkillParser();
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             // don't need dot at the end of line
             p = p.BeforeBackwards(".");
 
@@ -25,11 +25,11 @@ namespace advisor {
             var faction = p.Try(parser => factionParser.Parse(parser.After(",").SkipWhitespaces()));
 
             // now check for description, it must start with `;`
-            Maybe<string> description = Maybe<string>.NA;
+            PMaybe<string> description = PMaybe<string>.NA;
             p.PushBookmark();
             if (p.After(";")) {
                 var descPos = p.Pos - 2;
-                description = new Maybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
+                description = new PMaybe<string>(p.SkipWhitespaces().SkipWhitespacesBackwards().AsString());
 
                 // w/o description
                 p.PopBookmark();
@@ -72,7 +72,7 @@ namespace advisor {
             result.Add(ReportNode.Key("items", ReportNode.Array(items)));
             result.Add(ReportNode.Key("skills", ReportNode.Array(skills)));
 
-            return new Maybe<IReportNode>(result);
+            return new PMaybe<IReportNode>(result);
         }
     }
 }

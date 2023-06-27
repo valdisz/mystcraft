@@ -20,7 +20,7 @@ namespace advisor
         private readonly LocationParser locationParser;
         private readonly SettlementParser settlementParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             p.After("Exits:").SkipWhitespaces();
 
             List<IReportNode> exits = new List<IReportNode>();

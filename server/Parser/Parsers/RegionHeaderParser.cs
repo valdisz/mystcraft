@@ -11,7 +11,7 @@ namespace advisor
         private readonly LocationParser locationParser;
         private readonly SettlementParser settlementParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var location = locationParser.Parse(p);
             if (!location) return Error(location);
 
@@ -24,7 +24,7 @@ namespace advisor
                 var race = x.Between("(", ")").AsString();
                 if (!race) return race.Convert<(int, string)>();
 
-                return new Maybe<(int, string)>((amount.Value, race.Value));
+                return new PMaybe<(int, string)>((amount.Value, race.Value));
             });
 
             var tax = p.Try(x => x.After("$").Integer());

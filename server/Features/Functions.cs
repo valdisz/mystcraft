@@ -24,6 +24,9 @@ public static class Functions {
     public static AsyncIO<DbPlayer> Validate(this AsyncIO<Option<DbPlayer>> self, Func<DbPlayer, Result<DbPlayer>> validator)
         => self.Validate("Player does not exist.", validator);
 
+    public static AsyncIO<DbTurn> Validate(this AsyncIO<Option<DbTurn>> self, Func<DbTurn, Result<DbTurn>> validator)
+        => self.Validate("Turn does not exist.", validator);
+
     public static Task<R> RunWithRollback<T, R>(this AsyncIO<T> self, IUnitOfWork unitOfWork, Func<T, R> onSuccess, Func<Error, R> onFailure, CancellationToken cancellation)
         => self
             .Bind(value => unitOfWork.CommitTransaction(cancellation).Return(value))

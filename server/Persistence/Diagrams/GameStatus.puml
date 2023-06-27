@@ -1,0 +1,9 @@
+@startuml
+enum GameStatus {
+    NEW,
+    RUNNING,
+    LOCKED,
+    PAUSED,
+    COMPLEATED,
+}
+@enduml

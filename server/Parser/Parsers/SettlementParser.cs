@@ -1,7 +1,7 @@
 namespace advisor
 {
     public class SettlementParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var name = p.After("contains").SkipWhitespaces().Before("[").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
 

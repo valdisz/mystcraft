@@ -7,7 +7,7 @@ namespace advisor
 
         private readonly CoordsParser coordsParser;
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var terrain = p.Before("(").SkipWhitespacesBackwards().AsString();
             if (!terrain) return Error(terrain);
 
@@ -17,7 +17,7 @@ namespace advisor
             var province = p.After("in").SkipWhitespaces().OneOf(
                 x => x.Before(","),
                 x => x.Before("."),
-                x => new Maybe<TextParser>(x)
+                x => new PMaybe<TextParser>(x)
             ).AsString();
             if (!province) return Error(province);
 

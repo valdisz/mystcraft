@@ -1,0 +1,13 @@
+@startuml
+class DbStudyPlan {
+    + UnitNumber : int <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + Target : DbSkill <<get>> <<set>>
+    + Study : string <<get>> <<set>>
+    + Teach : List<int> <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Unit : DbUnit <<get>> <<set>>
+}
+InTurnContext <|-- DbStudyPlan
+@enduml

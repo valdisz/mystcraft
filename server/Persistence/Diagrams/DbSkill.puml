@@ -1,0 +1,8 @@
+@startuml
+class DbSkill {
+    + Code : string <<get>> <<set>>
+    + Level : int? <<get>> <<set>>
+    + Days : int? <<get>> <<set>>
+}
+AnSkill <|-- DbSkill
+@enduml

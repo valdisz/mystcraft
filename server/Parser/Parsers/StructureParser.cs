@@ -17,7 +17,7 @@ namespace advisor {
     // + Trade Academy [NIMB] [Nort Triders] [2] : Tower; comment.
     // + {Name} [{Number}] : {Type}, {Int} {Type}, {Flag}; {Key}: {Value}; {Description}.
     public class StructureParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var nameAndNumber = p.After("+").SkipWhitespaces().Before("] : ");  // lets hope noone will use this combination in their building names
             if (!nameAndNumber) return Error(nameAndNumber);
 
@@ -103,7 +103,7 @@ namespace advisor {
                         var max = targetProp.After("/").Integer();
                         if (!max) return max.Convert<IReportNode>();
 
-                        return new Maybe<IReportNode>(ReportNode.Key("load", ReportNode.Object(
+                        return new PMaybe<IReportNode>(ReportNode.Key("load", ReportNode.Object(
                             ReportNode.Int("used", value),
                             ReportNode.Int("max", max)
                         )));
@@ -118,7 +118,7 @@ namespace advisor {
                         var max = targetProp.After("/").Integer();
                         if (!max) return max.Convert<IReportNode>();
 
-                        return new Maybe<IReportNode>(ReportNode.Key("sailors", ReportNode.Object(
+                        return new PMaybe<IReportNode>(ReportNode.Key("sailors", ReportNode.Object(
                             ReportNode.Int("current", value),
                             ReportNode.Int("required", max)
                         )));

@@ -1,0 +1,16 @@
+@startuml
+class Queries <<static>> {
+    + {static} OnlyPlayer(query:IQueryable<T>, playerId:long) : IQueryable<T>
+    + {static} OnlyPlayer(query:IQueryable<T>, context:InPlayerContext) : IQueryable<T>
+    + {static} OnlyPlayer(query:IQueryable<T>, context:DbPlayer) : IQueryable<T>
+    + {static} InTurn(query:IQueryable<T>, playerId:long, turnNumber:int) : IQueryable<T>
+    + {static} InTurn(query:IQueryable<T>, context:InTurnContext) : IQueryable<T>
+    + {static} InTurn(query:IQueryable<T>, context:DbPlayerTurn) : IQueryable<T>
+    + {static} OnlyFaction(query:IQueryable<T>, playerId:long, turnNumber:int, factionNumber:int) : IQueryable<T>
+    + {static} OnlyFaction(query:IQueryable<T>, context:InFactionContext) : IQueryable<T>
+    + {static} OnlyFaction(query:IQueryable<T>, context:DbFaction) : IQueryable<T>
+    + {static} OnlyActivePlayers(query:IQueryable<DbPlayer>) : IQueryable<DbPlayer>
+    + {static} InGame(query:IQueryable<T>, gameId:long) : IQueryable<T>
+    + {static} InGame(query:IQueryable<T>, game:DbGame) : IQueryable<T>
+}
+@enduml

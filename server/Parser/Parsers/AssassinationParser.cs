@@ -6,7 +6,7 @@ namespace advisor
         readonly IParser unitName = new UnitNameParser();
         readonly IParser locationParser = new LocationParser(new CoordsParser());
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var h = p.BeforeBackwards("!");
             if (!h) return Error(h);
 

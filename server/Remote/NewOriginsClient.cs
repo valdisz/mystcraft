@@ -8,20 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AngleSharp;
 
-
-public record RemoteFaction(int? Number, string Name, bool OrdersSubmitted, bool TimesSubmitted) {
-    public bool IsNew => Number == null;
-}
-
-public record RemoteArticle(string Name, string Contents);
-
-public interface IRemoteGame {
-    Task<int> GetCurrentTurnNumberAsync(CancellationToken cancellation = default);
-    Task<string> DownloadReportAsync(int factionNumber, string password, CancellationToken cancellation = default);
-    IAsyncEnumerable<RemoteFaction> ListFactionsAsync(CancellationToken cancellation = default);
-    IAsyncEnumerable<RemoteArticle> ListArticlesAsync(CancellationToken cancellation = default);
-}
-
 public class NewOrigins : IRemoteGame {
     public NewOrigins(string url, IHttpClientFactory httpClientFactory, IConfiguration confg = null) {
         this.url = url;

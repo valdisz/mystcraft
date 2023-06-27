@@ -9,14 +9,14 @@ namespace advisor
 
         private readonly ItemParser itemParser;
 
-        private Maybe<IReportNode> ParaseItems(TextParser src, IParser parser, List<IReportNode> items) {
+        private PMaybe<IReportNode> ParaseItems(TextParser src, IParser parser, List<IReportNode> items) {
             if (src.Match("none")) {
                 return null;
             }
 
             while (!src.EOF) {
                 if (items.Count > 0) {
-                    Maybe<TextParser> result = src.After(",").SkipWhitespaces();
+                    PMaybe<TextParser> result = src.After(",").SkipWhitespaces();
                     if (!result) {
                         return Error(result);
                     }
@@ -33,12 +33,12 @@ namespace advisor
             return null;
         }
 
-        protected override Maybe<IReportNode> Execute(TextParser p) {
-            Maybe<double> wages = null;
-            Maybe<int> totalWages = null;
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
+            PMaybe<double> wages = null;
+            PMaybe<int> totalWages = null;
             List<IReportNode> wanted = new List<IReportNode>();
             List<IReportNode> forSale = new List<IReportNode>();
-            Maybe<int> entertainment = null;
+            PMaybe<int> entertainment = null;
             List<IReportNode> products = new List<IReportNode>();
 
             p.Before("Wages:");
@@ -49,7 +49,7 @@ namespace advisor
 
                 p.After(":").SkipWhitespaces();
 
-                Maybe<TextParser> value;
+                PMaybe<TextParser> value;
                 switch (prop.Value) {
                     case "Wages": {
                         value = p.OneOf(
@@ -74,7 +74,7 @@ namespace advisor
                 switch (prop.Value) {
                     case "Wages": {
                         wages = value.Value.EOF
-                            ? new Maybe<double>(0)
+                            ? new PMaybe<double>(0)
                             : value.Seek(1).Real();
                         if (!wages) {
                             return Error(wages);

@@ -13,7 +13,7 @@ namespace advisor
             await writer.WritePropertyNameAsync("skillReports");
             await writer.WriteStartArrayAsync();
 
-            Maybe<IReportNode> skill = Maybe<IReportNode>.NA;
+            PMaybe<IReportNode> skill = PMaybe<IReportNode>.NA;
             do {
                 await cursor.SkipEmptyLines();
                 var p = cursor.Value;

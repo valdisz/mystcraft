@@ -2,7 +2,7 @@ namespace advisor
 {
     // combat [COMB] 1 (31)
     public class SkillParser : BaseParser {
-        protected override Maybe<IReportNode> Execute(TextParser p) {
+        protected override PMaybe<IReportNode> Execute(TextParser p) {
             var name = p.Before("[").SkipWhitespacesBackwards().AsString();
             if (!name) return Error(name);
 
@@ -11,7 +11,7 @@ namespace advisor
 
             p.PushBookmark();
             var level = p.SkipWhitespaces().Integer();
-            var days = Maybe<int>.NA;
+            var days = PMaybe<int>.NA;
             if (level) {
                 p.RemoveBookmark();
                 days = p.Try(parser => parser.SkipWhitespaces().Between("(", ")").Integer());

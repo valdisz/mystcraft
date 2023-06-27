@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using advisor.Features;
 using HotChocolate;
 using HotChocolate.AspNetCore.Authorization;
+using HotChocolate.Resolvers;
 using HotChocolate.Types;
 using HotChocolate.Types.Relay;
 using MediatR;
@@ -109,7 +110,7 @@ public class Mutation {
     // }
 
     [Authorize(Policy = Policies.OwnPlayer)]
-    public async Task<UnitOrdersSetResult> SetOrders(IMediator mediator, [ID("Unit")] string unitId, string orders) {
+    public async Task<UnitOrdersSetResult> SetOrders(IResolverContext context, IMediator mediator, [ID("Unit")] string unitId, string orders) {
         try {
             var parsedId = DbUnit.ParseId(unitId);
             var result = await mediator.Send(new UnitOrdersSet(parsedId.PlayerId, parsedId.TurnNumber + 1, parsedId.UnitNumber, orders));

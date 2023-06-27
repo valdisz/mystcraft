@@ -1,0 +1,6 @@
+@startuml
+class DbSailors {
+    + Current : int <<get>> <<set>>
+    + Required : int <<get>> <<set>>
+}
+@enduml

@@ -2,20 +2,20 @@ namespace advisor
 {
     using System;
 
-    public class Maybe<T> {
-        public Maybe(T value) {
+    public class PMaybe<T> {
+        public PMaybe(T value) {
             Success = true;
             this.value = value;
         }
 
-        public Maybe(string error, int ln, int col) {
+        public PMaybe(string error, int ln, int col) {
             Success = false;
             Error = error;
             Ln = ln;
             Col = col;
         }
 
-        public static readonly Maybe<T> NA = new Maybe<T>("N/A", 0, 0);
+        public static readonly PMaybe<T> NA = new PMaybe<T>("N/A", 0, 0);
 
         private T value;
         public T Value {
@@ -34,12 +34,12 @@ namespace advisor
             ? Value.ToString()
             : $"[ERROR] ({Ln}:{Col}) {Error}";
 
-        public static implicit operator T(Maybe<T> v) => v.Value;
+        public static implicit operator T(PMaybe<T> v) => v.Value;
 
-        public static implicit operator bool(Maybe<T> v) => v != null && v.Success;
+        public static implicit operator bool(PMaybe<T> v) => v != null && v.Success;
 
-        public Maybe<TOut> Convert<TOut>() {
-            if (!Success) return new Maybe<TOut>(Error, Ln, Col);
+        public PMaybe<TOut> Convert<TOut>() {
+            if (!Success) return new PMaybe<TOut>(Error, Ln, Col);
 
             throw new InvalidCastException();
         }

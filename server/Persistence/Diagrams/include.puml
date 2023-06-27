@@ -1,0 +1,720 @@
+@startuml
+class DbGameEngine {
+    + Id : long <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + CreatedAt : DateTimeOffset <<get>> <<set>>
+    + Contents : byte[] <<get>> <<set>>
+    + Games : List<DbGame> <<get>> <<set>>
+}
+class DbCapacity {
+    + Flying : int <<get>> <<set>>
+    + Riding : int <<get>> <<set>>
+    + Walking : int <<get>> <<set>>
+    + Swimming : int <<get>> <<set>>
+}
+enum Market {
+    FOR_SALE,
+    WANTED,
+}
+class DbPlayerTurn {
+    + {static} CreateId(playerId:long, turnNumber:int) : string
+    + {static} CreateId(player:DbPlayerTurn) : string
+    + {static} ParseId(id:string) : (long playerId, int turnNumber)
+    + Id : string <<get>>
+    + GameId : long <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + FactionName : string <<get>> <<set>>
+    + FactionNumber : int <<get>> <<set>>
+    + Unclaimed : int <<get>> <<set>>
+    + Income : DbIncome <<get>> <<set>>
+    + Expenses : DbExpenses <<get>> <<set>>
+    + Statistics : List<DbTurnStatisticsItem> <<get>> <<set>>
+    + Treasury : List<DbTreasuryItem> <<get>> <<set>>
+    + ReadyAt : DateTimeOffset? <<get>> <<set>>
+    + OrdersSubmittedAt : DateTimeOffset? <<get>> <<set>>
+    + TimesSubmittedAt : DateTimeOffset? <<get>> <<set>>
+    + IsReady : bool <<get>>
+    + IsOrdersSubmitted : bool <<get>>
+    + IsTimesSubmitted : bool <<get>>
+    + IsProcessed : bool <<get>> <<set>>
+    + Player : DbPlayer <<get>> <<set>>
+    + Reports : List<DbAdditionalReport> <<get>> <<set>>
+    + Regions : List<DbRegion> <<get>> <<set>>
+    + Exits : List<DbExit> <<get>> <<set>>
+    + Markets : List<DbTradableItem> <<get>> <<set>>
+    + Production : List<DbProductionItem> <<get>> <<set>>
+    + Factions : List<DbFaction> <<get>> <<set>>
+    + Attitudes : List<DbAttitude> <<get>> <<set>>
+    + Events : List<DbEvent> <<get>> <<set>>
+    + Units : List<DbUnit> <<get>> <<set>>
+    + Items : List<DbUnitItem> <<get>> <<set>>
+    + Structures : List<DbStructure> <<get>> <<set>>
+    + Plans : List<DbStudyPlan> <<get>> <<set>>
+    + Battles : List<DbBattle> <<get>> <<set>>
+    + Orders : List<DbOrders> <<get>> <<set>>
+}
+InTurnContext <|-- DbPlayerTurn
+InGameContext <|-- DbPlayerTurn
+"IStatistics`1" "<DbTurnStatisticsItem>" <|-- DbPlayerTurn
+class UnitId <<record>> {
+    + PlayerId : long <<get>> <<init>>
+    + TurnNumber : int <<get>> <<init>>
+    + UnitNumber : int <<get>> <<init>>
+}
+class DbUnit {
+    + CompositeId : string <<get>>
+    + {static} MakeId(unit:DbUnit) : string
+    + {static} MakeId(playerId:long, turnNumber:int, unitNumber:int) : string
+    + {static} ParseId(id:string) : UnitId
+    + {static} FilterById(q:IQueryable<DbUnit>, id:UnitId) : IQueryable<DbUnit>
+    + Number : int <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+    + StrcutureId : string <<get>> <<set>>
+    + StructureNumber : int? <<get>> <<set>>
+    + FactionNumber : int? <<get>> <<set>>
+    + Sequence : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Description : string <<get>> <<set>>
+    + OnGuard : bool <<get>> <<set>>
+    + IsMage : bool <<get>> <<set>>
+    + Flags : List<string> <<get>> <<set>>
+    + Weight : int? <<get>> <<set>>
+    + Items : List<DbUnitItem> <<get>> <<set>>
+    + Capacity : DbCapacity <<get>> <<set>>
+    + Skills : List<DbSkill> <<get>> <<set>>
+    + CanStudy : List<string> <<get>> <<set>>
+    + ReadyItem : string <<get>> <<set>>
+    + CombatSpell : string <<get>> <<set>>
+    + Orders : string <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Region : DbRegion <<get>> <<set>>
+    + Faction : DbFaction <<get>> <<set>>
+    + Structure : DbStructure <<get>> <<set>>
+    + StudyPlan : DbStudyPlan <<get>> <<set>>
+    + Events : List<DbEvent> <<get>> <<set>>
+}
+InTurnContext <|-- DbUnit
+class DbIncome {
+    + Work : int <<get>> <<set>>
+    + Entertain : int <<get>> <<set>>
+    + Tax : int <<get>> <<set>>
+    + Pillage : int <<get>> <<set>>
+    + Trade : int <<get>> <<set>>
+    + Claim : int <<get>> <<set>>
+    + Total : int <<get>>
+}
+class DbExpenses {
+    + Trade : int <<get>> <<set>>
+    + Study : int <<get>> <<set>>
+    + Consume : int <<get>> <<set>>
+    + Total : int <<get>>
+}
+enum DigestAlgorithm {
+    SHA256,
+}
+class DbUser {
+    + Id : long <<get>> <<set>>
+    + Email : string <<get>> <<set>>
+    + Salt : string <<get>> <<set>>
+    + Algorithm : DigestAlgorithm <<get>> <<set>>
+    + Digest : string <<get>> <<set>>
+    + CreatedAt : DateTimeOffset <<get>> <<set>>
+    + LastLoginAt : DateTimeOffset <<get>> <<set>>
+    + Roles : List<string> <<get>> <<set>>
+    + Registrations : List<DbRegistration> <<get>> <<set>>
+    + Players : List<DbPlayer> <<get>> <<set>>
+}
+WithCreationTime <|-- DbUser
+class DbArticle {
+    + Id : long <<get>> <<set>>
+    + GameId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long? <<get>> <<set>>
+    + Type : string <<get>> <<set>>
+    + Text : string <<get>> <<set>>
+    + Game : DbGame <<get>> <<set>>
+    + Turn : DbTurn <<get>> <<set>>
+}
+class DbAttitude {
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + FactionNumber : int <<get>> <<set>>
+    + TargetFactionNumber : int <<get>> <<set>>
+    + Stance : Stance <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Faction : DbFaction <<get>> <<set>>
+}
+InFactionContext <|-- DbAttitude
+class DbArmy {
+    + Number : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+}
+class DbBattle {
+    + Id : long <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + Province : string <<get>> <<set>>
+    + Terrain : string <<get>> <<set>>
+    + Attacker : DbArmy <<get>> <<set>>
+    + Defender : DbArmy <<get>> <<set>>
+    + Battle : JBattle <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+InTurnContext <|-- DbBattle
+class DbRegistration {
+    + Id : long <<get>> <<set>>
+    + GameId : long <<get>> <<set>>
+    + UserId : long <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Password : string <<get>> <<set>>
+    + User : DbUser <<get>> <<set>>
+    + Game : DbGame <<get>> <<set>>
+}
+InGameContext <|-- DbRegistration
+enum DatabaseProvider {
+    SQLite,
+    PgSQL,
+    MsSQL,
+}
+class DbStructure {
+    + CompositeId : StructureId <<get>>
+    + {static} MakeId(playerId:long, turnNumber:int, structureId:string) : StructureId
+    + {static} MakeId(structure:DbStructure) : StructureId
+    + {static} FilterById(q:IQueryable<DbStructure>, id:StructureId) : IQueryable<DbStructure>
+    + Id : string <<get>> <<set>>
+    + {static} MakeId(number:int, regionId:string) : string
+    + {static} IsBuilding(number:int) : bool
+    + {static} IsShip(number:int) : bool
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + Sequence : int <<get>> <<set>>
+    + Number : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Type : string <<get>> <<set>>
+    + Description : string <<get>> <<set>>
+    + Contents : List<DbFleetContent> <<get>> <<set>>
+    + Flags : List<string> <<get>> <<set>>
+    + SailDirections : List<Direction> <<get>> <<set>>
+    + Speed : int? <<get>> <<set>>
+    + Needs : int? <<get>> <<set>>
+    + Load : DbTransportationLoad <<get>> <<set>>
+    + Sailors : DbSailors <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Region : DbRegion <<get>> <<set>>
+    + Units : List<DbUnit> <<get>> <<set>>
+}
+InTurnContext <|-- DbStructure
+interface InPlayerContext {
+    PlayerId : long <<get>> <<set>>
+}
+class Size <<static>> {
+    + <<const>> REGION_ID : int = 14
+    + <<const>> STRUCTURE_ID : int = 24
+    + <<const>> LABEL : int = 256
+    + <<const>> DESCRIPTION : int = 256
+    + <<const>> PROVINCE : int = 256
+    + <<const>> TERRAIN : int = 256
+    + <<const>> LEVEL : int = 128
+    + <<const>> FACTION : int = 256
+    + <<const>> RACE : int = 256
+    + <<const>> NAME : int = 256
+    + <<const>> TYPE : int = 64
+    + <<const>> ITEM_NAME : int = 256
+    + <<const>> ITEM_CODE : int = 8
+    + <<const>> SKILL_CODE : int = 8
+    + <<const>> PASSWORD : int = 64
+    + <<const>> SETTLEMENT : int = 256
+    + <<const>> STRUCTURE : int = 128
+    + <<const>> EMAIL : int = 128
+    + <<const>> SALT : int = 32
+    + <<const>> DIGEST : int = 128
+}
+enum StatisticsCategory {
+    Produced,
+    Bought,
+    Sold,
+    Consumed,
+}
+class DbStatisticsItem {
+    + DbStatisticsItem()
+    + DbStatisticsItem(other:AnItem)
+    + Id : long <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + Category : StatisticsCategory <<get>> <<set>>
+}
+class DbTurnStatisticsItem {
+    + TurnNumber : int <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+class DbRegionStatisticsItem {
+    + TurnNumber : int <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+}
+DbItem <|-- DbStatisticsItem
+InPlayerContext <|-- DbStatisticsItem
+DbStatisticsItem <|-- DbTurnStatisticsItem
+InTurnContext <|-- DbTurnStatisticsItem
+DbStatisticsItem <|-- DbRegionStatisticsItem
+InRegionContext <|-- DbRegionStatisticsItem
+class DbFaction {
+    + CompsiteId : FactionId <<get>>
+    + {static} MakeId(playerId:long, turnNumber:int, factionNumber:int) : FactionId
+    + {static} MakeId(faction:DbFaction) : FactionId
+    + {static} FilterById(q:IQueryable<DbFaction>, id:FactionId) : IQueryable<DbFaction>
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + Number : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + DefaultAttitude : Stance? <<get>> <<set>>
+    + Attitudes : List<DbAttitude> <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Events : List<DbEvent> <<get>> <<set>>
+    + Units : List<DbUnit> <<get>> <<set>>
+}
+InTurnContext <|-- DbFaction
+class DbExit {
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + OriginRegionId : string <<get>> <<set>>
+    + TargetRegionId : string <<get>> <<set>>
+    + Direction : Direction <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + Province : string <<get>> <<set>>
+    + Terrain : string <<get>> <<set>>
+    + Settlement : DbSettlement <<get>> <<set>>
+    + Origin : DbRegion <<get>> <<set>>
+    + Target : DbRegion <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+InTurnContext <|-- DbExit
+class RegionId <<record>> {
+    + PlayerId : long <<get>> <<init>>
+    + TurnNumber : int <<get>> <<init>>
+    + X : int <<get>> <<init>>
+    + Y : int <<get>> <<init>>
+    + Z : int <<get>> <<init>>
+    - {static} <<readonly>> PATTERN : Regex
+    + {static} CreateFrom(region:DbRegion) : RegionId
+    + {static} CreateFrom(s:string) : RegionId
+    + <<override>> ToString() : string
+}
+class DbRegion {
+    + PublicId : string <<get>>
+    + Id : string <<get>> <<set>>
+    + {static} MakeId(x:int, y:int, z:int) : string
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + X : int <<get>> <<set>>
+    + Y : int <<get>> <<set>>
+    + Z : int <<get>> <<set>>
+    + Explored : bool <<get>> <<set>>
+    + LastVisitedAt : int? <<get>> <<set>>
+    + Label : string <<get>> <<set>>
+    + Province : string <<get>> <<set>>
+    + Terrain : string <<get>> <<set>>
+    + Settlement : DbSettlement <<get>> <<set>>
+    + Population : int <<get>> <<set>>
+    + Race : string <<get>> <<set>>
+    + Entertainment : int <<get>> <<set>>
+    + Tax : int <<get>> <<set>>
+    + Wages : double <<get>> <<set>>
+    + TotalWages : int <<get>> <<set>>
+    + Gate : int? <<get>> <<set>>
+    + Markets : List<DbTradableItem> <<get>> <<set>>
+    + ForSale : IEnumerable<DbTradableItem> <<get>>
+    + Wanted : IEnumerable<DbTradableItem> <<get>>
+    + Produces : List<DbProductionItem> <<get>> <<set>>
+    + Income : DbIncome <<get>> <<set>>
+    + Expenses : DbExpenses <<get>> <<set>>
+    + Statistics : List<DbRegionStatisticsItem> <<get>> <<set>>
+    + Exits : List<DbExit> <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Units : List<DbUnit> <<get>> <<set>>
+    + Structures : List<DbStructure> <<get>> <<set>>
+    + Events : List<DbEvent> <<get>> <<set>>
+    + <<override>> ToString() : string
+}
+InTurnContext <|-- DbRegion
+"IStatistics`1" "<DbRegionStatisticsItem>" <|-- DbRegion
+class DbFleetContent {
+    + Type : string <<get>> <<set>>
+    + Count : int <<get>> <<set>>
+}
+class Queries <<static>> {
+    + {static} OnlyPlayer(query:IQueryable<T>, playerId:long) : IQueryable<T>
+    + {static} OnlyPlayer(query:IQueryable<T>, context:InPlayerContext) : IQueryable<T>
+    + {static} OnlyPlayer(query:IQueryable<T>, context:DbPlayer) : IQueryable<T>
+    + {static} InTurn(query:IQueryable<T>, playerId:long, turnNumber:int) : IQueryable<T>
+    + {static} InTurn(query:IQueryable<T>, context:InTurnContext) : IQueryable<T>
+    + {static} InTurn(query:IQueryable<T>, context:DbPlayerTurn) : IQueryable<T>
+    + {static} OnlyFaction(query:IQueryable<T>, playerId:long, turnNumber:int, factionNumber:int) : IQueryable<T>
+    + {static} OnlyFaction(query:IQueryable<T>, context:InFactionContext) : IQueryable<T>
+    + {static} OnlyFaction(query:IQueryable<T>, context:DbFaction) : IQueryable<T>
+    + {static} OnlyActivePlayers(query:IQueryable<DbPlayer>) : IQueryable<DbPlayer>
+    + {static} InGame(query:IQueryable<T>, gameId:long) : IQueryable<T>
+    + {static} InGame(query:IQueryable<T>, game:DbGame) : IQueryable<T>
+}
+enum GameType {
+    LOCAL,
+    REMOTE,
+}
+class DbSharingOptions {
+    + AdvancedResources : bool <<get>> <<set>>
+    + Structures : bool <<get>> <<set>>
+    + Units : bool <<get>> <<set>>
+}
+class DbAllianceMember {
+    + AllianceId : long <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + CreatedAt : DateTimeOffset <<get>> <<set>>
+    + AcceptedAt : DateTimeOffset? <<get>> <<set>>
+    + ShareMap : bool <<get>> <<set>>
+    + TeachMages : bool <<get>> <<set>>
+    + Owner : bool <<get>> <<set>>
+    + CanInvite : bool <<get>> <<set>>
+    + Alliance : DbAlliance <<get>> <<set>>
+    + Player : DbPlayer <<get>> <<set>>
+}
+InPlayerContext <|-- DbAllianceMember
+interface WithCreationTime {
+    CreatedAt : DateTimeOffset <<get>> <<set>>
+}
+class CreationTimeInterceptor {
+    + CreationTimeInterceptor(time:ITime)
+    - <<readonly>> time : ITime
+    + <<override>> SavingChanges(eventData:DbContextEventData, result:InterceptionResult<int>) : InterceptionResult<int>
+    + <<override>> SavingChangesAsync(eventData:DbContextEventData, result:InterceptionResult<int>, cancellationToken:CancellationToken) : ValueTask<InterceptionResult<int>>
+}
+SaveChangesInterceptor <|-- CreationTimeInterceptor
+class DbPlayer {
+    + Id : long <<get>> <<set>>
+    + UserId : long? <<get>> <<set>>
+    + GameId : long <<get>> <<set>>
+    + Number : int <<get>> <<set>>
+    + IsClaimed : bool <<get>>
+    + Name : string <<get>> <<set>>
+    + LastTurnNumber : int? <<get>> <<set>>
+    + NextTurnNumber : int? <<get>> <<set>>
+    + Password : string <<get>> <<set>>
+    + IsQuit : bool <<get>> <<set>>
+    + User : DbUser <<get>> <<set>>
+    + Game : DbGame <<get>> <<set>>
+    + Reports : List<DbReport> <<get>> <<set>>
+    + Turns : List<DbPlayerTurn> <<get>> <<set>>
+    + AdditionalReports : List<DbAdditionalReport> <<get>> <<set>>
+    + AllianceMembererships : List<DbAllianceMember> <<get>> <<set>>
+}
+InGameContext <|-- DbPlayer
+class DbAlliance {
+    + Id : long <<get>> <<set>>
+    + GameId : long <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Members : List<DbAllianceMember> <<get>> <<set>>
+    + Game : DbGame <<get>> <<set>>
+}
+InGameContext <|-- DbAlliance
+class DbEvent {
+    + Id : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + FactionNumber : int <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+    + UnitNumber : int? <<get>> <<set>>
+    + UnitName : string <<get>> <<set>>
+    + MissingUnitNumber : int? <<get>> <<set>>
+    + Type : EventType <<get>> <<set>>
+    + Category : EventCategory <<get>> <<set>>
+    + Message : string <<get>> <<set>>
+    + Amount : int? <<get>> <<set>>
+    + ItemCode : string <<get>> <<set>>
+    + ItemName : string <<get>> <<set>>
+    + ItemPrice : int? <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Faction : DbFaction <<get>> <<set>>
+    + Region : DbRegion <<get>> <<set>>
+    + Unit : DbUnit <<get>> <<set>>
+}
+InFactionContext <|-- DbEvent
+class DbReport {
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + GameId : long <<get>> <<set>>
+    + FactionNumber : int <<get>> <<set>>
+    + Source : byte[] <<get>> <<set>>
+    + Json : byte[] <<get>> <<set>>
+    + Error : string <<get>> <<set>>
+    + IsParsed : bool <<get>>
+    + IsMerged : bool <<get>> <<set>>
+    + Game : DbGame <<get>> <<set>>
+    + Player : DbPlayer <<get>> <<set>>
+    + Turn : DbTurn <<get>> <<set>>
+}
+InGameContext <|-- DbReport
+InPlayerContext <|-- DbReport
+class DbTransportationLoad {
+    + Used : int <<get>> <<set>>
+    + Max : int <<get>> <<set>>
+}
+class DatabaseOptions {
+    + ConnectionString : string <<get>> <<set>>
+    + Provider : DatabaseProvider <<get>> <<set>>
+    + IsProduction : bool <<get>> <<set>>
+}
+class DatabaseExtensions <<static>> {
+    + {static} AddDatabase(services:IServiceCollection, options:DatabaseOptions) : IServiceCollection
+}
+class MapLevel <<record>> {
+    + Label : string <<get>> <<init>>
+    + Level : int <<get>> <<init>>
+    + Width : int <<get>> <<init>>
+    + Height : int <<get>> <<init>>
+}
+class GameOptions <<record>> {
+    + Map : List<MapLevel> <<get>> <<set>>
+    + Schedule : string <<get>> <<set>>
+    + TimeZone : string <<get>> <<set>>
+    + ServerAddress : string <<get>> <<set>>
+    + StartAt : DateTimeOffset? <<get>> <<set>>
+    + FinishAt : DateTimeOffset? <<get>> <<set>>
+}
+class TurnId <<record>> {
+    + GameId : long <<get>> <<init>>
+    + TurnNumber : int <<get>> <<init>>
+    - {static} <<readonly>> PATTERN : Regex
+    + {static} CreateFrom(turn:DbTurn) : TurnId
+    + {static} CreateFrom(s:string) : TurnId
+    + <<override>> ToString() : string
+}
+class DbTurn {
+    + PublicId : string <<get>>
+    + GameId : long <<get>> <<set>>
+    + Number : int <<get>> <<set>>
+    + State : TurnState <<get>> <<set>>
+    + PlayerData : byte[] <<get>> <<set>>
+    + GameData : byte[] <<get>> <<set>>
+    + Game : DbGame <<get>> <<set>>
+    + Articles : List<DbArticle> <<get>> <<set>>
+    + Reports : List<DbReport> <<get>> <<set>>
+}
+InGameContext <|-- DbTurn
+enum GameStatus {
+    NEW,
+    RUNNING,
+    LOCKED,
+    PAUSED,
+    COMPLEATED,
+}
+class DbOrders {
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + UnitNumber : int <<get>> <<set>>
+    + Orders : string <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+InTurnContext <|-- DbOrders
+class DbGame {
+    + Id : long <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Type : GameType <<get>> <<set>>
+    + Status : GameStatus <<get>> <<set>>
+    + CreatedAt : DateTimeOffset <<get>> <<set>>
+    + EngineId : long? <<get>> <<set>>
+    + Options : GameOptions <<get>> <<set>>
+    + Ruleset : string <<get>> <<set>>
+    + LastTurnNumber : int? <<get>> <<set>>
+    + NextTurnNumber : int? <<get>> <<set>>
+    + Players : List<DbPlayer> <<get>> <<set>>
+    + Registrations : List<DbRegistration> <<get>> <<set>>
+    + Alliances : List<DbAlliance> <<get>> <<set>>
+    + Turns : List<DbTurn> <<get>> <<set>>
+    + Articles : List<DbArticle> <<get>> <<set>>
+    + Engine : DbGameEngine <<get>> <<set>>
+}
+class DbSailors {
+    + Current : int <<get>> <<set>>
+    + Required : int <<get>> <<set>>
+}
+class PgSqlDatabase {
+    + PgSqlDatabase()
+    + PgSqlDatabase(options:DbContextOptions)
+}
+class MsSqlDatabase {
+    + MsSqlDatabase()
+    + MsSqlDatabase(options:DbContextOptions)
+}
+class SQLiteDatabase {
+    + SQLiteDatabase()
+    + SQLiteDatabase(options:DbContextOptions)
+}
+abstract class Database {
+    # Database()
+    # Database(options:DbContextOptions)
+    # Provider : DatabaseProvider <<get>>
+    + Users : DbSet<DbUser> <<get>> <<set>>
+    + GameEngines : DbSet<DbGameEngine> <<get>> <<set>>
+    + Games : DbSet<DbGame> <<get>> <<set>>
+    + Turns : DbSet<DbTurn> <<get>> <<set>>
+    + Reports : DbSet<DbReport> <<get>> <<set>>
+    + Articles : DbSet<DbArticle> <<get>> <<set>>
+    + Registrations : DbSet<DbRegistration> <<get>> <<set>>
+    + Players : DbSet<DbPlayer> <<get>> <<set>>
+    + PlayerTurns : DbSet<DbPlayerTurn> <<get>> <<set>>
+    + AditionalReports : DbSet<DbAdditionalReport> <<get>> <<set>>
+    + Orders : DbSet<DbOrders> <<get>> <<set>>
+    + Factions : DbSet<DbFaction> <<get>> <<set>>
+    + Attitudes : DbSet<DbAttitude> <<get>> <<set>>
+    + Events : DbSet<DbEvent> <<get>> <<set>>
+    + Regions : DbSet<DbRegion> <<get>> <<set>>
+    + Production : DbSet<DbProductionItem> <<get>> <<set>>
+    + Markets : DbSet<DbTradableItem> <<get>> <<set>>
+    + Exits : DbSet<DbExit> <<get>> <<set>>
+    + Structures : DbSet<DbStructure> <<get>> <<set>>
+    + Units : DbSet<DbUnit> <<get>> <<set>>
+    + Items : DbSet<DbUnitItem> <<get>> <<set>>
+    + Battles : DbSet<DbBattle> <<get>> <<set>>
+    + Alliances : DbSet<DbAlliance> <<get>> <<set>>
+    + AllianceMembers : DbSet<DbAllianceMember> <<get>> <<set>>
+    + StudyPlans : DbSet<DbStudyPlan> <<get>> <<set>>
+    + TurnStatistics : DbSet<DbTurnStatisticsItem> <<get>> <<set>>
+    + RegionStatistics : DbSet<DbRegionStatisticsItem> <<get>> <<set>>
+    + Treasury : DbSet<DbTreasuryItem> <<get>> <<set>>
+    # <<override>> OnModelCreating(model:ModelBuilder) : void
+}
+Database <|-- PgSqlDatabase
+Database <|-- MsSqlDatabase
+Database <|-- SQLiteDatabase
+DbContext <|-- Database
+class DbSkill {
+    + Code : string <<get>> <<set>>
+    + Level : int? <<get>> <<set>>
+    + Days : int? <<get>> <<set>>
+}
+AnSkill <|-- DbSkill
+interface InTurnContext {
+    TurnNumber : int <<get>> <<set>>
+}
+interface InRegionContext {
+    RegionId : string <<get>> <<set>>
+}
+InPlayerContext <|-- InTurnContext
+InTurnContext <|-- InRegionContext
+enum ReportType {
+    Report,
+    Map,
+}
+class DbAdditionalReport {
+    + Id : long <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Type : ReportType <<get>> <<set>>
+    + Source : byte[] <<get>> <<set>>
+    + Json : byte[] <<get>> <<set>>
+    + Error : string <<get>> <<set>>
+    + Player : DbPlayer <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+InTurnContext <|-- DbAdditionalReport
+class DbItem {
+    + DbItem()
+    + DbItem(other:DbItem)
+    + Code : string <<get>> <<set>>
+    + Amount : int <<get>> <<set>>
+}
+class DbUnitItem {
+    + DbUnitItem()
+    + DbUnitItem(other:AnItem)
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + UnitNumber : int <<get>> <<set>>
+    + Illusion : bool <<get>> <<set>>
+    + Unfinished : bool <<get>> <<set>>
+    + Props : string <<get>> <<set>>
+}
+class DbProductionItem {
+    + DbProductionItem()
+    + DbProductionItem(other:AnItem)
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+}
+class DbTradableItem {
+    + DbTradableItem()
+    + DbTradableItem(other:DbTradableItem)
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + RegionId : string <<get>> <<set>>
+    + Price : int <<get>> <<set>>
+    + Market : Market <<get>> <<set>>
+}
+class DbTreasuryItem {
+    + DbTreasuryItem()
+    + DbTreasuryItem(other:DbTreasuryItem)
+    + PlayerId : long <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + Rank : int <<get>> <<set>>
+    + Max : int <<get>> <<set>>
+    + Total : int <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+}
+AnItem <|-- DbItem
+DbItem <|-- DbUnitItem
+InTurnContext <|-- DbUnitItem
+DbItem <|-- DbProductionItem
+InTurnContext <|-- DbProductionItem
+DbItem <|-- DbTradableItem
+InTurnContext <|-- DbTradableItem
+DbItem <|-- DbTreasuryItem
+InTurnContext <|-- DbTreasuryItem
+class DbStudyPlan {
+    + UnitNumber : int <<get>> <<set>>
+    + TurnNumber : int <<get>> <<set>>
+    + PlayerId : long <<get>> <<set>>
+    + Target : DbSkill <<get>> <<set>>
+    + Study : string <<get>> <<set>>
+    + Teach : List<int> <<get>> <<set>>
+    + Turn : DbPlayerTurn <<get>> <<set>>
+    + Unit : DbUnit <<get>> <<set>>
+}
+InTurnContext <|-- DbStudyPlan
+class DbSettlement {
+    + Name : string <<get>> <<set>>
+    + Size : SettlementSize <<get>> <<set>>
+}
+interface InGameContext {
+    GameId : long <<get>>
+}
+interface InFactionContext {
+    FactionNumber : int <<get>>
+}
+InTurnContext <|-- InFactionContext
+class ValueConversionExtensions <<static>> {
+    + {static} HasConversionJson(propertyBuilder:PropertyBuilder<T>, databaseType:DatabaseProvider) : PropertyBuilder<T>
+}
+enum TurnState {
+    PENDING,
+    READY,
+}
+interface "IStatistics`1"<T> {
+    Income : DbIncome <<get>> <<set>>
+    Expenses : DbExpenses <<get>> <<set>>
+    Statistics : List<T> <<get>> <<set>>
+}
+@enduml

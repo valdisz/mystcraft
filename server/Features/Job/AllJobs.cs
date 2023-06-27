@@ -2,7 +2,6 @@ namespace advisor.Features;
 
 using System.Threading.Tasks;
 using MediatR;
-using advisor.Schema;
 using advisor.Persistence;
 using System;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,55 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
 
 public delegate AsyncIO<T> StagePipeline<T>(IServiceScope scope, CancellationToken cancellation);
+
+public record Stage<T>();
+
+public static class StageExtensions {
+    public static IO<T> Flatten<T>(this IO<IO<T>> self)
+        => () => self() switch {
+            Result<IO<T>>.Success(var success) => success(),
+            Result<IO<T>>.Failure(var failure) => Failure<T>(failure),
+            _ => throw new InvalidOperationException()
+        };
+
+    public static IO<B> Select<A, B>(this IO<A> self, Func<A, B> selector)
+        => () => self().Select(selector);
+
+    public static IO<B> Select<A, B>(this IO<A> self, Func<A, Result<B>> selector)
+        => () => self().Bind(selector);
+
+    public static IO<R> Return<T, R>(this IO<T> self, Func<R> selector)
+        => () => (self()).Select(_ => selector());
+
+    public static IO<R> Return<T, R>(this IO<T> self, R value)
+        => () => (self()).Select(_ => value);
+
+    public static IO<B> Bind<A, B>(this IO<A> self, Func<A, IO<B>> selector)
+        => self.Select(selector).Flatten();
+
+
+    public static IO<T> OnFailure<T, R>(this IO<T> self, Func<Error, IO<R>> action)
+        => () => self() switch {
+            Result<T>.Success success => success,
+            Result<T>.Failure failure => action(failure.Error)() is Result<R>.Failure(var error)
+                    ? Failure<T>(error)
+                    : failure,
+            _ =>throw new InvalidOperationException()
+        };
+
+    public static IO<T> OnFailure<T, R>(this IO<T> self, Func<Error, Result<R>> action)
+        => () => self() switch {
+            Result<T>.Success success => success,
+            Result<T>.Failure failure => action(failure.Error) is Result<R>.Failure(var error)
+                    ? Failure<T>(error)
+                    : failure,
+            _ =>throw new InvalidOperationException()
+        };
+}
+
+public static class FunctionalBlocks {
+
+}
 
 public class AllJobs {
     public AllJobs(IGameRepository gameRepo, IMediator mediator, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
@@ -37,7 +85,7 @@ public class AllJobs {
 
     public async Task RunTurnAsync(long gameId, GameNextTurnForceInput force, CancellationToken cancellation) {
         await Log(LogLevel.Information, "Starting turn processing")
-            .Bind(() => PrepareProcessing(gameId, cancellation))
+            .Bind(() => StagePrepareProcessing(gameId, cancellation))
             .Bind(x => StageWithMediator("Execute engine",
                 condition:     x.state == TurnState.PENDING,
                 pipeline:      (m, _) => m.Mutate(new TurnRun(x.gameId, x.turnNumber, 0, null), cancellation)
@@ -74,7 +122,7 @@ public class AllJobs {
             .Run();
     }
 
-    public AsyncIO<ProcessingState> PrepareProcessing(long gameId, CancellationToken cancellation)
+    public AsyncIO<ProcessingState> StagePrepareProcessing(long gameId, CancellationToken cancellation)
         => gameRepo.GetOneGame(gameId, withTracking: false, cancellation: cancellation)
             .Validate(game => game switch {
                 { LastTurnNumber: null } => Failure<DbGame>("Last Turn is not specified"),
@@ -83,12 +131,16 @@ public class AllJobs {
                 { Status: GameStatus.RUNNING } => Success(game),
                 _ => Failure<DbGame>("Game must be in RUNNING or LOCKED state")
             })
-            .Select(game => ( gameId: game.Id, lastTurn: game.LastTurnNumber.Value, nextTurn: game.NextTurnNumber.Value ))
-            .Bind(state => PickTurnToProcess(gameRepo.Specialize(state.gameId), state.lastTurn, state.nextTurn))
+            .Select(game => (
+                lastTurn: game.LastTurnNumber.Value,
+                nextTurn: game.NextTurnNumber.Value,
+                repo: gameRepo.Specialize(game.Id)
+            ))
+            .Bind(state => PickTurnToProcess(state.repo, state.lastTurn, state.nextTurn, cancellation))
             .Select(turn => new ProcessingState(turn.GameId, turn.Number, turn.State));
 
-    public AsyncIO<DbTurn> PickTurnToProcess(ISpecializedGameRepository repo, int lastTurnNumber, int nextTurnNumber)
-        => repo.GetOneTurn(lastTurnNumber)
+    public AsyncIO<DbTurn> PickTurnToProcess(ISpecializedGameRepository repo, int lastTurnNumber, int nextTurnNumber, CancellationToken cancellation)
+        => repo.GetOneTurn(lastTurnNumber, cancellation: cancellation)
             .Bind(Functions.EnsurePresent<DbTurn>("Last Turn not found"))
             .Bind(lastTurn => lastTurn.State != TurnState.READY
                 ? Log(LogLevel.Information, $"Will try to finish running turn {lastTurnNumber}")
@@ -121,7 +173,7 @@ public class AllJobs {
                     )
                 )
             )
-            .Return(unit);
+            .Ignore();
 
     private IO<T> RequiredService<T>(IServiceScope scope)
         => Effect(() => scope.ServiceProvider.GetRequiredService<T>());
@@ -145,7 +197,7 @@ public class AllJobs {
     // we want to run each turn in a transaction and new scope
     private AsyncIO<T> Stage<T>(string name, bool condition, Func<IServiceScope, AsyncIO<T>> pipeline, T defaultResult, CancellationToken cancellation)
         => condition
-            ? Effect(() => services.CreateScope())
+            ? Effect(services.CreateScope)
                 .Bind(scope => RequiredService<IUnitOfWork>(scope)
                     .Bind(unitOfWork => unitOfWork.BeginTransaction(cancellation)
                         .Bind(() => Log(LogLevel.Information, $"[Starting] {name}"))
@@ -153,7 +205,7 @@ public class AllJobs {
                         .Bind(result => unitOfWork.CommitTransaction(cancellation).Return(result))
                         .OnFailure(err => unitOfWork.RollbackTransaction(cancellation))
                     )
-                    .Finally(() => scope.Dispose())
+                    .Finally(scope.Dispose)
                 )
             : AsyncEffect(() => Log(LogLevel.Information, $"[Skipping] {name}").Run())
                 .Return(defaultResult);
