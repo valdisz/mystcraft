@@ -39,31 +39,33 @@ using System.IO;
 using advisor.Authorization;
 
 public class Startup {
-    public Startup(IConfiguration configuration, IWebHostEnvironment env) {
-        Configuration = configuration;
+    public Startup(IWebHostEnvironment env, IConfiguration configuration) {
         Env = env;
+        Configuration = configuration;
     }
 
-    public IConfiguration Configuration { get; }
     public IWebHostEnvironment Env { get; }
+    public IConfiguration Configuration { get; }
 
     public DatabaseProvider DbProvider => Configuration.GetValue<DatabaseProvider>("Provider");
     public string DbConnectionString => Configuration.GetConnectionString("database");
     public string HangfireConnectionString => Configuration.GetConnectionString("hangfire");
 
+    public IConfigurationSection DiscordConfiguration => Configuration.GetSection("Discord");
+    public IConfigurationSection DiscordOAuthConfiguration => DiscordConfiguration.GetSection("OAuth");
+    public IConfigurationSection ProxyConfiguration => Configuration.GetSection("Proxy");
+
     public void ConfigureServices(IServiceCollection services) {
-        var discord = Configuration.GetSection("Discord");
-        var discordOAuth = discord.GetSection("OAuth");
-        var proxy = Configuration.GetSection("Proxy");
+        services.AddFunctionalRuntime();
 
         services.AddOptions();
 
-        services.Configure<DiscordOptions>(discord);
+        services.Configure<DiscordOptions>(DiscordConfiguration);
         services.Configure<ForwardedHeadersOptions>(opt => {
-            opt.ForwardedHeaders = proxy.GetValue<ForwardedHeaders>("ForwardedHeaders");
+            opt.ForwardedHeaders = ProxyConfiguration.GetValue<ForwardedHeaders>("ForwardedHeaders");
 
             opt.AllowedHosts.Clear();
-            var allowedHosts = proxy.GetSection("AllowedHosts").Get<string[]>();
+            var allowedHosts = ProxyConfiguration.GetSection("AllowedHosts").Get<string[]>();
             foreach (var h in (allowedHosts ?? Enumerable.Empty<string>())) {
                 opt.AllowedHosts.Add(h);
             }
@@ -78,7 +80,7 @@ public class Startup {
             }
 
             opt.KnownProxies.Clear();
-            var knownProxies = proxy.GetSection("KnownProxies").Get<string[]>();
+            var knownProxies = ProxyConfiguration.GetSection("KnownProxies").Get<string[]>();
             foreach (var ip in (knownProxies ?? Enumerable.Empty<string>()).Select(resolveProxy)) {
                 opt.KnownProxies.Add(ip);
             }
@@ -93,7 +95,7 @@ public class Startup {
             }
 
             opt.KnownNetworks.Clear();
-            var knownNetworks = proxy.GetSection("KnownNetworks").Get<string[]>();
+            var knownNetworks = ProxyConfiguration.GetSection("KnownNetworks").Get<string[]>();
             foreach (var network in (knownNetworks ?? Enumerable.Empty<string>()).Select(parseNetwork)) {
                 opt.KnownNetworks.Add(network);
             }
@@ -122,7 +124,7 @@ public class Startup {
             })
             .AddApiKeys()
             .AddOAuth(DiscordDefaults.AuthenticationScheme, opt => {
-                discordOAuth.Bind(opt);
+                DiscordOAuthConfiguration.Bind(opt);
 
                 opt.SignInScheme = ExternalAuthentication.AuthenticationScheme;
                 opt.SaveTokens = true;
@@ -155,6 +157,7 @@ public class Startup {
         });
 
         services.AddHttpClient();
+        services.AddHttpContextAccessor();
 
         services
             .AddCors(opt => {
@@ -227,7 +230,7 @@ public class Startup {
                 opt.DefaultResolverStrategy = ExecutionStrategy.Serial;
             })
             .RegisterService<Database>()
-            .RegisterService<IUnitOfWork>()
+            .RegisterService<IRuntimeAccessor>()
             .RegisterService<IMediator>()
             .RegisterService<IAuthorizationService>()
             .AddQueryType<QueryType>()
@@ -317,9 +320,7 @@ public class Startup {
             .UseStaticFiles()
             .UseEndpoints(endpoints => {
                 endpoints.MapControllers();
-
                 endpoints.MapGraphQL();
-
                 endpoints.MapHangfireDashboard(new DashboardOptions {
                     Authorization = new[] {
                         new RoleBasedDashboardAuthorizationFilter(Roles.Root)

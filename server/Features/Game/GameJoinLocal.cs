@@ -13,13 +13,13 @@ public record GameJoinLocal(long UserId, long GameId, string Name) : IRequest<Ga
 public record GameJoinLocalResult(bool IsSuccess, string Error = null, DbRegistration Registration = null) : MutationResult(IsSuccess, Error);
 
 public class GameJoinLocalHandler : IRequestHandler<GameJoinLocal, GameJoinLocalResult> {
-    public GameJoinLocalHandler(IGameRepository gameRepo, IPlayerRepository playerRepo) {
+    public GameJoinLocalHandler(IAllGamesRepository gameRepo, IPlayerRepository playerRepo) {
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IPlayerRepository playerRepo;
     private readonly IUnitOfWork unitOfWork;
 

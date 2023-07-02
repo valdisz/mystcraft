@@ -6,16 +6,18 @@ using System.Threading;
 using advisor.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-public interface IGameRepository : IReporsitory<DbGame> {
+
+
+public interface IAllGamesRepository : IReporsitory<DbGame> {
     IQueryable<DbGame> Games { get; }
-    ISpecializedGameRepository Specialize(DbGame game);
-    ISpecializedGameRepository Specialize(long gameId);
+    IOneGameRepository Specialize(DbGame game);
+    IOneGameRepository Specialize(long gameId);
     IO<DbGame> Add(DbGame game);
     IO<DbGame> Update(DbGame game);
     AsyncIO<Option<DbGame>> GetOneGame(long gameId, bool withTracking = true, CancellationToken cancellation = default);
 }
 
-public interface ISpecializedGameRepository {
+public interface IOneGameRepository {
     IQueryable<DbTurn> Turns { get; }
     IQueryable<DbReport> Reports { get; }
     IQueryable<DbArticle> Articles { get; }
@@ -31,7 +33,7 @@ public interface ISpecializedGameRepository {
     AsyncIO<Option<DbArticle>> GetOneArticle(long articleId, bool withTracking = true, CancellationToken cancellation = default);
 }
 
-public class GameRepository : IGameRepository {
+public class GameRepository : IAllGamesRepository {
     public GameRepository(Database db) {
         this.db = db;
     }
@@ -58,13 +60,13 @@ public class GameRepository : IGameRepository {
             return Success(game);
         };
 
-    public ISpecializedGameRepository Specialize(DbGame game)
+    public IOneGameRepository Specialize(DbGame game)
         => new SpecializedGameRepository(game.Id, db);
 
-    public ISpecializedGameRepository Specialize(long gameId)
+    public IOneGameRepository Specialize(long gameId)
         => new SpecializedGameRepository(gameId, db);
 
-    class SpecializedGameRepository : ISpecializedGameRepository {
+    class SpecializedGameRepository : IOneGameRepository {
         public SpecializedGameRepository(long gameId, Database db) {
             this.gameId = gameId;
             this.db = db;

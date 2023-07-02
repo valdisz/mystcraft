@@ -61,7 +61,7 @@ public static class FunctionalBlocks {
 }
 
 public class AllJobs {
-    public AllJobs(IGameRepository gameRepo, IMediator mediator, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
+    public AllJobs(IAllGamesRepository gameRepo, IMediator mediator, IServiceProvider services, IBackgroundJobClient jobs, ILogger<AllJobs> logger) {
         this.gameRepo = gameRepo;
         this.mediator = mediator;
         this.services = services;
@@ -69,7 +69,7 @@ public class AllJobs {
         this.logger = logger;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IMediator mediator;
     private readonly IServiceProvider services;
     private readonly IBackgroundJobClient jobs;
@@ -139,7 +139,7 @@ public class AllJobs {
             .Bind(state => PickTurnToProcess(state.repo, state.lastTurn, state.nextTurn, cancellation))
             .Select(turn => new ProcessingState(turn.GameId, turn.Number, turn.State));
 
-    public AsyncIO<DbTurn> PickTurnToProcess(ISpecializedGameRepository repo, int lastTurnNumber, int nextTurnNumber, CancellationToken cancellation)
+    public AsyncIO<DbTurn> PickTurnToProcess(IOneGameRepository repo, int lastTurnNumber, int nextTurnNumber, CancellationToken cancellation)
         => repo.GetOneTurn(lastTurnNumber, cancellation: cancellation)
             .Bind(Functions.EnsurePresent<DbTurn>("Last Turn not found"))
             .Bind(lastTurn => lastTurn.State != TurnState.READY
@@ -158,7 +158,7 @@ public class AllJobs {
             });
 
     public StagePipeline<advisor.Unit> FinshTurnProcessing(long gameId, int turnNumber)
-        => (scope, cancellation) => RequiredService<IGameRepository>(scope)
+        => (scope, cancellation) => RequiredService<IAllGamesRepository>(scope)
             .Bind(gameRepo => gameRepo.GetOneGame(gameId, cancellation: cancellation)
                 .Bind(Functions.EnsurePresent<DbGame>("Game not found"))
                 // change game state

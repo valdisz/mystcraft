@@ -5,7 +5,7 @@ public static class RepositoriesExtensions {
     public static IServiceCollection AddRepositories(this IServiceCollection services) {
         services.AddSingleton<ITime, DefaultTime>();
 
-        services.AddScoped<IGameRepository, GameRepository>();
+        services.AddScoped<IAllGamesRepository, GameRepository>();
         services.AddScoped<IGameEnginesRepository, GameEnginesRepository>();
         services.AddScoped<IAllianceRepository, AllianceRepository>();
         services.AddScoped<IPlayerRepository, PlayerRepository>();

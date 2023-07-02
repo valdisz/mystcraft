@@ -11,14 +11,14 @@ public record PlayerQuit(long GameId, long PlayerId) : IRequest<PlayerQuitResult
 public record PlayerQuitResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : IMutationResult;
 
 public class PlayerQuitHandler : IRequestHandler<PlayerQuit, PlayerQuitResult> {
-    public PlayerQuitHandler(IGameRepository gameRepo, IPlayerRepository playerRepo) {
+    public PlayerQuitHandler(IAllGamesRepository gameRepo, IPlayerRepository playerRepo) {
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
     }
 
     private readonly IUnitOfWork unitOfWork;
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IPlayerRepository playerRepo;
 
     public Task<PlayerQuitResult> Handle(PlayerQuit request, CancellationToken cancellationToken)

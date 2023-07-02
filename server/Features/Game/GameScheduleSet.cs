@@ -11,13 +11,13 @@ public record GameScheduleSet(long GameId, string Schedule): IRequest<GameSchedu
 public record GameScheduleSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameScheduleSetHandler : IRequestHandler<GameScheduleSet, GameScheduleSetResult> {
-    public GameScheduleSetHandler(IGameRepository gameRepo, IMediator mediator) {
+    public GameScheduleSetHandler(IAllGamesRepository gameRepo, IMediator mediator) {
         this.gameRepo = gameRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
         this.mediator = mediator;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IMediator mediator;
 

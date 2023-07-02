@@ -11,13 +11,13 @@ public record GameRulesetSet(long GameId, Stream Ruleset) : IRequest<GameRuleset
 public record GameRulesetSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRulesetSetResult> {
-    public GameRulesetSetHandler(IGameRepository gameRepo, IMediator mediator) {
+    public GameRulesetSetHandler(IAllGamesRepository gameRepo, IMediator mediator) {
         this.gameRepo = gameRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
         this.mediator = mediator;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IMediator mediator;
 

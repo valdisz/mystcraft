@@ -19,13 +19,13 @@ public class GameNextTurnForceInput {
 }
 
 public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnResult> {
-    public GameNextTurnHandler(IGameRepository gameRepo, IBackgroundJobClient jobs) {
+    public GameNextTurnHandler(IAllGamesRepository gameRepo, IBackgroundJobClient jobs) {
         this.gameRepo = gameRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
         this.jobs = jobs;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IBackgroundJobClient jobs;
 

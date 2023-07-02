@@ -10,13 +10,13 @@ public record GameOptionsSet(long GameId, GameOptions Options) : IRequest<GameOp
 public record GameOptionsSetResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptionsSetResult> {
-    public GameOptionsSetHandler(IGameRepository gameRepo, IMediator mediator) {
+    public GameOptionsSetHandler(IAllGamesRepository gameRepo, IMediator mediator) {
         this.gameRepo = gameRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
         this.mediator = mediator;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IMediator mediator;
 

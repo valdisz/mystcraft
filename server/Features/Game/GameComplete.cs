@@ -11,13 +11,13 @@ public record GameComplete(long GameId): IRequest<GameCompleteResult>;
 public record GameCompleteResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameCompleteHandler : IRequestHandler<GameComplete, GameCompleteResult> {
-    public GameCompleteHandler(IGameRepository gameRepo, IMediator mediator) {
+    public GameCompleteHandler(IAllGamesRepository gameRepo, IMediator mediator) {
         this.gameRepo = gameRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
         this.mediator = mediator;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IMediator mediator;
 

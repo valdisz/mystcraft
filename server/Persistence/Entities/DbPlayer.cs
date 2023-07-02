@@ -3,24 +3,29 @@ namespace advisor.Persistence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+/// <summary>
+/// This entity represents a player faction in a game.
+/// </summary>
 public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUpdateTime {
     [Key]
     public long Id { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public long? UserId { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public long GameId { get; set; }
 
     public int Number { get; set; }
 
     public bool IsClaimed => UserId != null && Password != null;
 
+    /// <summary>
+    /// Player faction name (not user name). Will be equal to the last turn faction name.
+    /// </summary>
     [MaxLength(Size.LABEL)]
     public string Name { get; set; }
 
@@ -33,22 +38,22 @@ public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUp
 
     public bool IsQuit { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public DbUser User { get;set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public DbGame Game { get;set; }
 
     // [GraphQLIgnore]
     public List<DbReport> Reports { get; set; } = new List<DbReport>();
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public List<DbPlayerTurn> Turns { get; set; } = new List<DbPlayerTurn>();
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public List<DbAdditionalReport> AdditionalReports { get; set; } = new List<DbAdditionalReport>();
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public List<DbAllianceMember> AllianceMembererships { get; set; } = new ();
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
@@ -68,25 +73,25 @@ public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUp
             Name = name
         };
 
-    public Result<DbPlayer> Claim(long userId, string password) {
+    public Either<Error, DbPlayer> Claim(long userId, string password) {
         if (IsClaimed) {
-            return Failure<DbPlayer>("Player already claimed.");
+            return failure<DbPlayer>("Player already claimed.");
         }
 
         UserId = userId;
         Password = password;
 
-        return Success(this);
+        return success(this);
     }
 
-    public Result<DbPlayer> Quit() {
+    public Either<Error, DbPlayer> Quit() {
         if (IsQuit) {
-            return Failure<DbPlayer>("Player already quitted.");
+            return failure<DbPlayer>("Player already quitted.");
         }
 
         IsQuit = true;
 
-        return Success(this);
+        return success(this);
     }
 }
 

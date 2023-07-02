@@ -20,7 +20,7 @@ public static class ReconcileExtensions {
 }
 
 public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
-    public ReconcileHandler(IGameRepository gameRepo, IRecurringJobManager recurringJobs, IBackgroundJobClient backgroundJobs) {
+    public ReconcileHandler(IAllGamesRepository gameRepo, IRecurringJobManager recurringJobs, IBackgroundJobClient backgroundJobs) {
         this.gameRepo = gameRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
         this.recurringJobs = recurringJobs;
@@ -30,7 +30,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
     public const string RECONCILE_EVERY_HOUR = "0 0 * * *";
     public const string SYNC_FACTIONS_EVERY_5_MINUTES = "*/5 * * * *";
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IRecurringJobManager recurringJobs;
     private readonly IBackgroundJobClient backgroundJobs;

@@ -15,7 +15,7 @@ public record GameJoinRemote(long UserId, long GameId, long PlayerId, string Pas
 public record GameJoinRemoteResult(bool IsSuccess, string Error = null, DbPlayer Player = null) : MutationResult(IsSuccess, Error);
 
 public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRemoteResult> {
-    public GameJoinRemoteHandler(IGameRepository gameRepo, IPlayerRepository playerRepo, IHttpClientFactory httpFactory, IMediator mediator) {
+    public GameJoinRemoteHandler(IAllGamesRepository gameRepo, IPlayerRepository playerRepo, IHttpClientFactory httpFactory, IMediator mediator) {
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
         this.unitOfWork = gameRepo.UnitOfWork;
@@ -23,7 +23,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
         this.mediator = mediator;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IPlayerRepository playerRepo;
     private readonly IUnitOfWork unitOfWork;
     private readonly IHttpClientFactory httpFactory;

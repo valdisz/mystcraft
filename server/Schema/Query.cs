@@ -2,13 +2,13 @@ namespace advisor.Schema;
 
 using System.Linq;
 using System.Threading.Tasks;
-using advisor.Persistence;
 using HotChocolate.AspNetCore.Authorization;
 using HotChocolate;
 using HotChocolate.Types;
-using advisor.Features;
+using HotChocolate.Resolvers;
 using MediatR;
-using HotChocolate.Types.Relay;
+using advisor.Features;
+using advisor.Persistence;
 
 public class Query {
     [Authorize(Policy = Policies.GameMasters)]
@@ -16,7 +16,16 @@ public class Query {
     public IQueryable<DbGameEngine> GameEngines(Database db) => db.GameEngines;
 
     [UseOffsetPaging]
-    public IQueryable<DbGame> Games(Database db) => db.Games;
+    public async ValueTask<IQueryable<DbGame>> Games(IResolverContext context, Database db) =>
+        (await GameInterpreter<Runtime>.Interpret(
+            from games in Mystcraft.ReadManyGames()
+            select games.OrderByDescending(g => g.CreatedAt)
+            , Runtime.New(db, context.RequestAborted)
+        ))
+        .Match(
+            Succ: games => games,
+            Fail: ex => throw ex
+        );
 
     [Authorize(Policy = Policies.UserManagers)]
     [UseOffsetPaging]

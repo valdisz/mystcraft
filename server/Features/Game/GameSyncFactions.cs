@@ -15,7 +15,7 @@ public record GameSyncFactions(long GameId) : IRequest<GameSyncFactionsResult>;
 public record GameSyncFactionsResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
 
 public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyncFactionsResult> {
-    public GameSyncFactionsHandler(IGameRepository gameRepo, IPlayerRepository playerRepo, ITime time, IHttpClientFactory httpFactory) {
+    public GameSyncFactionsHandler(IAllGamesRepository gameRepo, IPlayerRepository playerRepo, ITime time, IHttpClientFactory httpFactory) {
         this.gameRepo = gameRepo;
         this.playerRepo = playerRepo;
         this.time = time;
@@ -23,7 +23,7 @@ public class GameSyncFactionsHandler : IRequestHandler<GameSyncFactions, GameSyn
         this.httpFactory = httpFactory;
     }
 
-    private readonly IGameRepository gameRepo;
+    private readonly IAllGamesRepository gameRepo;
     private readonly IPlayerRepository playerRepo;
     private readonly ITime time;
     private readonly IUnitOfWork unitOfWork;

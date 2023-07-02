@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 public class GameCreateHandlerFacts {
     public GameCreateHandlerFacts() {
-        this.gameRepo = new Mock<IGameRepository>();
+        this.gameRepo = new Mock<IAllGamesRepository>();
         this.unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
         this.mediator = new Mock<IMediator>();
         this.logger = new Mock<ILogger<GameCreateHandler>>();
@@ -17,7 +17,7 @@ public class GameCreateHandlerFacts {
         this.handler = new GameCreateHandler(gameRepo.Object, mediator.Object, logger.Object);
     }
 
-    private readonly Mock<IGameRepository> gameRepo;
+    private readonly Mock<IAllGamesRepository> gameRepo;
     private readonly Mock<IUnitOfWork> unitOfWork;
     private readonly Mock<IMediator> mediator;
     private readonly Mock<ILogger<GameCreateHandler>> logger;

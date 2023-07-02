@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-public abstract class Database : DbContext, IUnitOfWork {
+public abstract class Database : DbContext, DatabaseIO, UnitOfWorkIO {
     protected Database() : base() {
 
     }
@@ -14,6 +14,9 @@ public abstract class Database : DbContext, IUnitOfWork {
 
     }
 
+    /// <summary>
+    /// Database provider used by the system
+    /// </summary>
     public DatabaseProvider Provider {
         get {
             if (Database.IsNpgsql()) { return DatabaseProvider.PgSQL; }
@@ -24,29 +27,78 @@ public abstract class Database : DbContext, IUnitOfWork {
         }
     }
 
-    // Registered users
+    /// <summary>
+    /// List of registered users who can access the system depending on their roles
+    /// </summary>
     public DbSet<DbUser> Users { get; set; }
 
-    // Game engines
+    /// <summary>
+    /// List of game engines which are supported by the system
+    /// </summary>
     public DbSet<DbGameEngine> GameEngines { get; set; }
 
-    // Local and remote games
+    /// <summary>
+    /// List of local and remote games which are registered in the system
+    /// </summary>
     public DbSet<DbGame> Games { get; set; }
 
-    // Game turn data as the engine returns it
+
+    /////////////////////////////////////////////
+    ///// Game turn data as the engine returns it
+
+    /// <summary>
+    /// List of turns for the game
+    /// </summary>
     public DbSet<DbTurn> Turns { get; set; }
+
+    /// <summary>
+    /// List of reports for the game
+    /// </summary>
     public DbSet<DbReport> Reports { get; set; }
+
+    /// <summary>
+    /// List of articles for the game written by player of by the game engine itself
+    /// </summary>
     public DbSet<DbArticle> Articles{ get; set; }
 
-    // Player controled factions and data which is modified during the game
+
+    /////////////////////////////////////////////
+    ///// Player controled factions and data which is modified during the game
+
+    /// <summary>
+    /// List of pending players for the game
+    /// </summary>
     public DbSet<DbRegistration> Registrations { get; set; }
+
+    /// <summary>
+    /// List of players for the game
+    /// </summary>
     public DbSet<DbPlayer> Players { get; set; }
+
+    /// <summary>
+    /// List of player turns for the game
+    /// </summary>
     public DbSet<DbPlayerTurn> PlayerTurns { get; set; }
+
+    /// <summary>
+    /// List of additional reports that playes added additionally for the game
+    /// </summary>
     public DbSet<DbAdditionalReport> AditionalReports { get; set; }
+
+    /// <summary>
+    /// List of orders that players submitted for the game
+    /// </summary>
     public DbSet<DbOrders> Orders { get; set; }
 
-    // Parsed and normalized game state for the each player based on their reports
+
+    /////////////////////////////////////////////
+    ///// Parsed and normalized game state for the each player based on their reports
+
+    /// <summary>
+    /// List of factions for the game turn as seen by the player
+    /// </summary>
     public DbSet<DbFaction> Factions { get; set; }
+
     public DbSet<DbAttitude> Attitudes { get; set; }
     public DbSet<DbEvent> Events { get; set; }
     public DbSet<DbRegion> Regions { get; set; }
@@ -101,20 +153,21 @@ public abstract class Database : DbContext, IUnitOfWork {
     private bool willRollback = false;
     private IDbContextTransaction transaction;
 
-    AsyncIO<int> IUnitOfWork.SaveChanges(CancellationToken cancellation)
-        => async () => Success(await this.SaveChangesAsync(cancellation));
+    async ValueTask<Unit> UnitOfWorkIO.Save(CancellationToken ct) {
+        await SaveChangesAsync(ct);
+        return unit;
+    }
 
-    public AsyncIO<Unit> BeginTransaction(CancellationToken cancellation = default)
-        => async () => {
-            if (txCounter++ != 0) {
-                return Success(unit);
-            }
-
-            transaction = await Database.BeginTransactionAsync(cancellation);
-            willRollback = false;
-
+    async ValueTask<Unit> UnitOfWorkIO.Begin(CancellationToken ct) {
+        if (txCounter++ != 0) {
             return Success(unit);
-        };
+        }
+
+        transaction = await Database.BeginTransactionAsync(ct);
+        willRollback = false;
+
+        return Success(unit);
+    }
 
     public AsyncIO<Unit> CommitTransaction(CancellationToken cancellation = default)
         => async () => {
@@ -161,5 +214,10 @@ public abstract class Database : DbContext, IUnitOfWork {
 
     public override ValueTask DisposeAsync() {
         return base.DisposeAsync();
+    }
+
+    public ValueTask<DbGame> Add(DbGame game, CancellationToken ct)
+    {
+        throw new System.NotImplementedException();
     }
 }
