@@ -6,7 +6,7 @@ public static class StringValidators {
     public static Validation<Error, string> NotEmpty(string input) =>
         Optional(input)
             .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToValidation(Error.New("Value cannot be empty."));
+            .ToValidation(E_VALUE_CANNOT_BE_EMPTY);
 
     public static Func<string, Validation<Error, string>> WithinLength(Option<int> min, Option<int> max) =>
         input => {
@@ -15,6 +15,6 @@ public static class StringValidators {
 
             return Optional(input)
                 .Where(x => x.Length >= minLen && x.Length <= maxLen)
-                .ToValidation(Error.New($"Value must be between {minLen} and {maxLen} characters long."));
+                .ToValidation(E_VALUE_MUST_BE_WITHIN_LENGTH(minLen, maxLen));
         };
 }

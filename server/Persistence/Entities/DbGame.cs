@@ -57,7 +57,7 @@ public class DbGame : IsAggregateRoot, WithCreationTime {
     [GraphQLIgnore]
     public DbGameEngine Engine { get; set; }
 
-    public static DbGame CreateLocal(string name, long engineId, byte[] ruleset, GameOptions options) {
+    public static DbGame New(string name, long engineId, byte[] ruleset, GameOptions options) {
         var game = new DbGame {
             Name = name,
             Type = GameType.LOCAL,
@@ -66,20 +66,6 @@ public class DbGame : IsAggregateRoot, WithCreationTime {
             Ruleset = ruleset,
             Options = options,
             NextTurnNumber = 1
-        };
-
-        return game;
-    }
-
-    public static DbGame CreateRemote(string name, string serverAddress, byte[] ruleset, GameOptions options) {
-        var game = new DbGame {
-            Name = name,
-            Type = GameType.REMOTE,
-            Status = GameStatus.NEW,
-            Ruleset = ruleset,
-            Options = options with {
-                ServerAddress = serverAddress
-            }
         };
 
         return game;

@@ -36,7 +36,7 @@ public class GameJoinRemoteHandler : IRequestHandler<GameJoinRemote, GameJoinRem
                 { Type: Persistence.GameType.LOCAL } => Failure<DbGame>("Cannot claim players in local game."),
                 { Status: GameStatus.NEW } => Failure<DbGame>("Game not yet started."),
                 { Status: GameStatus.LOCKED } => Failure<DbGame>("Game is processing a turn."),
-                { Status: GameStatus.COMPLEATED }  => Failure<DbGame>("Game compleated."),
+                { Status: GameStatus.STOPED }  => Failure<DbGame>("Game compleated."),
                 _ => Success(game)
             })
             .Select(game => (game: game, repo: playerRepo.Specialize(game)))

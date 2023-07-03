@@ -25,7 +25,7 @@ public class GameRulesetSetHandler : IRequestHandler<GameRulesetSet, GameRuleset
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
             .Validate(game => game switch {
-                { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
+                { Status: GameStatus.STOPED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
             })
             .Bind(game => ReadStream(request.Ruleset, cancellationToken)

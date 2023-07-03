@@ -12,7 +12,7 @@ public enum GameStatus {
     RUNNING,
 
     /// <summary>
-    /// Game us running. But no orders or new players are accepted.
+    /// Game is running. But no orders or new players are accepted.
     /// </summary>
     LOCKED,
 
@@ -24,21 +24,5 @@ public enum GameStatus {
     /// <summary>
     /// Game is not running, not order or new players are accepted.
     /// </summary>
-    COMPLEATED
+    STOPED
 }
-
-/*
-┌────────NEW
-│         │
-│         │  ┌──────────┐
-│         ▼  │          ▼
-│   ┌─►RUNNING◄───────LOCKED
-│   │   │  │            │
-│   │   │  └──┐         │
-│   │   ▼     │         │
-│   └──PAUSED │         │
-│         │   │         │
-│         │   │         │
-│         ▼   ▼         │
-└────►COMPLEATED◄───────┘
- */

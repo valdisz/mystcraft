@@ -8,7 +8,7 @@ public static class ListValidators {
     public static Validation<Error, List<A>> NotEmpty<A>(List<A> input) =>
         Optional(input)
             .Where(x => x.Count > 0)
-            .ToValidation(Error.New("List cannot be empty."));
+            .ToValidation(E_LIST_CANNOT_BE_EMPTY);
 
     public static Func<List<A>, Validation<Error, List<A>>> WithinLength<A>(Option<int> min, Option<int> max) =>
         input => {
@@ -17,12 +17,12 @@ public static class ListValidators {
 
             return Optional(input)
                 .Where(x => x.Count >= minLen && x.Count <= maxLen)
-                .ToValidation(Error.New($"List must have between {minLen} and {maxLen} items."));
+                .ToValidation(E_LIST_MUST_BE_WITHIN_LENGTH(minLen, maxLen));
         };
 
     public static Func<List<A>, Validation<Error, List<A>>> Unique<A>() =>
         input =>
             Optional(input)
                 .Where(x => x.Distinct().Count() == x.Count)
-                .ToValidation(Error.New("List must have unique items."));
+                .ToValidation(E_LIST_MUST_HAVE_UNIQUE_ITEMS);
 }

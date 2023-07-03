@@ -24,7 +24,7 @@ public class GameOptionsSetHandler : IRequestHandler<GameOptionsSet, GameOptions
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
             .Validate(game => game switch {
-                { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
+                { Status: GameStatus.STOPED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
             })
             .Do(game => game.Options = request.Options)

@@ -61,7 +61,7 @@ public class TurnRunHandler : IRequestHandler<TurnRun, TurnRunResult> {
 
             case GameStatus.PAUSED: return new TurnRunResult(false, "Game is paused.");
 
-            case GameStatus.COMPLEATED: return new TurnRunResult(false, "Game already compleated.");
+            case GameStatus.STOPED: return new TurnRunResult(false, "Game already compleated.");
 
             default: return new TurnRunResult(false, "Game is in the unknonw state.");
         }

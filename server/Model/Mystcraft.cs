@@ -21,7 +21,7 @@ public static class Mystcraft {
     /// <summary>
     /// Create a new game.
     /// </summary>
-    public static Mystcraft<DbGame> Create(string Name, EngineId Engine, Stream Ruleset, List<MapLevel> Map, GameSchedule Schedule) => new Mystcraft<DbGame>.Create(Name, Engine, Ruleset, Map, Schedule, Return);
+    public static Mystcraft<DbGame> Create(string Name, EngineId Engine, Stream Ruleset, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period) => new Mystcraft<DbGame>.Create(Name, Engine, Ruleset, Map, Schedule, Period, Return);
 
     /// <summary>
     /// Get a list of all games.
@@ -34,9 +34,9 @@ public static class Mystcraft {
     public static Mystcraft<IQueryable<DbGame>> ReadManyGames(Expression<Func<DbGame, bool>> Predicate) => new Mystcraft<IQueryable<DbGame>>.ReadManyGames(Predicate, Return);
 
     /// <summary>
-    /// Get a single game by ID.
+    /// Get a single game by ID in a read-only mode.
     /// </summary>
-    public static Mystcraft<DbGame> ReadOneGame(GameId Game) => new Mystcraft<DbGame>.ReadOneGame(Game, Return);
+    public static Mystcraft<ReadOnly<DbGame>> ReadOneGame(GameId Game) => new Mystcraft<ReadOnly<DbGame>>.ReadOneGame(Game, Return);
 
     /// <summary>
     /// Start or resume a game.
@@ -47,19 +47,24 @@ public static class Mystcraft {
     /// Pause a game unless already running.
     /// Paused game will accept new player registrations but will not run the next turn.
     /// </summary>
-    public static Mystcraft<DbGame> Pause(GameId Game) => new Mystcraft<DbGame>.Pause(Game, Return);
+    public static Mystcraft<DbGame> Pause(DbGame Game) => new Mystcraft<DbGame>.Pause(Game, Return);
+
+    /// <summary>
+    /// Lock a game unless already locked and prevent new player registrations and order updates.
+    /// </summary>
+    public static Mystcraft<DbGame> Lock(DbGame Game) => new Mystcraft<DbGame>.Lock(Game, Return);
 
     /// <summary>
     /// Stop a game unless already stopped.
     /// Stopped game will not accept new player registrations and will not run the next turn.
     /// </summary>
-    public static Mystcraft<DbGame> Stop(GameId Game) => new Mystcraft<DbGame>.Stop(Game, Return);
+    public static Mystcraft<DbGame> Stop(DbGame Game) => new Mystcraft<DbGame>.Stop(Game, Return);
 
     /// <summary>
     /// Delete a game with all its data.
     /// Cannot be undone and not data will be recoverable.
     /// </summary>
-    public static Mystcraft<GameId> Delete(GameId Game) => new Mystcraft<GameId>.Delete(Game, Return);
+    public static Mystcraft<Unit> Delete(DbGame Game) => new Mystcraft<Unit>.Delete(Game, Return);
 
     /// <summary>
     /// Read current game options.
@@ -132,110 +137,6 @@ public static class Mystcraft {
     public static Mystcraft<JReport> ParseReport(Stream Report) => new Mystcraft<JReport>.ParseReport(Report, Return);
 }
 
-public static class Sandbox {
-    public static async void Foo() {
-        var addNewRegistration =
-            from game in Mystcraft.ReadOneGame(new GameId(1))
-            from reg in Mystcraft.RegisterPlayer(new GameId(game.Id), "name", "password")
-            select reg;
-
-        Runtime rt = Runtime.New(null);
-
-        (await GameInterpreter<Runtime>
-            .Interpret(addNewRegistration, rt))
-            .Match(
-                Succ: r => Console.WriteLine(r),
-                Fail: e => Console.WriteLine(e)
-            );
-    }
-}
-
-/// <summary>
-/// Game schedule.
-/// </summary>
-public record GameSchedule(
-    string Cron,
-    string TimeZone,
-    DateTimeOffset? StartAt,
-    DateTimeOffset? FinishAt
-) {
-    public static GameSchedule New(string cron, string timeZone, DateTimeOffset? startAt, DateTimeOffset? finishAt) =>
-        new GameSchedule(cron, timeZone, startAt, finishAt);
-}
-
-public static class MystcraftExtensions
-{
-    public static Mystcraft<B> Bind<A, B>(this Mystcraft<A> ma, Func<A, Mystcraft<B>> f) => ma switch {
-        Mystcraft<A>.Return rt                => f(rt.Value),
-
-        Mystcraft<A>.Create cr                => new Mystcraft<B>.Create(cr.Name, cr.Engine, cr.Ruleset, cr.Map, cr.Schedule, n => cr.Next(n).Bind(f)),
-        Mystcraft<A>.ReadManyGames gm         => new Mystcraft<B>.ReadManyGames(gm.Predicate, n => gm.Next(n).Bind(f)),
-        Mystcraft<A>.ReadOneGame og           => new Mystcraft<B>.ReadOneGame(og.Game, n => og.Next(n).Bind(f)),
-        Mystcraft<A>.Start st                 => new Mystcraft<B>.Start(st.Game, n => st.Next(n).Bind(f)),
-        Mystcraft<A>.Pause ps                 => new Mystcraft<B>.Pause(ps.Game, n => ps.Next(n).Bind(f)),
-        Mystcraft<A>.Stop sp                  => new Mystcraft<B>.Stop(sp.Game, n => sp.Next(n).Bind(f)),
-        Mystcraft<A>.Delete dl                => new Mystcraft<B>.Delete(dl.Game, n => dl.Next(n).Bind(f)),
-        Mystcraft<A>.ReadOptions ro           => new Mystcraft<B>.ReadOptions(ro.Game, n => ro.Next(n).Bind(f)),
-        Mystcraft<A>.WriteSchedule ws         => new Mystcraft<B>.WriteSchedule(ws.Game, ws.Schedule, n => ws.Next(n).Bind(f)),
-        Mystcraft<A>.WriteMap wm              => new Mystcraft<B>.WriteMap(wm.Game, wm.Map, n => wm.Next(n).Bind(f)),
-        Mystcraft<A>.WritRuleset wr           => new Mystcraft<B>.WritRuleset(wr.Game, wr.Ruleset, n => wr.Next(n).Bind(f)),
-        Mystcraft<A>.WritEngine we            => new Mystcraft<B>.WritEngine(we.Game, we.Engine, n => we.Next(n).Bind(f)),
-        Mystcraft<A>.ReadManyRegistrations rg => new Mystcraft<B>.ReadManyRegistrations(rg.Game, rg.Predicate, n => rg.Next(n).Bind(f)),
-        Mystcraft<A>.ReadOneRegistration or   => new Mystcraft<B>.ReadOneRegistration(or.Registration, n => or.Next(n).Bind(f)),
-        Mystcraft<A>.RegisterPlayer rp        => new Mystcraft<B>.RegisterPlayer(rp.Game, rp.Name, rp.Password, n => rp.Next(n).Bind(f)),
-        Mystcraft<A>.RemoveRegistration rr    => new Mystcraft<B>.RemoveRegistration(rr.Registration, n => rr.Next(n).Bind(f)),
-        Mystcraft<A>.ReadManyPlayers pl       => new Mystcraft<B>.ReadManyPlayers(pl.Game, pl.IncludeQuit, pl.Predicate, n => pl.Next(n).Bind(f)),
-        Mystcraft<A>.ReadOnePlayer op         => new Mystcraft<B>.ReadOnePlayer(op.Player, n => op.Next(n).Bind(f)),
-        Mystcraft<A>.QuitPlayer qp            => new Mystcraft<B>.QuitPlayer(qp.Player, n => qp.Next(n).Bind(f)),
-        Mystcraft<A>.RunTurn rt               => new Mystcraft<B>.RunTurn(rt.Game, n => rt.Next(n).Bind(f)),
-        Mystcraft<A>.ParseReport pr           => new Mystcraft<B>.ParseReport(pr.Report, n => pr.Next(n).Bind(f)),
-
-        _ => throw new NotSupportedException()
-    };
-
-
-    public static Mystcraft<B> Map<A, B>(this Mystcraft<A> ma, Func<A, B> f) =>
-        ma.Bind(a => Mystcraft.Return(f(a)));
-
-    public static Mystcraft<B> Select<A, B>(this Mystcraft<A> ma, Func<A, B> f) =>
-        ma.Bind(a => Mystcraft.Return(f(a)));
-
-    public static Mystcraft<C> SelectMany<A, B, C>(this Mystcraft<A> ma, Func<A, Mystcraft<B>> bind, Func<A, B, C> project) =>
-        ma.Bind(a => bind(a).Select(b => project(a, b)));
-}
-
-/// <summary>
-/// Represents a game ID.
-/// </summary>
-public sealed class GameId : NewType<GameId, long> {
-    public GameId(long value) : base(value) { }
-}
-
-/// <summary>
-/// Represents an game engine ID.
-/// </summary>
-public sealed class EngineId : NewType<EngineId, long> {
-    public EngineId(long value) : base(value) { }
-}
-
-/// <summary>
-/// Represents a player registration ID.
-/// </summary>
-public sealed class RegistrationId : NewType<RegistrationId, long> {
-    public RegistrationId(long value) : base(value) { }
-}
-
-/// <summary>
-/// Represents a player ID.
-/// </summary>
-public sealed class PlayerId : NewType<PlayerId, long> {
-    public PlayerId(long value) : base(value) { }
-}
-
-public sealed class TurnNumber : NewType<TurnNumber, long> {
-    public TurnNumber(long value) : base(value) { }
-}
-
 /// <summary>
 /// Base class for the independent operations interacting with the game entity.
 /// </summary>
@@ -252,7 +153,7 @@ public abstract record Mystcraft<A> {
     /// <summary>
     /// Create a new game.
     /// </summary>
-    public sealed record Create(string Name, EngineId Engine, Stream Ruleset, List<MapLevel> Map, GameSchedule Schedule, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record Create(string Name, EngineId Engine, Stream Ruleset, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a list of all games.
@@ -260,9 +161,14 @@ public abstract record Mystcraft<A> {
     public sealed record ReadManyGames(Expression<Func<DbGame, bool>> Predicate, Func<IQueryable<DbGame>, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
-    /// Represents operation that gets a single game.
+    /// Represents operation that gets a single game in a read-only mode.
     /// </summary>
-    public sealed record ReadOneGame(GameId Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadOneGame(GameId Game, Func<ReadOnly<DbGame>, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    /// <summary>
+    /// Represents operation that gets a single game prepared for modification.
+    /// </summary>
+    public sealed record WriteOneGame(GameId Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
 
     /////////////////////////////////////////////
@@ -276,17 +182,22 @@ public abstract record Mystcraft<A> {
     /// <summary>
     /// Represents operation that pauses a game.
     /// </summary>
-    public sealed record Pause(GameId Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record Pause(DbGame Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    /// <summary>
+    /// Represents operation that locks a game and prevents new registrations and order updates.
+    /// </summary>
+    public sealed record Lock(DbGame Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that fully stops a game.
     /// </summary>
-    public sealed record Stop(GameId Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record Stop(DbGame Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that deletes a game.
     /// </summary>
-    public sealed record Delete(GameId Game, Func<GameId, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record Delete(DbGame Game, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
 
 
     /////////////////////////////////////////////

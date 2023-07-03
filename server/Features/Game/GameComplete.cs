@@ -25,10 +25,10 @@ public class GameCompleteHandler : IRequestHandler<GameComplete, GameCompleteRes
         => unitOfWork.BeginTransaction(cancellationToken)
             .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
             .Validate(game => game switch {
-                { Status: GameStatus.COMPLEATED } => Failure<DbGame>("Game already compleated."),
+                { Status: GameStatus.STOPED } => Failure<DbGame>("Game already compleated."),
                 _ => Success(game)
             })
-            .Do(game => game.Status = GameStatus.COMPLEATED)
+            .Do(game => game.Status = GameStatus.STOPED)
             .Bind(gameRepo.Update)
             .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
             .RunWithRollback(

@@ -33,7 +33,7 @@ public class GameCreateHandlerFacts {
         unitOfWork.InSequence(seq).Setup(x => x.SaveChanges(itIsAnyCancellation)).Returns(Task.FromResult(1));
         unitOfWork.InSequence(seq).Setup(x => x.CommitTransaction(itIsAnyCancellation)).Returns(Task.FromResult(true));
 
-        var input = new GameCreateLocal(
+        var input = new GameCreate(
             Name: "test",
             EngineId: 1,
             Ruleset: Stream.Null,
@@ -72,7 +72,7 @@ public class GameCreateHandlerFacts {
         unitOfWork.InSequence(seq).Setup(x => x.SaveChanges(itIsAnyCancellation)).Returns(Task.FromResult(1));
         unitOfWork.InSequence(seq).Setup(x => x.CommitTransaction(itIsAnyCancellation)).Returns(Task.FromResult(false));
 
-        var input = new GameCreateLocal(
+        var input = new GameCreate(
             Name: "",
             EngineId: 1,
             Ruleset: Stream.Null,
@@ -109,7 +109,7 @@ public class GameCreateHandlerFacts {
         unitOfWork.InSequence(seq).Setup(x => x.SaveChanges(itIsAnyCancellation)).Throws<Exception>();
         unitOfWork.InSequence(seq).Setup(x => x.RollbackTransaction(itIsAnyCancellation)).Returns(Task.FromResult(true));
 
-        var input = new GameCreateLocal(
+        var input = new GameCreate(
             Name: "",
             EngineId: 1,
             Ruleset: Stream.Null,
