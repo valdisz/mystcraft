@@ -8,34 +8,31 @@ using System.Threading;
 
 public record GamePause(long GameId): IRequest<GamePauseResult>;
 
-public record GamePauseResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error);
+public record GamePauseResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error) {
+    public static GamePauseResult New(Validation<Error, DbGame> result) =>
+        result.Match(
+            Succ: g => new GamePauseResult(true, Game: g),
+            Fail: e => new GamePauseResult(false, Error: e.Head.Message)
+        );
+}
 
 public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
-    public GamePauseHandler(IAllGamesRepository gameRepo, IMediator mediator) {
-        this.gameRepo = gameRepo;
-        this.unitOfWork = gameRepo.UnitOfWork;
-        this.mediator = mediator;
+    public GamePauseHandler(Database database) {
+        this.database = database;
     }
 
-    private readonly IAllGamesRepository gameRepo;
-    private readonly IUnitOfWork unitOfWork;
-    private readonly IMediator mediator;
+    private readonly Database database;
 
-    public Task<GamePauseResult> Handle(GamePause request, CancellationToken cancellationToken)
-        => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
-            .Validate(game => game switch {
-                { Status: GameStatus.RUNNING } => Success(game),
-                { Status: GameStatus.LOCKED } => Success(game),
-                _ => Failure<DbGame>("Game must be in RUNNING or LOCKED state.")
-            })
-            .Do(game => game.Status = GameStatus.PAUSED)
-            .Bind(gameRepo.Update)
-            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
-            .RunWithRollback(
-                unitOfWork,
-                game => new GamePauseResult(true, Game: game),
-                error => new GamePauseResult(false, error.Message),
-                cancellationToken
-            );
+    public Task<GamePauseResult> Handle(GamePause request, CancellationToken cancellationToken) =>
+        Validate(request)
+            .Map(gameId => GameInterpreter<Runtime>.Interpret(
+                from game in Mystcraft.WriteOneGame(gameId)
+                from res in Mystcraft.Pause(game)
+                select res
+            ))
+            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Map(GamePauseResult.New);
+
+    private static Validation<Error, GameId> Validate(GamePause request) =>
+        GameId.New(request.GameId).ForField("GameId");
 }

@@ -33,7 +33,7 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameCreateLocalResult> GameCreateLocal(
+    public async Task<GameCreateResult> GameCreate(
         IMediator mediator,
         string name,
         [ID("GameEngine")] long gameEngineId,
@@ -41,18 +41,19 @@ public class Mutation {
         IFile playerData,
         IFile gameData
     ) {
+        // FIXME
         using var playersDataStream = playerData.OpenReadStream();
         using var gameDataStream = gameData.OpenReadStream();
 
-        var result = await mediator.Send(new GameCreateLocal(name, gameEngineId, options, playersDataStream, gameDataStream));
+        var result = await mediator.Send(new GameCreate(name, gameEngineId, null, options.Map, options.Schedule, options.TimeZone, options.StartAt, options.FinishAt));
 
         return result;
     }
 
-    [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameCreateRemoteResult> GameCreateRemote(IMediator mediator, string name, GameOptions options) {
-        return mediator.Send(new GameCreateRemote(name, options));
-    }
+    // [Authorize(Policy = Policies.GameMasters)]
+    // public Task<GameCreateRemoteResult> GameCreateRemote(IMediator mediator, string name, GameOptions options) {
+    //     return mediator.Send(new GameCreateRemote(name, options));
+    // }
 
     public Task<GameJoinLocalResult> GameJoinLocal(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId, string name) {
         return mediator.Send(new GameJoinLocal(currentUserId, gameId, name));
@@ -73,8 +74,8 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameCompleteResult> GameComplete(IMediator mediator, [ID("Game")] long gameId) {
-        return mediator.Send(new GameComplete(gameId));
+    public Task<GameStopResult> GameComplete(IMediator mediator, [ID("Game")] long gameId) {
+        return mediator.Send(new GameStop(gameId));
     }
 
     [Authorize(Policy = Policies.GameMasters)]

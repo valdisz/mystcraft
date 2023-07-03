@@ -75,23 +75,23 @@ public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUp
 
     public Either<Error, DbPlayer> Claim(long userId, string password) {
         if (IsClaimed) {
-            return failure<DbPlayer>("Player already claimed.");
+            return Left(Error.New("Player already claimed."));
         }
 
         UserId = userId;
         Password = password;
 
-        return success(this);
+        return Right(this);
     }
 
     public Either<Error, DbPlayer> Quit() {
         if (IsQuit) {
-            return failure<DbPlayer>("Player already quitted.");
+            return Left(Error.New("Player already quitted."));
         }
 
         IsQuit = true;
 
-        return success(this);
+        return Right(this);
     }
 }
 

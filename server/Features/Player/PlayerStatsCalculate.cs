@@ -1,15 +1,16 @@
-// namespace advisor.Features;
+// FIXME
+namespace advisor.Features;
 
-// using System.Collections.Generic;
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Persistence;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
-// using Microsoft.EntityFrameworkCore.Metadata;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
-// public record PlayerStatsCalculate(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame>;
+public record PlayerStatsCalculate(long PlayerId, int EarliestTurnNumber) : IRequest<DbGame>;
 
 // public class PlayerStatsCalculateHandler : IRequestHandler<PlayerStatsCalculate, DbGame> {
 //     public PlayerStatsCalculateHandler(Database db)

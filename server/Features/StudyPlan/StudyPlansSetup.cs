@@ -1,19 +1,19 @@
 // FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System;
-// using System.Collections.Generic;
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Persistence;
-// using AutoMapper;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using AutoMapper;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-// public record StudyPlansSetup(long PlayerId) : IRequest {
+public record StudyPlansSetup(long PlayerId) : IRequest {
 
-// }
+}
 
 // public class StudyPlansSetupHandler : IRequestHandler<StudyPlansSetup> {
 //     public StudyPlansSetupHandler(Database db, IMapper mapper) {

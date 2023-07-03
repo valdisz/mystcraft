@@ -52,6 +52,9 @@ public static class DatabaseExtensions {
                 break;
         }
 
+        services.AddScoped<UnitOfWork>(ctx => ctx.GetRequiredService<Database>());
+        services.AddTransient<DatabaseIO>(ctx => ctx.GetRequiredService<Database>());
+
         return services;
     }
 }

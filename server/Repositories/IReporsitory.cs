@@ -1,5 +1,7 @@
-namespace advisor;
+// FIXME
 
-public interface IReporsitory<T> where T: IsAggregateRoot {
-    IUnitOfWork UnitOfWork { get; }
-}
+// namespace advisor;
+
+// public interface IReporsitory<T> where T: IsAggregateRoot {
+//     IUnitOfWork UnitOfWork { get; }
+// }

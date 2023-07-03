@@ -65,8 +65,8 @@ public readonly struct Runtime:
     public Eff<Runtime, DatabaseIO> DatabaseEff =>
         SuccessEff<DatabaseIO>(Env.Database);
 
-    public Eff<Runtime, UnitOfWorkIO> UnitOfWorkEff =>
-        SuccessEff<UnitOfWorkIO>(Env.Database);
+    public Eff<Runtime, UnitOfWork> UnitOfWorkEff =>
+        SuccessEff<UnitOfWork>(Env.Database);
 }
 
 public sealed class RuntimeEnv {

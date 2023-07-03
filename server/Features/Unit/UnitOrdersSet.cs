@@ -1,3 +1,4 @@
+// FIXME
 namespace advisor.Features;
 
 using System.Threading;
@@ -12,32 +13,32 @@ public record UnitOrdersSet(long PlayerId, int TurnNumber, int UnitNumber, strin
 public record UnitOrdersSetResult(bool IsSuccess, string Error = null) : MutationResult(IsSuccess, Error);
 
 
-public class UnitOrdersSetHandler : IRequestHandler<UnitOrdersSet, UnitOrdersSetResult> {
-    public UnitOrdersSetHandler(IUnitOfWork unit) {
-        this.db = unit.Database;
-    }
+// public class UnitOrdersSetHandler : IRequestHandler<UnitOrdersSet, UnitOrdersSetResult> {
+//     public UnitOrdersSetHandler(IUnitOfWork unit) {
+//         this.db = unit.Database;
+//     }
 
-    private readonly Database db;
+//     private readonly Database db;
 
-    public async Task<UnitOrdersSetResult> Handle(UnitOrdersSet request, CancellationToken cancellationToken) {
-        var orders = await db.Orders
-            .InTurn(request.PlayerId, request.TurnNumber)
-            .SingleOrDefaultAsync(x => x.UnitNumber == request.UnitNumber);
+//     public async Task<UnitOrdersSetResult> Handle(UnitOrdersSet request, CancellationToken cancellationToken) {
+//         var orders = await db.Orders
+//             .InTurn(request.PlayerId, request.TurnNumber)
+//             .SingleOrDefaultAsync(x => x.UnitNumber == request.UnitNumber);
 
-        if (orders == null) {
-            orders = new DbOrders {
-                PlayerId = request.PlayerId,
-                TurnNumber = request.TurnNumber,
-                UnitNumber = request.UnitNumber
-            };
+//         if (orders == null) {
+//             orders = new DbOrders {
+//                 PlayerId = request.PlayerId,
+//                 TurnNumber = request.TurnNumber,
+//                 UnitNumber = request.UnitNumber
+//             };
 
-            await db.AddAsync(orders);
-        }
+//             await db.AddAsync(orders);
+//         }
 
-        orders.Orders = request.Orders;
+//         orders.Orders = request.Orders;
 
-        await db.SaveChangesAsync();
+//         await db.SaveChangesAsync();
 
-        return new UnitOrdersSetResult(true);
-    }
-}
+//         return new UnitOrdersSetResult(true);
+//     }
+// }

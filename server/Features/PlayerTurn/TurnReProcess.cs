@@ -1,19 +1,19 @@
 // FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Persistence;
-// using advisor.Schema;
-// using Hangfire;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
-// using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using advisor.Schema;
+using Hangfire;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-// public record TurnReProcess(long GameId, int Turn) : IRequest<TurnReProcessResult>;
+public record TurnReProcess(long GameId, int Turn) : IRequest<TurnReProcessResult>;
 
-// public record TurnReProcessResult(bool IsSuccess, string Error) : IMutationResult;
+public record TurnReProcessResult(bool IsSuccess, string Error) : IMutationResult;
 
 // public class TurnReProcessHandler : IRequestHandler<TurnReProcess, TurnReProcessResult> {
 //     public TurnReProcessHandler(Database db, ILogger<TurnProcessHandler> logger, IBackgroundJobClient background) {

@@ -1,12 +1,12 @@
 // FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System.Threading;
-// using System.Threading.Tasks;
-// using MediatR;
-// using Microsoft.Extensions.Logging;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
-// public record TurnProcess(long PlayerId, int EarliestTurn) : IRequest;
+public record TurnProcess(long PlayerId, int EarliestTurn) : IRequest;
 
 // public class TurnProcessHandler : IRequestHandler<TurnProcess> {
 //     public TurnProcessHandler(IMediator mediator, ILogger<TurnProcessHandler> logger) {

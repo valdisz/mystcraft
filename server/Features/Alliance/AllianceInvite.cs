@@ -1,3 +1,4 @@
+// FIXME
 namespace advisor.Features;
 
 using System;
@@ -11,14 +12,14 @@ public record AllianceInvite(long AllianceId, long PlayerId, long UserId, long T
 
 public record AllianceInviteResult(bool IsSuccess, string Error = null, DbAlliance Alliance = null, DbAllianceMember Membership = null) : IMutationResult;
 
-public class AllianceInviteHandler : IRequestHandler<AllianceInvite, AllianceInviteResult> {
-    public AllianceInviteHandler(IUnitOfWork unit) {
-        this.unit = unit;
-    }
+// public class AllianceInviteHandler : IRequestHandler<AllianceInvite, AllianceInviteResult> {
+//     public AllianceInviteHandler(IUnitOfWork unit) {
+//         this.unit = unit;
+//     }
 
-    private readonly IUnitOfWork unit;
+//     private readonly IUnitOfWork unit;
 
-    public async Task<AllianceInviteResult> Handle(AllianceInvite request, CancellationToken cancellationToken) {
-        throw new NotImplementedException();
-    }
-}
+//     public async Task<AllianceInviteResult> Handle(AllianceInvite request, CancellationToken cancellationToken) {
+//         throw new NotImplementedException();
+//     }
+// }

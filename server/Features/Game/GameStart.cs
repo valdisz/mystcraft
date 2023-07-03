@@ -8,34 +8,31 @@ using advisor.Persistence;
 
 public record GameStart(long GameId): IRequest<GameStartResult>;
 
-public record GameStartResult(bool IsSuccess, string Error = null, DbGame Game = null, string JobId = null) : MutationResult(IsSuccess, Error);
+public record GameStartResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error) {
+    public static GameStartResult New(Validation<Error, DbGame> result) =>
+        result.Match(
+            Succ: g => new GameStartResult(true, Game: g),
+            Fail: e => new GameStartResult(false, Error: e.Head.Message)
+        );
+}
 
 public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
-    public GameStartHandler(IAllGamesRepository gameRepo, IMediator mediator) {
-        this.gameRepo = gameRepo;
-        this.unitOfWork = gameRepo.UnitOfWork;
-        this.mediator = mediator;
+    public GameStartHandler(Database database) {
+        this.database = database;
     }
 
-    private readonly IAllGamesRepository gameRepo;
-    private readonly IUnitOfWork unitOfWork;
-    private readonly IMediator mediator;
+    private readonly Database database;
 
-    public Task<GameStartResult> Handle(GameStart request, CancellationToken cancellationToken)
-        => unitOfWork.BeginTransaction(cancellationToken)
-            .Bind(() => gameRepo.GetOneGame(request.GameId, cancellation: cancellationToken))
-            .Validate(game => game switch {
-                { Status: GameStatus.NEW } => Success(game),
-                { Status: GameStatus.PAUSED } => Success(game),
-                _ => Failure<DbGame>("Game must be in NEW or PAUSED state.")
-            })
-            .Do(game => game.Status = GameStatus.RUNNING)
-            .Bind(gameRepo.Update)
-            .SaveAndReconcile(mediator, unitOfWork, cancellationToken)
-            .RunWithRollback(
-                unitOfWork,
-                game => new GameStartResult(true, Game: game),
-                error => new GameStartResult(false, error.Message),
-                cancellationToken
-            );
+    public Task<GameStartResult> Handle(GameStart request, CancellationToken cancellationToken) =>
+        Validate(request)
+            .Map(gameId => GameInterpreter<Runtime>.Interpret(
+                from game in Mystcraft.WriteOneGame(gameId)
+                from res in Mystcraft.Start(game)
+                select res
+            ))
+            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Map(GameStartResult.New);
+
+    private static Validation<Error, GameId> Validate(GameStart request) =>
+        GameId.New(request.GameId).ForField("GameId");
 }

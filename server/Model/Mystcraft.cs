@@ -39,6 +39,11 @@ public static class Mystcraft {
     public static Mystcraft<ReadOnly<DbGame>> ReadOneGame(GameId Game) => new Mystcraft<ReadOnly<DbGame>>.ReadOneGame(Game, Return);
 
     /// <summary>
+    /// Get a single game by ID prepared for modification.
+    /// </summary>
+    public static Mystcraft<DbGame> WriteOneGame(GameId Game) => new Mystcraft<DbGame>.WriteOneGame(Game, Return);
+
+    /// <summary>
     /// Start or resume a game.
     /// </summary>
     public static Mystcraft<DbGame> Start(DbGame Game) => new Mystcraft<DbGame>.Start(Game, Return);

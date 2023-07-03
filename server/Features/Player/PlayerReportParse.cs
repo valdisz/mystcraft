@@ -1,20 +1,21 @@
 // FIXME
-// namespace advisor.Features;
 
-// using System.IO;
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using System.Collections.Generic;
-// using Microsoft.EntityFrameworkCore;
-// using AutoMapper;
-// using MediatR;
-// using Newtonsoft.Json;
-// using advisor.Model;
-// using advisor.Persistence;
-// using advisor.TurnProcessing;
+namespace advisor.Features;
 
-// public record PlayerReportParse(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using MediatR;
+using Newtonsoft.Json;
+using advisor.Model;
+using advisor.Persistence;
+using advisor.TurnProcessing;
+
+public record PlayerReportParse(long PlayerId, int EarliestTurn, JReport Map = null) : IRequest;
 
 // public class PlayerReportParseHandler : IRequestHandler<PlayerReportParse> {
 //     public PlayerReportParseHandler(Database db, IMapper mapper, IMediator mediator) {

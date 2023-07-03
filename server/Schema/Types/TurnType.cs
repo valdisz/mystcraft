@@ -16,12 +16,18 @@ namespace advisor.Schema
                         return null;
                     }
 
-                    var (gameId, turnNumber) = TurnId.CreateFrom(id);
-                    var db = ctx.Service<Database>();
-                    return await db.Turns
-                        .AsNoTracking()
-                        .InGame(gameId)
-                        .SingleOrDefaultAsync(x => x.Number == turnNumber);
+                    var action =
+                        from turnId in TurnId.New(id)
+                        let db = ctx.Service<Database>()
+                        select db.Turns
+                            .AsNoTracking()
+                            .InGame(turnId.GameId)
+                            .SingleOrDefaultAsync(x => x.Number == turnId.TurnNumber);
+
+                    return await action.Match(
+                        Right: x => x,
+                        Left: err => throw err.ToException()
+                    );
                 });
         }
     }

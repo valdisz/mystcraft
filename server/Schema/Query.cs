@@ -20,11 +20,10 @@ public class Query {
         (await GameInterpreter<Runtime>.Interpret(
             from games in Mystcraft.ReadManyGames()
             select games.OrderByDescending(g => g.CreatedAt)
-            , Runtime.New(db, context.RequestAborted)
-        ))
+        ).Run(Runtime.New(db, context.RequestAborted)))
         .Match(
             Succ: games => games,
-            Fail: ex => throw ex
+            Fail: ex => throw ex.ToException()
         );
 
     [Authorize(Policy = Policies.UserManagers)]

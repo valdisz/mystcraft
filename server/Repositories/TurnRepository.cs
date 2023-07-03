@@ -20,14 +20,14 @@ public interface ITurnRepository {
 }
 
 public class TurnRepository : ITurnRepository {
-    public TurnRepository(DbGame game, IUnitOfWork unit, Database db) {
+    public TurnRepository(DbGame game, UnitOfWork unit, Database db) {
         this.game = game;
         this.unit = unit;
         this.db = db;
     }
 
     private readonly DbGame game;
-    private readonly IUnitOfWork unit;
+    private readonly UnitOfWork unit;
     private readonly Database db;
 
     public IQueryable<DbTurn> AllTurns => db.Turns.InGame(game);

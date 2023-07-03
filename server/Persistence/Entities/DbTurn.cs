@@ -2,54 +2,53 @@ namespace advisor.Persistence;
 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public record struct TurnId(long GameId, int TurnNumber) {
     private static readonly Regex PATTERN = new Regex(@"^(\d+)\@(\d+)$", RegexOptions.Compiled);
 
-    public static TurnId CreateFrom(DbTurn turn) => new TurnId(turn.GameId, turn.Number);
+    public static TurnId New(DbTurn turn) => new TurnId(turn.GameId, turn.Number);
 
-    public static Option<TurnId> CreateFrom(string s) {
+    public static Either<Error, TurnId> New(string s) {
         var m = PATTERN.Match(s);
         if (!m.Success) {
-            return None<TurnId>();
+            return Left(Error.New($"Invalid turn id: {s}"));
         }
 
-        return new TurnId(
+        return Right(new TurnId(
             GameId: long.Parse(m.Groups[2].Value),
             TurnNumber: int.Parse(m.Groups[1].Value)
-        );
+        ));
     }
 
     public override string ToString() =>  $"{TurnNumber}@{GameId}";
 }
 
 public class DbTurn : InGameContext {
-    [GraphQLIgnore]
-    public string PublicId => TurnId.CreateFrom(this).ToString();
+    [HotChocolate.GraphQLIgnore]
+    public string PublicId => TurnId.New(this).ToString();
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public long GameId { get; set; }
 
     public int Number { get; set; }
 
     public TurnState State { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public byte[] PlayerData { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public byte[] GameData { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public DbGame Game { get; set; }
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public List<DbArticle> Articles { get; set; } = new ();
 
-    [GraphQLIgnore]
+    [HotChocolate.GraphQLIgnore]
     public List<DbReport> Reports { get; set; } = new ();
 }
 

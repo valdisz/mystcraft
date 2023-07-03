@@ -7,11 +7,11 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 
 public class UnitOfWorkBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse> {
-    public UnitOfWorkBehavior(IUnitOfWork unitOfWork) {
-        this.unitOfWork = unitOfWork;
-    }
+    // public UnitOfWorkBehavior(IUnitOfWork unitOfWork) {
+    //     this.unitOfWork = unitOfWork;
+    // }
 
-    private readonly IUnitOfWork unitOfWork;
+    // private readonly IUnitOfWork unitOfWork;
 
     public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next) {
         return await next();

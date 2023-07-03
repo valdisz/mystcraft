@@ -1,18 +1,18 @@
 // FIXME
-// namespace advisor.Features;
+namespace advisor.Features;
 
-// using System;
-// using System.Collections.Generic;
-// using System.IO;
-// using System.Linq;
-// using System.Threading;
-// using System.Threading.Tasks;
-// using advisor.Model;
-// using advisor.Persistence;
-// using MediatR;
-// using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Model;
+using advisor.Persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
-// public record PlayerReportUpload(long PlayerId, IEnumerable<string> Reports) : IRequest<int>;
+public record PlayerReportUpload(long PlayerId, IEnumerable<string> Reports) : IRequest<int>;
 
 // public class PlayerReportUploadHandler : IRequestHandler<PlayerReportUpload, int> {
 //     public PlayerReportUploadHandler(Database db) {

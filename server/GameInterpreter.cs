@@ -4,6 +4,7 @@ using System;
 using advisor.Persistence;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 /// <summary>
 /// Live interpreter for the basic operations that can be performed on a game.
@@ -31,7 +32,7 @@ public readonly struct GameInterpreter<RT>
         Mystcraft<A>.Pause ps                 =>       PauseGame(ps),
         Mystcraft<A>.Lock lk                  =>       LockGame(lk),
         Mystcraft<A>.Stop sp                  =>       StopGame(sp),
-        // Mystcraft<A>.Delete dl                => _tran(DeleteGame(dl)),
+        Mystcraft<A>.Delete dl                =>       DeleteGame(dl),
         // Mystcraft<A>.ReadOptions ro           =>       ReadOptions(ro),
         // Mystcraft<A>.WriteSchedule ws         => _tran(WriteSchedule(ws)),
         // Mystcraft<A>.WriteMap wm              => _tran(WriteMap(wm)),
@@ -165,5 +166,12 @@ public readonly struct GameInterpreter<RT>
         from game in CanStopGame(sp.Game).ToEff()
         from _ in modify(game, g => g.Status = GameStatus.STOPED)
         from ret in _Interpret(sp.Next(game))
+        select ret;
+
+    private static Aff<RT, A> DeleteGame<A>(Mystcraft<A>.Delete dl) =>
+        from games in Database<RT>.Games
+        from _1 in Eff<RT, EntityEntry<DbGame>>(x => games.Remove(dl.Game))
+        from _2 in UnitOfWork<RT>.save()
+        from ret in _Interpret(dl.Next(unit))
         select ret;
 }

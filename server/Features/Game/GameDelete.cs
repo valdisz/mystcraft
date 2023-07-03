@@ -1,17 +1,19 @@
-// namespace advisor.Features {
-//     using System.Collections.Generic;
-//     using System.Linq;
-//     using System.Security.Claims;
-//     using System.Threading;
-//     using System.Threading.Tasks;
-//     using advisor.Persistence;
-//     using MediatR;
-//     using Microsoft.AspNetCore.Authorization;
-//     using Microsoft.EntityFrameworkCore;
+// FIXME
+namespace advisor.Features;
 
-//     public record GameDelete(long GameId) : IRequest<List<DbGame>>;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using advisor.Persistence;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
-//     public record TurnDelete(ClaimsPrincipal User, long PlayerId, int TurnNumber) : IRequest<int>;
+public record GameDelete(long GameId) : IRequest<List<DbGame>>;
+
+public record TurnDelete(ClaimsPrincipal User, long PlayerId, int TurnNumber) : IRequest<int>;
 
 //     public class GameDeleteHandler : IRequestHandler<GameDelete, List<DbGame>>, IRequestHandler<TurnDelete, int> {
 //         public GameDeleteHandler(Database db, IAuthorizationService auth) {
@@ -111,4 +113,3 @@
 //             return db.Database.ExecuteSqlRawAsync($@"delete from {targetTable} where {field1} = {id1} and {field2} = {id2}");
 //         }
 //     }
-// }

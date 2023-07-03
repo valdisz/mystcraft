@@ -1,240 +1,242 @@
-namespace advisor;
+//FIXME
 
-using System.Linq;
-using System.Threading;
-using advisor.Persistence;
-using Microsoft.EntityFrameworkCore;
+// namespace advisor;
 
-public interface IPlayerRepository : IReporsitory<DbPlayer> {
-    ISpecializedPlayerRepository Specialize(DbGame game);
-}
+// using System.Linq;
+// using System.Threading;
+// using advisor.Persistence;
+// using Microsoft.EntityFrameworkCore;
 
-public interface ISpecializedPlayerRepository : IReporsitory<DbPlayer> {
-    IQueryable<DbPlayer> Players { get; }
-    IQueryable<DbRegistration> Registrations { get; }
-    IQueryable<DbPlayerTurn> PlayerTurns { get; }
+// public interface IPlayerRepository : IReporsitory<DbPlayer> {
+//     ISpecializedPlayerRepository Specialize(DbGame game);
+// }
 
-    DbRegistration Add(DbRegistration registration);
-    DbPlayer Add(DbPlayer player);
-    DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn);
+// public interface ISpecializedPlayerRepository : IReporsitory<DbPlayer> {
+//     IQueryable<DbPlayer> Players { get; }
+//     IQueryable<DbRegistration> Registrations { get; }
+//     IQueryable<DbPlayerTurn> PlayerTurns { get; }
 
-    IO<DbRegistration> Update(DbRegistration registration);
-    IO<DbPlayer> Update(DbPlayer player);
-    IO<DbPlayerTurn> Update(DbPlayerTurn playerTurn);
+//     DbRegistration Add(DbRegistration registration);
+//     DbPlayer Add(DbPlayer player);
+//     DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn);
 
-    AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default);
-    AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default);
-    AsyncIO<Option<DbPlayerTurn>> GetOnePlayerTurn(long playerId, int turnNumber, bool withTracking = true, CancellationToken cancellation = default);
+//     IO<DbRegistration> Update(DbRegistration registration);
+//     IO<DbPlayer> Update(DbPlayer player);
+//     IO<DbPlayerTurn> Update(DbPlayerTurn playerTurn);
 
-    IO<Unit> Delete(DbRegistration registration);
-    IO<Unit> Delete(DbPlayer player);
-    IO<Unit> Delete(DbPlayerTurn playerTurn);
-}
+//     AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default);
+//     AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default);
+//     AsyncIO<Option<DbPlayerTurn>> GetOnePlayerTurn(long playerId, int turnNumber, bool withTracking = true, CancellationToken cancellation = default);
 
-public class PlayerRepository: IPlayerRepository {
-    public PlayerRepository(Database db) {
-        this.db = db;
-    }
-    private readonly Database db;
+//     IO<Unit> Delete(DbRegistration registration);
+//     IO<Unit> Delete(DbPlayer player);
+//     IO<Unit> Delete(DbPlayerTurn playerTurn);
+// }
 
-    public IUnitOfWork UnitOfWork => db;
+// public class PlayerRepository: IPlayerRepository {
+//     public PlayerRepository(Database db) {
+//         this.db = db;
+//     }
+//     private readonly Database db;
 
-    public ISpecializedPlayerRepository Specialize(DbGame game) => new SpecializePlayersRepository(db, game);
+//     public IUnitOfWork UnitOfWork => db;
 
-    sealed class SpecializePlayersRepository : ISpecializedPlayerRepository {
-        public SpecializePlayersRepository(Database db, DbGame game) {
-            this.db = db;
-            this.game = game;
-        }
+//     public ISpecializedPlayerRepository Specialize(DbGame game) => new SpecializePlayersRepository(db, game);
 
-        private readonly DbGame game;
-        private readonly Database db;
+//     sealed class SpecializePlayersRepository : ISpecializedPlayerRepository {
+//         public SpecializePlayersRepository(Database db, DbGame game) {
+//             this.db = db;
+//             this.game = game;
+//         }
 
-        public IUnitOfWork UnitOfWork => db;
+//         private readonly DbGame game;
+//         private readonly Database db;
 
-        public IQueryable<DbPlayer> Players => db.Players.InGame(game);
+//         public IUnitOfWork UnitOfWork => db;
 
-        public IQueryable<DbRegistration> Registrations => db.Registrations.InGame(game);
+//         public IQueryable<DbPlayer> Players => db.Players.InGame(game);
 
-        public IQueryable<DbPlayerTurn> PlayerTurns => db.PlayerTurns.InGame(game);
+//         public IQueryable<DbRegistration> Registrations => db.Registrations.InGame(game);
 
-        public DbRegistration Add(DbRegistration registration) {
-            registration.Game = game;
-            registration.GameId = game.Id;
+//         public IQueryable<DbPlayerTurn> PlayerTurns => db.PlayerTurns.InGame(game);
 
-            game.Registrations.Add(registration);
+//         public DbRegistration Add(DbRegistration registration) {
+//             registration.Game = game;
+//             registration.GameId = game.Id;
 
-            return db.Registrations.Add(registration).Entity;
-        }
+//             game.Registrations.Add(registration);
 
-        public DbPlayer Add(DbPlayer player) {
-            player.Game = game;
-            player.GameId = game.Id;
+//             return db.Registrations.Add(registration).Entity;
+//         }
 
-            game.Players.Add(player);
+//         public DbPlayer Add(DbPlayer player) {
+//             player.Game = game;
+//             player.GameId = game.Id;
 
-            return db.Players.Add(player).Entity;
-        }
+//             game.Players.Add(player);
 
-        public DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn) {
-            playerTurn.Player = player;
-            playerTurn.PlayerId = player.Id;
+//             return db.Players.Add(player).Entity;
+//         }
 
-            player.Turns.Add(playerTurn);
+//         public DbPlayerTurn Add(DbPlayer player, DbPlayerTurn playerTurn) {
+//             playerTurn.Player = player;
+//             playerTurn.PlayerId = player.Id;
 
-            return db.PlayerTurns.Add(playerTurn).Entity;
-        }
+//             player.Turns.Add(playerTurn);
 
-        private IO<T> UpdateEntity<T>(T entity)
-            => Effect(() => {
-                db.Entry(entity).State = EntityState.Modified;
-                return entity;
-            });
+//             return db.PlayerTurns.Add(playerTurn).Entity;
+//         }
 
-        public IO<DbRegistration> Update(DbRegistration registration)
-            => UpdateEntity(registration);
+//         private IO<T> UpdateEntity<T>(T entity)
+//             => Effect(() => {
+//                 db.Entry(entity).State = EntityState.Modified;
+//                 return entity;
+//             });
 
-        public IO<DbPlayer> Update(DbPlayer player)
-            => UpdateEntity(player);
+//         public IO<DbRegistration> Update(DbRegistration registration)
+//             => UpdateEntity(registration);
 
-        public IO<DbPlayerTurn> Update(DbPlayerTurn playerTurn)
-            => UpdateEntity(playerTurn);
+//         public IO<DbPlayer> Update(DbPlayer player)
+//             => UpdateEntity(player);
 
-        public AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default)
-            => async () => Success(await Players
-                .WithTracking(withTracking)
-                .SingleOrDefaultAsync(x => x.Id == playerId, cancellation)
-                .AsOption()
-            );
+//         public IO<DbPlayerTurn> Update(DbPlayerTurn playerTurn)
+//             => UpdateEntity(playerTurn);
 
-        public AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
-            => async () => Success(await Registrations
-                .WithTracking(withTracking)
-                .SingleOrDefaultAsync(x => x.Id == registrationId, cancellation)
-                .AsOption()
-            );
+//         public AsyncIO<Option<DbPlayer>> GetOnePlayer(long playerId, bool withTracking = true, CancellationToken cancellation = default)
+//             => async () => Success(await Players
+//                 .WithTracking(withTracking)
+//                 .SingleOrDefaultAsync(x => x.Id == playerId, cancellation)
+//                 .AsOption()
+//             );
 
-        public AsyncIO<Option<DbPlayerTurn>> GetOnePlayerTurn(long playerId, int turnNumber, bool withTracking = true, CancellationToken cancellation = default)
-            => async () => Success(await PlayerTurns
-                .WithTracking(withTracking)
-                .SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation)
-                .AsOption()
-            );
+//         public AsyncIO<Option<DbRegistration>> GetOneRegistration(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
+//             => async () => Success(await Registrations
+//                 .WithTracking(withTracking)
+//                 .SingleOrDefaultAsync(x => x.Id == registrationId, cancellation)
+//                 .AsOption()
+//             );
 
-        public IO<Unit> Delete(DbRegistration registration)
-            => () => {
-                db.Entry(registration).State = EntityState.Deleted;
-                return Success(unit);
-            };
+//         public AsyncIO<Option<DbPlayerTurn>> GetOnePlayerTurn(long playerId, int turnNumber, bool withTracking = true, CancellationToken cancellation = default)
+//             => async () => Success(await PlayerTurns
+//                 .WithTracking(withTracking)
+//                 .SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation)
+//                 .AsOption()
+//             );
 
-        public IO<Unit> Delete(DbPlayer player)
-            => () => {
-                db.Entry(player).State = EntityState.Deleted;
-                return Success(unit);
-            };
+//         public IO<Unit> Delete(DbRegistration registration)
+//             => () => {
+//                 db.Entry(registration).State = EntityState.Deleted;
+//                 return Success(unit);
+//             };
 
-        public IO<Unit> Delete(DbPlayerTurn playerTurn)
-            => () => {
-                db.Entry(playerTurn).State = EntityState.Deleted;
-                return Success(unit);
-            };
+//         public IO<Unit> Delete(DbPlayer player)
+//             => () => {
+//                 db.Entry(player).State = EntityState.Deleted;
+//                 return Success(unit);
+//             };
+
+//         public IO<Unit> Delete(DbPlayerTurn playerTurn)
+//             => () => {
+//                 db.Entry(playerTurn).State = EntityState.Deleted;
+//                 return Success(unit);
+//             };
 
 
-        // public Task<DbRegistration> GetRegistrationAsync(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
-        //     => Registrations.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == registrationId, cancellation);
+//         // public Task<DbRegistration> GetRegistrationAsync(long registrationId, bool withTracking = true, CancellationToken cancellation = default)
+//         //     => Registrations.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == registrationId, cancellation);
 
-        // public Task<DbPlayer> GetPlayerAsync(long playerId, bool withTracking = true, CancellationToken cancellation = default)
-        //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
+//         // public Task<DbPlayer> GetPlayerAsync(long playerId, bool withTracking = true, CancellationToken cancellation = default)
+//         //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Id == playerId, cancellation);
 
-        // public Task<DbPlayer> GetPlayerByUserAsync(long userId, bool withTracking = true, CancellationToken cancellation = default)
-        //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
+//         // public Task<DbPlayer> GetPlayerByUserAsync(long userId, bool withTracking = true, CancellationToken cancellation = default)
+//         //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.UserId == userId, cancellation);
 
-        // public Task<DbPlayer> GetPlayerByNumberAsync(int number, bool withTracking = true, CancellationToken cancellation = default)
-        //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Number == number, cancellation);
+//         // public Task<DbPlayer> GetPlayerByNumberAsync(int number, bool withTracking = true, CancellationToken cancellation = default)
+//         //     => Players.WithTracking(withTracking).SingleOrDefaultAsync(x => x.Number == number, cancellation);
 
-        // public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
-        //     => db.PlayerTurns.SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
+//         // public Task<DbPlayerTurn> GetPlayerTurnAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
+//         //     => db.PlayerTurns.SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
 
-        // public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
-        //     => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
+//         // public Task<DbPlayerTurn> GetPlayerTurnNoTrackingAsync(long playerId, int turnNumber, CancellationToken cancellation = default)
+//         //     => db.PlayerTurns.AsNoTracking().SingleOrDefaultAsync(x => x.PlayerId == playerId && x.TurnNumber == turnNumber, cancellation);
 
-        // public async Task<DbRegistration> RegisterPlayerAsync(long userId, string name, string password, CancellationToken cancellation = default) {
-        //     var reg = new DbRegistration {
-        //         GameId = gameId,
-        //         UserId = userId,
-        //         Name = name,
-        //         Password = password
-        //     };
+//         // public async Task<DbRegistration> RegisterPlayerAsync(long userId, string name, string password, CancellationToken cancellation = default) {
+//         //     var reg = new DbRegistration {
+//         //         GameId = gameId,
+//         //         UserId = userId,
+//         //         Name = name,
+//         //         Password = password
+//         //     };
 
-        //     await db.Registrations.AddAsync(reg, cancellation);
+//         //     await db.Registrations.AddAsync(reg, cancellation);
 
-        //     return reg;
-        // }
+//         //     return reg;
+//         // }
 
-        // public async Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
-        //     if (await GetPlayerByNumberAsync(factionNumber, withTracking: false) is not null) {
-        //         throw new RepositoryException("Player already exist");
-        //     }
+//         // public async Task<DbPlayer> AddLocalAsync(long registrationId, int factionNumber, CancellationToken cancellation = default) {
+//         //     if (await GetPlayerByNumberAsync(factionNumber, withTracking: false) is not null) {
+//         //         throw new RepositoryException("Player already exist");
+//         //     }
 
-        //     var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
+//         //     var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
 
-        //     var player = new DbPlayer {
-        //         GameId = reg.GameId,
-        //         UserId = reg.UserId,
-        //         Name = reg.Name,
-        //         Number = factionNumber,
-        //         Password = reg.Password
-        //     };
+//         //     var player = new DbPlayer {
+//         //         GameId = reg.GameId,
+//         //         UserId = reg.UserId,
+//         //         Name = reg.Name,
+//         //         Number = factionNumber,
+//         //         Password = reg.Password
+//         //     };
 
-        //     db.Remove(reg);
-        //     await db.Players.AddAsync(player, cancellation);
+//         //     db.Remove(reg);
+//         //     await db.Players.AddAsync(player, cancellation);
 
-        //     return player;
-        // }
+//         //     return player;
+//         // }
 
-        // public async Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default) {
-        //     if (await GetPlayerByNumberAsync(number, withTracking: false) is not null) {
-        //         throw new RepositoryException("Player already exist");
-        //     }
+//         // public async Task<DbPlayer> AddRemoteAsync(int number, string name, CancellationToken cancellation = default) {
+//         //     if (await GetPlayerByNumberAsync(number, withTracking: false) is not null) {
+//         //         throw new RepositoryException("Player already exist");
+//         //     }
 
-        //     var player = new DbPlayer {
-        //         GameId = gameId,
-        //         Number = number,
-        //         Name = name
-        //     };
+//         //     var player = new DbPlayer {
+//         //         GameId = gameId,
+//         //         Number = number,
+//         //         Name = name
+//         //     };
 
-        //     await db.Players.AddAsync(player, cancellation);
+//         //     await db.Players.AddAsync(player, cancellation);
 
-        //     return player;
-        // }
+//         //     return player;
+//         // }
 
-        // public async Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default) {
-        //     var player = await GetPlayerAsync(playerId);
-        //     if (player is null) {
-        //         throw new RepositoryException($"Player does not exist");
-        //     }
+//         // public async Task<DbPlayer> QuitAsync(long playerId, CancellationToken cancellation = default) {
+//         //     var player = await GetPlayerAsync(playerId);
+//         //     if (player is null) {
+//         //         throw new RepositoryException($"Player does not exist");
+//         //     }
 
-        //     player.IsQuit = true;
+//         //     player.IsQuit = true;
 
-        //     return player;
-        // }
+//         //     return player;
+//         // }
 
-        // public async Task DeleteRegistrationAsync(long registrationId, CancellationToken cancellation = default) {
-        //     var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
-        //     if (reg is null) {
-        //         throw new RepositoryException($"Registration does not exist");
-        //     }
+//         // public async Task DeleteRegistrationAsync(long registrationId, CancellationToken cancellation = default) {
+//         //     var reg = await GetRegistrationAsync(registrationId, cancellation: cancellation);
+//         //     if (reg is null) {
+//         //         throw new RepositoryException($"Registration does not exist");
+//         //     }
 
-        //     db.Remove(reg);
-        // }
+//         //     db.Remove(reg);
+//         // }
 
-        // public async Task DeletePlayerAsync(long playerId, CancellationToken cancellation = default) {
-        //     var reg = await GetPlayerAsync(playerId, cancellation: cancellation);
-        //     if (reg is null) {
-        //         throw new RepositoryException($"Player does not exist");
-        //     }
+//         // public async Task DeletePlayerAsync(long playerId, CancellationToken cancellation = default) {
+//         //     var reg = await GetPlayerAsync(playerId, cancellation: cancellation);
+//         //     if (reg is null) {
+//         //         throw new RepositoryException($"Player does not exist");
+//         //     }
 
-        //     db.Remove(reg);
-        // }
-    }
-}
+//         //     db.Remove(reg);
+//         // }
+//     }
+// }
