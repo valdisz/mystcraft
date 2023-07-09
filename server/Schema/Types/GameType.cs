@@ -13,7 +13,11 @@
     using Remote;
 
     public class GameType : ObjectType<DbGame> {
+        public const string NAME = "Game";
+
         protected override void Configure(IObjectTypeDescriptor<DbGame> descriptor) {
+            descriptor.Name(NAME);
+
             descriptor
                 .ImplementsNode()
                 .IdField(x => x.Id)
@@ -26,7 +30,7 @@
         }
     }
 
-    [ExtendObjectType("Game")]
+    [ExtendObjectType(GameType.NAME)]
     public class GameResolvers {
         [UseFirstOrDefault]
         [UseProjection]

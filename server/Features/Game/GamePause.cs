@@ -5,6 +5,7 @@ using advisor.Schema;
 using advisor.Persistence;
 using System.Threading.Tasks;
 using System.Threading;
+using advisor.Model;
 
 public record GamePause(long GameId): IRequest<GamePauseResult>;
 

@@ -22,10 +22,18 @@ public class DbGameEngine : WithCreationTime {
     public byte[] Contents { get; set; }
 
     [Required]
+    [GraphQLIgnore]
     public byte[] Ruleset { get; set; }
 
     [GraphQLIgnore]
     public List<DbGame> Games { get; set; } = new ();
+
+    public static DbGameEngine New(string name, byte[] contents, byte[] ruleset) =>
+        new DbGameEngine {
+            Name = name,
+            Contents = contents,
+            Ruleset = ruleset
+        };
 }
 
 public class DbGameEngineConfiguration : IEntityTypeConfiguration<DbGameEngine> {
@@ -38,6 +46,12 @@ public class DbGameEngineConfiguration : IEntityTypeConfiguration<DbGameEngine> 
     public void Configure(EntityTypeBuilder<DbGameEngine> builder) {
         builder.Property(x => x.Id)
             .UseIdentityColumn();
+
+        builder.Property(x => x.Contents)
+            .HasCompression();
+
+        builder.Property(x => x.Ruleset)
+            .HasCompression();
 
         builder.HasMany(x => x.Games)
             .WithOne(x => x.Engine)

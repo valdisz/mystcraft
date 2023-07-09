@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
+using advisor.Model;
 
 // public delegate AsyncIO<T> StagePipeline<T>(IServiceScope scope, CancellationToken cancellation);
 

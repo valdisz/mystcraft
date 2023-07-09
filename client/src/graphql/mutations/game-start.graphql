@@ -2,7 +2,6 @@ mutation GameStart($gameId: ID!) {
     gameStart(gameId: $gameId) {
         isSuccess
         error
-        jobId
     }
 }
 

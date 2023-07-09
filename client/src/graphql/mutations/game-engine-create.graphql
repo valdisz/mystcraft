@@ -1,5 +1,5 @@
-mutation GameEngineCreate($name: String!, $file: Upload!) {
-  gameEngineCreate(name: $name, file: $file) {
+mutation GameEngineCreate($name: String!, $content: Upload!, $ruleset: Upload) {
+  gameEngineCreate(name: $name, content: $content, ruleset: $ruleset) {
     isSuccess
     error
     engine {

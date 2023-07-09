@@ -139,20 +139,22 @@ export class GameDetailsStore {
 
     readonly start = async () => {
         const result = await mutate<GameStartMutation, GameStartMutationVariables>(GameStart, { gameId: this.gameId })
-        const { jobId } = result.data?.gameStart
 
-        let state: JobState
-        const ds = query<GetJobQuery, GetJobQuery, GetJobQueryVariables>(GetJob, identity, { jobId })
-        do {
-            await delay(1000)
-            await ds.reload()
-            state = ds.value.job.state
-        }
-        while (state !== JobState.Succeeded && state !== JobState.Failed)
+        // FIXME
+        // const { jobId } = result.data?.gameStart
 
-        ds.close()
+        // let state: JobState
+        // const ds = query<GetJobQuery, GetJobQuery, GetJobQueryVariables>(GetJob, identity, { jobId })
+        // do {
+        //     await delay(1000)
+        //     await ds.reload()
+        //     state = ds.value.job.state
+        // }
+        // while (state !== JobState.Succeeded && state !== JobState.Failed)
 
-        this.source.reload()
+        // ds.close()
+
+        // this.source.reload()
     }
 
     private mapReponse({ node }: GetGameDetailsQuery): Game | null {

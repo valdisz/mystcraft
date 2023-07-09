@@ -24,9 +24,10 @@ public static class Errors {
     };
 
 
-    public static readonly Error E_GAME_DOES_NOT_EXIST   = Error.New(300_00, "Game does not exist.");
-    public static readonly Error E_PLAYER_DOES_NOT_EXIST = Error.New(300_10, "Player does not exist.");
-    public static readonly Error E_TURN_DOES_NOT_EXIST   = Error.New(300_20, "Turn does not exist.");
+    public static readonly Error E_GAME_DOES_NOT_EXIST          = Error.New(300_00, "Game does not exist.");
+    public static readonly Error E_PLAYER_DOES_NOT_EXIST        = Error.New(300_10, "Player does not exist.");
+    public static readonly Error E_TURN_DOES_NOT_EXIST          = Error.New(300_20, "Turn does not exist.");
+    public static readonly Error E_GAME_ENGINE_DOES_NOT_EXIST   = Error.New(300_30, "Game engine does not exist.");
 
 
     public static readonly Error E_GAME_MUST_BE_RUNNING  = Error.New(400_00, "Game must be running.");

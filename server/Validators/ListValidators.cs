@@ -10,6 +10,11 @@ public static class ListValidators {
             .Where(x => x.Count > 0)
             .ToValidation(E_LIST_CANNOT_BE_EMPTY);
 
+    public static Validation<Error, A[]> NotEmpty<A>(A[] input) =>
+        Optional(input)
+            .Where(x => x.Length > 0)
+            .ToValidation(E_LIST_CANNOT_BE_EMPTY);
+
     public static Func<List<A>, Validation<Error, List<A>>> WithinLength<A>(Option<int> min, Option<int> max) =>
         input => {
             var minLen = min.Match(Some: x => x, None: 0);

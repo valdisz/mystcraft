@@ -2,14 +2,17 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import {
     Button, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography,
-    Box, Stack, Paper
+    Box, Stack, Paper, IconButton
 } from '@mui/material'
 import { PageTitle, EmptyListItem, Forbidden, FileInput } from '../components'
-import { NewGameEngineStore, useStore } from '../store'
+import { FileViewModel, NewGameEngineStore, useStore } from '../store'
 import { GameEngineFragment } from '../schema'
 import { Role, ForRole, forRole } from '../auth'
 
 import AttachFileIcon from '@mui/icons-material/AttachFile'
+import DeleteIcon from '@mui/icons-material/Delete'
+
+import { Clear } from '@mui/icons-material'
 
 function GameEnginesPage() {
     const { gameEngines } = useStore()
@@ -45,6 +48,34 @@ function GameEngineItem({ engine }: GameEngineItemProps) {
     </ListItem>
 }
 
+interface FileInputFieldProps {
+    model: FileViewModel
+    title: string
+}
+
+function _FileInputField({ model, title }: FileInputFieldProps) {
+    return <Stack direction='row' gap={2} alignItems='center'>
+        {!model.isEmpty && <IconButton onClick={model.clear}>
+            <DeleteIcon />
+        </IconButton>}
+
+        {model.isEmpty
+            ? <FileInput
+                trigger={
+                    <Button variant='outlined' startIcon={<AttachFileIcon />}>
+                        { title }
+                    </Button>
+                }
+                onChange={model.set}
+            />
+            : <Typography variant='body2' color='textSecondary'>{model.name}</Typography>
+        }
+
+    </Stack>
+}
+
+const FileInputField = observer(_FileInputField)
+
 
 interface NewGameEngineDialogProps {
     store: NewGameEngineStore
@@ -56,19 +87,10 @@ function NewGameEngineDialog({ store }: NewGameEngineDialogProps) {
         <DialogContent>
             <Stack gap={2}>
                 <TextField label='Name' value={store.name} onChange={store.setName} />
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                }}>
-                    <Typography>
-                        <span>File:{' '}</span>
-                        <strong>{store.fileName}</strong>
-                    </Typography>
-                    <FileInput trigger={<Button variant='outlined' startIcon={<AttachFileIcon />}>
-                        Select Game Engine
-                    </Button>} onChange={store.setFile} />
-                </Box>
+
+                <FileInputField model={store.content} title='Game Engine' />
+
+                <FileInputField model={store.ruleset} title='Ruleset' />
             </Stack>
 
         </DialogContent>

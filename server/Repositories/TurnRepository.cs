@@ -3,6 +3,7 @@ namespace advisor;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using advisor.Model;
 using advisor.Persistence;
 using Microsoft.EntityFrameworkCore;
 

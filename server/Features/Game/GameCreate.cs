@@ -45,7 +45,7 @@ public class GameCreateHandler : IRequestHandler<GameCreate, GameCreateResult> {
     private static Validation<Error, Mystcraft<DbGame>> Validate(GameCreate request) =>
     (
         ValidateName(request.Name).ForField("Name"),
-        EngineId.New(request.GameEngineId).ForField(nameof(GameCreate.GameEngineId)),
+        GameEngineId.New(request.GameEngineId).ForField(nameof(GameCreate.GameEngineId)),
         ValidateMap(request.Map).ForField("Map"),
         GameSchedule.New(request.Schedule, request.TimeZone).ForField("Schedule"),
         GamePeriod.New(Optional(request.StartAt), Optional(request.FinishAt)).ForField("Period")
@@ -54,7 +54,7 @@ public class GameCreateHandler : IRequestHandler<GameCreate, GameCreateResult> {
 
     private static Validation<Error, string> ValidateName(string name) =>
         NotEmpty(name)
-            .Bind(WithinLength(1, Some(Size.NAME)));
+            .Bind(WithinLength(1, Some(Size.LABEL)));
 
     private static Validation<Error, Stream> ValidateRuleset(Stream ruleset) =>
         Optional(ruleset)

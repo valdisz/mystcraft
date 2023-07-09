@@ -12,6 +12,7 @@ using MediatR;
 using advisor.Features;
 using advisor.Persistence;
 using advisor.Model;
+using System.Collections.Generic;
 
 [Authorize]
 public class Mutation {
@@ -26,21 +27,25 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameEngineCreateResult> GameEngineCreate(IMediator mediator, string name, IFile file) {
-        using var stream = file.OpenReadStream();
-        var result = await mediator.Send(new GameEngineCreate(name, stream));
+    public async Task<GameEngineCreateResult> GameEngineCreate(IMediator mediator, string name, IFile content, IFile ruleset) {
+        using var cs = content.OpenReadStream();
+        using var rs = ruleset.OpenReadStream();
+
+        var result = await mediator.Send(new GameEngineCreate(name, cs, rs));
 
         return result;
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameCreateResult> GameCreate(
+    public Task<GameCreateResult> GameCreate(
         IMediator mediator,
         string name,
         [ID("GameEngine")] long gameEngineId,
-        List<MapLevel> Map,
-        string Schedule,
-        string TimeZone
+        List<MapLevel> map,
+        string schedule,
+        string timeZone,
+        DateTimeOffset? startAt,
+        DateTimeOffset? finishAt
         // IFile playerData,
         // IFile gameData
     ) {
@@ -48,9 +53,7 @@ public class Mutation {
         // using var playersDataStream = playerData.OpenReadStream();
         // using var gameDataStream = gameData.OpenReadStream();
 
-        var result = await mediator.Send(new GameCreate(name, gameEngineId, Map,Schedule, TimeZone, options.StartAt, options.FinishAt));
-
-        return result;
+        return mediator.Send(new GameCreate(name, gameEngineId, map, schedule, timeZone, startAt, finishAt));
     }
 
     // [Authorize(Policy = Policies.GameMasters)]

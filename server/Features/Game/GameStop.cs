@@ -5,6 +5,7 @@ using advisor.Schema;
 using advisor.Persistence;
 using System.Threading.Tasks;
 using System.Threading;
+using advisor.Model;
 
 public record GameStop(long GameId): IRequest<GameStopResult>;
 

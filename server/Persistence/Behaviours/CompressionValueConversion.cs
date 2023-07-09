@@ -18,7 +18,9 @@ public static class CompressionValueConversion {
     private static byte[] CompressDecompress(byte[] bytes, CompressionMode mode) {
         using var msi = new MemoryStream(bytes);
         using var mso = new MemoryStream();
-        using var gs = new GZipStream(mso, mode);
+        using var gs = mode == CompressionMode.Compress
+            ? new BrotliStream(mso, CompressionLevel.Optimal)
+            : new BrotliStream(mso, mode);
 
         msi.CopyTo(gs, 0x10000);
 

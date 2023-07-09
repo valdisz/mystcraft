@@ -95,8 +95,8 @@ public class DbRegion : InTurnContext, IStatistics<DbRegionStatisticsItem> {
     [GraphQLIgnore]
     public List<DbTradableItem> Markets { get; set; } = new List<DbTradableItem>();
 
-    public IEnumerable<DbTradableItem> ForSale => Markets.Where(x => x.Market == Persistence.Market.FOR_SALE);
-    public IEnumerable<DbTradableItem> Wanted => Markets.Where(x => x.Market == Persistence.Market.WANTED);
+    public IEnumerable<DbTradableItem> ForSale => Markets.Where(x => x.Market == Model.Market.FOR_SALE);
+    public IEnumerable<DbTradableItem> Wanted => Markets.Where(x => x.Market == Model.Market.WANTED);
 
     public List<DbProductionItem> Produces { get; set; } = new List<DbProductionItem>();
 

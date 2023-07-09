@@ -2,6 +2,7 @@ namespace advisor.Persistence;
 
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using advisor.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

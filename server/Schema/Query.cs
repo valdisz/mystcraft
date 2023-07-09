@@ -9,29 +9,27 @@ using HotChocolate.Resolvers;
 using MediatR;
 using advisor.Features;
 using advisor.Persistence;
+using advisor.Model;
 
 public class Query {
     [Authorize(Policy = Policies.GameMasters)]
     [UseOffsetPaging]
-    public IQueryable<DbGameEngine> GameEngines(Database db) =>
-        db.GameEngines.OrderByDescending(x => x.CreatedAt);
+    public ValueTask<IOrderedQueryable<DbGameEngine>> GameEngines(IResolverContext context, Database db) =>
+        GameInterpreter<Runtime>.Interpret(
+            from items in Mystcraft.ReadManyGameEngines()
+            select items
+        )
+        .Run(Runtime.New(db, context.RequestAborted))
+        .Unwrap();
 
     [UseOffsetPaging]
-    public async ValueTask<IQueryable<DbGame>> Games(IResolverContext context, Database db) {
-        var effect = GameInterpreter<Runtime>.Interpret(
-            from games in Mystcraft.ReadManyGames()
-            select games.OrderByDescending(g => g.CreatedAt)
-        );
-
-        var result = await effect.Run(Runtime.New(db, context.RequestAborted));
-
-        var value = result.Match(
-            Succ: games => games,
-            Fail: ex => throw ex.ToException()
-        );
-
-        return value;
-    }
+    public ValueTask<IOrderedQueryable<DbGame>> Games(IResolverContext context, Database db) =>
+        GameInterpreter<Runtime>.Interpret(
+            from items in Mystcraft.ReadManyGames()
+            select items
+        )
+        .Run(Runtime.New(db, context.RequestAborted))
+        .Unwrap();
 
     [Authorize(Policy = Policies.UserManagers)]
     [UseOffsetPaging]

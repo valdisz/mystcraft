@@ -11,6 +11,7 @@ using Hangfire;
 using advisor.Persistence;
 using advisor.Schema;
 using System.Linq.Expressions;
+using advisor.Model;
 
 public record Reconcile(long? GameId = null): IRequest<ReconcileResult>;
 public record ReconcileResult(bool IsSuccess, string Error = null) : IMutationResult;
@@ -36,7 +37,7 @@ public class ReconcileHandler : IRequestHandler<Reconcile, ReconcileResult> {
     // private readonly IRecurringJobManager recurringJobs;
     // private readonly IBackgroundJobClient backgroundJobs;
 
-    private record GameProjection(long Id, GameStatus Status, Persistence.GameType Type, GameOptions Options);
+    private record GameProjection(long Id, GameStatus Status, Model.GameType Type, GameOptions Options);
 
     public async Task<ReconcileResult> Handle(Reconcile request, CancellationToken cancellation) {
         // var projection = Some(gameRepo.Games.AsNoTracking())

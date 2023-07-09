@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MediatR;
 using advisor.Schema;
 using advisor.Persistence;
+using advisor.Model;
 
 public record GameStart(long GameId): IRequest<GameStartResult>;
 

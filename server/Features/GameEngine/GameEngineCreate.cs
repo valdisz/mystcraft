@@ -1,38 +1,46 @@
 namespace advisor.Features;
 
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using advisor.Persistence;
 using advisor.Schema;
+using advisor.Model;
 
-public record GameEngineCreate(string Name, Stream Contents): IRequest<GameEngineCreateResult>;
+public record GameEngineCreate(string Name, Stream Contents, Stream Ruleset): IRequest<GameEngineCreateResult>;
 
-public record GameEngineCreateResult(bool IsSuccess, string Error = null, DbGameEngine Engine = null) : IMutationResult;
+public record GameEngineCreateResult(bool IsSuccess, string Error = null, DbGameEngine Engine = null) : IMutationResult {
+    public static GameEngineCreateResult New(Validation<Error, DbGameEngine> result) =>
+        result.Match(
+            Succ: ge => new GameEngineCreateResult(true, Engine: ge),
+            Fail: e  => new GameEngineCreateResult(false, Error: e.Head.Message)
+        );
+}
 
 public class GameEngineCreateHandler : IRequestHandler<GameEngineCreate, GameEngineCreateResult> {
-    public GameEngineCreateHandler(Database db) {
-        this.db = db;
+    public GameEngineCreateHandler(Database database) {
+        this.database = database;
     }
 
-    private readonly Database db;
+    private readonly Database database;
 
-    public async Task<GameEngineCreateResult> Handle(GameEngineCreate request, CancellationToken cancellationToken) {
-        using var buffer = new MemoryStream();
-        await request.Contents.CopyToAsync(buffer);
+    public async Task<GameEngineCreateResult> Handle(GameEngineCreate request, CancellationToken cancellationToken) =>
+        await (await Validate(request))
+            .Map(GameInterpreter<Runtime>.Interpret)
+            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Map(GameEngineCreateResult.New);
 
-        var ge = new DbGameEngine {
-            Name = request.Name,
-            Contents = buffer.ToArray(),
-            CreatedAt = DateTimeOffset.UtcNow
-        };
+    private static async Task<Validation<Error, Mystcraft<DbGameEngine>>> Validate(GameEngineCreate request) =>
+    (
+        ValidateName(request.Name).ForField("Name"),
+        NotEmpty(await request.Contents.ReadAllBytesAsync()).ForField(nameof(GameEngineCreate.Contents)),
+        NotEmpty(await request.Ruleset.ReadAllBytesAsync()).ForField(nameof(GameEngineCreate.Ruleset))
+    )
+    .Apply(Mystcraft.CreateGameEngine);
 
-        await db.GameEngines.AddAsync(ge);
+    private static Validation<Error, string> ValidateName(string name) =>
+        NotEmpty(name)
+            .Bind(WithinLength(1, Some(Size.LABEL)));
 
-        await db.SaveChangesAsync();
-
-        return new GameEngineCreateResult(true, Engine: ge);
-    }
 }

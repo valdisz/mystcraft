@@ -19,22 +19,52 @@ public static class Mystcraft {
         new Mystcraft<A>.Return(value);
 
     /// <summary>
+    /// Create a new game engine.
+    /// </summary>
+    public static Mystcraft<DbGameEngine> CreateGameEngine(string Name, byte[] Contents, byte[] Ruleset) =>
+        new Mystcraft<DbGameEngine>.CreateGameEngine(Name, Contents, Ruleset, Return);
+
+    /// <summary>
+    /// Get a list of all game engines.
+    /// </summary>
+    public static Mystcraft<IOrderedQueryable<DbGameEngine>> ReadManyGameEngines() =>
+        new Mystcraft<IOrderedQueryable<DbGameEngine>>.ReadManyGameEngines(None, Return);
+
+    /// <summary>
+    /// Get a list of all game engines matching the predicate.
+    /// </summary>
+    public static Mystcraft<IOrderedQueryable<DbGameEngine>> ReadManyGameEngines(Expression<Func<DbGameEngine, bool>> Predicate) =>
+        new Mystcraft<IOrderedQueryable<DbGameEngine>>.ReadManyGameEngines(Some(Predicate), Return);
+
+    /// <summary>
+    /// Get a single game engine by ID in a read-only mode.
+    /// </summary>
+    public static Mystcraft<ReadOnly<DbGameEngine>> ReadOneGameEngine(GameEngineId Game) =>
+        new Mystcraft<ReadOnly<DbGameEngine>>.ReadOneGameEngine(Game, Return);
+
+    /// <summary>
+    /// Get a single game engine by ID prepared for modification.
+    /// </summary>
+    public static Mystcraft<DbGameEngine> WriteOneGameEngine(GameEngineId Game) =>
+        new Mystcraft<DbGameEngine>.WriteOneGameEngine(Game, Return);
+
+    /// <summary>
     /// Create a new game.
     /// </summary>
-    public static Mystcraft<DbGame> CreateGame(string Name, EngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period) =>
+    public static Mystcraft<DbGame> CreateGame(string Name, GameEngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period) =>
         new Mystcraft<DbGame>.CreateGame(Name, Engine, Map, Schedule, Period, Return);
 
     /// <summary>
     /// Get a list of all games.
     /// </summary>
-    public static Mystcraft<IQueryable<DbGame>> ReadManyGames() =>
-        ReadManyGames(_ => true);
+    public static Mystcraft<IOrderedQueryable<DbGame>> ReadManyGames() =>
+        new Mystcraft<IOrderedQueryable<DbGame>>.ReadManyGames(None, Return);
 
     /// <summary>
     /// Get a list of all games matching the predicate.
     /// </summary>
-    public static Mystcraft<IQueryable<DbGame>> ReadManyGames(Expression<Func<DbGame, bool>> Predicate) =>
-        new Mystcraft<IQueryable<DbGame>>.ReadManyGames(Predicate, Return);
+    public static Mystcraft<IOrderedQueryable<DbGame>> ReadManyGames(Expression<Func<DbGame, bool>> Predicate) =>
+        new Mystcraft<IOrderedQueryable<DbGame>>.ReadManyGames(Some(Predicate), Return);
 
     /// <summary>
     /// Get a single game by ID in a read-only mode.
@@ -108,7 +138,7 @@ public static class Mystcraft {
     /// <summary>
     /// Change game engine.
     /// </summary>
-    public static Mystcraft<Unit> WritEngine(GameId Game, EngineId Engine) =>
+    public static Mystcraft<Unit> WritEngine(GameId Game, GameEngineId Engine) =>
         new Mystcraft<Unit>.WritEngine(Game, Engine, Return);
 
     /// <summary>
@@ -177,17 +207,42 @@ public abstract record Mystcraft<A> {
 
 
     /////////////////////////////////////////////
+    ///// Game engine creation and retrieval
+
+    /// <summary>
+    /// Represents operation that creates a new game engine.
+    /// </summary>
+    public sealed record CreateGameEngine(string Name, byte[] Contents, byte[] Ruleset, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    /// <summary>
+    /// Represents operation that gets a list of all game engines.
+    /// </summary>
+    public sealed record ReadManyGameEngines(Option<Expression<Func<DbGameEngine, bool>>> Predicate, Func<IOrderedQueryable<DbGameEngine>, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    /// <summary>
+    /// Represents operation that gets a single game engine in a read-only mode.
+    /// </summary>
+    public sealed record ReadOneGameEngine(GameEngineId Engine, Func<ReadOnly<DbGameEngine>, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    /// <summary>
+    /// Represents operation that gets a single game engine prepared for modification.
+    /// </summary>
+    public sealed record WriteOneGameEngine(GameEngineId Engine, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+
+
+
+    /////////////////////////////////////////////
     ///// Game creation and retrieval
 
     /// <summary>
     /// Create a new game.
     /// </summary>
-    public sealed record CreateGame(string Name, EngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record CreateGame(string Name, GameEngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a list of all games.
     /// </summary>
-    public sealed record ReadManyGames(Expression<Func<DbGame, bool>> Predicate, Func<IQueryable<DbGame>, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadManyGames(Option<Expression<Func<DbGame, bool>>> Predicate, Func<IOrderedQueryable<DbGame>, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a single game in a read-only mode.
@@ -255,7 +310,7 @@ public abstract record Mystcraft<A> {
     /// <summary>
     /// Represents operation that changes game engine.
     /// </summary>
-    public sealed record WritEngine(GameId Game, EngineId Engine, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record WritEngine(GameId Game, GameEngineId Engine, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
 
 
     /////////////////////////////////////////////

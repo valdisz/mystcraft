@@ -21,4 +21,9 @@ public static class Database<RT>
         from ct in cancelToken<RT>()
         from sc in default(RT).DatabaseEff.MapAsync(rt => rt.Add(game, ct))
         select sc;
+
+    public static Aff<RT, DbGameEngine> add(DbGameEngine gameEngine) =>
+        from ct in cancelToken<RT>()
+        from sc in default(RT).DatabaseEff.MapAsync(rt => rt.Add(gameEngine, ct))
+        select sc;
 }

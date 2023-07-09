@@ -313,7 +313,8 @@ export class GameStore {
         const worldInfo: WorldInfo = { map }
 
         const ruleset = new Ruleset()
-        ruleset.parse(game.ruleset)
+        // FIXME
+        // ruleset.parse(game.ruleset)
 
         const world = new World(worldInfo, ruleset)
         world.turnNumber = turn.turnNumber

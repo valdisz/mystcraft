@@ -1,8 +1,7 @@
 import React from 'react'
 import { IObservableArray, action, computed, makeObservable, observable } from 'mobx'
 import { HomeStore } from './home-store'
-import { GameCreateLocal, GameCreateLocalMutation, GameCreateLocalMutationVariables } from '../schema'
-import { GameCreateRemote, GameCreateRemoteMutation, GameCreateRemoteMutationVariables } from '../schema'
+import { GameCreate, GameCreateMutation, GameCreateMutationVariables } from '../schema'
 import { SelectChangeEvent } from '@mui/material'
 import { mutate } from './connection'
 
@@ -112,26 +111,30 @@ export class NewGameStore {
 
     confirm = () => {
         if (this.remote) {
-            const variables: GameCreateRemoteMutationVariables = {
-                name: this.name,
-                options: JSON.parse(this.options)
-            }
+            // FIXME
+            // const variables: GameCreateRemoteMutationVariables = {
+            //     name: this.name,
+            //     options: JSON.parse(this.options)
+            // }
 
-            mutate(GameCreateRemote, variables, {
-                refetch: [ this.store.games ]
-            })
-            .then(this.cancel, console.error)
+            // mutate(GameCreateRemote, variables, {
+            //     refetch: [ this.store.games ]
+            // })
+            // .then(this.cancel, console.error)
         }
         else {
-            const variables: GameCreateLocalMutationVariables = {
+            const variables: GameCreateMutationVariables = {
                 name: this.name,
-                options: JSON.parse(this.options),
+                // options: JSON.parse(this.options),
                 gameEngineId: this.engine,
-                playerData: this.playersFile,
-                gameData: this.gameFile
+                map: [],
+                schedule: '',
+                timeZone: ''
+                // playerData: this.playersFile,
+                // gameData: this.gameFile
             }
 
-            mutate(GameCreateLocal, variables, {
+            mutate(GameCreate, variables, {
                 refetch: [ this.store.games ]
             })
             .then(this.cancel, console.error)

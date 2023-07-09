@@ -25,6 +25,10 @@ public readonly struct GameInterpreter<RT>
     {
         Mystcraft<A>.Return rt => SuccessAff(rt.Value),
 
+        Mystcraft<A>.CreateGameEngine cge     => _tran(CreateGameEngine(cge)),
+        Mystcraft<A>.ReadManyGameEngines rge  =>       ReadManyGameEngines(rge),
+        Mystcraft<A>.ReadOneGameEngine oge    =>       ReadOneGameEngine(oge),
+        Mystcraft<A>.WriteOneGameEngine wge   => _tran(WriteOneGameEngine(wge)),
         Mystcraft<A>.CreateGame cr            => _tran(CreateGame(cr)),
         Mystcraft<A>.ReadManyGames gm         =>       ReadManyGames(gm),
         Mystcraft<A>.ReadOneGame og           =>       ReadOneGame(og),
@@ -64,19 +68,27 @@ public readonly struct GameInterpreter<RT>
         select ret;
 
 
-    private static Eff<RT, A> modify<A>(A value, Action<A> f) =>
+    private static Eff<RT, A> _modify<A>(A value, Action<A> f) =>
         Eff(() => {
             f(value);
             return value;
         });
 
+    private static Aff<RT, A> CreateGameEngine<A>(Mystcraft<A>.CreateGameEngine action) =>
+        from ge in Database<RT>.add(DbGameEngine.New(
+            action.Name,
+            action.Contents,
+            action.Ruleset
+        ))
+        from _ in UnitOfWork<RT>.save()
+        from ret in _Interpret(action.Next(ge))
+        select ret;
+
     private static Aff<RT, A> CreateGame<A>(Mystcraft<A>.CreateGame action) =>
-        from games in Database<RT>.Games
         // TODO: improve this
-        from game in Aff<RT, DbGame>(async rt => DbGame.New(
+        from game in Database<RT>.add(DbGame.New(
             action.Name,
             action.Engine.Value,
-            // await action.Ruleset.ReadAllBytesAsync(rt.CancellationToken),
             new GameOptions
             {
                 Map = action.Map,
@@ -86,20 +98,59 @@ public readonly struct GameInterpreter<RT>
                 FinishAt = action.Period.FinishAt.ToNullable()
             }
         ))
-        from _1 in Database<RT>.add(game)
-        from _2 in UnitOfWork<RT>.save()
+        from _ in UnitOfWork<RT>.save()
         from ret in _Interpret(action.Next(game))
         select ret;
 
-    private static Aff<RT, A> ReadManyGames<A>(Mystcraft<A>.ReadManyGames gm) =>
-        from games in Database<RT>.Games
-        let selection = games.Where(gm.Predicate)
-        from ret in _Interpret(gm.Next(selection))
+    private static Aff<RT, A> ReadManyGameEngines<A>(Mystcraft<A>.ReadManyGameEngines action) =>
+        from list in Database<RT>.GameEngines
+        let selection = action.Predicate
+            .Match(
+                Some: p => list.Where(p),
+                None: () => list
+            )
+            .OrderByDescending(g => g.CreatedAt)
+        from ret in _Interpret(action.Next(selection))
+        select ret;
+
+    private static Aff<RT, A> ReadOneGameEngine<A>(Mystcraft<A>.ReadOneGameEngine action) =>
+        from list in Database<RT>.GameEngines
+        from item in Aff<RT, DbGameEngine>(x => list
+            .AsNoTracking()
+            .Where(g => g.Id == action.Engine.Value)
+            .FirstOrDefaultAsync(x.CancellationToken)
+            .ToValue()
+        )
+        from _ in guard(item != null, E_GAME_ENGINE_DOES_NOT_EXIST)
+        from ret in _Interpret(action.Next(ReadOnly.New(item)))
+        select ret;
+
+    private static Aff<RT, A> WriteOneGameEngine<A>(Mystcraft<A>.WriteOneGameEngine action) =>
+        from list in Database<RT>.GameEngines
+        from item in Aff<RT, DbGameEngine>(x => list
+            .Where(g => g.Id == action.Engine.Value)
+            .FirstOrDefaultAsync(x.CancellationToken)
+            .ToValue()
+        )
+        from _ in guard(item != null, E_GAME_ENGINE_DOES_NOT_EXIST)
+        from ret in _Interpret(action.Next(item))
+        select ret;
+
+    private static Aff<RT, A> ReadManyGames<A>(Mystcraft<A>.ReadManyGames action) =>
+        from list in Database<RT>.Games
+        let selection = action.Predicate
+            .Match(
+                Some: p => list.Where(p),
+                None: () => list
+            )
+            .OrderByDescending(g => g.CreatedAt)
+        from ret in _Interpret(action.Next(selection))
         select ret;
 
     private static Aff<RT, A> ReadOneGame<A>(Mystcraft<A>.ReadOneGame og) =>
         from games in Database<RT>.Games
-        from game in Aff<RT, DbGame>(x => games.AsNoTracking()
+        from game in Aff<RT, DbGame>(x => games
+            .AsNoTracking()
             .Where(g => g.Id == og.Game.Value)
             .FirstOrDefaultAsync(x.CancellationToken)
             .ToValue()
@@ -126,7 +177,7 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> StartGame<A>(Mystcraft<A>.Start st) =>
         from game in CanStartGame(st.Game).ToEff()
-        from _ in modify(game, g => g.Status = GameStatus.RUNNING)
+        from _ in _modify(game, g => g.Status = GameStatus.RUNNING)
         from ret in _Interpret(st.Next(game))
         select ret;
 
@@ -140,7 +191,7 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> PauseGame<A>(Mystcraft<A>.Pause ps) =>
         from game in CanPauseGame(ps.Game).ToEff()
-        from _ in modify(game, g => g.Status = GameStatus.RUNNING)
+        from _ in _modify(game, g => g.Status = GameStatus.RUNNING)
         from ret in _Interpret(ps.Next(game))
         select ret;
 
@@ -154,7 +205,7 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> LockGame<A>(Mystcraft<A>.Lock lk) =>
         from game in CanLockGame(lk.Game).ToEff()
-        from _ in modify(game, g => g.Status = GameStatus.LOCKED)
+        from _ in _modify(game, g => g.Status = GameStatus.LOCKED)
         from ret in _Interpret(lk.Next(game))
         select ret;
 
@@ -165,7 +216,7 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> StopGame<A>(Mystcraft<A>.Stop sp) =>
         from game in CanStopGame(sp.Game).ToEff()
-        from _ in modify(game, g => g.Status = GameStatus.STOPED)
+        from _ in _modify(game, g => g.Status = GameStatus.STOPED)
         from ret in _Interpret(sp.Next(game))
         select ret;
 
