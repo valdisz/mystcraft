@@ -1,7 +1,6 @@
 import React from 'react'
-import { action, makeObservable, observable, runInAction } from 'mobx'
+import { IObservableArray, action, computed, makeObservable, observable } from 'mobx'
 import { HomeStore } from './home-store'
-import { CLIENT } from '../client'
 import { GameCreateLocal, GameCreateLocalMutation, GameCreateLocalMutationVariables } from '../schema'
 import { GameCreateRemote, GameCreateRemoteMutation, GameCreateRemoteMutationVariables } from '../schema'
 import { SelectChangeEvent } from '@mui/material'
@@ -27,6 +26,49 @@ const DEFAULT_OPTIONS = `{
     "serverAddress": "http://atlantis-pbem.com"
 }`
 
+function numberOrDefault(value: string | null | undefined, defaultValue: number) {
+    if (value === null || value === undefined) {
+        return defaultValue
+    }
+
+    if (!value) {
+        return ''
+    }
+
+    const n = Number(value)
+    if (isNaN(n)) {
+        return defaultValue
+    }
+
+    return n
+}
+
+export class MapLevelItem {
+    constructor(label: string = '', width: number = null, height: number = null) {
+        this.label = label
+        this.width = width
+        this.height = height
+
+        makeObservable(this)
+    }
+
+    @observable label: string = ''
+    @observable width: number | '' = ''
+    @observable height: number | '' = ''
+
+    @action setLabel = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.label = e.target.value
+    }
+
+    @action setWidth = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.width = numberOrDefault(e.target.value, this.width || 0)
+    }
+
+    @action setHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
+        this.height = numberOrDefault(e.target.value, this.height || 0)
+    }
+}
+
 export class NewGameStore {
     constructor(private readonly store: HomeStore) {
         makeObservable(this)
@@ -43,6 +85,8 @@ export class NewGameStore {
     @observable engine = ''
     @observable options = String(DEFAULT_OPTIONS)
 
+    readonly mapLevels: IObservableArray<MapLevelItem> = observable<MapLevelItem>([])
+
     @action open = () => {
         this.isOpen = true
 
@@ -53,6 +97,9 @@ export class NewGameStore {
         this.playersFileName = ''
         this.engine = ''
         this.options = String(DEFAULT_OPTIONS)
+
+        this.mapLevels.clear()
+        this.mapLevels.push(new MapLevelItem('nexus', 1, 1))
     }
 
     @action remoteChange = (ev: React.ChangeEvent<HTMLInputElement>, checked: boolean) => {
@@ -115,5 +162,19 @@ export class NewGameStore {
 
     @action setEngine = (e: SelectChangeEvent) => {
         this.engine = e.target.value
+    }
+
+    @action addLevel = () => {
+        this.mapLevels.push(new MapLevelItem())
+    }
+
+    @computed get canRemoveLevel() {
+        return this.mapLevels.length > 1
+    }
+
+    @action removeMapLevel = (index: number) => {
+        if (this.canRemoveLevel) {
+            this.mapLevels.splice(index, 1)
+        }
     }
 }

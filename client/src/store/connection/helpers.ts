@@ -25,7 +25,7 @@ export function query<TData, T extends object, TVariables extends object = { }>(
     return ds
 }
 
-export function querySeq<TData, T, TVariables extends object = { }>(
+export function seq<TData, T, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,
     projection: Projection<TData, T[]>,
     variables?: TVariables | VariablesGetter<TVariables>,

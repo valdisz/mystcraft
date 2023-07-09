@@ -25,7 +25,7 @@ export function useCopy(content: boolean = false, { onError, onSuccess, ...optio
         if (onError) clip.on('error', onError)
 
         return () => clip.destroy()
-    }, [ ref ])
+    }, [ ref, onSuccess, onError, options, content ])
 
     return setRef
 }

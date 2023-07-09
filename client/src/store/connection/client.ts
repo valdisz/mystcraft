@@ -6,7 +6,7 @@ import { env } from 'process'
 const exchanges: Exchange[] = [ ...defaultExchanges, multipartFetchExchange as any ]
 if (env.NODE_ENV !== 'production') {
     console.debug('URQL Dev Tools added to the exchanges list')
-    exchanges.unshift(devtoolsExchange)
+    exchanges.unshift(devtoolsExchange as any)
 }
 
 const client = createClient({

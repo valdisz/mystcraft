@@ -2,14 +2,14 @@ import { action, makeObservable, observable } from 'mobx'
 import { GameEngineFragment } from '../schema'
 import { GetGameEngines, GetGameEnginesQuery } from '../schema'
 import { GameEngineCreate, GameEngineCreateMutation, GameEngineCreateMutationVariables } from '../schema'
-import { querySeq, mutate } from './connection'
+import { seq, mutate } from './connection'
 
 export class GameEnginesStore {
     constructor() {
         // makeObservable(this)
     }
 
-    readonly engines = querySeq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [])
+    readonly engines = seq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [])
 
     readonly newEngine = new NewGameEngineStore(this)
 

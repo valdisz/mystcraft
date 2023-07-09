@@ -6,7 +6,7 @@ import { List, ListItem, ListItemText, TextField, Button, Container,
 } from '@mui/material'
 import { Observer, observer } from 'mobx-react'
 import { Link, LinkProps } from 'react-router-dom'
-import { useStore } from '../store'
+import { MapLevelItem, useStore } from '../store'
 import { SplitButton, PageTitle, EmptyListItem, FileInput } from '../components'
 import { GameHeaderFragment } from '../schema'
 import cronstrue from 'cronstrue'
@@ -113,6 +113,33 @@ function GameItem({ game }: GameItemProps) {
     </Grid>
 }
 
+interface MapLevelItemEditorProps {
+    level: MapLevelItem
+    onRemove: () => void
+}
+
+function _MapLevelItemEditor({ level, onRemove }: MapLevelItemEditorProps) {
+    return <Stack direction='row' gap={2}>
+        <TextField type='text' label='Label' value={level.label} onChange={level.setLabel} />
+        <TextField type='text' label='Width' value={level.width} onChange={level.setWidth} />
+        <TextField type='text' label='Height' value={level.height} onChange={level.setHeight} />
+        <Button variant='outlined' color='error' onClick={onRemove}>Remove</Button>
+    </Stack>
+}
+
+const MapLevelItemEditor = observer(_MapLevelItemEditor)
+
+function _MapLevelEditor() {
+    const { newGame } = useStore()
+
+    return <Stack>
+        {newGame.mapLevels.map((item, index) => <MapLevelItemEditor key={index} level={item} onRemove={() => newGame.removeMapLevel(index)} />)}
+        <Button variant='outlined' color='primary' onClick={newGame.addLevel}>Add level</Button>
+    </Stack>
+}
+
+const MapLevelEditor = observer(_MapLevelEditor)
+
 function NewGameDialog() {
     const { newGame, gameEngines } = useStore()
 
@@ -128,6 +155,8 @@ function NewGameDialog() {
                     value={newGame.name}
                     onChange={newGame.setName}
                     />
+
+                <MapLevelEditor />
 
                 <FormGroup>
                     <FormControlLabel control={<Switch checked={newGame.remote} onChange={newGame.remoteChange} />} label="Remote" />

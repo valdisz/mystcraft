@@ -1,5 +1,5 @@
 import { action, makeObservable, observable, runInAction } from 'mobx'
-import { mutate, querySeq } from './connection'
+import { mutate, seq } from './connection'
 import { GameHeaderFragment, GetGamesQuery, GetGames } from '../schema'
 // import { DeleteGame, DeleteGameMutation, DeleteGameMutationVariables } from '../schema'
 
@@ -8,7 +8,8 @@ export class HomeStore {
         makeObservable(this)
     }
 
-    readonly games = querySeq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [])
+    readonly games = seq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [])
+
 
     private fileUpload: HTMLInputElement = null
     @action setFileUpload = (ref: HTMLInputElement) => {
