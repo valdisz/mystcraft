@@ -9,7 +9,7 @@ export class GameEnginesStore {
         // makeObservable(this)
     }
 
-    readonly engines = seq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [])
+    readonly engines = seq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [], null, 'engines')
 
     readonly newEngine = new NewGameEngineStore(this)
 

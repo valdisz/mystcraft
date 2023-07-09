@@ -8,7 +8,7 @@ export class HomeStore {
         makeObservable(this)
     }
 
-    readonly games = seq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [])
+    readonly games = seq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [], null, 'games')
 
 
     private fileUpload: HTMLInputElement = null
