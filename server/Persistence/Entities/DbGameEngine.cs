@@ -46,5 +46,7 @@ public class DbGameEngineConfiguration : IEntityTypeConfiguration<DbGameEngine> 
 
         builder.HasIndex(x => x.Name)
             .IsUnique();
+
+        CreationTime<DbGameEngine>.Configure(db, builder);
     }
 }

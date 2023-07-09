@@ -3,24 +3,25 @@ namespace advisor.Schema;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using advisor.Features;
 using HotChocolate;
 using HotChocolate.AspNetCore.Authorization;
 using HotChocolate.Resolvers;
 using HotChocolate.Types;
 using HotChocolate.Types.Relay;
 using MediatR;
-using Persistence;
+using advisor.Features;
+using advisor.Persistence;
+using advisor.Model;
 
 [Authorize]
 public class Mutation {
     [Authorize(Policy = Policies.UserManagers)]
-    public Task<DbUser> CreateUser(IMediator mediator, string email, string password) {
+    public Task<DbUser> UserCreate(IMediator mediator, string email, string password) {
         return mediator.Send(new UserCreate(email, password));
     }
 
     [Authorize(Policy = Policies.UserManagers)]
-    public Task<DbUser> UpdateUserRoles(IMediator mediator, [ID("User")] long userId, string[] add, string[] remove) {
+    public Task<DbUser> UserRolesUpdate(IMediator mediator, [ID("User")] long userId, string[] add, string[] remove) {
         return mediator.Send(new UserRolesUpdate(userId, add, remove));
     }
 
@@ -37,15 +38,17 @@ public class Mutation {
         IMediator mediator,
         string name,
         [ID("GameEngine")] long gameEngineId,
-        GameOptions options,
-        IFile playerData,
-        IFile gameData
+        List<MapLevel> Map,
+        string Schedule,
+        string TimeZone
+        // IFile playerData,
+        // IFile gameData
     ) {
         // FIXME
-        using var playersDataStream = playerData.OpenReadStream();
-        using var gameDataStream = gameData.OpenReadStream();
+        // using var playersDataStream = playerData.OpenReadStream();
+        // using var gameDataStream = gameData.OpenReadStream();
 
-        var result = await mediator.Send(new GameCreate(name, gameEngineId, null, options.Map, options.Schedule, options.TimeZone, options.StartAt, options.FinishAt));
+        var result = await mediator.Send(new GameCreate(name, gameEngineId, Map,Schedule, TimeZone, options.StartAt, options.FinishAt));
 
         return result;
     }

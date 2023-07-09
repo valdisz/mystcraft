@@ -1,4 +1,4 @@
-namespace advisor;
+namespace advisor.Model;
 
 /// <summary>
 /// Represents a player ID.

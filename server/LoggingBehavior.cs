@@ -16,15 +16,15 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next) {
         var triggerName = typeof(TRequest).Name;
 
-        logger.LogInformation($"Starting [{triggerName}]");
+        logger.LogInformation("Starting [{Trigger}]", triggerName);
         try {
             var response = await next();
-            logger.LogInformation($"Executed [{triggerName}] --> [{typeof(TResponse).Name}]");
+            logger.LogInformation("Executed [{Trigger}] --> [{Output}]", triggerName, typeof(TResponse).Name);
 
             return response;
         }
         catch (Exception ex) {
-            logger.LogError(ex, $"Failed [{triggerName}] --> {ex.GetType().Name}");
+            logger.LogError(ex, "Failed [{Trigger}] --> {Exception}", triggerName, ex.GetType().Name);
 
             throw;
         }

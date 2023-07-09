@@ -1,6 +1,7 @@
 namespace advisor;
 
 using System;
+using advisor.Model;
 using advisor.Persistence;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ public readonly struct GameInterpreter<RT>
     {
         Mystcraft<A>.Return rt => SuccessAff(rt.Value),
 
-        Mystcraft<A>.Create cr                => _tran(CreateGame(cr)),
+        Mystcraft<A>.CreateGame cr            => _tran(CreateGame(cr)),
         Mystcraft<A>.ReadManyGames gm         =>       ReadManyGames(gm),
         Mystcraft<A>.ReadOneGame og           =>       ReadOneGame(og),
         Mystcraft<A>.WriteOneGame wg          => _tran(WriteOneGame(wg)),
@@ -69,13 +70,13 @@ public readonly struct GameInterpreter<RT>
             return value;
         });
 
-    private static Aff<RT, A> CreateGame<A>(Mystcraft<A>.Create action) =>
+    private static Aff<RT, A> CreateGame<A>(Mystcraft<A>.CreateGame action) =>
         from games in Database<RT>.Games
         // TODO: improve this
         from game in Aff<RT, DbGame>(async rt => DbGame.New(
             action.Name,
             action.Engine.Value,
-            await action.Ruleset.ReadAllBytesAsync(rt.CancellationToken),
+            // await action.Ruleset.ReadAllBytesAsync(rt.CancellationToken),
             new GameOptions
             {
                 Map = action.Map,

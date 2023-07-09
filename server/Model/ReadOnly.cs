@@ -1,4 +1,4 @@
-namespace advisor;
+namespace advisor.Model;
 
 /// <summary>
 /// Indicates value that is ment to be read-only.

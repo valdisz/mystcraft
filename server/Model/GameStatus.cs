@@ -1,4 +1,4 @@
-namespace advisor.Persistence;
+namespace advisor.Model;
 
 public enum GameStatus {
     /// <summary>

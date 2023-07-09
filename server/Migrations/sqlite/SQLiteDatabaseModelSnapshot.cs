@@ -361,8 +361,8 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<long?>("EngineId")
                         .HasColumnType("INTEGER");
@@ -382,9 +382,9 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Ruleset")
+                    b.Property<byte[]>("Ruleset")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("BLOB");
 
                     b.Property<int>("Status")
                         .HasMaxLength(64)
@@ -416,13 +416,17 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("BLOB");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Ruleset")
+                        .IsRequired()
+                        .HasColumnType("BLOB");
 
                     b.HasKey("Id");
 
@@ -458,6 +462,9 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("GameId")
                         .HasColumnType("INTEGER");
 
@@ -480,6 +487,9 @@ namespace advisor.Migrations.sqlite
                     b.Property<string>("Password")
                         .HasMaxLength(64)
                         .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("INTEGER");
@@ -669,6 +679,9 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("GameId")
                         .HasColumnType("INTEGER");
 
@@ -805,7 +818,7 @@ namespace advisor.Migrations.sqlite
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Study")
-                        .HasMaxLength(64)
+                        .HasMaxLength(8)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Teach")
@@ -1059,8 +1072,8 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Digest")
                         .HasMaxLength(128)

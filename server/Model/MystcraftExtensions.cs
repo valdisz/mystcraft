@@ -1,4 +1,4 @@
-namespace advisor;
+namespace advisor.Model;
 
 using System;
 
@@ -7,7 +7,7 @@ public static class MystcraftExtensions
     public static Mystcraft<B> Bind<A, B>(this Mystcraft<A> ma, Func<A, Mystcraft<B>> f) => ma switch {
         Mystcraft<A>.Return rt                => f(rt.Value),
 
-        Mystcraft<A>.Create cr                => new Mystcraft<B>.Create(cr.Name, cr.Engine, cr.Ruleset, cr.Map, cr.Schedule, cr.Period, n => cr.Next(n).Bind(f)),
+        Mystcraft<A>.CreateGame cr            => new Mystcraft<B>.CreateGame(cr.Name, cr.Engine, cr.Map, cr.Schedule, cr.Period, n => cr.Next(n).Bind(f)),
         Mystcraft<A>.ReadManyGames gm         => new Mystcraft<B>.ReadManyGames(gm.Predicate, n => gm.Next(n).Bind(f)),
         Mystcraft<A>.ReadOneGame og           => new Mystcraft<B>.ReadOneGame(og.Game, n => og.Next(n).Bind(f)),
         Mystcraft<A>.WriteOneGame wg          => new Mystcraft<B>.WriteOneGame(wg.Game, n => wg.Next(n).Bind(f)),

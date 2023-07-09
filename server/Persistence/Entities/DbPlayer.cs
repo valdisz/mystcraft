@@ -73,6 +73,7 @@ public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUp
             Name = name
         };
 
+    [HotChocolate.GraphQLIgnore]
     public Either<Error, DbPlayer> Claim(long userId, string password) {
         if (IsClaimed) {
             return Left(Error.New("Player already claimed."));
@@ -84,6 +85,7 @@ public class DbPlayer : IsAggregateRoot, InGameContext, WithCreationTime, WithUp
         return Right(this);
     }
 
+    [HotChocolate.GraphQLIgnore]
     public Either<Error, DbPlayer> Quit() {
         if (IsQuit) {
             return Left(Error.New("Player already quitted."));
@@ -145,5 +147,8 @@ public class DbPlayerConfiguration : IEntityTypeConfiguration<DbPlayer> {
             .WithOne()
             .HasForeignKey(x => x.PlayerId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        CreationTime<DbPlayer>.Configure(db, builder);
+        UpdateTime<DbPlayer>.Configure(db, builder);
     }
 }

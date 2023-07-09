@@ -7,10 +7,7 @@ using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public enum DigestAlgorithm {
-    SHA256
-}
-
+// TODO: add time when user last time accessed the game
 public class DbUser : WithCreationTime {
     [Key]
     public long Id { get; set; }
@@ -71,5 +68,7 @@ public class DbUserConfiguration : IEntityTypeConfiguration<DbUser> {
 
         builder.HasIndex(x => new { x.Email })
             .IsUnique();
+
+        CreationTime<DbUser>.Configure(db, builder);
     }
 }

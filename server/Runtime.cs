@@ -17,7 +17,8 @@ public readonly struct Runtime:
     /// <summary>
     /// Constructor
     /// </summary>
-    Runtime(RuntimeEnv env) => this.env = env;
+    Runtime(RuntimeEnv env) =>
+        this.env = env;
 
     /// <summary>
     /// Configuration environment accessor
@@ -63,10 +64,10 @@ public readonly struct Runtime:
         Env.Source;
 
     public Eff<Runtime, DatabaseIO> DatabaseEff =>
-        SuccessEff<DatabaseIO>(Env.Database);
+        Eff<Runtime, DatabaseIO>(rt => rt.Env.Database);
 
     public Eff<Runtime, UnitOfWork> UnitOfWorkEff =>
-        SuccessEff<UnitOfWork>(Env.Database);
+        Eff<Runtime, UnitOfWork>(rt => rt.Env.Database);
 }
 
 public sealed class RuntimeEnv {

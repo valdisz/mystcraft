@@ -1,4 +1,4 @@
-namespace advisor;
+namespace advisor.Model;
 
 /// <summary>
 /// Represents an game engine ID.

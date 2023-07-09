@@ -216,7 +216,7 @@ public class Startup {
             .AddApolloTracing()
             .AddProjections()
             .AddGlobalObjectIdentification()
-            .AddConvention<INamingConventions>(sp => new CustomNamingConventions())
+            .AddConvention<INamingConventions>(sp => new DatabaseEntityNamingConventions())
             .AddHttpRequestInterceptor<GraphQLHttpRequestInterceptor>()
             .SetPagingOptions(new PagingOptions {
                 DefaultPageSize = 100,

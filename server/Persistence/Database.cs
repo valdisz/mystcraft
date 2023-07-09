@@ -1,5 +1,6 @@
 namespace advisor.Persistence;
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -149,13 +150,18 @@ public abstract class Database : DbContext, DatabaseIO, UnitOfWork {
         model.ApplyConfiguration(new DbBattleConfiguration(this));
     }
 
-    public override ValueTask DisposeAsync() {
-        return base.DisposeAsync();
+    public async ValueTask<DbGame> Add(DbGame game, CancellationToken ct)
+    {
+        var entry = await Games.AddAsync(game, ct);
+
+        return entry.Entity;
     }
 
-    public ValueTask<DbGame> Add(DbGame game, CancellationToken ct)
+    public async ValueTask<DbGameEngine> Add(DbGameEngine engine, CancellationToken ct)
     {
-        throw new System.NotImplementedException();
+        var entry = await GameEngines.AddAsync(engine, ct);
+
+        return entry.Entity;
     }
 
     private int txCounter = 0;

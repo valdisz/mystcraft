@@ -1,4 +1,4 @@
-namespace advisor;
+namespace advisor.Model;
 
 using LanguageExt.ClassInstances;
 

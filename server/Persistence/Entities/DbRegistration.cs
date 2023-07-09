@@ -51,5 +51,7 @@ public class DbRegistrationConfiguration : IEntityTypeConfiguration<DbRegistrati
     public void Configure(EntityTypeBuilder<DbRegistration> builder) {
         builder.Property(x => x.Id)
             .UseIdentityColumn();
+
+        CreationTime<DbRegistration>.Configure(db, builder);
     }
 }

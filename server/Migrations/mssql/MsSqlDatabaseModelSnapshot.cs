@@ -399,9 +399,9 @@ namespace advisor.Migrations.mssql
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Ruleset")
+                    b.Property<byte[]>("Ruleset")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<int>("Status")
                         .HasMaxLength(64)
@@ -443,6 +443,10 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<byte[]>("Ruleset")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Name")
@@ -479,6 +483,9 @@ namespace advisor.Migrations.mssql
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
@@ -501,6 +508,9 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("Password")
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<long?>("UserId")
                         .HasColumnType("bigint");
@@ -694,6 +704,9 @@ namespace advisor.Migrations.mssql
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<long>("GameId")
                         .HasColumnType("bigint");
 
@@ -830,8 +843,8 @@ namespace advisor.Migrations.mssql
                         .HasColumnType("int");
 
                     b.Property<string>("Study")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
 
                     b.Property<string>("Teach")
                         .HasColumnType("nvarchar(max)");

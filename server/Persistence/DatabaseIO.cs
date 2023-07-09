@@ -104,4 +104,5 @@ public interface DatabaseIO {
     DbSet<DbTreasuryItem> Treasury { get; }
 
     ValueTask<DbGame> Add(DbGame game, CancellationToken ct);
+    ValueTask<DbGameEngine> Add(DbGameEngine engine, CancellationToken ct);
 }

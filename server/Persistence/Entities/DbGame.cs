@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using HotChocolate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using advisor.Model;
 
 public class DbGame : IsAggregateRoot, WithCreationTime {
     [Key]
@@ -57,13 +58,13 @@ public class DbGame : IsAggregateRoot, WithCreationTime {
     [GraphQLIgnore]
     public DbGameEngine Engine { get; set; }
 
-    public static DbGame New(string name, long engineId, byte[] ruleset, GameOptions options) {
+    public static DbGame New(string name, long engineId, GameOptions options) {
         var game = new DbGame {
             Name = name,
             Type = GameType.LOCAL,
             Status = GameStatus.NEW,
             EngineId = engineId,
-            Ruleset = ruleset,
+            // Ruleset = ruleset,
             Options = options,
             NextTurnNumber = 1
         };
@@ -127,5 +128,7 @@ public class DbGameConfiguration : IEntityTypeConfiguration<DbGame> {
 
         builder.HasIndex(x => x.Name)
             .IsUnique();
+
+        CreationTime<DbGame>.Configure(db, builder);
     }
 }

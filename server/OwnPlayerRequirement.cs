@@ -30,6 +30,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
         var allowedIds = context.User.FindAll(WellKnownClaimTypes.Player)
             .Select(x => long.Parse(x.Value))
             .ToList();
+
         if (allowedIds.Count == 0) {
             context.Fail(new AuthorizationFailureReason(this, "User does not own any player."));
             return Task.CompletedTask;
@@ -54,7 +55,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
         return Task.CompletedTask;
     }
 
-    private bool EnsurePlayerAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
+    private static bool EnsurePlayerAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
         var id = GetId<long>("Player", "playerId", ids);
         if (id != default) {
             EnsureOwnPlayerId(context, requirement, allowedIds, id);
@@ -64,7 +65,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
         return false;
     }
 
-    private bool EnsurePlayerTurnAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
+    private static bool EnsurePlayerTurnAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
         var id = GetId<string>("PlayerTurn", "playerTurnId", ids);
         if (id != default) {
             var (playerId, _) = DbPlayerTurn.ParseId(id);
@@ -75,7 +76,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
         return false;
     }
 
-    private bool EnsureUnitAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
+    private static bool EnsureUnitAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
         var id = GetId<string>("Unit", "unitId", ids);
         if (id != default) {
             var (playerId, _, _) = DbUnit.ParseId(id);
@@ -86,7 +87,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
         return false;
     }
 
-    private bool EnsureRegionAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
+    private static bool EnsureRegionAccess(AuthorizationHandlerContext context, OwnPlayerRequirement requirement, List<long> allowedIds, List<KeyValue> ids) {
         var id = GetId<string>("Region", "regionId", ids);
         if (id != default) {
             var regionId = RegionId.CreateFrom(id);
@@ -124,7 +125,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
         return (T) ids[i].Value.Value;
     }
 
-    private List<KeyValue> GetIdArguments(IResolverContext context) {
+    private static List<KeyValue> GetIdArguments(IResolverContext context) {
         var args = context.Selection.Field.Arguments;
         var idSerializer = context.Service<IIdSerializer>();
 

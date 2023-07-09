@@ -11,44 +11,44 @@ using Microsoft.EntityFrameworkCore;
 
 public record UserCreate(string Email, string Password, params string[] Roles) : IRequest<DbUser>;
 
-// public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
-//     public UserCreateHandler(Database db, IAccessControl accessControl) {
-//         this.db = db;
-//         this.accessControl = accessControl;
-//     }
+public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
+    public UserCreateHandler(Database db, IAccessControl accessControl) {
+        this.db = db;
+        this.accessControl = accessControl;
+    }
 
-//     private readonly Database db;
-//     private readonly IAccessControl accessControl;
+    private readonly Database db;
+    private readonly IAccessControl accessControl;
 
-//     public async Task<DbUser> Handle(UserCreate request, CancellationToken cancellationToken) {
-//         var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);
-//         if (user != null) {
-//             return user;
-//         }
+    public async Task<DbUser> Handle(UserCreate request, CancellationToken cancellationToken) {
+        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);
+        if (user != null) {
+            return user;
+        }
 
-//         var now = DateTimeOffset.UtcNow;
+        var now = DateTimeOffset.UtcNow;
 
-//         user = new DbUser {
-//             Email = request.Email,
-//             CreatedAt = now,
-//             LastLoginAt = now
-//         };
+        user = new DbUser {
+            Email = request.Email,
+            CreatedAt = now,
+            LastLoginAt = now
+        };
 
-//         if (!string.IsNullOrWhiteSpace(request.Password)) {
-//             user.Algorithm = DigestAlgorithm.SHA256;
-//             user.Salt = accessControl.GetSalt();
-//             user.Digest = accessControl.ComputeDigest(user.Salt, request.Password);
-//         }
+        if (!string.IsNullOrWhiteSpace(request.Password)) {
+            user.Algorithm = DigestAlgorithm.SHA256;
+            user.Salt = accessControl.GetSalt();
+            user.Digest = accessControl.ComputeDigest(user.Salt, request.Password);
+        }
 
-//         var resultingRoles = new HashSet<string>(user.Roles);
-//         resultingRoles.UnionWith(request.Roles);
+        var resultingRoles = new HashSet<string>(user.Roles);
+        resultingRoles.UnionWith(request.Roles);
 
-//         user.Roles.Clear();
-//         user.Roles.AddRange(resultingRoles);
+        user.Roles.Clear();
+        user.Roles.AddRange(resultingRoles);
 
-//         await db.Users.AddAsync(user);
-//         await db.SaveChangesAsync();
+        await db.Users.AddAsync(user);
+        await db.SaveChangesAsync();
 
-//         return user;
-//     }
-// }
+        return user;
+    }
+}

@@ -54,24 +54,28 @@ public class MappingProfile : Profile {
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
             .ForMember(x => x.Turn, opt => opt.Ignore())
             .ForMember(x => x.Origin, opt => opt.Ignore())
-            .ForMember(x => x.Target, opt => opt.Ignore());
+            .ForMember(x => x.Target, opt => opt.Ignore())
+        ;
 
         CreateMap<DbFaction, DbFaction>()
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
             .ForMember(x => x.Turn, opt => opt.Ignore())
-            .ForMember(x => x.Events, opt => opt.Ignore());
+            .ForMember(x => x.Events, opt => opt.Ignore())
+        ;
 
         CreateMap<DbRegion, DbRegion>()
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
             .ForMember(x => x.Turn, opt => opt.Ignore())
             .ForMember(x => x.Units, opt => opt.Ignore())
             .ForMember(x => x.ForSale, opt => opt.Ignore())
-            .ForMember(x => x.Wanted, opt => opt.Ignore());
+            .ForMember(x => x.Wanted, opt => opt.Ignore())
+        ;
 
         CreateMap<DbStructure, DbStructure>()
             .ForMember(x => x.TurnNumber, opt => opt.Ignore())
             .ForMember(x => x.Turn, opt => opt.Ignore())
             .ForMember(x => x.Region, opt => opt.Ignore())
-            .ForMember(x => x.Units, opt => opt.Ignore());
+            .ForMember(x => x.Units, opt => opt.Ignore())
+        ;
     }
 }
