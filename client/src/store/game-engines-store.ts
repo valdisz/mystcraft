@@ -2,18 +2,23 @@ import { action, makeObservable, observable } from 'mobx'
 import { GameEngineFragment } from '../schema'
 import { GetGameEngines, GetGameEnginesQuery } from '../schema'
 import { GameEngineCreate, GameEngineCreateMutation, GameEngineCreateMutationVariables } from '../schema'
+import { GameEngineDelete, GameEngineDeleteMutation, GameEngineDeleteMutationVariables } from '../schema'
 import { seq, mutate } from './connection'
 import { FileViewModel } from '../components'
 
 export class GameEnginesStore {
     readonly engines = seq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [], null, 'engines')
 
-    readonly newEngine = new NewGameEngineStore(this.addEngine.bind(this))
+    readonly newEngine = new NewGameEngineStore(this.add.bind(this))
 
-    addEngine(name: string, content: File, ruleset: File) {
+    add(name: string, content: File, ruleset: File) {
         return mutate<GameEngineCreateMutation, GameEngineCreateMutationVariables>(GameEngineCreate, { name, content, ruleset }, {
             refetch: [ this.engines ]
         })
+    }
+
+    delete(gameEngineId: string) {
+        return mutate<GameEngineDeleteMutation, GameEngineDeleteMutationVariables>(GameEngineDelete, { gameEngineId }, { refetch: [ this.engines ] })
     }
 }
 

@@ -20,6 +20,8 @@ export class MoveCommand implements InterfaceCommand {
 
     @computed get error() {
         if (this.game.unit.isOverweight) return 'Cannot move'
+
+        return ''
     }
 
     @computed get canExecute() {
@@ -31,6 +33,6 @@ export class MoveCommand implements InterfaceCommand {
     }
 
     @action execute() {
-        
+
     }
 }

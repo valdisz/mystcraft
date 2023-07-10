@@ -337,6 +337,11 @@ type GameEngineCreateResult implements MutationResult {
   isSuccess: Boolean!
 }
 
+type GameEngineDeleteResult implements MutationResult {
+  error: String
+  isSuccess: Boolean!
+}
+
 type GameJoinLocalResult implements MutationResult {
   error: String
   isSuccess: Boolean!
@@ -484,6 +489,7 @@ type Mutation {
   gameComplete(gameId: ID!): GameStopResult
   gameCreate(finishAt: DateTime, gameEngineId: ID!, map: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateResult
   gameEngineCreate(content: Upload, name: String, ruleset: Upload): GameEngineCreateResult
+  gameEngineDelete(gameEngineId: ID!): GameEngineDeleteResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
   gameJoinRemote(gameId: ID!, password: String, playerId: ID!): GameJoinRemoteResult
   gameNextTurn(force: GameNextTurnForceInput, gameId: ID!, turnNumber: Int): GameNextTurnResult

@@ -1,0 +1,6 @@
+mutation GameEngineDelete($gameEngineId: ID!) {
+  gameEngineDelete(gameEngineId: $gameEngineId) {
+    isSuccess
+    error
+  }
+}

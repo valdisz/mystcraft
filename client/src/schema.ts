@@ -345,6 +345,12 @@ export type GameEngineCreateResult = MutationResult & {
   isSuccess: Scalars['Boolean'];
 };
 
+export type GameEngineDeleteResult = MutationResult & {
+  __typename?: 'GameEngineDeleteResult';
+  error?: Maybe<Scalars['String']>;
+  isSuccess: Scalars['Boolean'];
+};
+
 export type GameJoinLocalResult = MutationResult & {
   __typename?: 'GameJoinLocalResult';
   error?: Maybe<Scalars['String']>;
@@ -501,6 +507,7 @@ export type Mutation = {
   gameComplete?: Maybe<GameStopResult>;
   gameCreate?: Maybe<GameCreateResult>;
   gameEngineCreate?: Maybe<GameEngineCreateResult>;
+  gameEngineDelete?: Maybe<GameEngineDeleteResult>;
   gameJoinLocal?: Maybe<GameJoinLocalResult>;
   gameJoinRemote?: Maybe<GameJoinRemoteResult>;
   gameNextTurn?: Maybe<GameNextTurnResult>;
@@ -556,6 +563,11 @@ export type MutationGameEngineCreateArgs = {
   content?: InputMaybe<Scalars['Upload']>;
   name?: InputMaybe<Scalars['String']>;
   ruleset?: InputMaybe<Scalars['Upload']>;
+};
+
+
+export type MutationGameEngineDeleteArgs = {
+  gameEngineId: Scalars['ID'];
 };
 
 
@@ -1211,6 +1223,13 @@ export type GameEngineCreateMutationVariables = Exact<{
 
 export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null } | null };
 
+export type GameEngineDeleteMutationVariables = Exact<{
+  gameEngineId: Scalars['ID'];
+}>;
+
+
+export type GameEngineDeleteMutation = { __typename?: 'Mutation', gameEngineDelete?: { __typename?: 'GameEngineDeleteResult', isSuccess: boolean, error?: string | null } | null };
+
 export type GameJoinLocalMutationVariables = Exact<{
   gameId: Scalars['ID'];
   name: Scalars['String'];
@@ -1838,6 +1857,14 @@ export const GameEngineCreate = gql`
   }
 }
     ${GameEngine}`;
+export const GameEngineDelete = gql`
+    mutation GameEngineDelete($gameEngineId: ID!) {
+  gameEngineDelete(gameEngineId: $gameEngineId) {
+    isSuccess
+    error
+  }
+}
+    `;
 export const GameJoinLocal = gql`
     mutation GameJoinLocal($gameId: ID!, $name: String!) {
   gameJoinLocal(gameId: $gameId, name: $name) {
