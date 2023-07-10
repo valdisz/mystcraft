@@ -1,6 +1,7 @@
 namespace advisor.facts;
 
 using advisor;
+using advisor.Model;
 
 public class GameInterpreterSpec {
     [Fact]

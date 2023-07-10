@@ -8,21 +8,39 @@ public static class CompressionValueConversion {
     public static PropertyBuilder<byte[]> HasCompression(this PropertyBuilder<byte[]> propertyBuilder) {
         propertyBuilder.HasConversion
         (
-            v => CompressDecompress(v, CompressionMode.Compress),
-            v => CompressDecompress(v, CompressionMode.Decompress)
+            v => Compress(v),
+            v => Decompress(v)
         );
 
         return propertyBuilder;
     }
 
-    private static byte[] CompressDecompress(byte[] bytes, CompressionMode mode) {
+    public static byte[] Compress(byte[] bytes) {
+        if (bytes.Length == 0) {
+            return bytes;
+        }
+
         using var msi = new MemoryStream(bytes);
         using var mso = new MemoryStream();
-        using var gs = mode == CompressionMode.Compress
-            ? new BrotliStream(mso, CompressionLevel.Optimal)
-            : new BrotliStream(mso, mode);
 
-        msi.CopyTo(gs, 0x10000);
+        using (var gs = new BrotliStream(mso, CompressionLevel.Optimal)) {
+            msi.CopyTo(gs, 0x10000);
+        }
+
+        return mso.ToArray();
+    }
+
+    public static byte[] Decompress(byte[] bytes) {
+        if (bytes.Length == 0) {
+            return bytes;
+        }
+
+        using var msi = new MemoryStream(bytes);
+        using var mso = new MemoryStream();
+
+        using (var gs = new BrotliStream(msi, CompressionMode.Decompress)) {
+            gs.CopyTo(mso, 0x10000);
+        }
 
         return mso.ToArray();
     }
