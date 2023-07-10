@@ -26,4 +26,8 @@ public static class Database<RT>
         from ct in cancelToken<RT>()
         from sc in default(RT).DatabaseEff.MapAsync(rt => rt.Add(gameEngine, ct))
         select sc;
+
+    public static Eff<RT, Unit> delete<A>(A entity) where A: class =>
+        from sc in default(RT).DatabaseEff.Map(rt => rt.Delete(entity))
+        select sc;
 }

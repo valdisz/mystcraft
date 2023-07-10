@@ -105,4 +105,6 @@ public interface DatabaseIO {
 
     ValueTask<DbGame> Add(DbGame game, CancellationToken ct);
     ValueTask<DbGameEngine> Add(DbGameEngine engine, CancellationToken ct);
+
+    Unit Delete<A>(A entity) where A: class;
 }

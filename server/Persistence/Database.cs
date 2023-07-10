@@ -226,4 +226,9 @@ public abstract class Database : DbContext, DatabaseIO, UnitOfWork {
 
         return unit;
     }
+
+    public Unit Delete<A>(A entity) where A: class {
+        Remove(entity);
+        return unit;
+    }
 }

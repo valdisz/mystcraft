@@ -29,6 +29,7 @@ public readonly struct GameInterpreter<RT>
         Mystcraft<A>.ReadManyGameEngines rge  =>       ReadManyGameEngines(rge),
         Mystcraft<A>.ReadOneGameEngine oge    =>       ReadOneGameEngine(oge),
         Mystcraft<A>.WriteOneGameEngine wge   => _tran(WriteOneGameEngine(wge)),
+        Mystcraft<A>.DeleteGameEngine dge     =>       DeleteGameEngine(dge),
         Mystcraft<A>.CreateGame cr            => _tran(CreateGame(cr)),
         Mystcraft<A>.ReadManyGames gm         =>       ReadManyGames(gm),
         Mystcraft<A>.ReadOneGame og           =>       ReadOneGame(og),
@@ -37,7 +38,7 @@ public readonly struct GameInterpreter<RT>
         Mystcraft<A>.Pause ps                 =>       PauseGame(ps),
         Mystcraft<A>.Lock lk                  =>       LockGame(lk),
         Mystcraft<A>.Stop sp                  =>       StopGame(sp),
-        Mystcraft<A>.Delete dl                =>       DeleteGame(dl),
+        Mystcraft<A>.DeleteGame dl                =>       DeleteGame(dl),
         // Mystcraft<A>.ReadOptions ro           =>       ReadOptions(ro),
         // Mystcraft<A>.WriteSchedule ws         => _tran(WriteSchedule(ws)),
         // Mystcraft<A>.WriteMap wm              => _tran(WriteMap(wm)),
@@ -115,25 +116,28 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> ReadOneGameEngine<A>(Mystcraft<A>.ReadOneGameEngine action) =>
         from list in Database<RT>.GameEngines
-        from item in Aff<RT, DbGameEngine>(x => list
+        from item in list
             .AsNoTracking()
             .Where(g => g.Id == action.Engine.Value)
-            .FirstOrDefaultAsync(x.CancellationToken)
-            .ToValue()
-        )
-        from _ in guard(item != null, E_GAME_ENGINE_DOES_NOT_EXIST)
+            .HeadOrFailAff<RT, DbGameEngine>(E_GAME_ENGINE_DOES_NOT_EXIST)
         from ret in _Interpret(action.Next(ReadOnly.New(item)))
         select ret;
 
     private static Aff<RT, A> WriteOneGameEngine<A>(Mystcraft<A>.WriteOneGameEngine action) =>
         from list in Database<RT>.GameEngines
-        from item in Aff<RT, DbGameEngine>(x => list
+        from item in list
             .Where(g => g.Id == action.Engine.Value)
-            .FirstOrDefaultAsync(x.CancellationToken)
-            .ToValue()
-        )
-        from _ in guard(item != null, E_GAME_ENGINE_DOES_NOT_EXIST)
+            .HeadOrFailAff<RT, DbGameEngine>(E_GAME_ENGINE_DOES_NOT_EXIST)
         from ret in _Interpret(action.Next(item))
+        select ret;
+
+    private static Aff<RT, A> DeleteGameEngine<A>(Mystcraft<A>.DeleteGameEngine action) =>
+        from games in Database<RT>.Games
+        from hasGames in Aff<RT, bool>(rt => games.AnyAsync(g => g.EngineId == action.Engine.Id, rt.CancellationToken).ToValue())
+        from _1 in guard(!hasGames, E_GAME_ENGINE_IS_IN_USE)
+        from _2 in Database<RT>.delete(action.Engine)
+        from _3 in UnitOfWork<RT>.save()
+        from ret in _Interpret(action.Next(unit))
         select ret;
 
     private static Aff<RT, A> ReadManyGames<A>(Mystcraft<A>.ReadManyGames action) =>
@@ -149,24 +153,18 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> ReadOneGame<A>(Mystcraft<A>.ReadOneGame og) =>
         from games in Database<RT>.Games
-        from game in Aff<RT, DbGame>(x => games
+        from game in games
             .AsNoTracking()
             .Where(g => g.Id == og.Game.Value)
-            .FirstOrDefaultAsync(x.CancellationToken)
-            .ToValue()
-        )
-        from _ in guard(game != null, E_GAME_DOES_NOT_EXIST)
+            .HeadOrFailAff<RT, DbGame>(E_GAME_DOES_NOT_EXIST)
         from ret in _Interpret(og.Next(ReadOnly.New(game)))
         select ret;
 
     private static Aff<RT, A> WriteOneGame<A>(Mystcraft<A>.WriteOneGame wg) =>
         from games in Database<RT>.Games
-        from game in Aff<RT, DbGame>(x => games
+        from game in games
             .Where(g => g.Id == wg.Game.Value)
-            .FirstOrDefaultAsync(x.CancellationToken)
-            .ToValue()
-        )
-        from _ in guard(game != null, E_GAME_DOES_NOT_EXIST)
+            .HeadOrFailAff<RT, DbGame>(E_GAME_DOES_NOT_EXIST)
         from ret in _Interpret(wg.Next(game))
         select ret;
 
@@ -220,7 +218,7 @@ public readonly struct GameInterpreter<RT>
         from ret in _Interpret(sp.Next(game))
         select ret;
 
-    private static Aff<RT, A> DeleteGame<A>(Mystcraft<A>.Delete dl) =>
+    private static Aff<RT, A> DeleteGame<A>(Mystcraft<A>.DeleteGame dl) =>
         from games in Database<RT>.Games
         from _1 in Eff<RT, EntityEntry<DbGame>>(x => games.Remove(dl.Game))
         from _2 in UnitOfWork<RT>.save()

@@ -49,6 +49,12 @@ public static class Mystcraft {
         new Mystcraft<DbGameEngine>.WriteOneGameEngine(Game, Return);
 
     /// <summary>
+    /// Delete a game engine.
+    /// </summary>
+    public static Mystcraft<Unit> DeleteGameEngine(DbGameEngine Engine) =>
+        new Mystcraft<Unit>.DeleteGameEngine(Engine, Return);
+
+    /// <summary>
     /// Create a new game.
     /// </summary>
     public static Mystcraft<DbGame> CreateGame(string Name, GameEngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period) =>
@@ -108,8 +114,8 @@ public static class Mystcraft {
     /// Delete a game with all its data.
     /// Cannot be undone and not data will be recoverable.
     /// </summary>
-    public static Mystcraft<Unit> Delete(DbGame Game) =>
-        new Mystcraft<Unit>.Delete(Game, Return);
+    public static Mystcraft<Unit> DeleteGame(DbGame Game) =>
+        new Mystcraft<Unit>.DeleteGame(Game, Return);
 
     /// <summary>
     /// Read current game options.
@@ -229,6 +235,11 @@ public abstract record Mystcraft<A> {
     /// </summary>
     public sealed record WriteOneGameEngine(GameEngineId Engine, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
 
+    /// <summary>
+    /// Represents operation that deletes a game engine.
+    /// </summary>
+    public sealed record DeleteGameEngine(DbGameEngine Engine, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+
 
 
     /////////////////////////////////////////////
@@ -281,7 +292,7 @@ public abstract record Mystcraft<A> {
     /// <summary>
     /// Represents operation that deletes a game.
     /// </summary>
-    public sealed record Delete(DbGame Game, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record DeleteGame(DbGame Game, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
 
 
     /////////////////////////////////////////////

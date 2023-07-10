@@ -17,30 +17,34 @@ using System.Collections.Generic;
 [Authorize]
 public class Mutation {
     [Authorize(Policy = Policies.UserManagers)]
-    public Task<DbUser> UserCreate(IMediator mediator, string email, string password) {
-        return mediator.Send(new UserCreate(email, password));
+    public Task<DbUser> UserCreate(IResolverContext context, IMediator mediator, string email, string password) {
+        return mediator.Send(new UserCreate(email, password), context.RequestAborted);
     }
 
     [Authorize(Policy = Policies.UserManagers)]
-    public Task<DbUser> UserRolesUpdate(IMediator mediator, [ID("User")] long userId, string[] add, string[] remove) {
-        return mediator.Send(new UserRolesUpdate(userId, add, remove));
+    public Task<DbUser> UserRolesUpdate(IResolverContext context, IMediator mediator, [ID("User")] long userId, string[] add, string[] remove) {
+        return mediator.Send(new UserRolesUpdate(userId, add, remove), context.RequestAborted);
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameEngineCreateResult> GameEngineCreate(IMediator mediator, string name, IFile content, IFile ruleset) {
+    public async Task<GameEngineCreateResult> GameEngineCreate(IResolverContext context, IMediator mediator, string name, IFile content, IFile ruleset) {
         using var cs = content.OpenReadStream();
         using var rs = ruleset.OpenReadStream();
 
-        var result = await mediator.Send(new GameEngineCreate(name, cs, rs));
+        var result = await mediator.Send(new GameEngineCreate(name, cs, rs), context.RequestAborted);
 
         return result;
     }
 
     [Authorize(Policy = Policies.GameMasters)]
+    public Task<GameEngineDeleteResult> GameEngineDelete(IResolverContext context, IMediator mediator, [ID(GameEngineType.NAME)] long gameEngineId) =>
+        mediator.Send(new GameEngineDelete(gameEngineId), context.RequestAborted);
+
+    [Authorize(Policy = Policies.GameMasters)]
     public Task<GameCreateResult> GameCreate(
         IMediator mediator,
         string name,
-        [ID("GameEngine")] long gameEngineId,
+        [ID(GameEngineType.NAME)] long gameEngineId,
         List<MapLevel> map,
         string schedule,
         string timeZone,
@@ -61,31 +65,31 @@ public class Mutation {
     //     return mediator.Send(new GameCreateRemote(name, options));
     // }
 
-    public Task<GameJoinLocalResult> GameJoinLocal(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId, string name) {
+    public Task<GameJoinLocalResult> GameJoinLocal(IMediator mediator, [GlobalState] long currentUserId, [ID(GameType.NAME)] long gameId, string name) {
         return mediator.Send(new GameJoinLocal(currentUserId, gameId, name));
     }
 
-    public Task<GameJoinRemoteResult> GameJoinRemote(IMediator mediator, [GlobalState] long currentUserId, [ID("Game")] long gameId, [ID("Player")] long playerId, string password) {
+    public Task<GameJoinRemoteResult> GameJoinRemote(IMediator mediator, [GlobalState] long currentUserId, [ID(GameType.NAME)] long gameId, [ID("Player")] long playerId, string password) {
         return mediator.Send(new GameJoinRemote(currentUserId, gameId, playerId, password));
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameStartResult> GameStart(IMediator mediator, [ID("Game")] long gameId) {
+    public Task<GameStartResult> GameStart(IMediator mediator, [ID(GameType.NAME)] long gameId) {
         return mediator.Send(new GameStart(gameId));
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GamePauseResult> GamePause(IMediator mediator, [ID("Game")] long gameId) {
+    public Task<GamePauseResult> GamePause(IMediator mediator, [ID(GameType.NAME)] long gameId) {
         return mediator.Send(new GamePause(gameId));
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameStopResult> GameComplete(IMediator mediator, [ID("Game")] long gameId) {
+    public Task<GameStopResult> GameComplete(IMediator mediator, [ID(GameType.NAME)] long gameId) {
         return mediator.Send(new GameStop(gameId));
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameNextTurnResult> GameNextTurn(IMediator mediator, [ID("Game")] long gameId, int? turnNumber = null, GameNextTurnForceInput force = null) {
+    public Task<GameNextTurnResult> GameNextTurn(IMediator mediator, [ID(GameType.NAME)] long gameId, int? turnNumber = null, GameNextTurnForceInput force = null) {
         return mediator.Send(new GameNextTurn(gameId, turnNumber, force));
     }
 
@@ -96,12 +100,12 @@ public class Mutation {
     // }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameOptionsSetResult> GameOptionsSet(IMediator mediator, [ID("Game")] long gameId, GameOptions options) {
+    public Task<GameOptionsSetResult> GameOptionsSet(IMediator mediator, [ID(GameType.NAME)] long gameId, GameOptions options) {
         return mediator.Send(new GameOptionsSet(gameId, options));
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameScheduleSetResult> GameScheduleSet(IMediator mediator, [ID("Game")] long gameId, string schedule) {
+    public Task<GameScheduleSetResult> GameScheduleSet(IMediator mediator, [ID(GameType.NAME)] long gameId, string schedule) {
         return mediator.Send(new GameScheduleSet(gameId, schedule));
     }
 

@@ -173,39 +173,41 @@ public class Startup {
             IsProduction = Env.IsProduction()
         });
 
-        services.AddHangfire(conf => {
-            conf.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
-            conf.UseSimpleAssemblyNameTypeSerializer();
-            conf.UseRecommendedSerializerSettings();
+        // TODO: enable hangfire back later
+        // services.AddHangfire(conf => {
+        //     conf.SetDataCompatibilityLevel(CompatibilityLevel.Version_170);
+        //     conf.UseSimpleAssemblyNameTypeSerializer();
+        //     conf.UseRecommendedSerializerSettings();
 
-            switch (DbProvider) {
-                case DatabaseProvider.SQLite:
-                    conf.UseSQLiteStorage(HangfireConnectionString);
-                    break;
+        //     switch (DbProvider) {
+        //         case DatabaseProvider.SQLite:
+        //             conf.UseSQLiteStorage(HangfireConnectionString);
+        //             break;
 
-                case DatabaseProvider.PgSQL:
-                    conf.UsePostgreSqlStorage(HangfireConnectionString);
-                    break;
+        //         case DatabaseProvider.PgSQL:
+        //             conf.UsePostgreSqlStorage(HangfireConnectionString);
+        //             break;
 
-                case DatabaseProvider.MsSQL:
-                    conf.UseSqlServerStorage(HangfireConnectionString);
-                    break;
-            }
+        //         case DatabaseProvider.MsSQL:
+        //             conf.UseSqlServerStorage(HangfireConnectionString);
+        //             break;
+        //     }
 
-            conf.UseConsole();
-            conf.UseRecurringJobAdmin(typeof(Startup).Assembly);
-            conf.UseHeartbeatPage(TimeSpan.FromSeconds(5));
-        });
+        //     conf.UseConsole();
+        //     conf.UseRecurringJobAdmin(typeof(Startup).Assembly);
+        //     conf.UseHeartbeatPage(TimeSpan.FromSeconds(5));
+        // });
 
         // GlobalJobFilters.Filters.Add(new JoiningSupportAttribute(new BackgroundJobStateChanger()));
         // GlobalStateHandlers.Handlers.Add(new JoiningState.Handler());
 
-        services
-            .AddHangfireServer((ctx, conf) => {
-                conf.Activator = new HangfireContainerActivator(ctx);
-            })
-            .AddHangfireConsoleExtensions()
-            .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
+        // TODO: enable hangfire back later
+        // services
+        //     .AddHangfireServer((ctx, conf) => {
+        //         conf.Activator = new HangfireContainerActivator(ctx);
+        //     })
+        //     .AddHangfireConsoleExtensions()
+        //     .AddSingleton<IBackgroundProcess, ProcessMonitor>(_ => new ProcessMonitor(TimeSpan.FromSeconds(5)));
 
         services
             .AddAutoMapper(typeof(MappingProfile));
@@ -321,11 +323,13 @@ public class Startup {
             .UseEndpoints(endpoints => {
                 endpoints.MapControllers();
                 endpoints.MapGraphQL();
-                endpoints.MapHangfireDashboard(new DashboardOptions {
-                    Authorization = new[] {
-                        new RoleBasedDashboardAuthorizationFilter(Roles.Root)
-                    }
-                });
+
+                // TODO: enable hangfire back later
+                // endpoints.MapHangfireDashboard(new DashboardOptions {
+                //     Authorization = new[] {
+                //         new RoleBasedDashboardAuthorizationFilter(Roles.Root)
+                //     }
+                // });
             });
     }
 }
