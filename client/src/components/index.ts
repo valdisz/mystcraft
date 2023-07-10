@@ -27,3 +27,6 @@ export { default as CommandButton } from './command-button'
 
 export * from './date-time'
 export { default as DateTime } from './date-time'
+
+export * from './confirmation'
+export { default as Confirmation } from './confirmation'
