@@ -39,7 +39,7 @@ public class GameCreateHandler : IRequestHandler<GameCreate, GameCreateResult> {
     public Task<GameCreateResult> Handle(GameCreate request, CancellationToken cancellationToken) =>
         Validate(request)
             .Map(GameInterpreter<Runtime>.Interpret)
-            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameCreateResult.New);
 
     private static Validation<Error, Mystcraft<DbGame>> Validate(GameCreate request) =>

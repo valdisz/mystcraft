@@ -7,7 +7,7 @@ public static class ValidationExtensions {
     /// <summary>
     /// Run the async effect wrapped in a Validation and then replaces the value in the Validation with the result of the effect.
     /// </summary>
-    public static Task<Validation<Error, A>> RunWrapped<RT, A>(this Validation<Error, Aff<RT, A>> wrappedAffect, RT runtime)
+    public static Task<Validation<Error, A>> Unwrap<RT, A>(this Validation<Error, Aff<RT, A>> wrappedAffect, RT runtime)
         where RT : struct, HasCancel<RT> =>
         wrappedAffect.MatchAsync(
             SuccAsync: async affect =>

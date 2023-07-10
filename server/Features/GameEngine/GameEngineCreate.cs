@@ -28,7 +28,7 @@ public class GameEngineCreateHandler : IRequestHandler<GameEngineCreate, GameEng
     public async Task<GameEngineCreateResult> Handle(GameEngineCreate request, CancellationToken cancellationToken) =>
         await (await Validate(request))
             .Map(GameInterpreter<Runtime>.Interpret)
-            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameEngineCreateResult.New);
 
     private static async Task<Validation<Error, Mystcraft<DbGameEngine>>> Validate(GameEngineCreate request) =>

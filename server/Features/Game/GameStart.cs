@@ -31,7 +31,7 @@ public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
                 from res in Mystcraft.Start(game)
                 select res
             ))
-            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameStartResult.New);
 
     private static Validation<Error, GameId> Validate(GameStart request) =>

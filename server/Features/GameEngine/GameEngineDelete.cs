@@ -27,15 +27,14 @@ public class GameEngineDeleteHandler : IRequestHandler<GameEngineDelete, GameEng
     public Task<GameEngineDeleteResult> Handle(GameEngineDelete request, CancellationToken cancellationToken) =>
         Validate(request)
             .Map(GameInterpreter<Runtime>.Interpret)
-            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameEngineDeleteResult.New);
 
     private static Validation<Error, Mystcraft<LanguageExt.Unit>> Validate(GameEngineDelete request) =>
-        GameEngineId.New(request.GameEngineId)//.ForField(nameof(GameEngineDelete.GameEngineId))
+        GameEngineId.New(request.GameEngineId).ForField(nameof(GameEngineDelete.GameEngineId))
             .Map(x =>
                 from engine in Mystcraft.WriteOneGameEngine(x)
                 from _ in Mystcraft.DeleteGameEngine(engine)
                 select unit
             );
-
 }

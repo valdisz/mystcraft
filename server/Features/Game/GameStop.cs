@@ -31,7 +31,7 @@ public class GameStopHandler : IRequestHandler<GameStop, GameStopResult> {
                 from res in Mystcraft.Stop(game)
                 select res
             ))
-            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameStopResult.New);
 
     private static Validation<Error, GameId> Validate(GameStop request) =>

@@ -31,7 +31,7 @@ public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
                 from res in Mystcraft.Pause(game)
                 select res
             ))
-            .RunWrapped(Runtime.New(database, cancellationToken))
+            .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GamePauseResult.New);
 
     private static Validation<Error, GameId> Validate(GamePause request) =>
