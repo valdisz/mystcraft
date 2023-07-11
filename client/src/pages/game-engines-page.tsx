@@ -4,7 +4,7 @@ import {
     Button, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography,
     Box, Stack, Paper, IconButton
 } from '@mui/material'
-import { PageTitle, EmptyListItem, Forbidden, FileInputField, Confirmation } from '../components'
+import { PageTitle, EmptyListItem, Forbidden, FileInputField, Confirm } from '../components'
 import { NewGameEngineStore, useStore } from '../store'
 import { GameEngineFragment } from '../schema'
 import { Role, ForRole, forRole } from '../auth'
@@ -44,11 +44,11 @@ interface GameEngineItemProps {
 
 function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
     return <ListItem secondaryAction={
-        <Confirmation confirm='Delete' reject='Cancel' onClick={onDelete}>
-            <IconButton onClick={onDelete}><DeleteIcon /></IconButton>
-        </Confirmation>
+        <Confirm onConfirm={onDelete}>
+            <IconButton><DeleteIcon /></IconButton>
+        </Confirm>
     }>
-        <ListItemText primary={engine.name} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
+        <ListItemText primary={engine.name} secondaryTypographyProps={{ component: 'div' }} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
     </ListItem>
 }
 
