@@ -1,4 +1,4 @@
-import { createAtom, IAtom, IReactionDisposer, reaction, autorun, transaction, IReactionOptions, runInAction } from 'mobx'
+import { createAtom, IAtom, IReactionDisposer, reaction, transaction, IReactionOptions } from 'mobx'
 import { OperationResult, TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
 import { RequestPolicy, DataSourceConnection, Disposable } from './data-source-connection'
@@ -30,23 +30,22 @@ export interface ResponseHandler<TData, TVariables extends object, TError> {
 
 export abstract class DataSource<T, TData = { }, TVariables extends object = { }, TError = unknown> {
     constructor(private readonly connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T, TData, TVariables>) {
+        this._name = options.name ?? 'DataSource'
         this._document = options.document
         this._projection = options.projection
         this._variables = options.variables
         this._defaultRequestPolicy = options.defaultRequestPolicy || RequestPolicy.CacheAndNetwork
         this._defaultReloadPolicy = options.defaultReloadPolicy || RequestPolicy.NetworkOnly
 
-        this._name = options.name ?? 'DataSource'
         this._valueAtom = createAtom(this._name, this.resume.bind(this), this.suspend.bind(this))
-
         this._stateAtom = createAtom(`${this._name}::state`)
         this._errorAtom = createAtom(`${this._name}::error`)
     }
 
     /** Name of the data source */
     private readonly _name: string
-    private readonly _defaultRequestPolicy: RequestPolicy = RequestPolicy.CacheAndNetwork
-    private readonly _defaultReloadPolicy: RequestPolicy = RequestPolicy.NetworkOnly
+    private readonly _defaultRequestPolicy: RequestPolicy
+    private readonly _defaultReloadPolicy: RequestPolicy
 
     private readonly _valueAtom: IAtom
     protected abstract getValue(): T;
@@ -141,11 +140,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         return new Promise((resolve, reject) => {
             this.state = 'loading'
 
-            if (this._requestHandle) {
-                console.debug(`${this._name}::load()..dispose previous request handle`)
-                this._requestHandle()
-            }
-
+            this._requestHandle?.()
             this._requestHandle = this.connection.query(this._document, {
                 onSuccess: data => {
                     console.debug(`${this._name}::load()..onSuccess`)
