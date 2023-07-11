@@ -11,10 +11,30 @@ export class GameEnginesStore {
 
     readonly newEngine = new NewGameEngineStore(this.add.bind(this))
 
-    add(name: string, content: File, ruleset: File) {
-        return mutate<GameEngineCreateMutation, GameEngineCreateMutationVariables>(GameEngineCreate, { name, content, ruleset }, {
-            refetch: [ this.engines ]
-        })
+    async add(name: string, content: File, ruleset: File) {
+        this.newEngine.begin()
+
+        try {
+            var result = await mutate<GameEngineCreateMutation, GameEngineCreateMutationVariables>(GameEngineCreate, { name, content, ruleset }, {
+                refetch: [this.engines]
+            })
+
+            if (result.error) {
+                this.newEngine.setError(result.error.message)
+            }
+            else if (!result.data.gameEngineCreate.isSuccess) {
+                this.newEngine.setError(result.data.gameEngineCreate.error)
+            }
+            else {
+                this.newEngine.close()
+            }
+        }
+        catch (error) {
+            this.newEngine.setError(error.toString())
+        }
+        finally {
+            this.newEngine.end()
+        }
     }
 
     delete(gameEngineId: string) {
@@ -33,6 +53,8 @@ export class NewGameEngineStore {
 
     @observable name = ''
     @observable isOpen = false
+    @observable inProgress = false
+    @observable error = ''
 
     readonly content = new FileViewModel()
     readonly ruleset = new FileViewModel()
@@ -45,6 +67,8 @@ export class NewGameEngineStore {
         this.isOpen = true
 
         this.name = ''
+        this.inProgress = false
+        this.error = ''
         this.content.clear()
         this.ruleset.clear()
     }
@@ -53,8 +77,25 @@ export class NewGameEngineStore {
         this.isOpen = false
     }
 
+    readonly autoClose = () => {
+        if (this.inProgress) {
+            return
+        }
+
+        this.close()
+    }
+
+    @action readonly begin = () => {
+        this.inProgress = true
+    }
+
+    @action readonly end = () => {
+        this.inProgress = false
+    }
+
+    @action readonly setError = (message: string) => this.error = message
+
     readonly confirm = async () => {
         await this.onConfirm(this.name, this.content.file, this.ruleset.file)
-        this.close()
     }
 }

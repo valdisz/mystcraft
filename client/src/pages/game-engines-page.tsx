@@ -1,34 +1,50 @@
 import React from 'react'
-import { observer } from 'mobx-react-lite'
+import { observer, Observer } from 'mobx-react-lite'
 import {
-    Button, Container, List, ListItem, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Typography,
-    Box, Stack, Paper, IconButton
+    Button, Container, List, ListItem, ListItemButton, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+    Alert, AlertTitle, Stack, Paper, IconButton, LinearProgress, Box
 } from '@mui/material'
-import { PageTitle, EmptyListItem, Forbidden, FileInputField, Confirm } from '../components'
+import { LoadingButton } from '@mui/lab'
+import { PageTitle, EmptyListItem, Forbidden, FileInputField, Confirm, DateTime } from '../components'
 import { NewGameEngineStore, useStore } from '../store'
 import { GameEngineFragment } from '../schema'
 import { Role, ForRole, forRole } from '../auth'
 
 import DeleteIcon from '@mui/icons-material/Delete'
-import DateTime from '../components/date-time'
 
 function GameEnginesPage() {
     const { gameEngines } = useStore()
 
-    return <Container>
-        <PageTitle title='Game Engines'
-                actions={<ForRole role={Role.GameMaster}>
-                <Button variant='outlined' color='primary' size='large' onClick={gameEngines.newEngine.open}>New Engine</Button>
-            </ForRole>} />
+    const engines = gameEngines.engines
+    const items = engines.map(x => <GameEngineItem key={x.id} engine={x} onDelete={() => gameEngines.delete(x.id)} />)
 
-        <Paper elevation={0} variant='outlined'>
-            <List dense>
-                { gameEngines.engines.value.length
-                    ? gameEngines.engines.value.map(x => <GameEngineItem key={x.id} engine={x} onDelete={() => gameEngines.delete(x.id)} />)
-                    : <EmptyListItem />
-                }
-            </List>
-        </Paper>
+    return <Container>
+        <PageTitle
+            title='Game Engines'
+            actions={
+                <ForRole role={Role.GameMaster}>
+                    <Button variant='outlined' color='primary' size='large' onClick={gameEngines.newEngine.open}>New Engine</Button>
+                </ForRole>
+            }
+        />
+
+        <Stack gap={6}>
+            { engines.isFailed && <Alert severity="error">
+                <AlertTitle>Error</AlertTitle>
+                { engines.error.message }
+            </Alert> }
+
+            <Paper elevation={0} variant='outlined'>
+                { engines.isLoading && <LinearProgress /> }
+
+                <List dense disablePadding>
+                    { engines.isEmpty
+                        ? <EmptyListItem>{engines.isLoading ? 'Loading...' : null}</EmptyListItem>
+                        : items
+                    }
+                </List>
+            </Paper>
+        </Stack>
 
         <ObservableNewGameEngineDialog model={gameEngines.newEngine} />
     </Container>
@@ -43,12 +59,17 @@ interface GameEngineItemProps {
 }
 
 function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
-    return <ListItem secondaryAction={
-        <Confirm onConfirm={onDelete}>
-            <IconButton><DeleteIcon /></IconButton>
-        </Confirm>
-    }>
-        <ListItemText primary={engine.name} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
+    return <ListItem
+        secondaryAction={
+            <Confirm onConfirm={onDelete}>
+                <IconButton><DeleteIcon /></IconButton>
+            </Confirm>
+        }
+        disablePadding
+    >
+        <ListItemButton>
+            <ListItemText primary={engine.name} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
+        </ListItemButton>
     </ListItem>
 }
 
@@ -57,9 +78,16 @@ interface NewGameEngineDialogProps {
 }
 
 function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
-    return <Dialog fullWidth maxWidth='sm' open={model.isOpen} onClose={model.close}>
+    return <Dialog fullWidth maxWidth='sm' open={model.isOpen} onClose={model.autoClose}>
         <DialogTitle>New game engine</DialogTitle>
         <DialogContent>
+            { model.error
+                ? <Alert severity="error">
+                    <AlertTitle>Error</AlertTitle>
+                    {model.error}
+                </Alert>
+                : null
+            }
             <Stack gap={2}>
                 <TextField label='Name' value={model.name} onChange={model.setName} />
 
@@ -69,8 +97,8 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
 
         </DialogContent>
         <DialogActions>
-            <Button onClick={model.close}>Cancel</Button>
-            <Button onClick={model.confirm} color='primary' variant='contained'>Upload game engine</Button>
+            <Button disabled={model.inProgress} onClick={model.close}>Cancel</Button>
+            <LoadingButton loading={model.inProgress} onClick={model.confirm} color='primary' variant='contained'>Upload game engine</LoadingButton>
         </DialogActions>
     </Dialog>
 }
