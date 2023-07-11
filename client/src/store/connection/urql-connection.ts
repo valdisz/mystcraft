@@ -1,9 +1,8 @@
-import { Client, TypedDocumentNode, createRequest, OperationResult, CombinedError, RequestPolicy as UrlRequestPolicy, makeErrorResult } from 'urql'
+import { Client, TypedDocumentNode, createRequest, OperationResult, CombinedError, RequestPolicy as UrlRequestPolicy } from 'urql'
 import { DocumentNode } from 'graphql'
 import { pipe, Source, subscribe } from 'wonka'
 import { ResponseHandler } from './data-source'
-import { DataSourceConnection, RequestPolicy } from './data-source-connection'
-import { Disposable, CallbackDisposable } from './disposable'
+import { DataSourceConnection, Disposable, RequestPolicy } from './data-source-connection'
 
 function mapRequestPolicy(requestPolicy?: RequestPolicy): UrlRequestPolicy {
     switch (requestPolicy) {
@@ -19,7 +18,12 @@ export class UrqlConnection<TData, TVariables extends object> implements DataSou
     constructor(private readonly client: Client) {
     }
 
-    query(query: DocumentNode | TypedDocumentNode<TData, TVariables>, { onSuccess, onFailure }: ResponseHandler<TData, TVariables, CombinedError>, variables: TVariables, requestPolicy: RequestPolicy): Disposable {
+    query(
+        query: DocumentNode | TypedDocumentNode<TData, TVariables>,
+        { onSuccess, onFailure }: ResponseHandler<TData, TVariables, CombinedError>,
+        variables: TVariables,
+        requestPolicy: RequestPolicy
+    ): Disposable {
         const request = createRequest(query, variables)
 
         const source: Source<OperationResult<TData, TVariables>> = this.client.executeQuery(request, {
@@ -43,6 +47,6 @@ export class UrqlConnection<TData, TVariables extends object> implements DataSou
             })
         )
 
-        return new CallbackDisposable(() => unsubscribe())
+        return () => unsubscribe()
     }
 }

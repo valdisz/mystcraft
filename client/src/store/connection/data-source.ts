@@ -1,8 +1,7 @@
-import { createAtom, IAtom, IReactionDisposer, makeObservable, observable, IObservableValue, reaction, computed } from 'mobx'
+import { createAtom, IAtom, IReactionDisposer, reaction, autorun, transaction, IReactionOptions, runInAction } from 'mobx'
 import { OperationResult, TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
-import { Disposable } from './disposable'
-import { RequestPolicy, DataSourceConnection } from './data-source-connection'
+import { RequestPolicy, DataSourceConnection, Disposable } from './data-source-connection'
 
 export type DataSourceState = 'loading' | 'ready' | 'failed' | 'unspecified'
 
@@ -20,6 +19,8 @@ export interface DataSourceOptions<T, TData, TVariables extends object> {
     projection: Projection<TData, T>
     variables?: TVariables | VariablesGetter<TVariables>
     name?: string
+    defaultRequestPolicy?: RequestPolicy
+    defaultReloadPolicy?: RequestPolicy
 }
 
 export interface ResponseHandler<TData, TVariables extends object, TError> {
@@ -29,47 +30,54 @@ export interface ResponseHandler<TData, TVariables extends object, TError> {
 
 export abstract class DataSource<T, TData = { }, TVariables extends object = { }, TError = unknown> {
     constructor(private readonly connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T, TData, TVariables>) {
-        makeObservable(this, {
-            isLoading: computed,
-            isReady: computed,
-            state: computed,
-            error: computed
-        })
-
         this._document = options.document
         this._projection = options.projection
         this._variables = options.variables
+        this._defaultRequestPolicy = options.defaultRequestPolicy || RequestPolicy.CacheAndNetwork
+        this._defaultReloadPolicy = options.defaultReloadPolicy || RequestPolicy.NetworkOnly
 
         this._name = options.name ?? 'DataSource'
         this._valueAtom = createAtom(this._name, this.resume.bind(this), this.suspend.bind(this))
+
+        this._stateAtom = createAtom(`${this._name}::state`)
+        this._errorAtom = createAtom(`${this._name}::error`)
     }
 
-    private readonly _valueAtom: IAtom
+    /** Name of the data source */
     private readonly _name: string
-    private _state: IObservableValue<DataSourceState> = observable.box<DataSourceState>('unspecified')
-    private _error: IObservableValue<TError | null> = observable.box<TError | null>(null)
-    private _document: DocumentNode | TypedDocumentNode<TData, TVariables>
-    private _projection: (data: TData) => T
-    private _variables?: TVariables | VariablesGetter<TVariables>
+    private readonly _defaultRequestPolicy: RequestPolicy = RequestPolicy.CacheAndNetwork
+    private readonly _defaultReloadPolicy: RequestPolicy = RequestPolicy.NetworkOnly
+
+    private readonly _valueAtom: IAtom
+    protected abstract getValue(): T;
+    protected abstract setValue(value: T): void;
+
+    private readonly _stateAtom: IAtom
+    private _state: DataSourceState = 'unspecified'
+
+    private readonly _errorAtom: IAtom
+    private _error: TError | null = null
+
+    private readonly _document: DocumentNode | TypedDocumentNode<TData, TVariables>
+    private readonly _projection: (data: TData) => T
+    private readonly _variables?: TVariables | VariablesGetter<TVariables>
 
     private _variablesWatch: IReactionDisposer
     private _requestHandle: Disposable
 
-    protected abstract getValue(): T;
-    protected abstract setValue(value: T): void;
-
     get value(): T {
         this._valueAtom.reportObserved()
-
         return this.getValue()
     }
 
-    get state() {
-        return this._state.get()
+    get state(): DataSourceState {
+        this._stateAtom.reportObserved()
+        return this._state
     }
 
     protected set state(newState: DataSourceState) {
-        this._state.set(newState)
+        this._state = newState
+        this._stateAtom.reportChanged()
     }
 
     get isLoading() {
@@ -80,67 +88,86 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         return this.state === 'ready'
     }
 
+    get isFailed() {
+        return this.state === 'failed'
+    }
+
     get error(): TError | null {
-        return this._error.get()
+        this._errorAtom.reportObserved()
+        return this._error
     }
 
     protected set error(err: TError) {
-        this._error.set(err)
+        this._error = err
+        this._errorAtom.reportChanged()
     }
 
-    defaultRequestPolicy: RequestPolicy = RequestPolicy.NetworkOnly
-
     protected resume() {
-        console.debug(`${this._name}::resume`)
+        console.debug(`${this._name}::resume()`)
 
         if (this._variables) {
-            if (this._variables instanceof Function) {
-                this._variablesWatch = reaction(this._variables, vars => this.load(vars, this.defaultRequestPolicy), {
-                    name: `${this._valueAtom.name_}::variables`,
-                    fireImmediately: true
-                })
+            const options: IReactionOptions<TVariables, any> = {
+                name: this._name,
+                fireImmediately: true
             }
-            else {
-                this.load(this._variables, this.defaultRequestPolicy)
+
+            const expression = () => {
+                if (this._variables instanceof Function) {
+                    return this._variables()
+                }
+                else {
+                    return {...this._variables}
+                }
             }
+
+            const effect = vars => this.load(vars, this._defaultRequestPolicy)
+
+            this._variablesWatch = reaction(expression, effect, options)
         }
         else {
-            this.load(null, this.defaultRequestPolicy)
+            this.load(null, this._defaultRequestPolicy)
         }
     }
 
     protected suspend() {
-        console.debug(`${this._name}::suspend`)
+        console.debug(`${this._name}::suspend()`)
 
         this.close()
     }
 
     protected load(variables: TVariables, requestPolicy: RequestPolicy) {
-        console.debug(`${this._name}::load`)
+        console.debug(`${this._name}::load()`)
 
         return new Promise((resolve, reject) => {
             this.state = 'loading'
 
             if (this._requestHandle) {
-                this._requestHandle.dispose()
+                console.debug(`${this._name}::load()..dispose previous request handle`)
+                this._requestHandle()
             }
 
             this._requestHandle = this.connection.query(this._document, {
                 onSuccess: data => {
+                    console.debug(`${this._name}::load()..onSuccess`)
+
                     const projection = this._projection(data)
 
-                    this.setValue(projection)
+                    transaction(() => {
+                        this.state = 'ready'
 
-                    this.state = 'ready'
-                    this._requestHandle = null
-
-                    this._valueAtom.reportChanged()
+                        this.setValue(projection)
+                        this._valueAtom.reportChanged()
+                    })
 
                     resolve(projection)
                 },
                 onFailure: error => {
-                    this.state = 'failed'
-                    this.error = error
+                    console.debug(`${this._name}::load()..onFailure`)
+
+                    transaction(() => {
+                        this.state = 'failed'
+                        this.error = error
+                    })
 
                     reject(error)
                 }
@@ -149,6 +176,8 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     }
 
     reload(requestPolicy?: RequestPolicy) {
+        console.debug(`${this._name}::reload()`)
+
         let variables: TVariables = null
 
         if (this._variables) {
@@ -157,17 +186,19 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
                 : this._variables
         }
 
-        return this.load(variables, requestPolicy || this.defaultRequestPolicy)
+        return this.load(variables, requestPolicy || this._defaultReloadPolicy)
     }
 
     close() {
+        console.debug(`${this._name}::close()`)
+
         if (this._variablesWatch) {
             this._variablesWatch()
             this._variablesWatch = null
         }
 
         if (this._requestHandle) {
-            this._requestHandle.dispose()
+            this._requestHandle()
             this._requestHandle = null
         }
     }

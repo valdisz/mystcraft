@@ -1,6 +1,5 @@
 import { TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
-import { Disposable } from './disposable'
 import { ResponseHandler } from './data-source'
 
 export enum RequestPolicy {
@@ -8,6 +7,10 @@ export enum RequestPolicy {
     CacheAndNetwork,
     NetworkOnly,
     CacheOnly
+}
+
+export interface Disposable {
+    (): void
 }
 
 export interface DataSourceConnection<TData, TVariables extends object, TError = unknown> {
