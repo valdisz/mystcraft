@@ -178,12 +178,17 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     reload(requestPolicy?: RequestPolicy) {
         console.debug(`${this._name}::reload()`)
 
+        if (!this._valueAtom.isBeingObserved_) {
+            // do nothing if no one is observing the value
+            return
+        }
+
         let variables: TVariables = null
 
         if (this._variables) {
             variables = this._variables instanceof Function
                 ? this._variables()
-                : this._variables
+                : {...this._variables}
         }
 
         return this.load(variables, requestPolicy || this._defaultReloadPolicy)
@@ -192,14 +197,10 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     close() {
         console.debug(`${this._name}::close()`)
 
-        if (this._variablesWatch) {
-            this._variablesWatch()
-            this._variablesWatch = null
-        }
+        this._variablesWatch?.()
+        this._variablesWatch = null
 
-        if (this._requestHandle) {
-            this._requestHandle()
-            this._requestHandle = null
-        }
+        this._requestHandle?.()
+        this._requestHandle = null
     }
 }
