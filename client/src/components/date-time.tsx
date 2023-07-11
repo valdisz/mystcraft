@@ -1,10 +1,10 @@
 import React, { memo, forwardRef, Ref } from 'react'
-import { Typography, TypographyProps } from '@mui/material'
+import { Typography, TypographyProps, styled } from '@mui/material'
 
-export interface DateTimeProps extends Intl.DateTimeFormatOptions {
+export interface DateTimeProps<TypographyComponent extends React.ElementType = 'span'> extends Intl.DateTimeFormatOptions {
     value: Date | string | number
     locale?: string
-    TypographyProps?: TypographyProps
+    TypographyProps?: Omit<TypographyProps<TypographyComponent, { component?: TypographyComponent }>, 'children'>
 }
 
 function toDate(value: Date | string | number): Date {
@@ -15,7 +15,11 @@ function toDate(value: Date | string | number): Date {
     return value
 }
 
-function DateTime({ value, locale, TypographyProps, dateStyle, timeStyle, hourCycle, ...options }: DateTimeProps, ref: Ref<HTMLDivElement>) {
+const DateTimeValue = styled(Typography, {
+    name: 'date-time'
+})({ })
+
+function DateTime({ value, locale, TypographyProps, dateStyle, timeStyle, hourCycle, ...options }: DateTimeProps, ref: Ref<HTMLElement>) {
     const formatter = new Intl.DateTimeFormat(locale, {
         ...options,
         dateStyle: dateStyle || 'medium',
@@ -23,12 +27,12 @@ function DateTime({ value, locale, TypographyProps, dateStyle, timeStyle, hourCy
         hourCycle: hourCycle || 'h24'
     })
 
-    const props: TypographyProps = TypographyProps || {}
-    delete props.children
+    const props = TypographyProps || { }
+    props.component = props.component || 'span'
 
-    return <Typography ref={ref} {...props}>
+    return <DateTimeValue ref={ref} {...props}>
         {formatter.format(toDate(value))}
-    </Typography>
+    </DateTimeValue>
 }
 
-export default memo(forwardRef<HTMLDivElement, DateTimeProps>(DateTime))
+export default memo(forwardRef<HTMLElement, DateTimeProps>(DateTime))

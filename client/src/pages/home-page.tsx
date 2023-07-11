@@ -7,7 +7,7 @@ import { List, ListItem, ListItemText, TextField, Button, Container,
 import { Observer, observer } from 'mobx-react'
 import { Link, LinkProps } from 'react-router-dom'
 import { MapLevelItem, useStore } from '../store'
-import { SplitButton, PageTitle, EmptyListItem, FileInput } from '../components'
+import { SplitButton, PageTitle, EmptyListItem, FileInput, DateTime } from '../components'
 import { GameHeaderFragment } from '../schema'
 import cronstrue from 'cronstrue'
 import { Role, ForRole } from '../auth'
@@ -168,7 +168,7 @@ function NewGameDialog() {
                         <Select label="Engine" value={newGame.engine} onChange={newGame.setEngine}>
                             { gameEngines.engines.value.map(x => <MenuItem key={x.id} value={x.id}>
                                 <ListItemText primary={x.name} />
-                                <Typography variant='caption'>{x.createdAt}</Typography>
+                                <DateTime value={x.createdAt} TypographyProps={{ variant: 'caption' }} />
                             </MenuItem>) }
                         </Select>
                     </FormControl>

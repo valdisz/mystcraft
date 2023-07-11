@@ -48,7 +48,7 @@ function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
             <IconButton><DeleteIcon /></IconButton>
         </Confirm>
     }>
-        <ListItemText primary={engine.name} secondaryTypographyProps={{ component: 'div' }} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
+        <ListItemText primary={engine.name} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
     </ListItem>
 }
 
