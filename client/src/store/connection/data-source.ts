@@ -28,6 +28,18 @@ export interface ResponseHandler<TData, TVariables extends object, TError> {
     onFailure: (error: TError, result?: OperationResult<TData, TVariables>) => void
 }
 
+export interface ReloadOptions {
+    /**
+     * Request policy to use for the reload operation
+     */
+    requestPolicy?: RequestPolicy
+
+    /**
+     * Force reload data from connection even if no one is observing
+     */
+    force?: boolean
+}
+
 export abstract class DataSource<T, TData = { }, TVariables extends object = { }, TError = unknown> {
     constructor(private readonly connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T, TData, TVariables>) {
         this._name = options.name ?? 'DataSource'
@@ -42,7 +54,9 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         this._errorAtom = createAtom(`${this._name}::error`)
     }
 
-    /** Name of the data source */
+    /**
+     * Name of the data source
+     */
     private readonly _name: string
     private readonly _defaultRequestPolicy: RequestPolicy
     private readonly _defaultReloadPolicy: RequestPolicy
@@ -134,7 +148,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         this.close()
     }
 
-    protected load(variables: TVariables, requestPolicy: RequestPolicy) {
+    protected load(variables: TVariables, requestPolicy: RequestPolicy): Promise<T> {
         console.debug(`${this._name}::load()`)
 
         return new Promise((resolve, reject) => {
@@ -170,12 +184,15 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         })
     }
 
-    reload(requestPolicy?: RequestPolicy) {
+    /**
+     * Reload data from connection if someone is observing
+     */
+    reload(options?: ReloadOptions): Promise<T> {
         console.debug(`${this._name}::reload()`)
 
-        if (!this._valueAtom.isBeingObserved_) {
-            // do nothing if no one is observing the value
-            return
+        if (!options?.force && !this._valueAtom.isBeingObserved_) {
+            // return current value if no one is observing and do not reload data from connection
+            return Promise.resolve(this.getValue())
         }
 
         let variables: TVariables = null
@@ -186,7 +203,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
                 : {...this._variables}
         }
 
-        return this.load(variables, requestPolicy || this._defaultReloadPolicy)
+        return this.load(variables, options?.requestPolicy || this._defaultReloadPolicy)
     }
 
     close() {
