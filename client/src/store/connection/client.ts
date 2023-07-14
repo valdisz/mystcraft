@@ -3,7 +3,7 @@ import { devtoolsExchange } from '@urql/devtools'
 import { env } from 'process'
 
 const exchanges: Exchange[] = [
-    cacheExchange,
+    // cacheExchange,
     fetchExchange
 ]
 

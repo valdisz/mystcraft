@@ -49,4 +49,45 @@ export class UrqlConnection<TData, TVariables extends object> implements DataSou
 
         return () => unsubscribe()
     }
+
+    mutate(
+        mutation: DocumentNode | TypedDocumentNode<TData, TVariables>,
+        { onSuccess, onFailure }: ResponseHandler<TData, TVariables, CombinedError>,
+        variables: TVariables,
+        requestPolicy: RequestPolicy): Disposable {
+
+        const request = createRequest(mutation, variables)
+
+        const source: Source<OperationResult<TData, TVariables>> = this.client.executeMutation(request, {
+            requestPolicy: mapRequestPolicy(requestPolicy)
+        })
+
+        // for capturing unsubscribe function
+        const memo = {
+            unsubscribe: null as (() => void)
+        }
+
+        const { unsubscribe } = pipe(
+            source,
+            subscribe(result => {
+                try {
+                    if (result.error) {
+                        onFailure(result.error, result)
+                    }
+                    else {
+                        onSuccess(result.data, result);
+                    }
+                }
+                catch (err) {
+                    onFailure(new CombinedError({ networkError: err as Error }))
+                }
+                finally {
+                    memo.unsubscribe?.()
+                }
+            })
+        )
+        memo.unsubscribe = unsubscribe
+
+        return () => unsubscribe()
+    }
 }

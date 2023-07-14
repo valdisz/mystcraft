@@ -2,7 +2,6 @@ const {
     override,
     addDecoratorsLegacy,
     disableEsLint,
-    disableEsLint,
     overrideDevServer,
     watchAll
 } = require("customize-cra");

@@ -1,22 +1,19 @@
 import React from 'react'
-import { observer, Observer } from 'mobx-react-lite'
+import { observer } from 'mobx-react-lite'
 import {
-    Button, Container, List, ListItem, ListItemButton, ListItemText, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-    Alert, AlertTitle, Stack, Paper, IconButton, LinearProgress, Box
+    Button, Container, List, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+    Alert, AlertTitle, Stack, Paper, LinearProgress
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { PageTitle, EmptyListItem, Forbidden, FileInputField, Confirm, DateTime } from '../components'
+import { PageTitle, EmptyListItem, Forbidden, FileInputField, GameEngineItem } from '../components'
 import { NewGameEngineStore, useStore } from '../store'
-import { GameEngineFragment } from '../schema'
 import { Role, ForRole, forRole } from '../auth'
-
-import DeleteIcon from '@mui/icons-material/Delete'
 
 function GameEnginesPage() {
     const { gameEngines } = useStore()
 
     const engines = gameEngines.engines
-    const items = engines.map(x => <GameEngineItem key={x.id} engine={x} onDelete={() => gameEngines.delete(x.id)} />)
+    const items = engines.map(x => <GameEngineItem key={x.id} engine={x} onDelete={gameEngines.delete} />)
 
     return <Container>
         <PageTitle
@@ -52,26 +49,6 @@ function GameEnginesPage() {
 
 export default forRole(observer(GameEnginesPage), Role.GameMaster, <Forbidden />)
 
-
-interface GameEngineItemProps {
-    engine: GameEngineFragment
-    onDelete: () => void
-}
-
-function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
-    return <ListItem
-        secondaryAction={
-            <Confirm onConfirm={onDelete}>
-                <IconButton><DeleteIcon /></IconButton>
-            </Confirm>
-        }
-        disablePadding
-    >
-        <ListItemButton>
-            <ListItemText primary={engine.name} secondary={<DateTime value={engine.createdAt} TypographyProps={{ variant: 'body2' }} />} />
-        </ListItemButton>
-    </ListItem>
-}
 
 interface NewGameEngineDialogProps {
     model: NewGameEngineStore

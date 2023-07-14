@@ -10,7 +10,8 @@
     "eject": "react-scripts eject",
     "codegen": "graphql-codegen --config codegen.yaml",
     "assets": "node ./assets.js",
-    "ts": "tsc --noEmit"
+    "ts": "tsc --noEmit",
+    "devtools": "react-devtools"
   },
   "dependencies": {
     "@apollo/client": "^3.7.17",
@@ -74,6 +75,7 @@
     "nodemon": "^2.0.19",
     "querystring-es3": "^0.2.1",
     "react-app-rewired": "^2.2.1",
+    "react-devtools": "^4.28.0",
     "react-scripts": "5.0.1",
     "serve-static": "^1.15.0",
     "sharp": "^0.30.7",

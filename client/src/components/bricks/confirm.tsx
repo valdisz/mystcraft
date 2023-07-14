@@ -10,12 +10,12 @@ export interface ConfirmProps {
     no?: React.ReactNode
     title?: React.ReactNode
     timeout?: number
-    onConfirm: () => void
     onReject?: () => void
 }
 
-function Confirm({ yes, no, timeout, title, onConfirm, onReject, children }: ConfirmProps) {
+function Confirm({ yes, no, timeout, title, onReject, children }: ConfirmProps) {
     const pendingTimeout = timeout || 5000
+    const onConfirm = children.props?.onClick
 
     const [pending, setPending] = useState(false)
     const [elapsed, setElapsed] = useState(0)
@@ -29,18 +29,19 @@ function Confirm({ yes, no, timeout, title, onConfirm, onReject, children }: Con
         setPending(false)
     }, [setPending])
 
-    const reject = useCallback(() => {
+    const handleReject = () => {
+        reset()
         onReject?.()
-        reset()
-    }, [onReject, reset])
+    }
 
-    const confirm = useCallback(() => {
-        onConfirm?.()
+    const handleConfirm = e => {
         reset()
-    }, [onConfirm, reset])
+        onConfirm?.(e)
+    }
 
     const animationRef = useRef<number>()
     const animationStartTimeRef = useRef<DOMHighResTimeStamp>()
+    const rejectRef = useRef<NodeJS.Timeout>()
 
     useEffect(() => {
         if (!pending) {
@@ -69,10 +70,18 @@ function Confirm({ yes, no, timeout, title, onConfirm, onReject, children }: Con
 
     const progress = Math.trunc(Math.min((elapsed / pendingTimeout) * 100, 100))
     useEffect(() => {
-        if (progress >= 100) {
-            setTimeout(reject, 500)
+        if (progress === 100) {
+            rejectRef.current = setTimeout(reset, 500)
         }
-    }, [progress, reject])
+
+        return () => {
+            // we need this to clear timeout when component is unmounted before timeout is reached
+            if (rejectRef.current) {
+                clearTimeout(rejectRef.current)
+                rejectRef.current = null
+            }
+        }
+    }, [progress, reset])
 
     if (pending) {
         return <Stack>
@@ -81,8 +90,8 @@ function Confirm({ yes, no, timeout, title, onConfirm, onReject, children }: Con
                 : title
             }
             <Stack direction='row' gap={2} alignItems='center'>
-                <IconButton size='small' onClick={confirm}>{yes || <CheckIcon />}</IconButton>
-                <IconButton size='small' onClick={reject}>
+                <IconButton size='small' onClick={handleConfirm}>{yes || <CheckIcon />}</IconButton>
+                <IconButton size='small' onClick={handleReject}>
                     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
                         <CircularProgress size='1.5rem' variant="determinate" value={progress} />
                         <Box sx={{

@@ -1,11 +1,13 @@
 import { DocumentNode } from 'graphql'
-import { CombinedError, TypedDocumentNode, OperationResult, OperationContext } from 'urql'
+import { CombinedError, TypedDocumentNode } from 'urql'
 import { ArrayDataSource } from './array-data-source'
-import { DataSource, Projection, VariablesGetter } from './data-source'
+import { VariablesGetter } from './variables-getter'
 import { ObjectDataSource } from './object-data-source'
 import { UrqlConnection } from './urql-connection'
+import { Mutation, MutationOptions } from './mutation'
 import client from './client'
-import { RequestPolicy } from './data-source-connection'
+import { MutationResult } from '../../schema'
+import { Option, OperationError, Projection, ContextProjection } from './types'
 
 export function query<TData, T extends object, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,
@@ -43,29 +45,49 @@ export function seq<TData, T, TVariables extends object = { }>(
     return ds
 }
 
-export interface MutationOptions extends Partial<OperationContext> {
-    refetch?: DataSource<any, any, any, any>[],
-    refetchRequestPolicy?: RequestPolicy
-}
-
-export async function mutate<TData, TVariables extends object = { }>(
-    document: DocumentNode | TypedDocumentNode<TData, TVariables>,
-    variables?: TVariables,
-    options?: MutationOptions
-): Promise<OperationResult<TData, TVariables>> {
-    const { refetch, refetchRequestPolicy, ...context } = options || { }
-
-    const response = await client.mutation(document, variables, context).toPromise()
-
-    if (refetch?.length > 0) {
-        const tasks = []
-
-        for (const source of refetch) {
-            tasks.push(source.reload(refetchRequestPolicy))
+export function mapMutationError<T>(selector: (data: T) => MutationResult): ((data: T) => Option<OperationError> ) {
+    return (data: T) => {
+        const result = selector(data)
+        if (result.isSuccess) {
+            return null
         }
 
-        await Promise.all(tasks)
+        return { message: result.error }
+    }
+}
+
+export function mapProtocolError(error: CombinedError): Option<OperationError> {
+    if (error.networkError) {
+        return { message: error.networkError.message }
     }
 
-    return response
+    if (error.graphQLErrors.length > 0) {
+        return { message: error.graphQLErrors[0].message }
+    }
+
+    return null
+}
+
+export function noop(...args: any): any {
+}
+
+export type MutationFactoryOptions<TData, TVariables extends object, TResult extends MutationResult, T> =
+    Omit<
+        MutationOptions<TData, TVariables, T, OperationError, CombinedError>,
+        'mapProtocolError' | 'mapError' | 'map'
+    > & {
+        pick: Projection<TData, TResult>
+        map?: ContextProjection<TResult, TVariables, T>
+    }
+
+export function mutate<TData, TVariables extends object, TResult extends MutationResult, T>(
+    { map, pick, ...options }: MutationFactoryOptions<TData, TVariables, TResult, T>
+): Mutation<TData, TVariables, T, OperationError, CombinedError> {
+    const conn = new UrqlConnection<TData, TVariables>(client)
+    return new Mutation<TData, TVariables, T, OperationError, CombinedError>(conn, {
+        ...options,
+        map: map ? (d, c) => map(pick(d), c) : noop,
+        mapError: mapMutationError<TData>(pick),
+        mapProtocolError
+    })
 }

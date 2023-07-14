@@ -15,4 +15,5 @@ export interface Disposable {
 
 export interface DataSourceConnection<TData, TVariables extends object, TError = unknown> {
     query(query: DocumentNode | TypedDocumentNode<TData, TVariables>, onResponse: ResponseHandler<TData, TVariables, TError>, variables: TVariables, requestPolicy: RequestPolicy): Disposable
+    mutate(mutation: DocumentNode | TypedDocumentNode<TData, TVariables>, onResponse: ResponseHandler<TData, TVariables, TError>, variables: TVariables, requestPolicy: RequestPolicy): Disposable
 }

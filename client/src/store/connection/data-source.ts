@@ -2,16 +2,10 @@ import { createAtom, IAtom, IReactionDisposer, reaction, transaction, IReactionO
 import { OperationResult, TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
 import { RequestPolicy, DataSourceConnection, Disposable } from './data-source-connection'
-
-export type DataSourceState = 'loading' | 'ready' | 'failed' | 'unspecified'
-
-export interface Projection<S, D> {
-    (source: S): D
-}
-
-export interface VariablesGetter<T> {
-    (): T
-}
+import { Operation } from './operation'
+import { VariablesGetter } from './variables-getter'
+import { OperationState } from './operation-state'
+import { Projection } from './types'
 
 export interface DataSourceOptions<T, TData, TVariables extends object> {
     initialValue: T,
@@ -40,7 +34,8 @@ export interface ReloadOptions {
     force?: boolean
 }
 
-export abstract class DataSource<T, TData = { }, TVariables extends object = { }, TError = unknown> {
+export abstract class DataSource<T, TData = {}, TVariables extends object = {}, TError = unknown>
+    implements Operation<TError> {
     constructor(private readonly connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T, TData, TVariables>) {
         this._name = options.name ?? 'DataSource'
         this._document = options.document
@@ -66,7 +61,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     protected abstract setValue(value: T): void;
 
     private readonly _stateAtom: IAtom
-    private _state: DataSourceState = 'unspecified'
+    private _state: OperationState = 'unspecified'
 
     private readonly _errorAtom: IAtom
     private _error: TError | null = null
@@ -83,12 +78,12 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
         return this.getValue()
     }
 
-    get state(): DataSourceState {
+    get state(): OperationState {
         this._stateAtom.reportObserved()
         return this._state
     }
 
-    protected set state(newState: DataSourceState) {
+    protected set state(newState: OperationState) {
         this._state = newState
         this._stateAtom.reportChanged()
     }
@@ -113,6 +108,10 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
     protected set error(err: TError) {
         this._error = err
         this._errorAtom.reportChanged()
+    }
+
+    protected valueChanged() {
+        this._valueAtom.reportChanged()
     }
 
     protected resume() {
@@ -165,7 +164,7 @@ export abstract class DataSource<T, TData = { }, TVariables extends object = { }
                         this.state = 'ready'
 
                         this.setValue(projection)
-                        this._valueAtom.reportChanged()
+                        this.valueChanged()
                     })
 
                     resolve(projection)

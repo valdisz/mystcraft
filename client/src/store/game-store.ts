@@ -113,23 +113,24 @@ export class GameStore {
                 }
                 this.ordersSaveAbortController = new AbortController()
 
-                try {
-                    const response = await mutate<SetOrderMutation, SetOrderMutationVariables>(SetOrder, { unitId: unit.id, orders })
-                    const result = response.data?.setOrders
-                    if (!response.error && result?.isSuccess) {
-                        unit.setOrders(orders)
-                        this.setPaths([ unit.path ])
-                    }
-                    else {
-                        this.setOrders(prevOrders)
-                        this.errorOrdersSaving()
-                    }
+                // FIXME    
+                // try {
+                //     const response = await mutate<SetOrderMutation, SetOrderMutationVariables>(SetOrder, { unitId: unit.id, orders })
+                //     const result = response.data?.setOrders
+                //     if (!response.error && result?.isSuccess) {
+                //         unit.setOrders(orders)
+                //         this.setPaths([ unit.path ])
+                //     }
+                //     else {
+                //         this.setOrders(prevOrders)
+                //         this.errorOrdersSaving()
+                //     }
 
-                    this.stopOrdersSaving()
-                }
-                catch {
-                    this.errorOrdersSaving()
-                }
+                //     this.stopOrdersSaving()
+                // }
+                // catch {
+                //     this.errorOrdersSaving()
+                // }
             },
             {
                 equals: comparer.shallow,

@@ -134,10 +134,11 @@ export class NewGameStore {
                 // gameData: this.gameFile
             }
 
-            mutate(GameCreate, variables, {
-                refetch: [ this.store.games ]
-            })
-            .then(this.cancel, console.error)
+            // FIXME
+            // mutate(GameCreate, variables, {
+            //     refetch: [ this.store.games ]
+            // })
+            // .then(this.cancel, console.error)
         }
     }
 
