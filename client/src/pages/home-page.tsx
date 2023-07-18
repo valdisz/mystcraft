@@ -141,7 +141,7 @@ function _MapLevelEditor() {
 const MapLevelEditor = observer(_MapLevelEditor)
 
 function NewGameDialog() {
-    const { newGame, gameEngines } = useStore()
+    const { newGame, engines } = useStore()
 
     return <Dialog fullWidth maxWidth='sm' open={newGame.isOpen} onClose={newGame.cancel}>
         <DialogTitle>New game</DialogTitle>
@@ -166,7 +166,7 @@ function NewGameDialog() {
                     <FormControl fullWidth>
                         <InputLabel>Engine</InputLabel>
                         <Select label="Engine" value={newGame.engine} onChange={newGame.setEngine}>
-                            { gameEngines.engines.value.map(x => <MenuItem key={x.id} value={x.id}>
+                            { engines.value.map(x => <MenuItem key={x.id} value={x.id}>
                                 <ListItemText primary={x.name} />
                                 <DateTime value={x.createdAt} TypographyProps={{ variant: 'caption' }} />
                             </MenuItem>) }

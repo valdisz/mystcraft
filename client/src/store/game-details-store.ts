@@ -138,9 +138,9 @@ export class GameDetailsStore {
     }
 
     readonly start = async () => {
-        const result = await mutate<GameStartMutation, GameStartMutationVariables>(GameStart, { gameId: this.gameId })
-
         // FIXME
+        // const result = await mutate<GameStartMutation, GameStartMutationVariables>(GameStart, { gameId: this.gameId })
+
         // const { jobId } = result.data?.gameStart
 
         // let state: JobState
@@ -223,31 +223,32 @@ export class ClaimFactionStore {
     readonly claim = async () => {
         runInAction(() => this.isLoading = true)
 
-        let error = ''
-        try {
-            const result = await mutate<FactionClaimMutation, FactionClaimMutationVariables>(FactionClaim, {
-                gameId: this.gameId,
-                playerId: this.playerId,
-                password: this.password
-            }, {
-                refetch: [ this.gameDetails.source ]
-            })
+        // FIXME
+        // let error = ''
+        // try {
+        //     const result = await mutate<FactionClaimMutation, FactionClaimMutationVariables>(FactionClaim, {
+        //         gameId: this.gameId,
+        //         playerId: this.playerId,
+        //         password: this.password
+        //     }, {
+        //         refetch: [ this.gameDetails.source ]
+        //     })
 
-            if (result.error) {
-                error = result.error.message
-                return
-            }
-            else if (!result.data?.gameJoinRemote?.isSuccess) {
-                error = result.data?.gameJoinRemote?.error
-            }
-        }
-        finally {
-            runInAction(() => {
-                this.isLoading = false
-                this.isOpen = !!error
-                this.error = error
-            })
-        }
+        //     if (result.error) {
+        //         error = result.error.message
+        //         return
+        //     }
+        //     else if (!result.data?.gameJoinRemote?.isSuccess) {
+        //         error = result.data?.gameJoinRemote?.error
+        //     }
+        // }
+        // finally {
+        //     runInAction(() => {
+        //         this.isLoading = false
+        //         this.isOpen = !!error
+        //         this.error = error
+        //     })
+        // }
     }
 
     @action close = () => {

@@ -20,7 +20,7 @@ public static class MystcraftExtensions
         Mystcraft<A>.Pause ps                 => new Mystcraft<B>.Pause(ps.Game, n => ps.Next(n).Bind(f)),
         Mystcraft<A>.Lock lk                  => new Mystcraft<B>.Lock(lk.Game, n => lk.Next(n).Bind(f)),
         Mystcraft<A>.Stop sp                  => new Mystcraft<B>.Stop(sp.Game, n => sp.Next(n).Bind(f)),
-        Mystcraft<A>.DeleteGame dl                => new Mystcraft<B>.DeleteGame(dl.Game, n => dl.Next(n).Bind(f)),
+        Mystcraft<A>.DeleteGame dl            => new Mystcraft<B>.DeleteGame(dl.Game, n => dl.Next(n).Bind(f)),
         Mystcraft<A>.ReadOptions ro           => new Mystcraft<B>.ReadOptions(ro.Game, n => ro.Next(n).Bind(f)),
         Mystcraft<A>.WriteSchedule ws         => new Mystcraft<B>.WriteSchedule(ws.Game, ws.Schedule, n => ws.Next(n).Bind(f)),
         Mystcraft<A>.WriteMap wm              => new Mystcraft<B>.WriteMap(wm.Game, wm.Map, n => wm.Next(n).Bind(f)),

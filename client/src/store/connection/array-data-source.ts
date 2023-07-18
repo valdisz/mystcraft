@@ -52,21 +52,32 @@ export class ArrayDataSource<T, TData = {}, TVariables extends object = {}, TErr
 
     push(...items: T[]): number {
         const ret = this._value.push(...items)
-        this.valueChanged()
+
+        if (items?.length) {
+            this.valueChanged()
+        }
 
         return ret
     }
 
     pop(): T | undefined {
+        const willChange = this._value.length > 0
+
         const ret = this._value.pop()
-        this.valueChanged()
+
+        if (willChange) {
+            this.valueChanged()
+        }
 
         return ret
     }
 
     splice(start: number, deleteCount: number, ...items: T[]): T[] {
         const ret = this._value.splice(start, deleteCount, ...items)
-        this.valueChanged()
+
+        if (ret.length || items?.length) {
+            this.valueChanged()
+        }
 
         return ret
     }

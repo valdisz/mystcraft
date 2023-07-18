@@ -7,7 +7,7 @@ import { UrqlConnection } from './urql-connection'
 import { Mutation, MutationOptions } from './mutation'
 import client from './client'
 import { MutationResult } from '../../schema'
-import { Option, OperationError, Projection, ContextProjection } from './types'
+import { Option, OperationError, Projection, ContextProjection, ContextCallback } from './types'
 
 export function query<TData, T extends object, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,

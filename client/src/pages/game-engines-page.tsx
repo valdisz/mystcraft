@@ -6,21 +6,20 @@ import {
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import { PageTitle, EmptyListItem, Forbidden, FileInputField, GameEngineItem } from '../components'
-import { NewGameEngineStore, useStore } from '../store'
+import { NewGameEngineViewModel, useStore } from '../store'
 import { Role, ForRole, forRole } from '../auth'
 
 function GameEnginesPage() {
-    const { gameEngines } = useStore()
+    const { engines, enginesDelete, enginesNew } = useStore()
 
-    const engines = gameEngines.engines
-    const items = engines.map(x => <GameEngineItem key={x.id} engine={x} onDelete={gameEngines.delete} />)
+    const items = engines.map(x => <GameEngineItem key={x.id} engine={x} onDelete={enginesDelete} />)
 
     return <Container>
         <PageTitle
             title='Game Engines'
             actions={
                 <ForRole role={Role.GameMaster}>
-                    <Button variant='outlined' color='primary' size='large' onClick={gameEngines.newEngine.open}>New Engine</Button>
+                    <Button variant='outlined' color='primary' size='large' onClick={enginesNew.open}>New Engine</Button>
                 </ForRole>
             }
         />
@@ -43,7 +42,7 @@ function GameEnginesPage() {
             </Paper>
         </Stack>
 
-        <ObservableNewGameEngineDialog model={gameEngines.newEngine} />
+        <ObservableNewGameEngineDialog model={enginesNew} />
     </Container>
 }
 
@@ -51,7 +50,7 @@ export default forRole(observer(GameEnginesPage), Role.GameMaster, <Forbidden />
 
 
 interface NewGameEngineDialogProps {
-    model: NewGameEngineStore
+    model: NewGameEngineViewModel
 }
 
 function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {

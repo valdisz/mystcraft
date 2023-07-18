@@ -6,6 +6,7 @@ import { Operation } from './operation'
 import { OperationState } from './operation-state'
 import { Option, Callback, ContextCallback, ContextProjection } from './types'
 
+
 export interface MutationOptions<TData, TVariables extends object, T, TError, TProtocolError> {
     /**
      * GraphQL document to use for the operation.
@@ -43,24 +44,47 @@ export interface MutationOptions<TData, TVariables extends object, T, TError, TP
     onLoad?: Callback<TVariables, void>
 
     /**
-     * Called when the mutation is successful.
+     * List of callbacks that will be called when the operation succeeds.
      */
-    onSuccess?: ContextCallback<T, TVariables, void>
+    onSuccess?: ContextCallback<T, TVariables, any>[]
 
     /**
-     * Called when the mutation fails.
+     * List of callbacks that will be called when the operation fails.
      */
-    onFailure?: ContextCallback<TError, TVariables, void>
+    onFailure?: ContextCallback<TError, TVariables, any>[]
 }
 
 export interface MutationRunOptions {
     requestPolicy?: Option<RequestPolicy>
 }
 
+function execList<A, B>(arg1: A, arg2: B, list?: ContextCallback<A, B, any>[]): Promise<any> {
+    if (!list) {
+        return Promise.resolve()
+    }
+
+    const effects = []
+    for (const effect of list) {
+        effects.push(effect(arg1, arg2) || Promise.resolve())
+    }
+
+    return Promise.all(effects)
+}
+
+/**
+ * Represents a runnable operation that can be run multiple times with different variables.
+ */
+export interface Runnable<TVariables extends object, T> {
+    /**
+     * Runs the operation with the specified variables and returns a promise that resolves to the result.
+     */
+    run(variables: Option<TVariables>, options?: MutationRunOptions): Promise<T>
+}
+
 /**
  * Represents a GraphQL mutation operation that can be run multiple times with different variables.
  */
-export class Mutation<TData, TVariables extends object, T, TError, TProtocolError> implements Operation<TError> {
+export class Mutation<TData, TVariables extends object, T, TError, TProtocolError> implements Operation<TError>, Runnable<TVariables, T> {
     constructor(
         private readonly connection: DataSourceConnection<TData, TVariables, TProtocolError>,
         options: MutationOptions<TData, TVariables, T, TError, TProtocolError>
@@ -91,8 +115,8 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
     private readonly _mapError: ContextProjection<TData, Option<TVariables>, Option<TError>>
     private readonly _mapProtocolError: ContextProjection<TProtocolError, Option<TVariables>, Option<TError>>
     private readonly _onLoad: Callback<TVariables, void>
-    private readonly _onSuccess?: ContextCallback<T, TVariables, void>
-    private readonly _onFailure?: ContextCallback<TError, TVariables, void>
+    private readonly _onSuccess?: ContextCallback<T, TVariables, any>[]
+    private readonly _onFailure?: ContextCallback<TError, TVariables, any>[]
 
     /**
      * Current state of the operation
@@ -137,9 +161,9 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
             const handleFailure = (error: TError) => {
                 runInAction(() => {
                     this.state = 'failed'
-                    this.error = error;
+                    this.error = error
 
-                    (this?._onFailure(error, variables) || Promise.resolve())
+                    execList(error, variables, this?._onFailure)
                         .finally(() => reject(error))
                 })
             }
@@ -158,9 +182,9 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
 
                     runInAction(() => {
                         this.state = 'ready'
-                        this.value = projection;
+                        this.value = projection
 
-                        (this._onSuccess?.(projection, variables) || Promise.resolve())
+                        execList(projection, variables, this?._onSuccess)
                             .finally(() => resolve(projection))
                     })
                 },

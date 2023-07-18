@@ -2,7 +2,7 @@ export type Option<T> = T | null | undefined
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
 
-export type OptionPromise<T> = Option<Promise<T>> | void
+export type OptionPromise<T> = Promise<T> | null | undefined | void
 
 export interface Projection<S, D> {
     (source: S): D;
