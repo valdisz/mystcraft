@@ -30,28 +30,42 @@ export function useAuth() {
 export interface AuthenticateProps {
 }
 
+type AuthState = 'loading' | 'sign-in' | 'sign-in-passkey' | 'error' | 'normal'
+
 export function Authenticate({ children }: React.PropsWithChildren<AuthenticateProps>) {
-    const [ state, setState ] = React.useState<'loading' | 'sign-in' | 'sign-in-passkey' | 'error' | 'normal'>('loading')
+    const [ state, setState ] = React.useState<AuthState>('loading')
     const [ auth, setAuth ] = React.useState<Auth>(null)
 
     React.useEffect(() => {
-        Promise.all([
-            CLIENT.query<GetMeQuery, GetMeQueryVariables>({
-                query: GetMe,
-                errorPolicy: 'none'
-            }),
-            canUsePasskey()
-        ])
-            .then(([ me, passkey ]) => {
+        CLIENT.query<GetMeQuery, GetMeQueryVariables>({
+            query: GetMe,
+            errorPolicy: 'none'
+        })
+        .then(
+            me => {
                 setAuth(new Auth((me.data.me.roles || []) as any))
-                setState('normal')
-            }, (err: ApolloError) => {
+                return 'normal'
+            },
+            (err: ApolloError) => {
                 const is401 = (err.networkError as any)?.statusCode === 401
                 const isNotAuthorized = err.graphQLErrors?.some(x => x.extensions['code'] === 'AUTH_NOT_AUTHORIZED')
 
-                setState(is401 || isNotAuthorized ? 'sign-in' : 'error')
-            })
+                return is401 || isNotAuthorized ? 'sign-in' : 'error'
+            }
+        )
+        .then(nextState => {
+            if (nextState === 'sign-in') {
+                return canUsePasskey().then(can => {
+                    return can ? 'sign-in-passkey' : 'sign-in'
+                })
+            }
+
+            return Promise.resolve(nextState)
+        })
+        .then(setState as any)
     }, [])
+
+    // canUsePasskey()
 
     if (state === 'loading') return (
         <div className="splash">

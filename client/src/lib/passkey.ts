@@ -2,22 +2,14 @@
  * Check if the browser supports the WebAuthn API.
  */
 export function canUsePasskey(): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-        if (window.PublicKeyCredential &&
-            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable &&
-            PublicKeyCredential.isConditionalMediationAvailable) {
+    return window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
+        ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        : Promise.resolve(false)
+}
 
-            // Check if user verifying platform authenticator is available.
-            Promise.all([
-                PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(),
-                PublicKeyCredential.isConditionalMediationAvailable(),
-            ])
-                .then(
-                    results => resolve(results.every(r => r === true)),
-                    reject
-                );
-        }
 
-        resolve(false)
-    })
+export function canUseConditionalMediation(): Promise<boolean> {
+    return window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable
+        ? PublicKeyCredential.isConditionalMediationAvailable()
+        : Promise.resolve(false)
 }
