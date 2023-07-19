@@ -42,4 +42,10 @@ public static class Queries {
 
     public static IQueryable<T> InGame<T>(this IQueryable<T> query, DbGame game) where T: InGameContext
         => query.InGame(game.Id);
+
+    public static IQueryable<DbUserEmail> OnlyActiveEmails(this IQueryable<DbUserEmail> query)
+        => query.Where(x => !x.Disabled && x.DeletedAt == null);
+
+    public static IEnumerable<DbUserEmail> OnlyActiveEmails(this IEnumerable<DbUserEmail> @enum)
+        => @enum.Where(x => !x.Disabled && x.DeletedAt == null);
 }

@@ -19,6 +19,15 @@ public static class Size {
     public const int SETTLEMENT = 256;
     public const int STRUCTURE = 128;
     public const int EMAIL = 128;
+    public const int EMAIL_VERIFICATION_CODE = 6;
     public const int SALT = 32;
     public const int DIGEST = 128;
+    public const int PROVIDER_TOKEN = 2048;
+    public const int IP_ADDRESS = 39;
+    public const int IP_ADDRESS_FAMILY = 32;
+    public const int HTTP_HEADER = 0x4000;
+    public const int PROVIDER = 32;
+    public const int COUNTRY = 128;
+    public const int CITY = 128;
+
 }

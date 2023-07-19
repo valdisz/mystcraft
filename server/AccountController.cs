@@ -19,8 +19,41 @@ namespace advisor {
     using System;
     using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.AspNetCore.Http;
+    using System.Net;
 
     public record UserPlayers(long UserId, long[] PlayerIds, long Timestamp);
+
+    public static class DbUserExtensions {
+        public static DbLoginAttempt RecordLoginAttempt(this DbUser user, HttpContext http, LoginOutcome outcome, string provider = null, long? userIdentityId = null, DateTimeOffset? timestamp = null) {
+            var forwardedIp = http.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            var addressFamily = forwardedIp != null
+                ? (
+                    IPAddress.TryParse(forwardedIp, out var parsedIp)
+                        ? parsedIp.AddressFamily.ToString()
+                        : null
+                )
+                : http.Connection.RemoteIpAddress.AddressFamily.ToString();
+
+            var attempt = new DbLoginAttempt {
+                IpAddress = forwardedIp ?? http.Connection.RemoteIpAddress.ToString(),
+                IpAddressFamily = addressFamily,
+                UserAgent = http.Request.Headers["User-Agent"].FirstOrDefault() ,
+                Timestamp = timestamp ?? DateTimeOffset.UtcNow,
+                HttpVersion = http.Request.Protocol,
+                Referer = http.Request.Headers["Referer"].FirstOrDefault() ,
+                Country = http.Request.Headers["X-Geo-Country"].FirstOrDefault() ,
+                City = http.Request.Headers["X-Geo-City"].FirstOrDefault(),
+                Outcome = outcome,
+                Provider = provider,
+                UserIdentityId = userIdentityId
+            };
+
+            user.LoginAttempts.Add(attempt);
+
+            return attempt;
+        }
+    }
 
     [AllowAnonymous]
     [Route("account")]
@@ -50,15 +83,22 @@ namespace advisor {
         private static string GetUserPlayersCacheKey(string userId) => $"user-{userId}-players";
 
         private static Task<DbUser> GetUserByIdAsync(Database db, long userId)
-            => db.Users.Include(x => x.Players).SingleOrDefaultAsync(x => x.Id == userId);
+            => db.Users
+                .Include(x => x.Emails)
+                .Include(x => x.Players)
+                .SingleOrDefaultAsync(x => x.Id == userId);
 
-        private static Task<DbUser> GetUserByEamilAsync(Database db, string email)
-            => db.Users.Include(x => x.Players).SingleOrDefaultAsync(x => x.Email == email);
+        private static Task<DbUserEmail> GetUserByEamilAsync(Database db, string email)
+            => db.UserEmails
+                .Include(x => x.User)
+                .ThenInclude(x => x.Players)
+                .OnlyActiveEmails()
+                .SingleOrDefaultAsync(x => x.Email == email);
 
-        private static ClaimsIdentity MapIdentity(IMemoryCache cache, string schema, DbUser user) {
+        private static ClaimsIdentity MapIdentity(IMemoryCache cache, string schema, DbUser user, DbUserEmail email) {
             var claims = new List<Claim> {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-                new Claim(WellKnownClaimTypes.Email, user.Email)
+                new Claim(WellKnownClaimTypes.Email, email.Email)
             };
 
             var cacheKey = GetUserPlayersCacheKey(user.Id);
@@ -114,7 +154,11 @@ namespace advisor {
                 return;
             }
 
-            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
+            // TODO: remove duplicate code
+            var emails = user.Emails.OnlyActiveEmails();
+            var userEmail = emails.FirstOrDefault(x => x.Primary) ?? emails.FirstOrDefault();
+
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user, userEmail);
             var newPrincipal = new ClaimsPrincipal(identity);
 
             context.ReplacePrincipal(newPrincipal);
@@ -136,35 +180,48 @@ namespace advisor {
                 return NotFound();
             }
 
-            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
+            var emails = user.Emails.OnlyActiveEmails();
+            var userEmail = emails.FirstOrDefault(x => x.Primary) ?? emails.FirstOrDefault();
+
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user, userEmail);
             await SignInIdentity(identity);
 
             return Redirect("/");
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromForm] LoginModel model) {
-            if (!ModelState.IsValid) {
+        public async Task<IActionResult> LoginAsync([FromForm] LoginModel model)
+        {
+            if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
             }
 
-            if (User.Identity.IsAuthenticated) {
+            if (User.Identity.IsAuthenticated)
+            {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             }
 
-            var user = await GetUserByEamilAsync(db, model.Email);
-            if (user == null) {
+            var userEmail = await GetUserByEamilAsync(db, model.Email);
+            if (userEmail == null)
+            {
                 return Unauthorized();
             }
 
-            if (!accessControl.VerifyPassword(user.Salt, model.Password, user.Digest)) {
-                return Unauthorized();
-            }
+            var user = userEmail.User;
 
-            user.LastLoginAt = DateTimeOffset.UtcNow;
+            var outcome = accessControl.VerifyPassword(user.Salt, model.Password, user.Digest)
+                ? LoginOutcome.SUCCESS
+                : LoginOutcome.FAILURE;
+
+            user.RecordLoginAttempt(HttpContext, outcome, "local");
             await db.SaveChangesAsync();
 
-            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
+            if (outcome == LoginOutcome.FAILURE) {
+                return Unauthorized();
+            }
+
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user, userEmail);
             await SignInIdentity(identity);
 
             return NoContent();
@@ -201,16 +258,18 @@ namespace advisor {
 
             var email = json.Value<string>("email");
 
-            var user = await GetUserByEamilAsync(db, email);
+            var userEmail = await GetUserByEamilAsync(db, email);
+            DbUser user = userEmail?.User;
+
             if (user == null) {
-                user = await mediator.Send(new UserCreate(email, null));
-            }
-            else {
-                user.LastLoginAt = DateTimeOffset.UtcNow;
-                await db.SaveChangesAsync();
+                user = await mediator.Send(new UserCreate(email, null, true));
+                userEmail = user.Emails.First();
             }
 
-            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user);
+            user.RecordLoginAttempt(HttpContext, LoginOutcome.SUCCESS, provider);
+            await db.SaveChangesAsync();
+
+            var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user, userEmail);
             await SignInIdentity(identity);
 
             return Redirect("/");
@@ -235,7 +294,7 @@ namespace advisor {
                 await HttpContext.SignOutAsync(User.Identity.AuthenticationType);
             }
 
-            var user = await mediator.Send(new UserCreate(model.Email, model.Password));
+            var user = await mediator.Send(new UserCreate(model.Email, model.Password, false));
             if (user == null) {
                 return BadRequest(new {
                     General = "User with such email already exists."

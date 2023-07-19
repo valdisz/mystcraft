@@ -18,7 +18,7 @@ using System.Collections.Generic;
 public class Mutation {
     [Authorize(Policy = Policies.UserManagers)]
     public Task<DbUser> UserCreate(IResolverContext context, IMediator mediator, string email, string password) {
-        return mediator.Send(new UserCreate(email, password), context.RequestAborted);
+        return mediator.Send(new UserCreate(email, password, false), context.RequestAborted);
     }
 
     [Authorize(Policy = Policies.UserManagers)]

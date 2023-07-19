@@ -89,7 +89,11 @@ namespace advisor {
             }
 
             var email = apiKeys.GetUsername(xApiKey);
-            var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email);
+            var userEmail = await db.UserEmails
+                .Include(x => x.User)
+                .SingleOrDefaultAsync(x => x.Email == email);
+
+            var user = userEmail?.User;
             if (user == null) {
                 return AuthenticateResult.Fail("User not found");
             }
@@ -98,7 +102,7 @@ namespace advisor {
             var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
             var identity = new ClaimsIdentity(new[] {
                 new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-                new Claim(WellKnownClaimTypes.Email, user.Email),
+                new Claim(WellKnownClaimTypes.Email, userEmail.Email),
             }.Concat(roles), scheme, null, WellKnownClaimTypes.Role);
             var principal = new ClaimsPrincipal(identity);
 

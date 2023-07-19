@@ -33,6 +33,10 @@ public abstract class Database : DbContext, DatabaseIO, UnitOfWork {
     /// </summary>
     public DbSet<DbUser> Users { get; set; }
 
+    public DbSet<DbUserIdentity> Identities { get; set; }
+
+    public DbSet<DbUserEmail> UserEmails { get; set; }
+
     /// <summary>
     /// List of game engines which are supported by the system
     /// </summary>

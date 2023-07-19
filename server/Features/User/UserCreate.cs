@@ -9,7 +9,7 @@ using advisor.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public record UserCreate(string Email, string Password, params string[] Roles) : IRequest<DbUser>;
+public record UserCreate(string Email, string Password, bool Verfied, params string[] Roles) : IRequest<DbUser>;
 
 public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
     public UserCreateHandler(Database db, IAccessControl accessControl) {
@@ -21,7 +21,13 @@ public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
     private readonly IAccessControl accessControl;
 
     public async Task<DbUser> Handle(UserCreate request, CancellationToken cancellationToken) {
-        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == request.Email);
+
+        var userEmail = await db.UserEmails
+            .Include(x => x.User)
+            .OnlyActiveEmails()
+            .SingleOrDefaultAsync(x => x.Email == request.Email);
+
+        var user = userEmail?.User;
         if (user != null) {
             return user;
         }
@@ -29,9 +35,15 @@ public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
         var now = DateTimeOffset.UtcNow;
 
         user = new DbUser {
-            Email = request.Email,
             CreatedAt = now,
-            LastLoginAt = now
+            LastVisitAt = now,
+            Emails = {
+                new DbUserEmail {
+                    Email = request.Email,
+                    Primary = true,
+                    EmailVerifiedAt = request.Verfied ? now : null
+                }
+            }
         };
 
         if (!string.IsNullOrWhiteSpace(request.Password)) {
