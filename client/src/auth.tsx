@@ -73,7 +73,11 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
         </div>
     )
 
-    if (state.startsWith('sign-in')) return <SignIn withPasskey={state === 'sign-in-passkey'} onSuccess={() => setState('normal')} />
+    if (state.startsWith('sign-in')) return <SignIn withPasskey={
+        false // TODO: implement passkey on backend before enabling here
+        // state === 'sign-in-passkey'
+    } onSuccess={() => setState('normal')} />
+
     if (state === 'error') return <div>Cannot reach server.</div>
 
     return <rolesContext.Provider value={auth}>{children}</rolesContext.Provider>
