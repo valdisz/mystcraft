@@ -29,7 +29,8 @@ function statsLoader(store: MainStore) {
 const router = (store: MainStore, map: MapContext) => createBrowserRouter([
     {
         path: '/play/:gameId', element: <Pages.GamePage />,
-        loader: gameLoader(store, map),
+        // FIXME: loader function return value is not assignable to type 'RouteLoader'
+        loader: gameLoader(store, map) as any,
         children: [
             { index: true, element: <Pages.MapTab /> },
             {

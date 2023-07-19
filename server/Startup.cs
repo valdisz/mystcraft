@@ -112,9 +112,13 @@ public class Startup {
         services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, opt => {
-                opt.SlidingExpiration = true;
-                opt.ExpireTimeSpan = TimeSpan.FromDays(30);
+                // store the cookie no longer than 30 days
+                opt.Cookie.Name = "mystcraft";
                 opt.Cookie.MaxAge = TimeSpan.FromDays(30);
+
+                // the authentication ticket will be valid for 7 days from the last time the user was active
+                opt.SlidingExpiration = true;
+                opt.ExpireTimeSpan = TimeSpan.FromDays(7);
 
                 opt.Events.OnValidatePrincipal = AccountController.ValidatePrinciaplAsync;
             })

@@ -3,6 +3,7 @@ import { CLIENT } from './client'
 import { SignIn } from './components'
 import { ApolloError } from '@apollo/client'
 import { GetMe, GetMeQuery, GetMeQueryVariables } from './schema'
+import { canUsePasskey } from './lib'
 
 export enum Role {
     Root = 'root',
@@ -30,32 +31,31 @@ export interface AuthenticateProps {
 }
 
 export function Authenticate({ children }: React.PropsWithChildren<AuthenticateProps>) {
-    const [ loading, setLoading ] = React.useState(true)
-    const [ needsSignIn, setNeedsSignIn ] = React.useState(true)
+    const [ state, setState ] = React.useState<'loading' | 'sign-in' | 'sign-in-passkey' | 'error' | 'normal'>('loading')
     const [ auth, setAuth ] = React.useState<Auth>(null)
 
     React.useEffect(() => {
-        CLIENT.query<GetMeQuery, GetMeQueryVariables>({
-            query: GetMe,
-            errorPolicy: 'none'
-        })
-            .then(result => {
-                setAuth(new Auth((result.data.me.roles || []) as any))
-                setNeedsSignIn(false)
+        Promise.all([
+            CLIENT.query<GetMeQuery, GetMeQueryVariables>({
+                query: GetMe,
+                errorPolicy: 'none'
+            }),
+            canUsePasskey()
+        ])
+            .then(([ me, passkey ]) => {
+                setAuth(new Auth((me.data.me.roles || []) as any))
+                setState('normal')
             }, (err: ApolloError) => {
-                const is401 = (err.networkError as any).statusCode === 401
-                const isNotAuthorized = !!err.graphQLErrors.find(x => x.extensions['code'] === 'AUTH_NOT_AUTHORIZED')
+                const is401 = (err.networkError as any)?.statusCode === 401
+                const isNotAuthorized = err.graphQLErrors?.some(x => x.extensions['code'] === 'AUTH_NOT_AUTHORIZED')
 
-                setNeedsSignIn(is401 || isNotAuthorized)
-            })
-            .finally(() => {
-                setLoading(false)
+                setState(is401 || isNotAuthorized ? 'sign-in' : 'error')
             })
     }, [])
 
-    if (loading) return <div>Loading...</div>
-
-    if (needsSignIn) return <SignIn onSuccess={() => setNeedsSignIn(false)}  />
+    if (state === 'loading') return <div>Loading...</div>
+    if (state.startsWith('sign-in')) return <SignIn withPasskey={state === 'sign-in-passkey'} onSuccess={() => setState('normal')} />
+    if (state === 'error') return <div>Cannot reach server.</div>
 
     return <rolesContext.Provider value={auth}>{children}</rolesContext.Provider>
 }

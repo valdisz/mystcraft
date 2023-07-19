@@ -14,12 +14,12 @@ public class GraphQLHttpRequestInterceptor : DefaultHttpRequestInterceptor {
         CancellationToken cancellationToken) {
 
         var userId = context.User.Identity.IsAuthenticated
-            ? context.User.FindFirst(WellKnownClaimTypes.UserId)?.Value
+            ? context.User.FindFirst(WellKnownClaimTypes.USER_ID)?.Value
             : null;
 
         if (userId != null) {
             requestBuilder.SetProperty("currentUserId", long.Parse(userId));
-            requestBuilder.SetProperty("currentUserEmail", context.User.FindFirst(WellKnownClaimTypes.Email)?.Value);
+            requestBuilder.SetProperty("currentUserEmail", context.User.FindFirst(WellKnownClaimTypes.EMAIL)?.Value);
         }
 
         return base.OnCreateAsync(context, requestExecutor, requestBuilder, cancellationToken);

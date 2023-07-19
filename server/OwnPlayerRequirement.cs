@@ -27,7 +27,7 @@ public class OwnPlayerAuthorizationHandler : AuthorizationHandler<OwnPlayerRequi
             return Task.CompletedTask;
         }
 
-        var allowedIds = context.User.FindAll(WellKnownClaimTypes.Player)
+        var allowedIds = context.User.FindAll(WellKnownClaimTypes.PLAYER)
             .Select(x => long.Parse(x.Value))
             .ToList();
 

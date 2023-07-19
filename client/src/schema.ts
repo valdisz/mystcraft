@@ -1113,11 +1113,12 @@ export type UnitsFilterInput = {
 export type User = Node & {
   __typename?: 'User';
   createdAt: Scalars['DateTime'];
-  email: Scalars['String'];
+  emails?: Maybe<Array<Maybe<UserEmail>>>;
   id: Scalars['ID'];
-  lastLoginAt: Scalars['DateTime'];
+  lastVisitAt: Scalars['DateTime'];
   players?: Maybe<Array<Maybe<Player>>>;
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
+  updatedAt: Scalars['DateTime'];
 };
 
 export type UserCollectionSegment = {
@@ -1126,6 +1127,22 @@ export type UserCollectionSegment = {
   /** Information to aid in pagination. */
   pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
+};
+
+export type UserEmail = {
+  __typename?: 'UserEmail';
+  createdAt: Scalars['DateTime'];
+  deletedAt?: Maybe<Scalars['DateTime']>;
+  disabled: Scalars['Boolean'];
+  email: Scalars['String'];
+  emailVerifiedAt?: Maybe<Scalars['DateTime']>;
+  id: Scalars['Long'];
+  primary: Scalars['Boolean'];
+  updatedAt: Scalars['DateTime'];
+  user?: Maybe<User>;
+  userId: Scalars['Long'];
+  verificationCode?: Maybe<Scalars['String']>;
+  verificationCodeExpiresAt?: Maybe<Scalars['DateTime']>;
 };
 
 export type AttitudeFragment = { __typename?: 'Attitude', factionNumber: number, stance: Stance };
@@ -1326,7 +1343,7 @@ export type GetGamesQuery = { __typename?: 'Query', games?: { __typename?: 'Game
 export type GetMeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetMeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, email: string, roles?: Array<string | null> | null } | null };
+export type GetMeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, roles?: Array<string | null> | null } | null };
 
 export type GetRegionsQueryVariables = Exact<{
   turnId: Scalars['ID'];
@@ -2029,7 +2046,6 @@ export const GetMe = gql`
     query GetMe {
   me {
     id
-    email
     roles
   }
 }

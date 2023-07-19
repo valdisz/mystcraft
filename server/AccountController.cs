@@ -97,21 +97,22 @@ namespace advisor {
 
         private static ClaimsIdentity MapIdentity(IMemoryCache cache, string schema, DbUser user, DbUserEmail email) {
             var claims = new List<Claim> {
-                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-                new Claim(WellKnownClaimTypes.Email, email.Email)
+                new Claim(WellKnownClaimTypes.USER_ID, user.Id.ToString()),
+                new Claim(WellKnownClaimTypes.EMAIL, email.Email)
             };
 
-            var cacheKey = GetUserPlayersCacheKey(user.Id);
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var playerIds = user.Players.Select(x => x.Id).ToArray();
 
+            claims.AddRange(user.Roles.Select(role => new Claim(WellKnownClaimTypes.ROLE, role)));
+            claims.AddRange(playerIds.Select(playerId => new Claim(WellKnownClaimTypes.PLAYER, playerId.ToString())));
+
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            claims.Add(new Claim(WellKnownClaimTypes.TIMESTAMP, timestamp.ToString()));
+            
+            var cacheKey = GetUserPlayersCacheKey(user.Id);
             cache.Set(cacheKey, new UserPlayers(user.Id, playerIds, timestamp));
 
-            claims.AddRange(user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role)));
-            claims.AddRange(playerIds.Select(playerId => new Claim(WellKnownClaimTypes.Player, playerId.ToString())));
-            claims.Add(new Claim(WellKnownClaimTypes.Timestamp, timestamp.ToString()));
-
-            var identity = new ClaimsIdentity(claims, schema, null, WellKnownClaimTypes.Role);
+            var identity = new ClaimsIdentity(claims, schema, null, WellKnownClaimTypes.ROLE);
             return identity;
         }
 
@@ -126,37 +127,42 @@ namespace advisor {
         public static async Task ValidatePrinciaplAsync(CookieValidatePrincipalContext context) {
             var principal = context.Principal;
 
-            var userId = principal.FindFirstValue(WellKnownClaimTypes.UserId);
+            var userId = principal.FindFirstValue(WellKnownClaimTypes.USER_ID);
             if (userId == null) {
                 context.RejectPrincipal();
                 return;
             }
 
-            var timestamp = principal.FindFirstValue(WellKnownClaimTypes.Timestamp);
+            var timestamp = principal.FindFirstValue(WellKnownClaimTypes.TIMESTAMP);
             if (timestamp == null) {
                 context.RejectPrincipal();
                 return;
             }
 
             var services = context.HttpContext.RequestServices;
-            var cache = services.GetService<IMemoryCache>();
+            var cache = services.GetRequiredService<IMemoryCache>();
 
             var cacheKey = GetUserPlayersCacheKey(userId);
             var players = cache.Get<UserPlayers>(cacheKey);
-            if (players != null && players.Timestamp == long.Parse(timestamp)) {
+            if (players?.Timestamp == long.Parse(timestamp)) {
                 return;
             }
 
             var db = services.GetRequiredService<Database>();
             var user = await GetUserByIdAsync(db, long.Parse(userId));
             if (user == null) {
+                cache.Remove(cacheKey);
                 context.RejectPrincipal();
+
                 return;
             }
 
             // TODO: remove duplicate code
+
+            // use current email if it's still active, otherwise use primary email, otherwise use first email
+            var currentEmail = principal.FindFirstValue(WellKnownClaimTypes.EMAIL);
             var emails = user.Emails.OnlyActiveEmails();
-            var userEmail = emails.FirstOrDefault(x => x.Primary) ?? emails.FirstOrDefault();
+            var userEmail = emails.FirstOrDefault(x => x.Email == currentEmail) ?? emails.FirstOrDefault(x => x.Primary) ?? emails.FirstOrDefault();
 
             var identity = MapIdentity(cache, CookieAuthenticationDefaults.AuthenticationScheme, user, userEmail);
             var newPrincipal = new ClaimsPrincipal(identity);

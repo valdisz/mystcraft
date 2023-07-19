@@ -10,3 +10,5 @@ dist/
 wwwroot/
 !.github/
 client/**/build/
+
+.fake

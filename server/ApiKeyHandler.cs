@@ -99,11 +99,11 @@ namespace advisor {
             }
 
             var scheme = Scheme.Name;
-            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.Role, role));
+            var roles = user.Roles.Select(role => new Claim(WellKnownClaimTypes.ROLE, role));
             var identity = new ClaimsIdentity(new[] {
-                new Claim(WellKnownClaimTypes.UserId, user.Id.ToString()),
-                new Claim(WellKnownClaimTypes.Email, userEmail.Email),
-            }.Concat(roles), scheme, null, WellKnownClaimTypes.Role);
+                new Claim(WellKnownClaimTypes.USER_ID, user.Id.ToString()),
+                new Claim(WellKnownClaimTypes.EMAIL, userEmail.Email),
+            }.Concat(roles), scheme, null, WellKnownClaimTypes.ROLE);
             var principal = new ClaimsPrincipal(identity);
 
             var ticket = new AuthenticationTicket(principal, scheme);

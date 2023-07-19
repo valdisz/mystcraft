@@ -864,11 +864,12 @@ scalar Upload
 
 type User implements Node {
   createdAt: DateTime!
-  email: String!
+  emails: [UserEmail]
   id: ID!
-  lastLoginAt: DateTime!
+  lastVisitAt: DateTime!
   players: [Player]
   roles: [String]
+  updatedAt: DateTime!
 }
 
 type UserCollectionSegment {
@@ -877,4 +878,19 @@ type UserCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type UserEmail {
+  createdAt: DateTime!
+  deletedAt: DateTime
+  disabled: Boolean!
+  email: String!
+  emailVerifiedAt: DateTime
+  id: Long!
+  primary: Boolean!
+  updatedAt: DateTime!
+  user: User
+  userId: Long!
+  verificationCode: String
+  verificationCodeExpiresAt: DateTime
 }
