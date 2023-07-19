@@ -53,7 +53,12 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
             })
     }, [])
 
-    if (state === 'loading') return <div>Loading...</div>
+    if (state === 'loading') return (
+        <div className="splash">
+            <div className="lds-ring"><div></div><div></div><div></div><div></div></div>
+        </div>
+    )
+
     if (state.startsWith('sign-in')) return <SignIn withPasskey={state === 'sign-in-passkey'} onSuccess={() => setState('normal')} />
     if (state === 'error') return <div>Cannot reach server.</div>
 
