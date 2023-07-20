@@ -7,7 +7,7 @@ import { UrqlConnection } from './urql-connection'
 import { Mutation, MutationOptions } from './mutation'
 import client from './client'
 import { MutationResult } from '../../schema'
-import { Option, OperationError, Projection, ContextProjection, ContextCallback } from './types'
+import { Option, OperationError, Projection, ContextProjection } from './types'
 
 export function query<TData, T extends object, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,
@@ -76,7 +76,14 @@ export type MutationFactoryOptions<TData, TVariables extends object, TResult ext
         MutationOptions<TData, TVariables, T, OperationError, CombinedError>,
         'mapProtocolError' | 'mapError' | 'map'
     > & {
+        /**
+         * Select the restult of the mutation from the mutation data
+         */
         pick: Projection<TData, TResult>
+
+        /**
+         * Map the mutation result to the desired type
+         */
         map?: ContextProjection<TResult, TVariables, T>
     }
 

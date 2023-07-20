@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using HotChocolate;
+using HotChocolate.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,6 +12,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 public class DbUser : WithCreationTime, WithUpdateTime {
     [Key]
     public long Id { get; set; }
+
+    [Required]
+    [MaxLength(Size.LABEL)]
+    public string Name { get; set; }
 
     [GraphQLIgnore]
     [MaxLength(Size.SALT)]
@@ -23,10 +28,16 @@ public class DbUser : WithCreationTime, WithUpdateTime {
     [MaxLength(Size.DIGEST)]
     public string Digest { get; set; }
 
+    [Authorize(Policy = Policies.UserManagers)]
     public DateTimeOffset CreatedAt { get; set; }
+
+    [Authorize(Policy = Policies.UserManagers)]
     public DateTimeOffset UpdatedAt { get; set; }
+
+    [Authorize(Policy = Policies.UserManagers)]
     public DateTimeOffset LastVisitAt { get; set; }
 
+    [Authorize(Policy = Policies.UserManagers)]
     public List<string> Roles { get; set; } = new ();
 
     [GraphQLIgnore]

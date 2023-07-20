@@ -10,9 +10,11 @@ using MediatR;
 using advisor.Features;
 using advisor.Persistence;
 using advisor.Model;
+using HotChocolate.Data;
 
 public class Query {
     [Authorize(Policy = Policies.GameMasters)]
+    [UseProjection]
     [UseOffsetPaging]
     public ValueTask<IOrderedQueryable<DbGameEngine>> GameEngines(IResolverContext context, Database db) =>
         GameInterpreter<Runtime>.Interpret(
@@ -22,6 +24,7 @@ public class Query {
         .Run(Runtime.New(db, context.RequestAborted))
         .Unwrap();
 
+    [UseProjection]
     [UseOffsetPaging]
     public ValueTask<IOrderedQueryable<DbGame>> Games(IResolverContext context, Database db) =>
         GameInterpreter<Runtime>.Interpret(
@@ -32,6 +35,7 @@ public class Query {
         .Unwrap();
 
     [Authorize(Policy = Policies.UserManagers)]
+    [UseProjection]
     [UseOffsetPaging]
     public IQueryable<DbUser> Users(Database db) =>
         db.Users.OrderByDescending(x => x.CreatedAt);

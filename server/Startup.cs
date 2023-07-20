@@ -302,7 +302,8 @@ public class Startup {
             .AddSingleton<IApiKeyStore, ConfigurationApiKeyStore>()
             .AddSingleton<IAccessControl, AccessControl>()
             .AddSingleton<IReportParser, ReportParser>()
-            .AddTransient<AllJobs>();
+            .AddTransient<AllJobs>()
+            .AddScoped<IUserAccessor, UserAccessor>();
     }
 
     public void Configure(IApplicationBuilder app) {

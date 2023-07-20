@@ -288,6 +288,8 @@ export type FleetContent = {
 export type Game = Node & {
   __typename?: 'Game';
   createdAt: Scalars['DateTime'];
+  createdBy?: Maybe<User>;
+  createdByUserId?: Maybe<Scalars['Long']>;
   id: Scalars['ID'];
   lastTurnNumber?: Maybe<Scalars['Int']>;
   me?: Maybe<Player>;
@@ -299,6 +301,9 @@ export type Game = Node & {
   status: GameStatus;
   turns?: Maybe<Array<Maybe<Turn>>>;
   type: GameType;
+  updatedAt: Scalars['DateTime'];
+  updatedBy?: Maybe<User>;
+  updatedByUserId?: Maybe<Scalars['Long']>;
 };
 
 
@@ -326,8 +331,14 @@ export type GameCreateResult = MutationResult & {
 export type GameEngine = Node & {
   __typename?: 'GameEngine';
   createdAt: Scalars['DateTime'];
+  createdBy?: Maybe<User>;
+  createdByUserId?: Maybe<Scalars['Long']>;
+  description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
+  updatedAt: Scalars['DateTime'];
+  updatedBy?: Maybe<User>;
+  updatedByUserId?: Maybe<Scalars['Long']>;
 };
 
 export type GameEngineCollectionSegment = {
@@ -561,6 +572,7 @@ export type MutationGameCreateArgs = {
 
 export type MutationGameEngineCreateArgs = {
   content?: InputMaybe<Scalars['Upload']>;
+  description?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   ruleset?: InputMaybe<Scalars['Upload']>;
 };
@@ -651,6 +663,7 @@ export type MutationStudyPlanTeachArgs = {
 
 export type MutationUserCreateArgs = {
   email?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
   password?: InputMaybe<Scalars['String']>;
 };
 
@@ -1116,6 +1129,7 @@ export type User = Node & {
   emails?: Maybe<Array<Maybe<UserEmail>>>;
   id: Scalars['ID'];
   lastVisitAt: Scalars['DateTime'];
+  name: Scalars['String'];
   players?: Maybe<Array<Maybe<Player>>>;
   roles?: Maybe<Array<Maybe<Scalars['String']>>>;
   updatedAt: Scalars['DateTime'];
@@ -1173,7 +1187,7 @@ export type FleetContentFragment = { __typename?: 'FleetContent', type?: string 
 
 export type GameDetailsFragment = { __typename?: 'Game', id: string, name: string, ruleset: Array<any>, options: { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null };
 
-export type GameEngineFragment = { __typename?: 'GameEngine', id: string, name: string, createdAt: any };
+export type GameEngineFragment = { __typename?: 'GameEngine', id: string, name: string, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null };
 
 export type GameHeaderFragment = { __typename?: 'Game', id: string, status: GameStatus, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null> | null } | null };
 
@@ -1233,12 +1247,13 @@ export type GameCreateMutation = { __typename?: 'Mutation', gameCreate?: { __typ
 
 export type GameEngineCreateMutationVariables = Exact<{
   name: Scalars['String'];
+  description?: InputMaybe<Scalars['String']>;
   content: Scalars['Upload'];
   ruleset?: InputMaybe<Scalars['Upload']>;
 }>;
 
 
-export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null } | null };
+export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null } | null };
 
 export type GameEngineDeleteMutationVariables = Exact<{
   gameEngineId: Scalars['ID'];
@@ -1323,7 +1338,7 @@ export type GetGameEnginesQueryVariables = Exact<{
 }>;
 
 
-export type GetGameEnginesQuery = { __typename?: 'Query', gameEngines?: { __typename?: 'GameEngineCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'GameEngine', id: string, name: string, createdAt: any } | null> | null, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+export type GetGameEnginesQuery = { __typename?: 'Query', gameEngines?: { __typename?: 'GameEngineCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'GameEngine', id: string, name: string, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null> | null, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean, hasPreviousPage: boolean } } | null };
 
 export type GetGameQueryVariables = Exact<{
   gameId: Scalars['ID'];
@@ -1425,7 +1440,11 @@ export const GameEngine = gql`
     fragment GameEngine on GameEngine {
   id
   name
+  description
   createdAt
+  createdBy {
+    name
+  }
 }
     `;
 export const GameHeader = gql`
@@ -1864,8 +1883,13 @@ export const GameCreate = gql`
 }
     ${GameHeader}`;
 export const GameEngineCreate = gql`
-    mutation GameEngineCreate($name: String!, $content: Upload!, $ruleset: Upload) {
-  gameEngineCreate(name: $name, content: $content, ruleset: $ruleset) {
+    mutation GameEngineCreate($name: String!, $description: String, $content: Upload!, $ruleset: Upload) {
+  gameEngineCreate(
+    name: $name
+    description: $description
+    content: $content
+    ruleset: $ruleset
+  ) {
     isSuccess
     error
     engine {

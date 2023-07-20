@@ -78,6 +78,7 @@ public readonly struct GameInterpreter<RT>
     private static Aff<RT, A> CreateGameEngine<A>(Mystcraft<A>.CreateGameEngine action) =>
         from ge in Database<RT>.add(DbGameEngine.New(
             action.Name,
+            action.Description,
             action.Contents,
             action.Ruleset
         ))

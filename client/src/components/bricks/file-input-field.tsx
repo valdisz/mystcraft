@@ -1,7 +1,7 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { action, computed, makeObservable, observable } from 'mobx'
-import { Button, IconButton, Stack, Typography } from '@mui/material'
+import { Button, FormControl, InputLabel, IconButton, Stack, Typography } from '@mui/material'
 import { FileInput } from './file-input'
 
 import AttachFileIcon from '@mui/icons-material/AttachFile'
@@ -64,14 +64,14 @@ function formatFileSize(size: number) {
 
 export interface FileInputFieldProps {
     model: FileViewModel
-    title: React.ReactNode
+    label?: React.ReactNode
     action?: React.ReactNode
 }
 
-function _FileInputField({ model, title, action }: FileInputFieldProps) {
-    return <Stack gap={1}>
-        <Typography variant='caption' color='textSecondary'>{title}</Typography>
-        <Stack direction='row' gap={2} alignItems='center'>
+function _FileInputField({ model, label, action }: FileInputFieldProps) {
+    return <FormControl>
+        <InputLabel shrink>{label}</InputLabel>
+        <Stack direction='row' alignItems='center' gap={2} mt={2}>
             {model.isSet && <IconButton color='error' onClick={model.clear}>
                 <ClearIcon />
             </IconButton> }
@@ -88,7 +88,7 @@ function _FileInputField({ model, title, action }: FileInputFieldProps) {
                 : <Typography variant='body2'>{model.name} ({formatFileSize(model.size)})</Typography>
             }
         </Stack>
-    </Stack>
+    </FormControl>
 }
 
 export const FileInputField = observer(_FileInputField)

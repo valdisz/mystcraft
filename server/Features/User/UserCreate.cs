@@ -9,7 +9,7 @@ using advisor.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-public record UserCreate(string Email, string Password, bool Verfied, params string[] Roles) : IRequest<DbUser>;
+public record UserCreate(string Name, string Email, string Password, bool Verfied, params string[] Roles) : IRequest<DbUser>;
 
 public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
     public UserCreateHandler(Database db, IAccessControl accessControl) {
@@ -35,6 +35,7 @@ public class UserCreateHandler : IRequestHandler<UserCreate, DbUser> {
         var now = DateTimeOffset.UtcNow;
 
         user = new DbUser {
+            Name = request.Name ?? request.Email[..request.Email.IndexOf('@')],
             CreatedAt = now,
             LastVisitAt = now,
             Emails = {

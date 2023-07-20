@@ -1,8 +1,17 @@
 import { DataSource, DataSourceOptions } from './data-source'
 import { DataSourceConnection } from './data-source-connection'
 
+export interface SeqDataSource<T> {
+    [Symbol.iterator](): IterableIterator<T>
+    readonly isEmpty: boolean
+    readonly length: number
+    map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[]
+    filter<S extends T>(predicate: (value: T, index: number, array: T[]) => value is S, thisArg?: any): S[]
+}
+
 export class ArrayDataSource<T, TData = {}, TVariables extends object = {}, TError = unknown>
-    extends DataSource<T[], TData, TVariables, TError> {
+    extends DataSource<T[], TData, TVariables, TError>
+    implements SeqDataSource<T> {
 
     constructor(connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T[], TData, TVariables>) {
         super(connection, options)
@@ -46,6 +55,9 @@ export class ArrayDataSource<T, TData = {}, TVariables extends object = {}, TErr
         return this.value.filter(predicate)
     }
 
+    find(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: any): T | undefined {
+        return this.value.find(predicate)
+    }
 
     /////////////////////////
     ///// writing sequence

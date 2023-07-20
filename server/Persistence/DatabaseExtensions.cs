@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 public static class DatabaseExtensions {
     public static IServiceCollection AddDatabase(this IServiceCollection services, DatabaseOptions options) {
         services.AddTransient<TimeInterceptor>();
+        services.AddTransient<UserInterceptor>();
 
         void configureDatabase(IServiceProvider provider, DbContextOptionsBuilder builder) {
             switch (options.Provider) {
@@ -26,6 +27,7 @@ public static class DatabaseExtensions {
             }
 
             builder.AddInterceptors(provider.GetRequiredService<TimeInterceptor>());
+            builder.AddInterceptors(provider.GetRequiredService<UserInterceptor>());
             builder.UseLoggerFactory(provider.GetRequiredService<ILoggerFactory>());
 
             if (!options.IsProduction) {

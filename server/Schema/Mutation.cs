@@ -17,8 +17,8 @@ using System.Collections.Generic;
 [Authorize]
 public class Mutation {
     [Authorize(Policy = Policies.UserManagers)]
-    public Task<DbUser> UserCreate(IResolverContext context, IMediator mediator, string email, string password) {
-        return mediator.Send(new UserCreate(email, password, false), context.RequestAborted);
+    public Task<DbUser> UserCreate(IResolverContext context, IMediator mediator, string name, string email, string password) {
+        return mediator.Send(new UserCreate(name, email, password, false), context.RequestAborted);
     }
 
     [Authorize(Policy = Policies.UserManagers)]
@@ -27,11 +27,11 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameEngineCreateResult> GameEngineCreate(IResolverContext context, IMediator mediator, string name, IFile content, IFile ruleset) {
+    public async Task<GameEngineCreateResult> GameEngineCreate(IResolverContext context, IMediator mediator, string name, string description, IFile content, IFile ruleset) {
         using var cs = content.OpenReadStream();
         using var rs = ruleset.OpenReadStream();
 
-        var result = await mediator.Send(new GameEngineCreate(name, cs, rs), context.RequestAborted);
+        var result = await mediator.Send(new GameEngineCreate(name, description, cs, rs), context.RequestAborted);
 
         return result;
     }

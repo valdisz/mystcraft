@@ -108,7 +108,7 @@ namespace advisor {
 
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             claims.Add(new Claim(WellKnownClaimTypes.TIMESTAMP, timestamp.ToString()));
-            
+
             var cacheKey = GetUserPlayersCacheKey(user.Id);
             cache.Set(cacheKey, new UserPlayers(user.Id, playerIds, timestamp));
 
@@ -268,7 +268,7 @@ namespace advisor {
             DbUser user = userEmail?.User;
 
             if (user == null) {
-                user = await mediator.Send(new UserCreate(email, null, true));
+                user = await mediator.Send(new UserCreate(null, email, null, true));
                 userEmail = user.Emails.First();
             }
 
@@ -300,7 +300,7 @@ namespace advisor {
                 await HttpContext.SignOutAsync(User.Identity.AuthenticationType);
             }
 
-            var user = await mediator.Send(new UserCreate(model.Email, model.Password, false));
+            var user = await mediator.Send(new UserCreate(null, model.Email, model.Password, false));
             if (user == null) {
                 return BadRequest(new {
                     General = "User with such email already exists."

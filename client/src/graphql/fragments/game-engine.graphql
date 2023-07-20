@@ -1,5 +1,9 @@
 fragment GameEngine on GameEngine {
   id
   name
+  description
   createdAt
+  createdBy {
+    name
+  }
 }

@@ -290,6 +290,8 @@ type FleetContent {
 
 type Game implements Node {
   createdAt: DateTime!
+  createdBy: User
+  createdByUserId: Long
   id: ID!
   lastTurnNumber: Int
   me: Player
@@ -301,6 +303,9 @@ type Game implements Node {
   status: GameStatus!
   turns: [Turn]
   type: GameType!
+  updatedAt: DateTime!
+  updatedBy: User
+  updatedByUserId: Long
 }
 
 type GameCollectionSegment {
@@ -319,8 +324,14 @@ type GameCreateResult implements MutationResult {
 
 type GameEngine implements Node {
   createdAt: DateTime!
+  createdBy: User
+  createdByUserId: Long
+  description: String
   id: ID!
   name: String!
+  updatedAt: DateTime!
+  updatedBy: User
+  updatedByUserId: Long
 }
 
 type GameEngineCollectionSegment {
@@ -488,7 +499,7 @@ type Mutation {
   deleteTurn(turnId: ID): Int!
   gameComplete(gameId: ID!): GameStopResult
   gameCreate(finishAt: DateTime, gameEngineId: ID!, map: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateResult
-  gameEngineCreate(content: Upload, name: String, ruleset: Upload): GameEngineCreateResult
+  gameEngineCreate(content: Upload, description: String, name: String, ruleset: Upload): GameEngineCreateResult
   gameEngineDelete(gameEngineId: ID!): GameEngineDeleteResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
   gameJoinRemote(gameId: ID!, password: String, playerId: ID!): GameJoinRemoteResult
@@ -503,7 +514,7 @@ type Mutation {
   studyPlanStudy(skill: String, unitId: ID): StudyPlanResult
   studyPlanTarget(level: Int!, skill: String, unitId: ID): StudyPlanResult
   studyPlanTeach(unitId: ID, units: [Int!]): StudyPlanResult
-  userCreate(email: String, password: String): User
+  userCreate(email: String, name: String, password: String): User
   userRolesUpdate(add: [String], remove: [String], userId: ID!): User
 }
 
@@ -867,6 +878,7 @@ type User implements Node {
   emails: [UserEmail]
   id: ID!
   lastVisitAt: DateTime!
+  name: String!
   players: [Player]
   roles: [String]
   updatedAt: DateTime!

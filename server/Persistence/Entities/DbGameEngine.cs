@@ -6,7 +6,7 @@ namespace advisor.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-public class DbGameEngine : WithCreationTime {
+public class DbGameEngine : WithAudit {
     [Key]
     public long Id { get; set; }
 
@@ -14,8 +14,15 @@ public class DbGameEngine : WithCreationTime {
     [MaxLength(Size.LABEL)]
     public string Name { get; set; }
 
+    [MaxLength(Size.LONG_DESCRIPTION)]
+    public string Description { get; set; }
+
     [Required]
+    public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+
+    public long? CreatedByUserId { get; set; }
+    public long? UpdatedByUserId { get; set; }
 
     [Required]
     [GraphQLIgnore]
@@ -28,9 +35,13 @@ public class DbGameEngine : WithCreationTime {
     [GraphQLIgnore]
     public List<DbGame> Games { get; set; } = new ();
 
-    public static DbGameEngine New(string name, byte[] contents, byte[] ruleset) =>
+    public DbUser CreatedBy { get; set; }
+    public DbUser UpdatedBy { get; set; }
+
+    public static DbGameEngine New(string name, string description, byte[] contents, byte[] ruleset) =>
         new DbGameEngine {
             Name = name,
+            Description = description,
             Contents = contents,
             Ruleset = ruleset
         };
@@ -61,6 +72,6 @@ public class DbGameEngineConfiguration : IEntityTypeConfiguration<DbGameEngine> 
         builder.HasIndex(x => x.Name)
             .IsUnique();
 
-        CreationTime<DbGameEngine>.Configure(db, builder);
+        Audit<DbGameEngine>.Configure(db, builder);
     }
 }

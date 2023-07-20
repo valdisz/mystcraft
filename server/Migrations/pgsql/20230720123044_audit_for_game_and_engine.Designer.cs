@@ -2,18 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.pgsql
+namespace server.Migrations.pgsql
 {
     [DbContext(typeof(PgSqlDatabase))]
-    partial class PgSqlDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20230720123044_audit_for_game_and_engine")]
+    partial class audit_for_game_and_engine
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -447,10 +449,6 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<long?>("CreatedByUserId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1195,11 +1193,6 @@ namespace advisor.Migrations.pgsql
 
                     b.Property<DateTimeOffset>("LastVisitAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Roles")
                         .HasColumnType("jsonb");

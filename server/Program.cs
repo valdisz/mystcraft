@@ -86,7 +86,7 @@
                     var email = conf.GetValue<string>("Seed:Email");
                     var password = conf.GetValue<string>("Seed:Password");
 
-                    await mediator.Send(new UserCreate(email, password, true, Policies.Root));
+                    await mediator.Send(new UserCreate("Game Master", email, password, true, Policies.Root));
 
                     await db.SaveChangesAsync();
                 }

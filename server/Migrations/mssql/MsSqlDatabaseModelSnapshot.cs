@@ -381,6 +381,9 @@ namespace advisor.Migrations.mssql
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("EngineId")
                         .HasColumnType("bigint");
 
@@ -412,12 +415,22 @@ namespace advisor.Migrations.mssql
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("EngineId");
 
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("Games");
                 });
@@ -438,6 +451,13 @@ namespace advisor.Migrations.mssql
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<long?>("CreatedByUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -447,10 +467,20 @@ namespace advisor.Migrations.mssql
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("UpdatedByUserId")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.HasIndex("UpdatedByUserId");
 
                     b.ToTable("GameEngines");
                 });
@@ -1175,6 +1205,11 @@ namespace advisor.Migrations.mssql
                     b.Property<DateTimeOffset>("LastVisitAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("Roles")
                         .HasColumnType("nvarchar(max)");
 
@@ -1523,11 +1558,38 @@ namespace advisor.Migrations.mssql
 
             modelBuilder.Entity("advisor.Persistence.DbGame", b =>
                 {
+                    b.HasOne("advisor.Persistence.DbUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
                     b.HasOne("advisor.Persistence.DbGameEngine", "Engine")
                         .WithMany("Games")
                         .HasForeignKey("EngineId");
 
+                    b.HasOne("advisor.Persistence.DbUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("CreatedBy");
+
                     b.Navigation("Engine");
+
+                    b.Navigation("UpdatedBy");
+                });
+
+            modelBuilder.Entity("advisor.Persistence.DbGameEngine", b =>
+                {
+                    b.HasOne("advisor.Persistence.DbUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("advisor.Persistence.DbUser", "UpdatedBy")
+                        .WithMany()
+                        .HasForeignKey("UpdatedByUserId");
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("UpdatedBy");
                 });
 
             modelBuilder.Entity("advisor.Persistence.DbLoginAttempt", b =>

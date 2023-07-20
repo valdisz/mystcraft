@@ -29,7 +29,7 @@ export function Layout() {
                     <MenuItem component={Link} to='/users'>Users</MenuItem>
                 </ForRole>
             </MenuIconButton>
-            <Button component={'a'} startIcon={<ExitToAppIcon />} href='/account/logout' >Sign out</Button>
+            <Button variant='text' component={'a'} startIcon={<ExitToAppIcon />} href='/account/logout' >Sign out</Button>
         </Box>
 
         <Box sx={{

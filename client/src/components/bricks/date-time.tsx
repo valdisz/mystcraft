@@ -4,7 +4,7 @@ import { Typography, TypographyProps, styled } from '@mui/material'
 export interface DateTimeProps<TypographyComponent extends React.ElementType = 'span'> extends Intl.DateTimeFormatOptions {
     value: Date | string | number
     locale?: string
-    TypographyProps?: Omit<TypographyProps<TypographyComponent, { component?: TypographyComponent }>, 'children'>
+    typographyProps?: Omit<TypographyProps<TypographyComponent, { component?: TypographyComponent }>, 'children'>
 }
 
 function toDate(value: Date | string | number): Date {
@@ -19,7 +19,7 @@ const DateTimeValue = styled(Typography, {
     name: 'date-time'
 })({ })
 
-function DateTime({ value, locale, TypographyProps, dateStyle, timeStyle, hourCycle, ...options }: DateTimeProps, ref: Ref<HTMLElement>) {
+function DateTime({ value, locale, typographyProps, dateStyle, timeStyle, hourCycle, ...options }: DateTimeProps, ref: Ref<HTMLElement>) {
     const formatter = new Intl.DateTimeFormat(locale, {
         ...options,
         dateStyle: dateStyle || 'medium',
@@ -27,8 +27,9 @@ function DateTime({ value, locale, TypographyProps, dateStyle, timeStyle, hourCy
         hourCycle: hourCycle || 'h24'
     })
 
-    const props = TypographyProps || { }
+    const props = typographyProps || { }
     props.component = props.component || 'span'
+    props.variant = props.variant || 'inherit'
 
     return <DateTimeValue ref={ref} {...props}>
         {formatter.format(toDate(value))}

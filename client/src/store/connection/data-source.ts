@@ -13,6 +13,7 @@ export interface DataSourceOptions<T, TData, TVariables extends object> {
     projection: Projection<TData, T>
     variables?: TVariables | VariablesGetter<TVariables>
     name?: string
+    reloadOnResume?: boolean
     defaultRequestPolicy?: RequestPolicy
     defaultReloadPolicy?: RequestPolicy
 }
@@ -41,6 +42,7 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
         this._document = options.document
         this._projection = options.projection
         this._variables = options.variables
+        this._reloadOnResume = options.reloadOnResume ?? false
         this._defaultRequestPolicy = options.defaultRequestPolicy || RequestPolicy.CacheAndNetwork
         this._defaultReloadPolicy = options.defaultReloadPolicy || RequestPolicy.NetworkOnly
 
@@ -55,6 +57,7 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
     private readonly _name: string
     private readonly _defaultRequestPolicy: RequestPolicy
     private readonly _defaultReloadPolicy: RequestPolicy
+    private readonly _reloadOnResume: boolean
 
     private readonly _valueAtom: IAtom
     protected abstract getValue(): T;
@@ -116,6 +119,10 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
 
     protected resume() {
         console.debug(`${this._name}::resume()`)
+
+        if (!this._reloadOnResume && this._state !== 'unspecified' && this._state !== 'failed') {
+            return
+        }
 
         if (this._variables) {
             const options: IReactionOptions<TVariables, any> = {

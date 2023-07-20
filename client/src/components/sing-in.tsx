@@ -3,17 +3,22 @@ import { Avatar, Button, Box, TextField, Alert, Typography, Container, Stack, cr
 import { observer, useLocalStore } from 'mobx-react'
 import { runInAction } from 'mobx'
 import { Copyright } from './copyright'
+import { GetMe, GetMeQuery, GetMeQueryVariables } from '../schema'
 
 import LockIcon from '@mui/icons-material/Lock'
 import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import FingerprintIcon from '@mui/icons-material/Fingerprint'
+import { CLIENT } from '../client'
 const DiscordIcon = createSvgIcon(
     <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>,
     'Discord'
 )
 
+interface SignInHandler {
+    (id: string, roles: string[]): void
+}
 
-function useSignInStore(onSuccess: () => void) {
+function useSignInStore(onSuccess: SignInHandler) {
     const store = useLocalStore(() => ({
         message: '',
         severity: 'error' as ('error' | 'success'),
@@ -34,6 +39,11 @@ function useSignInStore(onSuccess: () => void) {
         emailError: '',
         passwordError: '',
 
+        loading: false,
+
+        beginLoading: () => store.loading = true,
+        endLoading: () => store.loading = false,
+
         setEmail: (e: React.ChangeEvent<HTMLInputElement>) => {
             store.email = e.target.value
             store.emailError = ''
@@ -47,60 +57,77 @@ function useSignInStore(onSuccess: () => void) {
             e.preventDefault()
             e.stopPropagation()
 
-            const response = await fetch(store.mode === 'sign-in' ? '/account/login' : '/account/register', {
-                method: 'POST',
-                credentials: 'include',
-                body: new FormData(e.target as any)
-            })
+            store.beginLoading()
+            try {
 
-            if (store.mode === 'sign-in' && response.ok) {
-                onSuccess()
-                return
+                const response = await fetch(store.mode === 'sign-in' ? '/account/login' : '/account/register', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: new FormData(e.target as any)
+                })
+
+                if (response.ok) {
+                    switch (store.mode) {
+                        case 'sign-in': {
+                            const me = await CLIENT.query<GetMeQuery, GetMeQueryVariables>({
+                                query: GetMe,
+                                errorPolicy: 'none'
+                            })
+
+                            const { id, roles } = me.data.me
+                            onSuccess(id, roles)
+
+                            break
+                        }
+
+                        case 'sign-up': {
+                            runInAction(() => {
+                                store.setMessage('success', 'New account created! Now you can sign in.', )
+                                store.mode = 'sign-in'
+                                store.email = ''
+                                store.password = ''
+                            })
+                            break
+                        }
+                    }
+
+                    return
+                }
+
+                switch (response.status) {
+                    case 400: {
+                        const data = await response.json()
+
+                        runInAction(() => {
+                            store.emailError = data.Email ? data.Email[0] : ''
+                            store.passwordError = data.Password ? data.Password[0] : ''
+                            store.setMessage('error', data.general ?? '')
+                        })
+
+                        break
+                    }
+
+                    case 401: {
+                        runInAction(() => {
+                            store.emailError = ''
+                            store.passwordError = ''
+                            store.setMessage('error', 'Email or password is wrong.')
+                        })
+                        break
+                    }
+
+                    default: {
+                        runInAction(() => {
+                            store.emailError = ''
+                            store.passwordError = ''
+                            store.setMessage('error', 'An unknown error occured, try later or contact administrator.')
+                        })
+                        break
+                    }
+                }
             }
-
-            if (response.ok) {
-                if (store.mode === 'sign-up') {
-                    runInAction(() => {
-                        store.setMessage('success', 'New account created! Now you can sign in.', )
-                        store.mode = 'sign-in'
-                        store.email = ''
-                        store.password = ''
-                    })
-                }
-
-                return
-            }
-
-            switch (response.status) {
-                case 400: {
-                    const data = await response.json()
-
-                    runInAction(() => {
-                        store.emailError = data.Email ? data.Email[0] : ''
-                        store.passwordError = data.Password ? data.Password[0] : ''
-                        store.setMessage('error', data.general ?? '')
-                    })
-
-                    break
-                }
-
-                case 401: {
-                    runInAction(() => {
-                        store.emailError = ''
-                        store.passwordError = ''
-                        store.setMessage('error', 'Email or password is wrong.')
-                    })
-                    break
-                }
-
-                default: {
-                    runInAction(() => {
-                        store.emailError = ''
-                        store.passwordError = ''
-                        store.setMessage('error', 'An unknown error occured, try later or contact administrator.')
-                    })
-                    break
-                }
+            finally {
+                store.endLoading()
             }
         }
     }))
@@ -110,7 +137,7 @@ function useSignInStore(onSuccess: () => void) {
 
 export interface SignInProps {
     withPasskey: boolean
-    onSuccess: () => void
+    onSuccess: SignInHandler
 }
 
 function SignIn({ withPasskey, onSuccess }: SignInProps) {

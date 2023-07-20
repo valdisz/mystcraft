@@ -5,6 +5,8 @@ public static class Size {
     public const int STRUCTURE_ID = 24;
     public const int LABEL = 256;
     public const int DESCRIPTION = 256;
+    public const int LONG_DESCRIPTION = 2048;
+    public const int MAX_TEXT = int.MaxValue;
     public const int PROVINCE = 256;
     public const int TERRAIN = 256;
     public const int LEVEL = 128;
@@ -29,5 +31,4 @@ public static class Size {
     public const int PROVIDER = 32;
     public const int COUNTRY = 128;
     public const int CITY = 128;
-
 }

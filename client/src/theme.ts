@@ -1,10 +1,19 @@
-import { createTheme } from '@mui/material/styles'
+import { LoadingButtonProps } from '@mui/lab'
+import { createTheme, ThemeOptions } from '@mui/material'
 
 const heading = {
     fontFamily: 'Almendra, serif'
 }
 
-const theme = createTheme({
+interface ExtraThemeOptions {
+    components: {
+        MuiLoadingButton?: {
+            defaultProps?: Partial<LoadingButtonProps>
+        }
+    }
+}
+
+const options: ThemeOptions & ExtraThemeOptions = {
     palette: {
         // mode: 'dark'
     },
@@ -40,6 +49,13 @@ const theme = createTheme({
         MuiButton: {
             defaultProps: {
                 size: 'small',
+                variant: 'contained'
+            }
+        },
+        MuiLoadingButton: {
+            defaultProps: {
+                size: 'small',
+                variant: 'contained'
             }
         },
         MuiButtonGroup: {
@@ -105,6 +121,8 @@ const theme = createTheme({
             }
         },
     }
-})
+}
+
+const theme = createTheme(options)
 
 export default theme

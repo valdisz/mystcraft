@@ -2,7 +2,7 @@ import { action, makeObservable, observable } from 'mobx'
 import { FileViewModel } from '../components'
 
 export interface NewGameEngineConfirmationCallback {
-    (name: string, content: File, ruleset: File): Promise<any>
+    (name: string, description: string, content: File, ruleset: File): Promise<any>
 }
 
 export class NewGameEngineViewModel {
@@ -11,6 +11,7 @@ export class NewGameEngineViewModel {
     }
 
     @observable name = ''
+    @observable description = ''
     @observable isOpen = false
     @observable inProgress = false
     @observable error = ''
@@ -20,6 +21,10 @@ export class NewGameEngineViewModel {
 
     @action readonly setName = (event: React.ChangeEvent<HTMLInputElement>) => {
         this.name = event.target.value
+    }
+
+    @action readonly setDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
+        this.description = event.target.value
     }
 
     @action readonly open = () => {
@@ -55,6 +60,6 @@ export class NewGameEngineViewModel {
     @action readonly setError = (message: string) => this.error = message
 
     readonly confirm = async () => {
-        await this.onConfirm(this.name, this.content.file, this.ruleset.file)
+        await this.onConfirm(this.name, this.description, this.content.file, this.ruleset.file)
     }
 }

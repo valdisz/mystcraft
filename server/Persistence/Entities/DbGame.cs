@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using advisor.Model;
 
-public class DbGame : IsAggregateRoot, WithCreationTime {
+public class DbGame : IsAggregateRoot, WithAudit {
     [Key]
     public long Id { get; set; }
 
@@ -24,6 +24,12 @@ public class DbGame : IsAggregateRoot, WithCreationTime {
 
     [Required]
     public DateTimeOffset CreatedAt { get; set; }
+    [Required]
+    public DateTimeOffset UpdatedAt { get; set; }
+    public long? CreatedByUserId { get; set; }
+    public long? UpdatedByUserId { get; set; }
+    public DbUser CreatedBy { get; set; }
+    public DbUser UpdatedBy { get; set; }
 
     [GraphQLIgnore]
     public long? EngineId { get; set; }
@@ -129,6 +135,6 @@ public class DbGameConfiguration : IEntityTypeConfiguration<DbGame> {
         builder.HasIndex(x => x.Name)
             .IsUnique();
 
-        CreationTime<DbGame>.Configure(db, builder);
+        Audit<DbGame>.Configure(db, builder);
     }
 }
