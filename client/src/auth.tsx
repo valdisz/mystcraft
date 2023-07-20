@@ -65,6 +65,11 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
         .then(setState as any)
     }, [])
 
+    const handleSignIn = (id: string, roles: string[]) => {
+        setAuth(new Auth((roles || []) as any))
+        setState('normal')
+    }
+
     // canUsePasskey()
 
     if (state === 'loading') return (
@@ -76,7 +81,7 @@ export function Authenticate({ children }: React.PropsWithChildren<AuthenticateP
     if (state.startsWith('sign-in')) return <SignIn withPasskey={
         false // TODO: implement passkey on backend before enabling here
         // state === 'sign-in-passkey'
-    } onSuccess={() => setState('normal')} />
+    } onSuccess={handleSignIn} />
 
     if (state === 'error') return <div>Cannot reach server.</div>
 
