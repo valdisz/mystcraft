@@ -1,19 +1,20 @@
 import * as React from 'react'
-import { List, ListItem, ListItemText, TextField, Button, Container,
-    DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, Paper, FormControl, Select,
-    InputLabel, MenuItem, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent, CardActions,
-    FormGroup, FormControlLabel, Switch, IconButton, InputBase, FormHelperText
+import { ListItemText, TextField, Button, Container,
+    DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl, Select,
+    InputLabel, MenuItem, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
+    FormControlLabel, Switch, IconButton, FormHelperText
 } from '@mui/material'
-import { Observer, observer } from 'mobx-react'
+import { Observer, observer } from 'mobx-react-lite'
 import { Link, LinkProps } from 'react-router-dom'
-import { MapLevelItem, useStore } from '../store'
-import { SplitButton, PageTitle, EmptyListItem, FileInput, DateTime, ListLayout, FileInputField } from '../components'
+import { MapLevelItem, NewGameEngineViewModel, useStore } from '../store'
+import { ListLayout, FileInputField } from '../components'
 import { GameEngineFragment, GameHeaderFragment } from '../schema'
 import cronstrue from 'cronstrue'
 import { Role, ForRole } from '../auth'
 
 import AttachFileIcon from '@mui/icons-material/AttachFile'
 import ClearIcon from '@mui/icons-material/Clear'
+import { FieldList } from '../store/forms'
 
 export function HomePage() {
     const { games, newGame } = useStore()
@@ -131,44 +132,54 @@ function GameItem({ game }: GameItemProps) {
 </Stack> */
 
 interface MapLevelItemEditorProps {
-    level: MapLevelItem
-    canRemove: boolean
+    model: MapLevelItem
     onRemove: () => void
 }
 
-function _MapLevelItemEditor({ level, canRemove, onRemove }: MapLevelItemEditorProps) {
-    return <Stack direction='row' gap={2}>
-        <TextField label='Label' required {...level.label.forTextField} />
-        <TextField label='Width' required {...level.width.forTextField}  />
-        <TextField label='Height' required {...level.height.forTextField}  />
-        { canRemove && <FormControl sx={{ justifyContent: 'center' }}>
-            <IconButton color='error' onClick={onRemove}>
-                <ClearIcon />
-            </IconButton>
-        </FormControl> }
-    </Stack>
+function MapLevelItemEditor({ model, onRemove }: MapLevelItemEditorProps) {
+    return <Observer>
+        {() =>
+            <Stack direction='row' gap={2}>
+                <TextField label='Label' required {...model.label.forTextField} />
+                <TextField label='Width' required {...model.width.forTextField}  />
+                <TextField label='Height' required {...model.height.forTextField}  />
+                <FormControl sx={{ justifyContent: 'center' }}>
+                    <IconButton color='error' onClick={onRemove}>
+                        <ClearIcon />
+                    </IconButton>
+                </FormControl>
+            </Stack>
+        }
+    </Observer>
+
 }
 
-const MapLevelItemEditor = observer(_MapLevelItemEditor)
-
-function _MapLevelEditor() {
-    const { newGame } = useStore()
-
-    return <FormControl margin='dense'>
-        <InputLabel shrink>Levels</InputLabel>
-        <Stack mt={2}>
-            {newGame.mapLevels.map((item, index) => <MapLevelItemEditor key={index} level={item} canRemove={newGame.mapLevels.length > 1} onRemove={() => newGame.removeMapLevel(index)} />)}
-            <Box>
-                <Button variant='outlined' onClick={newGame.addLevel}>Add level</Button>
-            </Box>
-        </Stack>
-    </FormControl>
+interface MapLevelEditorProps {
+    model: FieldList<MapLevelItem>
+    onAdd: () => void
+    onRemove: (item: MapLevelItem, index: number) => void
 }
 
-const MapLevelEditor = observer(_MapLevelEditor)
+function MapLevelEditor({ model, onAdd, onRemove }: MapLevelEditorProps) {
+    return <Observer>
+        {() =>
+            <FormControl margin='dense' {...model.forFormControl}>
+                <InputLabel shrink>Levels</InputLabel>
+                <Stack mt={2}>
+                    {model.map((item, index) => <MapLevelItemEditor key={index} model={item} onRemove={() => onRemove(item, index)} />)}
+                    <Box>
+                        <Button variant='outlined' onClick={onAdd}>Add level</Button>
+                    </Box>
+                </Stack>
+                <FormHelperText {...model.forFormHelperText} />
+            </FormControl>
+        }
+    </Observer>
+}
 
 function NewGameDialog() {
     const { newGame, engines } = useStore()
+    const form = newGame.form
 
     const renderSelectedEngine = (engineId: string) => <ListItemText primary={engines.find(x => x.id === engineId).name} />
     const renderEngine = (engine: GameEngineFragment) => <ListItemText primary={engine.name} secondary={engine.description} />
@@ -177,7 +188,7 @@ function NewGameDialog() {
         <DialogTitle>New game</DialogTitle>
         <DialogContent>
             <Stack gap={2}>
-                <TextField autoFocus label='Name' {...newGame.name.forTextField} />
+                <TextField autoFocus label='Name' {...form.name.forTextField} />
 
                 <FormControl required>
                     <InputLabel required>Engine</InputLabel>
@@ -195,16 +206,16 @@ function NewGameDialog() {
                     <FileInputField label='players.in' model={newGame.playersFile} />
                 </> }
 
-                <MapLevelEditor />
+                <MapLevelEditor model={form.levels} onAdd={newGame.addLevel} onRemove={newGame.removeLevel} />
 
-                <TextField label='Schedule' />
+                <TextField label='Schedule' {...form.schedule.forTextField} />
 
-                <FormControl {...newGame.timeZone.forFormControl}>
-                    <InputLabel id='timeZoneLabel' {...newGame.timeZone.forInputLabel}>Time Zone</InputLabel>
-                    <Select labelId='timeZoneLabel' label='Time Zone' {...newGame.timeZone.forSelect}>
+                <FormControl {...form.timeZone.forFormControl}>
+                    <InputLabel id='timeZoneLabel' {...form.timeZone.forInputLabel}>Time Zone</InputLabel>
+                    <Select labelId='timeZoneLabel' label='Time Zone' {...form.timeZone.forSelect}>
                         { newGame.timeZones.map((x, i) => <MenuItem key={i} value={x}>{x}</MenuItem>) }
                     </Select>
-                    <FormHelperText {...newGame.timeZone.forFormHelperText} />
+                    <FormHelperText {...form.timeZone.forFormHelperText} />
                 </FormControl>
             </Stack>
         </DialogContent>
