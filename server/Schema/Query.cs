@@ -14,8 +14,8 @@ using HotChocolate.Data;
 
 public class Query {
     [Authorize(Policy = Policies.GameMasters)]
-    [UseProjection]
     [UseOffsetPaging]
+    [UseProjection]
     public ValueTask<IOrderedQueryable<DbGameEngine>> GameEngines(IResolverContext context, Database db) =>
         GameInterpreter<Runtime>.Interpret(
             from items in Mystcraft.ReadManyGameEngines()
@@ -24,8 +24,8 @@ public class Query {
         .Run(Runtime.New(db, context.RequestAborted))
         .Unwrap();
 
-    [UseProjection]
     [UseOffsetPaging]
+    [UseProjection]
     public ValueTask<IOrderedQueryable<DbGame>> Games(IResolverContext context, Database db) =>
         GameInterpreter<Runtime>.Interpret(
             from items in Mystcraft.ReadManyGames()
@@ -35,8 +35,8 @@ public class Query {
         .Unwrap();
 
     [Authorize(Policy = Policies.UserManagers)]
-    [UseProjection]
     [UseOffsetPaging]
+    [UseProjection]
     public IQueryable<DbUser> Users(Database db) =>
         db.Users.OrderByDescending(x => x.CreatedAt);
 
