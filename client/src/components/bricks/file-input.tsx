@@ -3,10 +3,11 @@ import React from 'react'
 
 export interface FileInputProps extends Omit<BoxProps, 'children' | 'onChange'> {
     trigger: React.ReactElement
+    accept?: string
     onChange?: (files: FileList) => void
 }
 
-export function FileInput({ trigger, onChange, ...props }: FileInputProps) {
+export function FileInput({ trigger, accept, onChange, ...props }: FileInputProps) {
     const inputRef = React.useRef<HTMLInputElement>(null)
 
     const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,6 +30,7 @@ export function FileInput({ trigger, onChange, ...props }: FileInputProps) {
         <input style={{ display: 'none' }}
             ref={inputRef}
             type='file'
+            accept={accept}
             onChange={onFileChange}
         />
     </Box>

@@ -4,18 +4,18 @@ export interface ValueOrError<T> {
 }
 
 export interface Converter<T> {
-    sanitzie(value: string): ValueOrError<T>
-    format(value: T | null): string
+    sanitzie(value: any): ValueOrError<T>
+    format(value: T | null): any
 }
 
 
 const _STRING: Converter<string> = {
-    sanitzie: value => ({ value }),
+    sanitzie: (value: string) => ({ value }),
     format: value => value || ''
 }
 
 const _STRING_TRIM: Converter<string> = {
-    sanitzie: value => ({ value: value?.trim() || '' }),
+    sanitzie: (value: string) => ({ value: value?.trim() || '' }),
     format: value => value || ''
 }
 

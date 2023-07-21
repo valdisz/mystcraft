@@ -3,6 +3,7 @@ import { FormControlProps, FormHelperTextProps, InputLabelProps, SelectProps, Te
 import { FormField } from './form-field'
 import { Converter } from './converters'
 import { Validator, combine, required, noValidate } from './validation'
+import { FileFieldProps } from '../../components'
 
 export class Field<T> implements FormField {
     constructor(private converter: Converter<T>, value: T | null, private isRequired?: boolean, ...validators: Validator<T>[]) {
@@ -18,7 +19,7 @@ export class Field<T> implements FormField {
     private readonly validator: Validator<T>
 
     @observable value: T | null = null
-    @observable rawValue: string = ''
+    @observable rawValue: any = null
 
     @observable dirty: boolean = false
     @observable touched: boolean = false
@@ -73,6 +74,17 @@ export class Field<T> implements FormField {
         }
     }
 
+    get forFileField(): FileFieldProps {
+        return {
+            required: this.isRequired,
+            value: this.rawValue,
+            error: this.showError,
+            helperText: this.errorText,
+            onChange: file => this.change(file),
+            onBlur: this.handleTouch,
+        }
+    }
+
     private readonly handleTouch = () => this.touch()
 
     private shouldShowError() {
@@ -95,7 +107,7 @@ export class Field<T> implements FormField {
         return this.valid
     }
 
-    @action setValue(input: string) {
+    @action setValue(input: any) {
         this.rawValue = input
 
         const { error, value } = this.converter.sanitzie(input)
@@ -115,7 +127,7 @@ export class Field<T> implements FormField {
         this.validate()
     }
 
-    @action change(value: string) {
+    @action change(value: any) {
         this.touched = true
         this.setValue(value)
     }

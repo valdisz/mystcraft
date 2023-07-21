@@ -1,11 +1,15 @@
 import React from 'react'
 import { action, makeObservable, observable } from 'mobx'
 import { HomeStore } from './home-store'
-import { GameCreate, GameCreateMutation, GameCreateMutationVariables } from '../schema'
+import { GameCreate, GameCreateMutation, GameCreateMutationVariables, GameEngineFragment } from '../schema'
 import { SelectChangeEvent } from '@mui/material'
 import { mutate } from './connection'
-import { FileViewModel } from '../components'
-import { Field, INT, STRING, maxLen, min, FieldList, FormField, makeGroup, maxCount } from './forms'
+import { Field, INT, STRING, maxLen, min, FieldList, FormField, makeGroup, maxCount, Converter } from './forms'
+
+const FILE: Converter<File> = {
+    sanitzie: (value: File) => ({ value }),
+    format: value => value
+}
 
 function dividesWithEight(value: number): string | null {
     if (value === 1) {
@@ -35,43 +39,37 @@ function newMapLevelItem(label: string = '', width: number = null, height: numbe
 
 export interface NewGameForm extends FormField {
     name: Field<string>
+    engine: Field<string>
     timeZone: Field<string>
     schedule: Field<string>
     levels: FieldList<MapLevelItem>
+    gameFile: Field<File>
+    playersFile: Field<File>
 }
-
-function newNewGameForm(name: string = '', timeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone): NewGameForm {
-    return makeGroup({
-        name: new Field<string>(STRING(true), name, true, maxLen(128)),
-        timeZone: new Field<string>(STRING(true), timeZone, true, maxLen(128)),
-        schedule: new Field<string>(STRING(true), '', false, maxLen(128)),
-        levels: new FieldList<MapLevelItem>([], true, maxCount(4))
-    })
-}
-
-const TIME_ZONES = Intl.supportedValuesOf('timeZone')
 
 export class NewGameStore {
-    constructor(private readonly store: HomeStore) {
+    constructor() {
         makeObservable(this)
     }
 
-    readonly form = newNewGameForm()
-    readonly gameFile = new FileViewModel()
-    readonly playersFile = new FileViewModel()
+    readonly form = makeGroup({
+        name: new Field<string>(STRING(true), '', true, maxLen(128)),
+        engine: new Field<string>(STRING(), '', true),
+        timeZone: new Field<string>(STRING(true), Intl.DateTimeFormat().resolvedOptions().timeZone, true, maxLen(128)),
+        schedule: new Field<string>(STRING(true), '', false, maxLen(128)),
+        levels: new FieldList<MapLevelItem>([], true, maxCount(4)),
+        gameFile: new Field<File>(FILE, null, true),
+        playersFile: new Field<File>(FILE, null, true),
+    })
+
 
     @observable isOpen = false
     @observable remote = false
-    @observable engine = ''
 
-    readonly timeZones = TIME_ZONES
+    readonly timeZones = Intl.supportedValuesOf('timeZone')
 
     @action open = () => {
         this.isOpen = true
-
-        this.gameFile.clear()
-        this.playersFile.clear()
-        this.engine = ''
 
         this.form.reset()
         this.form.levels.push(newMapLevelItem('nexus', 1, 1))
@@ -119,10 +117,6 @@ export class NewGameStore {
             // })
             // .then(this.cancel, console.error)
         }
-    }
-
-    @action setEngine = (e: SelectChangeEvent) => {
-        this.engine = e.target.value
     }
 
     @action addLevel = () => {

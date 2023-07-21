@@ -66,7 +66,7 @@ export class MainStore {
 
     readonly home = new HomeStore()
     readonly gameDetails = new GameDetailsStore()
-    readonly newGame = new NewGameStore(this.home)
+    readonly newGame = new NewGameStore()
     readonly game = new GameStore()
     readonly stats = new StatsStore(this.game)
     readonly loading = new GameLoadingStore()

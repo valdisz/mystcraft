@@ -2,7 +2,7 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle, Stack } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { Forbidden, FileInputField, GameEngineItem, ListLayout } from '../components'
+import { Forbidden, GameEngineItem, ListLayout } from '../components'
 import { NewGameEngineViewModel, useStore } from '../store'
 import { Role, ForRole, forRole } from '../auth'
 import { GameEngineFragment } from '../schema'
@@ -49,8 +49,8 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
 
                 <TextField fullWidth multiline label='Description' rows={4} value={model.description} onChange={model.setDescription} />
 
-                <FileInputField label='Game Engine' model={model.content} />
-                <FileInputField label='Ruleset' model={model.ruleset} />
+                {/* <FileInputField label='Game Engine' model={model.content} />
+                <FileInputField label='Ruleset' model={model.ruleset} /> */}
             </Stack>
         </DialogContent>
 

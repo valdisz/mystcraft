@@ -1,7 +1,7 @@
 export * from './empty-list-item'
 export * from './forbidden'
 export * from './file-input'
-export * from './file-input-field'
+export * from './file-field'
 
 export * from './date-time'
 export { default as DateTime } from './date-time'

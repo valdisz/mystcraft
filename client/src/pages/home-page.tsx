@@ -7,7 +7,7 @@ import { ListItemText, TextField, Button, Container,
 import { Observer, observer } from 'mobx-react-lite'
 import { Link, LinkProps } from 'react-router-dom'
 import { MapLevelItem, NewGameEngineViewModel, useStore } from '../store'
-import { ListLayout, FileInputField } from '../components'
+import { ListLayout, FileField } from '../components'
 import { GameEngineFragment, GameHeaderFragment } from '../schema'
 import cronstrue from 'cronstrue'
 import { Role, ForRole } from '../auth'
@@ -181,7 +181,7 @@ function NewGameDialog() {
     const { newGame, engines } = useStore()
     const form = newGame.form
 
-    const renderSelectedEngine = (engineId: string) => <ListItemText primary={engines.find(x => x.id === engineId).name} />
+    const renderSelectedEngine = (engineId: any) => <ListItemText primary={engines.find(x => x.id === engineId).name} />
     const renderEngine = (engine: GameEngineFragment) => <ListItemText primary={engine.name} secondary={engine.description} />
 
     return <Dialog fullWidth maxWidth='sm' open={newGame.isOpen} onClose={newGame.cancel}>
@@ -190,20 +190,21 @@ function NewGameDialog() {
             <Stack gap={2}>
                 <TextField autoFocus label='Name' {...form.name.forTextField} />
 
-                <FormControl required>
-                    <InputLabel required>Engine</InputLabel>
-                    <Select label="Engine" value={newGame.engine} onChange={newGame.setEngine} renderValue={renderSelectedEngine}>
+                <FormControl {...form.engine.forFormControl}>
+                    <InputLabel {...form.engine.forInputLabel}>Engine</InputLabel>
+                    <Select label='Engine' renderValue={renderSelectedEngine} {...form.engine.forSelect}>
                         { engines.value.map(engine => <MenuItem key={engine.id} value={engine.id}>
                             { renderEngine(engine) }
                         </MenuItem>) }
                     </Select>
+                    <FormHelperText {...form.engine.forFormHelperText} />
                 </FormControl>
 
                 <FormControlLabel control={<Switch checked={newGame.remote} onChange={newGame.remoteChange} />} label="Remote" />
 
                 { !newGame.remote && <>
-                    <FileInputField label='game.in' model={newGame.gameFile} />
-                    <FileInputField label='players.in' model={newGame.playersFile} />
+                    <FileField label='game.in' {...form.gameFile.forFileField} />
+                    <FileField label='players.in' {...form.playersFile.forFileField} />
                 </> }
 
                 <MapLevelEditor model={form.levels} onAdd={newGame.addLevel} onRemove={newGame.removeLevel} />
