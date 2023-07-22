@@ -37,6 +37,11 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
+    public Task<GameEngineCreateRemoteResult> GameEngineCreateRemote(IResolverContext context, IMediator mediator, string name, string description, string api, string options) {
+        return mediator.Send(new GameEngineCreateRemote(name, description, api, options), context.RequestAborted);
+    }
+
+    [Authorize(Policy = Policies.GameMasters)]
     public Task<GameEngineDeleteResult> GameEngineDelete(IResolverContext context, IMediator mediator, [ID(GameEngineType.NAME)] long gameEngineId) =>
         mediator.Send(new GameEngineDelete(gameEngineId), context.RequestAborted);
 

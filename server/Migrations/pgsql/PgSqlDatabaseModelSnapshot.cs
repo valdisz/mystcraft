@@ -439,7 +439,6 @@ namespace advisor.Migrations.pgsql
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<byte[]>("Contents")
-                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -457,8 +456,18 @@ namespace advisor.Migrations.pgsql
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<bool>("Remote")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RemoteApi")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("RemoteOptions")
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("text");
+
                     b.Property<byte[]>("Ruleset")
-                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<DateTimeOffset>("UpdatedAt")

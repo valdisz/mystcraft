@@ -25,6 +25,12 @@ public static class Mystcraft {
         new Mystcraft<DbGameEngine>.CreateGameEngine(Name, Description, Contents, Ruleset, Return);
 
     /// <summary>
+    /// Create a new remote game engine.
+    /// </summary>
+    public static Mystcraft<DbGameEngine> CreateGameEngineRemote(string Name, string Description, string Api, string Options) =>
+        new Mystcraft<DbGameEngine>.CreateGameEngineRemote(Name, Description, Api, Options, Return);
+
+    /// <summary>
     /// Get a list of all game engines.
     /// </summary>
     public static Mystcraft<IOrderedQueryable<DbGameEngine>> ReadManyGameEngines() =>
@@ -219,6 +225,11 @@ public abstract record Mystcraft<A> {
     /// Represents operation that creates a new game engine.
     /// </summary>
     public sealed record CreateGameEngine(string Name, string Description, byte[] Contents, byte[] Ruleset, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    /// <summary>
+    /// Represents operation that creates a new remote game engine.
+    /// </summary>
+    public sealed record CreateGameEngineRemote(string Name, string Description, string Api, string Options, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a list of all game engines.

@@ -426,7 +426,6 @@ namespace advisor.Migrations.sqlite
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<byte[]>("Contents")
-                        .IsRequired()
                         .HasColumnType("BLOB");
 
                     b.Property<long>("CreatedAt")
@@ -444,8 +443,18 @@ namespace advisor.Migrations.sqlite
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("Remote")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RemoteApi")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RemoteOptions")
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("TEXT");
+
                     b.Property<byte[]>("Ruleset")
-                        .IsRequired()
                         .HasColumnType("BLOB");
 
                     b.Property<long>("UpdatedAt")

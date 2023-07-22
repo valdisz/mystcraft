@@ -25,20 +25,21 @@ public readonly struct GameInterpreter<RT>
     {
         Mystcraft<A>.Return rt => SuccessAff(rt.Value),
 
-        Mystcraft<A>.CreateGameEngine cge     => _tran(CreateGameEngine(cge)),
-        Mystcraft<A>.ReadManyGameEngines rge  =>       ReadManyGameEngines(rge),
-        Mystcraft<A>.ReadOneGameEngine oge    =>       ReadOneGameEngine(oge),
-        Mystcraft<A>.WriteOneGameEngine wge   => _tran(WriteOneGameEngine(wge)),
-        Mystcraft<A>.DeleteGameEngine dge     =>       DeleteGameEngine(dge),
-        Mystcraft<A>.CreateGame cr            => _tran(CreateGame(cr)),
-        Mystcraft<A>.ReadManyGames gm         =>       ReadManyGames(gm),
-        Mystcraft<A>.ReadOneGame og           =>       ReadOneGame(og),
-        Mystcraft<A>.WriteOneGame wg          => _tran(WriteOneGame(wg)),
-        Mystcraft<A>.Start st                 =>       StartGame(st),
-        Mystcraft<A>.Pause ps                 =>       PauseGame(ps),
-        Mystcraft<A>.Lock lk                  =>       LockGame(lk),
-        Mystcraft<A>.Stop sp                  =>       StopGame(sp),
-        Mystcraft<A>.DeleteGame dl                =>       DeleteGame(dl),
+        Mystcraft<A>.CreateGameEngine cge       => _tran(CreateGameEngine(cge)),
+        Mystcraft<A>.CreateGameEngineRemote cge => _tran(CreateGameEngineRemote(cge)),
+        Mystcraft<A>.ReadManyGameEngines rge    =>       ReadManyGameEngines(rge),
+        Mystcraft<A>.ReadOneGameEngine oge      =>       ReadOneGameEngine(oge),
+        Mystcraft<A>.WriteOneGameEngine wge     => _tran(WriteOneGameEngine(wge)),
+        Mystcraft<A>.DeleteGameEngine dge       =>       DeleteGameEngine(dge),
+        Mystcraft<A>.CreateGame cr              => _tran(CreateGame(cr)),
+        Mystcraft<A>.ReadManyGames gm           =>       ReadManyGames(gm),
+        Mystcraft<A>.ReadOneGame og             =>       ReadOneGame(og),
+        Mystcraft<A>.WriteOneGame wg            => _tran(WriteOneGame(wg)),
+        Mystcraft<A>.Start st                   =>       StartGame(st),
+        Mystcraft<A>.Pause ps                   =>       PauseGame(ps),
+        Mystcraft<A>.Lock lk                    =>       LockGame(lk),
+        Mystcraft<A>.Stop sp                    =>       StopGame(sp),
+        Mystcraft<A>.DeleteGame dl              =>       DeleteGame(dl),
         // Mystcraft<A>.ReadOptions ro           =>       ReadOptions(ro),
         // Mystcraft<A>.WriteSchedule ws         => _tran(WriteSchedule(ws)),
         // Mystcraft<A>.WriteMap wm              => _tran(WriteMap(wm)),
@@ -76,11 +77,22 @@ public readonly struct GameInterpreter<RT>
         });
 
     private static Aff<RT, A> CreateGameEngine<A>(Mystcraft<A>.CreateGameEngine action) =>
-        from ge in Database<RT>.add(DbGameEngine.New(
+        from ge in Database<RT>.add(DbGameEngine.NewLocal(
             action.Name,
             action.Description,
             action.Contents,
             action.Ruleset
+        ))
+        from _ in UnitOfWork<RT>.save()
+        from ret in _Interpret(action.Next(ge))
+        select ret;
+
+    private static Aff<RT, A> CreateGameEngineRemote<A>(Mystcraft<A>.CreateGameEngineRemote action) =>
+        from ge in Database<RT>.add(DbGameEngine.NewRemote(
+            action.Name,
+            action.Description,
+            action.Api,
+            action.Options
         ))
         from _ in UnitOfWork<RT>.save()
         from ret in _Interpret(action.Next(ge))

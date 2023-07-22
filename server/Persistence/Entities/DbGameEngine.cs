@@ -17,18 +17,26 @@ public class DbGameEngine : WithAudit {
     [MaxLength(Size.LONG_DESCRIPTION)]
     public string Description { get; set; }
 
+    public bool Remote { get; set; }
+
+    [MaxLength(Size.SYMBOL)]
+    public string RemoteApi { get; set; }
+
+    [MaxLength(Size.MAX_TEXT)]
+    public string RemoteOptions { get; set; }
+
+    [Required]
+    public DateTimeOffset CreatedAt { get; set; }
+
     [Required]
     public DateTimeOffset UpdatedAt { get; set; }
-    public DateTimeOffset CreatedAt { get; set; }
 
     public long? CreatedByUserId { get; set; }
     public long? UpdatedByUserId { get; set; }
 
-    [Required]
     [GraphQLIgnore]
     public byte[] Contents { get; set; }
 
-    [Required]
     [GraphQLIgnore]
     public byte[] Ruleset { get; set; }
 
@@ -38,12 +46,21 @@ public class DbGameEngine : WithAudit {
     public DbUser CreatedBy { get; set; }
     public DbUser UpdatedBy { get; set; }
 
-    public static DbGameEngine New(string name, string description, byte[] contents, byte[] ruleset) =>
+    public static DbGameEngine NewLocal(string name, string description, byte[] contents, byte[] ruleset) =>
         new DbGameEngine {
-            Name = name,
+            Name        = name,
             Description = description,
-            Contents = contents,
-            Ruleset = ruleset
+            Contents    = contents,
+            Ruleset     = ruleset
+        };
+
+    public static DbGameEngine NewRemote(string name, string description, string api, string options) =>
+        new DbGameEngine {
+            Name          = name,
+            Description   = description,
+            Remote        = true,
+            RemoteApi     = api,
+            RemoteOptions = options
         };
 }
 
