@@ -2,7 +2,7 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle, Stack } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { Forbidden, GameEngineItem, ListLayout } from '../components'
+import { Forbidden, GameEngineItem, ListLayout, FileField } from '../components'
 import { NewGameEngineViewModel, useStore } from '../store'
 import { Role, ForRole, forRole } from '../auth'
 import { GameEngineFragment } from '../schema'
@@ -34,6 +34,8 @@ interface NewGameEngineDialogProps {
 }
 
 function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
+    const { form } = model
+
     return <Dialog fullWidth maxWidth='sm' open={model.isOpen} onClose={model.autoClose}>
         <DialogTitle>New game engine</DialogTitle>
         <DialogContent>
@@ -45,12 +47,12 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
                 : null
             }
             <Stack gap={2}>
-                <TextField label='Name' value={model.name} onChange={model.setName} />
+                <TextField label='Name' {...form.name.forTextField} />
 
-                <TextField fullWidth multiline label='Description' rows={4} value={model.description} onChange={model.setDescription} />
+                <TextField label='Description' fullWidth multiline rows={4} {...form.description.forTextField} />
 
-                {/* <FileInputField label='Game Engine' model={model.content} />
-                <FileInputField label='Ruleset' model={model.ruleset} /> */}
+                <FileField label='Game Engine' {...form.engine.forFileField} />
+                <FileField label='Ruleset' {...form.ruleset.forFileField} />
             </Stack>
         </DialogContent>
 

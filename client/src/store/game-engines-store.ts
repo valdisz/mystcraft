@@ -1,7 +1,15 @@
 import { action, makeObservable, observable } from 'mobx'
+import { FILE, Field, FormField, STRING, makeGroup, rule } from './forms'
 
 export interface NewGameEngineConfirmationCallback {
     (name: string, description: string, content: File, ruleset: File): Promise<any>
+}
+
+export interface NewGameEngineForm extends FormField {
+    name: Field<string>
+    description: Field<string>
+    engine: Field<File>
+    ruleset: Field<File>
 }
 
 export class NewGameEngineViewModel {
@@ -9,31 +17,23 @@ export class NewGameEngineViewModel {
         makeObservable(this)
     }
 
-    @observable name = ''
-    @observable description = ''
+    readonly form: NewGameEngineForm = makeGroup({
+        name: new Field<string>(STRING(true), '', true, rule('max:128')),
+        description: new Field<string>(STRING(true), '', false, rule('max:1024')),
+        engine: new Field<File>(FILE, null, true),
+        ruleset: new Field<File>(FILE, null, true),
+    })
+
     @observable isOpen = false
     @observable inProgress = false
     @observable error = ''
 
-    // readonly content = new FileViewModel()
-    // readonly ruleset = new FileViewModel()
-
-    @action readonly setName = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.name = event.target.value
-    }
-
-    @action readonly setDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-        this.description = event.target.value
-    }
-
     @action readonly open = () => {
         this.isOpen = true
 
-        this.name = ''
         this.inProgress = false
         this.error = ''
-        // this.content.clear()
-        // this.ruleset.clear()
+        this.form.reset()
     }
 
     @action readonly close = () => {
@@ -58,7 +58,8 @@ export class NewGameEngineViewModel {
 
     @action readonly setError = (message: string) => this.error = message
 
-    readonly confirm = async () => {
+    @action readonly confirm = async () => {
+        this.form.touch()
         // await this.onConfirm(this.name, this.description, this.content.file, this.ruleset.file)
     }
 }
