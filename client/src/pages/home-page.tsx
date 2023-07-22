@@ -221,13 +221,7 @@ function NewGameDialog() {
 
                 <TextField label='Schedule' {...form.schedule.forTextField} helperText={newGame.scheduleHelpText} />
 
-                <FormControl {...form.timeZone.forFormControl}>
-                    <InputLabel id='timeZoneLabel' {...form.timeZone.forInputLabel}>Time Zone</InputLabel>
-                    <Select labelId='timeZoneLabel' label='Time Zone' {...form.timeZone.forSelect}>
-                        { newGame.timeZones.map((x, i) => <MenuItem key={i} value={x}>{x}</MenuItem>) }
-                    </Select>
-                    <FormHelperText {...form.timeZone.forFormHelperText} />
-                </FormControl>
+                <SelectField label='Time Zone' items={newGame.timeZones} {...form.timeZone.forSelectField} />
             </Stack>
         </DialogContent>
 

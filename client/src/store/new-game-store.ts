@@ -1,16 +1,9 @@
 import React from 'react'
-import { action, computed, makeObservable, observable } from 'mobx'
-import { HomeStore } from './home-store'
-import { GameCreate, GameCreateMutation, GameCreateMutationVariables, GameEngineFragment } from '../schema'
-import { SelectChangeEvent } from '@mui/material'
-import { Seq, mutate } from './connection'
-import { Field, INT, STRING, maxLen, min, FieldList, FormField, makeGroup, maxCount, Converter } from './forms'
+import { action, computed, makeObservable, observable, reaction } from 'mobx'
+import { GameEngineFragment } from '../schema'
+import { Seq } from './connection'
+import { Field, FILE, INT, STRING, FieldList, FormField, makeGroup, isCron, Converter, rule } from './forms'
 import cronstrue from 'cronstrue'
-
-const FILE: Converter<File> = {
-    sanitzie: (value: File) => ({ value }),
-    format: value => value
-}
 
 const GAME_ENGINE: Converter<GameEngineFragment> = {
     sanitzie: (value: GameEngineFragment) => ({ value: value ? value : null }),
@@ -29,25 +22,6 @@ function dividesWithEight(value: number): string | null {
     return null
 }
 
-function cronExpression(value: string): string | null {
-    if (!value) {
-        return null
-    }
-
-    try {
-        cronstrue.toString(value)
-    }
-    catch (e) {
-        if (typeof e === 'string') {
-            return e
-        }
-
-        return (e as Error)?.message || 'Invalid cron expression'
-    }
-
-    return null
-}
-
 export interface MapLevelItem extends FormField {
     label: Field<string>
     width: Field<number>
@@ -56,9 +30,9 @@ export interface MapLevelItem extends FormField {
 
 function newMapLevelItem(label: string = '', width: number = null, height: number = null): MapLevelItem {
     return makeGroup({
-        label: new Field<string>(STRING(true), label, true, maxLen(128)),
-        width: new Field<number>(INT, width, true, min(1), dividesWithEight),
-        height: new Field<number>(INT, height, true, min(1), dividesWithEight)
+        label: new Field<string>(STRING(true), label, true, rule('max:128')),
+        width: new Field<number>(INT, width, true, rule('min:1'), dividesWithEight),
+        height: new Field<number>(INT, height, true, rule('min:1'), dividesWithEight)
     })
 }
 
@@ -78,28 +52,38 @@ export class NewGameStore {
     }
 
     readonly form = makeGroup({
-        name: new Field<string>(STRING(true), '', true, maxLen(128)),
+        name: new Field<string>(STRING(true), '', true, rule('max:128')),
         engine: new Field<GameEngineFragment>(GAME_ENGINE, null, true),
-        timeZone: new Field<string>(STRING(true), Intl.DateTimeFormat().resolvedOptions().timeZone, true, maxLen(128)),
-        schedule: new Field<string>(STRING(true), '0 0 12 * * MON,TUE,FRI *', false, maxLen(128), cronExpression),
-        levels: new FieldList<MapLevelItem>([], true, maxCount(4)),
+        timeZone: new Field<string>(STRING(true), Intl.DateTimeFormat().resolvedOptions().timeZone, true, rule('max:128')),
+        schedule: new Field<string>(STRING(true), '0 0 12 * * MON,TUE,FRI *', false, rule('max:128'), isCron()),
+        levels: new FieldList<MapLevelItem>([], true, rule('max:4')),
         gameFile: new Field<File>(FILE, null, true),
         playersFile: new Field<File>(FILE, null, true),
     })
+
+    private readonly _whenRemote = reaction(() =>
+        this.form.engine.value,
+        engine => {
+            if (!engine) {
+                return
+            }
+
+            if (engine.remote) {
+                this.form.gameFile.disable()
+                this.form.playersFile.disable()
+            }
+            else {
+                this.form.gameFile.enable()
+                this.form.playersFile.enable()
+            }
+        }
+    )
 
     @computed get scheduleHelpText() {
         const errorText = this.form.schedule.errorText
         const expression = this.form.schedule.value
 
-        if (errorText) {
-            return errorText
-        }
-
-        if (expression) {
-            return cronstrue.toString(this.form.schedule.value)
-        }
-
-        return ''
+        return errorText ?? cronstrue.toString(expression) ?? ''
     }
 
     @computed get requireUpload(): boolean {
@@ -116,6 +100,7 @@ export class NewGameStore {
         this.form.reset()
         this.form.levels.reset(newMapLevelItem('nexus', 1, 1))
         this.form.schedule.reset('0 12 * * MON,WED,FRI')
+        this.form.timeZone.reset(Intl.DateTimeFormat().resolvedOptions().timeZone)
     }
 
     @action cancel = () => {
@@ -123,39 +108,9 @@ export class NewGameStore {
     }
 
     @action confirm = () => {
-        // this.form.validate()
         this.form.touch()
 
-        // if (this.remote) {
-            // FIXME
-            // const variables: GameCreateRemoteMutationVariables = {
-            //     name: this.name,
-            //     options: JSON.parse(this.options)
-            // }
-
-            // mutate(GameCreateRemote, variables, {
-            //     refetch: [ this.store.games ]
-            // })
-            // .then(this.cancel, console.error)
-        // }
-        // else {
-            // const variables: GameCreateMutationVariables = {
-            //     name: this.form.name.value,
-            //     // options: JSON.parse(this.options),
-            //     gameEngineId: this.engine,
-            //     map: [],
-            //     schedule: '',
-            //     timeZone: ''
-            //     // playerData: this.playersFile,
-            //     // gameData: this.gameFile
-            // }
-
-            // FIXME
-            // mutate(GameCreate, variables, {
-            //     refetch: [ this.store.games ]
-            // })
-            // .then(this.cancel, console.error)
-        // }
+        console.log('Form is vaid: ', this.form.valid)
     }
 
     @action addLevel = () => {

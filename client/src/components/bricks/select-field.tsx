@@ -3,16 +3,16 @@ import { FormControl, InputLabel, Select, FormHelperText, SelectProps, MenuItem,
 
 export interface SelectFieldProps<T> extends Omit<SelectProps, 'children' | 'value' | 'onChange' | 'renderValue'> {
     items: T[]
-    children: (item: T) => React.ReactNode
-    mapKey: (item: T) => string
+    children?: (item: T) => React.ReactNode
+    mapKey?: (item: T) => string
     label?: React.ReactNode
     helperText?: React.ReactNode
     value?: T | null | ''
     onChange?: (value: T | null) => void
-    renderValue: (value: T | null) => React.ReactNode
+    renderValue?: (value: T | null) => React.ReactNode
 }
 
-function SelectField<T>({
+function SelectField<T = unknown>({
     label,
     required,
     error,
@@ -25,9 +25,11 @@ function SelectField<T>({
     renderValue,
     ...props
 }: SelectFieldProps<T>) {
+    const key = React.useCallback((item: T) => mapKey?.(item) ?? item, [mapKey])
+
     const itemMap = React.useMemo(() =>
-        new Map(items.map(item => [mapKey(item), item])),
-        [items, mapKey]
+        new Map(items.map(item => [key(item), item])),
+        [items, key]
     )
 
     const handleOnChange = React.useCallback((event: SelectChangeEvent<any>) => {
@@ -47,18 +49,18 @@ function SelectField<T>({
             return null
         }
 
-        return renderValue(itemMap.get(value))
+        return renderValue ? renderValue(itemMap.get(value)) : value
     }, [itemMap, renderValue])
 
-    const slectedValue = value ? mapKey(value) : ''
+    const slectedValue = value ? key(value) : ''
 
     return <FormControl required={required} error={error}>
         <InputLabel required={required} error={error}>{label}</InputLabel>
         <Select label={label} required={required} error={error} value={slectedValue} renderValue={renderSelectedValue} onChange={handleOnChange} {...props}>
             { items.map((item) => {
-                const key = mapKey(item)
-                return <MenuItem key={key} value={key}>
-                    {children(item)}
+                const keyValue = key(item) as any
+                return <MenuItem key={keyValue} value={keyValue}>
+                    {(children ? children(item) : item) as any}
                 </MenuItem>
             })}
         </Select>

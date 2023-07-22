@@ -62,3 +62,8 @@ export const REAL: Converter<number> = {
     },
     format: value => value?.toString() || ''
 }
+
+export const FILE: Converter<File> = {
+    sanitzie: (value: File) => ({ value }),
+    format: value => value
+}

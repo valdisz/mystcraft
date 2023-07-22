@@ -1,15 +1,15 @@
 import { IAtom, createAtom, computed, makeObservable, action, observable, runInAction } from 'mobx'
 import { FormField } from './form-field'
 import { FormControlProps, FormHelperTextProps, InputLabelProps } from '@mui/material'
-import { Validator, combine, noValidate, required } from './validation'
+import { Validator, combine, pass, required } from './validation'
 
 export class FieldList<T extends FormField> implements FormField {
     constructor(private readonly _items: T[] = [], private readonly isRequired: boolean = false, ...validators: Validator<T[]>[]) {
         this._atom = createAtom('items')
 
         this._validator = isRequired
-            ? combine(required(), ...validators, noValidate)
-            : combine(...validators, noValidate)
+            ? combine(required(), ...validators, pass)
+            : combine(...validators, pass)
 
         makeObservable(this, {
             dirty: computed,
@@ -20,6 +20,9 @@ export class FieldList<T extends FormField> implements FormField {
             touch: action,
             validate: action,
             reset: action,
+            disabled: observable,
+            disable: action,
+            enable: action,
         })
     }
 
@@ -104,7 +107,23 @@ export class FieldList<T extends FormField> implements FormField {
         return this._inner.valid && this.items.every(f => f.valid)
     }
 
+    disabled = false
+
+    disable(): void {
+        this.disabled = true
+        this.items.forEach(f => f.disable())
+    }
+
+    enable(): void {
+        this.disabled = false
+        this.items.forEach(f => f.enable())
+    }
+
     touch(everyone: boolean = true): void {
+        if (this.disabled) {
+            return
+        }
+
         if (everyone) {
             this.items.forEach(f => f.touch())
         }

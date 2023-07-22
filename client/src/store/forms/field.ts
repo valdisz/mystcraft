@@ -1,37 +1,52 @@
 import { action, computed, makeObservable, observable } from 'mobx'
-import { FormControlProps, FormHelperTextProps, InputLabelProps, SelectProps, TextFieldProps } from '@mui/material'
+import { FormControlProps, FormHelperTextProps, InputLabelProps, TextFieldProps } from '@mui/material'
 import { FormField } from './form-field'
 import { Converter } from './converters'
-import { Validator, combine, required, noValidate } from './validation'
+import { Validator, combine, required, pass } from './validation'
 import { FileFieldProps, SelectFieldProps } from '../../components'
 
 export class Field<T> implements FormField {
     constructor(private converter: Converter<T>, value: T | null, private isRequired?: boolean, ...validators: Validator<T>[]) {
         this.value = value
         this.rawValue = converter.format(value)
-        this.validator = isRequired
-            ? combine(required(), ...validators, noValidate)
-            : combine(...validators, noValidate)
+        this._validator = isRequired
+            ? combine(required(), ...validators)
+            : combine(...validators, pass)
 
         makeObservable(this)
     }
 
-    private readonly validator: Validator<T>
+    private readonly _validator: Validator<T>
+    private readonly _inner = observable.object({
+        dirty: false,
+        touched: false,
+        valid: true,
+    })
 
     @observable value: T | null = null
     @observable rawValue: any = null
+    @observable disabled: boolean = false
 
-    @observable dirty: boolean = false
-    @observable touched: boolean = false
-    @observable valid: boolean = true
+    @computed get dirty(): boolean {
+        return this.disabled ? false :this._inner.dirty
+    }
+
+    @computed get touched(): boolean {
+        return this.disabled ? false : this._inner.touched
+    }
+
+    @computed get valid(): boolean {
+        return this.disabled ? true : this._inner.valid
+    }
+
     @observable error: string = ''
 
     @computed get showError() {
-        return this.shouldShowError()
+        return !this.disabled && (this.dirty || this.touched) && !this.valid
     }
 
     @computed get errorText() {
-        return this.shouldShowError() ? this.error : ''
+        return this.showError ? this.error : ''
     }
 
     get forFormControl(): FormControlProps {
@@ -65,15 +80,6 @@ export class Field<T> implements FormField {
         }
     }
 
-    get forSelect(): SelectProps {
-        return {
-            value: this.rawValue,
-            error: this.showError,
-            onChange: e => this.change(e.target.value),
-            onBlur: this.handleTouch,
-        }
-    }
-
     get forFileField(): FileFieldProps {
         return {
             required: this.isRequired,
@@ -98,24 +104,20 @@ export class Field<T> implements FormField {
 
     private readonly handleTouch = () => this.touch()
 
-    private shouldShowError() {
-        return (this.dirty || this.touched) && !this.valid
-    }
-
     @action reset(value?: T | null) {
         this.value = value || null
         this.rawValue = this.converter.format(this.value)
-        this.dirty = false
-        this.touched = false
-        this.valid = true
+        this._inner.dirty = false
+        this._inner.touched = false
+        this._inner.valid = true
         this.error = ''
     }
 
     @action validate() {
-        this.error = this.validator?.(this.value)
-        this.valid = !this.error
+        this.error = this._validator?.(this.value)
+        this._inner.valid = !this.error
 
-        return this.valid
+        return this._inner.valid
     }
 
     @action setValue(input: any) {
@@ -126,28 +128,46 @@ export class Field<T> implements FormField {
             this.error = error
             this.value = null
 
-            this.dirty = true
-            this.valid = false
+            this._inner.dirty = true
+            this._inner.valid = false
 
             return
         }
 
-        this.dirty = this.dirty || this.value !== value
+        this._inner.dirty = this.dirty || this.value !== value
         this.value = value
 
         this.validate()
     }
 
     @action change(value: any) {
-        this.touched = true
+        this._inner.touched = true
         this.setValue(value)
     }
 
     @action touch() {
-        if (!this.touched) {
+        if (this.disabled) {
+            return
+        }
+
+        if (!this._inner.touched) {
             this.validate()
         }
 
-        this.touched = true
+        this._inner.touched = true
+    }
+
+    @action disable() {
+        this.disabled = true
+        this._inner.dirty = false
+        this._inner.touched = false
+        this._inner.valid = true
+    }
+
+    @action enable() {
+        this.disabled = false
+        this._inner.dirty = false
+        this._inner.touched = false
+        this._inner.valid = true
     }
 }

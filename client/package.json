@@ -43,6 +43,7 @@
     "regenerator-runtime": "^0.13.11",
     "simplebar-react": "^2.4.1",
     "urql": "^4.0.4",
+    "validatorjs": "^3.22.1",
     "wonka": "^6.3.2",
     "yaml": "^2.3.1"
   },
