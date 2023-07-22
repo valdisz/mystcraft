@@ -77,7 +77,7 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
     private _requestHandle: Disposable
 
     get value(): T {
-        this._valueAtom.reportObserved()
+        this.valueObserved()
         return this.getValue()
     }
 
@@ -115,6 +115,10 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
 
     protected valueChanged() {
         this._valueAtom.reportChanged()
+    }
+
+    protected valueObserved() {
+        this._valueAtom.reportObserved()
     }
 
     protected resume() {

@@ -1,6 +1,6 @@
 import { DocumentNode } from 'graphql'
 import { CombinedError, TypedDocumentNode } from 'urql'
-import { ArrayDataSource } from './array-data-source'
+import { SeqDataSource } from './array-data-source'
 import { VariablesGetter } from './variables-getter'
 import { ObjectDataSource } from './object-data-source'
 import { UrqlConnection } from './urql-connection'
@@ -34,7 +34,7 @@ export function seq<TData, T, TVariables extends object = { }>(
     name?: string
 ) {
     const conn = new UrqlConnection<TData, TVariables>(client)
-    const ds = new ArrayDataSource<T, TData, TVariables, CombinedError>(conn, {
+    const ds = new SeqDataSource<T, TData, TVariables, CombinedError>(conn, {
         document,
         projection,
         variables,

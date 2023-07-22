@@ -1,6 +1,7 @@
 fragment GameEngine on GameEngine {
   id
   name
+  remote
   description
   createdAt
   createdBy {

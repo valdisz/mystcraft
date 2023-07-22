@@ -329,6 +329,9 @@ type GameEngine implements Node {
   description: String
   id: ID!
   name: String!
+  remote: Boolean!
+  remoteApi: String
+  remoteOptions: String
   updatedAt: DateTime!
   updatedBy: User
   updatedByUserId: Long
@@ -340,6 +343,12 @@ type GameEngineCollectionSegment {
   """Information to aid in pagination."""
   pageInfo: CollectionSegmentInfo!
   totalCount: Int!
+}
+
+type GameEngineCreateRemoteResult implements MutationResult {
+  engine: GameEngine
+  error: String
+  isSuccess: Boolean!
 }
 
 type GameEngineCreateResult implements MutationResult {
@@ -500,6 +509,7 @@ type Mutation {
   gameComplete(gameId: ID!): GameStopResult
   gameCreate(finishAt: DateTime, gameEngineId: ID!, map: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateResult
   gameEngineCreate(content: Upload, description: String, name: String, ruleset: Upload): GameEngineCreateResult
+  gameEngineCreateRemote(api: String, description: String, name: String, options: String): GameEngineCreateRemoteResult
   gameEngineDelete(gameEngineId: ID!): GameEngineDeleteResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
   gameJoinRemote(gameId: ID!, password: String, playerId: ID!): GameJoinRemoteResult

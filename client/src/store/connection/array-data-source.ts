@@ -1,17 +1,24 @@
 import { DataSource, DataSourceOptions } from './data-source'
 import { DataSourceConnection } from './data-source-connection'
 
-export interface SeqDataSource<T> {
+export interface Seq<T> {
     [Symbol.iterator](): IterableIterator<T>
+    readonly value: T[]
     readonly isEmpty: boolean
     readonly length: number
     map<U>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any): U[]
     filter<S extends T>(predicate: (value: T, index: number, array: T[]) => value is S, thisArg?: any): S[]
+    find(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: any): T | undefined
+    push(...items: T[]): number
+    pop(): T | undefined
+    splice(start: number, deleteCount: number, ...items: T[]): T[]
+    insert(index: number, ...items: T[]): T[]
+    remove(predicate: (value: T, index: number, array: T[]) => boolean): T[]
 }
 
-export class ArrayDataSource<T, TData = {}, TVariables extends object = {}, TError = unknown>
+export class SeqDataSource<T, TData = {}, TVariables extends object = {}, TError = unknown>
     extends DataSource<T[], TData, TVariables, TError>
-    implements SeqDataSource<T> {
+    implements Seq<T> {
 
     constructor(connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T[], TData, TVariables>) {
         super(connection, options)
@@ -22,6 +29,7 @@ export class ArrayDataSource<T, TData = {}, TVariables extends object = {}, TErr
     private _value: T[]
 
     *[Symbol.iterator](): IterableIterator<T> {
+        this.valueObserved()
         for (let i = 0; i < this._value.length; ++i) {
             yield this._value[i];
         }

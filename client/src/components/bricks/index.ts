@@ -8,3 +8,6 @@ export { default as DateTime } from './date-time'
 
 export * from './confirm'
 export { default as Confirm } from './confirm'
+
+export * from './select-field'
+export { default as SelectField } from './select-field'

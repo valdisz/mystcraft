@@ -129,9 +129,11 @@ export class FieldList<T extends FormField> implements FormField {
         return this._inner.valid
     }
 
-    reset(): void {
-        if (this._items.length) {
+    reset(...items: T[]): void {
+        const newItems = items || []
+        if (this._items.length || newItems.length) {
             this._items.length = 0
+            this._items.push(...newItems)
             this.valueChanged()
         }
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container, List, Alert, AlertTitle, Stack, Paper, LinearProgress } from '@mui/material'
-import { Operation, OperationError, SeqDataSource } from '../store/connection'
+import { Operation, OperationError, Seq } from '../store/connection'
 import { PageTitle } from './page-title'
 import { observer } from 'mobx-react-lite'
 import { EmptyListItem } from './bricks'
@@ -10,7 +10,7 @@ interface ListLayoutProps<T> {
     actions?: React.ReactNode
 
     operation: Operation<OperationError>
-    items: SeqDataSource<T>
+    items: Seq<T>
 
     children: (item: T) => React.ReactNode
 }

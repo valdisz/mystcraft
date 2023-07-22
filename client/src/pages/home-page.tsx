@@ -1,20 +1,19 @@
 import * as React from 'react'
-import { ListItemText, TextField, Button, Container,
+import { ListItemText, TextField, Button,
     DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl, Select,
     InputLabel, MenuItem, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
-    FormControlLabel, Switch, IconButton, FormHelperText
+    IconButton, FormHelperText
 } from '@mui/material'
+import cronstrue from 'cronstrue'
 import { Observer, observer } from 'mobx-react-lite'
 import { Link, LinkProps } from 'react-router-dom'
 import { MapLevelItem, NewGameEngineViewModel, useStore } from '../store'
-import { ListLayout, FileField } from '../components'
+import { ListLayout, FileField, SelectField } from '../components'
 import { GameEngineFragment, GameHeaderFragment } from '../schema'
-import cronstrue from 'cronstrue'
 import { Role, ForRole } from '../auth'
-
-import AttachFileIcon from '@mui/icons-material/AttachFile'
-import ClearIcon from '@mui/icons-material/Clear'
 import { FieldList } from '../store/forms'
+
+import ClearIcon from '@mui/icons-material/Clear'
 
 export function HomePage() {
     const { games, newGame } = useStore()
@@ -177,12 +176,26 @@ function MapLevelEditor({ model, onAdd, onRemove }: MapLevelEditorProps) {
     </Observer>
 }
 
-function NewGameDialog() {
-    const { newGame, engines } = useStore()
-    const form = newGame.form
+function engineKey(engine: GameEngineFragment) {
+    return engine.id
+}
 
-    const renderSelectedEngine = (engineId: any) => <ListItemText primary={engines.find(x => x.id === engineId).name} />
-    const renderEngine = (engine: GameEngineFragment) => <ListItemText primary={engine.name} secondary={engine.description} />
+function NewGameDialog() {
+    const { newGame } = useStore()
+    const { engines, form } = newGame
+
+    const renderSelectedEngine = (engine: GameEngineFragment) => {
+        if (!engine) {
+            return null
+        }
+
+        return (
+            <Stack direction='row' alignItems='center'>
+                <ListItemText primary={engine.name} />
+                <Chip size='small' variant={engine.remote ? 'filled' : 'outlined' } label={engine.remote ? 'remote' : 'local'} />
+            </Stack>
+        )
+    }
 
     return <Dialog fullWidth maxWidth='sm' open={newGame.isOpen} onClose={newGame.cancel}>
         <DialogTitle>New game</DialogTitle>
@@ -190,26 +203,23 @@ function NewGameDialog() {
             <Stack gap={2}>
                 <TextField autoFocus label='Name' {...form.name.forTextField} />
 
-                <FormControl {...form.engine.forFormControl}>
-                    <InputLabel {...form.engine.forInputLabel}>Engine</InputLabel>
-                    <Select label='Engine' renderValue={renderSelectedEngine} {...form.engine.forSelect}>
-                        { engines.value.map(engine => <MenuItem key={engine.id} value={engine.id}>
-                            { renderEngine(engine) }
-                        </MenuItem>) }
-                    </Select>
-                    <FormHelperText {...form.engine.forFormHelperText} />
-                </FormControl>
+                <SelectField<GameEngineFragment> label='Engine' items={engines.value} mapKey={engineKey} renderValue={renderSelectedEngine} {...form.engine.forSelectField}>
+                    { (engine: GameEngineFragment) => (
+                        <>
+                            <ListItemText primary={engine.name} secondary={engine.description} />
+                            <Chip size='small' variant={engine.remote ? 'filled' : 'outlined' } label={engine.remote ? 'remote' : 'local'} />
+                        </>
+                    ) }
+                </SelectField>
 
-                <FormControlLabel control={<Switch checked={newGame.remote} onChange={newGame.remoteChange} />} label="Remote" />
-
-                { !newGame.remote && <>
+                { newGame.requireUpload && <>
                     <FileField label='game.in' {...form.gameFile.forFileField} />
                     <FileField label='players.in' {...form.playersFile.forFileField} />
                 </> }
 
                 <MapLevelEditor model={form.levels} onAdd={newGame.addLevel} onRemove={newGame.removeLevel} />
 
-                <TextField label='Schedule' {...form.schedule.forTextField} />
+                <TextField label='Schedule' {...form.schedule.forTextField} helperText={newGame.scheduleHelpText} />
 
                 <FormControl {...form.timeZone.forFormControl}>
                     <InputLabel id='timeZoneLabel' {...form.timeZone.forInputLabel}>Time Zone</InputLabel>
@@ -229,3 +239,4 @@ function NewGameDialog() {
 }
 
 const ObservableNewGameDialog = observer(NewGameDialog)
+

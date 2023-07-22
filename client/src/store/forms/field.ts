@@ -3,7 +3,7 @@ import { FormControlProps, FormHelperTextProps, InputLabelProps, SelectProps, Te
 import { FormField } from './form-field'
 import { Converter } from './converters'
 import { Validator, combine, required, noValidate } from './validation'
-import { FileFieldProps } from '../../components'
+import { FileFieldProps, SelectFieldProps } from '../../components'
 
 export class Field<T> implements FormField {
     constructor(private converter: Converter<T>, value: T | null, private isRequired?: boolean, ...validators: Validator<T>[]) {
@@ -69,7 +69,7 @@ export class Field<T> implements FormField {
         return {
             value: this.rawValue,
             error: this.showError,
-            onChange: e => this.change(e.target.value as string),
+            onChange: e => this.change(e.target.value),
             onBlur: this.handleTouch,
         }
     }
@@ -81,6 +81,17 @@ export class Field<T> implements FormField {
             error: this.showError,
             helperText: this.errorText,
             onChange: file => this.change(file),
+            onBlur: this.handleTouch,
+        }
+    }
+
+    get forSelectField(): Partial<SelectFieldProps<T>> {
+        return {
+            required: this.isRequired,
+            value: this.rawValue,
+            error: this.showError,
+            helperText: this.errorText,
+            onChange: value => this.change(value),
             onBlur: this.handleTouch,
         }
     }

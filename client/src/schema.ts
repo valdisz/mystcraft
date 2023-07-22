@@ -336,6 +336,9 @@ export type GameEngine = Node & {
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   name: Scalars['String'];
+  remote: Scalars['Boolean'];
+  remoteApi?: Maybe<Scalars['String']>;
+  remoteOptions?: Maybe<Scalars['String']>;
   updatedAt: Scalars['DateTime'];
   updatedBy?: Maybe<User>;
   updatedByUserId?: Maybe<Scalars['Long']>;
@@ -347,6 +350,13 @@ export type GameEngineCollectionSegment = {
   /** Information to aid in pagination. */
   pageInfo: CollectionSegmentInfo;
   totalCount: Scalars['Int'];
+};
+
+export type GameEngineCreateRemoteResult = MutationResult & {
+  __typename?: 'GameEngineCreateRemoteResult';
+  engine?: Maybe<GameEngine>;
+  error?: Maybe<Scalars['String']>;
+  isSuccess: Scalars['Boolean'];
 };
 
 export type GameEngineCreateResult = MutationResult & {
@@ -518,6 +528,7 @@ export type Mutation = {
   gameComplete?: Maybe<GameStopResult>;
   gameCreate?: Maybe<GameCreateResult>;
   gameEngineCreate?: Maybe<GameEngineCreateResult>;
+  gameEngineCreateRemote?: Maybe<GameEngineCreateRemoteResult>;
   gameEngineDelete?: Maybe<GameEngineDeleteResult>;
   gameJoinLocal?: Maybe<GameJoinLocalResult>;
   gameJoinRemote?: Maybe<GameJoinRemoteResult>;
@@ -575,6 +586,14 @@ export type MutationGameEngineCreateArgs = {
   description?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   ruleset?: InputMaybe<Scalars['Upload']>;
+};
+
+
+export type MutationGameEngineCreateRemoteArgs = {
+  api?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
+  name?: InputMaybe<Scalars['String']>;
+  options?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -1187,7 +1206,7 @@ export type FleetContentFragment = { __typename?: 'FleetContent', type?: string 
 
 export type GameDetailsFragment = { __typename?: 'Game', id: string, name: string, ruleset: Array<any>, options: { __typename?: 'GameOptions', map?: Array<{ __typename?: 'MapLevel', label?: string | null, level: number, width: number, height: number } | null> | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null };
 
-export type GameEngineFragment = { __typename?: 'GameEngine', id: string, name: string, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null };
+export type GameEngineFragment = { __typename?: 'GameEngine', id: string, name: string, remote: boolean, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null };
 
 export type GameHeaderFragment = { __typename?: 'Game', id: string, status: GameStatus, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null> | null } | null };
 
@@ -1253,7 +1272,7 @@ export type GameEngineCreateMutationVariables = Exact<{
 }>;
 
 
-export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null } | null };
+export type GameEngineCreateMutation = { __typename?: 'Mutation', gameEngineCreate?: { __typename?: 'GameEngineCreateResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, remote: boolean, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null } | null };
 
 export type GameEngineDeleteMutationVariables = Exact<{
   gameEngineId: Scalars['ID'];
@@ -1338,7 +1357,7 @@ export type GetGameEnginesQueryVariables = Exact<{
 }>;
 
 
-export type GetGameEnginesQuery = { __typename?: 'Query', gameEngines?: { __typename?: 'GameEngineCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'GameEngine', id: string, name: string, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null> | null, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean, hasPreviousPage: boolean } } | null };
+export type GetGameEnginesQuery = { __typename?: 'Query', gameEngines?: { __typename?: 'GameEngineCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'GameEngine', id: string, name: string, remote: boolean, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null> | null, pageInfo: { __typename?: 'CollectionSegmentInfo', hasNextPage: boolean, hasPreviousPage: boolean } } | null };
 
 export type GetGameQueryVariables = Exact<{
   gameId: Scalars['ID'];
@@ -1440,6 +1459,7 @@ export const GameEngine = gql`
     fragment GameEngine on GameEngine {
   id
   name
+  remote
   description
   createdAt
   createdBy {
