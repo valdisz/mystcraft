@@ -3,9 +3,9 @@ export interface ValueOrError<T> {
     value?: T
 }
 
-export interface Converter<T> {
-    sanitzie(value: any): ValueOrError<T>
-    format(value: T | null): any
+export interface Converter<TRaw, T> {
+    sanitzie(value: TRaw): ValueOrError<T>
+    format(value: T): TRaw
 }
 
 
@@ -65,5 +65,10 @@ export const REAL: Converter<number> = {
 
 export const FILE: Converter<File> = {
     sanitzie: (value: File) => ({ value }),
+    format: value => value
+}
+
+export const BOOLEAN: Converter<boolean> = {
+    sanitzie: (value: any) => ({ value: !!value }),
     format: value => value
 }

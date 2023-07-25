@@ -1,8 +1,8 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
-import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle, Stack } from '@mui/material'
+import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle, Stack, Box, Tabs, Tab } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { Forbidden, GameEngineItem, ListLayout, FileField } from '../components'
+import { Forbidden, GameEngineItem, ListLayout, FileField, SwitchField } from '../components'
 import { NewGameEngineViewModel, useStore } from '../store'
 import { Role, ForRole, forRole } from '../auth'
 import { GameEngineFragment } from '../schema'
@@ -49,10 +49,19 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
             <Stack gap={2}>
                 <TextField label='Name' {...form.name.forTextField} />
 
-                <TextField label='Description' fullWidth multiline rows={4} {...form.description.forTextField} />
+                <TextField label='Description' multiline rows={4} {...form.description.forTextField} />
 
-                <FileField label='Game Engine' {...form.engine.forFileField} />
-                <FileField label='Ruleset' {...form.ruleset.forFileField} />
+                <Tabs variant='fullWidth' value='local'>
+                    <Tab label="Local" value='local' />
+                    <Tab label="Remote" value='remote' />
+                </Tabs>
+
+                {/* <SwitchField label='Remote' {...form.remote.forSwitchField} /> */}
+
+                { !form.files.disabled && <>
+                    <FileField label='Game Engine' {...form.files.engine.forFileField} />
+                    <FileField label='Ruleset' {...form.files.ruleset.forFileField} />
+                </>}
             </Stack>
         </DialogContent>
 

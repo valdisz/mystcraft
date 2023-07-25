@@ -1,15 +1,18 @@
-import { action, makeObservable, observable } from 'mobx'
-import { FILE, Field, FormField, STRING, makeGroup, rule } from './forms'
+import { action, makeObservable, observable, reaction, runInAction } from 'mobx'
+import { BOOLEAN, FILE, Field, FieldView, STRING, makeGroup, rule } from './forms'
 
 export interface NewGameEngineConfirmationCallback {
     (name: string, description: string, content: File, ruleset: File): Promise<any>
 }
 
-export interface NewGameEngineForm extends FormField {
+export interface NewGameEngineForm extends FieldView {
     name: Field<string>
     description: Field<string>
-    engine: Field<File>
-    ruleset: Field<File>
+    remote: Field<boolean>
+    files: {
+        engine: Field<File>
+        ruleset: Field<File>
+    } & FieldView
 }
 
 export class NewGameEngineViewModel {
@@ -20,9 +23,24 @@ export class NewGameEngineViewModel {
     readonly form: NewGameEngineForm = makeGroup({
         name: new Field<string>(STRING(true), '', true, rule('max:128')),
         description: new Field<string>(STRING(true), '', false, rule('max:1024')),
-        engine: new Field<File>(FILE, null, true),
-        ruleset: new Field<File>(FILE, null, true),
+        remote: new Field<boolean>(BOOLEAN, false, true),
+        files: makeGroup({
+            engine: new Field<File>(FILE, null, true),
+            ruleset: new Field<File>(FILE, null, true),
+        })
     })
+
+    private readonly _whenRemote = reaction(
+        () => this.form.remote.value,
+        remote => {
+            if (remote) {
+                this.form.files.disable()
+            }
+            else {
+                this.form.files.enable()
+            }
+        }
+    )
 
     @observable isOpen = false
     @observable inProgress = false
@@ -33,7 +51,9 @@ export class NewGameEngineViewModel {
 
         this.inProgress = false
         this.error = ''
+
         this.form.reset()
+        this.form.remote.reset(false)
     }
 
     @action readonly close = () => {

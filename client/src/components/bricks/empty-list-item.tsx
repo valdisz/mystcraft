@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Typography, ListItem, ListItemText } from '@mui/material'
+import { Box, Typography, ListItem } from '@mui/material'
 
 export interface EmptyListItemProps {
     children?: React.ReactNode

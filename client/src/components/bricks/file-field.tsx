@@ -37,15 +37,13 @@ export interface FileFieldProps {
     label?: React.ReactNode
     actionLabel?: React.ReactNode
     required?: boolean
+    disabled?: boolean
     value?: File
     accept?: string
     error?: boolean
     helperText?: React.ReactNode
     onChange?: (file: File) => void
     onBlur?: () => void
-
-    // model: FileViewModel
-    // action?: React.ReactNode
 }
 
 export function FileField({

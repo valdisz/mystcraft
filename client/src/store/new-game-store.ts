@@ -2,7 +2,7 @@ import React from 'react'
 import { action, computed, makeObservable, observable, reaction } from 'mobx'
 import { GameEngineFragment } from '../schema'
 import { Seq } from './connection'
-import { Field, FILE, INT, STRING, FieldList, FormField, makeGroup, isCron, Converter, rule } from './forms'
+import { Field, FILE, INT, STRING, FieldList, FieldView, makeGroup, isCron, Converter, rule } from './forms'
 import cronstrue from 'cronstrue'
 
 const GAME_ENGINE: Converter<GameEngineFragment> = {
@@ -22,7 +22,7 @@ function dividesWithEight(value: number): string | null {
     return null
 }
 
-export interface MapLevelItem extends FormField {
+export interface MapLevelItem extends FieldView {
     label: Field<string>
     width: Field<number>
     height: Field<number>
@@ -36,7 +36,7 @@ function newMapLevelItem(label: string = '', width: number = null, height: numbe
     })
 }
 
-export interface NewGameForm extends FormField {
+export interface NewGameForm extends FieldView {
     name: Field<string>
     engine: Field<GameEngineFragment>
     timeZone: Field<string>
@@ -61,8 +61,8 @@ export class NewGameStore {
         playersFile: new Field<File>(FILE, null, true),
     })
 
-    private readonly _whenRemote = reaction(() =>
-        this.form.engine.value,
+    private readonly _whenRemote = reaction(
+        () => this.form.engine.value,
         engine => {
             if (!engine) {
                 return

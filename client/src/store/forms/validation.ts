@@ -22,16 +22,6 @@ export function pass() {
     return null
 }
 
-export function required<T>(error?: string): Validator<T> {
-    return (value: T) => {
-        if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
-            return error || 'Required'
-        }
-
-        return null
-    }
-}
-
 export function rule<T = unknown>(rule: string, error?: string): Validator<T> {
     return (value: T) => {
         const validation = new ValidatorJS({ value }, { value: rule });

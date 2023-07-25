@@ -1,9 +1,9 @@
 import { IAtom, createAtom, computed, makeObservable, action, observable, runInAction } from 'mobx'
-import { FormField } from './form-field'
+import { FieldView } from './form-field'
 import { FormControlProps, FormHelperTextProps, InputLabelProps } from '@mui/material'
 import { Validator, combine, pass, required } from './validation'
 
-export class FieldList<T extends FormField> implements FormField {
+export class FieldList<T extends FieldView> implements FieldView {
     constructor(private readonly _items: T[] = [], private readonly isRequired: boolean = false, ...validators: Validator<T[]>[]) {
         this._atom = createAtom('items')
 
