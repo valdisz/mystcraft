@@ -17,7 +17,6 @@ export interface FieldView {
     readonly error: string
 
     reset(): void
-    validate(): boolean
     touch(): void
     activate(): void
     deactivate(): void

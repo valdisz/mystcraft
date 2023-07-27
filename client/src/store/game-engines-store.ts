@@ -1,46 +1,38 @@
-import { action, makeObservable, observable, reaction, runInAction } from 'mobx'
-import { BOOLEAN, FILE, Field, FieldView, STRING, makeGroup, rule } from './forms'
+import { action, makeObservable, observable } from 'mobx'
+import { group, text, bool, file, rule } from './forms'
 
 export interface NewGameEngineConfirmationCallback {
     (name: string, description: string, content: File, ruleset: File): Promise<any>
 }
 
-export interface NewGameEngineForm extends FieldView {
-    name: Field<string>
-    description: Field<string>
-    remote: Field<boolean>
-    files: {
-        engine: Field<File>
-        ruleset: Field<File>
-    } & FieldView
+function newForm() {
+    const name = text(rule('max:128'), { isRequired: true })
+    const description = text(rule('max:1024'))
+    const remote = bool(null, { initialValue: false, isRequired: true })
+
+    const disabledWhenRemote = () => remote.value
+
+    const files = group(
+        {
+            engine: file(null, { isRequired: true }),
+            ruleset: file(null, { isRequired: true })
+        },
+        {
+            isDisabled: disabledWhenRemote
+        }
+    )
+
+    return group({ name, description, remote, files })
 }
+
+type Form = ReturnType<typeof newForm>
 
 export class NewGameEngineViewModel {
     constructor(private readonly onConfirm: NewGameEngineConfirmationCallback) {
         makeObservable(this)
     }
 
-    readonly form: NewGameEngineForm = makeGroup({
-        name: new Field<string>(STRING(true), '', true, rule('max:128')),
-        description: new Field<string>(STRING(true), '', false, rule('max:1024')),
-        remote: new Field<boolean>(BOOLEAN, false, true),
-        files: makeGroup({
-            engine: new Field<File>(FILE, null, true),
-            ruleset: new Field<File>(FILE, null, true),
-        })
-    })
-
-    private readonly _whenRemote = reaction(
-        () => this.form.remote.value,
-        remote => {
-            if (remote) {
-                this.form.files.disable()
-            }
-            else {
-                this.form.files.enable()
-            }
-        }
-    )
+    readonly form: Form = newForm()
 
     @observable isOpen = false
     @observable inProgress = false

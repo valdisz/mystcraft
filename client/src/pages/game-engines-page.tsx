@@ -2,10 +2,11 @@ import React from 'react'
 import { observer } from 'mobx-react-lite'
 import { Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Alert, AlertTitle, Stack, Box, Tabs, Tab } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
-import { Forbidden, GameEngineItem, ListLayout, FileField, SwitchField } from '../components'
+import { Forbidden, GameEngineItem, ListLayout, FileField } from '../components'
 import { NewGameEngineViewModel, useStore } from '../store'
 import { Role, ForRole, forRole } from '../auth'
 import { GameEngineFragment } from '../schema'
+import { forFileField, forTextField } from '../store/forms'
 
 function GameEnginesPage() {
     const { engines, enginesDelete, enginesNew } = useStore()
@@ -47,9 +48,9 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
                 : null
             }
             <Stack gap={2}>
-                <TextField label='Name' {...form.name.forTextField} />
+                <TextField label='Name' {...forTextField(form.name)} />
 
-                <TextField label='Description' multiline rows={4} {...form.description.forTextField} />
+                <TextField label='Description' multiline rows={4} {...forTextField(form.description)} />
 
                 <Tabs variant='fullWidth' value='local'>
                     <Tab label="Local" value='local' />
@@ -58,9 +59,9 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
 
                 {/* <SwitchField label='Remote' {...form.remote.forSwitchField} /> */}
 
-                { !form.files.disabled && <>
-                    <FileField label='Game Engine' {...form.files.engine.forFileField} />
-                    <FileField label='Ruleset' {...form.files.ruleset.forFileField} />
+                { form.files.isEnabled && <>
+                    <FileField label='Game Engine' {...forFileField(form.files.engine)} />
+                    <FileField label='Ruleset' {...forFileField(form.files.ruleset)} />
                 </>}
             </Stack>
         </DialogContent>

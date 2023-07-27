@@ -1,14 +1,9 @@
-import React from 'react'
 import { action, computed, makeObservable, observable, reaction } from 'mobx'
 import { GameEngineFragment } from '../schema'
 import { Seq } from './connection'
-import { Field, FILE, INT, STRING, FieldList, FieldView, makeGroup, isCron, Converter, rule } from './forms'
+import { text, file, int, group, list, custom, rule } from './forms'
 import cronstrue from 'cronstrue'
-
-const GAME_ENGINE: Converter<GameEngineFragment> = {
-    sanitzie: (value: GameEngineFragment) => ({ value: value ? value : null }),
-    format: value => value ? value : ''
-}
+import { type } from 'os'
 
 function dividesWithEight(value: number): string | null {
     if (value === 1) {
@@ -22,28 +17,47 @@ function dividesWithEight(value: number): string | null {
     return null
 }
 
-export interface MapLevelItem extends FieldView {
-    label: Field<string>
-    width: Field<number>
-    height: Field<number>
-}
-
-function newMapLevelItem(label: string = '', width: number = null, height: number = null): MapLevelItem {
-    return makeGroup({
-        label: new Field<string>(STRING(true), label, true, rule('max:128')),
-        width: new Field<number>(INT, width, true, rule('min:1'), dividesWithEight),
-        height: new Field<number>(INT, height, true, rule('min:1'), dividesWithEight)
+function newMapLevelItem(label: string = '', width: number = null, height: number = null) {
+    return group({
+        label: text(rule('max:128'), { trim: true, initialValue: label, isRequired: true }),
+        width: int([rule('min:1'), dividesWithEight], { initialValue: width, isRequired: true }),
+        height: int([rule('min:1'), dividesWithEight], { initialValue: height, isRequired: true }),
     })
 }
 
-export interface NewGameForm extends FieldView {
-    name: Field<string>
-    engine: Field<GameEngineFragment>
-    timeZone: Field<string>
-    schedule: Field<string>
-    levels: FieldList<MapLevelItem>
-    gameFile: Field<File>
-    playersFile: Field<File>
+export type MapLevelItem = ReturnType<typeof newMapLevelItem>
+
+function newForm() {
+    const engine = custom<GameEngineFragment>(
+        {
+            sanitize: value => ({ value: value ? value : null }),
+            format: value => value
+        },
+        null,
+        { isRequired: true }
+    )
+
+    const schedule = text(rule('max:128'), { trim: true })
+
+    return group({
+        name: text(rule('max:128'), { isRequired: true, trim: true }),
+        engine,
+        schedule,
+        timeZone: text(rule('max:128'), {
+            isRequired: () => schedule.isNotEmpty,
+            trim: true
+        }),
+        levels: list<MapLevelItem>(rule('min:1'), { isRequired: true }),
+        files: group(
+            {
+                game: file(null, { isRequired: true }),
+                players: file(null, { isRequired: true }),
+            },
+            {
+                isDisabled: () => engine.value?.remote ?? true
+            }
+        )
+    })
 }
 
 export class NewGameStore {
@@ -51,43 +65,13 @@ export class NewGameStore {
         makeObservable(this)
     }
 
-    readonly form = makeGroup({
-        name: new Field<string>(STRING(true), '', true, rule('max:128')),
-        engine: new Field<GameEngineFragment>(GAME_ENGINE, null, true),
-        timeZone: new Field<string>(STRING(true), Intl.DateTimeFormat().resolvedOptions().timeZone, true, rule('max:128')),
-        schedule: new Field<string>(STRING(true), '0 0 12 * * MON,TUE,FRI *', false, rule('max:128'), isCron()),
-        levels: new FieldList<MapLevelItem>([], true, rule('max:4')),
-        gameFile: new Field<File>(FILE, null, true),
-        playersFile: new Field<File>(FILE, null, true),
-    })
-
-    private readonly _whenRemote = reaction(
-        () => this.form.engine.value,
-        engine => {
-            if (!engine) {
-                return
-            }
-
-            if (engine.remote) {
-                this.form.gameFile.disable()
-                this.form.playersFile.disable()
-            }
-            else {
-                this.form.gameFile.enable()
-                this.form.playersFile.enable()
-            }
-        }
-    )
+    readonly form = newForm()
 
     @computed get scheduleHelpText() {
-        const errorText = this.form.schedule.errorText
+        const errorText = this.form.schedule.error
         const expression = this.form.schedule.value
 
         return errorText ?? cronstrue.toString(expression) ?? ''
-    }
-
-    @computed get requireUpload(): boolean {
-        return !(this.form.engine.value?.remote ?? true)
     }
 
     @observable isOpen = false
@@ -110,7 +94,7 @@ export class NewGameStore {
     @action confirm = () => {
         this.form.touch()
 
-        console.log('Form is vaid: ', this.form.valid)
+        console.log('Form is vaid: ', this.form.isValid)
     }
 
     @action addLevel = () => {

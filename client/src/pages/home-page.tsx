@@ -1,17 +1,17 @@
 import * as React from 'react'
 import { ListItemText, TextField, Button,
-    DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl, Select,
-    InputLabel, MenuItem, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
+    DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl,
+    InputLabel, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
     IconButton, FormHelperText
 } from '@mui/material'
 import cronstrue from 'cronstrue'
 import { Observer, observer } from 'mobx-react-lite'
 import { Link, LinkProps } from 'react-router-dom'
-import { MapLevelItem, NewGameEngineViewModel, useStore } from '../store'
+import { MapLevelItem, useStore } from '../store'
 import { ListLayout, FileField, SelectField } from '../components'
 import { GameEngineFragment, GameHeaderFragment } from '../schema'
 import { Role, ForRole } from '../auth'
-import { FieldList } from '../store/forms'
+import { List, forFileField, forFormControl, forFormHelperText, forSelectField, forTextField } from '../store/forms'
 
 import ClearIcon from '@mui/icons-material/Clear'
 
@@ -139,9 +139,9 @@ function MapLevelItemEditor({ model, onRemove }: MapLevelItemEditorProps) {
     return <Observer>
         {() =>
             <Stack direction='row' gap={2}>
-                <TextField label='Label' required {...model.label.forTextField} />
-                <TextField label='Width' required {...model.width.forTextField}  />
-                <TextField label='Height' required {...model.height.forTextField}  />
+                <TextField label='Label' required {...forTextField(model.label)} />
+                <TextField label='Width' required {...forTextField(model.width)}  />
+                <TextField label='Height' required {...forTextField(model.height)}  />
                 <FormControl sx={{ justifyContent: 'center' }}>
                     <IconButton color='error' onClick={onRemove}>
                         <ClearIcon />
@@ -154,7 +154,7 @@ function MapLevelItemEditor({ model, onRemove }: MapLevelItemEditorProps) {
 }
 
 interface MapLevelEditorProps {
-    model: FieldList<MapLevelItem>
+    model: List<MapLevelItem>
     onAdd: () => void
     onRemove: (item: MapLevelItem, index: number) => void
 }
@@ -162,7 +162,7 @@ interface MapLevelEditorProps {
 function MapLevelEditor({ model, onAdd, onRemove }: MapLevelEditorProps) {
     return <Observer>
         {() =>
-            <FormControl margin='dense' {...model.forFormControl}>
+            <FormControl margin='dense' {...forFormControl(model)}>
                 <InputLabel shrink>Levels</InputLabel>
                 <Stack mt={2}>
                     {model.map((item, index) => <MapLevelItemEditor key={index} model={item} onRemove={() => onRemove(item, index)} />)}
@@ -170,7 +170,7 @@ function MapLevelEditor({ model, onAdd, onRemove }: MapLevelEditorProps) {
                         <Button variant='outlined' onClick={onAdd}>Add level</Button>
                     </Box>
                 </Stack>
-                <FormHelperText {...model.forFormHelperText} />
+                <FormHelperText {...forFormHelperText(model)} />
             </FormControl>
         }
     </Observer>
@@ -201,9 +201,9 @@ function NewGameDialog() {
         <DialogTitle>New game</DialogTitle>
         <DialogContent>
             <Stack gap={2}>
-                <TextField autoFocus label='Name' {...form.name.forTextField} />
+                <TextField autoFocus label='Name' {...forTextField(form.name)} />
 
-                <SelectField<GameEngineFragment> label='Engine' items={engines.value} mapKey={engineKey} renderValue={renderSelectedEngine} {...form.engine.forSelectField}>
+                <SelectField<GameEngineFragment> label='Engine' items={engines.value} mapKey={engineKey} renderValue={renderSelectedEngine} {...forSelectField(form.engine)}>
                     { (engine: GameEngineFragment) => (
                         <>
                             <ListItemText primary={engine.name} secondary={engine.description} />
@@ -212,16 +212,16 @@ function NewGameDialog() {
                     ) }
                 </SelectField>
 
-                { newGame.requireUpload && <>
-                    <FileField label='game.in' {...form.gameFile.forFileField} />
-                    <FileField label='players.in' {...form.playersFile.forFileField} />
+                { form.files.isEnabled && <>
+                    <FileField label='game.in' {...forFileField(form.files.game)} />
+                    <FileField label='players.in' {...forFileField(form.files.players)} />
                 </> }
 
                 <MapLevelEditor model={form.levels} onAdd={newGame.addLevel} onRemove={newGame.removeLevel} />
 
-                <TextField label='Schedule' {...form.schedule.forTextField} helperText={newGame.scheduleHelpText} />
+                <TextField label='Schedule' {...forTextField(form.schedule)} helperText={newGame.scheduleHelpText} />
 
-                <SelectField label='Time Zone' items={newGame.timeZones} {...form.timeZone.forSelectField} />
+                <SelectField label='Time Zone' items={newGame.timeZones} {...forSelectField(form.timeZone)} />
             </Stack>
         </DialogContent>
 
