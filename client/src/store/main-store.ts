@@ -5,10 +5,10 @@ import { seq, mutate, combine } from './connection'
 import { GetGameEngines, GetGameEnginesQuery, GameEngineFragment, MutationResult } from '../schema'
 import { GetGames, GetGamesQuery, GameHeaderFragment } from '../schema'
 
-import { GameEngineCreate, GameEngineCreateMutation, GameEngineCreateMutationVariables } from '../schema'
+import { GameEngineCreateLocal, GameEngineCreateLocalMutation, GameEngineCreateLocalMutationVariables } from '../schema'
 import { GameEngineCreateRemote, GameEngineCreateRemoteMutation, GameEngineCreateRemoteMutationVariables } from '../schema'
 import { GameEngineDelete, GameEngineDeleteMutation, GameEngineDeleteMutationVariables, GameEngineDeleteResult } from '../schema'
-import { GameCreate, GameCreateMutation, GameCreateMutationVariables, GameCreateResult } from '../schema'
+import { GameCreateRemote, GameCreateRemoteMutation, GameCreateRemoteMutationVariables } from '../schema'
 
 import { GameDetailsStore } from './game-details-store'
 import { NewGameEngineViewModel } from './game-engines-store'
@@ -18,13 +18,17 @@ import { NewGameStore } from './new-game-store'
 // import { UniversityStore } from './university-store'
 import { StatsStore } from './stats-store'
 
+export type Result<K extends keyof any, T> = {
+    [P in K]?: T
+}  & MutationResult
+
 export class MainStore {
     readonly engines = seq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [], null, 'engines')
 
-    readonly opGameEngineAddLocal = mutate<GameEngineCreateMutation, GameEngineCreateMutationVariables, { engine?: GameEngineFragment } & MutationResult, GameEngineFragment>({
+    readonly opGameEngineAddLocal = mutate<GameEngineCreateLocalMutation, GameEngineCreateLocalMutationVariables, Result<'engine', GameEngineFragment>, GameEngineFragment>({
         name: 'opAddEngineLocal',
-        document: GameEngineCreate,
-        pick: data => data.gameEngineCreate,
+        document: GameEngineCreateLocal,
+        pick: data => data.gameEngineCreateLocal,
         map: data => data.engine,
         onSuccess: [
             engine => runInAction(() => {
@@ -34,7 +38,7 @@ export class MainStore {
         ]
     })
 
-    readonly opGameEngineAddRemote = mutate<GameEngineCreateRemoteMutation, GameEngineCreateRemoteMutationVariables, { engine?: GameEngineFragment } & MutationResult, GameEngineFragment>({
+    readonly opGameEngineAddRemote = mutate<GameEngineCreateRemoteMutation, GameEngineCreateRemoteMutationVariables, Result<'engine', GameEngineFragment>, GameEngineFragment>({
         name: 'opAddEngineRemote',
         document: GameEngineCreateRemote,
         pick: data => data.gameEngineCreateRemote,
@@ -68,21 +72,22 @@ export class MainStore {
 
     readonly games = seq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [], null, 'games')
 
-    readonly opGameAdd = mutate<GameCreateMutation, GameCreateMutationVariables, GameCreateResult, GameHeaderFragment>({
+    readonly opGameAddRemote = mutate<GameCreateRemoteMutation, GameCreateRemoteMutationVariables, Result<'game', GameHeaderFragment>, GameHeaderFragment>({
         name: 'opGameAdd',
-        document: GameCreate,
-        pick: data => data.gameCreate as GameCreateResult,
+        document: GameCreateRemote,
+        pick: data => data.gameCreateRemote,
         map: data => data.game,
         onSuccess: [
             game => runInAction(() => {
                 this.games.insert(0, game)
+                this.newGame.dialog.close()
             })
         ]
     })
 
     readonly home = new HomeStore()
     readonly gameDetails = new GameDetailsStore()
-    readonly newGame = new NewGameStore(this.engines)
+    readonly newGame = new NewGameStore(this.engines, this.opGameAddRemote, this.opGameAddRemote)
     readonly game = new GameStore()
     readonly stats = new StatsStore(this.game)
     readonly loading = new GameLoadingStore()

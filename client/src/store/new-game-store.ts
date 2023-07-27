@@ -1,8 +1,9 @@
-import { action, computed, makeObservable, observable } from 'mobx'
-import { GameEngineFragment } from '../schema'
-import { Seq } from './connection'
+import { action, computed, makeObservable } from 'mobx'
+import { GameCreateRemoteMutationVariables, GameEngineFragment } from '../schema'
+import { Operation, Runnable, Seq } from './connection'
 import { text, file, int, group, list, custom, rule } from './forms'
 import cronstrue from 'cronstrue'
+import { DialogViewModel, newDialog } from './dialog'
 
 function dividesWithEight(value: number): string | null {
     if (value === 1) {
@@ -60,10 +61,25 @@ function newForm() {
 }
 
 export class NewGameStore {
-    constructor(public readonly engines: Seq<GameEngineFragment>) {
+    constructor(
+        public readonly engines: Seq<GameEngineFragment>,
+        public readonly operation: Operation,
+        private readonly add: Runnable<GameCreateRemoteMutationVariables>,
+    ) {
+        this.dialog = newDialog({
+            onOpen: () => {
+                this.form.reset()
+                this.form.levels.reset(newMapLevelItem('nexus', 1, 1))
+                this.form.schedule.reset('0 12 * * MON,WED,FRI')
+                this.form.timeZone.reset(Intl.DateTimeFormat().resolvedOptions().timeZone)
+            },
+            operation: this.operation
+        })
+
         makeObservable(this)
     }
 
+    readonly dialog: DialogViewModel
     readonly form = newForm()
 
     @computed get scheduleHelpText() {
@@ -75,29 +91,7 @@ export class NewGameStore {
         return errorText || expression || ''
     }
 
-    @observable isOpen = false
-
     readonly timeZones = Intl.supportedValuesOf('timeZone')
-
-    @action open = () => {
-        this.isOpen = true
-
-        this.form.reset()
-        this.form.levels.reset(newMapLevelItem('nexus', 1, 1))
-        this.form.schedule.reset('0 12 * * MON,WED,FRI')
-        this.form.timeZone.reset(Intl.DateTimeFormat().resolvedOptions().timeZone)
-    }
-
-    @action cancel = () => {
-        this.isOpen = false;
-    }
-
-    @action confirm = () => {
-        this.form.touch()
-
-        console.log('Form is vaid: ', this.form.isValid)
-        console.log('Form: ', this.form.value)
-    }
 
     @action addLevel = () => {
         this.form.levels.push(newMapLevelItem())
@@ -106,5 +100,22 @@ export class NewGameStore {
 
     @action removeLevel = (item: MapLevelItem, index: number) => {
         this.form.levels.splice(index, 1)
+    }
+
+    @action confirm = async () => {
+        this.form.touch()
+        if (this.form.isInvalid) {
+            return
+        }
+
+        const { engine, files, levels, ...variables } = this.form.value
+        if (engine.remote) {
+            const vars = { gameEngineId: engine.id, levels: levels.map((l, i) => ({ level: i, ...l})), ...variables }
+
+            console.log('add remote', vars)
+            await this.add.run(vars)
+        }
+        else {
+        }
     }
 }

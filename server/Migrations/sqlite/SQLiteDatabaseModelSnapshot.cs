@@ -385,10 +385,6 @@ namespace advisor.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("Ruleset")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<int>("Status")
                         .HasMaxLength(64)
                         .HasColumnType("INTEGER");

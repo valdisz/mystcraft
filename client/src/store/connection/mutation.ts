@@ -2,8 +2,7 @@ import { observable, makeObservable, computed, runInAction, action } from 'mobx'
 import { TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
 import { RequestPolicy, DataSourceConnection } from './data-source-connection'
-import { Operation } from './operation'
-import { OperationState } from './operation-state'
+import { Operation, OperationState } from './operation'
 import { Option, Callback, ContextCallback, ContextProjection } from './types'
 
 
@@ -74,7 +73,7 @@ function execList<A, B>(arg1: A, arg2: B, list?: ContextCallback<A, B, any>[]): 
 /**
  * Represents a runnable operation that can be run multiple times with different variables.
  */
-export interface Runnable<TVariables extends object, T> {
+export interface Runnable<TVariables extends object, T = unknown> {
     /**
      * Runs the operation with the specified variables and returns a promise that resolves to the result.
      */
@@ -94,6 +93,7 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
             error: observable,
             value: observable,
             isLoading: computed,
+            isIdle: computed,
             isReady: computed,
             isFailed: computed,
             reset: action
@@ -145,6 +145,10 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
 
     get isFailed() {
         return this.state === 'failed'
+    }
+
+    get isIdle() {
+        return !this.isLoading
     }
 
     /**

@@ -27,11 +27,11 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameEngineCreateResult> GameEngineCreate(IResolverContext context, IMediator mediator, string name, string description, IFile engine, IFile ruleset) {
+    public async Task<GameEngineCreateLocalResult> GameEngineCreateLocal(IResolverContext context, IMediator mediator, string name, string description, IFile engine, IFile ruleset) {
         using var es = engine.OpenReadStream();
         using var rs = ruleset.OpenReadStream();
 
-        var result = await mediator.Send(new GameEngineCreate(name, description, es, rs), context.RequestAborted);
+        var result = await mediator.Send(new GameEngineCreateLocal(name, description, es, rs), context.RequestAborted);
 
         return result;
     }
@@ -46,11 +46,11 @@ public class Mutation {
         mediator.Send(new GameEngineDelete(gameEngineId), context.RequestAborted);
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameCreateResult> GameCreate(
+    public Task<GameCreateRemoteResult> GameCreateRemote(
         IMediator mediator,
         string name,
         [ID(GameEngineType.NAME)] long gameEngineId,
-        List<MapLevel> map,
+        List<MapLevel> levels,
         string schedule,
         string timeZone,
         DateTimeOffset? startAt,
@@ -62,7 +62,7 @@ public class Mutation {
         // using var playersDataStream = playerData.OpenReadStream();
         // using var gameDataStream = gameData.OpenReadStream();
 
-        return mediator.Send(new GameCreate(name, gameEngineId, map, schedule, timeZone, startAt, finishAt));
+        return mediator.Send(new GameCreateRemote(name, gameEngineId, levels, schedule, timeZone, startAt, finishAt));
     }
 
     // [Authorize(Policy = Policies.GameMasters)]

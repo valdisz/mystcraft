@@ -1,0 +1,9 @@
+mutation GameEngineCreateLocal($name: String!, $description: String, $engine: Upload!, $ruleset: Upload) {
+  gameEngineCreateLocal(name: $name, description: $description, engine: $engine, ruleset: $ruleset) {
+    isSuccess
+    error
+    engine {
+      ...GameEngine
+    }
+  }
+}

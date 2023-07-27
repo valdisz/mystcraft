@@ -397,10 +397,6 @@ namespace advisor.Migrations.pgsql
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<byte[]>("Ruleset")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
                     b.Property<int>("Status")
                         .HasMaxLength(64)
                         .HasColumnType("integer");

@@ -2,8 +2,9 @@ import * as React from 'react'
 import { ListItemText, TextField, Button,
     DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl,
     InputLabel, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
-    IconButton, FormHelperText
+    IconButton, FormHelperText, Alert, AlertTitle
 } from '@mui/material'
+import { LoadingButton } from '@mui/lab'
 import cronstrue from 'cronstrue'
 import { Observer, observer } from 'mobx-react-lite'
 import { Link, LinkProps } from 'react-router-dom'
@@ -20,7 +21,7 @@ export function HomePage() {
 
     const actions = (
         <ForRole role={Role.GameMaster}>
-            <Button color='primary' size='large' onClick={newGame.open}>New Game</Button>
+            <Button color='primary' size='large' onClick={newGame.dialog.open}>New Game</Button>
         </ForRole>
     )
 
@@ -182,7 +183,7 @@ function engineKey(engine: GameEngineFragment) {
 
 function NewGameDialog() {
     const { newGame } = useStore()
-    const { engines, form } = newGame
+    const { engines, form, dialog, operation } = newGame
 
     const renderSelectedEngine = (engine: GameEngineFragment) => {
         if (!engine) {
@@ -197,10 +198,18 @@ function NewGameDialog() {
         )
     }
 
-    return <Dialog fullWidth maxWidth='sm' open={newGame.isOpen} onClose={newGame.cancel}>
+    return <Dialog fullWidth maxWidth='sm' open={dialog.isOpen} onClose={dialog.autoClose}>
         <DialogTitle>New game</DialogTitle>
         <DialogContent>
             <Stack gap={2}>
+                { operation.isFailed
+                    ? <Alert severity="error">
+                        <AlertTitle>Error</AlertTitle>
+                        {operation.error?.message}
+                    </Alert>
+                    : null
+                }
+
                 <TextField autoFocus label='Name' {...forTextField(form.name)} />
 
                 <SelectField<GameEngineFragment> label='Engine' items={engines.value} mapKey={engineKey} renderValue={renderSelectedEngine} {...forSelectField(form.engine)}>
@@ -226,8 +235,8 @@ function NewGameDialog() {
         </DialogContent>
 
         <DialogActions>
-            <Button variant='text' onClick={newGame.cancel}>Cancel</Button>
-            <Button color='primary' onClick={newGame.confirm}>Add new game</Button>
+            <Button variant='text'  disabled={operation.isLoading} onClick={dialog.close}>Cancel</Button>
+            <LoadingButton loading={operation.isLoading} color='primary' onClick={newGame.confirm}>Add new game</LoadingButton>
         </DialogActions>
     </Dialog>
 }

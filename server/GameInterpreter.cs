@@ -31,7 +31,7 @@ public readonly struct GameInterpreter<RT>
         Mystcraft<A>.ReadOneGameEngine oge      =>       ReadOneGameEngine(oge),
         Mystcraft<A>.WriteOneGameEngine wge     => _tran(WriteOneGameEngine(wge)),
         Mystcraft<A>.DeleteGameEngine dge       =>       DeleteGameEngine(dge),
-        Mystcraft<A>.CreateGame cr              => _tran(CreateGame(cr)),
+        Mystcraft<A>.CreateGameRemote cr        => _tran(CreateGameRemote(cr)),
         Mystcraft<A>.ReadManyGames gm           =>       ReadManyGames(gm),
         Mystcraft<A>.ReadOneGame og             =>       ReadOneGame(og),
         Mystcraft<A>.WriteOneGame wg            => _tran(WriteOneGame(wg)),
@@ -99,14 +99,14 @@ public readonly struct GameInterpreter<RT>
         from ret in _Interpret(action.Next(ge))
         select ret;
 
-    private static Aff<RT, A> CreateGame<A>(Mystcraft<A>.CreateGame action) =>
+    private static Aff<RT, A> CreateGameRemote<A>(Mystcraft<A>.CreateGameRemote action) =>
         // TODO: improve this
         from game in Database<RT>.add(DbGame.New(
             action.Name,
             action.Engine.Value,
             new GameOptions
             {
-                Map = action.Map,
+                Map = action.Levels,
                 Schedule = action.Schedule.Cron,
                 TimeZone = action.Schedule.TimeZone,
                 StartAt = action.Period.StartAt.ToNullable(),

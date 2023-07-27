@@ -63,8 +63,8 @@ public static class Mystcraft {
     /// <summary>
     /// Create a new game.
     /// </summary>
-    public static Mystcraft<DbGame> CreateGame(string Name, GameEngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period) =>
-        new Mystcraft<DbGame>.CreateGame(Name, Engine, Map, Schedule, Period, Return);
+    public static Mystcraft<DbGame> CreateGameRemote(string Name, GameEngineId Engine, List<MapLevel> Levels, GameSchedule Schedule, GamePeriod Period) =>
+        new Mystcraft<DbGame>.CreateGameRemote(Name, Engine, Levels, Schedule, Period, Return);
 
     /// <summary>
     /// Get a list of all games.
@@ -259,7 +259,7 @@ public abstract record Mystcraft<A> {
     /// <summary>
     /// Create a new game.
     /// </summary>
-    public sealed record CreateGame(string Name, GameEngineId Engine, List<MapLevel> Map, GameSchedule Schedule, GamePeriod Period, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record CreateGameRemote(string Name, GameEngineId Engine, List<MapLevel> Levels, GameSchedule Schedule, GamePeriod Period, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a list of all games.

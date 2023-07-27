@@ -8,8 +8,7 @@ import { Mutation, MutationOptions } from './mutation'
 import client from './client'
 import { MutationResult } from '../../schema'
 import { Option, OperationError, Projection, ContextProjection } from './types'
-import { Operation } from './operation'
-import { OperationState } from './operation-state'
+import { Operation, OperationState } from './operation'
 import { computed, makeObservable } from 'mobx'
 
 export function query<TData, T extends object, TVariables extends object = { }>(
@@ -107,6 +106,7 @@ class CombinedOperation<TError> implements Operation<TError> {
         makeObservable(this, {
             state: computed,
             isLoading: computed,
+            isIdle: computed,
             isReady: computed,
             isFailed: computed,
             error: computed,
@@ -135,6 +135,10 @@ class CombinedOperation<TError> implements Operation<TError> {
 
     get isLoading() {
         return this.operations.some(o => o.isLoading)
+    }
+
+    get isIdle() {
+        return !this.isLoading
     }
 
     get isReady() {

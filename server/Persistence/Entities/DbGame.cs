@@ -37,9 +37,6 @@ public class DbGame : IsAggregateRoot, WithAudit {
     [Required]
     public GameOptions Options { get; set; }
 
-    [Required]
-    public byte[] Ruleset { get; set; }
-
 
     public int? LastTurnNumber { get; set; }
 
@@ -95,9 +92,6 @@ public class DbGameConfiguration : IEntityTypeConfiguration<DbGame> {
 
         builder.Property(x => x.Options)
             .HasConversionJson(db.Provider);
-
-        builder.Property(x => x.Ruleset)
-            .HasCompression();
 
         builder.HasMany(p => p.Players)
             .WithOne(p => p.Game)

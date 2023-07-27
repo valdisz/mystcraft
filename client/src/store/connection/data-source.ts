@@ -1,10 +1,9 @@
-import { createAtom, IAtom, IReactionDisposer, reaction, transaction, IReactionOptions } from 'mobx'
+import { createAtom, IAtom, IReactionDisposer, reaction, transaction, IReactionOptions, makeObservable, computed } from 'mobx'
 import { OperationResult, TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
 import { RequestPolicy, DataSourceConnection, Disposable } from './data-source-connection'
-import { Operation } from './operation'
+import { Operation, OperationState } from './operation'
 import { VariablesGetter } from './variables-getter'
-import { OperationState } from './operation-state'
 import { Projection } from './types'
 
 export interface DataSourceOptions<T, TData, TVariables extends object> {
@@ -37,6 +36,7 @@ export interface ReloadOptions {
 
 export abstract class DataSource<T, TData = {}, TVariables extends object = {}, TError = unknown>
     implements Operation<TError> {
+
     constructor(private readonly connection: DataSourceConnection<TData, TVariables, TError>, options: DataSourceOptions<T, TData, TVariables>) {
         this._name = options.name ?? 'DataSource'
         this._document = options.document
@@ -49,6 +49,13 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
         this._valueAtom = createAtom(this._name, this.resume.bind(this), this.suspend.bind(this))
         this._stateAtom = createAtom(`${this._name}::state`)
         this._errorAtom = createAtom(`${this._name}::error`)
+
+        makeObservable(this, {
+            isLoading: computed,
+            isIdle: computed,
+            isReady: computed,
+            isFailed: computed,
+        })
     }
 
     /**
@@ -93,6 +100,10 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
 
     get isLoading() {
         return this.state === 'loading'
+    }
+
+    get isIdle() {
+        return !this.isLoading
     }
 
     get isReady() {

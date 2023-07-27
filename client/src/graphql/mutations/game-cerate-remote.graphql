@@ -1,5 +1,5 @@
-mutation GameCreate($name: String!, $gameEngineId: ID!, $map: [MapLevelInput!]!, $schedule: String!, $timeZone: String!) {
-  gameCreate(name: $name, gameEngineId: $gameEngineId, map: $map, schedule: $schedule, timeZone: $timeZone) {
+mutation GameCreateRemote($name: String!, $gameEngineId: ID!, $levels: [MapLevelInput!]!, $schedule: String!, $timeZone: String!) {
+  gameCreateRemote(name: $name, gameEngineId: $gameEngineId, levels: $levels, schedule: $schedule, timeZone: $timeZone) {
     isSuccess
     error
     game {

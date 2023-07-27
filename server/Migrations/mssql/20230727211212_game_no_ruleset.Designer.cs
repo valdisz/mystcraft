@@ -3,18 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.mssql
+namespace server.Migrations.mssql
 {
     [DbContext(typeof(MsSqlDatabase))]
-    partial class MsSqlDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20230727211212_game_no_ruleset")]
+    partial class game_no_ruleset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

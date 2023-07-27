@@ -4,7 +4,7 @@ fragment GameDetails on Game {
   options {
     ...GameOptions
   }
-  ruleset
+#   ruleset
   me {
     ...PlayerHeader
   }

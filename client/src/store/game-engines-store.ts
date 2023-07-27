@@ -1,8 +1,8 @@
 import { action, computed, makeObservable } from 'mobx'
 import { group, text, bool, file, rule } from './forms'
 import { Operation, Runnable } from './connection'
-import { newDialog } from './dialog'
-import { GameEngineCreateMutationVariables, GameEngineCreateRemoteMutationVariables, GameEngineFragment } from '../schema'
+import { DialogViewModel, newDialog } from './dialog'
+import { GameEngineCreateLocalMutationVariables, GameEngineCreateRemoteMutationVariables } from '../schema'
 
 function newForm() {
     const name = text(rule('max:128'), { isRequired: true })
@@ -32,9 +32,18 @@ function newForm() {
 export class NewGameEngineViewModel {
     constructor(
         public readonly operation: Operation,
-        private readonly addLocal: Runnable<GameEngineCreateMutationVariables, GameEngineFragment>,
-        private readonly addRemote: Runnable<GameEngineCreateRemoteMutationVariables, GameEngineFragment>,
+        private readonly addLocal: Runnable<GameEngineCreateLocalMutationVariables>,
+        private readonly addRemote: Runnable<GameEngineCreateRemoteMutationVariables>,
     ) {
+        this.dialog = newDialog({
+            onOpen: () => {
+                this.operation.reset()
+                this.form.reset()
+                this.form.isRemote.reset(false)
+            },
+            operation: this.operation
+        })
+
         makeObservable(this, {
             mode: computed,
             setMode: action,
@@ -42,15 +51,8 @@ export class NewGameEngineViewModel {
         })
     }
 
+    readonly dialog: DialogViewModel
     readonly form = newForm()
-    readonly dialog = newDialog({
-        onOpen: () => {
-            this.operation.reset()
-            this.form.reset()
-            this.form.isRemote.reset(false)
-        },
-        onClose: () => !this.operation.isLoading
-    })
 
     get mode(): 'local' | 'remote' {
         return this.form.isRemote.value ? 'remote' : 'local'

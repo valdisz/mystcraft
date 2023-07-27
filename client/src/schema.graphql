@@ -299,7 +299,6 @@ type Game implements Node {
   nextTurnNumber: Int
   options: GameOptions!
   players(quit: Boolean! = false, skip: Int, take: Int): PlayerCollectionSegment
-  ruleset: [Byte!]!
   status: GameStatus!
   turns: [Turn]
   type: GameType!
@@ -316,7 +315,7 @@ type GameCollectionSegment {
   totalCount: Int!
 }
 
-type GameCreateResult implements MutationResult {
+type GameCreateRemoteResult implements MutationResult {
   error: String
   game: Game
   isSuccess: Boolean!
@@ -346,13 +345,13 @@ type GameEngineCollectionSegment {
   totalCount: Int!
 }
 
-type GameEngineCreateRemoteResult implements MutationResult {
+type GameEngineCreateLocalResult implements MutationResult {
   engine: GameEngine
   error: String
   isSuccess: Boolean!
 }
 
-type GameEngineCreateResult implements MutationResult {
+type GameEngineCreateRemoteResult implements MutationResult {
   engine: GameEngine
   error: String
   isSuccess: Boolean!
@@ -508,8 +507,8 @@ type Mutation {
   allianceJoin(allianceId: ID!, playerId: ID!): AllianceJoinResult
   deleteTurn(turnId: ID): Int!
   gameComplete(gameId: ID!): GameStopResult
-  gameCreate(finishAt: DateTime, gameEngineId: ID!, map: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateResult
-  gameEngineCreate(description: String, engine: Upload, name: String, ruleset: Upload): GameEngineCreateResult
+  gameCreateRemote(finishAt: DateTime, gameEngineId: ID!, levels: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateRemoteResult
+  gameEngineCreateLocal(description: String, engine: Upload, name: String, ruleset: Upload): GameEngineCreateLocalResult
   gameEngineCreateRemote(api: String, description: String, name: String, options: String, url: String): GameEngineCreateRemoteResult
   gameEngineDelete(gameEngineId: ID!): GameEngineDeleteResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult

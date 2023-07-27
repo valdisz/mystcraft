@@ -10,47 +10,47 @@ using advisor.Schema;
 using advisor.Model;
 using MediatR;
 
-public record GameCreate(
+public record GameCreateRemote(
     string Name,
     long GameEngineId,
     // Stream Ruleset,
-    List<MapLevel> Map,
+    List<MapLevel> Levels,
     string Schedule,
     string TimeZone,
     DateTimeOffset? StartAt,
     DateTimeOffset? FinishAt
-) : IRequest<GameCreateResult>;
+) : IRequest<GameCreateRemoteResult>;
 
-public record GameCreateResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error) {
-    public static GameCreateResult New(Validation<Error, DbGame> result) =>
+public record GameCreateRemoteResult(bool IsSuccess, string Error = null, DbGame Game = null) : MutationResult(IsSuccess, Error) {
+    public static GameCreateRemoteResult New(Validation<Error, DbGame> result) =>
         result.Match(
-            Succ: g => new GameCreateResult(true, Game: g),
-            Fail: e => new GameCreateResult(false, Error: e.Head.Message)
+            Succ: g => new GameCreateRemoteResult(true, Game: g),
+            Fail: e => new GameCreateRemoteResult(false, Error: e.Head.Message)
         );
 }
 
-public class GameCreateHandler : IRequestHandler<GameCreate, GameCreateResult> {
-    public GameCreateHandler(Database database) {
+public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCreateRemoteResult> {
+    public GameCreateRemoteHandler(Database database) {
         this.database = database;
     }
 
     private readonly Database database;
 
-    public Task<GameCreateResult> Handle(GameCreate request, CancellationToken cancellationToken) =>
+    public Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) =>
         Validate(request)
             .Map(GameInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
-            .Map(GameCreateResult.New);
+            .Map(GameCreateRemoteResult.New);
 
-    private static Validation<Error, Mystcraft<DbGame>> Validate(GameCreate request) =>
+    private static Validation<Error, Mystcraft<DbGame>> Validate(GameCreateRemote request) =>
     (
         ValidateName(request.Name).ForField("Name"),
-        GameEngineId.New(request.GameEngineId).ForField(nameof(GameCreate.GameEngineId)),
-        ValidateMap(request.Map).ForField("Map"),
+        GameEngineId.New(request.GameEngineId).ForField(nameof(GameCreateRemote.GameEngineId)),
+        ValidateMap(request.Levels).ForField("Levels"),
         GameSchedule.New(request.Schedule, request.TimeZone).ForField("Schedule"),
         GamePeriod.New(Optional(request.StartAt), Optional(request.FinishAt)).ForField("Period")
     )
-    .Apply(Mystcraft.CreateGame);
+    .Apply(Mystcraft.CreateGameRemote);
 
     private static Validation<Error, string> ValidateName(string name) =>
         NotEmpty(name)
