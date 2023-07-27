@@ -5,6 +5,28 @@ export interface Validator<T> {
     (value: T): string | null
 }
 
+export type OneOrManyValidators<T> = Validator<T> | Validator<T>[]
+
+export function makeValidator<T>(validators?: OneOrManyValidators<T>): Validator<T> {
+    if (!validators) {
+        return pass
+    }
+
+    if (Array.isArray(validators)) {
+        if (validators.length === 0) {
+            return pass
+        }
+
+        if (validators.length === 1) {
+            return validators[0]
+        }
+
+        return combine(...validators)
+    }
+
+    return validators
+}
+
 export function combine<T>(...validators: Validator<T>[]): Validator<T> {
     return (value: T) => {
         for (var v of validators) {
