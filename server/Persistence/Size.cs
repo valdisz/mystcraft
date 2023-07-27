@@ -32,4 +32,5 @@ public static class Size {
     public const int COUNTRY = 128;
     public const int CITY = 128;
     public const int SYMBOL = 64;
+    public const int URL = 2048;
 }

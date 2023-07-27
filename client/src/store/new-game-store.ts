@@ -19,8 +19,8 @@ function dividesWithEight(value: number): string | null {
 function newMapLevelItem(label: string = '', width: number = null, height: number = null) {
     return group({
         label: text(rule('max:128'), { trim: true, initialValue: label, isRequired: true }),
-        width: int([rule('min:1'), dividesWithEight], { initialValue: width, isRequired: true }),
-        height: int([rule('min:1'), dividesWithEight], { initialValue: height, isRequired: true }),
+        width: int([dividesWithEight], { initialValue: width, isRequired: true }),
+        height: int([dividesWithEight], { initialValue: height, isRequired: true }),
     })
 }
 
@@ -46,7 +46,7 @@ function newForm() {
             isRequired: () => schedule.isNotEmpty,
             trim: true
         }),
-        levels: list<MapLevelItem>(rule('min:1'), { isRequired: true }),
+        levels: list<MapLevelItem>(null, { isRequired: true }),
         files: group(
             {
                 game: file(null, { isRequired: true }),

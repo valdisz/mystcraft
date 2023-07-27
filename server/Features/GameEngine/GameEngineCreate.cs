@@ -8,7 +8,7 @@ using advisor.Persistence;
 using advisor.Schema;
 using advisor.Model;
 
-public record GameEngineCreate(string Name, string Description, Stream Contents, Stream Ruleset): IRequest<GameEngineCreateResult>;
+public record GameEngineCreate(string Name, string Description, Stream Engine, Stream Ruleset): IRequest<GameEngineCreateResult>;
 
 public record GameEngineCreateResult(bool IsSuccess, string Error = null, DbGameEngine Engine = null) : IMutationResult {
     public static GameEngineCreateResult New(Validation<Error, DbGameEngine> result) =>
@@ -35,7 +35,7 @@ public class GameEngineCreateHandler : IRequestHandler<GameEngineCreate, GameEng
     (
         ValidateName(request.Name).ForField("Name"),
         ValidateDescription(request.Description).ForField("Description"),
-        NotEmpty(await request.Contents.ReadAllBytesAsync()).ForField(nameof(GameEngineCreate.Contents)),
+        NotEmpty(await request.Engine.ReadAllBytesAsync()).ForField(nameof(GameEngineCreate.Engine)),
         NotEmpty(await request.Ruleset.ReadAllBytesAsync()).ForField(nameof(GameEngineCreate.Ruleset))
     )
     .Apply(Mystcraft.CreateGameEngine);

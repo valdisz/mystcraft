@@ -339,6 +339,7 @@ export type GameEngine = Node & {
   remote: Scalars['Boolean'];
   remoteApi?: Maybe<Scalars['String']>;
   remoteOptions?: Maybe<Scalars['String']>;
+  remoteUrl?: Maybe<Scalars['String']>;
   updatedAt: Scalars['DateTime'];
   updatedBy?: Maybe<User>;
   updatedByUserId?: Maybe<Scalars['Long']>;
@@ -582,8 +583,8 @@ export type MutationGameCreateArgs = {
 
 
 export type MutationGameEngineCreateArgs = {
-  content?: InputMaybe<Scalars['Upload']>;
   description?: InputMaybe<Scalars['String']>;
+  engine?: InputMaybe<Scalars['Upload']>;
   name?: InputMaybe<Scalars['String']>;
   ruleset?: InputMaybe<Scalars['Upload']>;
 };
@@ -594,6 +595,7 @@ export type MutationGameEngineCreateRemoteArgs = {
   description?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   options?: InputMaybe<Scalars['String']>;
+  url?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -1264,10 +1266,21 @@ export type GameCreateMutationVariables = Exact<{
 
 export type GameCreateMutation = { __typename?: 'Mutation', gameCreate?: { __typename?: 'GameCreateResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, status: GameStatus, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null> | null } | null } | null } | null };
 
+export type GameEngineCreateRemoteMutationVariables = Exact<{
+  name: Scalars['String'];
+  description?: InputMaybe<Scalars['String']>;
+  api?: InputMaybe<Scalars['String']>;
+  url?: InputMaybe<Scalars['String']>;
+  options?: InputMaybe<Scalars['String']>;
+}>;
+
+
+export type GameEngineCreateRemoteMutation = { __typename?: 'Mutation', gameEngineCreateRemote?: { __typename?: 'GameEngineCreateRemoteResult', isSuccess: boolean, error?: string | null, engine?: { __typename?: 'GameEngine', id: string, name: string, remote: boolean, description?: string | null, createdAt: any, createdBy?: { __typename?: 'User', name: string } | null } | null } | null };
+
 export type GameEngineCreateMutationVariables = Exact<{
   name: Scalars['String'];
   description?: InputMaybe<Scalars['String']>;
-  content: Scalars['Upload'];
+  engine: Scalars['Upload'];
   ruleset?: InputMaybe<Scalars['Upload']>;
 }>;
 
@@ -1902,12 +1915,29 @@ export const GameCreate = gql`
   }
 }
     ${GameHeader}`;
+export const GameEngineCreateRemote = gql`
+    mutation GameEngineCreateRemote($name: String!, $description: String, $api: String, $url: String, $options: String) {
+  gameEngineCreateRemote(
+    name: $name
+    description: $description
+    api: $api
+    url: $url
+    options: $options
+  ) {
+    isSuccess
+    error
+    engine {
+      ...GameEngine
+    }
+  }
+}
+    ${GameEngine}`;
 export const GameEngineCreate = gql`
-    mutation GameEngineCreate($name: String!, $description: String, $content: Upload!, $ruleset: Upload) {
+    mutation GameEngineCreate($name: String!, $description: String, $engine: Upload!, $ruleset: Upload) {
   gameEngineCreate(
     name: $name
     description: $description
-    content: $content
+    engine: $engine
     ruleset: $ruleset
   ) {
     isSuccess

@@ -8,6 +8,9 @@ import { Mutation, MutationOptions } from './mutation'
 import client from './client'
 import { MutationResult } from '../../schema'
 import { Option, OperationError, Projection, ContextProjection } from './types'
+import { Operation } from './operation'
+import { OperationState } from './operation-state'
+import { computed, makeObservable } from 'mobx'
 
 export function query<TData, T extends object, TVariables extends object = { }>(
     document: DocumentNode | TypedDocumentNode<TData, TVariables>,
@@ -97,4 +100,60 @@ export function mutate<TData, TVariables extends object, TResult extends Mutatio
         mapError: mapMutationError<TData>(pick),
         mapProtocolError
     })
+}
+
+class CombinedOperation<TError> implements Operation<TError> {
+    constructor(private readonly operations: Operation<TError>[]) {
+        makeObservable(this, {
+            state: computed,
+            isLoading: computed,
+            isReady: computed,
+            isFailed: computed,
+            error: computed,
+        })
+    }
+
+    get state() {
+        const isLoading = this.operations.some(o => o.isLoading)
+        const isReady = this.operations.every(o => o.isReady)
+        const isFailed = this.operations.some(o => o.isFailed)
+
+        if (isLoading) {
+            return 'loading' as OperationState
+        }
+
+        if (isFailed) {
+            return 'failed' as OperationState
+        }
+
+        if (isReady) {
+            return 'failed' as OperationState
+        }
+
+        return 'unspecified'
+    }
+
+    get isLoading() {
+        return this.operations.some(o => o.isLoading)
+    }
+
+    get isReady() {
+        return this.operations.every(o => o.isReady)
+    }
+
+    get isFailed() {
+        return this.operations.some(o => o.isFailed)
+    }
+
+    get error() {
+        return this.operations.find(o => o.isFailed)?.error ?? null
+    }
+
+    reset() {
+        this.operations.forEach(o => o.reset())
+    }
+}
+
+export function combine<TError = OperationError>(...operations: Operation<TError>[]): Operation<TError> {
+    return new CombinedOperation(operations || [])
 }

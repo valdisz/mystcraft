@@ -1,0 +1,9 @@
+mutation GameEngineCreateRemote($name: String!, $description: String, $api: String, $url: String, $options: String) {
+  gameEngineCreateRemote(name: $name, description: $description, api: $api, url: $url, options: $options) {
+    isSuccess
+    error
+    engine {
+      ...GameEngine
+    }
+  }
+}

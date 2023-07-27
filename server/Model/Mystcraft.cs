@@ -21,14 +21,14 @@ public static class Mystcraft {
     /// <summary>
     /// Create a new game engine.
     /// </summary>
-    public static Mystcraft<DbGameEngine> CreateGameEngine(string Name, string Description, byte[] Contents, byte[] Ruleset) =>
-        new Mystcraft<DbGameEngine>.CreateGameEngine(Name, Description, Contents, Ruleset, Return);
+    public static Mystcraft<DbGameEngine> CreateGameEngine(string Name, string Description, byte[] Engine, byte[] Ruleset) =>
+        new Mystcraft<DbGameEngine>.CreateGameEngine(Name, Description, Engine, Ruleset, Return);
 
     /// <summary>
     /// Create a new remote game engine.
     /// </summary>
-    public static Mystcraft<DbGameEngine> CreateGameEngineRemote(string Name, string Description, string Api, string Options) =>
-        new Mystcraft<DbGameEngine>.CreateGameEngineRemote(Name, Description, Api, Options, Return);
+    public static Mystcraft<DbGameEngine> CreateGameEngineRemote(string Name, string Description, string Api, string Url, string Options) =>
+        new Mystcraft<DbGameEngine>.CreateGameEngineRemote(Name, Description, Api, Url, Options, Return);
 
     /// <summary>
     /// Get a list of all game engines.
@@ -224,12 +224,12 @@ public abstract record Mystcraft<A> {
     /// <summary>
     /// Represents operation that creates a new game engine.
     /// </summary>
-    public sealed record CreateGameEngine(string Name, string Description, byte[] Contents, byte[] Ruleset, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record CreateGameEngine(string Name, string Description, byte[] Engine, byte[] Ruleset, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that creates a new remote game engine.
     /// </summary>
-    public sealed record CreateGameEngineRemote(string Name, string Description, string Api, string Options, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record CreateGameEngineRemote(string Name, string Description, string Api, string Url, string Options, Func<DbGameEngine, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a list of all game engines.

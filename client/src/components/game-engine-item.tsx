@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { GameEngineFragment } from '../schema'
-import { IconButton, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material'
+import { Chip, IconButton, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material'
 import { Confirm, DateTime } from './bricks'
 
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -33,6 +33,7 @@ function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
         <ListItemButton>
             <ListItemText primary={engine.name} primaryTypographyProps={{ variant: 'subtitle1' }} secondary={created} />
             <ListItemText primary={engine.description} />
+            <Chip size='small' variant={engine.remote ? 'filled' : 'outlined' } label={engine.remote ? 'remote' : 'local'} />
         </ListItemButton>
     </ListItem>
 }

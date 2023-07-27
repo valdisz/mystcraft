@@ -7,8 +7,8 @@ public static class MystcraftExtensions
     public static Mystcraft<B> Bind<A, B>(this Mystcraft<A> ma, Func<A, Mystcraft<B>> f) => ma switch {
         Mystcraft<A>.Return rt                => f(rt.Value),
 
-        Mystcraft<A>.CreateGameEngine cge       => new Mystcraft<B>.CreateGameEngine(cge.Name, cge.Description, cge.Contents, cge.Ruleset, n => cge.Next(n).Bind(f)),
-        Mystcraft<A>.CreateGameEngineRemote cge => new Mystcraft<B>.CreateGameEngineRemote(cge.Name, cge.Description, cge.Api, cge.Options, n => cge.Next(n).Bind(f)),
+        Mystcraft<A>.CreateGameEngine cge       => new Mystcraft<B>.CreateGameEngine(cge.Name, cge.Description, cge.Engine, cge.Ruleset, n => cge.Next(n).Bind(f)),
+        Mystcraft<A>.CreateGameEngineRemote cge => new Mystcraft<B>.CreateGameEngineRemote(cge.Name, cge.Description, cge.Api, cge.Url, cge.Options, n => cge.Next(n).Bind(f)),
         Mystcraft<A>.ReadManyGameEngines gme    => new Mystcraft<B>.ReadManyGameEngines(gme.Predicate, n => gme.Next(n).Bind(f)),
         Mystcraft<A>.ReadOneGameEngine oge      => new Mystcraft<B>.ReadOneGameEngine(oge.Engine, n => oge.Next(n).Bind(f)),
         Mystcraft<A>.WriteOneGameEngine wge     => new Mystcraft<B>.WriteOneGameEngine(wge.Engine, n => wge.Next(n).Bind(f)),

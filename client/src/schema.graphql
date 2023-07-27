@@ -332,6 +332,7 @@ type GameEngine implements Node {
   remote: Boolean!
   remoteApi: String
   remoteOptions: String
+  remoteUrl: String
   updatedAt: DateTime!
   updatedBy: User
   updatedByUserId: Long
@@ -508,8 +509,8 @@ type Mutation {
   deleteTurn(turnId: ID): Int!
   gameComplete(gameId: ID!): GameStopResult
   gameCreate(finishAt: DateTime, gameEngineId: ID!, map: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateResult
-  gameEngineCreate(content: Upload, description: String, name: String, ruleset: Upload): GameEngineCreateResult
-  gameEngineCreateRemote(api: String, description: String, name: String, options: String): GameEngineCreateRemoteResult
+  gameEngineCreate(description: String, engine: Upload, name: String, ruleset: Upload): GameEngineCreateResult
+  gameEngineCreateRemote(api: String, description: String, name: String, options: String, url: String): GameEngineCreateRemoteResult
   gameEngineDelete(gameEngineId: ID!): GameEngineDeleteResult
   gameJoinLocal(gameId: ID!, name: String): GameJoinLocalResult
   gameJoinRemote(gameId: ID!, password: String, playerId: ID!): GameJoinRemoteResult

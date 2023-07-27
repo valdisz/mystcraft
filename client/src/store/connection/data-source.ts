@@ -225,4 +225,13 @@ export abstract class DataSource<T, TData = {}, TVariables extends object = {}, 
         this._requestHandle?.()
         this._requestHandle = null
     }
+
+    reset() {
+        console.debug(`${this._name}::reset()`)
+
+        this.state = 'unspecified'
+        this.error = null
+        this.setValue(null)
+        this.valueChanged()
+    }
 }

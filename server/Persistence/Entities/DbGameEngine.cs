@@ -22,6 +22,9 @@ public class DbGameEngine : WithAudit {
     [MaxLength(Size.SYMBOL)]
     public string RemoteApi { get; set; }
 
+    [MaxLength(Size.URL)]
+    public string RemoteUrl { get; set; }
+
     [MaxLength(Size.MAX_TEXT)]
     public string RemoteOptions { get; set; }
 
@@ -35,7 +38,7 @@ public class DbGameEngine : WithAudit {
     public long? UpdatedByUserId { get; set; }
 
     [GraphQLIgnore]
-    public byte[] Contents { get; set; }
+    public byte[] Engine { get; set; }
 
     [GraphQLIgnore]
     public byte[] Ruleset { get; set; }
@@ -46,20 +49,21 @@ public class DbGameEngine : WithAudit {
     public DbUser CreatedBy { get; set; }
     public DbUser UpdatedBy { get; set; }
 
-    public static DbGameEngine NewLocal(string name, string description, byte[] contents, byte[] ruleset) =>
+    public static DbGameEngine NewLocal(string name, string description, byte[] engine, byte[] ruleset) =>
         new DbGameEngine {
             Name        = name,
             Description = description,
-            Contents    = contents,
+            Engine      = engine,
             Ruleset     = ruleset
         };
 
-    public static DbGameEngine NewRemote(string name, string description, string api, string options) =>
+    public static DbGameEngine NewRemote(string name, string description, string api, string url, string options) =>
         new DbGameEngine {
             Name          = name,
             Description   = description,
             Remote        = true,
             RemoteApi     = api,
+            RemoteUrl     = url,
             RemoteOptions = options
         };
 }
@@ -75,7 +79,7 @@ public class DbGameEngineConfiguration : IEntityTypeConfiguration<DbGameEngine> 
         builder.Property(x => x.Id)
             .UseIdentityColumn();
 
-        builder.Property(x => x.Contents)
+        builder.Property(x => x.Engine)
             .HasCompression();
 
         builder.Property(x => x.Ruleset)

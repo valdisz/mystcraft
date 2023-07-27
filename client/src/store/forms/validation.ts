@@ -1,5 +1,6 @@
 import * as ValidatorJS from 'validatorjs'
 import cronstrue from 'cronstrue'
+import { Option } from './utils'
 
 export interface Validator<T> {
     (value: T): string | null
@@ -44,8 +45,8 @@ export function pass() {
     return null
 }
 
-export function rule<T = unknown>(rule: string, error?: string): Validator<T> {
-    return (value: T) => {
+export function rule(rule: string, error?: string): Validator<Option<string>> {
+    return (value: Option<string>) => {
         const validation = new ValidatorJS({ value }, { value: rule });
 
         if (validation.fails()) {

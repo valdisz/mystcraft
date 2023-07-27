@@ -444,9 +444,6 @@ namespace advisor.Migrations.mssql
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"), 1L, 1);
 
-                    b.Property<byte[]>("Contents")
-                        .HasColumnType("varbinary(max)");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -456,6 +453,9 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("Description")
                         .HasMaxLength(2048)
                         .HasColumnType("nvarchar(2048)");
+
+                    b.Property<byte[]>("Engine")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -472,6 +472,10 @@ namespace advisor.Migrations.mssql
                     b.Property<string>("RemoteOptions")
                         .HasMaxLength(2147483647)
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RemoteUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
 
                     b.Property<byte[]>("Ruleset")
                         .HasColumnType("varbinary(max)");

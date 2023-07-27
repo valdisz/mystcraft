@@ -67,11 +67,13 @@ class Group implements FieldView {
     }
 
     get value() {
-        return this._fields.reduce((acc, f) => {
+        const value = this._fields.reduce((acc, f) => {
             acc[f.name] = f.value.value
             return acc
         }
         , {} as any)
+
+        return this.isEnabled ? value : null
     }
 
     get isDisabled() {
@@ -99,7 +101,7 @@ class Group implements FieldView {
     }
 
     get isDirty(): boolean {
-        return _some(this._values, f => f.isDirty)
+        return _and(this.isEnabled, _some(this._values, f => f.isDirty))
     }
 
     get isPristine(): boolean {
@@ -107,7 +109,7 @@ class Group implements FieldView {
     }
 
     get isTouched(): boolean {
-        return _some(this._values, f => f.isTouched)
+        return _and(this.isEnabled, _some(this._values, f => f.isTouched))
     }
 
     get isUntouched(): boolean {
@@ -115,7 +117,7 @@ class Group implements FieldView {
     }
 
     get isActive(): boolean {
-        return _some(this._values, f => f.isActive)
+        return _and(this.isEnabled, _some(this._values, f => f.isActive))
     }
 
     get isInactive(): boolean {
@@ -131,7 +133,7 @@ class Group implements FieldView {
     }
 
     get isValid(): boolean {
-        return _every(this._values, f => f.isValid)
+        return _or(this.isDisabled, _every(this._values, f => f.isValid))
     }
 
     get isInvalid(): boolean {

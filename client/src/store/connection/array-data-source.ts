@@ -52,6 +52,13 @@ export class SeqDataSource<T, TData = {}, TVariables extends object = {}, TError
         this._value.push(...value)
     }
 
+    reset(): void {
+        this.state = 'unspecified'
+        this.error = null
+        this._value.length = 0
+        this.valueChanged()
+    }
+
     /////////////////////////
     ///// reading sequence
 

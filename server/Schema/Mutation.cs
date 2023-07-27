@@ -27,18 +27,18 @@ public class Mutation {
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public async Task<GameEngineCreateResult> GameEngineCreate(IResolverContext context, IMediator mediator, string name, string description, IFile content, IFile ruleset) {
-        using var cs = content.OpenReadStream();
+    public async Task<GameEngineCreateResult> GameEngineCreate(IResolverContext context, IMediator mediator, string name, string description, IFile engine, IFile ruleset) {
+        using var es = engine.OpenReadStream();
         using var rs = ruleset.OpenReadStream();
 
-        var result = await mediator.Send(new GameEngineCreate(name, description, cs, rs), context.RequestAborted);
+        var result = await mediator.Send(new GameEngineCreate(name, description, es, rs), context.RequestAborted);
 
         return result;
     }
 
     [Authorize(Policy = Policies.GameMasters)]
-    public Task<GameEngineCreateRemoteResult> GameEngineCreateRemote(IResolverContext context, IMediator mediator, string name, string description, string api, string options) {
-        return mediator.Send(new GameEngineCreateRemote(name, description, api, options), context.RequestAborted);
+    public Task<GameEngineCreateRemoteResult> GameEngineCreateRemote(IResolverContext context, IMediator mediator, string name, string description, string api, string url, string options) {
+        return mediator.Send(new GameEngineCreateRemote(name, description, api, url, options), context.RequestAborted);
     }
 
     [Authorize(Policy = Policies.GameMasters)]

@@ -40,14 +40,15 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
     return <Dialog fullWidth maxWidth='sm' open={dialog.isOpen} onClose={dialog.autoClose}>
         <DialogTitle>New game engine</DialogTitle>
         <DialogContent>
-            { operation.isFailed
-                ? <Alert severity="error">
-                    <AlertTitle>Error</AlertTitle>
-                    {operation.error?.message}
-                </Alert>
-                : null
-            }
             <Stack gap={2}>
+                { operation.isFailed
+                    ? <Alert severity="error">
+                        <AlertTitle>Error</AlertTitle>
+                        {operation.error?.message}
+                    </Alert>
+                    : null
+                }
+
                 <TextField label='Name' {...forTextField(form.name)} />
 
                 <TextField label='Description' multiline rows={4} {...forTextField(form.description)} />
@@ -62,11 +63,11 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
                     <FileField label='Ruleset' {...forFileField(form.files.ruleset)} />
                 </>}
 
-                { form.remoteOptions.isEnabled && <>
+                { form.remote.isEnabled && <>
                     <TextField label='API' select value='no' disabled>
                         <option value='no'>New Origins (http://atlantis-pbem.com)</option>
                     </TextField>
-                    <TextField label='URL' type='url' {...forTextField(form.remoteOptions.url)} />
+                    <TextField label='URL' type='url' {...forTextField(form.remote.url)} />
                 </>}
             </Stack>
         </DialogContent>

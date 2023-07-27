@@ -54,7 +54,8 @@ export class DialogViewModel {
         if (this._onAutoClose() === false) {
             return
         }
-        this.isOpen = false
+
+        this.close()
     }
 }
 

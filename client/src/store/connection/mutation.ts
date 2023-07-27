@@ -1,4 +1,4 @@
-import { observable, makeObservable, computed, runInAction } from 'mobx'
+import { observable, makeObservable, computed, runInAction, action } from 'mobx'
 import { TypedDocumentNode } from 'urql'
 import { DocumentNode } from 'graphql'
 import { RequestPolicy, DataSourceConnection } from './data-source-connection'
@@ -95,7 +95,8 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
             value: observable,
             isLoading: computed,
             isReady: computed,
-            isFailed: computed
+            isFailed: computed,
+            reset: action
         })
 
         this._name = options.name ?? 'Mutation'
@@ -106,6 +107,7 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
         this._onLoad = options.onLoad
         this._onSuccess = options.onSuccess
         this._onFailure = options.onFailure
+        this._mapProtocolError = options.mapProtocolError
     }
 
     private readonly _name: string
@@ -194,5 +196,11 @@ export class Mutation<TData, TVariables extends object, T, TError, TProtocolErro
                 }
             }, variables, options?.requestPolicy || this._defaultRequestPolicy)
         })
+    }
+
+    reset(): void {
+        this.state = 'unspecified'
+        this.error = null
+        this.value = null
     }
 }

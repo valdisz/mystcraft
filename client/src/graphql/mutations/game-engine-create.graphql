@@ -1,5 +1,5 @@
-mutation GameEngineCreate($name: String!, $description: String, $content: Upload!, $ruleset: Upload) {
-  gameEngineCreate(name: $name, description: $description, content: $content, ruleset: $ruleset) {
+mutation GameEngineCreate($name: String!, $description: String, $engine: Upload!, $ruleset: Upload) {
+  gameEngineCreate(name: $name, description: $description, engine: $engine, ruleset: $ruleset) {
     isSuccess
     error
     engine {

@@ -80,7 +80,7 @@ public readonly struct GameInterpreter<RT>
         from ge in Database<RT>.add(DbGameEngine.NewLocal(
             action.Name,
             action.Description,
-            action.Contents,
+            action.Engine,
             action.Ruleset
         ))
         from _ in UnitOfWork<RT>.save()
@@ -92,6 +92,7 @@ public readonly struct GameInterpreter<RT>
             action.Name,
             action.Description,
             action.Api,
+            action.Url,
             action.Options
         ))
         from _ in UnitOfWork<RT>.save()
