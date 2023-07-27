@@ -13,7 +13,7 @@ function GameEnginesPage() {
 
     const actions = (
         <ForRole role={Role.GameMaster}>
-            <Button color='primary' size='large' onClick={enginesNew.open}>New Engine</Button>
+            <Button color='primary' size='large' onClick={enginesNew.dialog.open}>New Engine</Button>
         </ForRole>
     )
 
@@ -35,15 +35,15 @@ interface NewGameEngineDialogProps {
 }
 
 function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
-    const { form } = model
+    const { dialog, form, operation } = model
 
-    return <Dialog fullWidth maxWidth='sm' open={model.isOpen} onClose={model.autoClose}>
+    return <Dialog fullWidth maxWidth='sm' open={dialog.isOpen} onClose={dialog.autoClose}>
         <DialogTitle>New game engine</DialogTitle>
         <DialogContent>
-            { model.error
+            { operation.isFailed
                 ? <Alert severity="error">
                     <AlertTitle>Error</AlertTitle>
-                    {model.error}
+                    {operation.error?.message}
                 </Alert>
                 : null
             }
@@ -52,23 +52,28 @@ function NewGameEngineDialog({ model }: NewGameEngineDialogProps) {
 
                 <TextField label='Description' multiline rows={4} {...forTextField(form.description)} />
 
-                <Tabs variant='fullWidth' value='local'>
+                <Tabs centered value={model.mode} onChange={model.setMode}>
                     <Tab label="Local" value='local' />
                     <Tab label="Remote" value='remote' />
                 </Tabs>
-
-                {/* <SwitchField label='Remote' {...form.remote.forSwitchField} /> */}
 
                 { form.files.isEnabled && <>
                     <FileField label='Game Engine' {...forFileField(form.files.engine)} />
                     <FileField label='Ruleset' {...forFileField(form.files.ruleset)} />
                 </>}
+
+                { form.remoteOptions.isEnabled && <>
+                    <TextField label='API' select value='no' disabled>
+                        <option value='no'>New Origins (http://atlantis-pbem.com)</option>
+                    </TextField>
+                    <TextField label='URL' type='url' {...forTextField(form.remoteOptions.url)} />
+                </>}
             </Stack>
         </DialogContent>
 
         <DialogActions>
-            <Button variant='text' disabled={model.inProgress} onClick={model.close}>Cancel</Button>
-            <LoadingButton color='primary' loading={model.inProgress} onClick={model.confirm}>Upload game engine</LoadingButton>
+            <Button variant='text' disabled={operation.isLoading} onClick={dialog.close}>Cancel</Button>
+            <LoadingButton color='primary' loading={operation.isLoading} onClick={model.confirm}>Add game engine</LoadingButton>
         </DialogActions>
     </Dialog>
 }

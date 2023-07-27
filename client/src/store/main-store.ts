@@ -28,7 +28,7 @@ export class MainStore {
         onSuccess: [
             engine => runInAction(() => {
                 this.engines.insert(0, engine)
-                this.enginesNew.close()
+                this.enginesNew.dialog.close()
             })
         ]
     })
@@ -47,7 +47,7 @@ export class MainStore {
     readonly enginesAdd = (name: string, description: string, content: File, ruleset: File) => this.opGameEngineAdd.run({ name, description, content, ruleset })
     readonly enginesDelete = (gameEngineId: string) => this.opGameEngineDelete.run({ gameEngineId })
 
-    readonly enginesNew = new NewGameEngineViewModel(this.enginesAdd)
+    readonly enginesNew = new NewGameEngineViewModel(this.opGameEngineAdd, this.enginesAdd)
 
 
     readonly games = seq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [], null, 'games')

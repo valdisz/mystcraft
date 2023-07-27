@@ -1,5 +1,7 @@
-import { action, makeObservable, observable } from 'mobx'
+import { action, computed, makeObservable } from 'mobx'
 import { group, text, bool, file, rule } from './forms'
+import { Operation } from './connection'
+import { newDialog } from './dialog'
 
 export interface NewGameEngineConfirmationCallback {
     (name: string, description: string, content: File, ruleset: File): Promise<any>
@@ -11,6 +13,7 @@ function newForm() {
     const remote = bool(null, { initialValue: false, isRequired: true })
 
     const disabledWhenRemote = () => remote.value
+    const enabledWhenRemote = () => !remote.value
 
     const files = group(
         {
@@ -22,56 +25,49 @@ function newForm() {
         }
     )
 
-    return group({ name, description, remote, files })
+    const remoteOptions = group({
+        url: text(rule('max:1024'), { isRequired: true }),
+    }, { isDisabled: enabledWhenRemote })
+
+    return group({ name, description, remote, files, remoteOptions })
 }
 
-type Form = ReturnType<typeof newForm>
-
 export class NewGameEngineViewModel {
-    constructor(private readonly onConfirm: NewGameEngineConfirmationCallback) {
-        makeObservable(this)
+    constructor(public readonly operation: Operation, private readonly onConfirm: NewGameEngineConfirmationCallback) {
+        makeObservable(this, {
+            mode: computed,
+            setMode: action,
+            confirm: action
+        })
     }
 
-    readonly form: Form = newForm()
-
-    @observable isOpen = false
-    @observable inProgress = false
-    @observable error = ''
-
-    @action readonly open = () => {
-        this.isOpen = true
-
-        this.inProgress = false
-        this.error = ''
-
-        this.form.reset()
-        this.form.remote.reset(false)
+    private canClose() {
+        return !this.operation.isLoading
     }
 
-    @action readonly close = () => {
-        this.isOpen = false
+    readonly form = newForm()
+    readonly dialog = newDialog({
+        onOpen: () => {
+            this.form.reset()
+            this.form.remote.reset(false)
+        },
+        onClose: this.canClose.bind(this),
+        onAutoClose: this.canClose.bind(this)
+    })
+
+    get mode(): 'local' | 'remote' {
+        return this.form.remote.value ? 'remote' : 'local'
     }
 
-    readonly autoClose = () => {
-        if (this.inProgress) {
-            return
-        }
-
-        this.close()
+    setMode = (e, value) => {
+        this.form.remote.handleChange(value === 'remote')
     }
 
-    @action readonly begin = () => {
-        this.inProgress = true
-    }
-
-    @action readonly end = () => {
-        this.inProgress = false
-    }
-
-    @action readonly setError = (message: string) => this.error = message
-
-    @action readonly confirm = async () => {
+    readonly confirm = async () => {
         this.form.touch()
-        // await this.onConfirm(this.name, this.description, this.content.file, this.ruleset.file)
+        if (this.form.isValid) {
+            const { name, description, files } = this.form.value
+            await this.onConfirm(name, description, files.engine, files.ruleset)
+        }
     }
 }

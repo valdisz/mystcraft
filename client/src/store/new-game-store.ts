@@ -1,9 +1,8 @@
-import { action, computed, makeObservable, observable, reaction } from 'mobx'
+import { action, computed, makeObservable, observable } from 'mobx'
 import { GameEngineFragment } from '../schema'
 import { Seq } from './connection'
 import { text, file, int, group, list, custom, rule } from './forms'
 import cronstrue from 'cronstrue'
-import { type } from 'os'
 
 function dividesWithEight(value: number): string | null {
     if (value === 1) {
@@ -69,9 +68,11 @@ export class NewGameStore {
 
     @computed get scheduleHelpText() {
         const errorText = this.form.schedule.error
-        const expression = this.form.schedule.value
+        const expression = this.form.schedule.isNotEmpty
+            ? cronstrue.toString(this.form.schedule.value)
+            : ''
 
-        return errorText ?? cronstrue.toString(expression) ?? ''
+        return errorText || expression || ''
     }
 
     @observable isOpen = false
@@ -95,6 +96,7 @@ export class NewGameStore {
         this.form.touch()
 
         console.log('Form is vaid: ', this.form.isValid)
+        console.log('Form: ', this.form.value)
     }
 
     @action addLevel = () => {
