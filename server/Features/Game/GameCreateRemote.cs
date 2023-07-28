@@ -13,7 +13,6 @@ using MediatR;
 public record GameCreateRemote(
     string Name,
     long GameEngineId,
-    // Stream Ruleset,
     List<MapLevel> Levels,
     string Schedule,
     string TimeZone,

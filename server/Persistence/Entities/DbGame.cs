@@ -61,15 +61,34 @@ public class DbGame : IsAggregateRoot, WithAudit {
     [GraphQLIgnore]
     public DbGameEngine Engine { get; set; }
 
-    public static DbGame New(string name, long engineId, GameOptions options) {
+    public static DbGame NewRemote(string name, long engineId, GameOptions options) {
+        var game = new DbGame {
+            Name = name,
+            Type = GameType.REMOTE,
+            Status = GameStatus.NEW,
+            EngineId = engineId,
+            Options = options,
+            NextTurnNumber = 1
+        };
+
+        return game;
+    }
+
+    public static DbGame NewLocal(string name, long engineId, GameOptions options, byte[] gameIn, byte[] playersIn) {
         var game = new DbGame {
             Name = name,
             Type = GameType.LOCAL,
             Status = GameStatus.NEW,
             EngineId = engineId,
-            // Ruleset = ruleset,
             Options = options,
-            NextTurnNumber = 1
+            NextTurnNumber = 1,
+            Turns = {
+                new DbTurn {
+                    Number = 0,
+                    GameData = gameIn,
+                    PlayerData = playersIn
+                }
+            }
         };
 
         return game;

@@ -315,6 +315,12 @@ type GameCollectionSegment {
   totalCount: Int!
 }
 
+type GameCreateLocalResult implements MutationResult {
+  error: String
+  game: Game
+  isSuccess: Boolean!
+}
+
 type GameCreateRemoteResult implements MutationResult {
   error: String
   game: Game
@@ -507,6 +513,7 @@ type Mutation {
   allianceJoin(allianceId: ID!, playerId: ID!): AllianceJoinResult
   deleteTurn(turnId: ID): Int!
   gameComplete(gameId: ID!): GameStopResult
+  gameCreateLocal(finishAt: DateTime, gameEngineId: ID!, gameIn: Upload, levels: [MapLevelInput], name: String, playersIn: Upload, schedule: String, startAt: DateTime, timeZone: String): GameCreateLocalResult
   gameCreateRemote(finishAt: DateTime, gameEngineId: ID!, levels: [MapLevelInput], name: String, schedule: String, startAt: DateTime, timeZone: String): GameCreateRemoteResult
   gameEngineCreateLocal(description: String, engine: Upload, name: String, ruleset: Upload): GameEngineCreateLocalResult
   gameEngineCreateRemote(api: String, description: String, name: String, options: String, url: String): GameEngineCreateRemoteResult

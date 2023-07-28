@@ -17,7 +17,7 @@ import { List, forFileField, forFormControl, forFormHelperText, forSelectField, 
 import ClearIcon from '@mui/icons-material/Clear'
 
 export function HomePage() {
-    const { games, newGame } = useStore()
+    const { games, gamesNew: newGame } = useStore()
 
     const actions = (
         <ForRole role={Role.GameMaster}>
@@ -182,8 +182,8 @@ function engineKey(engine: GameEngineFragment) {
 }
 
 function NewGameDialog() {
-    const { newGame } = useStore()
-    const { engines, form, dialog, operation } = newGame
+    const { gamesNew } = useStore()
+    const { engines, form, dialog, operation } = gamesNew
 
     const renderSelectedEngine = (engine: GameEngineFragment) => {
         if (!engine) {
@@ -222,21 +222,21 @@ function NewGameDialog() {
                 </SelectField>
 
                 { form.files.isEnabled && <>
-                    <FileField label='game.in' {...forFileField(form.files.game)} />
-                    <FileField label='players.in' {...forFileField(form.files.players)} />
+                    <FileField label='game.in' {...forFileField(form.files.gameIn)} />
+                    <FileField label='players.in' {...forFileField(form.files.playersIn)} />
                 </> }
 
-                <MapLevelEditor model={form.levels} onAdd={newGame.addLevel} onRemove={newGame.removeLevel} />
+                <MapLevelEditor model={form.levels} onAdd={gamesNew.addLevel} onRemove={gamesNew.removeLevel} />
 
-                <TextField label='Schedule' {...forTextField(form.schedule)} helperText={newGame.scheduleHelpText} />
+                <TextField label='Schedule' {...forTextField(form.schedule)} helperText={gamesNew.scheduleHelpText} />
 
-                <SelectField label='Time Zone' items={newGame.timeZones} {...forSelectField(form.timeZone)} />
+                <SelectField label='Time Zone' items={gamesNew.timeZones} {...forSelectField(form.timeZone)} />
             </Stack>
         </DialogContent>
 
         <DialogActions>
             <Button variant='text'  disabled={operation.isLoading} onClick={dialog.close}>Cancel</Button>
-            <LoadingButton loading={operation.isLoading} color='primary' onClick={newGame.confirm}>Add new game</LoadingButton>
+            <LoadingButton loading={operation.isLoading} color='primary' onClick={gamesNew.confirm}>Add new game</LoadingButton>
         </DialogActions>
     </Dialog>
 }

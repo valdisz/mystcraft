@@ -320,6 +320,13 @@ export type GameCollectionSegment = {
   totalCount: Scalars['Int'];
 };
 
+export type GameCreateLocalResult = MutationResult & {
+  __typename?: 'GameCreateLocalResult';
+  error?: Maybe<Scalars['String']>;
+  game?: Maybe<Game>;
+  isSuccess: Scalars['Boolean'];
+};
+
 export type GameCreateRemoteResult = MutationResult & {
   __typename?: 'GameCreateRemoteResult';
   error?: Maybe<Scalars['String']>;
@@ -526,6 +533,7 @@ export type Mutation = {
   allianceJoin?: Maybe<AllianceJoinResult>;
   deleteTurn: Scalars['Int'];
   gameComplete?: Maybe<GameStopResult>;
+  gameCreateLocal?: Maybe<GameCreateLocalResult>;
   gameCreateRemote?: Maybe<GameCreateRemoteResult>;
   gameEngineCreateLocal?: Maybe<GameEngineCreateLocalResult>;
   gameEngineCreateRemote?: Maybe<GameEngineCreateRemoteResult>;
@@ -567,6 +575,19 @@ export type MutationDeleteTurnArgs = {
 
 export type MutationGameCompleteArgs = {
   gameId: Scalars['ID'];
+};
+
+
+export type MutationGameCreateLocalArgs = {
+  finishAt?: InputMaybe<Scalars['DateTime']>;
+  gameEngineId: Scalars['ID'];
+  gameIn?: InputMaybe<Scalars['Upload']>;
+  levels?: InputMaybe<Array<InputMaybe<MapLevelInput>>>;
+  name?: InputMaybe<Scalars['String']>;
+  playersIn?: InputMaybe<Scalars['Upload']>;
+  schedule?: InputMaybe<Scalars['String']>;
+  startAt?: InputMaybe<Scalars['DateTime']>;
+  timeZone?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -1254,6 +1275,19 @@ export type FactionClaimMutationVariables = Exact<{
 
 export type FactionClaimMutation = { __typename?: 'Mutation', gameJoinRemote?: { __typename?: 'GameJoinRemoteResult', isSuccess: boolean, error?: string | null, player?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null } | null };
 
+export type GameCreateLocalMutationVariables = Exact<{
+  name: Scalars['String'];
+  gameEngineId: Scalars['ID'];
+  levels: Array<MapLevelInput> | MapLevelInput;
+  schedule: Scalars['String'];
+  timeZone: Scalars['String'];
+  gameIn: Scalars['Upload'];
+  playersIn: Scalars['Upload'];
+}>;
+
+
+export type GameCreateLocalMutation = { __typename?: 'Mutation', gameCreateLocal?: { __typename?: 'GameCreateLocalResult', isSuccess: boolean, error?: string | null, game?: { __typename?: 'Game', id: string, status: GameStatus, createdAt: any, name: string, options: { __typename?: 'GameOptions', schedule?: string | null, timeZone?: string | null, startAt?: any | null, finishAt?: any | null }, me?: { __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null, players?: { __typename?: 'PlayerCollectionSegment', totalCount: number, items?: Array<{ __typename?: 'Player', id: string, number: number, name?: string | null, lastTurnNumber?: number | null, lastTurn?: { __typename?: 'PlayerTurn', id: string } | null } | null> | null } | null } | null } | null };
+
 export type GameCreateRemoteMutationVariables = Exact<{
   name: Scalars['String'];
   gameEngineId: Scalars['ID'];
@@ -1896,6 +1930,25 @@ export const FactionClaim = gql`
   }
 }
     ${PlayerHeader}`;
+export const GameCreateLocal = gql`
+    mutation GameCreateLocal($name: String!, $gameEngineId: ID!, $levels: [MapLevelInput!]!, $schedule: String!, $timeZone: String!, $gameIn: Upload!, $playersIn: Upload!) {
+  gameCreateLocal(
+    name: $name
+    gameEngineId: $gameEngineId
+    levels: $levels
+    schedule: $schedule
+    timeZone: $timeZone
+    gameIn: $gameIn
+    playersIn: $playersIn
+  ) {
+    isSuccess
+    error
+    game {
+      ...GameHeader
+    }
+  }
+}
+    ${GameHeader}`;
 export const GameCreateRemote = gql`
     mutation GameCreateRemote($name: String!, $gameEngineId: ID!, $levels: [MapLevelInput!]!, $schedule: String!, $timeZone: String!) {
   gameCreateRemote(

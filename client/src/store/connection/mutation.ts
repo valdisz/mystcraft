@@ -64,7 +64,7 @@ function execList<A, B>(arg1: A, arg2: B, list?: ContextCallback<A, B, any>[]): 
 
     const effects = []
     for (const effect of list) {
-        effects.push(effect(arg1, arg2) || Promise.resolve())
+        effects.push(runInAction(() => effect(arg1, arg2)) || Promise.resolve())
     }
 
     return Promise.all(effects)

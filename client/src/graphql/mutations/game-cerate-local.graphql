@@ -1,0 +1,9 @@
+mutation GameCreateLocal($name: String!, $gameEngineId: ID!, $levels: [MapLevelInput!]!, $schedule: String!, $timeZone: String!, $gameIn: Upload!, $playersIn: Upload!) {
+  gameCreateLocal(name: $name, gameEngineId: $gameEngineId, levels: $levels, schedule: $schedule, timeZone: $timeZone, gameIn: $gameIn, playersIn: $playersIn) {
+    isSuccess
+    error
+    game {
+        ...GameHeader
+    }
+  }
+}

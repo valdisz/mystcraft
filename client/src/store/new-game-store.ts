@@ -1,5 +1,5 @@
 import { action, computed, makeObservable } from 'mobx'
-import { GameCreateRemoteMutationVariables, GameEngineFragment } from '../schema'
+import { GameCreateRemoteMutationVariables, GameCreateLocalMutationVariables, GameEngineFragment } from '../schema'
 import { Operation, Runnable, Seq } from './connection'
 import { text, file, int, group, list, custom, rule } from './forms'
 import cronstrue from 'cronstrue'
@@ -50,8 +50,8 @@ function newForm() {
         levels: list<MapLevelItem>(null, { isRequired: true }),
         files: group(
             {
-                game: file(null, { isRequired: true }),
-                players: file(null, { isRequired: true }),
+                gameIn: file(null, { isRequired: true }),
+                playersIn: file(null, { isRequired: true }),
             },
             {
                 isDisabled: () => engine.value?.remote ?? true
@@ -64,7 +64,8 @@ export class NewGameStore {
     constructor(
         public readonly engines: Seq<GameEngineFragment>,
         public readonly operation: Operation,
-        private readonly add: Runnable<GameCreateRemoteMutationVariables>,
+        private readonly addLocal: Runnable<GameCreateLocalMutationVariables>,
+        private readonly addRemote: Runnable<GameCreateRemoteMutationVariables>,
     ) {
         this.dialog = newDialog({
             onOpen: () => {
@@ -109,13 +110,14 @@ export class NewGameStore {
         }
 
         const { engine, files, levels, ...variables } = this.form.value
-        if (engine.remote) {
-            const vars = { gameEngineId: engine.id, levels: levels.map((l, i) => ({ level: i, ...l})), ...variables }
+        const vars = { gameEngineId: engine.id, levels: levels.map((l, i) => ({ level: i, ...l })), ...variables }
 
-            console.log('add remote', vars)
-            await this.add.run(vars)
+        if (engine.remote) {
+            await this.addRemote.run(vars)
         }
         else {
+            const vars = { gameEngineId: engine.id, levels: levels.map((l, i) => ({ level: i, ...l})), ...variables }
+            await this.addLocal.run({ ...files, ...vars })
         }
     }
 }

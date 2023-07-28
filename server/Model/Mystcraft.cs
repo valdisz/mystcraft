@@ -61,10 +61,17 @@ public static class Mystcraft {
         new Mystcraft<Unit>.DeleteGameEngine(Engine, Return);
 
     /// <summary>
-    /// Create a new game.
+    /// Create a new remote game.
     /// </summary>
     public static Mystcraft<DbGame> CreateGameRemote(string Name, GameEngineId Engine, List<MapLevel> Levels, GameSchedule Schedule, GamePeriod Period) =>
         new Mystcraft<DbGame>.CreateGameRemote(Name, Engine, Levels, Schedule, Period, Return);
+
+
+    /// <summary>
+    /// Create a new local game.
+    /// </summary>
+    public static Mystcraft<DbGame> CreateGameLocal(string Name, GameEngineId Engine, List<MapLevel> Levels, GameSchedule Schedule, GamePeriod Period, byte[] GameIn, byte[] PlayersIn) =>
+        new Mystcraft<DbGame>.CreateGameLocal(Name, Engine, Levels, Schedule, Period, GameIn, PlayersIn, Return);
 
     /// <summary>
     /// Get a list of all games.
@@ -260,6 +267,8 @@ public abstract record Mystcraft<A> {
     /// Create a new game.
     /// </summary>
     public sealed record CreateGameRemote(string Name, GameEngineId Engine, List<MapLevel> Levels, GameSchedule Schedule, GamePeriod Period, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record CreateGameLocal(string Name, GameEngineId Engine, List<MapLevel> Levels, GameSchedule Schedule, GamePeriod Period, byte[] GameIn, byte[] PlayersIn, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
 
     /// <summary>
     /// Represents operation that gets a list of all games.

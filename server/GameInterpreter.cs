@@ -32,6 +32,7 @@ public readonly struct GameInterpreter<RT>
         Mystcraft<A>.WriteOneGameEngine wge     => _tran(WriteOneGameEngine(wge)),
         Mystcraft<A>.DeleteGameEngine dge       =>       DeleteGameEngine(dge),
         Mystcraft<A>.CreateGameRemote cr        => _tran(CreateGameRemote(cr)),
+        Mystcraft<A>.CreateGameLocal cl         => _tran(CreateGameLocal(cl)),
         Mystcraft<A>.ReadManyGames gm           =>       ReadManyGames(gm),
         Mystcraft<A>.ReadOneGame og             =>       ReadOneGame(og),
         Mystcraft<A>.WriteOneGame wg            => _tran(WriteOneGame(wg)),
@@ -101,7 +102,7 @@ public readonly struct GameInterpreter<RT>
 
     private static Aff<RT, A> CreateGameRemote<A>(Mystcraft<A>.CreateGameRemote action) =>
         // TODO: improve this
-        from game in Database<RT>.add(DbGame.New(
+        from game in Database<RT>.add(DbGame.NewRemote(
             action.Name,
             action.Engine.Value,
             new GameOptions
@@ -112,6 +113,26 @@ public readonly struct GameInterpreter<RT>
                 StartAt = action.Period.StartAt.ToNullable(),
                 FinishAt = action.Period.FinishAt.ToNullable()
             }
+        ))
+        from _ in UnitOfWork<RT>.save()
+        from ret in _Interpret(action.Next(game))
+        select ret;
+
+    private static Aff<RT, A> CreateGameLocal<A>(Mystcraft<A>.CreateGameLocal action) =>
+        // TODO: improve this
+        from game in Database<RT>.add(DbGame.NewLocal(
+            action.Name,
+            action.Engine.Value,
+            new GameOptions
+            {
+                Map = action.Levels,
+                Schedule = action.Schedule.Cron,
+                TimeZone = action.Schedule.TimeZone,
+                StartAt = action.Period.StartAt.ToNullable(),
+                FinishAt = action.Period.FinishAt.ToNullable()
+            },
+            action.GameIn,
+            action.PlayersIn
         ))
         from _ in UnitOfWork<RT>.save()
         from ret in _Interpret(action.Next(game))

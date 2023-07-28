@@ -55,20 +55,28 @@ public class Mutation {
         string timeZone,
         DateTimeOffset? startAt,
         DateTimeOffset? finishAt
-        // IFile playerData,
-        // IFile gameData
     ) {
-        // FIXME
-        // using var playersDataStream = playerData.OpenReadStream();
-        // using var gameDataStream = gameData.OpenReadStream();
-
         return mediator.Send(new GameCreateRemote(name, gameEngineId, levels, schedule, timeZone, startAt, finishAt));
     }
 
-    // [Authorize(Policy = Policies.GameMasters)]
-    // public Task<GameCreateRemoteResult> GameCreateRemote(IMediator mediator, string name, GameOptions options) {
-    //     return mediator.Send(new GameCreateRemote(name, options));
-    // }
+    [Authorize(Policy = Policies.GameMasters)]
+    public async Task<GameCreateLocalResult> GameCreateLocal(
+        IMediator mediator,
+        string name,
+        [ID(GameEngineType.NAME)] long gameEngineId,
+        List<MapLevel> levels,
+        string schedule,
+        string timeZone,
+        DateTimeOffset? startAt,
+        DateTimeOffset? finishAt,
+        IFile gameIn,
+        IFile playersIn
+    ) {
+        using var gs = gameIn.OpenReadStream();
+        using var ps = playersIn.OpenReadStream();
+
+        return await mediator.Send(new GameCreateLocal(name, gameEngineId, levels, schedule, timeZone, startAt, finishAt, gs, ps));
+    }
 
     public Task<GameJoinLocalResult> GameJoinLocal(IMediator mediator, [GlobalState] long currentUserId, [ID(GameType.NAME)] long gameId, string name) {
         return mediator.Send(new GameJoinLocal(currentUserId, gameId, name));

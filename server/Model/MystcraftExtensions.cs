@@ -14,6 +14,7 @@ public static class MystcraftExtensions
         Mystcraft<A>.WriteOneGameEngine wge     => new Mystcraft<B>.WriteOneGameEngine(wge.Engine, n => wge.Next(n).Bind(f)),
         Mystcraft<A>.DeleteGameEngine dge       => new Mystcraft<B>.DeleteGameEngine(dge.Engine, n => dge.Next(n).Bind(f)),
         Mystcraft<A>.CreateGameRemote cr        => new Mystcraft<B>.CreateGameRemote(cr.Name, cr.Engine, cr.Levels, cr.Schedule, cr.Period, n => cr.Next(n).Bind(f)),
+        Mystcraft<A>.CreateGameLocal cl         => new Mystcraft<B>.CreateGameLocal(cl.Name, cl.Engine, cl.Levels, cl.Schedule, cl.Period, cl.GameIn, cl.PlayersIn, n => cl.Next(n).Bind(f)),
         Mystcraft<A>.ReadManyGames gm           => new Mystcraft<B>.ReadManyGames(gm.Predicate, n => gm.Next(n).Bind(f)),
         Mystcraft<A>.ReadOneGame og             => new Mystcraft<B>.ReadOneGame(og.Game, n => og.Next(n).Bind(f)),
         Mystcraft<A>.WriteOneGame wg            => new Mystcraft<B>.WriteOneGame(wg.Game, n => wg.Next(n).Bind(f)),
