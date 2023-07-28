@@ -78,6 +78,11 @@ public class Mutation {
         return await mediator.Send(new GameCreateLocal(name, gameEngineId, levels, schedule, timeZone, startAt, finishAt, gs, ps));
     }
 
+    [Authorize(Policy = Policies.GameMasters)]
+    public Task<GameDeleteResult> GameDelete(IMediator mediator, [ID("Game")] long gameId) {
+        return mediator.Send(new GameDelete(gameId));
+    }
+
     public Task<GameJoinLocalResult> GameJoinLocal(IMediator mediator, [GlobalState] long currentUserId, [ID(GameType.NAME)] long gameId, string name) {
         return mediator.Send(new GameJoinLocal(currentUserId, gameId, name));
     }
@@ -105,12 +110,6 @@ public class Mutation {
     public Task<GameNextTurnResult> GameNextTurn(IMediator mediator, [ID(GameType.NAME)] long gameId, int? turnNumber = null, GameNextTurnForceInput force = null) {
         return mediator.Send(new GameNextTurn(gameId, turnNumber, force));
     }
-
-    // FIXME
-    // [Authorize(Policy = Policies.GameMasters)]
-    // public Task<List<DbGame>> GameDelete(IMediator mediator, [ID("Game")] long gameId) {
-    //     return mediator.Send(new GameDelete(gameId));
-    // }
 
     [Authorize(Policy = Policies.GameMasters)]
     public Task<GameOptionsSetResult> GameOptionsSet(IMediator mediator, [ID(GameType.NAME)] long gameId, GameOptions options) {

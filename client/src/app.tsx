@@ -47,12 +47,19 @@ const router = (store: MainStore, map: MapContext) => createBrowserRouter([
         ]
     },
     {
-        path: '/', element: <Pages.Layout />,
+        element: <Pages.Layout />,
         children: [
-            { index: true, element: <Pages.HomePage /> },
-            { path: 'engines', element: <Pages.GameEnginesPage /> },
-            { path: 'users', element: <Pages.UsersPage />},
-            { path: 'games/:gameId', element: <Pages.GameDetailsPage />}
+            { path: '/',             handle: { title: 'Games' },        element: <Pages.HomePage /> },
+            { path: 'engines',       handle: { title: 'Game Engines' }, element: <Pages.GameEnginesPage /> },
+            { path: 'users',         handle: { title: 'Users' },        element: <Pages.UsersPage />},
+            {
+                path: 'games/:gameId',
+                element: <Pages.GameDetailsPage />,
+                loader: ({ params }) => {
+                    store.gameDetails.setGameId(params.gameId)
+                    return store.gameDetails
+                }
+            }
         ]
     }
 ])

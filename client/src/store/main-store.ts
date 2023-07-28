@@ -8,6 +8,8 @@ import { GameEngineCreateRemote, GameEngineCreateRemoteMutation, GameEngineCreat
 import { GameEngineDelete, GameEngineDeleteMutation, GameEngineDeleteMutationVariables, GameEngineDeleteResult } from '../schema'
 import { GameCreateRemote, GameCreateRemoteMutation, GameCreateRemoteMutationVariables } from '../schema'
 import { GameCreateLocal, GameCreateLocalMutation, GameCreateLocalMutationVariables } from '../schema'
+import { GameDelete, GameDeleteMutation, GameDeleteMutationVariables, GameDeleteResult } from '../schema'
+
 
 import { GameDetailsStore } from './game-details-store'
 import { NewGameEngineViewModel } from './game-engines-store'
@@ -25,7 +27,7 @@ export class MainStore {
     readonly engines = seq<GetGameEnginesQuery, GameEngineFragment>(GetGameEngines, data => data.gameEngines.items || [], null, 'engines')
 
     readonly opGameEngineAddLocal = mutate<GameEngineCreateLocalMutation, GameEngineCreateLocalMutationVariables, Result<'engine', GameEngineFragment>, GameEngineFragment>({
-        name: 'opAddEngineLocal',
+        name: 'opGameEngineAddLocal',
         document: GameEngineCreateLocal,
         pick: data => data.gameEngineCreateLocal,
         map: data => data.engine,
@@ -38,7 +40,7 @@ export class MainStore {
     })
 
     readonly opGameEngineAddRemote = mutate<GameEngineCreateRemoteMutation, GameEngineCreateRemoteMutationVariables, Result<'engine', GameEngineFragment>, GameEngineFragment>({
-        name: 'opAddEngineRemote',
+        name: 'opGameEngineAddRemote',
         document: GameEngineCreateRemote,
         pick: data => data.gameEngineCreateRemote,
         map: data => data.engine,
@@ -51,7 +53,7 @@ export class MainStore {
     })
 
     readonly opGameEngineDelete = mutate<GameEngineDeleteMutation, GameEngineDeleteMutationVariables, GameEngineDeleteResult, void>({
-        name: 'opDeleteEngine',
+        name: 'opGameEngineDelete',
         document: GameEngineDelete,
         pick: data => data.gameEngineDelete,
         onSuccess: [
@@ -66,7 +68,7 @@ export class MainStore {
     readonly games = seq<GetGamesQuery, GameHeaderFragment>(GetGames, data => data.games?.items || [], null, 'games')
 
     readonly opGameAddRemote = mutate<GameCreateRemoteMutation, GameCreateRemoteMutationVariables, Result<'game', GameHeaderFragment>, GameHeaderFragment>({
-        name: 'opGameAdd',
+        name: 'opGameAddRemote',
         document: GameCreateRemote,
         pick: data => data.gameCreateRemote,
         map: data => data.game,
@@ -79,7 +81,7 @@ export class MainStore {
     })
 
     readonly opGameAddLocal = mutate<GameCreateLocalMutation, GameCreateLocalMutationVariables, Result<'game', GameHeaderFragment>, GameHeaderFragment>({
-        name: 'opGameAdd',
+        name: 'opGameAddLocal',
         document: GameCreateLocal,
         pick: data => data.gameCreateLocal,
         map: data => data.game,
@@ -90,6 +92,22 @@ export class MainStore {
             }
         ]
     })
+
+    readonly opGameDelete = mutate<GameDeleteMutation, GameDeleteMutationVariables, GameDeleteResult, void>({
+        name: 'opGameDelete',
+        document: GameDelete,
+        pick: data => data.gameDelete,
+        onSuccess: [
+            (_, variables) => {
+                this.games.remove(e => e.id === variables.gameId)
+            }
+        ]
+    })
+
+    readonly gamesDelete = (gameId: string) => this.opGameDelete.run({ gameId })
+
+    readonly homePageOperation = combine(this.games, this.opGameDelete)
+    readonly gameEnginesPageOperation = combine(this.engines, this.opGameEngineDelete)
 
     readonly home = new HomeStore()
     readonly enginesNew = new NewGameEngineViewModel(

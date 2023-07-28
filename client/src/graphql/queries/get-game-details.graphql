@@ -1,5 +1,6 @@
 query GetGameDetails($gameId: ID!) {
   node(id: $gameId) {
+    __typename
     ... on Game {
       id
       name

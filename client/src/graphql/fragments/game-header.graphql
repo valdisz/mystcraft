@@ -2,6 +2,10 @@ fragment GameHeader on Game {
   id
   status
   createdAt
+  createdBy {
+    name
+  }
+  type
   name
   options {
     schedule

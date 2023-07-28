@@ -1,5 +1,0 @@
-# mutation DeleteGame($gameId: ID!) {
-#     gameDelete(gameId: $gameId) {
-#         ...GameHeader
-#     }
-# }

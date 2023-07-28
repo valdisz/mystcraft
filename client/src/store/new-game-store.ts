@@ -69,6 +69,7 @@ export class NewGameStore {
     ) {
         this.dialog = newDialog({
             onOpen: () => {
+                this.operation.reset()
                 this.form.reset()
                 this.form.levels.reset(newMapLevelItem('nexus', 1, 1))
                 this.form.schedule.reset('0 12 * * MON,WED,FRI')

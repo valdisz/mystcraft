@@ -9,7 +9,7 @@ import { GameEngineFragment } from '../schema'
 import { forFileField, forTextField } from '../store/forms'
 
 function GameEnginesPage() {
-    const { engines, enginesDelete, enginesNew } = useStore()
+    const { engines, enginesDelete, gameEnginesPageOperation, enginesNew } = useStore()
 
     const actions = (
         <ForRole role={Role.GameMaster}>
@@ -19,7 +19,7 @@ function GameEnginesPage() {
 
     return (
         <>
-            <ListLayout<GameEngineFragment> title='Game Engines' actions={actions} items={engines} operation={engines}>
+            <ListLayout<GameEngineFragment> title='Game Engines' actions={actions} items={engines} operation={gameEnginesPageOperation}>
                 {item => <GameEngineItem key={item.id} engine={item} onDelete={enginesDelete} />}
             </ListLayout>
             <ObservableNewGameEngineDialog model={enginesNew} />

@@ -1,0 +1,6 @@
+mutation GameDelete($gameId: ID!) {
+    gameDelete(gameId: $gameId) {
+        isSuccess
+        error
+    }
+}

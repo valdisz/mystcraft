@@ -6,14 +6,47 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using advisor.Model;
 using advisor.Persistence;
+using advisor.Schema;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
-public record GameDelete(long GameId) : IRequest<List<DbGame>>;
-
 public record TurnDelete(ClaimsPrincipal User, long PlayerId, int TurnNumber) : IRequest<int>;
+
+public record GameDelete(long GameId): IRequest<GameDeleteResult>;
+
+public record GameDeleteResult(bool IsSuccess, string Error = null) : IMutationResult {
+    public static GameDeleteResult New(Validation<Error, LanguageExt.Unit> result) =>
+        result.Match(
+            Succ: ge => new GameDeleteResult(true),
+            Fail: e  => new GameDeleteResult(false, Error: e.First().Message)
+        );
+}
+
+public class GameDeleteHandler : IRequestHandler<GameDelete, GameDeleteResult> {
+    public GameDeleteHandler(Database database) {
+        this.database = database;
+    }
+
+    private readonly Database database;
+
+    public Task<GameDeleteResult> Handle(GameDelete request, CancellationToken cancellationToken) =>
+        Validate(request)
+            .Map(GameInterpreter<Runtime>.Interpret)
+            .Unwrap(Runtime.New(database, cancellationToken))
+            .Map(GameDeleteResult.New);
+
+    private static Validation<Error, Mystcraft<LanguageExt.Unit>> Validate(GameDelete request) =>
+        GameId.New(request.GameId).ForField(nameof(GameDelete.GameId))
+            .Map(x =>
+                from game in Mystcraft.WriteOneGame(x)
+                from _ in Mystcraft.DeleteGame(game)
+                select unit
+            );
+}
+
 
 //     public class GameDeleteHandler : IRequestHandler<GameDelete, List<DbGame>>, IRequestHandler<TurnDelete, int> {
 //         public GameDeleteHandler(Database db, IAuthorizationService auth) {

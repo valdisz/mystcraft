@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { GameEngineFragment } from '../schema'
-import { Chip, IconButton, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material'
+import { Chip, IconButton, ListItem, ListItemButton, Typography, Stack, Box } from '@mui/material'
 import { Confirm, DateTime } from './bricks'
 
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -12,17 +12,13 @@ export interface GameEngineItemProps {
 }
 
 function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
-    console.log('rendering game engine item', engine.id)
-
-    const created = <Typography variant='subtitle2'>
-        <DateTime value={engine.createdAt} />
-        {' '}
-        by
-        {' '}
-        {engine.createdBy?.name || 'unknown'}
-    </Typography>
-
-    return <ListItem
+    return <ListItem sx={{
+            ':not(:last-child)': {
+                borderBottomWidth: '1px',
+                borderBottomStyle: 'dashed',
+                borderBottomColor: 'divider',
+            }
+        }}
         secondaryAction={
             <Confirm>
                 <IconButton onClick={() => onDelete?.(engine.id)}><DeleteIcon /></IconButton>
@@ -31,9 +27,20 @@ function GameEngineItem({ engine, onDelete }: GameEngineItemProps) {
         disablePadding
     >
         <ListItemButton>
-            <ListItemText primary={engine.name} primaryTypographyProps={{ variant: 'subtitle1' }} secondary={created} />
-            <ListItemText primary={engine.description} />
-            <Chip size='small' variant={engine.remote ? 'filled' : 'outlined' } label={engine.remote ? 'remote' : 'local'} />
+            <Stack gap={2} flex={1} minWidth={0}>
+                <Typography variant='h6'>{engine.name}</Typography>
+                <Typography variant='body1'>{engine.description}</Typography>
+                <Typography variant='subtitle2'>
+                    <DateTime value={engine.createdAt} />
+                    {' '}
+                    by
+                    {' '}
+                    {engine.createdBy?.name || 'unknown'}
+                </Typography>
+            </Stack>
+            <Box flex={1} minWidth={0}>
+                <Chip variant={engine.remote ? 'filled' : 'outlined' } label={engine.remote ? 'Remote' : 'Local'} />
+            </Box>
         </ListItemButton>
     </ListItem>
 }

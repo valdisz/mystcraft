@@ -2,134 +2,113 @@ import * as React from 'react'
 import { ListItemText, TextField, Button,
     DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl,
     InputLabel, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
-    IconButton, FormHelperText, Alert, AlertTitle
+    IconButton, FormHelperText, Alert, AlertTitle, ListItem, ListItemButton
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
 import cronstrue from 'cronstrue'
 import { Observer, observer } from 'mobx-react-lite'
-import { Link, LinkProps } from 'react-router-dom'
+import { Link, useMatches } from 'react-router-dom'
 import { MapLevelItem, useStore } from '../store'
-import { ListLayout, FileField, SelectField } from '../components'
-import { GameEngineFragment, GameHeaderFragment } from '../schema'
+import { ListLayout, FileField, SelectField, Confirm } from '../components'
+import { GameEngineFragment, GameHeaderFragment, GameStatus, GameType } from '../schema'
 import { Role, ForRole } from '../auth'
 import { List, forFileField, forFormControl, forFormHelperText, forSelectField, forTextField } from '../store/forms'
 
 import ClearIcon from '@mui/icons-material/Clear'
+import DeleteIcon from '@mui/icons-material/Delete'
+
+import FiberNewIcon from '@mui/icons-material/FiberNew'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import PauseIcon from '@mui/icons-material/Pause'
+import LockIcon from '@mui/icons-material/Lock'
+import StopIcon from '@mui/icons-material/Stop'
 
 export function HomePage() {
-    const { games, gamesNew: newGame } = useStore()
+    const { games, gamesNew, homePageOperation, gamesDelete } = useStore()
+    const matches = useMatches()
+
+    const m = matches[matches.length - 1]
+    const title = (m.handle as any).title
+
+    console.log(matches)
 
     const actions = (
         <ForRole role={Role.GameMaster}>
-            <Button color='primary' size='large' onClick={newGame.dialog.open}>New Game</Button>
+            <Button color='primary' size='large' onClick={gamesNew.dialog.open}>New Game</Button>
         </ForRole>
     )
 
     return (
         <>
-            <ListLayout<GameHeaderFragment> title='Games' actions={actions} operation={games} items={games}>
-                { item => <GameItem key={item.id} game={item} /> }
+            <ListLayout<GameHeaderFragment> title={title} actions={actions} operation={homePageOperation} items={games}>
+                { item => <GameItem key={item.id} game={item} onDelete={gamesDelete} /> }
             </ListLayout>
             <ObservableNewGameDialog />
         </>
     )
+}
 
-    // React.useEffect(() => { home.load() }, [])
+interface GameStatusIconProps {
+    status: GameStatus
+}
 
-    // return <Container>
-    //     <PageTitle title='Games'
-    //         actions={<ForRole role={Role.GameMaster}>
-    //                     <Button variant='outlined' color='primary' size='large' onClick={newGame.open}>New game</Button>
-    //                 </ForRole>} />
-    //     <Paper elevation={0}>
-    //         <input type='file' ref={home.setFileUpload} style={{ display: 'none' }} onChange={home.uploadFile} />
-    //         <Grid container spacing={2}>
-    //             <Observer>
-    //                 {() => {
-    //                     const games = home.games.value
-
-    //                     return games.length
-    //                         ? <>{games.map(x => <GameItem key={x.id} game={x} />)}</>
-    //                         : <EmptyListItem>
-    //                             <Stack alignItems='center'>
-    //                                 <Typography variant='h6'>Empty</Typography>
-    //                                 <Button variant='outlined' color='primary' onClick={newGame.open}>Create first game</Button>
-    //                             </Stack>
-    //                         </EmptyListItem>
-
-    //                 }}
-    //             </Observer>
-    //         </Grid>
-    //     </Paper>
-    //     <ObservableNewGameDialog />
-    // </Container>
+function GameStatusIcon({ status }: GameStatusIconProps) {
+    switch (status) {
+        case GameStatus.New: return <FiberNewIcon color='info' />
+        case GameStatus.Running: return <PlayArrowIcon color='success' />
+        case GameStatus.Paused: return <PauseIcon color='secondary' />
+        case GameStatus.Locked: return <LockIcon color='warning' />
+        case GameStatus.Stoped: return <StopIcon color='disabled' />
+        default: return null
+    }
 }
 
 interface GameItemProps {
     game: GameHeaderFragment
+    onDelete?: (id: string) => void
 }
 
-function GameItem({ game }: GameItemProps) {
-    const { home, gameDetails } = useStore()
-
-    const props: ListItemProps & Partial<LinkProps> = { }
-
-    const playerJoind = !!game.me
-    const playerFactionKnown = !!game.me?.number
-
+function GameItem({ game, onDelete }: GameItemProps) {
     const cron = game.options.schedule
         ? `${cronstrue.toString(game.options.schedule, { use24HourTimeFormat: true })} (${game.options.timeZone ?? 'UTC'})`
         : null
-// onClick={() => playerJoind ? home.triggerUploadReport(game.me.id) : home.joinGame(game.id)}
-    return <Grid item xs={12} sm={6} md={4}>
-        <Card>
-            <CardActionArea component={Link} to={`/games/${game.id}`}>
-                <CardContent>
-                    <Stack direction='row' justifyContent='space-between' alignItems='center'>
-                        <Typography variant='h4' gutterBottom>{game.name}</Typography>
-                        { playerJoind && <Chip label='Joined' size='small' color='success' /> }
-                    </Stack>
-                    <Typography variant='caption'>{cron}</Typography>
 
-                </CardContent>
-            </CardActionArea>
-        </Card>
-    </Grid>
-}
+    const isRemote = game.type === GameType.Remote
 
-/* <CardActions>
-    <Observer>
-        {() => playerJoind
-            ? <SplitButton disabled={home.uploading} color='secondary' size='small' variant='outlined'
-            onClick={() => home.triggerUploadReport(game.me.id)}
-            actions={[
-                { content: 'Import map', onAction: () => home.triggerImportMap(game.me.id) },
-                '---',
-                { content: 'Update Ruleset', onAction: () => home.triggerRuleset(game.id) },
-                { content: 'Delete', onAction: () => home.deleteGame(game.id) },
-            ]}>
-                    Upload report
-            </SplitButton>
-            : null }
-    </Observer>
-
-</CardActions> */
-/* <Stack flex={1} gap={2} sx={{ p: 2}}>
-    <Stack direction='row' alignItems='flex-start' justifyContent='space-between' gap={2}>
-        <Stack>
-        </Stack>
-    </Stack>
-
-    <Box>
-        <Stack flex={1} gap={2} direction='row' alignItems='center' justifyContent='space-between' minWidth={0}>
-            <Stack direction='row' gap={2}>
-                <Chip label='Pending' size='small' color='warning' />
-                <Typography variant='overline'>Starting in 35 days</Typography>
+    return <ListItem sx={{
+            ':not(:last-child)': {
+                borderBottomWidth: '1px',
+                borderBottomStyle: 'dashed',
+                borderBottomColor: 'divider',
+            }
+        }}
+        secondaryAction={
+            <ForRole role={Role.GameMaster}>
+                <Confirm>
+                    <IconButton onClick={() => onDelete?.(game.id)}><DeleteIcon /></IconButton>
+                </Confirm>
+            </ForRole>
+        }
+        disablePadding
+    >
+        <ListItemButton component={Link} to={`/games/${game.id}`}>
+            <Stack gap={2} flex={1} minWidth={0}>
+                <Typography variant='h6' sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <GameStatusIcon status={game.status} />
+                    {' '}
+                    {game.name}
+                </Typography>
+                <Box>
+                    <Typography variant='caption'>Turn Schedule</Typography>
+                    <Typography variant='body1'>{cron}</Typography>
+                </Box>
             </Stack>
-            <Button>0 Players</Button>
-        </Stack>
-    </Box>
-</Stack> */
+            <Box flex={1} minWidth={0}>
+                <Chip variant={isRemote ? 'filled' : 'outlined' } label={isRemote ? 'Remote' : 'Local'} />
+            </Box>
+        </ListItemButton>
+    </ListItem>
+}
 
 interface MapLevelItemEditorProps {
     model: MapLevelItem

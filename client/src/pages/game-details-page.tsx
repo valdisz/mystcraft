@@ -7,28 +7,38 @@ import {
 import { styled } from '@mui/material/styles'
 import { Link } from 'react-router-dom'
 import { PageTitle } from '../components'
-import { useParams } from 'react-router'
-import { useStore, Player, TurnState } from '../store'
+import { useLoaderData, useParams } from 'react-router'
+import { useStore, Player, TurnState, GameDetailsStore } from '../store'
 import { GameStatus } from '../schema'
 
-function GameDetailsPage() {
-    const { gameDetails } = useStore()
-    const { gameId } = useParams()
+export default function GameDetailsPage() {
+    const gameDetails = useLoaderData() as GameDetailsStore;
+    return <GameDetailsObserved store={gameDetails} />
 
-    useEffect(() => {
-        if (gameId) {
-            gameDetails.setGameId(gameId)
-        }
-    }, [ gameId ])
+    // return <Container>
+    //     <PageTitle
+    //         title={gameDetails.name || 'Loading...'}
+    //         back='/'
+    //         actions={<GameActionsObserved />}
+    //     />
+    //     { content }
+    //     <ClaimFactionPromptObserved />
+    // </Container>
+}
 
+interface GameDetailsProps {
+    store: GameDetailsStore
+}
+
+function GameDetails({ store }: GameDetailsProps) {
     let content
-    if (gameDetails.isLoading) {
+    if (store.isLoading) {
         content = <Box sx={{ m: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <CircularProgress />
         </Box>
     }
-    else if (gameDetails.source.error) {
-        content = <Alert severity="error">{gameDetails.source.error.message}</Alert>
+    else if (store.source.error) {
+        content = <Alert severity="error">{store.source.error.message}</Alert>
     }
     else {
         content = <Stack gap={4}>
@@ -36,44 +46,44 @@ function GameDetailsPage() {
                 <Card variant='outlined'>
                     <CenterCardContent>
                         <Typography variant='caption'>Turn</Typography>
-                        <Typography variant='h5'>{gameDetails.turnNumber}</Typography>
+                        <Typography variant='h5'>{store.turnNumber}</Typography>
                     </CenterCardContent>
                 </Card>
                 <Card variant='outlined'>
                 <CenterCardContent>
                         <Typography variant='caption'>Players</Typography>
-                        <Typography variant='h5'>{gameDetails.playerCount}</Typography>
+                        <Typography variant='h5'>{store.playerCount}</Typography>
                     </CenterCardContent>
                 </Card>
                 <Card variant='outlined'>
                     <CenterCardContent>
                         <Typography variant='caption'>Local Players</Typography>
-                        <Typography variant='h5'>{gameDetails.locaPlayerCount}</Typography>
+                        <Typography variant='h5'>{store.locaPlayerCount}</Typography>
                     </CenterCardContent>
                 </Card>
             </Stack>
 
-            { gameDetails.showOwnPlayers &&
+            { store.showOwnPlayers &&
                 <Box>
                     <Typography variant='h5'>Own Faction</Typography>
                     <Paper variant='outlined'>
-                        <PlayerList items={gameDetails.ownPlayers} />
+                        <PlayerList items={store.ownPlayers} />
                     </Paper>
                 </Box> }
 
-            { gameDetails.showClaimedPlayers &&
+            { store.showClaimedPlayers &&
                 <Box>
                     <Typography variant='h5'>Claimed Factions</Typography>
                     <Paper variant='outlined'>
-                        <PlayerList items={gameDetails.claimedPlayers} />
+                        <PlayerList items={store.claimedPlayers} />
                     </Paper>
                 </Box> }
 
-            { gameDetails.showRemotePlayers &&
+            { store.showRemotePlayers &&
                 <Box>
                     <Typography variant='h5'>Remote Factions</Typography>
                     <Paper variant='outlined'>
-                        <PlayerList items={gameDetails.remotePlayers} onClaim={gameDetails.claim} />
+                        <PlayerList items={store.remotePlayers} onClaim={store.claim} />
                     </Paper>
                 </Box> }
         </Stack>
@@ -81,7 +91,7 @@ function GameDetailsPage() {
 
     return <Container>
         <PageTitle
-            title={gameDetails.name || 'Loading...'}
+            title={store.name || 'Loading...'}
             back='/'
             actions={<GameActionsObserved />}
         />
@@ -89,7 +99,8 @@ function GameDetailsPage() {
         <ClaimFactionPromptObserved />
     </Container>
 }
-export default observer(GameDetailsPage)
+
+const GameDetailsObserved = observer(GameDetails)
 
 function GameActions() {
     const { gameDetails } = useStore()
