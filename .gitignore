@@ -12,3 +12,4 @@ wwwroot/
 client/**/build/
 
 .fake
+.yarn/
