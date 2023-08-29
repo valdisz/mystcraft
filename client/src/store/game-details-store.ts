@@ -52,6 +52,10 @@ export class GameDetailsStore {
 
     readonly claimFaction = new ClaimFactionStore(this)
 
+    get game() {
+        return this.source.value
+    }
+
     get name() {
         return this.source.value?.name
     }

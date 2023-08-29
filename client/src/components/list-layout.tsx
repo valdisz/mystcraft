@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container, List, Alert, AlertTitle, Stack, Paper, LinearProgress } from '@mui/material'
 import { Operation, OperationError, Seq } from '../store/connection'
-import { PageTitle } from './page-title'
+import PageTitle from './page-title'
 import { observer } from 'mobx-react-lite'
 import { EmptyListItem } from './bricks'
 
@@ -20,9 +20,9 @@ function ListLayout<T>({ title, actions, items, operation, children }: ListLayou
 
     return (
         <Container>
-            <PageTitle title={title} actions={actions} />
-
             <Stack gap={6}>
+                <PageTitle title={title} actions={actions} />
+
                 { operation.isFailed && <Alert severity="error">
                     <AlertTitle>Error</AlertTitle>
                     { operation.error.message }

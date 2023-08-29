@@ -9,14 +9,13 @@ export interface PageTitleProps {
     actions?: React.ReactNode
 }
 
-export function PageTitle({ title, back, actions }: PageTitleProps) {
+export default function PageTitle({ title, back, actions }: PageTitleProps) {
     const theme = useTheme()
     return <Box sx={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: theme.spacing(2),
-        mb: 4
+        gap: theme.spacing(2)
     }}>
         <Stack direction='row' flex={1} minWidth={0} alignItems='center' gap={2}>
             { back && <IconButton component={Link} to={back}><ArrowBackIcon fontSize='large' /></IconButton> }

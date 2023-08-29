@@ -18,7 +18,9 @@ export * from './battle-list'
 export * from './fixed-typography'
 export * from './bricks/fluid-fab'
 export * from './menu-icon-button'
+
 export * from './page-title'
+export { default as PageTitle } from './page-title'
 
 export * from './game-engine-item'
 export { default as GameEngineItem } from './game-engine-item'
@@ -28,3 +30,7 @@ export { default as CommandButton } from './command-button'
 
 export * from './list-layout'
 export { default as ListLayout } from './list-layout'
+
+
+export * from './game-details'
+export { default as GameDetails } from './game-details'

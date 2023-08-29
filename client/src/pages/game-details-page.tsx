@@ -6,114 +6,15 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { Link } from 'react-router-dom'
-import { PageTitle } from '../components'
+import { GameDetails } from '../components'
 import { useLoaderData, useParams } from 'react-router'
 import { useStore, Player, TurnState, GameDetailsStore } from '../store'
 import { GameStatus } from '../schema'
 
 export default function GameDetailsPage() {
-    const gameDetails = useLoaderData() as GameDetailsStore;
-    return <GameDetailsObserved store={gameDetails} />
-
-    // return <Container>
-    //     <PageTitle
-    //         title={gameDetails.name || 'Loading...'}
-    //         back='/'
-    //         actions={<GameActionsObserved />}
-    //     />
-    //     { content }
-    //     <ClaimFactionPromptObserved />
-    // </Container>
+    const store = useLoaderData() as GameDetailsStore;
+    return <GameDetails store={store} />
 }
-
-interface GameDetailsProps {
-    store: GameDetailsStore
-}
-
-function GameDetails({ store }: GameDetailsProps) {
-    let content
-    if (store.isLoading) {
-        content = <Box sx={{ m: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <CircularProgress />
-        </Box>
-    }
-    else if (store.source.error) {
-        content = <Alert severity="error">{store.source.error.message}</Alert>
-    }
-    else {
-        content = <Stack gap={4}>
-            <Stack direction='row' justifyContent='center' gap={4}>
-                <Card variant='outlined'>
-                    <CenterCardContent>
-                        <Typography variant='caption'>Turn</Typography>
-                        <Typography variant='h5'>{store.turnNumber}</Typography>
-                    </CenterCardContent>
-                </Card>
-                <Card variant='outlined'>
-                <CenterCardContent>
-                        <Typography variant='caption'>Players</Typography>
-                        <Typography variant='h5'>{store.playerCount}</Typography>
-                    </CenterCardContent>
-                </Card>
-                <Card variant='outlined'>
-                    <CenterCardContent>
-                        <Typography variant='caption'>Local Players</Typography>
-                        <Typography variant='h5'>{store.locaPlayerCount}</Typography>
-                    </CenterCardContent>
-                </Card>
-            </Stack>
-
-            { store.showOwnPlayers &&
-                <Box>
-                    <Typography variant='h5'>Own Faction</Typography>
-                    <Paper variant='outlined'>
-                        <PlayerList items={store.ownPlayers} />
-                    </Paper>
-                </Box> }
-
-            { store.showClaimedPlayers &&
-                <Box>
-                    <Typography variant='h5'>Claimed Factions</Typography>
-                    <Paper variant='outlined'>
-                        <PlayerList items={store.claimedPlayers} />
-                    </Paper>
-                </Box> }
-
-            { store.showRemotePlayers &&
-                <Box>
-                    <Typography variant='h5'>Remote Factions</Typography>
-                    <Paper variant='outlined'>
-                        <PlayerList items={store.remotePlayers} onClaim={store.claim} />
-                    </Paper>
-                </Box> }
-        </Stack>
-    }
-
-    return <Container>
-        <PageTitle
-            title={store.name || 'Loading...'}
-            back='/'
-            actions={<GameActionsObserved />}
-        />
-        { content }
-        <ClaimFactionPromptObserved />
-    </Container>
-}
-
-const GameDetailsObserved = observer(GameDetails)
-
-function GameActions() {
-    const { gameDetails } = useStore()
-    const { gameId } = useParams()
-
-    if (gameDetails.status === GameStatus.New) return <Button variant='outlined' color='primary' size='large' onClick={gameDetails.start}>Start</Button>
-    if (gameDetails.canPlay) return <Button variant='outlined' color='primary' size='large' component={Link} to={`/play/${gameId}`} replace>Play</Button>
-}
-const GameActionsObserved = observer(GameActions)
-
-const CenterCardContent = styled(CardContent)({
-    textAlign: 'center'
-})
 
 interface PlayerListProps {
     items: Player[]
