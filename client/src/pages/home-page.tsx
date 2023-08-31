@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ListItemText, TextField, Button,
     DialogTitle, DialogContent, DialogActions, Dialog, Box, Typography, Stack, FormControl,
-    InputLabel, ListItemProps, Chip, Grid, Card, CardActionArea, CardContent,
+    InputLabel, Chip,
     IconButton, FormHelperText, Alert, AlertTitle, ListItem, ListItemButton
 } from '@mui/material'
 import { LoadingButton } from '@mui/lab'
@@ -9,19 +9,13 @@ import cronstrue from 'cronstrue'
 import { Observer, observer } from 'mobx-react-lite'
 import { Link, useMatches } from 'react-router-dom'
 import { MapLevelItem, useStore } from '../store'
-import { ListLayout, FileField, SelectField, Confirm } from '../components'
-import { GameEngineFragment, GameHeaderFragment, GameStatus, GameType } from '../schema'
+import { ListLayout, FileField, SelectField, Confirm, GameStatusIcon } from '../components'
+import { GameEngineFragment, GameHeaderFragment, GameType } from '../schema'
 import { Role, ForRole } from '../auth'
 import { List, forFileField, forFormControl, forFormHelperText, forSelectField, forTextField } from '../store/forms'
 
 import ClearIcon from '@mui/icons-material/Clear'
 import DeleteIcon from '@mui/icons-material/Delete'
-
-import FiberNewIcon from '@mui/icons-material/FiberNew'
-import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import PauseIcon from '@mui/icons-material/Pause'
-import LockIcon from '@mui/icons-material/Lock'
-import StopIcon from '@mui/icons-material/Stop'
 
 export function HomePage() {
     const { games, gamesNew, homePageOperation, gamesDelete } = useStore()
@@ -46,21 +40,6 @@ export function HomePage() {
             <ObservableNewGameDialog />
         </>
     )
-}
-
-interface GameStatusIconProps {
-    status: GameStatus
-}
-
-function GameStatusIcon({ status }: GameStatusIconProps) {
-    switch (status) {
-        case GameStatus.New: return <FiberNewIcon color='info' />
-        case GameStatus.Running: return <PlayArrowIcon color='success' />
-        case GameStatus.Paused: return <PauseIcon color='secondary' />
-        case GameStatus.Locked: return <LockIcon color='warning' />
-        case GameStatus.Stoped: return <StopIcon color='disabled' />
-        default: return null
-    }
 }
 
 interface GameItemProps {

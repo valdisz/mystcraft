@@ -16,10 +16,10 @@ export function MenuIconButton({ icon, IconButtonProps, MenuProps, children }: M
     const closeMenu = () => setOpen(false)
 
     return <>
-        <IconButton {...IconButtonProps || {}} ref={anchorRef} onClick={toggleMenu}>
+        <IconButton ref={anchorRef} onClick={toggleMenu} {...IconButtonProps || {}}>
             {icon}
         </IconButton>
-        <Menu {...MenuProps || {}} anchorEl={anchorRef.current} open={open} onBackdropClick={closeMenu} onClick={closeMenu}>
+        <Menu anchorEl={anchorRef.current} open={open} onClose={closeMenu} onClick={closeMenu} {...MenuProps || {}}>
             {children}
         </Menu>
     </>

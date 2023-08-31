@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom'
 import { GameDetails } from '../components'
 import { useLoaderData, useParams } from 'react-router'
 import { useStore, Player, TurnState, GameDetailsStore } from '../store'
-import { GameStatus } from '../schema'
 
 export default function GameDetailsPage() {
     const store = useLoaderData() as GameDetailsStore;
