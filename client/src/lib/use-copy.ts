@@ -1,6 +1,6 @@
 import ClipboardJS from 'clipboard';
 import * as React from 'react'
-import { useCallbackRef } from './use-callback-ref';
+import useCallbackRef from './use-callback-ref';
 
 export interface UseCopyOptions extends ClipboardJS.Options {
     onSuccess?: () => void
@@ -8,7 +8,7 @@ export interface UseCopyOptions extends ClipboardJS.Options {
 }
 
 // data-clipboard-text
-export function useCopy(content: boolean = false, { onError, onSuccess, ...options }: UseCopyOptions = { }) {
+export default function useCopy(content: boolean = false, { onError, onSuccess, ...options }: UseCopyOptions = { }) {
     const [ref, setRef] = useCallbackRef<HTMLButtonElement>()
 
     React.useEffect(() => {

@@ -29,6 +29,11 @@ const ChipLabel = styled(Avatar)({
 function GameDetails({ store }: GameDetailsProps) {
     // reading all observable variables into local variables to indicate that this component is observing them
     const isLoading = store.isLoading
+        if (isLoading) return (
+                <Box sx={{ m: 4, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <CircularProgress />
+                </Box>
+            )
     const error = store.source.error
     const game = store.game
 

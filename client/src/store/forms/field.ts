@@ -1,7 +1,7 @@
-import { IAtom, IObservableValue, action, computed, createAtom, makeObservable, observable, runInAction } from 'mobx'
+import { IObservableValue, action, computed, makeObservable, observable } from 'mobx'
 import { Converter, ValueOrError } from './converters'
 import { Validator } from './validation'
-import { _and, _asCallable, _or, _isEmpty } from './utils'
+import { _and, _asCallable, _or, isEmpty } from './utils'
 
 export interface FieldView {
     readonly isDisabled: boolean
@@ -119,7 +119,7 @@ export class Field<TRaw, T> implements FieldView {
             return { error }
         }
 
-        if (required && _isEmpty(value)) {
+        if (required && isEmpty(value)) {
             return {
                 value,
                 error: 'Required'
@@ -190,7 +190,7 @@ export class Field<TRaw, T> implements FieldView {
     }
 
     get isEmpty(): boolean {
-        return _isEmpty(this.value)
+        return isEmpty(this.value)
     }
 
     get isNotEmpty(): boolean {

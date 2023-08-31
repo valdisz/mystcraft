@@ -1,6 +1,6 @@
 import { IAtom, IObservableValue, action, computed, createAtom, makeObservable, observable, runInAction } from 'mobx'
 import { FieldView } from './field'
-import { _asCallable, _or, _and, _every, _some, _isEmpty } from './utils'
+import { _asCallable, _or, _and, _every, _some, isEmpty } from './utils'
 import { OneOrManyValidators, Validator, makeValidator } from './validation'
 
 export interface ListOptions<T extends FieldView> {
@@ -156,7 +156,7 @@ export class List<T extends FieldView> implements FieldView {
     }
 
     get isEmpty(): boolean {
-        return _isEmpty(this.items)
+        return isEmpty(this.items)
     }
 
     get isNotEmpty(): boolean {
