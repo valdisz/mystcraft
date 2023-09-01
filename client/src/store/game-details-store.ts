@@ -28,7 +28,8 @@ export interface Player {
     number: number
     name: string
     isClaimed: boolean
-    isOwn: boolean
+    isOwn?: boolean
+    stance: 'own' | 'ally' | 'friendly' | 'neutral' | 'unfriendly' | 'hostile'
     turns: TurnState[]
 }
 

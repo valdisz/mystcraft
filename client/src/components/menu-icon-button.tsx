@@ -1,14 +1,16 @@
 import React from 'react'
-import { IconButton, IconButtonProps, Menu, MenuProps } from '@mui/material'
+import { Button, ButtonProps, IconButton, IconButtonProps, Menu, MenuProps } from '@mui/material'
 
 export interface MenuIconButtonProps {
     icon: React.ReactNode
     children: React.ReactNode
     IconButtonProps?: IconButtonProps
+    ButtonProps?: ButtonProps
     MenuProps?: MenuProps
+    useButton?: boolean
 }
 
-export function MenuIconButton({ icon, IconButtonProps, MenuProps, children }: MenuIconButtonProps) {
+export function MenuIconButton({ icon, IconButtonProps, ButtonProps, MenuProps, useButton, children }: MenuIconButtonProps) {
     const anchorRef = React.useRef(null)
     const [ open, setOpen ] = React.useState(false)
 
@@ -16,9 +18,18 @@ export function MenuIconButton({ icon, IconButtonProps, MenuProps, children }: M
     const closeMenu = () => setOpen(false)
 
     return <>
-        <IconButton ref={anchorRef} onClick={toggleMenu} {...IconButtonProps || {}}>
-            {icon}
-        </IconButton>
+        {useButton
+            ? (
+                <Button ref={anchorRef} onClick={toggleMenu} {...ButtonProps || {}}>
+                    {icon}
+                </Button>
+            )
+            : (
+                <IconButton ref={anchorRef} onClick={toggleMenu} {...IconButtonProps || {}}>
+                    {icon}
+                </IconButton>
+            )
+        }
         <Menu anchorEl={anchorRef.current} open={open} onClose={closeMenu} onClick={closeMenu} {...MenuProps || {}}>
             {children}
         </Menu>
