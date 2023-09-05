@@ -3,7 +3,8 @@ import { observer } from 'mobx-react-lite'
 import {
     styled,
     Box, Container, Stack, Alert, CircularProgress, ButtonGroup, Button, Typography, Chip,
-    Avatar, Tabs, Tab, Divider, Switch, FormControlLabel
+    Avatar, Tabs, Tab, Divider, Switch, FormControlLabel, Pagination,
+    List, ListItemButton, ListItemText,
 } from '@mui/material'
 import PageTitle from './page-title'
 import { GameDetailsStore, Player, TurnState } from '../store'
@@ -418,7 +419,6 @@ function FactionsTable({ items, caption, inGame, canContact, canClaim, sx, ...pr
             </tbody>
         </Box>
     )
-
 }
 
 function GameMasterControls() {
@@ -578,6 +578,166 @@ function Factions({ inGame }: FactionsProps) {
     )
 }
 
+const LONG_ARTICLE = `
+  _.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._.-=-._
+.----      - ---     --     ---   -----   - --       ----  ----   -     ----.
+ )                                                                         (
+(                             NewOrigins Events                             )
+ )                               May, Year 5                               (
+(                                                                           )
+ )     Numerous wanderers have heard about a fight between combatants      (
+(        happened in the desert of Great Bletchvil Desert where many        )
+ )      soldiers will never fight again. This battle will be known as      (
+(                  Battle near the ocean of Lochael River.                  )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(     Handful peasants are worried about the battle between two armies      )
+ )    happened in the mountains of Ibinmor Heights where 1combatant was    (
+(      killed. The defenders were furious and put all attackers to the      )
+ )    sword. This battle will be known as Siege of the Magical Fortress    (
+(                               Building [9].                               )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(        Multiple druids have heard about the battle between enemies        )
+ )      happened in the desert of Great Perikeros Desert where battle      (
+(       ended in a slaughter of one of the sides. This battle will be       )
+ )            known as Battle near the ocean of Sinalizo Pond.             (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )     Dozen merchants have heard about a fight between hostile forces     (
+(     happened in the desert of Great Lurgbuz Desert where battle ended     )
+ )    in a slaughter of one of the sides. This battle will be known as     (
+(                  Battle near the ocean of Gwalall River.                  )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(     Many locals are worried about the village of Balkhagal that lies      )
+ )     in the Great Morwaz Desert desert, where a partisans destroyed      (
+(                                  guards.                                  )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(      Many peasants are discussing about the city of 38 Epikatarirmos      )
+ )    that lies in the Glanar River swamps, where an opposition put to     (
+(                             the sword guards.                             )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(     Many refugees are rumoring about hunters who have murdered Sphinx     )
+ )      (20307) near mountains of Durwaz Rocks. Freeing the desert of      (
+(                 Great Bletchvil Desert from their terror.                 )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(       Some pilgrims have heard about witchers who have extinguished       )
+ )      Undead (18600) near volcanoes of Lurggar Volcano. Freeing the      (
+(            mountains of Bolagal Mountains from their anxiety.             )
+ )                                                                         (
+(                          .:*~*:._.:*~*:._.:*~*:.                          )
+ )                                                                         (
+(         Numerous locals are whispering about daredevils who have          )
+ )      decimated Giant Scorpions (391) near volcanoes of Bletchgrove      (
+(        Peak. Freeing the desert of Great Volbuz Desert from their         )
+ )                                 horror.                                 (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )      In the desert of Great Birmington Desert, near ocean of Great      (
+(     Methan River, Giant Scorpions (134) who continue to cause horror      )
+ )                          to local inhabitants.                          (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )     In the desert of Great Bletchgrove Desert, near ocean of Great      (
+(     Lochash River, Giant Scorpions (108) who continue to cause terror     )
+ )                          to local inhabitants.                          (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )    In the desert of Great Volbuz Desert, near forests of Ametanopos     (
+(        Forest, Sphinx (631) who continue to cause terror to local         )
+ )                              inhabitants.                               (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )         In the desert of Great Ialihn Desert, near mountains of         (
+(      Antanoatres Peak, Undead (18828) who continue to cause fear to       )
+ )                           local inhabitants.                            (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )       Worrisome news were coming from the desert of Great Dunlock       (
+(      Desert. Inhabitants were shocked by the assassination near the       )
+ )    mountains of Khimilmud Mountains. The assassin escaped unnoticed.    (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )      Frightening news were coming from the desert of Great Durbuz       (
+(      Desert. Commoners were terrified by the assassination near the       )
+ )       ocean of Great Amain River. The assassin escaped unnoticed.       (
+(                                                                           )
+ )                         .:*~*:._.:*~*:._.:*~*:.                         (
+(                                                                           )
+ )      Horrifying news were coming from the desert of Great Dunlock       (
+(        Desert. Citizens were afraid by the assassination near the         )
+ )    mountains of Khimilmud Mountains. The assassin escaped unnoticed.    (
+(__       _       _       _       _       _       _       _       _       __)
+   '-._.-' (___ _) '-._.-' '-._.-' )     ( '-._.-' '-._.-' (__ _ ) '-._.-'
+           ( _ __)                (_     _)                (_ ___)
+           (__  _)                 '-._.-'                 (___ _)
+           '-._.-'                                         '-._.-'
+`
+
+
+function Articles() {
+    return (
+        <>
+            <Stack
+                direction='row'
+                justifyContent='center'
+            >
+                <Stack>
+                    <Typography variant='caption'>Issue</Typography>
+                    <Pagination count={10} defaultPage={10} />
+                </Stack>
+            </Stack>
+
+            <Stack
+                direction='row'
+                gap={2}
+            >
+                <List>
+                    <ListItemButton>
+                        <ListItemText primary='Quests' />
+                    </ListItemButton>
+                    <ListItemButton>
+                        <ListItemText primary='Articles' />
+                    </ListItemButton>
+                    <ListItemButton>
+                        <ListItemText primary='Rumours' />
+                    </ListItemButton>
+                </List>
+
+                <Box
+                    sx={{
+                        flex: 1,
+                        minWidth: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography whiteSpace='pre'>
+                        {LONG_ARTICLE}
+                    </Typography>
+                </Box>
+            </Stack>
+        </>
+    )
+}
 
 
 function GameDetails({ store }: GameDetailsProps) {
@@ -714,9 +874,7 @@ function GameDetails({ store }: GameDetailsProps) {
 
                     {/* Articles */}
                     {pane === 'articles' && (
-                        <>
-                            <p>ToDo: articles</p>
-                        </>
+                        <Articles />
                     )}
 
                     {/* Rules */}
