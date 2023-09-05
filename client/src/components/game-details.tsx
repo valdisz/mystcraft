@@ -1,28 +1,26 @@
 import React from 'react'
 import { observer } from 'mobx-react-lite'
 import {
-    Box, Container, Stack, Alert, CircularProgress, ButtonGroup, Button, AlertTitle, Paper, LinearProgress, List, Typography, Chip,
-    Avatar, MenuItem, Tabs, Tab, Divider, ListItem, ListItemButton, ListItemText, styled, Switch, FormControlLabel
+    styled,
+    Box, Container, Stack, Alert, CircularProgress, ButtonGroup, Button, Typography, Chip,
+    Avatar, Tabs, Tab, Divider, Switch, FormControlLabel
 } from '@mui/material'
 import PageTitle from './page-title'
 import { GameDetailsStore, Player, TurnState } from '../store'
-import { Operation, OperationError } from '../store/connection'
-import { EmptyListItem } from './bricks'
+import { ActionGroup, ActionItem } from './bricks'
 
 import IconPlay from '@mui/icons-material/PlayArrow'
 import IconPause from '@mui/icons-material/Pause'
 import IconStop from '@mui/icons-material/Stop'
 import IconNext from '@mui/icons-material/SkipNext'
 import IconRepeat from '@mui/icons-material/Repeat'
-import IconMore from '@mui/icons-material/MoreVert'
-import { MenuIconButton } from './menu-icon-button'
 
 import LayersIcon from '@mui/icons-material/Layers'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import MiscellaneousServicesIcon from '@mui/icons-material/MiscellaneousServices'
 import GameStatusIcon from './game-status-icon'
 import { blue, green, orange, red } from '@mui/material/colors'
-import { BoxProps } from '@mui/system'
+import { BoxProps, SxProps, Theme } from '@mui/system'
 
 const gameMasterContext = React.createContext(false)
 
@@ -286,12 +284,37 @@ interface FactionItemProps {
     canContact: boolean
 }
 
+const FACTION_NUMBER_STYLE: SxProps<Theme> = {
+    minWidth: '3ch',
+    textAlign: 'right'
+}
+
 function FactionItem({ canClaim, canContact, player, withActions, withTurns }: FactionItemProps) {
     const isGameMaster = useGameMaster()
+
+    const actions: ActionItem[] = []
+    if (canClaim) {
+        actions.push({ content: 'Claim', onAction: () => {} })
+    }
+
+    if (canContact) {
+        actions.push({ content: 'Contact', onAction: () => {} })
+    }
+
+    const gameMasterActions: ActionItem[] = isGameMaster
+        ? [
+            { content: 'Quit', onAction: () => { } },
+            { content: 'Delete', onAction: () => { } },
+        ]
+        : []
+
     return (
         <tr>
             <td className='shrink right'>
-                <Typography variant='body1' fontSize='1rem' sx={{ minWidth: '3ch', textAlign: 'right' }}>{player.number}</Typography>
+                {player.number
+                    ? <Typography variant='body1' sx={FACTION_NUMBER_STYLE}>{player.number}</Typography>
+                    : <Typography variant='body2' sx={FACTION_NUMBER_STYLE}>new</Typography>
+                }
             </td>
             <td>
                 <Typography fontWeight={player.isOwn ? 600 : 400}>{player.name}</Typography>
@@ -308,20 +331,7 @@ function FactionItem({ canClaim, canContact, player, withActions, withTurns }: F
             )}
             {withActions && (
                 <td className='shrink right'>
-                    <ButtonGroup size='small'>
-                        {canClaim && (
-                            <Button>Claim</Button>
-                        )}
-                        {canContact && (
-                            <Button>Contact</Button>
-                        )}
-                        {isGameMaster && (
-                            <MenuIconButton icon={<IconMore />} useButton>
-                                <MenuItem>Quit</MenuItem>
-                                <MenuItem>Delete</MenuItem>
-                            </MenuIconButton>
-                        )}
-                    </ButtonGroup>
+                    <ActionGroup size='small' actions={actions} additionalActions={gameMasterActions} />
                 </td>
             )}
         </tr>
@@ -363,7 +373,7 @@ function FactionsTable({ items, caption, inGame, canContact, canClaim, sx, ...pr
                         verticalAlign: 'baseline',
                     },
                     'th': {
-                        py: 0
+                        py: 0,
                     },
                     'td': {
                         borderColor: 'divider',
@@ -411,6 +421,165 @@ function FactionsTable({ items, caption, inGame, canContact, canClaim, sx, ...pr
 
 }
 
+function GameMasterControls() {
+    return (
+        <Stack>
+            <Typography variant='caption'>Game Master Controls</Typography>
+            <Stack direction='row' alignItems='center'
+                sx={{
+                    bgcolor: 'grey.100',
+                }}
+                >
+                <ButtonGroup size='medium'>
+                    <Button startIcon={<IconPlay />}>Start</Button>
+                    <Button startIcon={<IconPause />}>Pause</Button>
+                    <Button startIcon={<IconStop />}>Stop</Button>
+                    <Button startIcon={<IconRepeat />}>Re-run Turn</Button>
+                    <Button startIcon={<IconNext />}>Next Turn</Button>
+                </ButtonGroup>
+
+                <Box sx={{ flex: 1 }} />
+
+                <ActionGroup
+                    size='medium'
+                    variant='text'
+                    actions={[
+                        { content: 'View Logs', onAction: () => { } },
+                    ]}
+                    additionalActions={[
+                        { content: 'Change Schedule', onAction: () => { } },
+                        { content: 'Change Engine', onAction: () => { } },
+                        '---',
+                        { content: 'Delete', onAction: () => { } },
+                    ]}
+                />
+            </Stack>
+        </Stack>
+    )
+}
+
+function Description() {
+    return (
+        <Box>
+            <Typography align='justify'>
+                Step into the enigmatic realm of Atlantis, a Play-By-Email (PBEM) game that defies the conventional boundaries of strategy and role-playing, all accessible through a user-friendly website interface. Unlike traditional PBEM games, Atlantis is not an endless loop of resource gathering and skirmishes; it offers a tantalizing victory condition that keeps players on the edge of their seats.
+            </Typography>
+            <Typography align='justify'>
+                Set in a mythical underwater kingdom teetering on the brink of apocalypse, you assume the role of a faction leader vying for control of the <strong>Heart of Atlantis</strong> &mdash; a mystical artifact said to possess the power to either save or doom the realm. With a rich tapestry of lore, complex economic systems, and a myriad of magical and military units at your disposal, the game challenges you to forge alliances, outwit enemies, and navigate moral quandaries.
+            </Typography>
+            <Typography align='justify'>
+                Will you be the savior who unites Atlantis or the conqueror who plunges it into eternal darkness? The fate of an entire civilization rests on your strategic acumen. Welcome to Atlantis, where every decision echoes in the annals of history.
+            </Typography>
+        </Box>
+    )
+}
+
+interface FactionsProps {
+    inGame?: boolean
+}
+
+function Factions({ inGame }: FactionsProps) {
+    return (
+        <>
+            <FactionsTable
+                items={NEW_FACTIONS}
+                caption={'New Factions'}
+                inGame={inGame}
+                canClaim={player => false}
+                canContact={player => false}
+            />
+            {inGame
+                ? (
+                    <>
+                        <FactionsTable
+                            items={ITEMS.filter(player => player.stance === 'own')}
+                            caption={'My Faction'}
+                            inGame={inGame}
+                            canClaim={player => false}
+                            canContact={player => false}
+                            sx={{
+                                'td': {
+                                    bgcolor: blue[50],
+                                }
+
+                            }}
+                        />
+                        <FactionsTable
+                            items={ITEMS.filter(player => player.stance === 'ally')}
+                            caption={'Allies'}
+                            inGame={inGame}
+                            canClaim={player => false}
+                            canContact={player => inGame}
+                            sx={{
+                                'td': {
+                                    bgcolor: green[100],
+                                }
+
+                            }}
+                        />
+                        <FactionsTable
+                            items={ITEMS.filter(player => player.stance === 'friendly')}
+                            caption={'Friends'}
+                            inGame={inGame}
+                            canClaim={player => false}
+                            canContact={player => inGame}
+                            sx={{
+                                'td': {
+                                    bgcolor: green[50],
+                                }
+
+                            }}
+                        />
+                        <FactionsTable
+                            items={ITEMS.filter(player => player.stance === 'hostile')}
+                            caption={'Enemies'}
+                            inGame={inGame}
+                            canClaim={player => false}
+                            canContact={player => inGame}
+                            sx={{
+                                'td': {
+                                    bgcolor: red[50],
+                                }
+                            }}
+                        />
+                        <FactionsTable
+                            items={ITEMS.filter(player => player.stance === 'unfriendly')}
+                            caption={'Rivals'}
+                            inGame={inGame}
+                            canClaim={player => false}
+                            canContact={player => inGame}
+                            sx={{
+                                'td': {
+                                    bgcolor: orange[50],
+                                }
+
+                            }}
+                        />
+                        <FactionsTable
+                            items={ITEMS.filter(player => player.stance === 'neutral')}
+                            caption={'Neutrals'}
+                            inGame={inGame}
+                            canClaim={player => false}
+                            canContact={player => inGame}
+                        />
+                    </>
+                )
+                : (
+                    <FactionsTable
+                        items={ITEMS}
+                        caption={'Factions'}
+                        inGame={inGame}
+                        canClaim={player => !player.isClaimed}
+                        canContact={player => inGame}
+                    />
+                )
+            }
+        </>
+    )
+}
+
+
+
 function GameDetails({ store }: GameDetailsProps) {
     // TODO: replace with routing
     const [pane, setPane] = React.useState('description')
@@ -435,14 +604,27 @@ function GameDetails({ store }: GameDetailsProps) {
     const game = store.game
 
     const actions = (
-        <Stack direction='row' alignItems='center' gap={1}>
-            <Button color='primary' size='large' onClick={handleJoinGame}>{ inGame ? 'Open Game' : 'Join Game'}</Button>
-            {inGame && (
-                <MenuIconButton icon={<IconMore />}>
-                    <MenuItem>Quit</MenuItem>
-                </MenuIconButton>
-            )}
-        </Stack>
+        <ActionGroup
+            size='large'
+            color='primary'
+            variant='contained'
+            slotProps={{
+                trigger: {
+                    variant: 'text',
+                }
+            }}
+            actions={[
+                { content: inGame ? 'Open Game' : 'Join Game', onAction: handleJoinGame },
+            ]}
+            additionalActions={[
+                ...(inGame
+                    ? [
+                        { content: 'Quit', onAction: () => { } },
+                    ]
+                    : []
+                )
+            ]}
+        />
     )
 
     const title = (
@@ -504,34 +686,8 @@ function GameDetails({ store }: GameDetailsProps) {
 
                     {/* Game master controls */}
                     {isGameMaster && (
-                        <Stack>
-                            <Typography variant='caption'>Game Master Controls</Typography>
-                            <Stack direction='row' alignItems='center'
-                                sx={{
-                                    bgcolor: 'grey.100',
-                                }}
-                                >
-                                <ButtonGroup size='medium'>
-                                    <Button startIcon={<IconPlay />}>Start</Button>
-                                    <Button startIcon={<IconPause />}>Pause</Button>
-                                    <Button startIcon={<IconStop />}>Stop</Button>
-                                    <Button startIcon={<IconRepeat />}>Re-run Turn</Button>
-                                    <Button startIcon={<IconNext />}>Next Turn</Button>
-                                </ButtonGroup>
-
-                                <Box sx={{ flex: 1 }} />
-
-                                <Button size='medium' variant='text'>View Logs</Button>
-                                <MenuIconButton icon={<IconMore />} useButton ButtonProps={{ variant: 'text', size: 'medium' }}>
-                                    <MenuItem>Change Schedule</MenuItem>
-                                    <MenuItem>Change Engine</MenuItem>
-                                    <Divider />
-                                    <MenuItem>Delete</MenuItem>
-                                </MenuIconButton>
-                            </Stack>
-                        </Stack>
+                        <GameMasterControls />
                     )}
-
 
                     <Tabs value={pane} onChange={handleTabChange}>
                         <Tab label='Description' value='description'  />
@@ -548,116 +704,12 @@ function GameDetails({ store }: GameDetailsProps) {
 
                     {/* Description */}
                     {pane === 'description' && (
-                        <Box>
-                            <Typography align='justify'>
-                                Step into the enigmatic realm of Atlantis, a Play-By-Email (PBEM) game that defies the conventional boundaries of strategy and role-playing, all accessible through a user-friendly website interface. Unlike traditional PBEM games, Atlantis is not an endless loop of resource gathering and skirmishes; it offers a tantalizing victory condition that keeps players on the edge of their seats.
-                            </Typography>
-                            <Typography align='justify'>
-                                Set in a mythical underwater kingdom teetering on the brink of apocalypse, you assume the role of a faction leader vying for control of the <strong>Heart of Atlantis</strong> &mdash; a mystical artifact said to possess the power to either save or doom the realm. With a rich tapestry of lore, complex economic systems, and a myriad of magical and military units at your disposal, the game challenges you to forge alliances, outwit enemies, and navigate moral quandaries.
-                            </Typography>
-                            <Typography align='justify'>
-                                Will you be the savior who unites Atlantis or the conqueror who plunges it into eternal darkness? The fate of an entire civilization rests on your strategic acumen. Welcome to Atlantis, where every decision echoes in the annals of history.
-                            </Typography>
-                        </Box>
+                        <Description />
                     )}
 
                     {/* Factions */}
                     {pane === 'factions' && (
-                        <>
-                            <FactionsTable
-                                items={NEW_FACTIONS}
-                                caption={'New Factions'}
-                                inGame={inGame}
-                                canClaim={player => false}
-                                canContact={player => false}
-                            />
-                            {inGame
-                                ? (
-                                    <>
-                                        <FactionsTable
-                                            items={ITEMS.filter(player => player.stance === 'own')}
-                                            caption={'My Faction'}
-                                            inGame={inGame}
-                                            canClaim={player => false}
-                                            canContact={player => false}
-                                            sx={{
-                                                'td': {
-                                                    bgcolor: blue[50],
-                                                }
-
-                                            }}
-                                        />
-                                        <FactionsTable
-                                            items={ITEMS.filter(player => player.stance === 'ally')}
-                                            caption={'Allies'}
-                                            inGame={inGame}
-                                            canClaim={player => false}
-                                            canContact={player => inGame}
-                                            sx={{
-                                                'td': {
-                                                    bgcolor: green[100],
-                                                }
-
-                                            }}
-                                        />
-                                        <FactionsTable
-                                            items={ITEMS.filter(player => player.stance === 'friendly')}
-                                            caption={'Friends'}
-                                            inGame={inGame}
-                                            canClaim={player => false}
-                                            canContact={player => inGame}
-                                            sx={{
-                                                'td': {
-                                                    bgcolor: green[50],
-                                                }
-
-                                            }}
-                                        />
-                                        <FactionsTable
-                                            items={ITEMS.filter(player => player.stance === 'hostile')}
-                                            caption={'Enemies'}
-                                            inGame={inGame}
-                                            canClaim={player => false}
-                                            canContact={player => inGame}
-                                            sx={{
-                                                'td': {
-                                                    bgcolor: red[50],
-                                                }
-                                            }}
-                                        />
-                                        <FactionsTable
-                                            items={ITEMS.filter(player => player.stance === 'unfriendly')}
-                                            caption={'Rivals'}
-                                            inGame={inGame}
-                                            canClaim={player => false}
-                                            canContact={player => inGame}
-                                            sx={{
-                                                'td': {
-                                                    bgcolor: orange[50],
-                                                }
-
-                                            }}
-                                        />
-                                        <FactionsTable
-                                            items={ITEMS.filter(player => player.stance === 'neutral')}
-                                            caption={'Neutrals'}
-                                            inGame={inGame}
-                                            canClaim={player => false}
-                                            canContact={player => inGame}
-                                        />
-                                    </>
-                                )
-                                : (
-                                    <FactionsTable
-                                        items={ITEMS}
-                                        caption={'Factions'}
-                                        inGame={inGame}
-                                        canClaim={player => !player.isClaimed}
-                                        canContact={player => inGame}
-                                    />
-                                )
-                            }
-                        </>
+                        <Factions inGame={inGame} />
                     )}
 
                     {/* Articles */}

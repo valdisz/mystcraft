@@ -1,6 +1,6 @@
 export * from './bricks'
 
-export * from './split-button'
+export * from './bricks/action-group'
 
 export * from './sing-in'
 export { default as SignIn } from './sing-in'
