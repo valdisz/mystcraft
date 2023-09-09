@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using advisor.Persistence;
 using System.Linq.Expressions;
 using System.Linq;
+using LanguageExt.ClassInstances;
 
 /// <summary>
 /// IO independent operations interacting with the game entity. It will hold everything that can be done with the game entity
@@ -213,6 +214,58 @@ public static class Mystcraft {
     /// </summary>
     public static Mystcraft<JReport> ParseReport(Stream Report) =>
         new Mystcraft<JReport>.ParseReport(Report, Return);
+
+
+    public static Mystcraft<WorkFolder> OpenWorkFolder() =>
+        new Mystcraft<WorkFolder>.OpenWorkFolder(Return);
+
+    public static Mystcraft<WorkFolderWithEngine> WriteGameEngine(WorkFolder Folder, GameEngineStream Engine) =>
+        new Mystcraft<WorkFolderWithEngine>.WriteGameEngine(Folder, Engine, Return);
+
+    public static Mystcraft<WorkFolderWithInput> WriteGameState(WorkFolderWithEngine Folder, PlayersInStream PlayersIn, GameInStream GameIn) =>
+        new Mystcraft<WorkFolderWithInput>.WriteGameState(Folder, PlayersIn, GameIn, Return);
+
+    public static Mystcraft<Unit> WriteOrders(WorkFolderWithInput Folder, FactionNumber Faction, OrdersStream Orders) =>
+        new Mystcraft<Unit>.WriteOrders(Folder, Faction, Orders, Return);
+
+    public static Mystcraft<GameRunResult> RunEngine(WorkFolderWithInput Folder, TimeSpan Timeout) =>
+        new Mystcraft<GameRunResult>.RunEngine(Folder, Timeout, Return);
+
+    public static Mystcraft<PlayersOutStream> ReadPlayers(WorkFolderWithOutput Folder) =>
+        new Mystcraft<PlayersOutStream>.ReadPlayers(Folder, Return);
+
+    public static Mystcraft<GameOutStream> ReadGame(WorkFolderWithOutput Folder) =>
+        new Mystcraft<GameOutStream>.ReadGame(Folder, Return);
+
+    public static Mystcraft<Seq<ReportStream>> ReadReports(WorkFolderWithOutput Folder) =>
+        new Mystcraft<Seq<ReportStream>>.ReadReports(Folder, Return);
+
+    public static Mystcraft<Seq<OrdersStream>> ReadOrders(WorkFolderWithOutput Folder) =>
+        new Mystcraft<Seq<OrdersStream>>.ReadOrders(Folder, Return);
+
+    public static Mystcraft<Seq<MessageStream>> ReadMessages(WorkFolderWithOutput Folder) =>
+        new Mystcraft<Seq<MessageStream>>.ReadMessages(Folder, Return);
+
+    public static Mystcraft<Unit> CloseWorkFolder(WorkFolder Folder) =>
+        new Mystcraft<Unit>.CloseWorkFolder(Folder, Return);
+
+/*
+    public sealed record OpenWorkFolder(Func<WorkFolder, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record WriteGameEngine(WorkFolder Folder, DbGameEngine Engine, Func<WorkFolderWithEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record WriteGameState(WorkFolderWithEngine Folder, Stream PlayersIn, Stream GameIn, Func<WorkFolderWithInput, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record WriteOrders(WorkFolderWithInput Folder, FactionNumber Faction, Stream Orders, Func<WorkFolderWithInput, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record RunEngine(WorkFolderWithInput Folder, Func<GameRunResult, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record ReadPlayers(WorkFolderWithOutput Folder, Func<Stream, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadGame(WorkFolderWithOutput Folder, Func<Stream, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadReports(WorkFolderWithOutput Folder, Func<FileInfo[], Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadOrders(WorkFolderWithOutput Folder, Func<FileInfo[], Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadMessages(WorkFolderWithOutput Folder, Func<FileInfo[], Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record CloseWorkFolder(WorkFolder Folder, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+*/
 }
 
 /// <summary>
@@ -405,4 +458,92 @@ public abstract record Mystcraft<A> {
     // public sealed record MergeTurn(PlayerId Player, TurnNumber Turn, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
 
     // public sealed record CollectTurnStatistics(PlayerId Player, TurnNumber Turn, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record OpenWorkFolder(Func<WorkFolder, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record WriteGameEngine(WorkFolder Folder, GameEngineStream Engine, Func<WorkFolderWithEngine, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record WriteGameState(WorkFolderWithEngine Folder, PlayersInStream PlayersIn, GameInStream GameIn, Func<WorkFolderWithInput, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record WriteOrders(WorkFolderWithInput Folder, FactionNumber Faction, OrdersStream Orders, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record RunEngine(WorkFolderWithInput Folder, TimeSpan Timeout, Func<GameRunResult, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record ReadPlayers(WorkFolderWithOutput Folder, Func<PlayersOutStream, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadGame(WorkFolderWithOutput Folder, Func<GameOutStream, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadReports(WorkFolderWithOutput Folder, Func<Seq<ReportStream>, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadOrders(WorkFolderWithOutput Folder, Func<Seq<OrdersStream>, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record ReadMessages(WorkFolderWithOutput Folder, Func<Seq<MessageStream>, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record CloseWorkFolder(WorkFolder Folder, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+
+}
+
+public class WorkFolder : NewType<WorkFolder, string> {
+    public WorkFolder(string value) : base(value) { }
+}
+
+public sealed class WorkFolderWithEngine : WorkFolder
+{
+    public WorkFolderWithEngine(string value) : base(value)
+    {
+    }
+
+    public static new WorkFolderWithEngine New(WorkFolder folder) => new (folder.Value);
+}
+
+public sealed class WorkFolderWithInput : WorkFolder
+{
+    public WorkFolderWithInput(string value) : base(value)
+    {
+    }
+
+    public static new WorkFolderWithInput New(WorkFolder folder) => new (folder.Value);
+}
+
+public sealed class WorkFolderWithOutput : WorkFolder
+{
+    public WorkFolderWithOutput(string value) : base(value)
+    {
+    }
+
+    public static new WorkFolderWithOutput New(WorkFolder folder) => new (folder.Value);
+}
+
+public sealed class FactionNumber : NumType<FactionNumber, TInt, int> {
+    public FactionNumber(int value) : base(value) { }
+}
+
+public record struct GameRunResult(WorkFolderWithOutput WorkFolder, bool Success, int ExitCode, Option<string> StdOut, Option<string> StdErr) {
+    public static GameRunResult New(WorkFolderWithOutput workFolder, bool success, int exitCode, Option<string> stdOut, Option<string> stdErr) => new (workFolder, success exitCode, stdOut, stdErr);
+}
+
+public record struct ReportStream(Stream Stream, string FileName) {
+    public static ReportStream New(Stream stream, string fileName) => new (stream, fileName);
+}
+
+public record struct OrdersStream(Stream Stream, string FileName) {
+    public static OrdersStream New(Stream stream, string fileName) => new (stream, fileName);
+}
+
+public record struct MessageStream(Stream Stream, string FileName) {
+    public static MessageStream New(Stream stream, string fileName) => new (stream, fileName);
+}
+
+public record struct GameInStream(Stream Stream) {
+    public static GameInStream New(Stream stream) => new (stream);
+}
+
+public record struct GameOutStream(Stream Stream) {
+    public static GameOutStream New(Stream stream) => new (stream);
+}
+
+public record struct PlayersInStream(Stream Stream) {
+    public static PlayersInStream New(Stream stream) => new (stream);
+}
+
+public record struct PlayersOutStream(Stream Stream) {
+    public static PlayersOutStream New(Stream stream) => new (stream);
+}
+
+public record struct GameEngineStream(Stream Stream) {
+    public static GameEngineStream New(Stream stream) => new (stream);
 }

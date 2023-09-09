@@ -6,11 +6,15 @@ using LanguageExt.Effects.Traits;
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
+using LanguageExt.Sys.Traits;
+using System.Text;
 
 public readonly struct Runtime:
     HasCancel<Runtime>,
     HasDatabase<Runtime>,
-    HasUnitOfWork<Runtime>
+    HasUnitOfWork<Runtime>,
+    HasDirectory<Runtime>,
+    HasFile<Runtime>
 {
     readonly RuntimeEnv env;
 
@@ -68,6 +72,14 @@ public readonly struct Runtime:
 
     public Eff<Runtime, UnitOfWork> UnitOfWorkEff =>
         Eff<Runtime, UnitOfWork>(rt => rt.Env.Database);
+
+    public Eff<Runtime, DirectoryIO> DirectoryEff =>
+        SuccessEff(LanguageExt.Sys.Live.DirectoryIO.Default);
+
+    public Eff<Runtime, FileIO> FileEff =>
+        SuccessEff(LanguageExt.Sys.Live.FileIO.Default);
+
+    public Encoding Encoding => throw new NotImplementedException();
 }
 
 public sealed class RuntimeEnv {
