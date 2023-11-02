@@ -143,7 +143,7 @@ public class Startup {
                 builder.RequireAuthenticatedUser();
 
                 conf.DefaultPolicy = builder.Build();
-                conf.FallbackPolicy = conf.DefaultPolicy;
+                // conf.FallbackPolicy = conf.DefaultPolicy;
 
                 conf.AddPolicyAnyRole(Policies.Root, Roles.Root);
                 conf.AddPolicyAnyRole(Policies.GameMasters, Roles.Root, Roles.GameMaster);
