@@ -29,7 +29,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 
 EXPOSE 5000
 
-RUN apt-get update && apt-get --yes install curl
+RUN apt-get update && apt-get --yes install curl bash
 HEALTHCHECK --start-period=10s --interval=5s --timeout=30s CMD curl --silent --fail http://localhost:5000/system/ping || exit 1
 
 ENV ASPNETCORE_ENVIRONMENT="Production"
@@ -47,6 +47,7 @@ WORKDIR /app
 
 COPY --from=net-build /server/out .
 # COPY --from=node-build /client/build ./wwwroot
+RUN mkdir /app/wwwroot
 
 RUN mkdir -p /usr/var/advisor \
     && chown app:app /usr/var/advisor \
