@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 import { SkillCell } from './skill-cell'
 import { Student, StudyLocation } from '../store'
 import { Box, ButtonGroup, Tooltip } from '@mui/material'

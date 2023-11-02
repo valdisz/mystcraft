@@ -1,6 +1,6 @@
 import React from 'react'
 import { Avatar, Button, Box, TextField, Alert, Typography, Container, Stack, createSvgIcon, Divider } from '@mui/material'
-import { observer, useLocalStore } from 'mobx-react'
+import { observer, useLocalStore } from 'mobx-react-lite'
 import { runInAction } from 'mobx'
 import { Copyright } from './copyright'
 import { GetMe, GetMeQuery, GetMeQueryVariables } from '../schema'

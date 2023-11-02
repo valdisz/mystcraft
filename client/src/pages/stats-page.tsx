@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles'
 import { useStore } from '../store'
-import { Observer } from 'mobx-react'
+import { Observer } from 'mobx-react-lite'
 import { SkillInfo } from '../game'
 import { Link, Outlet, PathMatch, useLocation, useMatch, useResolvedPath } from 'react-router-dom'
 

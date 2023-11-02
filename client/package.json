@@ -33,7 +33,7 @@
     "graphql-tag": "^2.12.6",
     "lodash": "^4.17.21",
     "mobx": "^6.10.2",
-    "mobx-react": "^9.0.1",
+    "mobx-react-lite": "^4.0.5",
     "parsimmon": "^1.18.1",
     "pixi.js": "^6.5.10",
     "prismjs": "^1.29.0",

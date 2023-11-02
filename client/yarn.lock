@@ -9255,7 +9255,7 @@ __metadata:
     jimp: ^0.22.10
     lodash: ^4.17.21
     mobx: ^6.10.2
-    mobx-react: ^9.0.1
+    mobx-react-lite: ^4.0.5
     nodemon: ^3.0.1
     parsimmon: ^1.18.1
     pixi.js: ^6.5.10
@@ -16297,7 +16297,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mobx-react-lite@npm:^4.0.4":
+"mobx-react-lite@npm:^4.0.5":
   version: 4.0.5
   resolution: "mobx-react-lite@npm:4.0.5"
   dependencies:
@@ -16311,23 +16311,6 @@ __metadata:
     react-native:
       optional: true
   checksum: b0a3e4345c1449eee7c0a6aa2369475024a0c8227e11305cc965229527e3ddede4ca7b8337912a7fe396e24bd83986f2a88a21813c51cabdc18330fa484023b5
-  languageName: node
-  linkType: hard
-
-"mobx-react@npm:^9.0.1":
-  version: 9.0.1
-  resolution: "mobx-react@npm:9.0.1"
-  dependencies:
-    mobx-react-lite: ^4.0.4
-  peerDependencies:
-    mobx: ^6.9.0
-    react: ^16.8.0 || ^17 || ^18
-  peerDependenciesMeta:
-    react-dom:
-      optional: true
-    react-native:
-      optional: true
-  checksum: b0677a6ca2f55ff5adc3b9052a511b2cd9f1f2484bd40a390f2c345936c00b1086631f2458e07efb782d2289b668dcfbbcfe84be56acf5283d95bfb9650efd98
   languageName: node
   linkType: hard
 

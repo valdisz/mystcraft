@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Button, Tooltip } from '@mui/material'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 import { InterfaceCommand } from '../store/commands/move'
 
 export interface CommandButtonProps {

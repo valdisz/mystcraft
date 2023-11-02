@@ -3,7 +3,7 @@ import { Box, BoxProps, Stack, StackProps, Typography, List, ListSubheader, List
     DialogContent, DialogActions, Button, IconButton, Divider, Grid
 } from '@mui/material'
 import { autorun } from 'mobx'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 import { Battle, BattleUnit, Army as BattleArmy, Faction as GameFaction, Region, Casualties, Squad } from '../game'
 import { FixedTypography } from './fixed-typography'
 import { useStore } from '../store'

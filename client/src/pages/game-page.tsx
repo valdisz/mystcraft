@@ -8,7 +8,7 @@ import { AppBar, Typography, Toolbar, IconButton, Table, TableHead, TableRow, Ta
     ButtonProps
 } from '@mui/material'
 import { useStore, GameLoadingStore, GameStore } from '../store'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 import {MapProvider, Paths, useMapContext} from '../map'
 import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType, Structure } from '../game'
 import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList, FluidFab } from '../components'

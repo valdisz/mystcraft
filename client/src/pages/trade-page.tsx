@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useStore } from '../store'
-import { observer, Observer } from 'mobx-react'
+import { observer, Observer } from 'mobx-react-lite'
 import {
     Box,
     AppBar,

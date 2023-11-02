@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { styled } from '@mui/material/styles'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 import Editor from 'react-simple-code-editor'
 import Prism from 'prismjs'
 import { Typography, Box, BoxProps } from '@mui/material'

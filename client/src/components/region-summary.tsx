@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from '@emotion/styled'
 import { Box, BoxProps, Typography, Button, IconButton, Grid, Stack, Tooltip, Menu, MenuItem, ClickAwayListener, Divider } from '@mui/material'
-import { observer } from 'mobx-react'
+import { observer } from 'mobx-react-lite'
 import { Region, Coords, TerrainInfo, Item, ItemInfo } from '../game'
 import { copy } from '../lib'
 import { Item as ItemComponent2, FixedTypography } from '../components'
