@@ -1,10 +1,13 @@
-FROM node:16 as node-build
+FROM node:18.12 as node-build
+
+RUN yarn set version 3.6.1
 
 WORKDIR /client
 COPY client/package.json ./
 COPY client/yarn.lock ./
-RUN yarn install --ignore-optional
+RUN yarn install --immutable
 COPY client/ ./
+RUN npx update-browserslist-db@latest
 RUN yarn build
 
 ####################

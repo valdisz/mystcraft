@@ -6,7 +6,7 @@ import { GetAllianceMages, GetAllianceMagesQuery, GetAllianceMagesQueryVariables
 import { StudyPlanTarget, StudyPlanTargetMutation, StudyPlanTargetMutationVariables } from '../schema'
 import { StudyPlanTeach, StudyPlanTeachMutation, StudyPlanTeachMutationVariables } from '../schema'
 import { StudyPlanStudy, StudyPlanStudyMutation, StudyPlanStudyMutationVariables } from '../schema'
-import { MageFragment, SkillFragment, StudyPlanFragment } from '../schema'
+import type { MageFragment, SkillFragment, StudyPlanFragment } from '../schema'
 import { World } from '../game'
 import { Region } from '../game'
 

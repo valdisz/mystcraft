@@ -10,6 +10,6 @@ dist/
 wwwroot/
 !.github/
 client/**/build/
-
 .fake
 .yarn/
+logs/

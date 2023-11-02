@@ -14,7 +14,7 @@ import { Region, ItemMap, Item, Unit, ICoords, Capacity, MoveType, Structure } f
 import { UnitSummary, Orders, FloatingPanel, RegionSummary, RegionHeader, BattleList, FluidFab } from '../components'
 import { green, lightBlue } from '@mui/material/colors'
 import { useTheme } from '@mui/system'
-import SimpleBar from 'simplebar-react'
+// import SimpleBar from 'simplebar-react'
 import { sumBy } from 'lodash'
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -378,7 +378,8 @@ const UnitsComponent = observer(({ sx, ...props }: BoxProps) => {
     return (
         <Box {...props} sx={{ display: 'flex', flexDirection: 'column', ...(sx || { }) }}>
             <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-            <Box component={SimpleBar} sx={{ height: '100%' }} autoHide={false}>
+            {/* <Box component={SimpleBar} sx={{ height: '100%' }} autoHide={false}> */}
+            <Box sx={{ height: '100%' }}>
                 <UnitsTable size='small' stickyHeader >
                     <TableHead>
                         <TableRow>
@@ -636,7 +637,8 @@ export const MapTab = observer(() => {
                         flexDirection: 'column'
                     }}>
                         <Box sx={{ flex: 1, minHeight: 0 }}>
-                            <Box component={SimpleBar} autoHide={false} sx={{ height: '100%' }}>
+                            {/* <Box component={SimpleBar} autoHide={false} sx={{ height: '100%' }}> */}
+                            <Box sx={{ height: '100%' }}>
                                 <BattleList battles={battles} />
                             </Box>
                         </Box>
@@ -657,7 +659,8 @@ export const MapTab = observer(() => {
                     gridRowStart: 1, gridRowEnd: 3,
                     overflow: 'hidden'
                 }}>
-                    <Box component={SimpleBar} autoHide={false} sx={{
+                    {/* <Box component={SimpleBar} autoHide={false} sx={{ */}
+                    <Box sx={{
                         pointerEvents: 'all',
                         minHeight: 0,
                         maxHeight: '100%'

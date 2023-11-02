@@ -1,31 +1,38 @@
 {
-    "include": [
-        "./src/**/*"
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "src/.advisor",
+    "node_modules",
+    "build",
+    "public",
+    "static",
+    "**/*.spec.ts",
+  ],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "esnext",
+    "lib": [
+      "dom",
+      "ESNext.Intl",
+      "ESNext"
     ],
-    "exclude": [
-        "src/.advisor",
-        "node_modules",
-        "build",
-        "public",
-        "static",
-    ],
-    "compilerOptions": {
-        "target": "ESNext",
-        "module": "commonjs",
-        "lib": [
-            "dom",
-            "ESNext",
-        ],
-        "jsx": "react",
-        "strict": true,
-        "strictNullChecks": false,
-        "esModuleInterop": true,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        // "isolatedModules": true,
-        "noEmit": true,
-        "noImplicitAny": false,
-        "skipLibCheck": true,
-        "resolveJsonModule": true
-    }
+    "jsx": "react-jsx",
+    "strict": true,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": false,
+    "noEmit": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "isolatedModules": false
+  }
 }

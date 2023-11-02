@@ -178,6 +178,8 @@ export class GameDetailsStore {
                 number,
                 isClaimed,
                 isOwn,
+                // FIXME: dummy value, replace with real value
+                stance: 'neutral',
                 turns: turns.items.map(x => ({
                     turnNumber: x.turnNumber,
                     orders: x.isOrdersSubmitted,

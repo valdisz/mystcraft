@@ -16,7 +16,7 @@ import { Unit } from '../game'
 import { saveAs } from 'file-saver'
 import { InterfaceCommand, MoveCommand } from './commands/move'
 import { UniversityStore } from './university-store'
-import { Paths } from '../map'
+import type { Paths } from '../map'
 import { mutate } from './connection'
 
 export class TurnsStore {
@@ -113,7 +113,7 @@ export class GameStore {
                 }
                 this.ordersSaveAbortController = new AbortController()
 
-                // FIXME    
+                // FIXME
                 // try {
                 //     const response = await mutate<SetOrderMutation, SetOrderMutationVariables>(SetOrder, { unitId: unit.id, orders })
                 //     const result = response.data?.setOrders

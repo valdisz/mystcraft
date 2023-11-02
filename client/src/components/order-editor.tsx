@@ -6,7 +6,7 @@ import Prism from 'prismjs'
 import { Typography, Box, BoxProps } from '@mui/material'
 import { Ruleset } from '../game'
 import { OrdersState, useStore } from '../store'
-import SimpleBar from 'simplebar-react'
+// import SimpleBar from 'simplebar-react'
 import {useEffect, useRef} from 'react';
 
 
@@ -132,13 +132,13 @@ export const Orders = observer(({ readOnly, sx, ...props }: OrdersProps) => {
     const store = useStore()
     const game = store.game
     const ruleset = game.world.ruleset
-    const simpleBarRef = useRef(null);
+    // const simpleBarRef = useRef(null);
 
-    useEffect(() => {
-        if (simpleBarRef.current) {
-            simpleBarRef.current.getContentElement().style.height = '100%';
-        }
-    }, [simpleBarRef])
+    // useEffect(() => {
+    //     if (simpleBarRef.current) {
+    //         simpleBarRef.current.getContentElement().style.height = '100%';
+    //     }
+    // }, [simpleBarRef])
 
     return <Box {...props} sx={{
         display: 'flex',
@@ -150,7 +150,8 @@ export const Orders = observer(({ readOnly, sx, ...props }: OrdersProps) => {
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <Typography variant='subtitle1'>Orders</Typography>
             <Box sx={{ flex: 1, border: 1, borderColor: 'divider', p: 1, mr: 1, minHeight: 0 }}>
-                <Box ref={simpleBarRef} component={SimpleBar} sx={{ height: '100%' }} autoHide={false}>
+                {/* <Box ref={simpleBarRef} component={SimpleBar} sx={{ height: '100%' }} autoHide={false}> */}
+                <Box sx={{ height: '100%' }}>
                     <OrdersEditor readOnly={readOnly} value={game.unitOrders ?? ''} onValueChange={game.setOrders} highlight={s => highlight(ruleset, s)} />
                 </Box>
             </Box>

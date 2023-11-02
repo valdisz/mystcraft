@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { CssBaseline, GlobalStyles } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import 'regenerator-runtime/runtime.js'
-import 'simplebar/dist/simplebar.min.css'
+// import 'simplebar/dist/simplebar.min.css'
 
 import { App } from './app'
 import THEME from './theme'
