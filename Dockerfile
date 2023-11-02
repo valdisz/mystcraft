@@ -1,4 +1,4 @@
-FROM node:14 as node-build
+FROM node:16 as node-build
 
 WORKDIR /client
 COPY client/package.json ./
