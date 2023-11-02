@@ -8,13 +8,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using LanguageExt.Sys.Traits;
 using System.Text;
+using advisor.IO;
 
 public readonly struct Runtime:
     HasCancel<Runtime>,
     HasDatabase<Runtime>,
     HasUnitOfWork<Runtime>,
     HasDirectory<Runtime>,
-    HasFile<Runtime>
+    HasFile<Runtime>,
+    HasUnix<Runtime>
 {
     readonly RuntimeEnv env;
 
@@ -79,7 +81,11 @@ public readonly struct Runtime:
     public Eff<Runtime, FileIO> FileEff =>
         SuccessEff(LanguageExt.Sys.Live.FileIO.Default);
 
-    public Encoding Encoding => throw new NotImplementedException();
+    public Encoding Encoding =>
+        throw new NotImplementedException();
+
+    public Eff<Runtime, IO.Traits.UnixIO> UnixEff =>
+        SuccessEff(UnixIO.Default);
 }
 
 public sealed class RuntimeEnv {

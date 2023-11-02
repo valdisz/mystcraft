@@ -13,12 +13,16 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using IO.Traits;
+using advisor.IO;
+using System.Text;
+using System.IO;
 
 /// <summary>
 /// Live interpreter for the basic operations that can be performed on a game.
 /// </summary>
 public readonly struct GameInterpreter<RT>
-    where RT : struct, HasDatabase<RT>, HasUnitOfWork<RT>, HasDirectory<RT>, HasFile<RT>
+    where RT : struct, HasDatabase<RT>, HasUnitOfWork<RT>, HasDirectory<RT>, HasFile<RT>, HasUnix<RT>
 {
     /// <summary>
     /// Interpret the Game DSL as an asynchronous effect.
@@ -63,19 +67,15 @@ public readonly struct GameInterpreter<RT>
         // Mystcraft<A>.ReadManyPlayers pl       =>       ReadManyPlayers(pl),
         // Mystcraft<A>.ReadOnePlayer op         =>       ReadOnePlayer(op),
         // Mystcraft<A>.QuitPlayer qp            => _tran(QuitPlayer(qp)),
-        // Mystcraft<A>.RunTurn rt               => _tran(RunTurn(rt)),
         // Mystcraft<A>.ParseReport pr           =>       ParseReport(pr),
-        Mystcraft<A>.OpenWorkFolder action         => _next(OpenWorkFolder(action), action.Next),
-        Mystcraft<A>.WriteGameEngine action        => _next(WriteGameEngine(action), action.Next),
+        Mystcraft<A>.OpenWorkFolder action         =>   use(OpenWorkFolder(action), folder => _interpret(action.Next(folder))),
         Mystcraft<A>.WriteGameState action         => _next(WriteGameState(action), action.Next),
-        Mystcraft<A>.WriteOrders action            => _next(WriteOrders(action), action.Next),
         Mystcraft<A>.RunEngine action              => _next(RunEngine(action), action.Next),
         Mystcraft<A>.ReadPlayers action            => _next(ReadPlayers(action), action.Next),
         Mystcraft<A>.ReadGame action               => _next(ReadGame(action), action.Next),
         Mystcraft<A>.ReadReports action            => _next(ReadReports(action), action.Next),
-        Mystcraft<A>.ReadOrders action             => _next(ReadOrders(action), action.Next),
+        // Mystcraft<A>.ReadOrders action             => _next(ReadOrders(action), action.Next),
         Mystcraft<A>.ReadMessages action           => _next(ReadMessages(action), action.Next),
-        Mystcraft<A>.CloseWorkFolder action        => _next(CloseWorkFolder(action), action.Next),
 
         _ => FailAff<A>(E_OPERATION_NOT_SUPPORTED)
     };
@@ -276,33 +276,13 @@ public readonly struct GameInterpreter<RT>
         from _ in Directory<RT>.create(dirName)
         select WorkFolder.New(dirName);
 
-    private static Eff<string> workFolderFile(WorkFolder folder, string name) =>
-        Eff(() => System.IO.Path.Combine(folder.Value, name));
-
     private static Producer<RT, System.IO.Stream, Unit> openWriteFile(string fileName) =>
         File<RT>.openWrite(fileName);
 
+    // TODO: Pipes are more suitable for this because they will handle the closing of the stream
     private static Eff<RT, System.IO.Stream> openReadFile(string fileName) =>
         from file in default(RT).FileEff
         select file.OpenRead(fileName);
-
-    private static Eff<string> gameEngineFile(WorkFolder folder) =>
-        workFolderFile(folder, "engine");
-
-    private static Eff<string> gameInFile(WorkFolderWithEngine folder) =>
-        workFolderFile(folder, "game.in");
-
-    private static Eff<string> playersInFile(WorkFolderWithEngine folder) =>
-        workFolderFile(folder, "players.in");
-
-    private static Eff<string> ordersFile(WorkFolderWithInput folder, FactionNumber num) =>
-        workFolderFile(folder, $"orders.{num.Value}");
-
-    private static Eff<string> gameOutFile(WorkFolderWithOutput folder) =>
-        workFolderFile(folder, "game.out");
-
-    private static Eff<string> playersOutFile(WorkFolderWithOutput folder) =>
-        workFolderFile(folder, "players.out");
 
     private static Consumer<RT, System.IO.Stream, Unit> writeFromStream(System.IO.Stream stream) =>
         from dest in awaiting<System.IO.Stream>()
@@ -312,40 +292,65 @@ public readonly struct GameInterpreter<RT>
         })
         select unit;
 
-    private static Aff<RT, WorkFolderWithEngine> WriteGameEngine<A>(Mystcraft<A>.WriteGameEngine action) =>
-        from fileName in gameEngineFile(action.Folder)
-        from _1 in (openWriteFile(fileName) | writeFromStream(action.Engine.Stream)).RunEffectUnit()
-        from _2 in Eff(() => {
-            _ = UnixInterop.chmod(
-                fileName,
-                UnixInterop.S_IXUSR | UnixInterop.S_IRUSR | UnixInterop.S_IWUSR |
-                UnixInterop.S_IXGRP | UnixInterop.S_IRGRP |
-                UnixInterop.S_IXOTH | UnixInterop.S_IROTH
-            );
-            return unit;
-        })
-        select WorkFolderWithEngine.New(action.Folder);
+    // private static Pipe<RT, System.IO.Stream, (string, System.IO.Stream), Unit> ordersFileContent(FactionOrders orders) =>
+    //     from stream in awaiting<System.IO.Stream>()
+    //     from _1 in yield(($"#atlantis {orders.Faction.Value} \"{orders.Password}\"", stream))
+    //     from _2 in yieldAll(orders.Orders
+    //         .SelectMany(u => Seq($"unit {u.Unit.Value}", u.Orders))
+    //         .Map(s => (s, stream))
+    //     )
+    //     from _3 in yield(("#end", stream))
+    //     select unit;
 
-    private static Aff<RT, WorkFolderWithInput> WriteGameState<A>(Mystcraft<A>.WriteGameState action) =>
-        from gameFile in gameInFile(action.Folder)
-        from playersFile in playersInFile(action.Folder)
-        from _1 in (openWriteFile(gameFile) | writeFromStream(action.GameIn.Stream)).RunEffectUnit()
-        from _2 in (openWriteFile(playersFile) | writeFromStream(action.PlayersIn.Stream)).RunEffectUnit()
-        select WorkFolderWithInput.New(action.Folder);
-
-
-    private static Aff<RT, Unit> WriteOrders<A>(Mystcraft<A>.WriteOrders action) =>
-        from ordersFile in ordersFile(action.Folder, action.Faction)
-        from _ in (openWriteFile(ordersFile) | writeFromStream(action.Orders.Stream)).RunEffectUnit()
+    static Pipe<RT, System.IO.Stream, TextWriter, Unit> textWriter() =>
+        from stream in awaiting<System.IO.Stream>()
+        from writer in use<RT, StreamWriter>(Eff(() => new StreamWriter(stream, Encoding.UTF8, 1024, true)))
+        from _ in yield(writer as TextWriter)
         select unit;
 
+    // static Consumer<RT, (string, TextWriter), Unit> writeString() =>
+    //     from data in awaiting<(string, TextWriter)>()
+    //     from _ in Aff<RT>(async rt => await data.Item2.WriteLineAsync(data.Item1, rt.CancellationToken))
+    //     select unit;
+
+    // static string formatOrdersFile(FactionOrders orders) {
+    //     StringBuilder sb = new StringBuilder();
+
+    //     sb.AppendLine($"#atlantis {orders.Faction.Value} \"{orders.Password}\"");
+
+    //     sb = orders.Orders
+    //         .SelectMany(u => Seq($"unit {u.Unit.Value}", u.Orders))
+    //         .Fold(sb, (s, u) => s.AppendLine(u));
+
+    //     sb.AppendLine($"#end");
+
+    //     return sb.ToString();
+    // }
+
+    private static Aff<RT, WorkFolderWithInput> WriteGameState<A>(Mystcraft<A>.WriteGameState action) =>
+        from gameEngineFile in action.Folder.File("engine")
+        from gameFile in action.Folder.File("game.in")
+        from playersFile in action.Folder.File("players.in")
+        from _1 in (openWriteFile(gameEngineFile) | writeFromStream(action.Engine.Stream)).RunEffectUnit()
+        from _3 in (openWriteFile(gameFile) | writeFromStream(action.GameIn.Stream)).RunEffectUnit()
+        from _4 in (openWriteFile(playersFile) | writeFromStream(action.PlayersIn.Stream)).RunEffectUnit()
+        // from _5 in action.Orders.
+        from _2 in Unix<RT>.Chmod(gameEngineFile, FilePermission.UserAll)
+        select WorkFolderWithInput.New(action.Folder);
+
+    // private static Aff<RT, Unit> WriteOrders<A>(Mystcraft<A>.WriteOrders action) =>
+    //     from ordersFile in ordersFile(action.Folder, action.Faction)
+    //     from _ in (openWriteFile(ordersFile) | writeFromStream(action.Orders.Stream)).RunEffectUnit()
+    //     select unit;
+
+    // TODO: make this method monadic, Process must be abstract into a Runtime
     private static Aff<RT, GameRunResult> RunEngine<A>(Mystcraft<A>.RunEngine action) =>
-        from gameEngine in gameEngineFile(action.Folder)
+        from gameEngineFile in action.Folder.File("engine")
         from ret in Aff<RT, GameRunResult>(async rt => {
             using var p = new Process();
             p.StartInfo = new ProcessStartInfo {
                 WorkingDirectory = action.Folder.Value,
-                FileName = gameEngine,
+                FileName = gameEngineFile,
                 Arguments = "run",
                 UseShellExecute = false,
                 CreateNoWindow = true,
@@ -382,12 +387,12 @@ public readonly struct GameInterpreter<RT>
         select ret;
 
     private static Aff<RT, PlayersOutStream> ReadPlayers<A>(Mystcraft<A>.ReadPlayers action) =>
-        from playersFile in playersOutFile(action.Folder)
+        from playersFile in action.Folder.File("players.out")
         from stream in openReadFile(playersFile)
         select PlayersOutStream.New(stream);
 
     private static Aff<RT, GameOutStream> ReadGame<A>(Mystcraft<A>.ReadGame action) =>
-        from gameFile in gameOutFile(action.Folder)
+        from gameFile in action.Folder.File("game.out")
         from stream in openReadFile(gameFile)
         select GameOutStream.New(stream);
 
@@ -401,13 +406,13 @@ public readonly struct GameInterpreter<RT>
 
     private static readonly Regex ORDERS_PATTERN = new Regex(@"template\.\d+");
 
-    private static Aff<RT, Seq<OrdersStream>> ReadOrders<A>(Mystcraft<A>.ReadOrders action) =>
-        from fa in default(RT).FileEff
-        from files in Directory<RT>.enumerateFiles(action.Folder.Value)
-            .Select(seq => seq.Filter(ORDERS_PATTERN.IsMatch))
-        let orderFiles = files
-            .Select(f => OrdersStream.New(fa.OpenRead(f), f))
-        select orderFiles;
+    // private static Aff<RT, Seq<OrdersStream>> ReadOrders<A>(Mystcraft<A>.ReadOrders action) =>
+    //     from fa in default(RT).FileEff
+    //     from files in Directory<RT>.enumerateFiles(action.Folder.Value)
+    //         .Select(seq => seq.Filter(ORDERS_PATTERN.IsMatch))
+    //     let orderFiles = files
+    //         .Select(f => OrdersStream.New(fa.OpenRead(f), f))
+    //     select orderFiles;
 
     private static readonly Regex MESSAGE_PATTERN = new Regex(@"times\.\d+");
 
@@ -419,7 +424,7 @@ public readonly struct GameInterpreter<RT>
             .Select(f => MessageStream.New(fa.OpenRead(f), f))
         select messageFiles;
 
-    private static Aff<RT, Unit> CloseWorkFolder<A>(Mystcraft<A>.CloseWorkFolder action) =>
-        from _ in Directory<RT>.delete(action.Folder.Value)
-        select unit;
+    // private static Aff<RT, Unit> CloseWorkFolder<A>(Mystcraft<A>.CloseWorkFolder action) =>
+    //     from _ in Directory<RT>.delete(action.Folder.Value)
+    //     select unit;
 }

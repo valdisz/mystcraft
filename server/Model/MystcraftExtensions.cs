@@ -35,8 +35,8 @@ public static class MystcraftExtensions
         Mystcraft<A>.ReadManyPlayers pl         => new Mystcraft<B>.ReadManyPlayers(pl.Game, pl.IncludeQuit, pl.Predicate, n => pl.Next(n).Bind(f)),
         Mystcraft<A>.ReadOnePlayer op           => new Mystcraft<B>.ReadOnePlayer(op.Player, n => op.Next(n).Bind(f)),
         Mystcraft<A>.QuitPlayer qp              => new Mystcraft<B>.QuitPlayer(qp.Player, n => qp.Next(n).Bind(f)),
-        Mystcraft<A>.RunTurn rt                 => new Mystcraft<B>.RunTurn(rt.Game, n => rt.Next(n).Bind(f)),
         Mystcraft<A>.ParseReport pr             => new Mystcraft<B>.ParseReport(pr.Report, n => pr.Next(n).Bind(f)),
+
 
         _ => throw new NotSupportedException()
     };

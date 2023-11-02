@@ -1,7 +1,9 @@
 namespace advisor.TurnProcessing;
 
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using advisor.Model;
 
 public class TurnRunnerOptions {
     public TurnRunnerOptions(string workingDirectory) {
@@ -17,6 +19,7 @@ public class TurnRunnerOptions {
     public Regex ReportFileFomat { get; set; } = new Regex(@"report\.(\d+)$", RegexOptions.IgnoreCase);
     public Regex TemplateFileFomat { get; set; } = new Regex(@"template\.(\d+)$", RegexOptions.IgnoreCase);
     public Regex ArticleFileFormat { get; set; } = new Regex(@"times\.(\d+)$", RegexOptions.IgnoreCase);
+    public Func<FactionNumber, string> FactionOrdersFileName { get; set; } = number => $"orders.{number.Value}";
 
     public static TurnRunnerOptions UseTempDirectory() {
         var tempPath = Path.GetTempPath();

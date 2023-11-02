@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using advisor.Persistence;
 using System.Linq.Expressions;
 using System.Linq;
-using LanguageExt.ClassInstances;
 
 /// <summary>
 /// IO independent operations interacting with the game entity. It will hold everything that can be done with the game entity
@@ -203,11 +202,15 @@ public static class Mystcraft {
     public static Mystcraft<PlayerId> QuitPlayer(PlayerId Player) =>
         new Mystcraft<PlayerId>.QuitPlayer(Player, Return);
 
-    /// <summary>
-    /// Run the next game turn using the Game Engine.
-    /// </summary>
-    public static Mystcraft<DbTurn> RunTurn(GameId Game) =>
-        new Mystcraft<DbTurn>.RunTurn(Game, Return);
+
+    public static Mystcraft<DbTurn> CreateTurn(GameId gameId, TurnNumber turnNumber) =>
+        new Mystcraft<DbTurn>.CreateTurn(Return);
+
+    public static Mystcraft<DbTurn> WriteOneTurn(GameId Game, TurnNumber Turn) =>
+        new Mystcraft<DbTurn>.WriteOneTurn(Game, Turn, Return);
+
+    public static Mystcraft<Seq<FactionOrders>> ReadTurnOrders(GameId Game, TurnNumber Turn) =>
+        new Mystcraft<Seq<FactionOrders>>.ReadTurnOrders(Game, Turn, Return);
 
     /// <summary>
     /// Parse the turn report.
@@ -219,14 +222,8 @@ public static class Mystcraft {
     public static Mystcraft<WorkFolder> OpenWorkFolder() =>
         new Mystcraft<WorkFolder>.OpenWorkFolder(Return);
 
-    public static Mystcraft<WorkFolderWithEngine> WriteGameEngine(WorkFolder Folder, GameEngineStream Engine) =>
-        new Mystcraft<WorkFolderWithEngine>.WriteGameEngine(Folder, Engine, Return);
-
-    public static Mystcraft<WorkFolderWithInput> WriteGameState(WorkFolderWithEngine Folder, PlayersInStream PlayersIn, GameInStream GameIn) =>
-        new Mystcraft<WorkFolderWithInput>.WriteGameState(Folder, PlayersIn, GameIn, Return);
-
-    public static Mystcraft<Unit> WriteOrders(WorkFolderWithInput Folder, FactionNumber Faction, OrdersStream Orders) =>
-        new Mystcraft<Unit>.WriteOrders(Folder, Faction, Orders, Return);
+    public static Mystcraft<WorkFolderWithInput> WriteGameState(WorkFolder Folder,  GameEngineStream Engine, PlayersInStream PlayersIn, GameInStream GameIn, Seq<FactionOrders> Orders) =>
+        new Mystcraft<WorkFolderWithInput>.WriteGameState(Folder, Engine, PlayersIn, GameIn, Orders, Return);
 
     public static Mystcraft<GameRunResult> RunEngine(WorkFolderWithInput Folder, TimeSpan Timeout) =>
         new Mystcraft<GameRunResult>.RunEngine(Folder, Timeout, Return);
@@ -240,14 +237,8 @@ public static class Mystcraft {
     public static Mystcraft<Seq<ReportStream>> ReadReports(WorkFolderWithOutput Folder) =>
         new Mystcraft<Seq<ReportStream>>.ReadReports(Folder, Return);
 
-    public static Mystcraft<Seq<OrdersStream>> ReadOrders(WorkFolderWithOutput Folder) =>
-        new Mystcraft<Seq<OrdersStream>>.ReadOrders(Folder, Return);
-
     public static Mystcraft<Seq<MessageStream>> ReadMessages(WorkFolderWithOutput Folder) =>
         new Mystcraft<Seq<MessageStream>>.ReadMessages(Folder, Return);
-
-    public static Mystcraft<Unit> CloseWorkFolder(WorkFolder Folder) =>
-        new Mystcraft<Unit>.CloseWorkFolder(Folder, Return);
 
 /*
     public sealed record OpenWorkFolder(Func<WorkFolder, Mystcraft<A>> Next) : Mystcraft<A>;
@@ -337,6 +328,16 @@ public abstract record Mystcraft<A> {
     /// Represents operation that gets a single game prepared for modification.
     /// </summary>
     public sealed record WriteOneGame(GameId Game, Func<DbGame, Mystcraft<A>> Next) : Mystcraft<A>;
+
+
+    /////////////////////////////////////////////
+    ///// Turn creation and retrieval
+
+    public sealed record CreateTurn(Func<DbTurn, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record WriteOneTurn(GameId Game, TurnNumber Turn, Func<DbTurn, Mystcraft<A>> Next) : Mystcraft<A>;
+
+    public sealed record ReadTurnOrders(GameId Game, TurnNumber Turn, Func<Seq<FactionOrders>, Mystcraft<A>> Next) : Mystcraft<A>;
 
 
     /////////////////////////////////////////////
@@ -444,11 +445,6 @@ public abstract record Mystcraft<A> {
     ///// Game turn operations
 
     /// <summary>
-    /// Represents operation that runs the next game turn using the Game Engine.
-    /// </summary>
-    public sealed record RunTurn(GameId Game, Func<DbTurn, Mystcraft<A>> Next) : Mystcraft<A>;
-
-    /// <summary>
     /// Represents operation that parses the turn report.
     /// </summary>
     public sealed record ParseReport(Stream Report, Func<JReport, Mystcraft<A>> Next) : Mystcraft<A>;
@@ -461,36 +457,34 @@ public abstract record Mystcraft<A> {
 
     public sealed record OpenWorkFolder(Func<WorkFolder, Mystcraft<A>> Next) : Mystcraft<A>;
 
-    public sealed record WriteGameEngine(WorkFolder Folder, GameEngineStream Engine, Func<WorkFolderWithEngine, Mystcraft<A>> Next) : Mystcraft<A>;
-    public sealed record WriteGameState(WorkFolderWithEngine Folder, PlayersInStream PlayersIn, GameInStream GameIn, Func<WorkFolderWithInput, Mystcraft<A>> Next) : Mystcraft<A>;
-    public sealed record WriteOrders(WorkFolderWithInput Folder, FactionNumber Faction, OrdersStream Orders, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
+    public sealed record WriteGameState(WorkFolder Folder,  GameEngineStream Engine, PlayersInStream PlayersIn, GameInStream GameIn, Seq<FactionOrders> Orders, Func<WorkFolderWithInput, Mystcraft<A>> Next) : Mystcraft<A>;
 
     public sealed record RunEngine(WorkFolderWithInput Folder, TimeSpan Timeout, Func<GameRunResult, Mystcraft<A>> Next) : Mystcraft<A>;
 
     public sealed record ReadPlayers(WorkFolderWithOutput Folder, Func<PlayersOutStream, Mystcraft<A>> Next) : Mystcraft<A>;
     public sealed record ReadGame(WorkFolderWithOutput Folder, Func<GameOutStream, Mystcraft<A>> Next) : Mystcraft<A>;
     public sealed record ReadReports(WorkFolderWithOutput Folder, Func<Seq<ReportStream>, Mystcraft<A>> Next) : Mystcraft<A>;
-    public sealed record ReadOrders(WorkFolderWithOutput Folder, Func<Seq<OrdersStream>, Mystcraft<A>> Next) : Mystcraft<A>;
     public sealed record ReadMessages(WorkFolderWithOutput Folder, Func<Seq<MessageStream>, Mystcraft<A>> Next) : Mystcraft<A>;
-
-    public sealed record CloseWorkFolder(WorkFolder Folder, Func<Unit, Mystcraft<A>> Next) : Mystcraft<A>;
-
 }
 
-public class WorkFolder : NewType<WorkFolder, string> {
-    public WorkFolder(string value) : base(value) { }
-}
+public record WorkFolder(string Value) : IDisposable {
+    private bool disposed = false;
 
-public sealed class WorkFolderWithEngine : WorkFolder
-{
-    public WorkFolderWithEngine(string value) : base(value)
-    {
+    public static WorkFolder New(string value) => new (value);
+
+    public Eff<string> File(string name) =>
+        Eff(() => System.IO.Path.Combine(Value, name));
+
+    public void Dispose() {
+        if (disposed) {
+            return;
+        }
+
+        System.IO.Directory.Delete(Value, true);
     }
-
-    public static new WorkFolderWithEngine New(WorkFolder folder) => new (folder.Value);
 }
 
-public sealed class WorkFolderWithInput : WorkFolder
+public sealed record WorkFolderWithInput : WorkFolder
 {
     public WorkFolderWithInput(string value) : base(value)
     {
@@ -499,7 +493,7 @@ public sealed class WorkFolderWithInput : WorkFolder
     public static new WorkFolderWithInput New(WorkFolder folder) => new (folder.Value);
 }
 
-public sealed class WorkFolderWithOutput : WorkFolder
+public sealed record WorkFolderWithOutput : WorkFolder
 {
     public WorkFolderWithOutput(string value) : base(value)
     {
@@ -508,12 +502,8 @@ public sealed class WorkFolderWithOutput : WorkFolder
     public static new WorkFolderWithOutput New(WorkFolder folder) => new (folder.Value);
 }
 
-public sealed class FactionNumber : NumType<FactionNumber, TInt, int> {
-    public FactionNumber(int value) : base(value) { }
-}
-
 public record struct GameRunResult(WorkFolderWithOutput WorkFolder, bool Success, int ExitCode, Option<string> StdOut, Option<string> StdErr) {
-    public static GameRunResult New(WorkFolderWithOutput workFolder, bool success, int exitCode, Option<string> stdOut, Option<string> stdErr) => new (workFolder, success exitCode, stdOut, stdErr);
+    public static GameRunResult New(WorkFolderWithOutput workFolder, bool success, int exitCode, Option<string> stdOut, Option<string> stdErr) => new (workFolder, success, exitCode, stdOut, stdErr);
 }
 
 public record struct ReportStream(Stream Stream, string FileName) {
@@ -530,20 +520,25 @@ public record struct MessageStream(Stream Stream, string FileName) {
 
 public record struct GameInStream(Stream Stream) {
     public static GameInStream New(Stream stream) => new (stream);
+    public static GameInStream New(byte[] buffer) => new (new MemoryStream(buffer, false));
 }
 
 public record struct GameOutStream(Stream Stream) {
     public static GameOutStream New(Stream stream) => new (stream);
+    public static GameOutStream New(byte[] buffer) => new (new MemoryStream(buffer, false));
 }
 
 public record struct PlayersInStream(Stream Stream) {
     public static PlayersInStream New(Stream stream) => new (stream);
+    public static PlayersInStream New(byte[] buffer) => new (new MemoryStream(buffer, false));
 }
 
 public record struct PlayersOutStream(Stream Stream) {
     public static PlayersOutStream New(Stream stream) => new (stream);
+    public static PlayersOutStream New(byte[] buffer) => new (new MemoryStream(buffer, false));
 }
 
 public record struct GameEngineStream(Stream Stream) {
     public static GameEngineStream New(Stream stream) => new (stream);
+    public static GameEngineStream New(byte[] buffer) => new (new MemoryStream(buffer, false));
 }

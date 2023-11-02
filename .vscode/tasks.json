@@ -3,8 +3,8 @@
     "tasks": [
         {
             "label": "build",
-            "command": "dotnet",
             "type": "process",
+            "command": "dotnet",
             "args": [
                 "build",
                 "${workspaceFolder}/server/server.csproj",
@@ -15,8 +15,8 @@
         },
         {
             "label": "Server: Run",
-            "command": "dotnet",
             "type": "process",
+            "command": "dotnet",
             "args": [
                 "watch",
                 "run"
@@ -33,17 +33,20 @@
         },
         {
             "label": "Client: Run",
+            "type": "process",
             "command": "yarn",
             "args": [
                 "start"
             ],
             "options": {
-                "cwd": "${workspaceFolder}/client"
+                "cwd": "${workspaceFolder}/client",
+                "env": {
+                    "NODE_ENV": "development"
+                }
             },
-            "problemMatcher": [],
-            "env": {
-                "NODE_ENV": "development"
-            }
+            "problemMatcher": [
+                "$tsc-watch"
+            ]
         },
         {
             "label": "Run",
@@ -56,8 +59,8 @@
         },
         {
             "label": "publish",
-            "command": "dotnet",
             "type": "process",
+            "command": "dotnet",
             "args": [
                 "publish",
                 "${workspaceFolder}/server/server.csproj",

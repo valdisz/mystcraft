@@ -8,6 +8,8 @@ using advisor.Schema;
 using advisor.Persistence;
 using Hangfire;
 using System;
+using advisor.Model;
+using System.Linq;
 
 public record GameNextTurn(long GameId, int? TurnNumber, GameNextTurnForceInput Force = null): IRequest<GameNextTurnResult>;
 
@@ -18,6 +20,47 @@ public class GameNextTurnForceInput {
     public bool Process { get; set; }
     public bool Merge { get; set; }
 }
+
+public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnResult> {
+    public Task<GameNextTurnResult> Handle(GameNextTurn request, CancellationToken cancellationToken) {
+        throw new NotImplementedException();
+    }
+
+    private static Mystcraft<(PlayersOutStream playersOut, GameOutStream gameOut, Seq<ReportStream> reports, Seq<MessageStream> messages)> executeEngine(GameEngineStream engine, PlayersInStream playersIn, GameInStream gameIn, Seq<FactionOrders> orders) =>
+        from folder in Mystcraft.OpenWorkFolder()
+        from input in Mystcraft.WriteGameState(folder, engine, playersIn, gameIn, orders)
+        // TODO: make timeout configurable
+        from result in Mystcraft.RunEngine(input, TimeSpan.FromMinutes(10))
+        let output = result.WorkFolder
+        from gameOut in Mystcraft.ReadGame(output)
+        from playersOut in Mystcraft.ReadPlayers(output)
+        from reports in Mystcraft.ReadReports(output)
+        from messages in Mystcraft.ReadMessages(output)
+        select (playersOut, gameOut, reports, messages);
+
+    private static Mystcraft<LanguageExt.Unit> RunTurn(GameId gameId, TurnNumber turnNumber) =>
+        from game in Mystcraft.ReadOneGame(gameId)
+
+        from engine in Mystcraft.ReadOneGameEngine(new GameEngineId(game.Value.EngineId.Value))
+        let engineStream = GameEngineStream.New(engine.Value.Engine)
+
+        from turn in Mystcraft.WriteOneTurn(gameId, turnNumber)
+        let playersIn = PlayersInStream.New(turn.PlayerData)
+        let gameIn = GameInStream.New(turn.GameData)
+
+        from orders in Mystcraft.ReadTurnOrders(gameId, turnNumber)
+
+        from result in executeEngine(engineStream, playersIn, gameIn, orders)
+
+        let nextTurnNumber = TurnNumber.New(turnNumber.Value + 1)
+        // from nextTurn in Mystcraft.CreateTurn(gameId, nextTurnNumber, result.playersOut, result.gameOut)
+        // read reports
+        // read messages
+        // save it all
+        // schedule processing
+        select unit;
+}
+
 
 // public class GameNextTurnHandler : IRequestHandler<GameNextTurn, GameNextTurnResult> {
 //     public GameNextTurnHandler(IAllGamesRepository gameRepo, IBackgroundJobClient jobs) {

@@ -40,4 +40,30 @@ public static class Errors {
     public static readonly Error E_GAME_ALREADY_STOPED   = Error.New(40_31, "Game already stoped.");
 
     public static readonly Error E_GAME_ENGINE_IS_IN_USE = Error.New(50_00, "Game engine is in use.");
+
+    public static Error E_GAME_ENGINE_FAILED(int exitCode, string stdOut, string stdErr) => ProcessError.New(60_00, "Game engine failed.", exitCode, stdOut, stdErr);
+    public static readonly Error E_OTHER_TURN_PROCESSING_ERROR = Error.New(60_10, "Other error during turn processing.");
+}
+
+public record ProcessError(int Code, string Message, int ExitCode, string StdOut, string StdErr) : Error {
+    public static ProcessError New(int code, string message, int exitCode, string stdOut, string stdErr) =>
+        new (code, message, exitCode, stdOut, stdErr);
+
+    public override string Message { get; } =
+        Message;
+
+    public override int Code { get; } =
+        Code;
+
+    public override bool IsExceptional =>
+        false;
+
+    public override bool IsExpected =>
+        true;
+
+    public override bool Is<E>() =>
+        false;
+
+    public override ErrorException ToErrorException() =>
+        new ExpectedException(Message, Code, None);
 }
