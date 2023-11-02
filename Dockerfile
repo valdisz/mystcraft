@@ -1,14 +1,16 @@
-FROM node:18.12 as node-build
+# Disabled for now CLIENT
+#
+# FROM node:18.12 as node-build
 
-RUN yarn set version 3.6.1
+# RUN yarn set version 3.6.1
 
-WORKDIR /client
-COPY client/package.json ./
-COPY client/yarn.lock ./
-RUN yarn install --immutable
-COPY client/ ./
-RUN npx update-browserslist-db@latest
-RUN yarn build
+# WORKDIR /client
+# COPY client/package.json ./
+# COPY client/yarn.lock ./
+# RUN yarn install --immutable
+# COPY client/ ./
+# RUN npx update-browserslist-db@latest
+# RUN yarn build
 
 ####################
 
@@ -44,7 +46,7 @@ RUN groupadd --gid 1001 app \
 WORKDIR /app
 
 COPY --from=net-build /server/out .
-COPY --from=node-build /client/build ./wwwroot
+# COPY --from=node-build /client/build ./wwwroot
 
 RUN mkdir -p /usr/var/advisor \
     && chown app:app /usr/var/advisor \
