@@ -8,7 +8,7 @@ using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.pgsql
+namespace server.Migrations.pgsql
 {
     [DbContext(typeof(PgSqlDatabase))]
     partial class PgSqlDatabaseModelSnapshot : ModelSnapshot

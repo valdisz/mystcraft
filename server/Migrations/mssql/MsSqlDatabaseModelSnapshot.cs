@@ -9,7 +9,7 @@ using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.mssql
+namespace server.Migrations.mssql
 {
     [DbContext(typeof(MsSqlDatabase))]
     partial class MsSqlDatabaseModelSnapshot : ModelSnapshot

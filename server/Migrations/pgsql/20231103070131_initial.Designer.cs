@@ -12,8 +12,8 @@ using advisor.Persistence;
 namespace server.Migrations.pgsql
 {
     [DbContext(typeof(PgSqlDatabase))]
-    [Migration("20230720123044_audit_for_game_and_engine")]
-    partial class audit_for_game_and_engine
+    [Migration("20231103070131_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -399,10 +399,6 @@ namespace server.Migrations.pgsql
                         .IsRequired()
                         .HasColumnType("jsonb");
 
-                    b.Property<byte[]>("Ruleset")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
                     b.Property<int>("Status")
                         .HasMaxLength(64)
                         .HasColumnType("integer");
@@ -440,23 +436,40 @@ namespace server.Migrations.pgsql
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<byte[]>("Contents")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<long?>("CreatedByUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<byte[]>("Engine")
+                        .HasColumnType("bytea");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<bool>("Remote")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RemoteApi")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("RemoteOptions")
+                        .HasMaxLength(2147483647)
+                        .HasColumnType("text");
+
+                    b.Property<string>("RemoteUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
                     b.Property<byte[]>("Ruleset")
-                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
@@ -1193,6 +1206,11 @@ namespace server.Migrations.pgsql
 
                     b.Property<DateTimeOffset>("LastVisitAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
 
                     b.Property<string>("Roles")
                         .HasColumnType("jsonb");

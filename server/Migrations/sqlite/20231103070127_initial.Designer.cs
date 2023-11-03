@@ -12,8 +12,8 @@ using advisor.Persistence;
 namespace server.Migrations.sqlite
 {
     [DbContext(typeof(SQLiteDatabase))]
-    [Migration("20230722064710_engine_remote")]
-    partial class engine_remote
+    [Migration("20231103070127_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -387,10 +387,6 @@ namespace server.Migrations.sqlite
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<byte[]>("Ruleset")
-                        .IsRequired()
-                        .HasColumnType("BLOB");
-
                     b.Property<int>("Status")
                         .HasMaxLength(64)
                         .HasColumnType("INTEGER");
@@ -427,9 +423,6 @@ namespace server.Migrations.sqlite
                         .HasColumnType("INTEGER")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<byte[]>("Contents")
-                        .HasColumnType("BLOB");
-
                     b.Property<long>("CreatedAt")
                         .HasColumnType("INTEGER");
 
@@ -439,6 +432,9 @@ namespace server.Migrations.sqlite
                     b.Property<string>("Description")
                         .HasMaxLength(2048)
                         .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Engine")
+                        .HasColumnType("BLOB");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -454,6 +450,10 @@ namespace server.Migrations.sqlite
 
                     b.Property<string>("RemoteOptions")
                         .HasMaxLength(2147483647)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RemoteUrl")
+                        .HasMaxLength(2048)
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Ruleset")

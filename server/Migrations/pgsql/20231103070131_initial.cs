@@ -4,12 +4,32 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace advisor.Migrations.pgsql
+namespace server.Migrations.pgsql
 {
     public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Salt = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    Algorithm = table.Column<string>(type: "text", nullable: false),
+                    Digest = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastVisitAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Roles = table.Column<string>(type: "jsonb", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "GameEngines",
                 columns: table => new
@@ -17,29 +37,83 @@ namespace advisor.Migrations.pgsql
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Description = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    Remote = table.Column<bool>(type: "boolean", nullable: false),
+                    RemoteApi = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    RemoteUrl = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    RemoteOptions = table.Column<string>(type: "text", maxLength: 2147483647, nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Contents = table.Column<byte[]>(type: "bytea", nullable: false)
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedByUserId = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedByUserId = table.Column<long>(type: "bigint", nullable: true),
+                    Engine = table.Column<byte[]>(type: "bytea", nullable: true),
+                    Ruleset = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GameEngines", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GameEngines_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_GameEngines_Users_UpdatedByUserId",
+                        column: x => x.UpdatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Identities",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Email = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    Salt = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
-                    Algorithm = table.Column<string>(type: "text", nullable: false),
-                    Digest = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    Roles = table.Column<string>(type: "jsonb", nullable: true)
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Provider = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    Token = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
+                    Details = table.Column<byte[]>(type: "bytea", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Identities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Identities_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserEmails",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    Disabled = table.Column<bool>(type: "boolean", nullable: false),
+                    Primary = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    Email = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    VerificationCode = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: true),
+                    VerificationCodeExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    EmailVerifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserEmails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserEmails_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -49,12 +123,14 @@ namespace advisor.Migrations.pgsql
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Type = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Status = table.Column<int>(type: "integer", maxLength: 64, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedByUserId = table.Column<long>(type: "bigint", nullable: true),
+                    UpdatedByUserId = table.Column<long>(type: "bigint", nullable: true),
                     EngineId = table.Column<long>(type: "bigint", nullable: true),
                     Options = table.Column<string>(type: "jsonb", nullable: false),
-                    Ruleset = table.Column<string>(type: "text", nullable: false),
                     LastTurnNumber = table.Column<int>(type: "integer", nullable: true),
                     NextTurnNumber = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -66,6 +142,52 @@ namespace advisor.Migrations.pgsql
                         column: x => x.EngineId,
                         principalTable: "GameEngines",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Games_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Games_Users_UpdatedByUserId",
+                        column: x => x.UpdatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DbLoginAttempt",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    UserIdentityId = table.Column<long>(type: "bigint", nullable: true),
+                    Outcome = table.Column<int>(type: "integer", nullable: false),
+                    IpAddress = table.Column<string>(type: "character varying(39)", maxLength: 39, nullable: true),
+                    IpAddressFamily = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    Referer = table.Column<string>(type: "character varying(16384)", maxLength: 16384, nullable: true),
+                    HttpVersion = table.Column<string>(type: "character varying(16384)", maxLength: 16384, nullable: true),
+                    UserAgent = table.Column<string>(type: "character varying(16384)", maxLength: 16384, nullable: true),
+                    Provider = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    Country = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    City = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    Timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    IdentityId = table.Column<long>(type: "bigint", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DbLoginAttempt", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DbLoginAttempt_Identities_IdentityId",
+                        column: x => x.IdentityId,
+                        principalTable: "Identities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_DbLoginAttempt_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -97,11 +219,13 @@ namespace advisor.Migrations.pgsql
                     UserId = table.Column<long>(type: "bigint", nullable: true),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
                     Number = table.Column<int>(type: "integer", nullable: false),
-                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     LastTurnNumber = table.Column<int>(type: "integer", nullable: true),
                     NextTurnNumber = table.Column<int>(type: "integer", nullable: true),
                     Password = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    IsQuit = table.Column<bool>(type: "boolean", nullable: false)
+                    IsQuit = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,8 +251,9 @@ namespace advisor.Migrations.pgsql
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    Password = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true)
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    Password = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -153,7 +278,7 @@ namespace advisor.Migrations.pgsql
                 {
                     GameId = table.Column<long>(type: "bigint", nullable: false),
                     Number = table.Column<int>(type: "integer", nullable: false),
-                    State = table.Column<int>(type: "integer", nullable: false),
+                    State = table.Column<string>(type: "text", nullable: false),
                     PlayerData = table.Column<byte[]>(type: "bytea", nullable: true),
                     GameData = table.Column<byte[]>(type: "bytea", nullable: true)
                 },
@@ -174,6 +299,8 @@ namespace advisor.Migrations.pgsql
                 {
                     AllianceId = table.Column<long>(type: "bigint", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AcceptedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     ShareMap = table.Column<bool>(type: "boolean", nullable: false),
                     TeachMages = table.Column<bool>(type: "boolean", nullable: false),
                     Owner = table.Column<bool>(type: "boolean", nullable: false),
@@ -203,7 +330,7 @@ namespace advisor.Migrations.pgsql
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    FactionName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     FactionNumber = table.Column<int>(type: "integer", nullable: false),
                     Unclaimed = table.Column<int>(type: "integer", nullable: false),
                     Income_Work = table.Column<int>(type: "integer", nullable: true),
@@ -246,7 +373,7 @@ namespace advisor.Migrations.pgsql
                     GameId = table.Column<long>(type: "bigint", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: true),
-                    Type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    Type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
@@ -274,7 +401,7 @@ namespace advisor.Migrations.pgsql
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     GameId = table.Column<long>(type: "bigint", nullable: false),
                     FactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    Data = table.Column<byte[]>(type: "bytea", nullable: false),
+                    Source = table.Column<byte[]>(type: "bytea", nullable: false),
                     Json = table.Column<byte[]>(type: "bytea", nullable: true),
                     Error = table.Column<string>(type: "text", nullable: true),
                     IsMerged = table.Column<bool>(type: "boolean", nullable: false)
@@ -306,16 +433,19 @@ namespace advisor.Migrations.pgsql
                 name: "AditionalReports",
                 columns: table => new
                 {
-                    FactionNumber = table.Column<int>(type: "integer", nullable: false),
-                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    FactionName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
-                    Source = table.Column<string>(type: "text", nullable: false),
-                    Json = table.Column<string>(type: "text", nullable: true)
+                    TurnNumber = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Source = table.Column<byte[]>(type: "bytea", nullable: false),
+                    Json = table.Column<byte[]>(type: "bytea", nullable: true),
+                    Error = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AditionalReports", x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
+                    table.PrimaryKey("PK_AditionalReports", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AditionalReports_Players_PlayerId",
                         column: x => x.PlayerId,
@@ -420,7 +550,7 @@ namespace advisor.Migrations.pgsql
                     Z = table.Column<int>(type: "integer", nullable: false),
                     Explored = table.Column<bool>(type: "boolean", nullable: false),
                     LastVisitedAt = table.Column<int>(type: "integer", nullable: true),
-                    Label = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    Label = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Province = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Terrain = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Settlement_Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -457,13 +587,13 @@ namespace advisor.Migrations.pgsql
                 name: "Treasury",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
                     Rank = table.Column<int>(type: "integer", nullable: false),
                     Max = table.Column<int>(type: "integer", nullable: false),
-                    Total = table.Column<int>(type: "integer", nullable: false)
+                    Total = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -489,10 +619,10 @@ namespace advisor.Migrations.pgsql
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
-                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    Category = table.Column<string>(type: "text", nullable: false),
                     Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false)
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
+                    Category = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -583,13 +713,13 @@ namespace advisor.Migrations.pgsql
                 name: "Markets",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     Market = table.Column<string>(type: "text", nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<int>(type: "integer", nullable: false)
+                    Price = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -612,10 +742,10 @@ namespace advisor.Migrations.pgsql
                 name: "Production",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: false),
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     Amount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -643,10 +773,10 @@ namespace advisor.Migrations.pgsql
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     RegionId = table.Column<string>(type: "character varying(14)", nullable: true),
-                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    Category = table.Column<string>(type: "text", nullable: false),
                     Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false)
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
+                    Category = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -678,7 +808,7 @@ namespace advisor.Migrations.pgsql
                     Sequence = table.Column<int>(type: "integer", nullable: false),
                     Number = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    Type = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Type = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Description = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Contents = table.Column<string>(type: "jsonb", nullable: true),
                     Flags = table.Column<string>(type: "jsonb", nullable: true),
@@ -724,6 +854,7 @@ namespace advisor.Migrations.pgsql
                     Name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     OnGuard = table.Column<bool>(type: "boolean", nullable: false),
+                    IsMage = table.Column<bool>(type: "boolean", nullable: false),
                     Flags = table.Column<string>(type: "jsonb", nullable: true),
                     Weight = table.Column<int>(type: "integer", nullable: true),
                     Capacity_Flying = table.Column<int>(type: "integer", nullable: true),
@@ -773,7 +904,7 @@ namespace advisor.Migrations.pgsql
                     FactionNumber = table.Column<int>(type: "integer", nullable: false),
                     RegionId = table.Column<string>(type: "character varying(14)", maxLength: 14, nullable: true),
                     UnitNumber = table.Column<int>(type: "integer", nullable: true),
-                    UnitName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    UnitName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     MissingUnitNumber = table.Column<int>(type: "integer", nullable: true),
                     Type = table.Column<string>(type: "text", nullable: false),
                     Category = table.Column<string>(type: "text", nullable: false),
@@ -814,14 +945,14 @@ namespace advisor.Migrations.pgsql
                 name: "Items",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     TurnNumber = table.Column<int>(type: "integer", nullable: false),
                     UnitNumber = table.Column<int>(type: "integer", nullable: false),
-                    Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "integer", nullable: false),
                     Illusion = table.Column<bool>(type: "boolean", nullable: false),
                     Unfinished = table.Column<bool>(type: "boolean", nullable: false),
-                    Props = table.Column<string>(type: "text", nullable: true)
+                    Props = table.Column<string>(type: "text", nullable: true),
+                    Amount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -849,7 +980,7 @@ namespace advisor.Migrations.pgsql
                     PlayerId = table.Column<long>(type: "bigint", nullable: false),
                     Target_Code = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
                     Target_Level = table.Column<int>(type: "integer", nullable: true),
-                    Study = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    Study = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: true),
                     Teach = table.Column<string>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
@@ -868,6 +999,11 @@ namespace advisor.Migrations.pgsql
                         principalColumns: new[] { "PlayerId", "TurnNumber", "Number" },
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AditionalReports_PlayerId_TurnNumber",
+                table: "AditionalReports",
+                columns: new[] { "PlayerId", "TurnNumber" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AllianceMembers_AllianceId",
@@ -890,6 +1026,16 @@ namespace advisor.Migrations.pgsql
                 columns: new[] { "PlayerId", "TurnNumber" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_DbLoginAttempt_IdentityId",
+                table: "DbLoginAttempt",
+                column: "IdentityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DbLoginAttempt_UserId",
+                table: "DbLoginAttempt",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Events_PlayerId_TurnNumber_FactionNumber",
                 table: "Events",
                 columns: new[] { "PlayerId", "TurnNumber", "FactionNumber" });
@@ -910,10 +1056,25 @@ namespace advisor.Migrations.pgsql
                 columns: new[] { "PlayerId", "TurnNumber", "TargetRegionId" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_GameEngines_CreatedByUserId",
+                table: "GameEngines",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GameEngines_Name",
                 table: "GameEngines",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEngines_UpdatedByUserId",
+                table: "GameEngines",
+                column: "UpdatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Games_CreatedByUserId",
+                table: "Games",
+                column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Games_EngineId",
@@ -925,6 +1086,16 @@ namespace advisor.Migrations.pgsql
                 table: "Games",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Games_UpdatedByUserId",
+                table: "Games",
+                column: "UpdatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Identities_UserId",
+                table: "Identities",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Players_GameId",
@@ -987,10 +1158,9 @@ namespace advisor.Migrations.pgsql
                 columns: new[] { "PlayerId", "TurnNumber", "StrcutureId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Email",
-                table: "Users",
-                column: "Email",
-                unique: true);
+                name: "IX_UserEmails_UserId",
+                table: "UserEmails",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -1009,6 +1179,9 @@ namespace advisor.Migrations.pgsql
 
             migrationBuilder.DropTable(
                 name: "Battles");
+
+            migrationBuilder.DropTable(
+                name: "DbLoginAttempt");
 
             migrationBuilder.DropTable(
                 name: "Events");
@@ -1047,7 +1220,13 @@ namespace advisor.Migrations.pgsql
                 name: "TurnStatistics");
 
             migrationBuilder.DropTable(
+                name: "UserEmails");
+
+            migrationBuilder.DropTable(
                 name: "Alliances");
+
+            migrationBuilder.DropTable(
+                name: "Identities");
 
             migrationBuilder.DropTable(
                 name: "Turns");
@@ -1074,10 +1253,10 @@ namespace advisor.Migrations.pgsql
                 name: "Games");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "GameEngines");
 
             migrationBuilder.DropTable(
-                name: "GameEngines");
+                name: "Users");
         }
     }
 }

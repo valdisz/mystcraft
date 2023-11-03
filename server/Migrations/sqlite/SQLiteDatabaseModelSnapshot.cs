@@ -8,7 +8,7 @@ using advisor.Persistence;
 
 #nullable disable
 
-namespace advisor.Migrations.sqlite
+namespace server.Migrations.sqlite
 {
     [DbContext(typeof(SQLiteDatabase))]
     partial class SQLiteDatabaseModelSnapshot : ModelSnapshot

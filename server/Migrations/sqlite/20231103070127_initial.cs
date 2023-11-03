@@ -3,12 +3,32 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace advisor.Migrations.sqlite
+namespace server.Migrations.sqlite
 {
     public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    Salt = table.Column<string>(type: "TEXT", maxLength: 32, nullable: true),
+                    Algorithm = table.Column<string>(type: "TEXT", nullable: false),
+                    Digest = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    LastVisitAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Roles = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "GameEngines",
                 columns: table => new
@@ -16,29 +36,83 @@ namespace advisor.Migrations.sqlite
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
-                    Contents = table.Column<byte[]>(type: "BLOB", nullable: false)
+                    Description = table.Column<string>(type: "TEXT", maxLength: 2048, nullable: true),
+                    Remote = table.Column<bool>(type: "INTEGER", nullable: false),
+                    RemoteApi = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
+                    RemoteUrl = table.Column<string>(type: "TEXT", maxLength: 2048, nullable: true),
+                    RemoteOptions = table.Column<string>(type: "TEXT", maxLength: 2147483647, nullable: true),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    CreatedByUserId = table.Column<long>(type: "INTEGER", nullable: true),
+                    UpdatedByUserId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Engine = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    Ruleset = table.Column<byte[]>(type: "BLOB", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GameEngines", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GameEngines_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_GameEngines_Users_UpdatedByUserId",
+                        column: x => x.UpdatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Identities",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
-                    Salt = table.Column<string>(type: "TEXT", maxLength: 32, nullable: true),
-                    Algorithm = table.Column<string>(type: "TEXT", nullable: false),
-                    Digest = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
-                    Roles = table.Column<string>(type: "TEXT", nullable: true)
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Provider = table.Column<string>(type: "TEXT", maxLength: 32, nullable: true),
+                    Token = table.Column<string>(type: "TEXT", maxLength: 2048, nullable: false),
+                    Details = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Identities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Identities_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserEmails",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Disabled = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Primary = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    VerificationCode = table.Column<string>(type: "TEXT", maxLength: 6, nullable: true),
+                    VerificationCodeExpiresAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    EmailVerifiedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserEmails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserEmails_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -48,12 +122,14 @@ namespace advisor.Migrations.sqlite
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    Type = table.Column<string>(type: "TEXT", nullable: false),
-                    Status = table.Column<int>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", maxLength: 64, nullable: false),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    CreatedByUserId = table.Column<long>(type: "INTEGER", nullable: true),
+                    UpdatedByUserId = table.Column<long>(type: "INTEGER", nullable: true),
                     EngineId = table.Column<long>(type: "INTEGER", nullable: true),
                     Options = table.Column<string>(type: "TEXT", nullable: false),
-                    Ruleset = table.Column<string>(type: "TEXT", nullable: false),
                     LastTurnNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     NextTurnNumber = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -65,6 +141,52 @@ namespace advisor.Migrations.sqlite
                         column: x => x.EngineId,
                         principalTable: "GameEngines",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Games_Users_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Games_Users_UpdatedByUserId",
+                        column: x => x.UpdatedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DbLoginAttempt",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    UserId = table.Column<long>(type: "INTEGER", nullable: false),
+                    UserIdentityId = table.Column<long>(type: "INTEGER", nullable: true),
+                    Outcome = table.Column<int>(type: "INTEGER", nullable: false),
+                    IpAddress = table.Column<string>(type: "TEXT", maxLength: 39, nullable: true),
+                    IpAddressFamily = table.Column<string>(type: "TEXT", maxLength: 32, nullable: true),
+                    Referer = table.Column<string>(type: "TEXT", maxLength: 16384, nullable: true),
+                    HttpVersion = table.Column<string>(type: "TEXT", maxLength: 16384, nullable: true),
+                    UserAgent = table.Column<string>(type: "TEXT", maxLength: 16384, nullable: true),
+                    Provider = table.Column<string>(type: "TEXT", maxLength: 32, nullable: true),
+                    Country = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
+                    City = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
+                    Timestamp = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    IdentityId = table.Column<long>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DbLoginAttempt", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DbLoginAttempt_Identities_IdentityId",
+                        column: x => x.IdentityId,
+                        principalTable: "Identities",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_DbLoginAttempt_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -96,11 +218,13 @@ namespace advisor.Migrations.sqlite
                     UserId = table.Column<long>(type: "INTEGER", nullable: true),
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
                     Number = table.Column<int>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     LastTurnNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     NextTurnNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     Password = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
-                    IsQuit = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsQuit = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false),
+                    UpdatedAt = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -126,8 +250,9 @@ namespace advisor.Migrations.sqlite
                         .Annotation("Sqlite:Autoincrement", true),
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
                     UserId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
-                    Password = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true)
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
+                    Password = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
+                    CreatedAt = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -152,7 +277,7 @@ namespace advisor.Migrations.sqlite
                 {
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
                     Number = table.Column<int>(type: "INTEGER", nullable: false),
-                    State = table.Column<int>(type: "INTEGER", nullable: false),
+                    State = table.Column<string>(type: "TEXT", nullable: false),
                     PlayerData = table.Column<byte[]>(type: "BLOB", nullable: true),
                     GameData = table.Column<byte[]>(type: "BLOB", nullable: true)
                 },
@@ -173,6 +298,8 @@ namespace advisor.Migrations.sqlite
                 {
                     AllianceId = table.Column<long>(type: "INTEGER", nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    AcceptedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
                     ShareMap = table.Column<bool>(type: "INTEGER", nullable: false),
                     TeachMages = table.Column<bool>(type: "INTEGER", nullable: false),
                     Owner = table.Column<bool>(type: "INTEGER", nullable: false),
@@ -202,7 +329,7 @@ namespace advisor.Migrations.sqlite
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
-                    FactionName = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
+                    FactionName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     Unclaimed = table.Column<int>(type: "INTEGER", nullable: false),
                     Income_Work = table.Column<int>(type: "INTEGER", nullable: true),
@@ -245,7 +372,7 @@ namespace advisor.Migrations.sqlite
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: true),
-                    Type = table.Column<string>(type: "TEXT", maxLength: 32, nullable: false),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
                     Text = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -273,7 +400,7 @@ namespace advisor.Migrations.sqlite
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     GameId = table.Column<long>(type: "INTEGER", nullable: false),
                     FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    Data = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Source = table.Column<byte[]>(type: "BLOB", nullable: false),
                     Json = table.Column<byte[]>(type: "BLOB", nullable: true),
                     Error = table.Column<string>(type: "TEXT", nullable: true),
                     IsMerged = table.Column<bool>(type: "INTEGER", nullable: false)
@@ -305,16 +432,19 @@ namespace advisor.Migrations.sqlite
                 name: "AditionalReports",
                 columns: table => new
                 {
-                    FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    FactionName = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Source = table.Column<string>(type: "TEXT", nullable: false),
-                    Json = table.Column<string>(type: "TEXT", nullable: true)
+                    TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Source = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    Json = table.Column<byte[]>(type: "BLOB", nullable: true),
+                    Error = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AditionalReports", x => new { x.PlayerId, x.TurnNumber, x.FactionNumber });
+                    table.PrimaryKey("PK_AditionalReports", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AditionalReports_Players_PlayerId",
                         column: x => x.PlayerId,
@@ -418,7 +548,7 @@ namespace advisor.Migrations.sqlite
                     Z = table.Column<int>(type: "INTEGER", nullable: false),
                     Explored = table.Column<bool>(type: "INTEGER", nullable: false),
                     LastVisitedAt = table.Column<int>(type: "INTEGER", nullable: true),
-                    Label = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    Label = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
                     Province = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     Terrain = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     Settlement_Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -455,13 +585,13 @@ namespace advisor.Migrations.sqlite
                 name: "Treasury",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     Rank = table.Column<int>(type: "INTEGER", nullable: false),
                     Max = table.Column<int>(type: "INTEGER", nullable: false),
-                    Total = table.Column<int>(type: "INTEGER", nullable: false)
+                    Total = table.Column<int>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -487,10 +617,10 @@ namespace advisor.Migrations.sqlite
                     Id = table.Column<long>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Category = table.Column<string>(type: "TEXT", nullable: false),
                     Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false)
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Category = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -581,13 +711,13 @@ namespace advisor.Migrations.sqlite
                 name: "Markets",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: false),
-                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
                     Market = table.Column<string>(type: "TEXT", nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
-                    Price = table.Column<int>(type: "INTEGER", nullable: false)
+                    Price = table.Column<int>(type: "INTEGER", nullable: false),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -610,10 +740,10 @@ namespace advisor.Migrations.sqlite
                 name: "Production",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: false),
-                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
                     Amount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -641,10 +771,10 @@ namespace advisor.Migrations.sqlite
                         .Annotation("Sqlite:Autoincrement", true),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<string>(type: "TEXT", nullable: true),
-                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
-                    Category = table.Column<string>(type: "TEXT", nullable: false),
                     Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false)
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
+                    Category = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -676,7 +806,7 @@ namespace advisor.Migrations.sqlite
                     Sequence = table.Column<int>(type: "INTEGER", nullable: false),
                     Number = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
-                    Type = table.Column<string>(type: "TEXT", maxLength: 64, nullable: false),
+                    Type = table.Column<string>(type: "TEXT", maxLength: 128, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Contents = table.Column<string>(type: "TEXT", nullable: true),
                     Flags = table.Column<string>(type: "TEXT", nullable: true),
@@ -722,6 +852,7 @@ namespace advisor.Migrations.sqlite
                     Name = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     Description = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     OnGuard = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsMage = table.Column<bool>(type: "INTEGER", nullable: false),
                     Flags = table.Column<string>(type: "TEXT", nullable: true),
                     Weight = table.Column<int>(type: "INTEGER", nullable: true),
                     Capacity_Flying = table.Column<int>(type: "INTEGER", nullable: true),
@@ -771,7 +902,7 @@ namespace advisor.Migrations.sqlite
                     FactionNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     RegionId = table.Column<string>(type: "TEXT", maxLength: 14, nullable: true),
                     UnitNumber = table.Column<int>(type: "INTEGER", nullable: true),
-                    UnitName = table.Column<string>(type: "TEXT", maxLength: 128, nullable: true),
+                    UnitName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     MissingUnitNumber = table.Column<int>(type: "INTEGER", nullable: true),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Category = table.Column<string>(type: "TEXT", nullable: false),
@@ -812,14 +943,14 @@ namespace advisor.Migrations.sqlite
                 name: "Items",
                 columns: table => new
                 {
+                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     TurnNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     UnitNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
-                    Amount = table.Column<int>(type: "INTEGER", nullable: false),
                     Illusion = table.Column<bool>(type: "INTEGER", nullable: false),
                     Unfinished = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Props = table.Column<string>(type: "TEXT", nullable: true)
+                    Props = table.Column<string>(type: "TEXT", nullable: true),
+                    Amount = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -847,7 +978,7 @@ namespace advisor.Migrations.sqlite
                     PlayerId = table.Column<long>(type: "INTEGER", nullable: false),
                     Target_Code = table.Column<string>(type: "TEXT", maxLength: 8, nullable: true),
                     Target_Level = table.Column<int>(type: "INTEGER", nullable: true),
-                    Study = table.Column<string>(type: "TEXT", maxLength: 64, nullable: true),
+                    Study = table.Column<string>(type: "TEXT", maxLength: 8, nullable: true),
                     Teach = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -866,6 +997,11 @@ namespace advisor.Migrations.sqlite
                         principalColumns: new[] { "PlayerId", "TurnNumber", "Number" },
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AditionalReports_PlayerId_TurnNumber",
+                table: "AditionalReports",
+                columns: new[] { "PlayerId", "TurnNumber" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AllianceMembers_AllianceId",
@@ -888,6 +1024,16 @@ namespace advisor.Migrations.sqlite
                 columns: new[] { "PlayerId", "TurnNumber" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_DbLoginAttempt_IdentityId",
+                table: "DbLoginAttempt",
+                column: "IdentityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DbLoginAttempt_UserId",
+                table: "DbLoginAttempt",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Events_PlayerId_TurnNumber_FactionNumber",
                 table: "Events",
                 columns: new[] { "PlayerId", "TurnNumber", "FactionNumber" });
@@ -908,10 +1054,25 @@ namespace advisor.Migrations.sqlite
                 columns: new[] { "PlayerId", "TurnNumber", "TargetRegionId" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_GameEngines_CreatedByUserId",
+                table: "GameEngines",
+                column: "CreatedByUserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GameEngines_Name",
                 table: "GameEngines",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GameEngines_UpdatedByUserId",
+                table: "GameEngines",
+                column: "UpdatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Games_CreatedByUserId",
+                table: "Games",
+                column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Games_EngineId",
@@ -923,6 +1084,16 @@ namespace advisor.Migrations.sqlite
                 table: "Games",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Games_UpdatedByUserId",
+                table: "Games",
+                column: "UpdatedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Identities_UserId",
+                table: "Identities",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Players_GameId",
@@ -985,10 +1156,9 @@ namespace advisor.Migrations.sqlite
                 columns: new[] { "PlayerId", "TurnNumber", "StrcutureId" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Email",
-                table: "Users",
-                column: "Email",
-                unique: true);
+                name: "IX_UserEmails_UserId",
+                table: "UserEmails",
+                column: "UserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -1007,6 +1177,9 @@ namespace advisor.Migrations.sqlite
 
             migrationBuilder.DropTable(
                 name: "Battles");
+
+            migrationBuilder.DropTable(
+                name: "DbLoginAttempt");
 
             migrationBuilder.DropTable(
                 name: "Events");
@@ -1045,7 +1218,13 @@ namespace advisor.Migrations.sqlite
                 name: "TurnStatistics");
 
             migrationBuilder.DropTable(
+                name: "UserEmails");
+
+            migrationBuilder.DropTable(
                 name: "Alliances");
+
+            migrationBuilder.DropTable(
+                name: "Identities");
 
             migrationBuilder.DropTable(
                 name: "Turns");
@@ -1072,10 +1251,10 @@ namespace advisor.Migrations.sqlite
                 name: "Games");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "GameEngines");
 
             migrationBuilder.DropTable(
-                name: "GameEngines");
+                name: "Users");
         }
     }
 }
