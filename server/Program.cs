@@ -16,9 +16,9 @@
 
     public class Program {
         public static Task Main(string[] args) {
-            if (!Debugger.IsAttached && Console.IsInputRedirected) {
-                return RunConverterAsync(Console.In);
-            }
+            // if (!Debugger.IsAttached && Console.IsInputRedirected) {
+            //     return RunConverterAsync(Console.In);
+            // }
 
             return RunServerAsync(args);
         }
