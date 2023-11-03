@@ -43,17 +43,20 @@ public class ParserController : ControllerBase {
             return BadRequest("No file was uploaded.");
         }
 
+
         // Read the file contents
         using var reader = new StreamReader(file.OpenReadStream());
-
         using var converter = new AtlantisReportJsonConverter(reader);
 
-        Response.ContentType = "application/json";
-        using var writer = new JsonTextWriter(new StreamWriter(Response.Body)) {
-            Formatting = Formatting.Indented
-        };
+        using var writer = new JsonTextWriter(new StreamWriter(Response.Body, leaveOpen: true));
+        writer.Formatting = Formatting.Indented;
 
+        Response.ContentType = "application/json";
         await converter.ReadAsJsonAsync(writer);
+
+        await writer.FlushAsync();
+        await writer.CloseAsync();
+        reader.Close();
 
         return new EmptyResult();
     }
