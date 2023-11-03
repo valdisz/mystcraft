@@ -1,3 +1,3 @@
 #!/bin/bash
-docker build -t valdisz/atlantis-economy-adivsor .
-docker push valdisz/atlantis-economy-adivsor
+docker build -t valdisz/mystcraft .
+docker push valdisz/mystcraft
