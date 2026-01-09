@@ -26,7 +26,7 @@ public class GamePauseHandler : IRequestHandler<GamePause, GamePauseResult> {
 
     public Task<GamePauseResult> Handle(GamePause request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(gameId => GameInterpreter<Runtime>.Interpret(
+            .Map(gameId => MystcraftInterpreter<Runtime>.Interpret(
                 from game in Mystcraft.WriteOneGame(gameId)
                 from res in Mystcraft.Pause(game)
                 select res

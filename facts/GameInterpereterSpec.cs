@@ -10,7 +10,7 @@ public class GameInterpreterSpec {
     public void CanInterpret() {
         var value = GameId.New(1).Match(
             Succ: gameId => {
-                return GameInterpreter<Runtime>.Interpret(Mystcraft.ReadOneGame(gameId));
+                return MystcraftInterpreter<Runtime>.Interpret(Mystcraft.ReadOneGame(gameId));
             },
             Fail: _ => throw new Exception("Should not fail")
         );
@@ -23,7 +23,7 @@ public class GameInterpreterSpec {
         var value = GameEngineId.New(1)
             .Match(
                 Succ: gameEngineId =>
-                    GameInterpreter<Runtime>.Interpret(
+                    MystcraftInterpreter<Runtime>.Interpret(
                         from engine in Mystcraft.WriteOneGameEngine(gameEngineId)
                         select engine
                     ),
@@ -35,7 +35,7 @@ public class GameInterpreterSpec {
 
     [Fact]
     public void CanDeleteGameEngine() {
-        var value = GameInterpreter<Runtime>.Interpret(
+        var value = MystcraftInterpreter<Runtime>.Interpret(
             from _ in Mystcraft.DeleteGameEngine(new Persistence.DbGameEngine { Id = 1 })
             select _
         );

@@ -5,12 +5,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using advisor.Model;
 
-public class TurnRunnerOptions {
-    public TurnRunnerOptions(string workingDirectory) {
-        WorkingDirectory = workingDirectory;
-    }
-
-    public string WorkingDirectory { get;  }
+public record TurnRunnerOptions {
+    public required string WorkingDirectory { get; init; }
     public string EngineFileName { get; init; } = "engine";
     public string PlayersInFileName { get; init; } = "players.in";
     public string PlayersOutFileName { get; init; } = "players.out";
@@ -21,19 +17,28 @@ public class TurnRunnerOptions {
     public Regex ArticleFileFormat { get; init; } = new Regex(@"times\.(\d+)$", RegexOptions.IgnoreCase);
     public Func<FactionNumber, string> FactionOrdersFileName { get; init; } = number => $"orders.{number.Value}";
 
-    public static TurnRunnerOptions UseTempDirectory() {
-        var tempPath = Path.GetTempPath();
+    public static Try<Option<TurnRunnerOptions>> UseTempDirectory(int attempts = 1000) {
+        return () =>
+        {
+            var tempPath = Path.GetTempPath();
 
-        string workDir;
-        do {
-            workDir = Path.Join(tempPath, Path.GetRandomFileName());
-        } while (Directory.Exists(workDir));
+            string workDir;
+            int iter = 0;
+            do
+            {
+                workDir = Path.Join(tempPath, Path.GetRandomFileName());
+                if (++iter > attempts)
+                {
+                    return Option<TurnRunnerOptions>.None;
+                }
+            } while (Directory.Exists(workDir));
 
-        Directory.CreateDirectory(workDir);
+            Directory.CreateDirectory(workDir);
 
-        return New(workDir);
+            return Some(New(workDir));
+        };
     }
 
     public static TurnRunnerOptions New(string workingDirectory)
-        => new (workingDirectory);
+        => new () { WorkingDirectory = workingDirectory };
 }

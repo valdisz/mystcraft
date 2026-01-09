@@ -472,15 +472,18 @@ public record WorkFolder(string Value) : IDisposable {
 
     public static WorkFolder New(string value) => new (value);
 
-    public Eff<string> File(string name) =>
-        Eff(() => System.IO.Path.Combine(Value, name));
+    public string File(string name) => Path.Combine(Value, name);
 
     public void Dispose() {
         if (disposed) {
             return;
         }
 
-        System.IO.Directory.Delete(Value, true);
+        if (Directory.Exists(Value)) {
+            Directory.Delete(Value, true);
+        }
+
+        disposed = true;
     }
 }
 
@@ -490,7 +493,7 @@ public sealed record WorkFolderWithInput : WorkFolder
     {
     }
 
-    public static new WorkFolderWithInput New(WorkFolder folder) => new (folder.Value);
+    public static WorkFolderWithInput New(WorkFolder folder) => new (folder.Value);
 }
 
 public sealed record WorkFolderWithOutput : WorkFolder
@@ -499,7 +502,7 @@ public sealed record WorkFolderWithOutput : WorkFolder
     {
     }
 
-    public static new WorkFolderWithOutput New(WorkFolder folder) => new (folder.Value);
+    public static WorkFolderWithOutput New(WorkFolder folder) => new (folder.Value);
 }
 
 public record struct GameRunResult(WorkFolderWithOutput WorkFolder, bool Success, int ExitCode, Option<string> StdOut, Option<string> StdErr) {

@@ -25,9 +25,9 @@ public static class ListValidators {
                 .ToValidation(E_LIST_MUST_BE_WITHIN_LENGTH(minLen, maxLen));
         };
 
-    public static Func<List<A>, Validation<Error, List<A>>> Unique<A>() =>
+    public static Func<List<A>, Validation<Error, List<A>>> Unique<A>(Option<Error> error) =>
         input =>
             Optional(input)
                 .Where(x => x.Distinct().Count() == x.Count)
-                .ToValidation(E_LIST_MUST_HAVE_UNIQUE_ITEMS);
+                .ToValidation(error.Match(identity, E_LIST_MUST_HAVE_UNIQUE_ITEMS));
 }

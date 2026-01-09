@@ -26,7 +26,7 @@ public class GameEngineCreateRemoteHandler : IRequestHandler<GameEngineCreateRem
 
     public Task<GameEngineCreateRemoteResult> Handle(GameEngineCreateRemote request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(GameInterpreter<Runtime>.Interpret)
+            .Map(MystcraftInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameEngineCreateRemoteResult.New);
 

@@ -509,7 +509,7 @@ namespace advisor {
         public static bool StartsWith(this PMaybe<TextParser> p, ReadOnlySpan<char> s) => p ? p.Value.StartsWith(s) : false;
         public static PMaybe<int> Integer(this PMaybe<TextParser> p) => p ? p.Value.Integer() : p.Convert<int>();
         public static PMaybe<double> Real(this PMaybe<TextParser> p) => p ? p.Value.Real() : p.Convert<double>();
-        public static PMaybe<TextParser> Between(this PMaybe<TextParser> p, ReadOnlySpan<char> left, ReadOnlySpan<char> right, bool useThen = false) => p ? p.Value.Between(left, right, useThen) : p;
+        public static PMaybe<TextParser> Between(this PMaybe<TextParser> p, ReadOnlySpan<char> left, ReadOnlySpan<char> right, bool useSkip = false) => p ? p.Value.Between(left, right, useSkip) : p;
         public static PMaybe<TextParser> Between(this PMaybe<TextParser> p, ReadOnlySpan<char> s, bool useThen = false) => p ? p.Value.Between(s, useThen) : p;
         public static PMaybe<string> AsString(this PMaybe<TextParser> p) => p ? new PMaybe<string>(p.Value) : p.Convert<string>();
 

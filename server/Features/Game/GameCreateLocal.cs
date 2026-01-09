@@ -40,7 +40,7 @@ public class GameCreateLocalHandler : IRequestHandler<GameCreateLocal, GameCreat
 
     public Task<GameCreateLocalResult> Handle(GameCreateLocal request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(GameInterpreter<Runtime>.Interpret)
+            .Map(MystcraftInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameCreateLocalResult.New);
 

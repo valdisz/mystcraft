@@ -27,7 +27,7 @@ public class GameEngineCreateLocalHandler : IRequestHandler<GameEngineCreateLoca
 
     public async Task<GameEngineCreateLocalResult> Handle(GameEngineCreateLocal request, CancellationToken cancellationToken) =>
         await (await Validate(request))
-            .Map(GameInterpreter<Runtime>.Interpret)
+            .Map(MystcraftInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameEngineCreateLocalResult.New);
 

@@ -34,7 +34,7 @@ public class GameDeleteHandler : IRequestHandler<GameDelete, GameDeleteResult> {
 
     public Task<GameDeleteResult> Handle(GameDelete request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(GameInterpreter<Runtime>.Interpret)
+            .Map(MystcraftInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameDeleteResult.New);
 

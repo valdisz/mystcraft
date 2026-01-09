@@ -13,44 +13,9 @@ using advisor.IO.Traits;
 using advisor.Model;
 using LanguageExt.Effects.Traits;
 using LanguageExt.Sys.Traits;
-using -.UnsafeValueAccess;
 
-public readonly struct TurnRunnerIO : Traits.TurnRunnerIO {
-    public readonly static Traits.TurnRunnerIO Default =
-        new TurnRunnerIO();
-
-    public string WorkingDirectory => throw new NotImplementedException();
-
-    public string EngineFileName => throw new NotImplementedException();
-
-    public string PlayersInFileName => throw new NotImplementedException();
-
-    public string PlayersOutFileName => throw new NotImplementedException();
-
-    public string GameInFileName => throw new NotImplementedException();
-
-    public string GameOutFileName => throw new NotImplementedException();
-
-    public Regex ReportFileFormat => throw new NotImplementedException();
-
-    public Regex TemplateFileFormat => throw new NotImplementedException();
-
-    public Regex ArticleFileFormat => throw new NotImplementedException();
-
-    public string FormatOrdersFileName(FactionNumber factionNumber)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public interface HasTurnRunner<out RT>: HasCancel<RT>, HasUnix<RT>, HasDirectory<RT>, HasFile<RT>
-    where RT : struct, HasTurnRunner<RT>  {
-
-    Eff<RT, Traits.TurnRunnerIO> TurnRunnerEff { get; }
-}
-
-public static class TurnRunner<RT>
-    where RT: struct, HasTurnRunner<RT> {
+public class TurnRunner<RT>
+    where RT: struct, HasCancel<RT>, HasUnix<RT>, HasDirectory<RT>, HasFile<RT> {
     public static Aff<RT, A> Use<A>(Func<TurnRunner<RT>, Aff<RT, A>> map) =>
         from runner in Eff(() => New(options))
         from ret in run(runner, map) | @catch(cleanup<A>(runner))
@@ -65,8 +30,6 @@ public static class TurnRunner<RT>
         from _ in runner.Clean()
         from ret in FailAff<A>(E_OTHER_TURN_PROCESSING_ERROR)
         select ret;
-
-    readonly TurnRunnerOptions options;
 
     Eff<RT, Seq<FileInfo>> enumerateFiles(Regex pattern) =>
         from items in LanguageExt.Sys.IO.Directory<RT>.enumerateFiles(options.WorkingDirectory)

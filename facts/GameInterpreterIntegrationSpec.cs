@@ -9,7 +9,7 @@ using static LanguageExt.Prelude;
 public class GameInterpreterIntegrationSpec: WithDatabaseSpec {
     [Fact]
     public async Task ShouldFailIfNoGameEnginePresent() {
-        var result = await GameInterpreter<Runtime>.Interpret(
+        var result = await MystcraftInterpreter<Runtime>.Interpret(
             from engine in Mystcraft.WriteOneGameEngine(new GameEngineId(1))
             select engine
         )

@@ -26,7 +26,7 @@ public class GameStartHandler : IRequestHandler<GameStart, GameStartResult> {
 
     public Task<GameStartResult> Handle(GameStart request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(gameId => GameInterpreter<Runtime>.Interpret(
+            .Map(gameId => MystcraftInterpreter<Runtime>.Interpret(
                 from game in Mystcraft.WriteOneGame(gameId)
                 from res in Mystcraft.Start(game)
                 select res

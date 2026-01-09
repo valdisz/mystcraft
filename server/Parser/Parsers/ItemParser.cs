@@ -9,6 +9,7 @@ namespace advisor
     // high elf [HELF] at $34
     // 2 high elves [HELF] at $48
     // unlimited high elves [HELF] at $75
+    // (?{amount as number | unlimited amount}) {name} [{code}] (?at ${price})
     public class ItemParser : BaseParser {
         protected override PMaybe<IReportNode> Execute(TextParser p) {
             var amount = p.Try(pp => pp.Word().OneOf(
@@ -25,7 +26,7 @@ namespace advisor
             var propOrPrice = p.Try(_ => _.OneOf(
                 pp => pp
                     .SkipWhitespaces(minTimes: 1)
-                    .Between("(", ")", useThen: true)
+                    .Between("(", ")", useSkip: true)
                     .AsString()
                     .Map(props => ReportNode.Str("props", props)),
                 pp => pp

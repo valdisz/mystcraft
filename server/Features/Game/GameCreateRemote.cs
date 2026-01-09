@@ -37,7 +37,7 @@ public class GameCreateRemoteHandler : IRequestHandler<GameCreateRemote, GameCre
 
     public Task<GameCreateRemoteResult> Handle(GameCreateRemote request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(GameInterpreter<Runtime>.Interpret)
+            .Map(MystcraftInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameCreateRemoteResult.New);
 

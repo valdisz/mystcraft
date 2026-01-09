@@ -2,7 +2,7 @@ namespace advisor.TurnProcessing;
 
 using System.Collections.Generic;
 
-public record FactionRecord(int? Number = null) {
+public record FactionRecord(FactionRecordNumber Number) {
     public string Name {
         get => GetStr("Name");
         set => SetStr("Name", value);
@@ -75,7 +75,7 @@ public record FactionRecord(int? Number = null) {
     // Order
 
 
-    public bool IsNew => Number == null;
+    public bool IsNew => Number.IsNew;
 
     public List<(string, string)> Props { get; init; } = [];
 

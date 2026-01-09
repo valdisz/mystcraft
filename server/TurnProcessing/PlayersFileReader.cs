@@ -26,6 +26,11 @@ public class PlayersFileReader : IEnumerable<FactionRecord> {
             // skip until "Faction:"
         }
 
+        // end of file, no factions
+        if (reader.EndOfStream) {
+            yield break;
+        }
+
         FactionRecord rec = null;
         do {
             var (key, value) = parse(line);
@@ -36,9 +41,9 @@ public class PlayersFileReader : IEnumerable<FactionRecord> {
                         yield return rec;
                     }
 
-                    int? number = value.Equals("new", StringComparison.OrdinalIgnoreCase)
-                        ? null
-                        : int.Parse(value);
+                    var number = value.Equals("new", StringComparison.OrdinalIgnoreCase)
+                        ? FactionRecordNumber.New
+                        : FactionRecordNumber.Number(int.Parse(value));
 
                     rec = new FactionRecord(number);
                     break;

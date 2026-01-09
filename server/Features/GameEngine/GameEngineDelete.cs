@@ -26,7 +26,7 @@ public class GameEngineDeleteHandler : IRequestHandler<GameEngineDelete, GameEng
 
     public Task<GameEngineDeleteResult> Handle(GameEngineDelete request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(GameInterpreter<Runtime>.Interpret)
+            .Map(MystcraftInterpreter<Runtime>.Interpret)
             .Unwrap(Runtime.New(database, cancellationToken))
             .Map(GameEngineDeleteResult.New);
 

@@ -26,7 +26,7 @@ public class GameStopHandler : IRequestHandler<GameStop, GameStopResult> {
 
     public Task<GameStopResult> Handle(GameStop request, CancellationToken cancellationToken) =>
         Validate(request)
-            .Map(gameId => GameInterpreter<Runtime>.Interpret(
+            .Map(gameId => MystcraftInterpreter<Runtime>.Interpret(
                 from game in Mystcraft.WriteOneGame(gameId)
                 from res in Mystcraft.Stop(game)
                 select res

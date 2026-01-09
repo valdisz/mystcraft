@@ -21,7 +21,7 @@ using System.IO;
 /// <summary>
 /// Live interpreter for the basic operations that can be performed on a game.
 /// </summary>
-public readonly struct GameInterpreter<RT>
+public readonly struct MystcraftInterpreter<RT>
     where RT : struct, HasDatabase<RT>, HasUnitOfWork<RT>, HasDirectory<RT>, HasFile<RT>, HasUnix<RT>
 {
     /// <summary>

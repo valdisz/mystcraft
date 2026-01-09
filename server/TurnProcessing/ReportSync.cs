@@ -14,6 +14,9 @@ using UnitsDic = System.Collections.Generic.Dictionary<int, Persistence.DbUnit>;
 using StructuresDic = System.Collections.Generic.Dictionary<string, Persistence.DbStructure>;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// The purpose of this class is to synchronize the report data with the database.
+/// </summary>
 public class ReportSync : InTurnContext {
     public ReportSync(Database db, long playerId, int turnNumber, JReport report) {
         Db = db;
@@ -262,8 +265,8 @@ public class ReportSync : InTurnContext {
     private void SyncEvents() {
         SyncEvents(Report.Faction.Number, Report.Errors, Report.Events);
 
-        foreach (var othetReport in Report.OtherReports) {
-            SyncEvents(othetReport.Faction.Number, othetReport.Errors, othetReport.Events);
+        foreach (var otherReport in Report.OtherReports) {
+            SyncEvents(otherReport.Faction.Number, otherReport.Errors, otherReport.Events);
         }
     }
 
@@ -546,7 +549,7 @@ public class ReportSync : InTurnContext {
         return unit;
     }
 
-    // todo: event sync must take inot account new report data
+    // todo: event sync must take into account new report data
     private void SyncEvents(int factionNumber, IEnumerable<string> errors, IEnumerable<JEvent> events) {
         var faction = GetFaction(Report.Faction.Number);
 

@@ -17,7 +17,7 @@ public class Query {
     [UseOffsetPaging]
     [UseProjection]
     public ValueTask<IOrderedQueryable<DbGameEngine>> GameEngines(IResolverContext context, Database db) =>
-        GameInterpreter<Runtime>.Interpret(
+        MystcraftInterpreter<Runtime>.Interpret(
             from items in Mystcraft.ReadManyGameEngines()
             select items
         )
@@ -27,7 +27,7 @@ public class Query {
     [UseOffsetPaging]
     [UseProjection]
     public ValueTask<IOrderedQueryable<DbGame>> Games(IResolverContext context, Database db) =>
-        GameInterpreter<Runtime>.Interpret(
+        MystcraftInterpreter<Runtime>.Interpret(
             from items in Mystcraft.ReadManyGames()
             select items
         )
